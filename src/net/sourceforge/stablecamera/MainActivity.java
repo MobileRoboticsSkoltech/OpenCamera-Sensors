@@ -26,12 +26,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 	SensorManager mSensorManager;
 	Sensor mSensorAccelerometer;
 	Preview preview;
+	boolean is_taking_photo = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -122,8 +124,14 @@ public class MainActivity extends Activity {
 
     private void takePicture() {
     	Log.d(TAG, "takePicture");
+    	if( is_taking_photo ) {
+        	Log.d(TAG, "already taking a photo");
+    		return;
+    	}
         PictureCallback jpegPictureCallback = new PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
+    	    	// n.b., this is automatically run in a different thread
+    	    	Log.d(TAG, "onPictureTaken");
     			Bitmap bitmap = null;
     			if( preview.hasLevelAngle() )
     			{
@@ -165,20 +173,39 @@ public class MainActivity extends Activity {
     	        catch(FileNotFoundException e) {
     	            Log.e(TAG, "File not found: " + e.getMessage());
     	            e.getStackTrace();
+    	    	    Toast.makeText(getApplicationContext(), "Failed to save photo", Toast.LENGTH_SHORT).show();
     	        }
     	        catch(IOException e) {
     	            Log.e(TAG, "I/O error writing file: " + e.getMessage());
     	            e.getStackTrace();
+    	    	    Toast.makeText(getApplicationContext(), "Failed to save photo", Toast.LENGTH_SHORT).show();
     	        }
-    	        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(picFile)));
+	            sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(picFile)));
+    	    	Log.d(TAG, "onPictureTaken saved photo");
+
+    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
+    	    	// (otherwise this can fail, at least on Nexus 7)
+	            try {
+	            	preview.camera.startPreview();
+	            	is_taking_photo = false;
+	    	    	Log.d(TAG, "onPictureTaken started preview");
+	            }
+	            catch(Exception e) {
+	            	Log.d(TAG, "Error starting camera preview after taking photo: " + e.getMessage());
+	            	e.printStackTrace();
+	            }
     	    }
     	};
-        preview.camera.takePicture(null, null, jpegPictureCallback);
-        try {
-            preview.camera.startPreview();
-        }
+    	try {
+    		preview.camera.takePicture(null, null, jpegPictureCallback);
+    	    Toast.makeText(getApplicationContext(), "Taking a photo...", Toast.LENGTH_SHORT).show();
+    		is_taking_photo = true;
+    	}
         catch(Exception e) {
-            Log.d(TAG, "Error starting camera preview after taking photo: " + e.getMessage());
+            Log.d(TAG, "Camera takePicture failed: " + e.getMessage());
+            e.printStackTrace();
+    	    Toast.makeText(getApplicationContext(), "Failed to take picture", Toast.LENGTH_SHORT).show();
         }
+    	Log.d(TAG, "takePicture exit");
     }
 }
