@@ -20,6 +20,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 import android.widget.ZoomControls;
 
 class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.PreviewCallback,*/ SensorEventListener {
@@ -302,6 +303,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	private void updateFlash(int new_flash_index) {
 		// updates the Flash button, and Flash camera mode
 		if( new_flash_index != current_flash_index ) {
+			boolean initial = current_flash_index==-1;
 			current_flash_index = new_flash_index;
 			Log.d(TAG, "    current_flash_index is now " + current_flash_index);
 
@@ -313,6 +315,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	    	for(int i=0;i<flash_values.length;i++) {
 	    		if( flash_value.equals(flash_values[i]) ) {
 	    			flashButton.setText(flash_entries[i]);
+	    			if( !initial ) {
+	    				Toast.makeText(activity.getApplicationContext(), flash_entries[i], Toast.LENGTH_SHORT).show();
+	    			}
 	    			break;
 	    		}
 	    	}
