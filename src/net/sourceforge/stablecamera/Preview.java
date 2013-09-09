@@ -114,10 +114,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         				}
     				}
     			}
-        		Log.d(TAG, "ScaleListener.onScale zoom_ratio is now " + zoom_ratio);
-        		Log.d(TAG, "    chosen new zoom_factor " + zoom_factor + " ratio " + zoom_ratios.get(zoom_factor)/100.0f);
+    			if( MyDebug.LOG ) {
+    				Log.d(TAG, "ScaleListener.onScale zoom_ratio is now " + zoom_ratio);
+    				Log.d(TAG, "    chosen new zoom_factor " + zoom_factor + " ratio " + zoom_ratios.get(zoom_factor)/100.0f);
+    			}
     			Camera.Parameters parameters = camera.getParameters();
-	        	Log.d(TAG, "zoom was: " + parameters.getZoom());
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "zoom was: " + parameters.getZoom());
     			parameters.setZoom((int)zoom_factor);
 	    		camera.setParameters(parameters);
 
@@ -133,13 +136,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	        sizes = parameters.getSupportedPictureSizes();
 	        for(int i=0;i<sizes.size();i++) {
 	        	Camera.Size size = sizes.get(i);
-	        	Log.d(TAG, "Supported size: " + size.width + ", " + size.height);
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "Supported size: " + size.width + ", " + size.height);
 	        	if( current_size == null || size.width > current_size.width || (size.width == current_size.width && size.height > current_size.height) ) {
 	        		current_size = size;
 	        	}
 	        }
 	        if( current_size != null ) {
-	        	Log.d(TAG, "Current size: " + current_size.width + ", " + current_size.height);
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "Current size: " + current_size.width + ", " + current_size.height);
 	        	parameters.setPictureSize(current_size.width, current_size.height);
 	    		camera.setParameters(parameters);
 	        }
@@ -147,14 +152,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	}
 	
 	public void surfaceCreated(SurfaceHolder holder) {
-		Log.d(TAG, "Preview.surfaceCreated()");
+		if( MyDebug.LOG )
+			Log.d(TAG, "Preview.surfaceCreated()");
 		// The Surface has been created, acquire the camera and tell it where
 		// to draw.
 		try {
 			camera = Camera.open();
 		}
 		catch(Exception e) {
-			Log.d(TAG, "Failed to open camera");
+			if( MyDebug.LOG )
+				Log.d(TAG, "Failed to open camera");
 			camera = null;
 		}
 		if( camera != null ) {
@@ -164,7 +171,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 				camera.startPreview();
 			}
 			catch(IOException e) {
-				Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
+				if( MyDebug.LOG )
+					Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -172,7 +180,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 			Camera.Parameters parameters = camera.getParameters();
 			this.has_zoom = parameters.isZoomSupported();
-			Log.d(TAG, "has_zoom? " + has_zoom);
+			if( MyDebug.LOG )
+				Log.d(TAG, "has_zoom? " + has_zoom);
 			Activity activity = (Activity)this.getContext();
 		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
 			if( this.has_zoom ) {
@@ -187,9 +196,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		            public void onClick(View v){
 		            	if(zoom_factor < max_zoom_factor){
 		            		zoom_factor++;
-		            		Log.d(TAG, "zoom in to " + zoom_factor);
+		            		if( MyDebug.LOG )
+		            			Log.d(TAG, "zoom in to " + zoom_factor);
 		        			Camera.Parameters parameters = camera.getParameters();
-		    	        	Log.d(TAG, "zoom was: " + parameters.getZoom());
+		        			if( MyDebug.LOG )
+		        				Log.d(TAG, "zoom was: " + parameters.getZoom());
 		        			parameters.setZoom((int)zoom_factor);
 		    	    		camera.setParameters(parameters);
 		                }
@@ -200,9 +211,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			    	public void onClick(View v){
 			    		if(zoom_factor > 0){
 			    			zoom_factor--;
-		            		Log.d(TAG, "zoom out to " + zoom_factor);
+			    			if( MyDebug.LOG )
+			    				Log.d(TAG, "zoom out to " + zoom_factor);
 		        			Camera.Parameters parameters = camera.getParameters();
-		    	        	Log.d(TAG, "zoom was: " + parameters.getZoom());
+		        			if( MyDebug.LOG )
+		        				Log.d(TAG, "zoom was: " + parameters.getZoom());
 		        			parameters.setZoom((int)zoom_factor);
 		    	    		camera.setParameters(parameters);
 			            }
@@ -216,12 +229,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
 		    Button flashButton = (Button) activity.findViewById(R.id.flash);
 			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
-				Log.d(TAG, "flash modes: " + supported_flash_modes);
+				if( MyDebug.LOG )
+					Log.d(TAG, "flash modes: " + supported_flash_modes);
 				supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
 		    	updateFlash(0);
 			}
 			else {
-				Log.d(TAG, "flash not supported");
+				if( MyDebug.LOG )
+					Log.d(TAG, "flash not supported");
 				supported_flash_values = null;
 				current_flash_index = -1;
 				flashButton.setVisibility(View.GONE);
@@ -232,7 +247,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		Log.d(TAG, "Preview.surfaceDestroyed()");
+		if( MyDebug.LOG )
+			Log.d(TAG, "Preview.surfaceDestroyed()");
 		// Surface will be destroyed when we return, so stop the preview.
 		// Because the CameraDevice object is not a shared resource, it's very
 		// important to release it when the activity is paused.
@@ -245,7 +261,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-		Log.d(TAG, "Preview.surfaceChanged " + w + ", " + h);
+		if( MyDebug.LOG )
+			Log.d(TAG, "Preview.surfaceChanged " + w + ", " + h);
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
 
@@ -275,13 +292,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
             camera.startPreview();
         }
         catch(Exception e) {
-            Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
 	}
 
 	@Override
 	public void onDraw(Canvas canvas) {
-		//Log.d(TAG, "Preview.onDraw()");
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "Preview.onDraw()");*/
 		p.setColor(Color.WHITE);
 		p.setTextAlign(Paint.Align.CENTER);
 		p.setTextSize(24.0f);
@@ -294,8 +313,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			}
 		}
 		else {
-			Log.d(TAG, "no camera!");
-			Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "no camera!");
+				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
+			}
 			canvas.drawText("FAILED TO OPEN CAMERA", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 			//canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, p);
 			//canvas.drawRGB(255, 0, 0);
@@ -308,7 +329,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	}
 
 	public void cycleFlash() {
-		Log.d(TAG, "Preview.cycleFlash()");
+		if( MyDebug.LOG )
+			Log.d(TAG, "Preview.cycleFlash()");
 		if( this.supported_flash_values != null && this.supported_flash_values.size() > 1 ) {
 			int new_flash_index = (current_flash_index+1) % this.supported_flash_values.size();
 			updateFlash(new_flash_index);
@@ -320,7 +342,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		if( new_flash_index != current_flash_index ) {
 			boolean initial = current_flash_index==-1;
 			current_flash_index = new_flash_index;
-			Log.d(TAG, "    current_flash_index is now " + current_flash_index);
+			if( MyDebug.LOG )
+				Log.d(TAG, "    current_flash_index is now " + current_flash_index);
 
 			Activity activity = (Activity)this.getContext();
 		    Button flashButton = (Button) activity.findViewById(R.id.flash);
@@ -341,7 +364,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	}
 
 	private void setFlash(String flash_value) {
-		Log.d(TAG, "Preview.setFlash() " + flash_value);
+		if( MyDebug.LOG )
+			Log.d(TAG, "Preview.setFlash() " + flash_value);
 		Camera.Parameters parameters = camera.getParameters();
     	if( flash_value.equals("flash_off") ) {
     		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
@@ -362,7 +386,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	}
 
 	private List<String> getSupportedFlashModes(List<String> supported_flash_modes) {
-		Log.d(TAG, "Preview.getSupportedFlashModes()");
+		if( MyDebug.LOG )
+			Log.d(TAG, "Preview.getSupportedFlashModes()");
 		List<String> output_modes = new Vector<String>();
 		if( supported_flash_modes != null ) {
 			/*for(String flash_mode : supported_flash_modes) {
@@ -385,23 +410,28 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			// also resort as well as converting
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
 				output_modes.add("flash_off");
-				Log.d(TAG, " supports flash_off");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports flash_off");
 			}
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_AUTO) ) {
 				output_modes.add("flash_auto");
-				Log.d(TAG, " supports flash_auto");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports flash_auto");
 			}
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_ON) ) {
 				output_modes.add("flash_on");
-				Log.d(TAG, " supports flash_on");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports flash_on");
 			}
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_TORCH) ) {
 				output_modes.add("flash_torch");
-				Log.d(TAG, " supports flash_torch");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports flash_torch");
 			}
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_RED_EYE) ) {
 				output_modes.add("flash_red_eye");
-				Log.d(TAG, " supports flash_red_eye");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports flash_red_eye");
 			}
 		}
 		return output_modes;
@@ -424,7 +454,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         // Create the storage directory if it does not exist
         if( !mediaStorageDir.exists() ) {
             if( !mediaStorageDir.mkdirs() ) {
-                Log.d(TAG, "failed to create directory");
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "failed to create directory");
                 return null;
             }
 	        activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(mediaStorageDir)));
@@ -449,16 +480,19 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     }
 
     public void takePicture() {
-    	Log.d(TAG, "takePicture");
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicture");
     	if( is_taking_photo ) {
-        	Log.d(TAG, "already taking a photo");
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "already taking a photo");
     		return;
     	}
 		final Activity activity = (Activity)getContext();
         PictureCallback jpegPictureCallback = new PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
     	    	// n.b., this is automatically run in a different thread
-    	    	Log.d(TAG, "onPictureTaken");
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "onPictureTaken");
     			Bitmap bitmap = null;
     			if( hasLevelAngle() )
     			{
@@ -467,7 +501,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
         			int width = bitmap.getWidth();
         			int height = bitmap.getHeight();
-        			Log.d(TAG, "decoded bitmap size " + width + ", " + height);
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "decoded bitmap size " + width + ", " + height);
         			/*for(int y=0;y<height;y++) {
         				for(int x=0;x<width;x++) {
         					int col = bitmap.getPixel(x, y);
@@ -498,15 +533,18 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     	            fos.close();
 
     	            activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(picFile)));
-        	    	Log.d(TAG, "onPictureTaken saved photo");
+    	    		if( MyDebug.LOG )
+    	    			Log.d(TAG, "onPictureTaken saved photo");
     	        }
     	        catch(FileNotFoundException e) {
-    	            Log.e(TAG, "File not found: " + e.getMessage());
+    	    		if( MyDebug.LOG )
+    	    			Log.e(TAG, "File not found: " + e.getMessage());
     	            e.getStackTrace();
     	    	    Toast.makeText(activity.getApplicationContext(), "Failed to save photo", Toast.LENGTH_SHORT).show();
     	        }
     	        catch(IOException e) {
-    	            Log.e(TAG, "I/O error writing file: " + e.getMessage());
+    	    		if( MyDebug.LOG )
+    	    			Log.e(TAG, "I/O error writing file: " + e.getMessage());
     	            e.getStackTrace();
     	    	    Toast.makeText(activity.getApplicationContext(), "Failed to save photo", Toast.LENGTH_SHORT).show();
     	        }
@@ -516,10 +554,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	            try {
 	            	camera.startPreview();
 	            	is_taking_photo = false;
-	    	    	Log.d(TAG, "onPictureTaken started preview");
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "onPictureTaken started preview");
 	            }
 	            catch(Exception e) {
-	            	Log.d(TAG, "Error starting camera preview after taking photo: " + e.getMessage());
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "Error starting camera preview after taking photo: " + e.getMessage());
 	            	e.printStackTrace();
 	            }
     	    }
@@ -530,64 +570,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     		is_taking_photo = true;
     	}
         catch(Exception e) {
-            Log.d(TAG, "Camera takePicture failed: " + e.getMessage());
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "Camera takePicture failed: " + e.getMessage());
             e.printStackTrace();
     	    Toast.makeText(activity.getApplicationContext(), "Failed to take picture", Toast.LENGTH_SHORT).show();
         }
-    	Log.d(TAG, "takePicture exit");
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicture exit");
     }
-
-    /*public void onPreviewFrame(byte[] data, Camera camera) {
-		Log.d(TAG, "onPreviewFrame()");
-		if( camera != null ) {
-			Camera.Parameters parameters = camera.getParameters();
-			int width = parameters.getPreviewSize().width;
-			int height = parameters.getPreviewSize().height;
-			Log.d(TAG, "preview size: " + width + ", " + height);
-			int rgb_size = width * height;
-			if( pixels == null || pixels.length != rgb_size ) {
-				Log.d(TAG, "allocate pixel buffer size: " + rgb_size);
-				pixels = new int[rgb_size];
-			}
-			convertYUV420_NV21toARGB8888(pixels, data, width, height);
-		}
-	}
-
-	// from http://en.wikipedia.org/wiki/YUV#Y.27UV420p_.28and_Y.27V12_or_YV12.29_to_RGB888_conversion
-	public void convertYUV420_NV21toARGB8888(int [] rgb, byte [] data, int width, int height) {
-	    int size = width*height;
-	    int offset = size;
-
-	    for(int i=0, k=0; i < size; i+=2, k+=2) {
-	        int y1 = data[i  ]&0xff;
-	        int y2 = data[i+1]&0xff;
-	        int y3 = data[width+i  ]&0xff;
-	        int y4 = data[width+i+1]&0xff;
-
-	        int u = data[offset+k  ]&0xff;
-	        int v = data[offset+k+1]&0xff;
-	        u = u-128;
-	        v = v-128;
-
-	        rgb[i  ] = convertYUVtoARGB(y1, u, v);
-	        rgb[i+1] = convertYUVtoARGB(y2, u, v);
-	        rgb[width+i  ] = convertYUVtoARGB(y3, u, v);
-	        rgb[width+i+1] = convertYUVtoARGB(y4, u, v);
-
-	        if (i!=0 && (i+2)%width==0)
-	            i+=width;
-	    }
-	}
-
-	private int convertYUVtoARGB(int y, int u, int v) {
-	    int r = y + (int)1.402f*u;
-	    int g = y - (int)(0.344f*v +0.714f*u);
-	    int b = y + (int)1.772f*v;
-	    r = r>255? 255 : r<0 ? 0 : r;
-	    g = g>255? 255 : g<0 ? 0 : g;
-	    b = b>255? 255 : b<0 ? 0 : b;
-	    return 0xff000000 | (r<<16) | (g<<8) | b;
-	}*/
 
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
@@ -595,8 +585,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     public void onSensorChanged(SensorEvent event) {
 		double x = Math.abs(event.values[0]);
 		double y = Math.abs(event.values[1]);
-		//double z = Math.abs(event.values[2]);
-	    //Log.d(TAG, "onSensorChanged: " + x + ", " + y + ", " + z);
+		/*double z = Math.abs(event.values[2]);
+		if( MyDebug.LOG )
+	    	Log.d(TAG, "onSensorChanged: " + x + ", " + y + ", " + z);
+	    	*/
 		this.has_level_angle = true;
 		this.level_angle = Math.atan2(x, y) * 180.0 / Math.PI;
 		if( this.level_angle > 45.0 ) {

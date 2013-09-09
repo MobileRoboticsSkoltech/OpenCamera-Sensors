@@ -11,6 +11,10 @@ import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 
+class MyDebug {
+	static final boolean LOG = true;
+}
+
 public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 	private SensorManager mSensorManager;
@@ -27,11 +31,13 @@ public class MainActivity extends Activity {
 
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		if( mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null ) {
-            Log.d(TAG, "found accelerometer");
+			if( MyDebug.LOG )
+				Log.d(TAG, "found accelerometer");
 			mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		}
 		else {
-            Log.d(TAG, "no support for accelerometer");
+			if( MyDebug.LOG )
+				Log.d(TAG, "no support for accelerometer");
 		}
 
 		preview = new Preview(this);
@@ -53,34 +59,40 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onResume() {
-        Log.d(TAG, "onResume");
+		if( MyDebug.LOG )
+			Log.d(TAG, "onResume");
         super.onResume();
         mSensorManager.registerListener(preview, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     protected void onPause() {
-        Log.d(TAG, "onPause");
+		if( MyDebug.LOG )
+			Log.d(TAG, "onPause");
         super.onPause();
         mSensorManager.unregisterListener(preview);
     }
 
     public void clickedTakePhoto(View view) {
-    	Log.d(TAG, "clickedTakePhoto");
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedTakePhoto");
     	this.takePicture();
     }
 
     public void clickedSwitchCamera(View view) {
-    	Log.d(TAG, "clickedSwitchCamera");
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedSwitchCamera");
     }
 
     public void clickedFlash(View view) {
-    	Log.d(TAG, "clickedFlash");
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedFlash");
     	this.preview.cycleFlash();
     }
 
     private void takePicture() {
-    	Log.d(TAG, "takePicture");
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicture");
     	this.preview.takePicture();
     }
 }
