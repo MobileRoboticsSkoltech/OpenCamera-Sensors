@@ -27,6 +27,7 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.Toast;
+import android.widget.ZoomControls;
 
 public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
@@ -55,11 +56,11 @@ public class MainActivity extends Activity {
 		preview = new Preview(this);
 		((FrameLayout) findViewById(R.id.preview)).addView(preview);
 		
-		preview.setOnClickListener(new OnClickListener() {
+		/*preview.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				takePicture();
 			}
-		});
+		});*/
 	}
 
 	@Override
@@ -120,6 +121,15 @@ public class MainActivity extends Activity {
         }
 
         return mediaFile;
+    }
+
+    public void clickedTakePhoto(View view) {
+    	Log.d(TAG, "clickedTakePhoto");
+    	this.takePicture();
+    }
+
+    public void clickedSwitchCamera(View view) {
+    	Log.d(TAG, "clickedSwitchCamera");
     }
 
     private void takePicture() {

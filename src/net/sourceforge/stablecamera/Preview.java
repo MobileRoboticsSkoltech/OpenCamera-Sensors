@@ -3,6 +3,7 @@ package net.sourceforge.stablecamera;
 import java.io.IOException;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,8 +13,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.ZoomControls;
 
 class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.PreviewCallback,*/ SensorEventListener {
 	private static final String TAG = "Preview";
@@ -26,6 +31,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	Paint p = new Paint();
 	boolean has_level_angle = false;
 	double level_angle = 0.0f;
+	boolean has_zoom = false;
+	int zoom_factor = 0;
+	int max_zoom_factor = 0;
+	ScaleGestureDetector scaleGestureDetector;
+	List<Integer> zoom_ratios = null;
 
 	@SuppressWarnings("deprecation")
 	Preview(Context context) {
@@ -37,9 +47,65 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		mHolder.addCallback(this);
         // deprecated setting, but required on Android versions prior to 3.0
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // deprecated
+
+	    scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
 	}
 
-	private void setCameraParameters() {
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        scaleGestureDetector.onTouchEvent(event);
+        //invalidate();
+        return true;
+    }
+
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+    	@Override
+    	public boolean onScale(ScaleGestureDetector detector) {
+    		if( Preview.this.camera != null && Preview.this.has_zoom ) {
+    			float zoom_ratio = Preview.this.zoom_ratios.get(zoom_factor)/100.0f;
+    			zoom_ratio *= detector.getScaleFactor();
+
+    			if( zoom_ratio <= 1.0f ) {
+    				zoom_factor = 0;
+    			}
+    			else if( zoom_ratio >= zoom_ratios.get(max_zoom_factor)/100.0f ) {
+    				zoom_factor = max_zoom_factor;
+    			}
+    			else {
+    				// find the closest zoom level
+    				if( detector.getScaleFactor() > 1.0f ) {
+    					// zooming in
+        				for(int i=zoom_factor;i<zoom_ratios.size();i++) {
+        					if( zoom_ratios.get(i)/100.0f >= zoom_ratio ) {
+        						zoom_factor = i;
+        						break;
+        					}
+        				}
+    				}
+    				else {
+    					// zooming out
+        				for(int i=zoom_factor;i>0;i--) {
+        					if( zoom_ratios.get(i)/100.0f <= zoom_ratio ) {
+        						zoom_factor = i;
+        						break;
+        					}
+        				}
+    				}
+    			}
+        		Log.d(TAG, "ScaleListener.onScale zoom_ratio is now " + zoom_ratio);
+        		Log.d(TAG, "    chosen new zoom_factor " + zoom_factor + " ratio " + zoom_ratios.get(zoom_factor)/100.0f);
+    			Camera.Parameters parameters = camera.getParameters();
+	        	Log.d(TAG, "zoom was: " + parameters.getZoom());
+    			parameters.setZoom((int)zoom_factor);
+	    		camera.setParameters(parameters);
+
+        		//invalidate();
+    		}
+    		return true;
+    	}
+    }
+
+    private void setCameraParameters() {
 		if( camera != null ) {
 			Camera.Parameters parameters = camera.getParameters();
 	        sizes = parameters.getSupportedPictureSizes();
@@ -72,16 +138,59 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		if( camera != null ) {
 
 			try {
-				//camera.setPreviewCallback(this);
 				camera.setPreviewDisplay(holder);
+				camera.startPreview();
 			}
 			catch(IOException e) {
-				Log.d(TAG, "Failed to start camera preview");
+				Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
 				e.printStackTrace();
 			}
 
 			this.setCameraParameters();
-        }
+
+			Camera.Parameters parameters = camera.getParameters();
+			this.has_zoom = parameters.isZoomSupported();
+			Activity activity = (Activity)this.getContext();
+		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
+			Log.d(TAG, "have zoomControls? " + (zoomControls!=null));
+			if( this.has_zoom ) {
+				this.max_zoom_factor = parameters.getMaxZoom();
+				this.zoom_ratios = parameters.getZoomRatios();
+
+			    zoomControls.setIsZoomInEnabled(true);
+		        zoomControls.setIsZoomOutEnabled(true);
+		        zoomControls.setZoomSpeed(20);
+
+		        zoomControls.setOnZoomInClickListener(new OnClickListener(){
+		            public void onClick(View v){
+		            	if(zoom_factor < max_zoom_factor){
+		            		zoom_factor++;
+		            		Log.d(TAG, "zoom in to " + zoom_factor);
+		        			Camera.Parameters parameters = camera.getParameters();
+		    	        	Log.d(TAG, "zoom was: " + parameters.getZoom());
+		        			parameters.setZoom((int)zoom_factor);
+		    	    		camera.setParameters(parameters);
+		                }
+		            }
+		        });
+
+			    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
+			    	public void onClick(View v){
+			    		if(zoom_factor > 0){
+			    			zoom_factor--;
+		            		Log.d(TAG, "zoom out to " + zoom_factor);
+		        			Camera.Parameters parameters = camera.getParameters();
+		    	        	Log.d(TAG, "zoom was: " + parameters.getZoom());
+		        			parameters.setZoom((int)zoom_factor);
+		    	    		camera.setParameters(parameters);
+			            }
+			        }
+			    });
+			}
+			else {
+				zoomControls.setVisibility(View.GONE);
+			}
+		}
 
 		this.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
 	}
@@ -121,9 +230,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         }
         // set preview size and make any resize, rotate or
         // reformatting changes here
-		/*Camera.Parameters parameters = camera.getParameters();
-		parameters.setPreviewSize(w, h);
-		camera.setParameters(parameters);*/
 		this.setCameraParameters();
 
         // start preview with new settings
@@ -158,6 +264,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			//canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, p);
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+		}
+		if( this.has_zoom ) {
+			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
+			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - 128, p);
 		}
 	}
 
@@ -219,8 +329,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     public void onSensorChanged(SensorEvent event) {
 		double x = Math.abs(event.values[0]);
 		double y = Math.abs(event.values[1]);
-		double z = Math.abs(event.values[2]);
-	    Log.d(TAG, "onSensorChanged: " + x + ", " + y + ", " + z);
+		//double z = Math.abs(event.values[2]);
+	    //Log.d(TAG, "onSensorChanged: " + x + ", " + y + ", " + z);
 		this.has_level_angle = true;
 		this.level_angle = Math.atan2(x, y) * 180.0 / Math.PI;
 		if( this.level_angle > 45.0 ) {
@@ -238,5 +348,4 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     public double getLevelAngle() {
     	return this.level_angle;
     }
-    
 }
