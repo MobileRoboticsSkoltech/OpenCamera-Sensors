@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="flash_entries">
+        <item>Flash Off</item>
+        <item>Flash Auto</item>
+        <item>Flash On</item>
+        <item>Torch</item>
+        <item>Red Eye</item>
+    </string-array>
+    <string-array name="flash_values">
+        <item>flash_off</item>
+        <item>flash_auto</item>
+        <item>flash_on</item>
+        <item>flash_torch</item>
+        <item>flash_red_eye</item>
+    </string-array>
+</resources>

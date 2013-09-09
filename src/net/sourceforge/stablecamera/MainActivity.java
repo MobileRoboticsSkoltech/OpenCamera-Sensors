@@ -23,11 +23,9 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-import android.widget.ZoomControls;
 
 public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
@@ -130,6 +128,11 @@ public class MainActivity extends Activity {
 
     public void clickedSwitchCamera(View view) {
     	Log.d(TAG, "clickedSwitchCamera");
+    }
+
+    public void clickedFlash(View view) {
+    	Log.d(TAG, "clickedFlash");
+    	this.preview.cycleFlash();
     }
 
     private void takePicture() {

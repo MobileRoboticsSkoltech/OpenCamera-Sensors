@@ -37,4 +37,14 @@
         android:layout_below="@+id/take_photo"
     />
 
+    <Button
+        android:id="@+id/flash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/buttonStyleSmall"
+        android:text=""
+        android:onClick="clickedFlash"
+        android:layout_below="@+id/switch_camera"
+    />
+
 </RelativeLayout>

@@ -2,6 +2,7 @@ package net.sourceforge.stablecamera;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Context;
@@ -18,6 +19,7 @@ import android.view.ScaleGestureDetector;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ZoomControls;
 
 class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.PreviewCallback,*/ SensorEventListener {
@@ -31,11 +33,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	Paint p = new Paint();
 	boolean has_level_angle = false;
 	double level_angle = 0.0f;
+
 	boolean has_zoom = false;
 	int zoom_factor = 0;
 	int max_zoom_factor = 0;
 	ScaleGestureDetector scaleGestureDetector;
 	List<Integer> zoom_ratios = null;
+
+	List<String> supported_flash_values = null; // our "values" format
+	int current_flash_index = -1;
 
 	@SuppressWarnings("deprecation")
 	Preview(Context context) {
@@ -150,9 +156,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 			Camera.Parameters parameters = camera.getParameters();
 			this.has_zoom = parameters.isZoomSupported();
+			Log.d(TAG, "has_zoom? " + has_zoom);
 			Activity activity = (Activity)this.getContext();
 		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
-			Log.d(TAG, "have zoomControls? " + (zoomControls!=null));
 			if( this.has_zoom ) {
 				this.max_zoom_factor = parameters.getMaxZoom();
 				this.zoom_ratios = parameters.getZoomRatios();
@@ -189,6 +195,20 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			}
 			else {
 				zoomControls.setVisibility(View.GONE);
+			}
+
+			List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
+		    Button flashButton = (Button) activity.findViewById(R.id.flash);
+			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
+				Log.d(TAG, "flash modes: " + supported_flash_modes);
+				supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
+		    	updateFlash(0);
+			}
+			else {
+				Log.d(TAG, "flash not supported");
+				supported_flash_values = null;
+				current_flash_index = -1;
+				flashButton.setVisibility(View.GONE);
 			}
 		}
 
@@ -269,6 +289,102 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - 128, p);
 		}
+	}
+
+	public void cycleFlash() {
+		Log.d(TAG, "Preview.cycleFlash()");
+		if( this.supported_flash_values != null && this.supported_flash_values.size() > 1 ) {
+			int new_flash_index = (current_flash_index+1) % this.supported_flash_values.size();
+			updateFlash(new_flash_index);
+		}
+	}
+
+	private void updateFlash(int new_flash_index) {
+		// updates the Flash button, and Flash camera mode
+		if( new_flash_index != current_flash_index ) {
+			current_flash_index = new_flash_index;
+			Log.d(TAG, "    current_flash_index is now " + current_flash_index);
+
+			Activity activity = (Activity)this.getContext();
+		    Button flashButton = (Button) activity.findViewById(R.id.flash);
+	    	String [] flash_entries = getResources().getStringArray(R.array.flash_entries);
+			String flash_value = supported_flash_values.get(current_flash_index);
+	    	String [] flash_values = getResources().getStringArray(R.array.flash_values);
+	    	for(int i=0;i<flash_values.length;i++) {
+	    		if( flash_value.equals(flash_values[i]) ) {
+	    			flashButton.setText(flash_entries[i]);
+	    			break;
+	    		}
+	    	}
+	    	this.setFlash(flash_value);
+		}
+	}
+
+	private void setFlash(String flash_value) {
+		Log.d(TAG, "Preview.setFlash() " + flash_value);
+		Camera.Parameters parameters = camera.getParameters();
+    	if( flash_value.equals("flash_off") ) {
+    		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+    	}
+    	else if( flash_value.equals("flash_auto") ) {
+    		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+    	}
+    	else if( flash_value.equals("flash_on") ) {
+    		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
+    	}
+    	else if( flash_value.equals("flash_torch") ) {
+    		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+    	}
+    	else if( flash_value.equals("flash_red_eye") ) {
+    		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_RED_EYE);
+    	}
+		camera.setParameters(parameters);
+	}
+
+	private List<String> getSupportedFlashModes(List<String> supported_flash_modes) {
+		Log.d(TAG, "Preview.getSupportedFlashModes()");
+		List<String> output_modes = new Vector<String>();
+		if( supported_flash_modes != null ) {
+			/*for(String flash_mode : supported_flash_modes) {
+				if( flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
+					output_modes.add("flash_off");
+				}
+				else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_AUTO) ) {
+					output_modes.add("flash_auto");
+				}
+				else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_ON) ) {
+					output_modes.add("flash_on");
+				}
+				else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_TORCH) ) {
+					output_modes.add("flash_torch");
+				}
+				else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_RED_EYE) ) {
+					output_modes.add("flash_red_eye");
+				}
+			}*/
+			// also resort as well as converting
+			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
+				output_modes.add("flash_off");
+				Log.d(TAG, " supports flash_off");
+			}
+			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_AUTO) ) {
+				output_modes.add("flash_auto");
+				Log.d(TAG, " supports flash_auto");
+			}
+			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_ON) ) {
+				output_modes.add("flash_on");
+				Log.d(TAG, " supports flash_on");
+			}
+			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_TORCH) ) {
+				output_modes.add("flash_torch");
+				Log.d(TAG, " supports flash_torch");
+			}
+			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_RED_EYE) ) {
+				output_modes.add("flash_red_eye");
+				Log.d(TAG, " supports flash_red_eye");
+			}
+		}
+		return output_modes;
 	}
 
 	/*public void onPreviewFrame(byte[] data, Camera camera) {
