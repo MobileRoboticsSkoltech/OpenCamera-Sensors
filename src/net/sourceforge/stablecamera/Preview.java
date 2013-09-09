@@ -496,6 +496,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         	            fos.write(data);
     	            }
     	            fos.close();
+
+    	            activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(picFile)));
+        	    	Log.d(TAG, "onPictureTaken saved photo");
     	        }
     	        catch(FileNotFoundException e) {
     	            Log.e(TAG, "File not found: " + e.getMessage());
@@ -507,8 +510,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     	            e.getStackTrace();
     	    	    Toast.makeText(activity.getApplicationContext(), "Failed to save photo", Toast.LENGTH_SHORT).show();
     	        }
-    	        activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(picFile)));
-    	    	Log.d(TAG, "onPictureTaken saved photo");
 
     	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
     	    	// (otherwise this can fail, at least on Nexus 7)
