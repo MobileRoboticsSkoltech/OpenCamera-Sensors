@@ -3,3 +3,5 @@ _docs/_gitignore/
 
 bin/
 gfx/
+
+*.db
