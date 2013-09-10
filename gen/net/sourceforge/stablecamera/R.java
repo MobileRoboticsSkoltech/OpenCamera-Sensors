@@ -32,8 +32,8 @@ public final class R {
         public static final int flash=0x7f090004;
         public static final int preview=0x7f090000;
         public static final int switch_camera=0x7f090003;
-        public static final int take_photo=0x7f090002;
-        public static final int zoom=0x7f090001;
+        public static final int take_photo=0x7f090001;
+        public static final int zoom=0x7f090002;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
