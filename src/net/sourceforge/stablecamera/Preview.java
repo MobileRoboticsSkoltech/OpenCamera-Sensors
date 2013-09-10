@@ -33,6 +33,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ZoomControls;
 
@@ -227,7 +228,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			}
 
 			List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
-		    Button flashButton = (Button) activity.findViewById(R.id.flash);
+		    View flashButton = (View) activity.findViewById(R.id.flash);
 			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "flash modes: " + supported_flash_modes);
@@ -349,13 +350,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 				Log.d(TAG, "    current_flash_index is now " + current_flash_index);
 
 			Activity activity = (Activity)this.getContext();
-		    Button flashButton = (Button) activity.findViewById(R.id.flash);
+		    ImageButton flashButton = (ImageButton) activity.findViewById(R.id.flash);
 	    	String [] flash_entries = getResources().getStringArray(R.array.flash_entries);
+	    	String [] flash_icons = getResources().getStringArray(R.array.flash_icons);
 			String flash_value = supported_flash_values.get(current_flash_index);
 	    	String [] flash_values = getResources().getStringArray(R.array.flash_values);
 	    	for(int i=0;i<flash_values.length;i++) {
 	    		if( flash_value.equals(flash_values[i]) ) {
-	    			flashButton.setText(flash_entries[i]);
+	    			//flashButton.setText(flash_entries[i]);
+	    			int resource = getResources().getIdentifier(flash_icons[i], null, activity.getApplicationContext().getPackageName());
+	    			flashButton.setImageResource(resource);
 	    			if( !initial ) {
 	    				Toast.makeText(activity.getApplicationContext(), flash_entries[i], Toast.LENGTH_SHORT).show();
 	    			}
@@ -411,15 +415,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 				}
 			}*/
 			// also resort as well as converting
-			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
-				output_modes.add("flash_off");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports flash_off");
-			}
+			// first one will be the default choice
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_AUTO) ) {
 				output_modes.add("flash_auto");
 				if( MyDebug.LOG )
 					Log.d(TAG, " supports flash_auto");
+			}
+			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
+				output_modes.add("flash_off");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports flash_off");
 			}
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_ON) ) {
 				output_modes.add("flash_on");
