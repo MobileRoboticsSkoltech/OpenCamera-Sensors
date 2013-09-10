@@ -4,5 +4,6 @@
     <string name="app_name">Stable Camera</string>
     <string name="action_settings">Settings</string>
     <string name="take_photo">Take Photo</string>
+    <string name="switch_camera">Switch Camera</string>
     
 </resources>

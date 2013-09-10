@@ -31,14 +31,16 @@
         android:layout_toLeftOf="@+id/take_photo"
         />
 
-    <Button
+    <ImageButton
         android:id="@+id/switch_camera"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:attr/buttonStyleSmall"
-        android:text="Switch camera"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/switch_camera"
+        android:src="@drawable/switch_camera"
         android:onClick="clickedSwitchCamera"
-    />
+        />
 
     <Button
         android:id="@+id/flash"
