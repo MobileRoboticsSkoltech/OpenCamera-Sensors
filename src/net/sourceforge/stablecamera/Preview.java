@@ -301,6 +301,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	public void onDraw(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "Preview.onDraw()");*/
+		final float scale = getResources().getDisplayMetrics().density;
 		p.setColor(Color.WHITE);
 		p.setTextAlign(Paint.Align.CENTER);
 		p.setTextSize(24.0f);
@@ -324,7 +325,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		}
 		if( this.has_zoom ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
-			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - 128, p);
+			// Convert the dps to pixels, based on density scale
+			int pixels_offset = (int) (100 * scale + 0.5f); // convert dps to pixels
+			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset, p);
 		}
 	}
 
