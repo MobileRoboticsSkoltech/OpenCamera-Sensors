@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.util.Log;
 import android.view.Menu;
@@ -26,7 +27,13 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-        // keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
+		if( MyDebug.LOG ) {
+			ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+			Log.d(TAG, "standard max memory = " + activityManager.getMemoryClass() + "MB");
+			Log.d(TAG, "large max memory = " + activityManager.getLargeMemoryClass() + "MB");
+		}
+
+		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
         getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
