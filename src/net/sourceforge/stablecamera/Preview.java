@@ -600,13 +600,17 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         		    Matrix matrix = new Matrix();
         		    /*{
         		    	// test for low memory
-        		    	//level_angle = -6.0;
+        		    	level_angle = 45.0;
             		    matrix.postScale(2.0f, 2.0f); // test for larger sizes
         		    }*/
         		    matrix.postRotate((float)level_angle);
         		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
         		    bitmap.recycle();
         		    bitmap = new_bitmap;
+        			if( MyDebug.LOG ) {
+        				Log.d(TAG, "rotated bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
+        				Log.d(TAG, "rotated bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
+        			}
     			}
 
     	    	File picFile = getOutputMediaFile(1);
