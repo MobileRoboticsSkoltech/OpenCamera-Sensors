@@ -28,7 +28,9 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.OrientationEventListener;
 import android.view.ScaleGestureDetector;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -43,11 +45,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	private SurfaceHolder mHolder;
 	//private int [] pixels = null; 
 	private Camera camera = null;
+	private int cameraId = 0;
 	private List<Camera.Size> sizes = null;
 	private Camera.Size current_size = null;
 	private Paint p = new Paint();
 	private boolean is_taking_photo = false;
 
+	private int current_orientation = 0;
 	private boolean has_level_angle = false;
 	private double level_angle = 0.0f;
 
@@ -137,8 +141,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	        sizes = parameters.getSupportedPictureSizes();
 	        for(int i=0;i<sizes.size();i++) {
 	        	Camera.Size size = sizes.get(i);
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "Supported size: " + size.width + ", " + size.height);
+	    		/*if( MyDebug.LOG )
+	    			Log.d(TAG, "Supported size: " + size.width + ", " + size.height);*/
 	        	if( current_size == null || size.width > current_size.width || (size.width == current_size.width && size.height > current_size.height) ) {
 	        		current_size = size;
 	        	}
@@ -158,7 +162,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		// The Surface has been created, acquire the camera and tell it where
 		// to draw.
 		try {
-			camera = Camera.open();
+			camera = Camera.open(cameraId);
 		}
 		catch(Exception e) {
 			if( MyDebug.LOG )
@@ -166,6 +170,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			camera = null;
 		}
 		if( camera != null ) {
+			Activity activity = (Activity)this.getContext();
+	        this.setCameraDisplayOrientation(activity);
+	        new OrientationEventListener(activity) {
+				@Override
+				public void onOrientationChanged(int orientation) {
+					Preview.this.onOrientationChanged(orientation);
+				}
+	        }.enable();
 
 			try {
 				camera.setPreviewDisplay(holder);
@@ -183,7 +195,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			this.has_zoom = parameters.isZoomSupported();
 			if( MyDebug.LOG )
 				Log.d(TAG, "has_zoom? " + has_zoom);
-			Activity activity = (Activity)this.getContext();
 		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
 			if( this.has_zoom ) {
 				this.max_zoom_factor = parameters.getMaxZoom();
@@ -298,6 +309,69 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         }
 	}
 
+	// for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
+	private void setCameraDisplayOrientation(Activity activity) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "Preview.setCameraDisplayOrientation()");
+	    Camera.CameraInfo info = new Camera.CameraInfo();
+	    Camera.getCameraInfo(cameraId, info);
+	    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+	    int degrees = 0;
+	    switch (rotation) {
+	    	case Surface.ROTATION_0: degrees = 0; break;
+	        case Surface.ROTATION_90: degrees = 90; break;
+	        case Surface.ROTATION_180: degrees = 180; break;
+	        case Surface.ROTATION_270: degrees = 270; break;
+	    }
+		if( MyDebug.LOG )
+			Log.d(TAG, "    degrees = " + degrees);
+
+	    int result = 0;
+	    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+	        result = (info.orientation + degrees) % 360;
+	        result = (360 - result) % 360;  // compensate the mirror
+	    }
+	    else {  // back-facing
+	        result = (info.orientation - degrees + 360) % 360;
+	    }
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "    info orientation is " + info.orientation);
+			Log.d(TAG, "    setDisplayOrientation to " + result);
+		}
+	    camera.setDisplayOrientation(result);
+	}
+	
+	// for taking photos - from http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
+	private void onOrientationChanged(int orientation) {
+		/*if( MyDebug.LOG ) {
+			Log.d(TAG, "Preview.setCameraDisplayOrientation()");
+			Log.d(TAG, "orientation: " + orientation);
+		}*/
+		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
+			return;
+		if( camera == null )
+			return;
+	    Camera.CameraInfo info = new Camera.CameraInfo();
+	    Camera.getCameraInfo(cameraId, info);
+	    orientation = (orientation + 45) / 90 * 90;
+	    this.current_orientation = orientation % 360;
+	    int rotation = 0;
+	    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+	        rotation = (info.orientation - orientation + 360) % 360;
+	    }
+	    else {  // back-facing camera
+	        rotation = (info.orientation + orientation) % 360;
+	    }
+		/*if( MyDebug.LOG ) {
+			Log.d(TAG, "    current_orientation is " + current_orientation);
+			Log.d(TAG, "    info orientation is " + info.orientation);
+			Log.d(TAG, "    set Camera rotation to " + rotation);
+		}*/
+		Camera.Parameters parameters = camera.getParameters();
+		parameters.setRotation(rotation);
+		camera.setParameters(parameters);
+	 }
+
 	@Override
 	public void onDraw(Canvas canvas) {
 		/*if( MyDebug.LOG )
@@ -310,8 +384,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
 			if( this.has_level_angle ) {
-				canvas.drawText("Angle: " + this.level_angle, canvas.getWidth() / 2,
-						canvas.getHeight() / 2, p);
+				//canvas.drawText("Angle: " + this.level_angle, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
+				canvas.drawText("Angle: " + this.level_angle + " (" + this.current_orientation + ")", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 			}
 		}
 		else {
@@ -502,7 +576,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     			if( MyDebug.LOG )
     				Log.d(TAG, "onPictureTaken");
     			Bitmap bitmap = null;
-    			if( hasLevelAngle() )
+    			if( has_level_angle )
     			{
     				BitmapFactory.Options options = new BitmapFactory.Options();
     				//options.inMutable = true;
@@ -520,7 +594,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         			}*/
         		    Matrix matrix = new Matrix();
         		    //matrix.postScale(scaleWidth, scaleHeight);
-        		    matrix.postRotate((float)getLevelAngle());
+        		    matrix.postRotate((float)level_angle);
         		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
         		    bitmap = new_bitmap;
     			}
@@ -591,12 +665,26 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     }
 
     public void onSensorChanged(SensorEvent event) {
-		double x = Math.abs(event.values[0]);
+		/*if( MyDebug.LOG )
+    	Log.d(TAG, "onSensorChanged: " + event.values[0] + ", " + event.values[1] + ", " + event.values[2]);*/
+
+		double x = event.values[0];
+		double y = event.values[1];
+		this.has_level_angle = true;
+		this.level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
+		if( this.level_angle < -0.0f ) {
+			this.level_angle += 360.0f;
+		}
+		this.level_angle -= (float)this.current_orientation;
+		if( this.level_angle < -180.0f ) {
+			this.level_angle += 360.0f;
+		}
+		else if( this.level_angle > 180.0f ) {
+			this.level_angle -= 360.0f;
+		}
+
+		/*double x = Math.abs(event.values[0]);
 		double y = Math.abs(event.values[1]);
-		/*double z = Math.abs(event.values[2]);
-		if( MyDebug.LOG )
-	    	Log.d(TAG, "onSensorChanged: " + x + ", " + y + ", " + z);
-	    	*/
 		this.has_level_angle = true;
 		this.level_angle = Math.atan2(x, y) * 180.0 / Math.PI;
 		if( this.level_angle > 45.0 ) {
@@ -604,14 +692,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		}
 		if( event.values[1] < 0.0 ) {
 			this.level_angle = - this.level_angle;
-		}
+		}*/
+
 		this.invalidate();
 	}
-    
-    public boolean hasLevelAngle() {
-    	return this.has_level_angle;
-    }
-    public double getLevelAngle() {
-    	return this.level_angle;
-    }
 }
