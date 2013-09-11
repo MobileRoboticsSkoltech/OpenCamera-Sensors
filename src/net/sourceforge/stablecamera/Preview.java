@@ -573,6 +573,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         PictureCallback jpegPictureCallback = new PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
     	    	// n.b., this is automatically run in a different thread
+	            System.gc();
     			if( MyDebug.LOG )
     				Log.d(TAG, "onPictureTaken");
     			Bitmap bitmap = null;
@@ -580,11 +581,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     			{
     				BitmapFactory.Options options = new BitmapFactory.Options();
     				//options.inMutable = true;
+    				options.inPurgeable = true;
         			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
         			int width = bitmap.getWidth();
         			int height = bitmap.getHeight();
-        			if( MyDebug.LOG )
+        			if( MyDebug.LOG ) {
+        				Log.d(TAG, "level_angle: " + level_angle);
         				Log.d(TAG, "decoded bitmap size " + width + ", " + height);
+        				Log.d(TAG, "bitmap size: " + width*height*4);
+        			}
         			/*for(int y=0;y<height;y++) {
         				for(int x=0;x<width;x++) {
         					int col = bitmap.getPixel(x, y);
@@ -593,9 +598,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         				}
         			}*/
         		    Matrix matrix = new Matrix();
-        		    //matrix.postScale(scaleWidth, scaleHeight);
+        		    /*{
+        		    	// test for low memory
+        		    	//level_angle = -6.0;
+            		    matrix.postScale(2.0f, 2.0f); // test for larger sizes
+        		    }*/
         		    matrix.postRotate((float)level_angle);
         		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+        		    bitmap.recycle();
         		    bitmap = new_bitmap;
     			}
 
@@ -644,6 +654,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	        			Log.d(TAG, "Error starting camera preview after taking photo: " + e.getMessage());
 	            	e.printStackTrace();
 	            }
+	            
+	            if( bitmap != null ) {
+        		    bitmap.recycle();
+        		    bitmap = null;
+	            }
+	            System.gc();
     	    }
     	};
     	try {
@@ -672,15 +688,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		double y = event.values[1];
 		this.has_level_angle = true;
 		this.level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
-		if( this.level_angle < -0.0f ) {
-			this.level_angle += 360.0f;
+		if( this.level_angle < -0.0 ) {
+			this.level_angle += 360.0;
 		}
 		this.level_angle -= (float)this.current_orientation;
-		if( this.level_angle < -180.0f ) {
-			this.level_angle += 360.0f;
+		if( this.level_angle < -180.0 ) {
+			this.level_angle += 360.0;
 		}
-		else if( this.level_angle > 180.0f ) {
-			this.level_angle -= 360.0f;
+		else if( this.level_angle > 180.0 ) {
+			this.level_angle -= 360.0;
 		}
 
 		/*double x = Math.abs(event.values[0]);
