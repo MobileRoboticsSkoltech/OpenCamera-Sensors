@@ -48,7 +48,7 @@
         android:layout_height="50dp"
         android:padding="10dp"
         android:scaleType="fitCenter"
-        android:contentDescription="@string/switch_camera"
+        android:contentDescription="@string/flash_mode"
         android:onClick="clickedFlash"
         android:layout_below="@+id/switch_camera"
         />
