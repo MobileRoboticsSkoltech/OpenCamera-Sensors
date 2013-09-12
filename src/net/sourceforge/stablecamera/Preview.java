@@ -13,6 +13,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -26,6 +27,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.Camera.PictureCallback;
 import android.net.Uri;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
@@ -34,7 +36,6 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ZoomControls;
@@ -62,7 +63,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	private List<Integer> zoom_ratios = null;
 
 	private List<String> supported_flash_values = null; // our "values" format
-	private int current_flash_index = -1;
+	private int current_flash_index = -1; // this is an index into the supported_flash_values array, or -1 if no flash modes available
 
 	@SuppressWarnings("deprecation")
 	Preview(Context context) {
@@ -244,7 +245,25 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 				if( MyDebug.LOG )
 					Log.d(TAG, "flash modes: " + supported_flash_modes);
 				supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
-		    	updateFlash(0);
+				current_flash_index = -1; // initialise
+
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+				String flash_value = sharedPreferences.getString("flash_value", "");
+				if( flash_value.length() > 0 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found existing flash_value: " + flash_value);
+					updateFlash(flash_value);
+					if( current_flash_index == -1 ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "flash value no longer supported!");
+						updateFlash(0);
+					}
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found no existing flash_value");
+					updateFlash(0);
+				}
 			}
 			else {
 				if( MyDebug.LOG )
@@ -412,10 +431,36 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		if( this.supported_flash_values != null && this.supported_flash_values.size() > 1 ) {
 			int new_flash_index = (current_flash_index+1) % this.supported_flash_values.size();
 			updateFlash(new_flash_index);
+
+			// now save
+			String flash_value = supported_flash_values.get(current_flash_index);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "save new flash_value: " + flash_value);
+			}
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putString("flash_value", flash_value);
+			editor.apply();
 		}
 	}
 
+	private void updateFlash(String flash_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "Preview.updateFlash(): " + flash_value);
+    	int new_flash_index = supported_flash_values.indexOf(flash_value);
+		if( MyDebug.LOG )
+			Log.d(TAG, "current_flash_index set to: " + current_flash_index);
+    	if( new_flash_index != -1 ) {
+    		updateFlash(new_flash_index);
+    	}
+    	else {
+    		this.current_flash_index = -1;
+    	}
+	}
+	
 	private void updateFlash(int new_flash_index) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "Preview.updateFlash(): " + new_flash_index);
 		// updates the Flash button, and Flash camera mode
 		if( new_flash_index != current_flash_index ) {
 			boolean initial = current_flash_index==-1;
