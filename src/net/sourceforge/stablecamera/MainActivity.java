@@ -96,6 +96,11 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "clickedFlash");
     	this.preview.cycleFlash();
     }
+    
+    public void clickedSettings(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedSettings");
+    }
 
     private void takePicture() {
 		if( MyDebug.LOG )

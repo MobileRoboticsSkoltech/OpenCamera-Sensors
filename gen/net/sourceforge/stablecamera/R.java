@@ -37,9 +37,10 @@ public final class R {
         public static final int take_photo=0x7f020008;
     }
     public static final class id {
-        public static final int action_settings=0x7f090005;
+        public static final int action_settings=0x7f090006;
         public static final int flash=0x7f090004;
         public static final int preview=0x7f090000;
+        public static final int settings=0x7f090005;
         public static final int switch_camera=0x7f090003;
         public static final int take_photo=0x7f090001;
         public static final int zoom=0x7f090002;
