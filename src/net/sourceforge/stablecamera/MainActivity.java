@@ -23,9 +23,9 @@ class MyDebug {
 
 public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
-	private SensorManager mSensorManager;
-	private Sensor mSensorAccelerometer;
-	private Preview preview;
+	private SensorManager mSensorManager = null;
+	private Sensor mSensorAccelerometer = null;
+	private Preview preview = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
