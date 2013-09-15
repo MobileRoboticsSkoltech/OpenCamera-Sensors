@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
 				Log.d(TAG, "no support for accelerometer");
 		}
 
-		preview = new Preview(this);
+		preview = new Preview(this, savedInstanceState);
 		((FrameLayout) findViewById(R.id.preview)).addView(preview);
 		
 		/*preview.setOnClickListener(new OnClickListener() {
@@ -95,6 +95,7 @@ public class MainActivity extends Activity {
     public void clickedSwitchCamera(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchCamera");
+		this.preview.switchCamera();
     }
 
     public void clickedFlash(View view) {
@@ -134,4 +135,17 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "takePicture");
     	this.preview.takePicture();
     }
+
+	@Override
+	protected void onSaveInstanceState(Bundle state) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onSaveInstanceState");
+	    super.onSaveInstanceState(state);
+	    if( this.preview != null ) {
+		    int cameraId = preview.getCameraId();
+			if( MyDebug.LOG )
+				Log.d(TAG, "save cameraId: " + cameraId);
+	    	state.putInt("cameraId", cameraId);
+	    }
+	}
 }

@@ -26,6 +26,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.Camera.PictureCallback;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -66,7 +67,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
 	@SuppressWarnings("deprecation")
-	Preview(Context context) {
+	Preview(Context context, Bundle savedInstanceState) {
 		super(context);
 
 		// Install a SurfaceHolder.Callback so we get notified when the
@@ -77,6 +78,19 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // deprecated
 
 	    scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
+
+        if( savedInstanceState != null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "have savedInstanceState");
+    		cameraId = savedInstanceState.getInt("cameraId", 0);
+			if( MyDebug.LOG )
+				Log.d(TAG, "found cameraId: " + cameraId);
+    		if( cameraId < 0 || cameraId >= Camera.getNumberOfCameras() ) {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "cameraID not valid for " + Camera.getNumberOfCameras() + " cameras!");
+    			cameraId = 0;
+    		}
+        }
 	}
 
     @Override
@@ -163,8 +177,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	}
 	
 	public void openCamera() {
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera()");
+			Log.d(TAG, "cameraId: " + cameraId);
+		}
 		try {
 			camera = Camera.open(cameraId);
 		}
@@ -201,6 +217,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			if( MyDebug.LOG )
 				Log.d(TAG, "has_zoom? " + has_zoom);
 		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
+		    this.zoom_factor = 0;
 			if( this.has_zoom ) {
 				this.max_zoom_factor = parameters.getMaxZoom();
 				this.zoom_ratios = parameters.getZoomRatios();
@@ -238,6 +255,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			            }
 			        }
 			    });
+				zoomControls.setVisibility(View.VISIBLE);
 			}
 			else {
 				zoomControls.setVisibility(View.GONE);
@@ -245,11 +263,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 			List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
 		    View flashButton = (View) activity.findViewById(R.id.flash);
+			current_flash_index = -1;
 			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "flash modes: " + supported_flash_modes);
 				supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
-				current_flash_index = -1; // initialise
 
 				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
 				if( flash_value.length() > 0 ) {
@@ -267,12 +285,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 						Log.d(TAG, "found no existing flash_value");
 					updateFlash(0);
 				}
+				flashButton.setVisibility(View.VISIBLE);
 			}
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "flash not supported");
 				supported_flash_values = null;
-				current_flash_index = -1;
 				flashButton.setVisibility(View.GONE);
 			}
 
@@ -505,6 +523,24 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 		}
 	}
 
+	public void switchCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "switchCamera()");
+		int n_cameras = Camera.getNumberOfCameras();
+		if( MyDebug.LOG )
+			Log.d(TAG, "found " + n_cameras + " cameras");
+		if( n_cameras > 1 ) {
+			if( camera != null ) {
+				//camera.setPreviewCallback(null);
+				camera.stopPreview();
+				camera.release();
+				camera = null;
+			}
+			cameraId = (cameraId+1) % n_cameras;
+			this.openCamera();
+		}
+	}
+
 	public void cycleFlash() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cycleFlash()");
@@ -732,7 +768,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         		    	level_angle = 45.0;
             		    matrix.postScale(2.0f, 2.0f); // test for larger sizes
         		    }*/
-        		    matrix.postRotate((float)level_angle);
+        		    Camera.CameraInfo info = new Camera.CameraInfo();
+        		    Camera.getCameraInfo(cameraId, info);
+        		    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            		    matrix.postRotate((float)-level_angle);
+        		    }
+        		    else {
+            		    matrix.postRotate((float)level_angle);
+        		    }
         		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
         		    bitmap.recycle();
         		    bitmap = new_bitmap;
