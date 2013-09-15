@@ -47,8 +47,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	//private int [] pixels = null; 
 	private Camera camera = null;
 	private int cameraId = 0;
-	private List<Camera.Size> sizes = null;
-	private Camera.Size current_size = null;
 	private Paint p = new Paint();
 	private boolean is_taking_photo = false;
 
@@ -64,6 +62,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 	private List<String> supported_flash_values = null; // our "values" format
 	private int current_flash_index = -1; // this is an index into the supported_flash_values array, or -1 if no flash modes available
+
+	private List<Camera.Size> sizes = null;
+	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
 	@SuppressWarnings("deprecation")
 	Preview(Context context) {
@@ -136,30 +137,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     	}
     }
 
-    private void setCameraParameters() {
-		if( camera != null ) {
-			Camera.Parameters parameters = camera.getParameters();
-	        sizes = parameters.getSupportedPictureSizes();
-	        for(int i=0;i<sizes.size();i++) {
-	        	Camera.Size size = sizes.get(i);
-	    		/*if( MyDebug.LOG )
-	    			Log.d(TAG, "Supported size: " + size.width + ", " + size.height);*/
-	        	if( current_size == null || size.width > current_size.width || (size.width == current_size.width && size.height > current_size.height) ) {
-	        		current_size = size;
-	        	}
-	        }
-	        if( current_size != null ) {
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "Current size: " + current_size.width + ", " + current_size.height);
-	        	parameters.setPictureSize(current_size.width, current_size.height);
-	    		camera.setParameters(parameters);
-	        }
-		}
-	}
+    /*private void setCameraParameters() {
+	}*/
 	
 	public void surfaceCreated(SurfaceHolder holder) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "Preview.surfaceCreated()");
+			Log.d(TAG, "surfaceCreated()");
 		// The Surface has been created, acquire the camera and tell it where
 		// to draw.
 		try {
@@ -190,7 +173,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 				e.printStackTrace();
 			}
 
-			this.setCameraParameters();
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
 			Camera.Parameters parameters = camera.getParameters();
 			this.has_zoom = parameters.isZoomSupported();
@@ -247,8 +230,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 				supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
 				current_flash_index = -1; // initialise
 
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-				String flash_value = sharedPreferences.getString("flash_value", "");
+				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
 				if( flash_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing flash_value: " + flash_value);
@@ -272,6 +254,90 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 				current_flash_index = -1;
 				flashButton.setVisibility(View.GONE);
 			}
+
+			// get available sizes
+	        sizes = parameters.getSupportedPictureSizes();
+			if( MyDebug.LOG ) {
+				for(int i=0;i<sizes.size();i++) {
+		        	Camera.Size size = sizes.get(i);
+		        	Log.d(TAG, "supported picture size: " + size.width + " , " + size.height);
+				}
+			}
+	        current_size_index = -1;
+			String resolution_value = sharedPreferences.getString(getResolutionPreferenceKey(cameraId), "");
+			if( MyDebug.LOG )
+				Log.d(TAG, "resolution_value: " + resolution_value);
+			if( resolution_value.length() > 0 ) {
+				// parse the saved size, and make sure it is still valid
+				int index = resolution_value.indexOf(' ');
+				if( index == -1 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "resolution_value invalid format, can't find space");
+				}
+				else {
+					String resolution_w_s = resolution_value.substring(0, index);
+					String resolution_h_s = resolution_value.substring(index+1);
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "resolution_w_s: " + resolution_w_s);
+						Log.d(TAG, "resolution_h_s: " + resolution_h_s);
+					}
+					try {
+						int resolution_w = Integer.parseInt(resolution_w_s);
+						if( MyDebug.LOG )
+							Log.d(TAG, "resolution_w: " + resolution_w);
+						int resolution_h = Integer.parseInt(resolution_h_s);
+						if( MyDebug.LOG )
+							Log.d(TAG, "resolution_h: " + resolution_h);
+						// now find size in valid list
+						for(int i=0;i<sizes.size() && current_size_index==-1;i++) {
+				        	Camera.Size size = sizes.get(i);
+				        	if( size.width == resolution_w && size.height == resolution_h ) {
+				        		current_size_index = i;
+								if( MyDebug.LOG )
+									Log.d(TAG, "set current_size_index to: " + current_size_index);
+				        	}
+						}
+						if( current_size_index == -1 ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "failed to find valid size");
+						}
+					}
+					catch(NumberFormatException exception) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "resolution_value invalid format, can't parse w or h to int");
+					}
+				}
+			}
+
+			if( current_size_index == -1 ) {
+				// set to largest
+				Camera.Size current_size = null;
+				for(int i=0;i<sizes.size();i++) {
+		        	Camera.Size size = sizes.get(i);
+		        	if( current_size == null || size.width*size.height > current_size.width*current_size.height ) {
+		        		current_size_index = i;
+		        		current_size = size;
+		        	}
+		        }
+			}
+			if( current_size_index != -1 ) {
+				Camera.Size current_size = sizes.get(current_size_index);
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "Current size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
+
+	    		// now save, so it's available for PreferenceActivity
+				resolution_value = current_size.width + " " + current_size.height;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "save new resolution_value: " + resolution_value);
+				}
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getResolutionPreferenceKey(cameraId), resolution_value);
+				editor.apply();
+
+				// now set the size
+	        	parameters.setPictureSize(current_size.width, current_size.height);
+	    		camera.setParameters(parameters);
+	        }
 		}
 
 		this.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
@@ -279,7 +345,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "Preview.surfaceDestroyed()");
+			Log.d(TAG, "surfaceDestroyed()");
 		// Surface will be destroyed when we return, so stop the preview.
 		// Because the CameraDevice object is not a shared resource, it's very
 		// important to release it when the activity is paused.
@@ -293,7 +359,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "Preview.surfaceChanged " + w + ", " + h);
+			Log.d(TAG, "surfaceChanged " + w + ", " + h);
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
 
@@ -314,7 +380,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         }
         // set preview size and make any resize, rotate or
         // reformatting changes here
-		this.setCameraParameters();
 
         // start preview with new settings
         try {
@@ -331,7 +396,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	// for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
 	private void setCameraDisplayOrientation(Activity activity) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "Preview.setCameraDisplayOrientation()");
+			Log.d(TAG, "setCameraDisplayOrientation()");
 	    Camera.CameraInfo info = new Camera.CameraInfo();
 	    Camera.getCameraInfo(cameraId, info);
 	    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
@@ -363,7 +428,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	// for taking photos - from http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
 	private void onOrientationChanged(int orientation) {
 		/*if( MyDebug.LOG ) {
-			Log.d(TAG, "Preview.setCameraDisplayOrientation()");
+			Log.d(TAG, "setCameraDisplayOrientation()");
 			Log.d(TAG, "orientation: " + orientation);
 		}*/
 		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
@@ -394,7 +459,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	@Override
 	public void onDraw(Canvas canvas) {
 		/*if( MyDebug.LOG )
-			Log.d(TAG, "Preview.onDraw()");*/
+			Log.d(TAG, "onDraw()");*/
 		final float scale = getResources().getDisplayMetrics().density;
 		p.setColor(Color.WHITE);
 		p.setTextAlign(Paint.Align.CENTER);
@@ -427,7 +492,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 	public void cycleFlash() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "Preview.cycleFlash()");
+			Log.d(TAG, "cycleFlash()");
 		if( this.supported_flash_values != null && this.supported_flash_values.size() > 1 ) {
 			int new_flash_index = (current_flash_index+1) % this.supported_flash_values.size();
 			updateFlash(new_flash_index);
@@ -439,14 +504,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			}
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString("flash_value", flash_value);
+			editor.putString(getFlashPreferenceKey(cameraId), flash_value);
 			editor.apply();
 		}
 	}
 
 	private void updateFlash(String flash_value) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "Preview.updateFlash(): " + flash_value);
+			Log.d(TAG, "updateFlash(): " + flash_value);
     	int new_flash_index = supported_flash_values.indexOf(flash_value);
 		if( MyDebug.LOG )
 			Log.d(TAG, "current_flash_index set to: " + current_flash_index);
@@ -460,7 +525,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	
 	private void updateFlash(int new_flash_index) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "Preview.updateFlash(): " + new_flash_index);
+			Log.d(TAG, "updateFlash(): " + new_flash_index);
 		// updates the Flash button, and Flash camera mode
 		if( new_flash_index != current_flash_index ) {
 			boolean initial = current_flash_index==-1;
@@ -491,7 +556,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 	private void setFlash(String flash_value) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "Preview.setFlash() " + flash_value);
+			Log.d(TAG, "setFlash() " + flash_value);
 		Camera.Parameters parameters = camera.getParameters();
     	if( flash_value.equals("flash_off") ) {
     		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
@@ -513,7 +578,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 	private List<String> getSupportedFlashModes(List<String> supported_flash_modes) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "Preview.getSupportedFlashModes()");
+			Log.d(TAG, "getSupportedFlashModes()");
 		List<String> output_modes = new Vector<String>();
 		if( supported_flash_modes != null ) {
 			/*for(String flash_mode : supported_flash_modes) {
@@ -761,4 +826,42 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 		this.invalidate();
 	}
+
+    /*List<Camera.Size> getSupportedPictureSizes() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedPictureSizes");
+    	if( this.camera == null )
+    		return new Vector<Camera.Size>();
+		Camera.Parameters parameters = camera.getParameters();
+    	List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
+    	for(Camera.Size size : sizes) {
+			Log.d(TAG, "    size: " + size.width + " x " + size.height);
+    	}
+    	return sizes;
+    }*/
+    List<Camera.Size> getSupportedPictureSizes() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedPictureSizes");
+		return this.sizes;
+    }
+    
+    int getCurrentPictureSizeIndex() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getCurrentPictureSizeIndex");
+    	return this.current_size_index;
+    }
+    
+    int getCameraId() {
+    	return this.cameraId;
+    }
+
+    // must be static, to safely call from other Activities
+    public static String getFlashPreferenceKey(int cameraId) {
+    	return "flash_value_" + cameraId;
+    }
+
+    // must be static, to safely call from other Activities
+    public static String getResolutionPreferenceKey(int cameraId) {
+    	return "camera_resolution_" + cameraId;
+    }
 }

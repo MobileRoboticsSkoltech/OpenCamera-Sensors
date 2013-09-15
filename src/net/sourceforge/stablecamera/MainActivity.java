@@ -1,11 +1,16 @@
 package net.sourceforge.stablecamera;
 
+import java.util.List;
+
+import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -26,6 +31,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
 		if( MyDebug.LOG ) {
 			ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -100,6 +106,27 @@ public class MainActivity extends Activity {
     public void clickedSettings(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSettings");
+
+		Intent intent = new Intent(this, MyPreferenceActivity.class);
+
+		intent.putExtra("cameraId", this.preview.getCameraId());
+		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
+		if( sizes != null ) {
+			int [] widths = new int[sizes.size()];
+			int [] heights = new int[sizes.size()];
+			int i=0;
+			for(Camera.Size size: sizes) {
+				widths[i] = size.width;
+				heights[i] = size.height;
+				i++;
+			}
+			intent.putExtra("resolution_widths", widths);
+			intent.putExtra("resolution_heights", heights);
+			int current_size_index = this.preview.getCurrentPictureSizeIndex();
+			intent.putExtra("current_resolution_index", current_size_index);
+		}
+
+		this.startActivity(intent);
     }
 
     private void takePicture() {
