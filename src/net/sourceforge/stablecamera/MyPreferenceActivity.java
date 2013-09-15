@@ -80,5 +80,18 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			}
 			lp.setValueIndex(best_index);
 		}*/
+
+		{
+			final int n_quality = 100;
+			CharSequence [] entries = new CharSequence[n_quality];
+			CharSequence [] values = new CharSequence[n_quality];
+			for(int i=0;i<n_quality;i++) {
+				entries[i] = "" + (i+1) + "%";
+				values[i] = "" + (i+1);
+			}
+			ListPreference lp = (ListPreference)findPreference("preference_quality");
+			lp.setEntries(entries);
+			lp.setEntryValues(values);
+		}
 	}
 }

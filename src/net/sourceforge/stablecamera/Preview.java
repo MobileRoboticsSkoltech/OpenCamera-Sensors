@@ -43,7 +43,7 @@ import android.widget.ZoomControls;
 class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.PreviewCallback,*/ SensorEventListener {
 	private static final String TAG = "Preview";
 
-	private SurfaceHolder mHolder;
+	private SurfaceHolder mHolder = null;
 	private Camera camera = null;
 	private int cameraId = 0;
 	private Paint p = new Paint();
@@ -335,8 +335,18 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
 				// now set the size
 	        	parameters.setPictureSize(current_size.width, current_size.height);
-	    		camera.setParameters(parameters);
 	        }
+			
+			
+    		/*if( MyDebug.LOG )
+    			Log.d(TAG, "Current image quality: " + parameters.getJpegQuality());*/
+			int image_quality = getImageQuality();
+			parameters.setJpegQuality(image_quality);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "image quality: " + image_quality);
+
+    		// update parameters
+    		camera.setParameters(parameters);
 		}
 
 		this.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
@@ -734,7 +744,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     	        try {
     	            FileOutputStream fos = new FileOutputStream(picFile);
     	            if( bitmap != null ) {
-        	            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
+    	    			int image_quality = getImageQuality();
+        	            bitmap.compress(Bitmap.CompressFormat.JPEG, image_quality, fos);
     	            }
     	            else {
         	            fos.write(data);
@@ -856,6 +867,21 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     
     int getCameraId() {
     	return this.cameraId;
+    }
+    
+    private int getImageQuality(){
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String image_quality_s = sharedPreferences.getString("preference_quality", "90");
+		int image_quality = 0;
+		try {
+			image_quality = Integer.parseInt(image_quality_s);
+		}
+		catch(NumberFormatException exception) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "image_quality_s invalid format: " + image_quality_s);
+			image_quality = 90;
+		}
+		return image_quality;
     }
 
     // must be static, to safely call from other Activities
