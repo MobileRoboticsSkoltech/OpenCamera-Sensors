@@ -144,12 +144,34 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			Log.d(TAG, "surfaceCreated()");
 		// The Surface has been created, acquire the camera and tell it where
 		// to draw.
+		this.openCamera();
+		this.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
+	}
+
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "surfaceDestroyed()");
+		// Surface will be destroyed when we return, so stop the preview.
+		// Because the CameraDevice object is not a shared resource, it's very
+		// important to release it when the activity is paused.
+		if( camera != null ) {
+			//camera.setPreviewCallback(null);
+			camera.stopPreview();
+			camera.release();
+			camera = null;
+		}
+	}
+	
+	public void openCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "openCamera()");
 		try {
 			camera = Camera.open(cameraId);
 		}
 		catch(Exception e) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "Failed to open camera");
+				Log.d(TAG, "Failed to open camera: " + e.getMessage());
+			e.printStackTrace();
 			camera = null;
 		}
 		if( camera != null ) {
@@ -163,7 +185,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	        }.enable();
 
 			try {
-				camera.setPreviewDisplay(holder);
+				camera.setPreviewDisplay(mHolder);
 				camera.startPreview();
 			}
 			catch(IOException e) {
@@ -347,22 +369,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
     		// update parameters
     		camera.setParameters(parameters);
-		}
-
-		this.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
-	}
-
-	public void surfaceDestroyed(SurfaceHolder holder) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "surfaceDestroyed()");
-		// Surface will be destroyed when we return, so stop the preview.
-		// Because the CameraDevice object is not a shared resource, it's very
-		// important to release it when the activity is paused.
-		if( camera != null ) {
-			//camera.setPreviewCallback(null);
-			camera.stopPreview();
-			camera.release();
-			camera = null;
 		}
 	}
 
