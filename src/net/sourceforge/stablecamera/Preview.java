@@ -44,7 +44,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	private static final String TAG = "Preview";
 
 	private SurfaceHolder mHolder;
-	//private int [] pixels = null; 
 	private Camera camera = null;
 	private int cameraId = 0;
 	private Paint p = new Paint();
@@ -687,8 +686,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     			if( MyDebug.LOG )
     				Log.d(TAG, "onPictureTaken");
     			Bitmap bitmap = null;
-    			if( has_level_angle )
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Preview.this.getContext());
+				boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
+    			if( auto_stabilise && has_level_angle )
     			{
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "auto stabilising...");
     				BitmapFactory.Options options = new BitmapFactory.Options();
     				//options.inMutable = true;
     				options.inPurgeable = true;
