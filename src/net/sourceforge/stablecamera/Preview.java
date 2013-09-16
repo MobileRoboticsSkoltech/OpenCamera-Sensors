@@ -565,7 +565,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 			Log.d(TAG, "updateFlash(): " + flash_value);
     	int new_flash_index = supported_flash_values.indexOf(flash_value);
 		if( MyDebug.LOG )
-			Log.d(TAG, "current_flash_index set to: " + current_flash_index);
+			Log.d(TAG, "new_flash_index: " + new_flash_index);
     	if( new_flash_index != -1 ) {
     		updateFlash(new_flash_index);
     	}
@@ -589,9 +589,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	    	String [] flash_entries = getResources().getStringArray(R.array.flash_entries);
 	    	String [] flash_icons = getResources().getStringArray(R.array.flash_icons);
 			String flash_value = supported_flash_values.get(current_flash_index);
+			if( MyDebug.LOG )
+				Log.d(TAG, "    flash_value: " + flash_value);
 	    	String [] flash_values = getResources().getStringArray(R.array.flash_values);
 	    	for(int i=0;i<flash_values.length;i++) {
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "    compare to: " + flash_values[i]);*/
 	    		if( flash_value.equals(flash_values[i]) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "    found entry: " + i);
 	    			//flashButton.setText(flash_entries[i]);
 	    			int resource = getResources().getIdentifier(flash_icons[i], null, activity.getApplicationContext().getPackageName());
 	    			flashButton.setImageResource(resource);
