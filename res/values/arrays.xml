@@ -21,4 +21,12 @@
         <item>flash_torch</item>
         <item>flash_red_eye</item>
     </string-array>
+    <string-array name="preference_ui_placement_entries">
+        <item>Left-handed user interface</item>
+        <item>Right-handed user interface</item>
+    </string-array>
+    <string-array name="preference_ui_placement_values">
+        <item>ui_left</item>
+        <item>ui_right</item>
+    </string-array>
 </resources>

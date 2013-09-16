@@ -7,10 +7,12 @@
     <string name="preference_auto_stabilise_summary">Images will be rotated so they are automatically level</string>
     <string name="preference_resolution">Camera Resolution</string>
     <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
-    <string name="preference_shutter_sound">Shutter sound</string>
-    <string name="preference_shutter_sound_summary">Whether to play a sound when taking a photo</string>
     <string name="preference_quality">Image quality</string>
     <string name="preference_quality_summary">Set the image quality of saved photo images (recommended value is 90%%)</string>
+    <string name="preference_shutter_sound">Shutter sound</string>
+    <string name="preference_shutter_sound_summary">Whether to play a sound when taking a photo</string>
+    <string name="preference_ui_placement">UI placement</string>
+    <string name="preference_ui_placement_summary">Whether to have a left-handed or right-handed user interface</string>
     <string name="take_photo">Take Photo</string>
     <string name="switch_camera">Switch Camera</string>
     <string name="flash_mode">Flash Mode</string>

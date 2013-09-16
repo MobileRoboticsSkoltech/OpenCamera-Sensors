@@ -11,11 +11,13 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 class MyDebug {
 	static final boolean LOG = true;
@@ -76,6 +78,22 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "onResume");
         super.onResume();
         mSensorManager.registerListener(preview, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
+		if( MyDebug.LOG )
+			Log.d(TAG, "ui_placement: " + ui_placement);
+		View top_view = findViewById(R.id.switch_camera);
+		RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)top_view.getLayoutParams();
+		if( ui_placement.equals("ui_left") ) {
+			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+		}
+		else {
+			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+			layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+		}
+		top_view.setLayoutParams(layoutParams);
     }
 
     @Override

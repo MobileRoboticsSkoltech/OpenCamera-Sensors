@@ -31,6 +31,7 @@
         android:layout_toLeftOf="@+id/take_photo"
         />
 
+    <!-- if we change the id switch_camera, or put another GUI item above this, we need to update the code for UI placement in MainActivity.java -->
     <ImageButton
         android:id="@+id/switch_camera"
         android:layout_width="50dp"
@@ -51,6 +52,7 @@
         android:contentDescription="@string/flash_mode"
         android:onClick="clickedFlash"
         android:layout_below="@+id/switch_camera"
+        android:layout_alignLeft="@+id/switch_camera"
         />
 
     <ImageButton
@@ -63,6 +65,7 @@
         android:src="@drawable/settings"
         android:onClick="clickedSettings"
         android:layout_below="@+id/flash"
+        android:layout_alignLeft="@+id/flash"
         />
 
 </RelativeLayout>
