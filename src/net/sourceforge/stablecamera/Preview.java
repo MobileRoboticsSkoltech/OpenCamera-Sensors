@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +30,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
@@ -743,7 +745,24 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	            System.gc();
     			if( MyDebug.LOG )
     				Log.d(TAG, "onPictureTaken");
-    			Bitmap bitmap = null;
+
+    			Activity activity = (Activity)Preview.this.getContext();
+    			boolean image_capture_intent = false;
+       	        Uri image_capture_intent_uri = null;
+    	        String action = activity.getIntent().getAction();
+    	        if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) ) {
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "from image capture intent");
+        			image_capture_intent = true;
+        	        Bundle myExtras = activity.getIntent().getExtras();
+        	        if (myExtras != null) {
+        	        	image_capture_intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
+            			if( MyDebug.LOG )
+            				Log.d(TAG, "save to: " + image_capture_intent_uri);
+        	        }
+    	        }
+
+    	        Bitmap bitmap = null;
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Preview.this.getContext());
 				boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
     			if( auto_stabilise && has_level_angle )
@@ -791,26 +810,84 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
         			}
     			}
 
-    	    	File picFile = getOutputMediaFile(1);
-    	        if( picFile == null ) {
-    	            Log.e(TAG, "Couldn't create media file; check storage permissions?");
-    	            return;
-    	        }
     	        try {
-    	            FileOutputStream fos = new FileOutputStream(picFile);
-    	            if( bitmap != null ) {
-    	    			int image_quality = getImageQuality();
-        	            bitmap.compress(Bitmap.CompressFormat.JPEG, image_quality, fos);
-    	            }
-    	            else {
-        	            fos.write(data);
-    	            }
-    	            fos.close();
+	    			File picFile = null;
+	    			OutputStream outputStream = null;
+	    			if( image_capture_intent ) {
+	        			if( image_capture_intent_uri != null )
+	        			{
+	        			    // Save the bitmap to the specified URI (use a try/catch block)
+	        			    outputStream = activity.getContentResolver().openOutputStream(image_capture_intent_uri);
+	        			}
+	        			else
+	        			{
+	        			    // If the intent doesn't contain an URI, send the bitmap as a parcel
+	        			    // (it is a good idea to reduce its size to ~50k pixels before)
+		        			if( MyDebug.LOG )
+		        				Log.d(TAG, "sent to intent via parcel");
+	        				if( bitmap == null ) {
+			        			if( MyDebug.LOG )
+			        				Log.d(TAG, "create bitmap");
+			    				BitmapFactory.Options options = new BitmapFactory.Options();
+			    				//options.inMutable = true;
+			    				options.inPurgeable = true;
+			        			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+			        			int width = bitmap.getWidth();
+			        			int height = bitmap.getHeight();
+			        			if( MyDebug.LOG ) {
+			        				Log.d(TAG, "decoded bitmap size " + width + ", " + height);
+			        				Log.d(TAG, "bitmap size: " + width*height*4);
+			        			}
+			        			final int small_size_c = 128;
+			        			if( width > small_size_c ) {
+			        				float scale = ((float)small_size_c)/(float)width;
+				        			if( MyDebug.LOG )
+				        				Log.d(TAG, "scale to " + scale);
+				        		    Matrix matrix = new Matrix();
+				        		    matrix.postScale(scale, scale);
+				        		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+				        		    bitmap.recycle();
+				        		    bitmap = new_bitmap;
+				        			if( MyDebug.LOG ) {
+				        				Log.d(TAG, "scaled bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
+				        				Log.d(TAG, "scaled bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
+				        			}
+				        		}
+	        				}
+	        				activity.setResult(Activity.RESULT_OK, new Intent("inline-data").putExtra("data", bitmap));
+            			    activity.finish();
+	        			}
+	    			}
+	    			else {
+	        			picFile = getOutputMediaFile(1);
+	        	        if( picFile == null ) {
+	        	            Log.e(TAG, "Couldn't create media file; check storage permissions?");
+	        	            return;
+	        	        }
+	    	            outputStream = new FileOutputStream(picFile);
+	    			}
+	    			
+	    			if( outputStream != null ) {
+        	            if( bitmap != null ) {
+        	    			int image_quality = getImageQuality();
+            	            bitmap.compress(Bitmap.CompressFormat.JPEG, image_quality, outputStream);
+        	            }
+        	            else {
+        	            	outputStream.write(data);
+        	            }
+        	            outputStream.close();
+        	    		if( MyDebug.LOG )
+        	    			Log.d(TAG, "onPictureTaken saved photo");
 
-    	            activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(picFile)));
-    	    		if( MyDebug.LOG )
-    	    			Log.d(TAG, "onPictureTaken saved photo");
-    	        }
+        	            if( picFile != null ) {
+            	            activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(picFile)));
+        	            }
+        	            if( image_capture_intent ) {
+            			    activity.setResult(Activity.RESULT_OK);
+            			    activity.finish();
+        	            }
+        	        }
+    			}
     	        catch(FileNotFoundException e) {
     	    		if( MyDebug.LOG )
     	    			Log.e(TAG, "File not found: " + e.getMessage());
