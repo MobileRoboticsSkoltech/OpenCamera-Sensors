@@ -68,6 +68,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
+	Preview(Context context) {
+		this(context, null);
+	}
+
 	@SuppressWarnings("deprecation")
 	Preview(Context context, Bundle savedInstanceState) {
 		super(context);
@@ -738,7 +742,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     			Log.d(TAG, "already taking a photo");
     		return;
     	}
-		final Activity activity = (Activity)getContext();
+
+    	final Activity activity = (Activity)getContext();
+
         PictureCallback jpegPictureCallback = new PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
     	    	// n.b., this is automatically run in a different thread
