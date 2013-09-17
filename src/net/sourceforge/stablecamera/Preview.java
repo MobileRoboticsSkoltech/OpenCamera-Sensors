@@ -25,7 +25,6 @@ import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.Camera.PictureCallback;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -43,7 +42,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ZoomControls;
 
-class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.PreviewCallback,*/ SensorEventListener {
+class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEventListener {
 	private static final String TAG = "Preview";
 
 	private SurfaceHolder mHolder = null;
@@ -745,7 +744,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
 
     	final Activity activity = (Activity)getContext();
 
-        PictureCallback jpegPictureCallback = new PictureCallback() {
+    	Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
+            public void onShutter() {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "shutterCallback.onShutter()");
+            }
+        };
+
+        Camera.PictureCallback jpegPictureCallback = new Camera.PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
     	    	// n.b., this is automatically run in a different thread
 	            System.gc();
@@ -929,7 +935,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, /*Camera.Pr
     	    }
     	};
     	try {
-    		camera.takePicture(null, null, jpegPictureCallback);
+    		camera.takePicture(shutterCallback, null, jpegPictureCallback);
     	    Toast.makeText(activity.getApplicationContext(), "Taking a photo...", Toast.LENGTH_SHORT).show();
     		is_taking_photo = true;
     	}
