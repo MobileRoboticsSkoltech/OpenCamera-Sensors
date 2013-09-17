@@ -1,10 +1,13 @@
 package net.sourceforge.stablecamera;
 
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.util.Log;
 
 public class MyPreferenceActivity extends PreferenceActivity {
@@ -93,5 +96,12 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
 		}
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
+        	// Camera.enableShutterSound requires JELLY_BEAN_MR1 or greater
+        	CheckBoxPreference cbp = (CheckBoxPreference)findPreference("preference_shutter_sound");
+        	PreferenceScreen preferenceScreen = getPreferenceScreen();
+        	preferenceScreen.removePreference(cbp);
+        }
 	}
 }
