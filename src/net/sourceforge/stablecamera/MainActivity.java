@@ -58,11 +58,6 @@ public class MainActivity extends Activity {
 		preview = new Preview(this, savedInstanceState);
 		((FrameLayout) findViewById(R.id.preview)).addView(preview);
 		
-		/*preview.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				takePicture();
-			}
-		});*/
 	}
 
 	@Override
