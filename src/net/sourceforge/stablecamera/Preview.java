@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Vector;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -42,6 +44,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ZoomControls;
 
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEventListener {
 	private static final String TAG = "Preview";
 
@@ -733,7 +736,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         return mediaFile;
     }
 
-    public void takePicture() {
+	public void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
     	if( is_taking_photo ) {
@@ -745,6 +748,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	final Activity activity = (Activity)getContext();
 
     	Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
+    		// don't do anything here, but we need to implement the callback to get the shutter sound (at least on Galaxy Nexus and Nexus 7)
             public void onShutter() {
     			if( MyDebug.LOG )
     				Log.d(TAG, "shutterCallback.onShutter()");
@@ -935,6 +939,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	    }
     	};
     	try {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+			boolean enable_sound = sharedPreferences.getBoolean("preference_shutter_sound", true);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "enable_sound? " + enable_sound);
+            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
+            	camera.enableShutterSound(enable_sound);
+            }
     		camera.takePicture(shutterCallback, null, jpegPictureCallback);
     	    Toast.makeText(activity.getApplicationContext(), "Taking a photo...", Toast.LENGTH_SHORT).show();
     		is_taking_photo = true;
