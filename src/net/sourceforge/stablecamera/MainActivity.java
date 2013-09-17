@@ -122,6 +122,12 @@ public class MainActivity extends Activity {
     	this.preview.cycleFlash();
     }
     
+    public void clickedFocusMode(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedFocusMode");
+    	this.preview.cycleFocusMode();
+    }
+    
     public void clickedSettings(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSettings");
