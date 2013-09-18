@@ -573,7 +573,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
 			}
 			p.setTextAlign(Paint.Align.CENTER);
+			int pixels_offset = (int) (20 * scale + 0.5f); // convert dps to pixels
 			canvas.drawText("FAILED TO OPEN CAMERA", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
+			canvas.drawText("CAMERA MAY BE IN USE BY ANOTHER APPLICATION?", canvas.getWidth() / 2, canvas.getHeight() / 2 + pixels_offset, p);
 			//canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, p);
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
