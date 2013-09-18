@@ -17,5 +17,6 @@
     <string name="switch_camera">Switch Camera</string>
     <string name="flash_mode">Flash Mode</string>
     <string name="focus_mode">Focus Mode</string>
+    <string name="trash">Delete Last Picture</string>
     
 </resources>

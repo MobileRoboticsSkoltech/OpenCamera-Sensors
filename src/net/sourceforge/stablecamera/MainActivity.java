@@ -149,6 +149,12 @@ public class MainActivity extends Activity {
 		this.startActivity(intent);
     }
 
+    public void clickedTrash(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedTrash");
+    	this.preview.clickedTrash();
+    }
+
     private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");

@@ -53,6 +53,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private int cameraId = 0;
 	private Paint p = new Paint();
 	private boolean is_taking_photo = false;
+	private boolean is_preview_paused = false;
+	private String preview_image_name = null;
 
 	private int current_orientation = 0;
 	private boolean has_level_angle = false;
@@ -108,7 +110,20 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
         //invalidate();
-        return true;
+
+		// note, we always try to force start the preview (in case is_preview_paused has become false)
+		if( camera != null ) {
+			try {
+				camera.startPreview();
+			}
+			catch(Exception e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		this.setPreviewPaused(false);
+		return true;
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
@@ -181,7 +196,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		// important to release it when the activity is paused.
 		if( camera != null ) {
 			//camera.setPreviewCallback(null);
-			camera.stopPreview();
+			if( !this.is_preview_paused ) {
+				camera.stopPreview();
+			}
 			camera.release();
 			camera = null;
 		}
@@ -215,11 +232,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				camera.setPreviewDisplay(mHolder);
 				camera.startPreview();
 			}
-			catch(IOException e) {
+			catch(Exception e) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
 				e.printStackTrace();
 			}
+			this.setPreviewPaused(false);
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
@@ -449,11 +467,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         }
 
         // stop preview before making changes
-        try {
-            camera.stopPreview();
-        }
-        catch(Exception e) {
-            // ignore: tried to stop a non-existent preview
+        if( !this.is_preview_paused ) {
+	        try {
+	            camera.stopPreview();
+	        }
+	        catch(Exception e) {
+	            // ignore: tried to stop a non-existent preview
+	        }
         }
         // set preview size and make any resize, rotate or
         // reformatting changes here
@@ -462,7 +482,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         try {
 			//camera.setPreviewCallback(this);
             camera.setPreviewDisplay(mHolder);
-            camera.startPreview();
+            if( !this.is_preview_paused ) {
+            	camera.startPreview();
+            }
         }
         catch(Exception e) {
     		if( MyDebug.LOG )
@@ -541,7 +563,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		p.setColor(Color.WHITE);
 		p.setTextAlign(Paint.Align.CENTER);
 		p.setTextSize(24.0f);
-		if( camera != null ) {
+		if( camera != null && !this.is_preview_paused ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
 			if( this.has_level_angle ) {
@@ -549,7 +571,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				canvas.drawText("Angle: " + this.level_angle + " (" + this.current_orientation + ")", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 			}
 		}
-		else {
+		else if( camera == null ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "no camera!");
 				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
@@ -574,6 +596,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( MyDebug.LOG )
 			Log.d(TAG, "found " + n_cameras + " cameras");
 		if( n_cameras > 1 ) {
+			this.setPreviewPaused(false);
 			if( camera != null ) {
 				//camera.setPreviewCallback(null);
 				camera.stopPreview();
@@ -997,6 +1020,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         			}
     			}
 
+    			String picFileName = null;
     	        try {
 	    			File picFile = null;
 	    			OutputStream outputStream = null;
@@ -1051,6 +1075,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        	            Log.e(TAG, "Couldn't create media file; check storage permissions?");
 	        	            return;
 	        	        }
+	    	            picFileName = picFile.getAbsolutePath();
+        	    		if( MyDebug.LOG )
+        	    			Log.d(TAG, "save to" + picFileName);
 	    	            outputStream = new FileOutputStream(picFile);
 	    			}
 	    			
@@ -1067,7 +1094,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         	    			Log.d(TAG, "onPictureTaken saved photo");
 
         	            if( picFile != null ) {
-            	            activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(picFile)));
+            	            activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(picFile)));
         	            }
         	            if( image_capture_intent ) {
             			    activity.setResult(Activity.RESULT_OK);
@@ -1090,7 +1117,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
     	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
     	    	// (otherwise this can fail, at least on Nexus 7)
-	            try {
+	            /*try {
 	            	camera.startPreview();
 	            	is_taking_photo = false;
 	        		if( MyDebug.LOG )
@@ -1100,7 +1127,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        		if( MyDebug.LOG )
 	        			Log.d(TAG, "Error starting camera preview after taking photo: " + e.getMessage());
 	            	e.printStackTrace();
-	            }
+	            }*/
+    	        is_taking_photo = false;
+    			Preview.this.setPreviewPaused(true);
+    			preview_image_name = picFileName;
 	            
 	            if( bitmap != null ) {
         		    bitmap.recycle();
@@ -1131,7 +1161,54 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "takePicture exit");
     }
 
-	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    public void clickedTrash() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedTrash");
+		if( is_preview_paused ) {
+			if( preview_image_name != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Delete: " + preview_image_name);
+				File file = new File(preview_image_name);
+				if( !file.delete() ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "failed to delete " + preview_image_name);
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "successsfully deleted " + preview_image_name);
+					Activity activity = (Activity)this.getContext();
+		    	    Toast.makeText(activity.getApplicationContext(), "Photo deleted", Toast.LENGTH_SHORT).show();
+    	            activity.sendBroadcast(new Intent(Intent. ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+				}
+			}
+			if( camera != null ) {
+				try {
+					camera.startPreview();
+				}
+				catch(Exception e) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
+					e.printStackTrace();
+				}
+			}
+			this.setPreviewPaused(false);
+		}
+    }
+
+    private void setPreviewPaused(boolean paused) {
+		Activity activity = (Activity)this.getContext();
+	    View trashButton = (View) activity.findViewById(R.id.trash);
+		is_preview_paused = paused;
+		if( is_preview_paused ) {
+		    trashButton.setVisibility(View.VISIBLE);
+		}
+		else {
+		    trashButton.setVisibility(View.GONE);
+		    preview_image_name = null;
+		}
+    }
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
     public void onSensorChanged(SensorEvent event) {
