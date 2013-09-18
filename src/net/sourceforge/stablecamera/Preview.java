@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -48,10 +49,12 @@ import android.widget.ZoomControls;
 class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEventListener {
 	private static final String TAG = "Preview";
 
+	private Paint p = new Paint();
+	private DecimalFormat decimalFormat = new DecimalFormat("##.00");
+
 	private SurfaceHolder mHolder = null;
 	private Camera camera = null;
 	private int cameraId = 0;
-	private Paint p = new Paint();
 	private boolean is_taking_photo = false;
 	private boolean is_preview_paused = false;
 	private String preview_image_name = null;
@@ -550,14 +553,18 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "onDraw()");*/
 		final float scale = getResources().getDisplayMetrics().density;
 		p.setColor(Color.WHITE);
-		p.setTextAlign(Paint.Align.CENTER);
 		p.setTextSize(24.0f);
 		if( camera != null && !this.is_preview_paused ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
 			if( this.has_level_angle ) {
 				//canvas.drawText("Angle: " + this.level_angle, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
-				canvas.drawText("Angle: " + this.level_angle + " (" + this.current_orientation + ")", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
+				//canvas.drawText("Angle: " + this.level_angle + " (" + this.current_orientation + ")", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
+				// Convert the dps to pixels, based on density scale
+				int pixels_offset_x = (int) (50 * scale + 0.5f); // convert dps to pixels
+				int pixels_offset_y = (int) (20 * scale + 0.5f); // convert dps to pixels
+				p.setTextAlign(Paint.Align.LEFT);
+				canvas.drawText("Angle: " + decimalFormat.format(this.level_angle), canvas.getWidth() / 2 + pixels_offset_x, canvas.getHeight() - pixels_offset_y, p);
 			}
 		}
 		else if( camera == null ) {
@@ -565,6 +572,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "no camera!");
 				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
 			}
+			p.setTextAlign(Paint.Align.CENTER);
 			canvas.drawText("FAILED TO OPEN CAMERA", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 			//canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, p);
 			//canvas.drawRGB(255, 0, 0);
@@ -574,6 +582,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			// Convert the dps to pixels, based on density scale
 			int pixels_offset = (int) (100 * scale + 0.5f); // convert dps to pixels
+			p.setTextAlign(Paint.Align.CENTER);
 			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset, p);
 		}
 	}
