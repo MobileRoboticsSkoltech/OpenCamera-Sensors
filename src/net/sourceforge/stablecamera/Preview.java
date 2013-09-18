@@ -112,17 +112,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         //invalidate();
 
 		// note, we always try to force start the preview (in case is_preview_paused has become false)
-		if( camera != null ) {
-			try {
-				camera.startPreview();
-			}
-			catch(Exception e) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
-				e.printStackTrace();
-			}
-		}
-		this.setPreviewPaused(false);
+        this.startCameraPreview();
 		return true;
     }
 
@@ -230,14 +220,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 			try {
 				camera.setPreviewDisplay(mHolder);
-				camera.startPreview();
 			}
 			catch(Exception e) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
+					Log.d(TAG, "Failed to set preview display: " + e.getMessage());
 				e.printStackTrace();
 			}
-			this.setPreviewPaused(false);
+			startCameraPreview();
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
@@ -482,13 +471,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         try {
 			//camera.setPreviewCallback(this);
             camera.setPreviewDisplay(mHolder);
-            if( !this.is_preview_paused ) {
-            	camera.startPreview();
-            }
         }
         catch(Exception e) {
     		if( MyDebug.LOG )
-    			Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+    			Log.d(TAG, "Error setting preview display: " + e.getMessage());
+        }
+        if( !this.is_preview_paused ) {
+			startCameraPreview();
         }
 	}
 
@@ -845,6 +834,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
     	}
 		camera.setParameters(parameters);
+		tryAutoFocus();
 	}
 
 	private List<String> getSupportedFocusModes(List<String> supported_focus_modes) {
@@ -933,6 +923,27 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	public void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
+    	if( is_taking_photo ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "already taking a photo");
+    		return;
+    	}
+
+        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+			@Override
+			public void onAutoFocus(boolean success, Camera camera) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "autofocus complete: " + success);
+				takePictureWhenFocused();
+			}
+        };
+		camera.autoFocus(autoFocusCallback);
+	}
+
+	private void takePictureWhenFocused() {
+		// should be called when auto-focused
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePictureWhenFocused");
     	if( is_taking_photo ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "already taking a photo");
@@ -1117,17 +1128,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
     	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
     	    	// (otherwise this can fail, at least on Nexus 7)
-	            /*try {
-	            	camera.startPreview();
-	            	is_taking_photo = false;
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "onPictureTaken started preview");
-	            }
-	            catch(Exception e) {
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "Error starting camera preview after taking photo: " + e.getMessage());
-	            	e.printStackTrace();
-	            }*/
+	            /*startCameraPreview();
+            	is_taking_photo = false;
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "onPictureTaken started preview");*/
     	        is_taking_photo = false;
     			Preview.this.setPreviewPaused(true);
     			preview_image_name = picFileName;
@@ -1181,21 +1185,60 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	            activity.sendBroadcast(new Intent(Intent. ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
 				}
 			}
-			if( camera != null ) {
-				try {
-					camera.startPreview();
-				}
-				catch(Exception e) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
-					e.printStackTrace();
-				}
-			}
-			this.setPreviewPaused(false);
+			startCameraPreview();
 		}
     }
 
+    private void tryAutoFocus() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "tryAutoFocus");
+		/*if( camera != null ) {
+			Camera.Parameters parameters = camera.getParameters();
+			String focus_mode = parameters.getFocusMode();
+			if( MyDebug.LOG )
+				Log.d(TAG, "focus_mode is " + focus_mode);
+			if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "try to start autofocus");
+		        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+					@Override
+					public void onAutoFocus(boolean success, Camera camera) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "autofocus complete: " + success);
+						Activity activity = (Activity)Preview.this.getContext();
+						if( success ) {
+				    	    Toast.makeText(activity.getApplicationContext(), "Auto focused", Toast.LENGTH_SHORT).show();
+						}
+						else {
+				    	    Toast.makeText(activity.getApplicationContext(), "Auto focus failed", Toast.LENGTH_SHORT).show();
+						}
+					}
+		        };
+				camera.autoFocus(autoFocusCallback);
+			}
+		}*/
+    }
+    
+    private void startCameraPreview() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startCameraPreview");
+		if( camera != null ) {
+			try {
+				camera.startPreview();
+			}
+			catch(Exception e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
+				e.printStackTrace();
+			}
+			tryAutoFocus();
+		}
+		this.setPreviewPaused(false);
+    }
+
     private void setPreviewPaused(boolean paused) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPreviewPaused: " + paused);
 		Activity activity = (Activity)this.getContext();
 	    View trashButton = (View) activity.findViewById(R.id.trash);
 		is_preview_paused = paused;
