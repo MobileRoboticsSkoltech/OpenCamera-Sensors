@@ -111,7 +111,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         scaleGestureDetector.onTouchEvent(event);
         //invalidate();
 
-		// note, we always try to force start the preview (in case is_preview_paused has become false)
+		// note, we always try to force start the preview (in case is_preview_paused has become false); also this does an auto-focus
         this.startCameraPreview();
 		return true;
     }
@@ -1192,7 +1192,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     private void tryAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "tryAutoFocus");
-		/*if( camera != null ) {
+		if( camera != null ) {
 			Camera.Parameters parameters = camera.getParameters();
 			String focus_mode = parameters.getFocusMode();
 			if( MyDebug.LOG )
@@ -1205,18 +1205,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					public void onAutoFocus(boolean success, Camera camera) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "autofocus complete: " + success);
-						Activity activity = (Activity)Preview.this.getContext();
-						if( success ) {
-				    	    Toast.makeText(activity.getApplicationContext(), "Auto focused", Toast.LENGTH_SHORT).show();
-						}
-						else {
-				    	    Toast.makeText(activity.getApplicationContext(), "Auto focus failed", Toast.LENGTH_SHORT).show();
-						}
 					}
 		        };
 				camera.autoFocus(autoFocusCallback);
 			}
-		}*/
+		}
     }
     
     private void startCameraPreview() {
