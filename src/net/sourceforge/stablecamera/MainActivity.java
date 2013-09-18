@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
@@ -173,4 +174,17 @@ public class MainActivity extends Activity {
 	    	state.putInt("cameraId", cameraId);
 	    }
 	}
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int keyCode = event.getKeyCode();
+        switch( keyCode ) {
+        case KeyEvent.KEYCODE_VOLUME_UP:
+        case KeyEvent.KEYCODE_VOLUME_DOWN:
+        	takePicture();
+            return true;
+        default:
+            return super.dispatchKeyEvent(event);
+        }
+    }
 }
