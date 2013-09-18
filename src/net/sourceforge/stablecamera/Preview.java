@@ -564,7 +564,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				int pixels_offset_x = (int) (50 * scale + 0.5f); // convert dps to pixels
 				int pixels_offset_y = (int) (20 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.LEFT);
+				if( Math.abs(this.level_angle) <= 1.0 ) {
+					p.setColor(Color.GREEN);
+				}
 				canvas.drawText("Angle: " + decimalFormat.format(this.level_angle), canvas.getWidth() / 2 + pixels_offset_x, canvas.getHeight() - pixels_offset_y, p);
+				p.setColor(Color.WHITE);
 			}
 		}
 		else if( camera == null ) {
