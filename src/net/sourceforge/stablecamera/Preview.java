@@ -1137,15 +1137,19 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	    	    Toast.makeText(activity.getApplicationContext(), "Failed to save photo", Toast.LENGTH_SHORT).show();
     	        }
 
-    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
-    	    	// (otherwise this can fail, at least on Nexus 7)
-	            /*startCameraPreview();
-            	is_taking_photo = false;
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "onPictureTaken started preview");*/
     	        is_taking_photo = false;
-    			Preview.this.setPreviewPaused(true);
-    			preview_image_name = picFileName;
+				boolean pause_preview = sharedPreferences.getBoolean("preference_pause_preview", true);
+				if( pause_preview ) {
+	    			setPreviewPaused(true);
+	    			preview_image_name = picFileName;
+				}
+				else {
+	    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
+	    	    	// (otherwise this can fail, at least on Nexus 7)
+		            startCameraPreview();
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "onPictureTaken started preview");
+				}
 	            
 	            if( bitmap != null ) {
         		    bitmap.recycle();

@@ -21,6 +21,13 @@
         android:defaultValue="90"
         />
 
+    <CheckBoxPreference
+        android:key="preference_pause_preview"
+        android:title="@string/preference_pause_preview"
+        android:summary="@string/preference_pause_preview_summary"
+        android:defaultValue="true"
+        />
+
     <ListPreference 
         android:key="preference_ui_placement"
         android:title="@string/preference_ui_placement"
