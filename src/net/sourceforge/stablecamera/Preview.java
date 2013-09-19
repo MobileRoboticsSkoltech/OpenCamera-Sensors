@@ -1057,8 +1057,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
             		    matrix.postRotate((float)level_angle);
         		    }
         		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-        		    bitmap.recycle();
-        		    bitmap = new_bitmap;
+        		    // careful, as new_bitmap is sometimes not a copy!
+        		    if( new_bitmap != bitmap ) {
+        		    	bitmap.recycle();
+        		    	bitmap = new_bitmap;
+        		    }
         			if( MyDebug.LOG ) {
         				Log.d(TAG, "rotated bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
         				Log.d(TAG, "rotated bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
@@ -1102,8 +1105,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				        		    Matrix matrix = new Matrix();
 				        		    matrix.postScale(scale, scale);
 				        		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-				        		    bitmap.recycle();
-				        		    bitmap = new_bitmap;
+				        		    // careful, as new_bitmap is sometimes not a copy!
+				        		    if( new_bitmap != bitmap ) {
+				        		    	bitmap.recycle();
+				        		    	bitmap = new_bitmap;
+				        		    }
 				        			if( MyDebug.LOG ) {
 				        				Log.d(TAG, "scaled bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
 				        				Log.d(TAG, "scaled bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
