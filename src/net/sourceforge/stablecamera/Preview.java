@@ -961,7 +961,17 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				takePictureWhenFocused();
 			}
         };
-		camera.autoFocus(autoFocusCallback);
+        // make sure that preview running
+        this.startCameraPreview();
+        // wrap in try block just to be safe
+        try {
+        	camera.autoFocus(autoFocusCallback);
+        }
+        catch(Exception e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "failed to autofocus");
+        	e.printStackTrace();
+        }
 	}
 
 	private void takePictureWhenFocused() {
