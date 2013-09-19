@@ -608,6 +608,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				camera = null;
 			}
 			cameraId = (cameraId+1) % n_cameras;
+		    Camera.CameraInfo info = new Camera.CameraInfo();
+		    Camera.getCameraInfo(cameraId, info);
+			Activity activity = (Activity)this.getContext();
+		    if( info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
+				Toast.makeText(activity.getApplicationContext(), "Front Camera", Toast.LENGTH_SHORT).show();
+		    }
+		    else {
+				Toast.makeText(activity.getApplicationContext(), "Back Camera", Toast.LENGTH_SHORT).show();
+		    }
 			this.openCamera();
 		}
 	}
