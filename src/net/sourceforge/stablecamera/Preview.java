@@ -356,6 +356,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		        	Log.d(TAG, "supported picture size: " + size.width + " , " + size.height);
 				}
 			}
+			if( MyDebug.LOG ) {
+				List<Camera.Size> preview_sizes = parameters.getSupportedPreviewSizes();
+				for(int i=0;i<preview_sizes.size();i++) {
+		        	Camera.Size size = preview_sizes.get(i);
+		        	Log.d(TAG, "supported preview size: " + size.width + " , " + size.height);
+				}
+			}
 	        current_size_index = -1;
 			String resolution_value = sharedPreferences.getString(getResolutionPreferenceKey(cameraId), "");
 			if( MyDebug.LOG )
@@ -429,7 +436,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 				// now set the size
 	        	parameters.setPictureSize(current_size.width, current_size.height);
-	        }
+			}
 			
 			
     		/*if( MyDebug.LOG )
@@ -469,7 +476,27 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         }
         // set preview size and make any resize, rotate or
         // reformatting changes here
+        /*Camera.Parameters parameters = camera.getParameters();
+		if( MyDebug.LOG )
+			Log.d(TAG, "current preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
+        parameters.setPreviewSize(w, h);
+        camera.setParameters(parameters);
+		if( MyDebug.LOG )
+			Log.d(TAG, "new preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);*/
 
+        /*{
+			// set optimal preview size
+        	Camera.Parameters parameters = camera.getParameters();
+        	Camera.Size current_size = parameters.getPictureSize();
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "current size: " + current_size.width + ", " + current_size.height);
+	        List<Camera.Size> preview_sizes = parameters.getSupportedPreviewSizes();
+	        Camera.Size optimalSize = getOptimalPreviewSize(preview_sizes, (double) current_size.width / current_size.height);
+	        if( optimalSize != null ) {
+	            parameters.setPreviewSize(optimalSize.width, optimalSize.height);
+	        }
+        }*/
+ 
         // start preview with new settings
         try {
 			//camera.setPreviewCallback(this);
@@ -484,7 +511,56 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         }
 	}
 
-	// for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
+    /*private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, double targetRatio) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getOptimalPreviewSize() targetRatio: " + targetRatio);
+        final double ASPECT_TOLERANCE = 0.05;
+        if (sizes == null)
+        	return null;
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+        // Because of bugs of overlay and layout, we sometimes will try to
+        // layout the viewfinder in the portrait orientation and thus get the
+        // wrong size of mSurfaceView. When we change the preview size, the
+        // new overlay will be created before the old one closed, which causes
+        // an exception. For now, just get the screen size
+		Activity activity = (Activity)this.getContext();
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        int targetHeight = Math.min(display.getHeight(), display.getWidth());
+        if (targetHeight <= 0) {
+            // We don't know the size of SurefaceView, use screen height
+            WindowManager windowManager = (WindowManager)activity.getSystemService(Context.WINDOW_SERVICE);
+            targetHeight = windowManager.getDefaultDisplay().getHeight();
+        }
+		if( MyDebug.LOG )
+			Log.d(TAG, "targetHeight: " + targetHeight);
+        // Try to find an size match aspect ratio and size
+        for(Camera.Size size : sizes) {
+            double ratio = (double) size.width / size.height;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+            	continue;
+            if (Math.abs(size.height - targetHeight) < minDiff) {
+                optimalSize = size;
+                minDiff = Math.abs(size.height - targetHeight);
+            }
+        }
+        if( optimalSize == null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "can't find exact aspect ratio, so ignore requirement");
+            minDiff = Double.MAX_VALUE;
+            for(Camera.Size size : sizes) {
+                if (Math.abs(size.height - targetHeight) < minDiff) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - targetHeight);
+                }
+            }
+        }
+		if( MyDebug.LOG )
+			Log.d(TAG, "optimal preview size is: " + optimalSize.width + ", " + optimalSize.height);
+        return optimalSize;
+    }*/
+
+    // for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
 	private void setCameraDisplayOrientation(Activity activity) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setCameraDisplayOrientation()");
