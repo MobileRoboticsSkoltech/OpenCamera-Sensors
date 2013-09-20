@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -50,6 +51,13 @@ public class MainActivity extends Activity {
 
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
         getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // set screen to max brightness - see http://stackoverflow.com/questions/11978042/android-screen-brightness-max-value
+        {
+	        WindowManager.LayoutParams layout = getWindow().getAttributes();
+	        layout.screenBrightness = 1.0f;
+	        getWindow().setAttributes(layout); 
+        }
 
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		if( mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null ) {
