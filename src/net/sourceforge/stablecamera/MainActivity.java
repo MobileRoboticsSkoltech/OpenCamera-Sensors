@@ -156,6 +156,12 @@ public class MainActivity extends Activity {
 		this.startActivity(intent);
     }
 
+    public void clickedShare(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedShare");
+    	this.preview.clickedShare();
+    }
+
     public void clickedTrash(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTrash");

@@ -82,6 +82,20 @@
 
     <!-- should be at bottom -->
     <ImageButton
+        android:id="@+id/share"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/share"
+        android:src="@drawable/share"
+        android:onClick="clickedShare"
+        android:layout_below="@+id/settings"
+        android:layout_alignLeft="@+id/settings"
+        android:visibility="gone"
+        />
+    
+    <ImageButton
         android:id="@+id/trash"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -90,8 +104,8 @@
         android:contentDescription="@string/trash"
         android:src="@drawable/trash"
         android:onClick="clickedTrash"
-        android:layout_below="@+id/settings"
-        android:layout_alignLeft="@+id/settings"
+        android:layout_below="@+id/share"
+        android:layout_alignLeft="@+id/share"
         android:visibility="gone"
         />
 

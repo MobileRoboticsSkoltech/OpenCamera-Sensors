@@ -1159,7 +1159,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        	        }
 	    	            picFileName = picFile.getAbsolutePath();
         	    		if( MyDebug.LOG )
-        	    			Log.d(TAG, "save to" + picFileName);
+        	    			Log.d(TAG, "save to: " + picFileName);
 	    	            outputStream = new FileOutputStream(picFile);
 	    			}
 	    			
@@ -1240,7 +1240,24 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "takePicture exit");
     }
 
-    public void clickedTrash() {
+	public void clickedShare() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedShare");
+		if( is_preview_paused ) {
+			if( preview_image_name != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Share: " + preview_image_name);
+				Intent intent = new Intent(Intent.ACTION_SEND);
+				intent.setType("image/jpeg");
+				intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + preview_image_name));
+				Activity activity = (Activity)this.getContext();
+				activity.startActivity(Intent.createChooser(intent, "Photo"));
+			}
+			startCameraPreview();
+		}
+	}
+
+	public void clickedTrash() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTrash");
 		if( is_preview_paused ) {
@@ -1308,12 +1325,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewPaused: " + paused);
 		Activity activity = (Activity)this.getContext();
+	    View shareButton = (View) activity.findViewById(R.id.share);
 	    View trashButton = (View) activity.findViewById(R.id.trash);
 		is_preview_paused = paused;
 		if( is_preview_paused ) {
+		    shareButton.setVisibility(View.VISIBLE);
 		    trashButton.setVisibility(View.VISIBLE);
 		}
 		else {
+			shareButton.setVisibility(View.GONE);
 		    trashButton.setVisibility(View.GONE);
 		    preview_image_name = null;
 		}
