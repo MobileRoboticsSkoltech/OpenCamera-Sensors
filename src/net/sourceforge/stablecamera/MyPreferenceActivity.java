@@ -1,6 +1,7 @@
 package net.sourceforge.stablecamera;
 
 import android.content.SharedPreferences;
+import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -24,6 +25,29 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		int cameraId = getIntent().getExtras().getInt("cameraId");
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
+
+		String [] color_effects = getIntent().getExtras().getStringArray("color_effects");
+		if( color_effects != null && color_effects.length > 0 ) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "color_effects:");
+				for(int i=0;i<color_effects.length;i++) {
+					Log.d(TAG, color_effects[i]);
+				}
+			}
+			ListPreference lp = (ListPreference)findPreference("preference_color_effect");
+			lp.setEntries(color_effects);
+			lp.setEntryValues(color_effects);
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String color_effect = sharedPreferences.getString("preference_color_effect", Camera.Parameters.EFFECT_NONE);
+			if( MyDebug.LOG )
+				Log.d(TAG, "color_effect: " + color_effect);
+			lp.setValue(color_effect);
+		}
+		else {
+			ListPreference lp = (ListPreference)findPreference("preference_color_effect");
+        	PreferenceScreen preferenceScreen = getPreferenceScreen();
+        	preferenceScreen.removePreference(lp);
+		}
 		
 		int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
 		int [] heights = getIntent().getExtras().getIntArray("resolution_heights");

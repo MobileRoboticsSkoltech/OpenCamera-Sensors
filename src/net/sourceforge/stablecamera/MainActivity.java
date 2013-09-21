@@ -145,6 +145,18 @@ public class MainActivity extends Activity {
 		Intent intent = new Intent(this, MyPreferenceActivity.class);
 
 		intent.putExtra("cameraId", this.preview.getCameraId());
+		
+		List<String> color_effects = this.preview.getSupportedColorEffects();
+		if( color_effects != null ) {
+			String [] color_effects_arr = new String[color_effects.size()];
+			int i=0;
+			for(String color_effect: color_effects) {
+				color_effects_arr[i] = color_effect;
+				i++;
+			}
+			intent.putExtra("color_effects", color_effects_arr);
+		}
+
 		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
 		if( sizes != null ) {
 			int [] widths = new int[sizes.size()];

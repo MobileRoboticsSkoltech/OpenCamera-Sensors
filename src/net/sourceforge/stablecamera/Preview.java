@@ -71,6 +71,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private List<String> supported_focus_values = null; // our "values" format
 	private int current_focus_index = -1; // this is an index into the supported_focus_values array, or -1 if no focus modes available
 
+	private List<String> color_effects = null;
+
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
@@ -342,6 +344,42 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					Log.d(TAG, "focus not supported");
 				supported_focus_values = null;
 				focusModeButton.setVisibility(View.GONE);
+			}
+
+			// get available color effects
+			color_effects = parameters.getSupportedColorEffects();
+			if( color_effects != null && color_effects.size() > 0 ) {
+				if( MyDebug.LOG ) {
+					for(int i=0;i<color_effects.size();i++) {
+			        	Log.d(TAG, "supported color effect: " + color_effects.get(i));
+					}
+				}
+				String color_effect = sharedPreferences.getString("preference_color_effect", Camera.Parameters.EFFECT_NONE);
+				if( MyDebug.LOG )
+					Log.d(TAG, "color_effect: " + color_effect);
+				// make sure result is valid
+				if( !color_effects.contains(color_effect) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "color effect not valid!");
+					if( color_effects.contains(Camera.Parameters.EFFECT_NONE) )
+						color_effect = Camera.Parameters.EFFECT_NONE;
+					else
+						color_effect = color_effects.get(0);
+					if( MyDebug.LOG )
+						Log.d(TAG, "color_effect is now: " + color_effect);
+				}
+
+	    		// now save, so it's available for PreferenceActivity
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString("preference_color_effect", color_effect);
+				editor.apply();
+
+				// now set the size
+	        	parameters.setColorEffect(color_effect);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "color effects not supported");
 			}
 
 			// get available sizes
@@ -1374,6 +1412,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 		this.invalidate();
 	}
+
+    List<String> getSupportedColorEffects() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedColorEffects");
+		return this.color_effects;
+    }
 
     /*List<Camera.Size> getSupportedPictureSizes() {
 		if( MyDebug.LOG )
