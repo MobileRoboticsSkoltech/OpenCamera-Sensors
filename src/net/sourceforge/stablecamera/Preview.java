@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -47,6 +48,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("##.00");
+	private boolean ui_placement_right = true;
 
 	private SurfaceHolder mHolder = null;
 	private Camera camera = null;
@@ -674,7 +676,17 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				// Convert the dps to pixels, based on density scale
 				int pixels_offset_x = (int) (50 * scale + 0.5f); // convert dps to pixels
 				int pixels_offset_y = (int) (20 * scale + 0.5f); // convert dps to pixels
-				p.setTextAlign(Paint.Align.LEFT);
+				if( getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
+					pixels_offset_x = 0;
+					p.setTextAlign(Paint.Align.CENTER);
+				}
+				else if( ui_placement_right ) {
+					pixels_offset_x = - pixels_offset_x;
+					p.setTextAlign(Paint.Align.RIGHT);
+				}
+				else {
+					p.setTextAlign(Paint.Align.LEFT);
+				}
 				if( Math.abs(this.level_angle) <= 1.0 ) {
 					p.setColor(Color.GREEN);
 				}
@@ -1461,6 +1473,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			image_quality = 90;
 		}
 		return image_quality;
+    }
+    
+    public void onResume() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
+		this.ui_placement_right = ui_placement.equals("ui_right");
     }
 
     // must be static, to safely call from other Activities
