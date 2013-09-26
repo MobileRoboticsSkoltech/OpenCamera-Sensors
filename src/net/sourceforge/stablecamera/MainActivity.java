@@ -289,6 +289,17 @@ public class MainActivity extends Activity {
 			intent.putExtra("color_effects", color_effects_arr);
 		}
 
+		List<String> scene_modes = this.preview.getSupportedSceneModes();
+		if( scene_modes != null ) {
+			String [] scene_modes_arr = new String[scene_modes.size()];
+			int i=0;
+			for(String scene_mode: scene_modes) {
+				scene_modes_arr[i] = scene_mode;
+				i++;
+			}
+			intent.putExtra("scene_modes", scene_modes_arr);
+		}
+
 		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
 		if( sizes != null ) {
 			int [] widths = new int[sizes.size()];

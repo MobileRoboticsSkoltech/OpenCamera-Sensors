@@ -49,6 +49,29 @@ public class MyPreferenceActivity extends PreferenceActivity {
         	preferenceScreen.removePreference(lp);
 		}
 		
+		String [] scene_modes = getIntent().getExtras().getStringArray("scene_modes");
+		if( scene_modes != null && scene_modes.length > 0 ) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "scene_modes:");
+				for(int i=0;i<scene_modes.length;i++) {
+					Log.d(TAG, scene_modes[i]);
+				}
+			}
+			ListPreference lp = (ListPreference)findPreference("preference_scene_mode");
+			lp.setEntries(scene_modes);
+			lp.setEntryValues(scene_modes);
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String scene_mode = sharedPreferences.getString("preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
+			if( MyDebug.LOG )
+				Log.d(TAG, "scene_mode: " + scene_mode);
+			lp.setValue(scene_mode);
+		}
+		else {
+			ListPreference lp = (ListPreference)findPreference("preference_scene_mode");
+        	PreferenceScreen preferenceScreen = getPreferenceScreen();
+        	preferenceScreen.removePreference(lp);
+		}
+
 		int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
 		int [] heights = getIntent().getExtras().getIntArray("resolution_heights");
 		if( widths != null && heights != null ) {

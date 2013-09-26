@@ -74,6 +74,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private int current_focus_index = -1; // this is an index into the supported_focus_values array, or -1 if no focus modes available
 
 	private List<String> color_effects = null;
+	private List<String> scene_modes = null;
 
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
@@ -376,12 +377,48 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				editor.putString("preference_color_effect", color_effect);
 				editor.apply();
 
-				// now set the size
+				// now set the color effect
 	        	parameters.setColorEffect(color_effect);
 			}
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "color effects not supported");
+			}
+
+			// get available scene modes
+			scene_modes = parameters.getSupportedSceneModes();
+			if( scene_modes != null && scene_modes.size() > 0 ) {
+				if( MyDebug.LOG ) {
+					for(int i=0;i<scene_modes.size();i++) {
+			        	Log.d(TAG, "supported scene mode: " + scene_modes.get(i));
+					}
+				}
+				String scene_mode = sharedPreferences.getString("preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
+				if( MyDebug.LOG )
+					Log.d(TAG, "scene_mode: " + scene_mode);
+				// make sure result is valid
+				if( !scene_modes.contains(scene_mode) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "scene mode not valid!");
+					if( scene_modes.contains(Camera.Parameters.SCENE_MODE_AUTO) )
+						scene_mode = Camera.Parameters.SCENE_MODE_AUTO;
+					else
+						scene_mode = scene_modes.get(0);
+					if( MyDebug.LOG )
+						Log.d(TAG, "scene_mode is now: " + scene_mode);
+				}
+
+	    		// now save, so it's available for PreferenceActivity
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString("preference_scene_mode", scene_mode);
+				editor.apply();
+
+				// now set the scene mode
+	        	parameters.setSceneMode(scene_mode);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "scene modes not supported");
 			}
 
 			// get available sizes
@@ -1430,6 +1467,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedColorEffects");
 		return this.color_effects;
+    }
+
+    List<String> getSupportedSceneModes() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedSceneModes");
+		return this.scene_modes;
     }
 
     /*List<Camera.Size> getSupportedPictureSizes() {
