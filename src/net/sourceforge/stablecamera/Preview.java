@@ -595,6 +595,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     }*/
 
     // for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
+	// note, if orientation is locked to landscape this is only called when setting up the activity, and will always have the same orientation
 	private void setCameraDisplayOrientation(Activity activity) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setCameraDisplayOrientation()");
@@ -629,7 +630,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	// for taking photos - from http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
 	private void onOrientationChanged(int orientation) {
 		/*if( MyDebug.LOG ) {
-			Log.d(TAG, "setCameraDisplayOrientation()");
+			Log.d(TAG, "onOrientationChanged()");
 			Log.d(TAG, "orientation: " + orientation);
 		}*/
 		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
