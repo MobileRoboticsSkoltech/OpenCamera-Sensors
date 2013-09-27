@@ -80,6 +80,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
+	private Toast switch_camera_toast = null;
+	private Toast flash_toast = null;
+	private Toast focus_toast = null;
+
 	Preview(Context context) {
 		this(context, null);
 	}
@@ -758,12 +762,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			cameraId = (cameraId+1) % n_cameras;
 		    Camera.CameraInfo info = new Camera.CameraInfo();
 		    Camera.getCameraInfo(cameraId, info);
-			Activity activity = (Activity)this.getContext();
 		    if( info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-				Toast.makeText(activity.getApplicationContext(), "Front Camera", Toast.LENGTH_SHORT).show();
+				switch_camera_toast = showToast(switch_camera_toast, "Front Camera");
 		    }
 		    else {
-				Toast.makeText(activity.getApplicationContext(), "Back Camera", Toast.LENGTH_SHORT).show();
+				switch_camera_toast = showToast(switch_camera_toast, "Back Camera");
 		    }
 			this.openCamera();
 		}
@@ -830,7 +833,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    			int resource = getResources().getIdentifier(flash_icons[i], null, activity.getApplicationContext().getPackageName());
 	    			flashButton.setImageResource(resource);
 	    			if( !initial ) {
-	    				Toast.makeText(activity.getApplicationContext(), flash_entries[i], Toast.LENGTH_SHORT).show();
+	    				flash_toast = showToast(flash_toast, flash_entries[i]);
 	    			}
 	    			break;
 	    		}
@@ -974,7 +977,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    			int resource = getResources().getIdentifier(focus_icons[i], null, activity.getApplicationContext().getPackageName());
 	    			focusModeButton.setImageResource(resource);
 	    			if( !initial ) {
-	    				Toast.makeText(activity.getApplicationContext(), focus_entries[i], Toast.LENGTH_SHORT).show();
+	    				focus_toast = showToast(focus_toast, focus_entries[i]);
 	    			}
 	    			break;
 	    		}
@@ -1518,6 +1521,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		this.ui_placement_right = ui_placement.equals("ui_right");
     }
 
+	private Toast showToast(Toast clear_toast, String message) {
+		if( clear_toast != null )
+			clear_toast.cancel();
+		Activity activity = (Activity)this.getContext();
+		clear_toast = Toast.makeText(activity.getApplicationContext(), message, Toast.LENGTH_SHORT);
+		clear_toast.show();
+		return clear_toast;
+	}
+	
     // must be static, to safely call from other Activities
     public static String getFlashPreferenceKey(int cameraId) {
     	return "flash_value_" + cameraId;
