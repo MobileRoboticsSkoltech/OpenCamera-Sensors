@@ -277,28 +277,9 @@ public class MainActivity extends Activity {
 		Intent intent = new Intent(this, MyPreferenceActivity.class);
 
 		intent.putExtra("cameraId", this.preview.getCameraId());
-		
-		List<String> color_effects = this.preview.getSupportedColorEffects();
-		if( color_effects != null ) {
-			String [] color_effects_arr = new String[color_effects.size()];
-			int i=0;
-			for(String color_effect: color_effects) {
-				color_effects_arr[i] = color_effect;
-				i++;
-			}
-			intent.putExtra("color_effects", color_effects_arr);
-		}
 
-		List<String> scene_modes = this.preview.getSupportedSceneModes();
-		if( scene_modes != null ) {
-			String [] scene_modes_arr = new String[scene_modes.size()];
-			int i=0;
-			for(String scene_mode: scene_modes) {
-				scene_modes_arr[i] = scene_mode;
-				i++;
-			}
-			intent.putExtra("scene_modes", scene_modes_arr);
-		}
+		putIntentExtra(intent, "color_effects", this.preview.getSupportedColorEffects());
+		putIntentExtra(intent, "scene_modes", this.preview.getSupportedSceneModes());
 
 		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
 		if( sizes != null ) {
@@ -317,6 +298,19 @@ public class MainActivity extends Activity {
 		}
 
 		this.startActivity(intent);
+    }
+    
+    static private void putIntentExtra(Intent intent, String key, List<String> values) {
+		if( values != null ) {
+			String [] values_arr = new String[values.size()];
+			int i=0;
+			for(String value: values) {
+				values_arr[i] = value;
+				i++;
+			}
+			intent.putExtra(key, values_arr);
+		}
+
     }
 
     public void clickedShare(View view) {

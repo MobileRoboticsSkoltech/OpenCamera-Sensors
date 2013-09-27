@@ -351,74 +351,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 			// get available color effects
 			color_effects = parameters.getSupportedColorEffects();
-			if( color_effects != null && color_effects.size() > 0 ) {
-				if( MyDebug.LOG ) {
-					for(int i=0;i<color_effects.size();i++) {
-			        	Log.d(TAG, "supported color effect: " + color_effects.get(i));
-					}
-				}
-				String color_effect = sharedPreferences.getString("preference_color_effect", Camera.Parameters.EFFECT_NONE);
-				if( MyDebug.LOG )
-					Log.d(TAG, "color_effect: " + color_effect);
-				// make sure result is valid
-				if( !color_effects.contains(color_effect) ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "color effect not valid!");
-					if( color_effects.contains(Camera.Parameters.EFFECT_NONE) )
-						color_effect = Camera.Parameters.EFFECT_NONE;
-					else
-						color_effect = color_effects.get(0);
-					if( MyDebug.LOG )
-						Log.d(TAG, "color_effect is now: " + color_effect);
-				}
-
-	    		// now save, so it's available for PreferenceActivity
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString("preference_color_effect", color_effect);
-				editor.apply();
-
-				// now set the color effect
+			String color_effect = setupValuesPref(color_effects, "preference_color_effect", Camera.Parameters.EFFECT_NONE);
+			if( color_effect != null ) {
 	        	parameters.setColorEffect(color_effect);
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "color effects not supported");
 			}
 
 			// get available scene modes
 			scene_modes = parameters.getSupportedSceneModes();
-			if( scene_modes != null && scene_modes.size() > 0 ) {
-				if( MyDebug.LOG ) {
-					for(int i=0;i<scene_modes.size();i++) {
-			        	Log.d(TAG, "supported scene mode: " + scene_modes.get(i));
-					}
-				}
-				String scene_mode = sharedPreferences.getString("preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
-				if( MyDebug.LOG )
-					Log.d(TAG, "scene_mode: " + scene_mode);
-				// make sure result is valid
-				if( !scene_modes.contains(scene_mode) ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "scene mode not valid!");
-					if( scene_modes.contains(Camera.Parameters.SCENE_MODE_AUTO) )
-						scene_mode = Camera.Parameters.SCENE_MODE_AUTO;
-					else
-						scene_mode = scene_modes.get(0);
-					if( MyDebug.LOG )
-						Log.d(TAG, "scene_mode is now: " + scene_mode);
-				}
-
-	    		// now save, so it's available for PreferenceActivity
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString("preference_scene_mode", scene_mode);
-				editor.apply();
-
-				// now set the scene mode
+			String scene_mode = setupValuesPref(scene_modes, "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
+			if( scene_mode != null ) {
 	        	parameters.setSceneMode(scene_mode);
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "scene modes not supported");
 			}
 
 			// get available sizes
@@ -524,6 +466,44 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 	}
 
+	private String setupValuesPref(List<String> values, String key, String default_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setupValuesPref, key: " + key);
+		if( values != null && values.size() > 0 ) {
+			if( MyDebug.LOG ) {
+				for(int i=0;i<values.size();i++) {
+		        	Log.d(TAG, "supported value: " + values.get(i));
+				}
+			}
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+			String value = sharedPreferences.getString(key, default_value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "value: " + value);
+			// make sure result is valid
+			if( !values.contains(value) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "value not valid!");
+				if( values.contains(default_value) )
+					value = default_value;
+				else
+					value = values.get(0);
+				if( MyDebug.LOG )
+					Log.d(TAG, "value is now: " + value);
+			}
+
+    		// now save, so it's available for PreferenceActivity
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putString(key, value);
+			editor.apply();
+
+        	return value;
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "values not supported");
+			return null;
+		}
+	}
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "surfaceChanged " + w + ", " + h);

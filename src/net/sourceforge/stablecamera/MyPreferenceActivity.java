@@ -26,52 +26,9 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
 
-		String [] color_effects = getIntent().getExtras().getStringArray("color_effects");
-		if( color_effects != null && color_effects.length > 0 ) {
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "color_effects:");
-				for(int i=0;i<color_effects.length;i++) {
-					Log.d(TAG, color_effects[i]);
-				}
-			}
-			ListPreference lp = (ListPreference)findPreference("preference_color_effect");
-			lp.setEntries(color_effects);
-			lp.setEntryValues(color_effects);
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			String color_effect = sharedPreferences.getString("preference_color_effect", Camera.Parameters.EFFECT_NONE);
-			if( MyDebug.LOG )
-				Log.d(TAG, "color_effect: " + color_effect);
-			lp.setValue(color_effect);
-		}
-		else {
-			ListPreference lp = (ListPreference)findPreference("preference_color_effect");
-        	PreferenceScreen preferenceScreen = getPreferenceScreen();
-        	preferenceScreen.removePreference(lp);
-		}
+		readFromIntent("color_effects", "preference_color_effect", Camera.Parameters.EFFECT_NONE);
+		readFromIntent("scene_modes", "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
 		
-		String [] scene_modes = getIntent().getExtras().getStringArray("scene_modes");
-		if( scene_modes != null && scene_modes.length > 0 ) {
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "scene_modes:");
-				for(int i=0;i<scene_modes.length;i++) {
-					Log.d(TAG, scene_modes[i]);
-				}
-			}
-			ListPreference lp = (ListPreference)findPreference("preference_scene_mode");
-			lp.setEntries(scene_modes);
-			lp.setEntryValues(scene_modes);
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			String scene_mode = sharedPreferences.getString("preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
-			if( MyDebug.LOG )
-				Log.d(TAG, "scene_mode: " + scene_mode);
-			lp.setValue(scene_mode);
-		}
-		else {
-			ListPreference lp = (ListPreference)findPreference("preference_scene_mode");
-        	PreferenceScreen preferenceScreen = getPreferenceScreen();
-        	preferenceScreen.removePreference(lp);
-		}
-
 		int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
 		int [] heights = getIntent().getExtras().getIntArray("resolution_heights");
 		if( widths != null && heights != null ) {
@@ -90,46 +47,9 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			if( MyDebug.LOG )
 				Log.d(TAG, "resolution_value: " + resolution_value);
 			lp.setValue(resolution_value);
-			/*if( resolution_value.length() > 0 ) {
-			}
-			else {
-				int current_resolution_index = getIntent().getExtras().getInt("current_resolution_index");
-				if( MyDebug.LOG )
-					Log.d(TAG, "set via intent bundle: current_resolution_index: " + current_resolution_index);
-				lp.setValueIndex(current_resolution_index);
-			}*/
 			// now set the key, so we save for the correct cameraId
 			lp.setKey(resolution_preference_key);
 		}
-		/*SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String resolution_value = sharedPreferences.getString("camera_resolution", "");
-		if( MyDebug.LOG )
-			Log.d(TAG, "resolution_value: " + resolution_value);
-		boolean found = false;
-		if( resolution_value.length() > 0 ) {
-			for(int i=0;i<values.length && !found;i++) {
-				if( values[i].equals(resolution_value) ) {
-					//lp.setDefaultValue(values[i]);
-					lp.setValueIndex(i);
-					found = true;
-				}
-			}
-		}
-		if( !found ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "set default value for resolution");
-			//lp.setDefaultValue(values[0]);
-			int best_index = 0;
-			int best_pixels = widths[0]*heights[0];
-			for(int i=1;i<widths.length;i++) {
-				int pixels = widths[i]*heights[i];
-				if( pixels > best_pixels ) {
-					best_index = i;
-					best_pixels = pixels;
-				}
-			}
-			lp.setValueIndex(best_index);
-		}*/
 
 		{
 			final int n_quality = 100;
@@ -150,5 +70,33 @@ public class MyPreferenceActivity extends PreferenceActivity {
         	PreferenceScreen preferenceScreen = getPreferenceScreen();
         	preferenceScreen.removePreference(cbp);
         }
+	}
+	
+	private void readFromIntent(String intent_key, String preference_key, String default_value) {
+		String [] values = getIntent().getExtras().getStringArray(intent_key);
+		if( values != null && values.length > 0 ) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, intent_key + " values:");
+				for(int i=0;i<values.length;i++) {
+					Log.d(TAG, values[i]);
+				}
+			}
+			@SuppressWarnings("deprecation")
+			ListPreference lp = (ListPreference)findPreference(preference_key);
+			lp.setEntries(values);
+			lp.setEntryValues(values);
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String value = sharedPreferences.getString(preference_key, default_value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "    value: " + values);
+			lp.setValue(value);
+		}
+		else {
+			@SuppressWarnings("deprecation")
+			ListPreference lp = (ListPreference)findPreference(preference_key);
+        	@SuppressWarnings("deprecation")
+			PreferenceScreen preferenceScreen = getPreferenceScreen();
+        	preferenceScreen.removePreference(lp);
+		}
 	}
 }
