@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import android.annotation.TargetApi;
@@ -53,7 +55,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private SurfaceHolder mHolder = null;
 	private Camera camera = null;
 	private int cameraId = 0;
+
 	private boolean is_taking_photo = false;
+	private boolean is_taking_photo_on_timer = false;
+	private Timer takePictureTimer = new Timer();
+	private TimerTask takePictureTimerTask = null;
+	private long take_photo_time = 0;
+
 	private boolean is_preview_paused = false;
 	private String preview_image_name = null;
 
@@ -694,12 +702,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDraw()");*/
 		final float scale = getResources().getDisplayMetrics().density;
-		p.setColor(Color.WHITE);
-		p.setTextSize(24.0f);
 		if( camera != null && !this.is_preview_paused ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
 			if( this.has_level_angle ) {
+				p.setColor(Color.WHITE);
+				p.setTextSize(24.0f);
 				//canvas.drawText("Angle: " + this.level_angle, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 				//canvas.drawText("Angle: " + this.level_angle + " (" + this.current_orientation + ")", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 				// Convert the dps to pixels, based on density scale
@@ -720,7 +728,17 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					p.setColor(Color.GREEN);
 				}
 				canvas.drawText("Angle: " + decimalFormat.format(this.level_angle), canvas.getWidth() / 2 + pixels_offset_x, canvas.getHeight() - pixels_offset_y, p);
-				p.setColor(Color.WHITE);
+			}
+			if( this.is_taking_photo_on_timer ) {
+				long remaining_time = (take_photo_time - System.currentTimeMillis() + 999)/1000;
+				if( MyDebug.LOG )
+					Log.d(TAG, "remaining_time: " + remaining_time);
+				if( remaining_time >= 0 ) {
+					p.setColor(Color.RED);
+					p.setTextSize(70.0f);
+					p.setTextAlign(Paint.Align.CENTER);
+					canvas.drawText("" + remaining_time, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
+				}
 			}
 		}
 		else if( camera == null ) {
@@ -728,6 +746,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "no camera!");
 				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
 			}
+			p.setColor(Color.WHITE);
+			p.setTextSize(24.0f);
 			p.setTextAlign(Paint.Align.CENTER);
 			int pixels_offset = (int) (20 * scale + 0.5f); // convert dps to pixels
 			canvas.drawText("FAILED TO OPEN CAMERA", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
@@ -740,6 +760,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			// Convert the dps to pixels, based on density scale
 			int pixels_offset = (int) (100 * scale + 0.5f); // convert dps to pixels
+			p.setColor(Color.WHITE);
+			p.setTextSize(24.0f);
 			p.setTextAlign(Paint.Align.CENTER);
 			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset, p);
 		}
@@ -1052,15 +1074,66 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		return output_modes;
 	}
-
-	public void takePicture() {
+	
+	public void takePicturePressed() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "takePicture");
+			Log.d(TAG, "takePicturePressed");
+    	Activity activity = (Activity)getContext();
+		if( is_taking_photo_on_timer ) {
+			takePictureTimerTask.cancel();
+			is_taking_photo_on_timer = false;
+			is_taking_photo = false;
+			if( MyDebug.LOG )
+				Log.d(TAG, "cancelled camera timer");
+    	    Toast.makeText(activity.getApplicationContext(), "Cancelled timer", Toast.LENGTH_SHORT).show();
+			return;
+		}
     	if( is_taking_photo ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "already taking a photo");
     		return;
     	}
+		is_taking_photo = true;
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String timer_value = sharedPreferences.getString("preference_timer", "0");
+		long timer_delay = 0;
+		try {
+			timer_delay = Integer.parseInt(timer_value) * 1000;
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "failed to parse timer_value: " + timer_value);
+    		e.printStackTrace();
+    		timer_delay = 0;
+        }
+
+		if( timer_delay == 0 ) {
+			takePicture();
+		}
+		else {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "timer_delay: " + timer_delay);
+    		class TakePictureTimerTask extends TimerTask {
+    			public void run() {
+        	        is_taking_photo_on_timer = false; // must be set to false now, to indicate that we can no longer try to cancel the timer task!
+    				takePicture();
+    			}
+    		}
+    		is_taking_photo_on_timer = true;
+    		take_photo_time = System.currentTimeMillis() + timer_delay;
+			if( MyDebug.LOG )
+				Log.d(TAG, "take photo at: " + take_photo_time);
+    	    Toast.makeText(activity.getApplicationContext(), "Started timer", Toast.LENGTH_SHORT).show();
+            // make sure that preview running (also needed to hide trash/share icons)
+            this.startCameraPreview();
+    		takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
+		}
+	}
+
+	private void takePicture() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicture");
 
         Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 			@Override
@@ -1070,7 +1143,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				takePictureWhenFocused();
 			}
         };
-        // make sure that preview running
+        // make sure that preview running (also needed to hide trash/share icons)
         this.startCameraPreview();
         // wrap in try block just to be safe
         try {
@@ -1087,11 +1160,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		// should be called when auto-focused
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureWhenFocused");
-    	if( is_taking_photo ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "already taking a photo");
-    		return;
-    	}
 
     	final Activity activity = (Activity)getContext();
 
@@ -1307,7 +1375,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
             }
     		camera.takePicture(shutterCallback, null, jpegPictureCallback);
     	    Toast.makeText(activity.getApplicationContext(), "Taking a photo...", Toast.LENGTH_SHORT).show();
-    		is_taking_photo = true;
     	}
         catch(Exception e) {
     		if( MyDebug.LOG )

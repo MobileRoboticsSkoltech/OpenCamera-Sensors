@@ -329,7 +329,7 @@ public class MainActivity extends Activity {
     private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
-    	this.preview.takePicture();
+    	this.preview.takePicturePressed();
     }
 
 	@Override

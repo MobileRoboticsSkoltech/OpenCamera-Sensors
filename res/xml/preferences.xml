@@ -27,6 +27,15 @@
         />
 
     <ListPreference 
+        android:key="preference_timer"
+        android:title="@string/preference_timer"
+        android:summary="@string/preference_timer_summary"
+        android:entries="@array/preference_timer_entries"
+        android:entryValues="@array/preference_timer_values"
+        android:defaultValue="0"
+        />
+
+    <ListPreference 
         android:key="preference_resolution"
         android:title="@string/preference_resolution"
         android:summary="@string/preference_resolution_summary"
