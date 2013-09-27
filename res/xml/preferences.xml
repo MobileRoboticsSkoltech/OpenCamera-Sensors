@@ -21,6 +21,12 @@
         />
 
     <ListPreference 
+        android:key="preference_white_balance"
+        android:title="@string/preference_white_balance"
+        android:summary="@string/preference_white_balance_summary"
+        />
+
+    <ListPreference 
         android:key="preference_resolution"
         android:title="@string/preference_resolution"
         android:summary="@string/preference_resolution_summary"

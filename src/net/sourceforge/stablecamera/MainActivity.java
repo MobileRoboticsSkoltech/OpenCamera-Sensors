@@ -280,6 +280,7 @@ public class MainActivity extends Activity {
 
 		putIntentExtra(intent, "color_effects", this.preview.getSupportedColorEffects());
 		putIntentExtra(intent, "scene_modes", this.preview.getSupportedSceneModes());
+		putIntentExtra(intent, "white_balances", this.preview.getSupportedWhiteBalances());
 
 		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
 		if( sizes != null ) {

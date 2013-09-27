@@ -9,6 +9,8 @@
     <string name="preference_color_effect_summary">Applies the selected color effect to the photo</string>
     <string name="preference_scene_mode">Apply a scene mode</string>
     <string name="preference_scene_mode_summary">Optimise the photo for different scenes</string>
+    <string name="preference_white_balance">Set the white balance</string>
+    <string name="preference_white_balance_summary">Choose a setting to adjust the white balance</string>
     <string name="preference_resolution">Camera Resolution</string>
     <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
     <string name="preference_quality">Image quality</string>

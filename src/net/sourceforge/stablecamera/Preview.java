@@ -75,6 +75,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 	private List<String> color_effects = null;
 	private List<String> scene_modes = null;
+	private List<String> white_balances = null;
 
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
@@ -361,6 +362,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			String scene_mode = setupValuesPref(scene_modes, "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
 			if( scene_mode != null ) {
 	        	parameters.setSceneMode(scene_mode);
+			}
+
+			// get available white balances
+			white_balances = parameters.getSupportedWhiteBalance();
+			String white_balance = setupValuesPref(white_balances, "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO);
+			if( white_balance != null ) {
+	        	parameters.setWhiteBalance(white_balance);
 			}
 
 			// get available sizes
@@ -1453,6 +1461,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedSceneModes");
 		return this.scene_modes;
+    }
+
+    List<String> getSupportedWhiteBalances() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedWhiteBalances");
+		return this.white_balances;
     }
 
     /*List<Camera.Size> getSupportedPictureSizes() {

@@ -28,7 +28,8 @@ public class MyPreferenceActivity extends PreferenceActivity {
 
 		readFromIntent("color_effects", "preference_color_effect", Camera.Parameters.EFFECT_NONE);
 		readFromIntent("scene_modes", "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
-		
+		readFromIntent("white_balances", "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO);
+
 		int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
 		int [] heights = getIntent().getExtras().getIntArray("resolution_heights");
 		if( widths != null && heights != null ) {
