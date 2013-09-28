@@ -91,6 +91,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private Toast switch_camera_toast = null;
 	private Toast flash_toast = null;
 	private Toast focus_toast = null;
+	private Toast take_photo_toast = null;
 	
 	private float ui_rotation = 0.0f;
 
@@ -1097,7 +1098,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			is_taking_photo = false;
 			if( MyDebug.LOG )
 				Log.d(TAG, "cancelled camera timer");
-    	    Toast.makeText(activity.getApplicationContext(), "Cancelled timer", Toast.LENGTH_SHORT).show();
+		    take_photo_toast = showToast(take_photo_toast, "Cancelled timer");
 			return;
 		}
     	if( is_taking_photo ) {
@@ -1136,7 +1137,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     		take_photo_time = System.currentTimeMillis() + timer_delay;
 			if( MyDebug.LOG )
 				Log.d(TAG, "take photo at: " + take_photo_time);
-    	    Toast.makeText(activity.getApplicationContext(), "Started timer", Toast.LENGTH_SHORT).show();
+		    take_photo_toast = showToast(take_photo_toast, "Started timer");
             // make sure that preview running (also needed to hide trash/share icons)
             this.startCameraPreview();
     		takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
@@ -1396,7 +1397,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
             	camera.enableShutterSound(enable_sound);
             }
     		camera.takePicture(shutterCallback, null, jpegPictureCallback);
-    	    Toast.makeText(activity.getApplicationContext(), "Taking a photo...", Toast.LENGTH_SHORT).show();
+		    take_photo_toast = showToast(take_photo_toast, "Taking a photo...");
     	}
         catch(Exception e) {
     		if( MyDebug.LOG )
