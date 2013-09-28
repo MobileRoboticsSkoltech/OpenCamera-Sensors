@@ -23,6 +23,8 @@
     <string name="preference_pause_preview_summary">Whether to pause the screen after taking a photo, with the option to delete the photo</string>
     <string name="preference_shutter_sound">Shutter sound</string>
     <string name="preference_shutter_sound_summary">Whether to play a sound when taking a photo (requires Android 4.2 or greater to disable)</string>
+    <string name="preference_volume_keys">Volume keys</string>
+    <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
     
     <string name="preference_category_camera_quality">Camera Quality</string>
     <string name="preference_resolution">Camera Resolution</string>

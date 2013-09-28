@@ -586,8 +586,20 @@ public class MainActivity extends Activity {
             switch( keyCode ) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-            	takePicture();
-                return true;
+        		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        		String volume_keys = sharedPreferences.getString("preference_volume_keys", "volume_take_photo");
+        		if( volume_keys.equals("volume_take_photo") ) {
+                	takePicture();
+                    return true;
+        		}
+        		else if ( volume_keys.equals("volume_zoom") ) {
+        			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+        				this.preview.zoomIn();
+        			else
+        				this.preview.zoomOut();
+                    return true;
+        		}
+        		// else do nothing
             }
         }
         return super.dispatchKeyEvent(event);

@@ -266,31 +266,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 		        zoomControls.setOnZoomInClickListener(new OnClickListener(){
 		            public void onClick(View v){
-		            	if(zoom_factor < max_zoom_factor){
-		            		zoom_factor++;
-		            		if( MyDebug.LOG )
-		            			Log.d(TAG, "zoom in to " + zoom_factor);
-		        			Camera.Parameters parameters = camera.getParameters();
-		        			if( MyDebug.LOG )
-		        				Log.d(TAG, "zoom was: " + parameters.getZoom());
-		        			parameters.setZoom((int)zoom_factor);
-		    	    		camera.setParameters(parameters);
-		                }
+		            	zoomIn();
 		            }
 		        });
 
 			    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
 			    	public void onClick(View v){
-			    		if(zoom_factor > 0){
-			    			zoom_factor--;
-			    			if( MyDebug.LOG )
-			    				Log.d(TAG, "zoom out to " + zoom_factor);
-		        			Camera.Parameters parameters = camera.getParameters();
-		        			if( MyDebug.LOG )
-		        				Log.d(TAG, "zoom was: " + parameters.getZoom());
-		        			parameters.setZoom((int)zoom_factor);
-		    	    		camera.setParameters(parameters);
-			            }
+			    		zoomOut();
 			        }
 			    });
 				zoomControls.setVisibility(View.VISIBLE);
@@ -527,6 +509,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			return null;
 		}
 	}
+
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "surfaceChanged " + w + ", " + h);
@@ -773,6 +756,36 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		
 		canvas.restore();
+	}
+
+	public void zoomIn() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "zoomIn()");
+    	if(zoom_factor < max_zoom_factor) {
+    		zoom_factor++;
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "zoom in to " + zoom_factor);
+			Camera.Parameters parameters = camera.getParameters();
+			if( MyDebug.LOG )
+				Log.d(TAG, "zoom was: " + parameters.getZoom());
+			parameters.setZoom((int)zoom_factor);
+    		camera.setParameters(parameters);
+        }
+	}
+	
+	public void zoomOut() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "zoomOut()");
+		if(zoom_factor > 0) {
+			zoom_factor--;
+			if( MyDebug.LOG )
+				Log.d(TAG, "zoom out to " + zoom_factor);
+			Camera.Parameters parameters = camera.getParameters();
+			if( MyDebug.LOG )
+				Log.d(TAG, "zoom was: " + parameters.getZoom());
+			parameters.setZoom((int)zoom_factor);
+    		camera.setParameters(parameters);
+        }
 	}
 
 	public void switchCamera() {
