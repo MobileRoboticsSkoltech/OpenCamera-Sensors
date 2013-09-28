@@ -1091,7 +1091,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "camera not available");
 			return;
 		}
-    	Activity activity = (Activity)getContext();
 		if( is_taking_photo_on_timer ) {
 			takePictureTimerTask.cancel();
 			is_taking_photo_on_timer = false;
