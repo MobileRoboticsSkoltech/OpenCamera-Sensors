@@ -581,15 +581,16 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        int keyCode = event.getKeyCode();
-        switch( keyCode ) {
-        case KeyEvent.KEYCODE_VOLUME_UP:
-        case KeyEvent.KEYCODE_VOLUME_DOWN:
-        	takePicture();
-            return true;
-        default:
-            return super.dispatchKeyEvent(event);
+        if( event.getAction() == KeyEvent.ACTION_DOWN ) {
+            int keyCode = event.getKeyCode();
+            switch( keyCode ) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            	takePicture();
+                return true;
+            }
         }
+        return super.dispatchKeyEvent(event);
     }
 
     private static String folder_name = "StableCamera";
