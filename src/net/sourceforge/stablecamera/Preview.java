@@ -91,6 +91,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private Toast switch_camera_toast = null;
 	private Toast flash_toast = null;
 	private Toast focus_toast = null;
+	
+	private float ui_rotation = 0.0f;
 
 	Preview(Context context) {
 		this(context, null);
@@ -701,6 +703,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	public void onDraw(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDraw()");*/
+		canvas.save();
+		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
+
 		final float scale = getResources().getDisplayMetrics().density;
 		if( camera != null && !this.is_preview_paused ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
@@ -742,10 +747,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 		}
 		else if( camera == null ) {
-			if( MyDebug.LOG ) {
+			/*if( MyDebug.LOG ) {
 				Log.d(TAG, "no camera!");
 				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
-			}
+			}*/
 			p.setColor(Color.WHITE);
 			p.setTextSize(24.0f);
 			p.setTextAlign(Paint.Align.CENTER);
@@ -765,6 +770,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			p.setTextAlign(Paint.Align.CENTER);
 			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset, p);
 		}
+		
+		canvas.restore();
 	}
 
 	public void switchCamera() {
@@ -1078,6 +1085,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	public void takePicturePressed() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicturePressed");
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not available");
+			return;
+		}
     	Activity activity = (Activity)getContext();
 		if( is_taking_photo_on_timer ) {
 			takePictureTimerTask.cancel();
@@ -1134,6 +1146,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not available");
+			return;
+		}
 
         Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 			@Override
@@ -1160,6 +1177,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		// should be called when auto-focused
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureWhenFocused");
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not available");
+			return;
+		}
 
     	final Activity activity = (Activity)getContext();
 
@@ -1568,6 +1590,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     }
     
     private int getImageQuality(){
+		if( MyDebug.LOG )
+			Log.d(TAG, "getImageQuality");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String image_quality_s = sharedPreferences.getString("preference_quality", "90");
 		int image_quality = 0;
@@ -1583,18 +1607,28 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     }
     
     public void onResume() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onResume");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
 		this.ui_placement_right = ui_placement.equals("ui_right");
     }
 
 	private Toast showToast(Toast clear_toast, String message) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "showToast");
 		if( clear_toast != null )
 			clear_toast.cancel();
 		Activity activity = (Activity)this.getContext();
 		clear_toast = Toast.makeText(activity.getApplicationContext(), message, Toast.LENGTH_SHORT);
 		clear_toast.show();
 		return clear_toast;
+	}
+	
+	public void setUIRotation(float ui_rotation) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setUIRotation");
+		this.ui_rotation = ui_rotation;
 	}
 	
     // must be static, to safely call from other Activities
