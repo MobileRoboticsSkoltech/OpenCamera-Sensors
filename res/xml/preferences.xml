@@ -1,74 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     
-    <CheckBoxPreference
-        android:key="preference_auto_stabilise"
-        android:title="@string/preference_auto_stabilise"
-        android:summary="@string/preference_auto_stabilise_summary"
-        android:defaultValue="false"
-        />
+    <PreferenceCategory 
+        android:title="@string/preference_category_camera_effects">
 
-    <ListPreference 
-        android:key="preference_color_effect"
-        android:title="@string/preference_color_effect"
-        android:summary="@string/preference_color_effect_summary"
-        />
+        <CheckBoxPreference
+	        android:key="preference_auto_stabilise"
+	        android:title="@string/preference_auto_stabilise"
+	        android:summary="@string/preference_auto_stabilise_summary"
+	        android:defaultValue="false"
+	        />
+	
+	    <ListPreference 
+	        android:key="preference_color_effect"
+	        android:title="@string/preference_color_effect"
+	        android:summary="@string/preference_color_effect_summary"
+	        />
+	
+	    <ListPreference 
+	        android:key="preference_scene_mode"
+	        android:title="@string/preference_scene_mode"
+	        android:summary="@string/preference_scene_mode_summary"
+	        />
+	
+	    <ListPreference 
+	        android:key="preference_white_balance"
+	        android:title="@string/preference_white_balance"
+	        android:summary="@string/preference_white_balance_summary"
+	        />
 
-    <ListPreference 
-        android:key="preference_scene_mode"
-        android:title="@string/preference_scene_mode"
-        android:summary="@string/preference_scene_mode_summary"
-        />
+    </PreferenceCategory>
 
-    <ListPreference 
-        android:key="preference_white_balance"
-        android:title="@string/preference_white_balance"
-        android:summary="@string/preference_white_balance_summary"
-        />
+    <PreferenceCategory 
+        android:title="@string/preference_category_camera_controls">
 
-    <ListPreference 
-        android:key="preference_timer"
-        android:title="@string/preference_timer"
-        android:summary="@string/preference_timer_summary"
-        android:entries="@array/preference_timer_entries"
-        android:entryValues="@array/preference_timer_values"
-        android:defaultValue="0"
-        />
+	    <ListPreference 
+	        android:key="preference_timer"
+	        android:title="@string/preference_timer"
+	        android:summary="@string/preference_timer_summary"
+	        android:entries="@array/preference_timer_entries"
+	        android:entryValues="@array/preference_timer_values"
+	        android:defaultValue="0"
+	        />
 
-    <ListPreference 
-        android:key="preference_resolution"
-        android:title="@string/preference_resolution"
-        android:summary="@string/preference_resolution_summary"
-        />
+	    <ListPreference 
+	        android:key="preference_ui_placement"
+	        android:title="@string/preference_ui_placement"
+	        android:summary="@string/preference_ui_placement_summary"
+	        android:entries="@array/preference_ui_placement_entries"
+	        android:entryValues="@array/preference_ui_placement_values"
+	        android:defaultValue="ui_right"
+	        />
+	
+	    <CheckBoxPreference
+	        android:key="preference_pause_preview"
+	        android:title="@string/preference_pause_preview"
+	        android:summary="@string/preference_pause_preview_summary"
+	        android:defaultValue="true"
+	        />
+	
+	    <CheckBoxPreference
+	        android:key="preference_shutter_sound"
+	        android:title="@string/preference_shutter_sound"
+	        android:summary="@string/preference_shutter_sound_summary"
+	        android:defaultValue="true"
+	        />
 
-    <ListPreference 
-        android:key="preference_quality"
-        android:title="@string/preference_quality"
-        android:summary="@string/preference_quality_summary"
-        android:defaultValue="90"
-        />
+    </PreferenceCategory>
 
-    <CheckBoxPreference
-        android:key="preference_pause_preview"
-        android:title="@string/preference_pause_preview"
-        android:summary="@string/preference_pause_preview_summary"
-        android:defaultValue="true"
-        />
+    <PreferenceCategory 
+        android:title="@string/preference_category_camera_quality">
 
-    <ListPreference 
-        android:key="preference_ui_placement"
-        android:title="@string/preference_ui_placement"
-        android:summary="@string/preference_ui_placement_summary"
-        android:entries="@array/preference_ui_placement_entries"
-        android:entryValues="@array/preference_ui_placement_values"
-        android:defaultValue="ui_right"
-        />
-
-    <CheckBoxPreference
-        android:key="preference_shutter_sound"
-        android:title="@string/preference_shutter_sound"
-        android:summary="@string/preference_shutter_sound_summary"
-        android:defaultValue="true"
-        />
+        <ListPreference 
+	        android:key="preference_resolution"
+	        android:title="@string/preference_resolution"
+	        android:summary="@string/preference_resolution_summary"
+	        />
+	
+	    <ListPreference 
+	        android:key="preference_quality"
+	        android:title="@string/preference_quality"
+	        android:summary="@string/preference_quality_summary"
+	        android:defaultValue="90"
+	        />
+    
+    </PreferenceCategory>
 
 </PreferenceScreen>
