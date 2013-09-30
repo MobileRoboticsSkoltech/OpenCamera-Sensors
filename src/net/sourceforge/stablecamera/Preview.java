@@ -1378,13 +1378,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	    		if( MyDebug.LOG )
     	    			Log.e(TAG, "File not found: " + e.getMessage());
     	            e.getStackTrace();
-    	    	    Toast.makeText(activity.getApplicationContext(), "Failed to save photo", Toast.LENGTH_SHORT).show();
+    	    	    showToast(null, "Failed to save photo");
     	        }
     	        catch(IOException e) {
     	    		if( MyDebug.LOG )
     	    			Log.e(TAG, "I/O error writing file: " + e.getMessage());
     	            e.getStackTrace();
-    	    	    Toast.makeText(activity.getApplicationContext(), "Failed to save photo", Toast.LENGTH_SHORT).show();
+    	    	    showToast(null, "Failed to save photo");
     	        }
 
     	        is_taking_photo = false;
@@ -1423,7 +1423,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     		if( MyDebug.LOG )
     			Log.d(TAG, "Camera takePicture failed: " + e.getMessage());
             e.printStackTrace();
-    	    Toast.makeText(activity.getApplicationContext(), "Failed to take picture", Toast.LENGTH_SHORT).show();
+    	    showToast(null, "Failed to take photo");
         }
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
@@ -1462,7 +1462,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					if( MyDebug.LOG )
 						Log.d(TAG, "successsfully deleted " + preview_image_name);
 					Activity activity = (Activity)this.getContext();
-		    	    Toast.makeText(activity.getApplicationContext(), "Photo deleted", Toast.LENGTH_SHORT).show();
+    	    	    showToast(null, "Photo deleted");
     	            activity.sendBroadcast(new Intent(Intent. ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
 				}
 			}
@@ -1659,11 +1659,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					Log.d(TAG, "bounds: " + bounds);
 				}*/
 				final int padding = (int) (14 * scale + 0.5f); // convert dps to pixels
+				final int offset_y = (int) (32 * scale + 0.5f); // convert dps to pixels
 				canvas.save();
 				canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
-				canvas.drawRect(canvas.getWidth()/2 - bounds.width()/2 + bounds.left - padding, canvas.getHeight()/2 + bounds.top - padding, canvas.getWidth()/2 - bounds.width()/2 + bounds.right + padding, canvas.getHeight()/2 + bounds.bottom + padding, paint);
+				canvas.drawRect(canvas.getWidth()/2 - bounds.width()/2 + bounds.left - padding, canvas.getHeight()/2 + bounds.top - padding + offset_y, canvas.getWidth()/2 - bounds.width()/2 + bounds.right + padding, canvas.getHeight()/2 + bounds.bottom + padding + offset_y, paint);
 				paint.setColor(Color.WHITE);
-				canvas.drawText(text, canvas.getWidth()/2 - bounds.width()/2, canvas.getHeight()/2, paint);
+				canvas.drawText(text, canvas.getWidth()/2 - bounds.width()/2, canvas.getHeight()/2 + offset_y, paint);
 				canvas.restore();
 			} 
 		}
