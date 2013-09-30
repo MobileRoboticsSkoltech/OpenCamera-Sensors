@@ -605,12 +605,17 @@ public class MainActivity extends Activity {
         return super.dispatchKeyEvent(event);
     }
 
-    private static String folder_name = "StableCamera";
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
 
     private File getImageFolder() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String folder_name = sharedPreferences.getString("preference_save_location", "StableCamera");
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), folder_name);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "folder_name: " + folder_name);
+			Log.d(TAG, "full path: " + file);
+		}
         return file;
     }
 
@@ -649,6 +654,9 @@ public class MainActivity extends Activity {
             return null;
         }
 
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "getOutputMediaFile returns: " + mediaFile);
+		}
         return mediaFile;
     }
 }

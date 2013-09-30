@@ -74,21 +74,23 @@ public final class R {
     public static final class string {
         public static final int action_settings=0x7f070001;
         public static final int app_name=0x7f070000;
-        public static final int flash_mode=0x7f07001d;
-        public static final int focus_mode=0x7f07001e;
+        public static final int flash_mode=0x7f07001f;
+        public static final int focus_mode=0x7f070020;
         public static final int preference_auto_stabilise=0x7f070003;
         public static final int preference_auto_stabilise_summary=0x7f070004;
         public static final int preference_category_camera_controls=0x7f07000b;
         public static final int preference_category_camera_effects=0x7f070002;
-        public static final int preference_category_camera_quality=0x7f070016;
+        public static final int preference_category_camera_quality=0x7f070018;
         public static final int preference_color_effect=0x7f070005;
         public static final int preference_color_effect_summary=0x7f070006;
         public static final int preference_pause_preview=0x7f070010;
         public static final int preference_pause_preview_summary=0x7f070011;
-        public static final int preference_quality=0x7f070019;
-        public static final int preference_quality_summary=0x7f07001a;
-        public static final int preference_resolution=0x7f070017;
-        public static final int preference_resolution_summary=0x7f070018;
+        public static final int preference_quality=0x7f07001b;
+        public static final int preference_quality_summary=0x7f07001c;
+        public static final int preference_resolution=0x7f070019;
+        public static final int preference_resolution_summary=0x7f07001a;
+        public static final int preference_save_location=0x7f070016;
+        public static final int preference_save_location_summary=0x7f070017;
         public static final int preference_scene_mode=0x7f070007;
         public static final int preference_scene_mode_summary=0x7f070008;
         public static final int preference_shutter_sound=0x7f070012;
@@ -101,10 +103,10 @@ public final class R {
         public static final int preference_volume_keys_summary=0x7f070015;
         public static final int preference_white_balance=0x7f070009;
         public static final int preference_white_balance_summary=0x7f07000a;
-        public static final int share=0x7f07001f;
-        public static final int switch_camera=0x7f07001c;
-        public static final int take_photo=0x7f07001b;
-        public static final int trash=0x7f070020;
+        public static final int share=0x7f070021;
+        public static final int switch_camera=0x7f07001e;
+        public static final int take_photo=0x7f07001d;
+        public static final int trash=0x7f070022;
     }
     public static final class style {
         /** 
