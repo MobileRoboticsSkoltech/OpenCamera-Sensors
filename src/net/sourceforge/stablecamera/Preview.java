@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -41,6 +42,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ZoomControls;
 
@@ -696,7 +698,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					canvas.getHeight() / 2, p);*/
 			if( this.has_level_angle ) {
 				p.setColor(Color.WHITE);
-				p.setTextSize(24.0f);
+				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				//canvas.drawText("Angle: " + this.level_angle, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 				//canvas.drawText("Angle: " + this.level_angle + " (" + this.current_orientation + ")", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 				// Convert the dps to pixels, based on density scale
@@ -724,7 +726,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					Log.d(TAG, "remaining_time: " + remaining_time);
 				if( remaining_time >= 0 ) {
 					p.setColor(Color.RED);
-					p.setTextSize(70.0f);
+					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
 					canvas.drawText("" + remaining_time, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 				}
@@ -736,7 +738,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
 			}*/
 			p.setColor(Color.WHITE);
-			p.setTextSize(24.0f);
+			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			int pixels_offset = (int) (20 * scale + 0.5f); // convert dps to pixels
 			canvas.drawText("FAILED TO OPEN CAMERA", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
@@ -750,7 +752,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			// Convert the dps to pixels, based on density scale
 			int pixels_offset = (int) (100 * scale + 0.5f); // convert dps to pixels
 			p.setColor(Color.WHITE);
-			p.setTextSize(24.0f);
+			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset, p);
 		}
@@ -1634,13 +1636,52 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     }
 
 	private Toast showToast(Toast clear_toast, String message) {
+		class RotatedTextView extends View {
+			private String text = "";
+			private Paint paint = new Paint();
+			private Rect bounds = new Rect();
+
+			public RotatedTextView(String text, Context context) {
+				super(context);
+
+				this.text = text;
+			}
+
+			@Override 
+			protected void onDraw(Canvas canvas) { 
+				final float scale = getResources().getDisplayMetrics().density;
+				paint.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+				paint.setStyle(Paint.Style.FILL);
+				paint.setColor(Color.rgb(75, 75, 75));
+				paint.setShadowLayer(1, 0, 1, Color.BLACK);
+				paint.getTextBounds(text, 0, text.length(), bounds);
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "bounds: " + bounds);
+				}*/
+				final int padding = (int) (14 * scale + 0.5f); // convert dps to pixels
+				canvas.save();
+				canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
+				canvas.drawRect(canvas.getWidth()/2 - bounds.width()/2 + bounds.left - padding, canvas.getHeight()/2 + bounds.top - padding, canvas.getWidth()/2 - bounds.width()/2 + bounds.right + padding, canvas.getHeight()/2 + bounds.bottom + padding, paint);
+				paint.setColor(Color.WHITE);
+				canvas.drawText(text, canvas.getWidth()/2 - bounds.width()/2, canvas.getHeight()/2, paint);
+				canvas.restore();
+			} 
+		}
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "showToast");
 		if( clear_toast != null )
 			clear_toast.cancel();
 		Activity activity = (Activity)this.getContext();
-		clear_toast = Toast.makeText(activity.getApplicationContext(), message, Toast.LENGTH_SHORT);
+		//clear_toast = Toast.makeText(activity.getApplicationContext(), message, Toast.LENGTH_SHORT);
+		//clear_toast.show();
+
+		clear_toast = new Toast(activity);
+		View text = new RotatedTextView(message, activity);
+		clear_toast.setView(text);
+		clear_toast.setDuration(Toast.LENGTH_SHORT);
 		clear_toast.show();
+
 		return clear_toast;
 	}
 	
