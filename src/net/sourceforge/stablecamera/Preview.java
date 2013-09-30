@@ -1102,6 +1102,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not available");
+			is_taking_photo_on_timer = false;
+			is_taking_photo = false;
 			return;
 		}
 		if( is_taking_photo_on_timer ) {
@@ -1162,6 +1164,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not available");
+			is_taking_photo_on_timer = false;
+			is_taking_photo = false;
 			return;
 		}
 
@@ -1193,6 +1197,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not available");
+			is_taking_photo_on_timer = false;
+			is_taking_photo = false;
 			return;
 		}
 
