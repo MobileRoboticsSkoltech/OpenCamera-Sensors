@@ -469,15 +469,21 @@ public class MainActivity extends Activity {
 		}*/
 		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
 			return;
-	    orientation = (orientation + 45) / 90 * 90;
-	    orientation = orientation % 360;
-	    if( orientation != current_orientation ) {
-		    this.current_orientation = orientation;
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "current_orientation is now: " + current_orientation);
-			}
-			layoutUI();
-	    }
+		int diff = Math.abs(orientation - current_orientation);
+		if( diff > 180 )
+			diff = 360 - diff;
+		// only change orientation when sufficiently changed
+		if( diff > 60 ) {
+		    orientation = (orientation + 45) / 90 * 90;
+		    orientation = orientation % 360;
+		    if( orientation != current_orientation ) {
+			    this.current_orientation = orientation;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "current_orientation is now: " + current_orientation);
+				}
+				layoutUI();
+		    }
+		}
 	}
 
     public void clickedTakePhoto(View view) {
