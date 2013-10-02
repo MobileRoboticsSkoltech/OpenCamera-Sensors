@@ -12,14 +12,14 @@
 
     <ImageButton
         android:id="@+id/take_photo"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/take_photo"
         android:src="@drawable/take_photo"
         android:onClick="clickedTakePhoto"
-        android:layout_alignBottom="@+id/preview"
+        android:layout_alignRight="@+id/preview"
         android:layout_centerInParent="true"
         />
 
@@ -28,44 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/preview"
-        android:layout_toLeftOf="@+id/take_photo"
-        android:scaleX="0.8"
-        />
-
-    <!-- if we change the id switch_camera, or put another GUI item above this, we need to update the code for UI placement in MainActivity.java -->
-    <ImageButton
-        android:id="@+id/switch_camera"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/switch_camera"
-        android:src="@drawable/switch_camera"
-        android:onClick="clickedSwitchCamera"
-        />
-
-    <ImageButton
-        android:id="@+id/flash"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/flash_mode"
-        android:onClick="clickedFlash"
-        android:layout_below="@+id/switch_camera"
-        android:layout_alignLeft="@+id/switch_camera"
-        />
-
-    <ImageButton
-        android:id="@+id/focus_mode"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/focus_mode"
-        android:onClick="clickedFocusMode"
-        android:layout_below="@+id/flash"
-        android:layout_alignLeft="@+id/flash"
+        android:layout_alignRight="@+id/preview"
         />
 
     <ImageButton
@@ -77,25 +40,44 @@
         android:contentDescription="@string/action_settings"
         android:src="@drawable/settings"
         android:onClick="clickedSettings"
-        android:layout_below="@+id/focus_mode"
-        android:layout_alignLeft="@+id/focus_mode"
+        android:layout_alignRight="@+id/preview"
         />
 
-    <!-- should be at bottom -->
     <ImageButton
-        android:id="@+id/share"
+        android:id="@+id/focus_mode"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:padding="10dp"
         android:scaleType="fitCenter"
-        android:contentDescription="@string/share"
-        android:src="@drawable/share"
-        android:onClick="clickedShare"
-        android:layout_below="@+id/settings"
-        android:layout_alignLeft="@+id/settings"
-        android:visibility="gone"
+        android:contentDescription="@string/focus_mode"
+        android:onClick="clickedFocusMode"
+        android:layout_toLeftOf="@+id/settings"
         />
-    
+
+    <ImageButton
+        android:id="@+id/flash"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/flash_mode"
+        android:onClick="clickedFlash"
+        android:layout_toLeftOf="@+id/focus_mode"
+        />
+
+    <ImageButton
+        android:id="@+id/switch_camera"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/switch_camera"
+        android:src="@drawable/switch_camera"
+        android:onClick="clickedSwitchCamera"
+        android:layout_toLeftOf="@+id/flash"
+        />
+
+    <!-- should be at left-most -->
     <ImageButton
         android:id="@+id/trash"
         android:layout_width="50dp"
@@ -105,9 +87,21 @@
         android:contentDescription="@string/trash"
         android:src="@drawable/trash"
         android:onClick="clickedTrash"
-        android:layout_below="@+id/share"
-        android:layout_alignLeft="@+id/share"
+        android:layout_toLeftOf="@+id/switch_camera"
         android:visibility="gone"
         />
 
+    <ImageButton
+        android:id="@+id/share"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/share"
+        android:src="@drawable/share"
+        android:onClick="clickedShare"
+        android:layout_toLeftOf="@+id/trash"
+        android:visibility="gone"
+        />
+    
 </RelativeLayout>
