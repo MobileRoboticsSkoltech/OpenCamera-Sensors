@@ -233,9 +233,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	}
 	
 	private void openCamera() {
+		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera()");
 			Log.d(TAG, "cameraId: " + cameraId);
+			debug_time = System.currentTimeMillis();
 		}
 		if( !this.has_surface ) {
 			Log.d(TAG, "preview surface not yet available");
@@ -254,6 +256,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			e.printStackTrace();
 			camera = null;
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "time after opening camera: " + (System.currentTimeMillis() - debug_time));
+		}
 		if( camera != null ) {
 			Activity activity = (Activity)this.getContext();
 	        this.setCameraDisplayOrientation(activity);
@@ -263,6 +268,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					Preview.this.onOrientationChanged(orientation);
 				}
 	        }.enable();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "time after setting orientation: " + (System.currentTimeMillis() - debug_time));
+			}
 
 			try {
 				camera.setPreviewDisplay(mHolder);
@@ -272,7 +280,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					Log.d(TAG, "Failed to set preview display: " + e.getMessage());
 				e.printStackTrace();
 			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
+			}
 			startCameraPreview();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
+			}
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
@@ -492,8 +506,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     		if( MyDebug.LOG )
     			Log.d(TAG, "image quality: " + image_quality);
 
+    		if( MyDebug.LOG ) {
+    			Log.d(TAG, "time after reading camera parameters: " + (System.currentTimeMillis() - debug_time));
+    		}
+
     		// update parameters
     		camera.setParameters(parameters);
+		}
+
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
 
@@ -1564,8 +1586,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     }
     
     private void startCameraPreview() {
-		if( MyDebug.LOG )
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "startCameraPreview");
+			debug_time = System.currentTimeMillis();
+		}
 		if( camera != null ) {
 			try {
 				camera.startPreview();
@@ -1575,7 +1600,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
 				e.printStackTrace();
 			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
+			}
 			tryAutoFocus();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "time after trying autofocus: " + (System.currentTimeMillis() - debug_time));
+			}
 		}
 		this.setPreviewPaused(false);
     }
