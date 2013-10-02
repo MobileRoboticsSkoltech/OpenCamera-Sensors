@@ -18,6 +18,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -39,9 +40,13 @@ public class MainActivity extends Activity {
 	private Sensor mSensorAccelerometer = null;
 	private Preview preview = null;
 	private int current_orientation = 0;
+	private OrientationEventListener orientationEventListener = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "onCreate");
+		}
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -76,12 +81,12 @@ public class MainActivity extends Activity {
 		preview = new Preview(this, savedInstanceState);
 		((FrameLayout) findViewById(R.id.preview)).addView(preview);
 		
-        new OrientationEventListener(this) {
+        orientationEventListener = new OrientationEventListener(this) {
 			@Override
 			public void onOrientationChanged(int orientation) {
 				MainActivity.this.onOrientationChanged(orientation);
 			}
-        }.enable();
+        };
 	}
 
 	@Override
@@ -97,6 +102,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "onResume");
         super.onResume();
         mSensorManager.registerListener(preview, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        orientationEventListener.enable();
 
         layoutUI();
 
@@ -109,6 +115,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "onPause");
         super.onPause();
         mSensorManager.unregisterListener(preview);
+        orientationEventListener.disable();
     }
 
     private void layoutUI() {
@@ -261,6 +268,13 @@ public class MainActivity extends Activity {
 			}
 		}*/
 		// new code for orientation fixed to landscape	
+		if( getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ) {
+			// despite being fixed to orientation, the app is switched to portrait when the screen is blanked
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "unexpected portrait mode");
+			}
+			return;
+		}
 		// the display orientation should be locked to landscape, but how many degrees is that?
 	    int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
 	    int degrees = 0;
@@ -292,15 +306,6 @@ public class MainActivity extends Activity {
 				align_top = RelativeLayout.ALIGN_BOTTOM;
 				align_bottom = RelativeLayout.ALIGN_TOP;
 			}
-			/*if( relative_orientation == 180 || relative_orientation == 270 ) {
-				//ui_placement_right = !ui_placement_right;
-				align_left = RelativeLayout.ALIGN_RIGHT;
-				align_right = RelativeLayout.ALIGN_LEFT;
-				left_of = RelativeLayout.RIGHT_OF;
-				right_of = RelativeLayout.LEFT_OF;
-				align_top = RelativeLayout.ALIGN_BOTTOM;
-				align_bottom = RelativeLayout.ALIGN_TOP;
-			}*/
 			View view = findViewById(R.id.settings);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_left, 0);
