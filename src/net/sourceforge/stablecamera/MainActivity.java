@@ -116,6 +116,7 @@ public class MainActivity extends Activity {
         super.onPause();
         mSensorManager.unregisterListener(preview);
         orientationEventListener.disable();
+		preview.onPause();
     }
 
     private void layoutUI() {

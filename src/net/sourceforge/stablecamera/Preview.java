@@ -54,7 +54,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private DecimalFormat decimalFormat = new DecimalFormat("##.00");
 	private boolean ui_placement_right = true;
 
+	private boolean app_is_paused = true;
 	private SurfaceHolder mHolder = null;
+	private boolean has_surface = false;
 	private Camera camera = null;
 	private int cameraId = 0;
 
@@ -104,6 +106,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	@SuppressWarnings("deprecation")
 	Preview(Context context, Bundle savedInstanceState) {
 		super(context);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "new Preview");
+		}
 
 		// Install a SurfaceHolder.Callback so we get notified when the
 		// underlying surface is created and destroyed.
@@ -196,6 +201,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "surfaceCreated()");
 		// The Surface has been created, acquire the camera and tell it where
 		// to draw.
+		this.has_surface = true;
 		this.openCamera();
 		this.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
 	}
@@ -206,20 +212,38 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		// Surface will be destroyed when we return, so stop the preview.
 		// Because the CameraDevice object is not a shared resource, it's very
 		// important to release it when the activity is paused.
+		this.has_surface = false;
+		this.closeCamera();
+	}
+	
+	private void closeCamera() {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "closeCamera()");
+		}
 		if( camera != null ) {
 			//camera.setPreviewCallback(null);
 			if( !this.is_preview_paused ) {
 				camera.stopPreview();
 			}
+			this.is_taking_photo = false;
+			this.is_taking_photo_on_timer = false;
 			camera.release();
 			camera = null;
 		}
 	}
 	
-	public void openCamera() {
+	private void openCamera() {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera()");
 			Log.d(TAG, "cameraId: " + cameraId);
+		}
+		if( !this.has_surface ) {
+			Log.d(TAG, "preview surface not yet available");
+			return;
+		}
+		if( this.app_is_paused ) {
+			Log.d(TAG, "app is paused");
+			return;
 		}
 		try {
 			camera = Camera.open(cameraId);
@@ -798,12 +822,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "found " + n_cameras + " cameras");
 		if( n_cameras > 1 ) {
 			this.setPreviewPaused(false);
-			if( camera != null ) {
-				//camera.setPreviewCallback(null);
-				camera.stopPreview();
-				camera.release();
-				camera = null;
-			}
+			closeCamera();
 			cameraId = (cameraId+1) % n_cameras;
 		    Camera.CameraInfo info = new Camera.CameraInfo();
 		    Camera.getCameraInfo(cameraId, info);
@@ -1243,7 +1262,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     			if( auto_stabilise && has_level_angle )
     			{
         			if( MyDebug.LOG )
-        				Log.d(TAG, "auto stabilising...");
+        				Log.d(TAG, "auto stabilising... angle: " + level_angle);
     				BitmapFactory.Options options = new BitmapFactory.Options();
     				//options.inMutable = true;
     				options.inPurgeable = true;
@@ -1282,9 +1301,60 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         		    	bitmap.recycle();
         		    	bitmap = new_bitmap;
         		    }
+        		    double level_angle_rad_abs = Math.abs( Math.toRadians(level_angle) );
+        		    int w1 = width, h1 = height;
+        		    double w0 = (w1 * Math.cos(level_angle_rad_abs) + h1 * Math.sin(level_angle_rad_abs));
+        		    double h0 = (w1 * Math.sin(level_angle_rad_abs) + h1 * Math.cos(level_angle_rad_abs));
         			if( MyDebug.LOG ) {
         				Log.d(TAG, "rotated bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
         				Log.d(TAG, "rotated bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
+        				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
+        			}
+        			double tan_theta = Math.tan(level_angle_rad_abs);
+        			double sin_theta = Math.sin(level_angle_rad_abs);
+        			double denom = (double)( h0/w0 + tan_theta );
+        			double alt_denom = (double)( w0/h0 + tan_theta );
+        			if( denom == 0.0 || denom < 1.0e-14 ) {
+        				Log.d(TAG, "zero denominator?!");
+        			}
+        			else if( alt_denom == 0.0 || alt_denom < 1.0e-14 ) {
+        				Log.d(TAG, "zero alt denominator?!");
+        			}
+        			else {
+            			int w2 = (int)(( h0 + 2.0*h1*sin_theta*tan_theta - w0*tan_theta ) / denom);
+            			int h2 = (int)(w2*h0/(double)w0);
+            			int alt_h2 = (int)(( w0 + 2.0*w1*sin_theta*tan_theta - h0*tan_theta ) / alt_denom);
+            			int alt_w2 = (int)(alt_h2*w0/(double)h0);
+            			if( MyDebug.LOG ) {
+            				//Log.d(TAG, "h0 " + h0 + " 2.0*h1*sin_theta*tan_theta " + 2.0*h1*sin_theta*tan_theta + " w0*tan_theta " + w0*tan_theta + " / h0/w0 " + h0/w0 + " tan_theta " + tan_theta);
+            				Log.d(TAG, "w2 = " + w2 + " , h2 = " + h2);
+            				Log.d(TAG, "alt_w2 = " + alt_w2 + " , alt_h2 = " + alt_h2);
+            			}
+            			if( alt_w2 < w2 ) {
+                			if( MyDebug.LOG ) {
+                				Log.d(TAG, "chose alt!");
+                			}
+            				w2 = alt_w2;
+            				h2 = alt_h2;
+            			}
+            			if( w2 <= 0 )
+            				w2 = 1;
+            			else if( w2 >= bitmap.getWidth() )
+            				w2 = bitmap.getWidth()-1;
+            			if( h2 <= 0 )
+            				h2 = 1;
+            			else if( h2 >= bitmap.getHeight() )
+            				h2 = bitmap.getHeight()-1;
+            			int x0 = (bitmap.getWidth()-w2)/2;
+            			int y0 = (bitmap.getHeight()-h2)/2;
+            			if( MyDebug.LOG ) {
+            				Log.d(TAG, "x0 = " + x0 + " , y0 = " + y0);
+            			}
+            			new_bitmap = Bitmap.createBitmap(bitmap, x0, y0, w2, h2);
+            		    if( new_bitmap != bitmap ) {
+            		    	bitmap.recycle();
+            		    	bitmap = new_bitmap;
+            		    }
         			}
     			}
 
@@ -1630,12 +1700,21 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     public void onResume() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
+		this.app_is_paused = false;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
 		this.ui_placement_right = ui_placement.equals("ui_right");
+		this.openCamera();
     }
 
-	private Toast showToast(Toast clear_toast, String message) {
+    public void onPause() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onPause");
+		this.app_is_paused = true;
+		this.closeCamera();
+    }
+
+    private Toast showToast(Toast clear_toast, String message) {
 		class RotatedTextView extends View {
 			private String text = "";
 			private Paint paint = new Paint();
