@@ -229,6 +229,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( video_recorder != null ) { // check again, just to be safe
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
+    	    showToast(null, "Stopped recording video");
 			is_taking_photo = false;
 			is_taking_photo_on_timer = false;
 			this.is_taking_photo_on_timer = false;
@@ -1401,6 +1402,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				video_recorder.prepare();
             	video_recorder.start();
             	video_start_time = System.currentTimeMillis();
+	    	    showToast(null, "Started recording video");
 	            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
 			}
         	catch(IOException e) {
