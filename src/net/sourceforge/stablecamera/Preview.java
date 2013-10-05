@@ -1384,11 +1384,17 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         	this.camera.unlock();
         	video_recorder = new MediaRecorder();
         	video_recorder.setCamera(camera);
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+			boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
         	video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        	video_recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+			if( record_audio ) {
+				video_recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+			}
         	video_recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        	video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+			if( record_audio ) {
+				video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+			}
         	video_recorder.setOrientationHint(this.current_rotation);
 			MainActivity main_activity = (MainActivity)Preview.this.getContext();
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
