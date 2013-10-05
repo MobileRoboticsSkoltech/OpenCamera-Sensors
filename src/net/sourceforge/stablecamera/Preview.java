@@ -145,8 +145,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         scaleGestureDetector.onTouchEvent(event);
         //invalidate();
 
-		// note, we always try to force start the preview (in case is_preview_paused has become false); also this does an auto-focus
-        this.startCameraPreview();
+		// note, we always try to force start the preview (in case is_preview_paused has become false)
+        startCameraPreview();
+		tryAutoFocus();
 		return true;
     }
 
@@ -256,6 +257,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    	    showToast(null, "Failed to reconnect to camera");
 	    	    closeCamera();
 			}
+			tryAutoFocus();
 		}
 	}
 
@@ -1755,6 +1757,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				activity.startActivity(Intent.createChooser(intent, "Photo"));
 			}
 			startCameraPreview();
+			tryAutoFocus();
 		}
 	}
 
@@ -1779,6 +1782,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				}
 			}
 			startCameraPreview();
+			tryAutoFocus();
 		}
     }
 
@@ -1835,10 +1839,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
-			}
-			tryAutoFocus();
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "time after trying autofocus: " + (System.currentTimeMillis() - debug_time));
 			}
 		}
 		this.setPreviewPaused(false);
