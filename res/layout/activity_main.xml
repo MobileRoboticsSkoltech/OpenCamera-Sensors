@@ -77,6 +77,18 @@
         android:layout_toLeftOf="@+id/flash"
         />
 
+    <ImageButton
+        android:id="@+id/switch_video"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/switch_video"
+        android:src="@drawable/switch_video"
+        android:onClick="clickedSwitchVideo"
+        android:layout_toLeftOf="@+id/switch_camera"
+        />
+
     <!-- should be at left-most -->
     <ImageButton
         android:id="@+id/trash"
@@ -87,7 +99,7 @@
         android:contentDescription="@string/trash"
         android:src="@drawable/trash"
         android:onClick="clickedTrash"
-        android:layout_toLeftOf="@+id/switch_camera"
+        android:layout_toLeftOf="@+id/switch_video"
         android:visibility="gone"
         />
 

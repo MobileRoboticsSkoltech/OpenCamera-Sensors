@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 class MyDebug {
@@ -128,7 +129,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "ui_placement: " + ui_placement);
 		/*
-		// old code for changing orientation
+		// old code for changing orientation (not yet updated for switch_video)
 		if( getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "display is in portrait orientation");
@@ -336,13 +337,24 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 
-			view = findViewById(R.id.switch_camera);
+			view = findViewById(R.id.switch_video);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_left, 0);
 			layoutParams.addRule(align_right, 0);
 			layoutParams.addRule(align_top, R.id.preview);
 			layoutParams.addRule(align_bottom, 0);
 			layoutParams.addRule(left_of, R.id.flash);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+
+			view = findViewById(R.id.switch_camera);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_left, 0);
+			layoutParams.addRule(align_right, 0);
+			layoutParams.addRule(align_top, R.id.preview);
+			layoutParams.addRule(align_bottom, 0);
+			layoutParams.addRule(left_of, R.id.switch_video);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -398,12 +410,21 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 
-			view = findViewById(R.id.flash);
+			view = findViewById(R.id.switch_video);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_top, R.id.preview);
 			layoutParams.addRule(align_bottom, 0);
 			layoutParams.addRule(left_of, 0);
 			layoutParams.addRule(right_of, R.id.switch_camera);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+
+			view = findViewById(R.id.flash);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_top, R.id.preview);
+			layoutParams.addRule(align_bottom, 0);
+			layoutParams.addRule(left_of, 0);
+			layoutParams.addRule(right_of, R.id.switch_video);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 
@@ -466,6 +487,14 @@ public class MainActivity extends Activity {
 				view.setRotation(0.0f);
 			}
 		}
+		
+		{
+			// set icon for taking photos vs videos
+			ImageButton view = (ImageButton)findViewById(R.id.take_photo);
+			if( preview != null ) {
+				view.setImageResource(preview.isVideo() ? R.drawable.take_video : R.drawable.take_photo);
+			}
+		}
     }
 
     private void onOrientationChanged(int orientation) {
@@ -502,6 +531,12 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchCamera");
 		this.preview.switchCamera();
+    }
+
+    public void clickedSwitchVideo(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedSwitchVideo");
+		this.preview.switchVideo();
     }
 
     public void clickedFlash(View view) {
