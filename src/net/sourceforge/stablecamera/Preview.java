@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -61,6 +62,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private int cameraId = 0;
 	private boolean is_video = false;
 	private MediaRecorder video_recorder = null;
+	private long video_start_time = 0;
 
 	private boolean is_taking_photo = false;
 	private boolean is_taking_photo_on_timer = false;
@@ -842,6 +844,25 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					canvas.drawText("" + remaining_time, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 				}
 			}
+			else if( this.video_recorder != null ) {
+            	long video_time = (System.currentTimeMillis() - video_start_time);
+            	int ms = (int)(video_time % 1000);
+            	video_time /= 1000;
+            	int secs = (int)(video_time % 60);
+            	video_time /= 60;
+            	int mins = (int)(video_time % 60);
+            	video_time /= 60;
+            	long hours = video_time;
+            	//String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs) + ":" + String.format("%03d", ms);
+            	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
+            	/*if( MyDebug.LOG )
+					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
+				p.setColor(Color.RED);
+				p.setTextSize(24 * scale + 0.5f); // convert dps to pixels
+				p.setTextAlign(Paint.Align.CENTER);
+				int pixels_offset_y = (int) (140 * scale + 0.5f); // convert dps to pixels
+				canvas.drawText("" + time_s, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+			}
 		}
 		else if( camera == null ) {
 			/*if( MyDebug.LOG ) {
@@ -1360,6 +1381,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         	try {
 				video_recorder.prepare();
             	video_recorder.start();   
+            	video_start_time = System.currentTimeMillis();
 	            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
 			}
         	catch (IOException e) {
