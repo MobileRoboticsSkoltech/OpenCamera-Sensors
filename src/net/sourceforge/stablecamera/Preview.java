@@ -72,9 +72,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private boolean is_preview_paused = false;
 	private String preview_image_name = null;
 
-	private int current_orientation = 0;
+	private int current_orientation = 0; // orientation received by onOrientationChanged
+	private int current_rotation = 0; // orientation relative to camera's orientation
 	private boolean has_level_angle = false;
 	private double level_angle = 0.0f;
+	
+	private float free_memory_gb = -1.0f;
+	private long last_free_memory_time = 0;
 
 	private boolean has_zoom = false;
 	private int zoom_factor = 0;
@@ -226,27 +230,32 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
 			is_taking_photo = false;
+			is_taking_photo_on_timer = false;
 			this.is_taking_photo_on_timer = false;
     		video_recorder.stop();
     		video_recorder.reset();
     		video_recorder.release(); 
     		video_recorder = null;
-            if( camera != null ) { // just to be safe
-	    		try {
-					camera.reconnect();
-			        this.startCameraPreview();
-		    		setPreviewSize();
-				}
-	    		catch (IOException e) {
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "failed to reconnect to camera");
-					e.printStackTrace();
-    	    	    showToast(null, "Failed to reconnect to camera");
-    	    	    closeCamera();
-				}
-    		}
+    		reconnectCamera();
 		}
 		
+	}
+	
+	private void reconnectCamera() {
+        if( camera != null ) { // just to be safe
+    		try {
+				camera.reconnect();
+		        this.startCameraPreview();
+	    		setPreviewSize();
+			}
+    		catch (IOException e) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "failed to reconnect to camera");
+				e.printStackTrace();
+	    	    showToast(null, "Failed to reconnect to camera");
+	    	    closeCamera();
+			}
+		}
 	}
 
 	private void closeCamera() {
@@ -775,12 +784,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    Camera.getCameraInfo(cameraId, info);
 	    orientation = (orientation + 45) / 90 * 90;
 	    this.current_orientation = orientation % 360;
-	    int rotation = 0;
+	    this.current_rotation = 0;
 	    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-	        rotation = (info.orientation - orientation + 360) % 360;
+	    	current_rotation = (info.orientation - orientation + 360) % 360;
 	    }
 	    else {  // back-facing camera
-	        rotation = (info.orientation + orientation) % 360;
+	    	current_rotation = (info.orientation + orientation) % 360;
 	    }
 		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "    current_orientation is " + current_orientation);
@@ -788,7 +797,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "    set Camera rotation to " + rotation);
 		}*/
 		Camera.Parameters parameters = camera.getParameters();
-		parameters.setRotation(rotation);
+		parameters.setRotation(current_rotation);
 		camera.setParameters(parameters);
 	 }
 
@@ -860,7 +869,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				p.setTextSize(24 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.CENTER);
 				int pixels_offset_y = (int) (140 * scale + 0.5f); // convert dps to pixels
-				canvas.drawText("" + time_s, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+				int pixels_offset_diff = (int) (24 * scale + 0.5f); // convert dps to pixels
+				canvas.drawText("" + time_s, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y - pixels_offset_diff, p);
+				long time_now = System.currentTimeMillis();
+				if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
+					long free_mb = MainActivity.freeMemory();
+					free_memory_gb = free_mb/1024.0f;
+					last_free_memory_time = time_now;
+				}
+				canvas.drawText("Remaining memory: " + String.format("%1.3f", free_memory_gb) + "MB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
 			}
 		}
 		else if( camera == null ) {
@@ -1371,6 +1388,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         	video_recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         	video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        	video_recorder.setOrientationHint(this.current_rotation);
 			MainActivity main_activity = (MainActivity)Preview.this.getContext();
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
 			String videoFileName = videoFile.getAbsolutePath();
@@ -1378,17 +1396,24 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     			Log.d(TAG, "save to: " + videoFileName);
         	video_recorder.setOutputFile(videoFileName);
         	try {
+        		/*if( true ) // test
+        			throw new IOException();*/
 				video_recorder.prepare();
-            	video_recorder.start();   
+            	video_recorder.start();
             	video_start_time = System.currentTimeMillis();
 	            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
 			}
-        	catch (IOException e) {
+        	catch(IOException e) {
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "failed to save video");
 				e.printStackTrace();
 	    	    showToast(null, "Failed to save video");
+	    		video_recorder.reset();
+	    		video_recorder.release(); 
 	    		video_recorder = null;
+				is_taking_photo = false;
+				is_taking_photo_on_timer = false;
+				this.reconnectCamera();
 			}
 
         	return;

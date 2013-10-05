@@ -11,6 +11,7 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -705,5 +706,17 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "getOutputMediaFile returns: " + mediaFile);
 		}
         return mediaFile;
+    }
+
+    public static long freeMemory() { // return free memory in MB
+        StatFs statFs = new StatFs(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+        // cast to long to avoid overflow!
+        long blocks = statFs.getAvailableBlocks();
+        long size = statFs.getBlockSize();
+        long free  = (blocks*size) / 1048576;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
+		}
+        return free;
     }
 }
