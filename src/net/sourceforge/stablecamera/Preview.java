@@ -267,6 +267,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "closeCamera()");
 		}
+		if( is_taking_photo_on_timer ) {
+			takePictureTimerTask.cancel();
+			is_taking_photo_on_timer = false;
+			is_taking_photo = false;
+			if( MyDebug.LOG )
+				Log.d(TAG, "cancelled camera timer");
+		}
 		if( camera != null ) {
 			if( video_recorder != null ) {
 				stopVideo();
