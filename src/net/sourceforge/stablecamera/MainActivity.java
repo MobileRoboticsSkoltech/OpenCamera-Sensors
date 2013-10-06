@@ -708,7 +708,8 @@ public class MainActivity extends Activity {
         return mediaFile;
     }
 
-    public static long freeMemory() { // return free memory in MB
+    @SuppressWarnings("deprecation")
+	public static long freeMemory() { // return free memory in MB
         StatFs statFs = new StatFs(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
         // cast to long to avoid overflow!
         long blocks = statFs.getAvailableBlocks();
