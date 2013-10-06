@@ -342,232 +342,230 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 			}
 			
-			if( camera != null ) { // check again, as camera closed if setting preview fails
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
-				Camera.Parameters parameters = camera.getParameters();
-				this.has_zoom = parameters.isZoomSupported();
+			Camera.Parameters parameters = camera.getParameters();
+			this.has_zoom = parameters.isZoomSupported();
+			if( MyDebug.LOG )
+				Log.d(TAG, "has_zoom? " + has_zoom);
+		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
+		    this.zoom_factor = 0;
+			if( this.has_zoom ) {
+				this.max_zoom_factor = parameters.getMaxZoom();
+				this.zoom_ratios = parameters.getZoomRatios();
+
+			    zoomControls.setIsZoomInEnabled(true);
+		        zoomControls.setIsZoomOutEnabled(true);
+		        zoomControls.setZoomSpeed(20);
+
+		        zoomControls.setOnZoomInClickListener(new OnClickListener(){
+		            public void onClick(View v){
+		            	zoomIn();
+		            }
+		        });
+
+			    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
+			    	public void onClick(View v){
+			    		zoomOut();
+			        }
+			    });
+				zoomControls.setVisibility(View.VISIBLE);
+			}
+			else {
+				zoomControls.setVisibility(View.GONE);
+			}
+
+			List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
+		    View flashButton = (View) activity.findViewById(R.id.flash);
+			current_flash_index = -1;
+			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "has_zoom? " + has_zoom);
-			    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
-			    this.zoom_factor = 0;
-				if( this.has_zoom ) {
-					this.max_zoom_factor = parameters.getMaxZoom();
-					this.zoom_ratios = parameters.getZoomRatios();
+					Log.d(TAG, "flash modes: " + supported_flash_modes);
+				supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
 
-				    zoomControls.setIsZoomInEnabled(true);
-			        zoomControls.setIsZoomOutEnabled(true);
-			        zoomControls.setZoomSpeed(20);
-
-			        zoomControls.setOnZoomInClickListener(new OnClickListener(){
-			            public void onClick(View v){
-			            	zoomIn();
-			            }
-			        });
-
-				    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
-				    	public void onClick(View v){
-				    		zoomOut();
-				        }
-				    });
-					zoomControls.setVisibility(View.VISIBLE);
-				}
-				else {
-					zoomControls.setVisibility(View.GONE);
-				}
-
-				List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
-			    View flashButton = (View) activity.findViewById(R.id.flash);
-				current_flash_index = -1;
-				if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
+				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
+				if( flash_value.length() > 0 ) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "flash modes: " + supported_flash_modes);
-					supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
-
-					String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
-					if( flash_value.length() > 0 ) {
+						Log.d(TAG, "found existing flash_value: " + flash_value);
+					updateFlash(flash_value);
+					if( current_flash_index == -1 ) {
 						if( MyDebug.LOG )
-							Log.d(TAG, "found existing flash_value: " + flash_value);
-						updateFlash(flash_value);
-						if( current_flash_index == -1 ) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "flash value no longer supported!");
-							updateFlash(0);
-						}
-					}
-					else {
-						if( MyDebug.LOG )
-							Log.d(TAG, "found no existing flash_value");
+							Log.d(TAG, "flash value no longer supported!");
 						updateFlash(0);
 					}
-					flashButton.setVisibility(View.VISIBLE);
 				}
 				else {
 					if( MyDebug.LOG )
-						Log.d(TAG, "flash not supported");
-					supported_flash_values = null;
-					flashButton.setVisibility(View.GONE);
+						Log.d(TAG, "found no existing flash_value");
+					updateFlash(0);
 				}
+				flashButton.setVisibility(View.VISIBLE);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "flash not supported");
+				supported_flash_values = null;
+				flashButton.setVisibility(View.GONE);
+			}
 
-				List<String> supported_focus_modes = parameters.getSupportedFocusModes(); // Android format
-			    View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
-				current_focus_index = -1;
-				if( supported_focus_modes != null && supported_focus_modes.size() > 1 ) {
+			List<String> supported_focus_modes = parameters.getSupportedFocusModes(); // Android format
+		    View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
+			current_focus_index = -1;
+			if( supported_focus_modes != null && supported_focus_modes.size() > 1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "focus modes: " + supported_focus_modes);
+				supported_focus_values = getSupportedFocusModes(supported_focus_modes); // convert to our format (also resorts)
+
+				String focus_value = sharedPreferences.getString(getFocusPreferenceKey(cameraId), "");
+				if( focus_value.length() > 0 ) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "focus modes: " + supported_focus_modes);
-					supported_focus_values = getSupportedFocusModes(supported_focus_modes); // convert to our format (also resorts)
-
-					String focus_value = sharedPreferences.getString(getFocusPreferenceKey(cameraId), "");
-					if( focus_value.length() > 0 ) {
+						Log.d(TAG, "found existing focus_value: " + focus_value);
+					updateFocus(focus_value);
+					if( current_focus_index == -1 ) {
 						if( MyDebug.LOG )
-							Log.d(TAG, "found existing focus_value: " + focus_value);
-						updateFocus(focus_value);
-						if( current_focus_index == -1 ) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "focus value no longer supported!");
-							updateFocus(0);
-						}
-					}
-					else {
-						if( MyDebug.LOG )
-							Log.d(TAG, "found no existing focus_value");
+							Log.d(TAG, "focus value no longer supported!");
 						updateFocus(0);
 					}
-					focusModeButton.setVisibility(View.VISIBLE);
 				}
 				else {
 					if( MyDebug.LOG )
-						Log.d(TAG, "focus not supported");
-					supported_focus_values = null;
-					focusModeButton.setVisibility(View.GONE);
+						Log.d(TAG, "found no existing focus_value");
+					updateFocus(0);
 				}
-
-				// get available color effects
-				color_effects = parameters.getSupportedColorEffects();
-				String color_effect = setupValuesPref(color_effects, "preference_color_effect", Camera.Parameters.EFFECT_NONE);
-				if( color_effect != null ) {
-		        	parameters.setColorEffect(color_effect);
-				}
-
-				// get available scene modes
-				scene_modes = parameters.getSupportedSceneModes();
-				String scene_mode = setupValuesPref(scene_modes, "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
-				if( scene_mode != null ) {
-		        	parameters.setSceneMode(scene_mode);
-				}
-
-				// get available white balances
-				white_balances = parameters.getSupportedWhiteBalance();
-				String white_balance = setupValuesPref(white_balances, "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO);
-				if( white_balance != null ) {
-		        	parameters.setWhiteBalance(white_balance);
-				}
-
-				// get available sizes
-		        sizes = parameters.getSupportedPictureSizes();
-				if( MyDebug.LOG ) {
-					for(int i=0;i<sizes.size();i++) {
-			        	Camera.Size size = sizes.get(i);
-			        	Log.d(TAG, "supported picture size: " + size.width + " , " + size.height);
-					}
-				}
-				/*if( MyDebug.LOG ) {
-					List<Camera.Size> preview_sizes = parameters.getSupportedPreviewSizes();
-					for(int i=0;i<preview_sizes.size();i++) {
-			        	Camera.Size size = preview_sizes.get(i);
-			        	Log.d(TAG, "supported preview size: " + size.width + " , " + size.height);
-					}
-				}*/
-				current_size_index = -1;
-				String resolution_value = sharedPreferences.getString(getResolutionPreferenceKey(cameraId), "");
-				if( MyDebug.LOG )
-					Log.d(TAG, "resolution_value: " + resolution_value);
-				if( resolution_value.length() > 0 ) {
-					// parse the saved size, and make sure it is still valid
-					int index = resolution_value.indexOf(' ');
-					if( index == -1 ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "resolution_value invalid format, can't find space");
-					}
-					else {
-						String resolution_w_s = resolution_value.substring(0, index);
-						String resolution_h_s = resolution_value.substring(index+1);
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "resolution_w_s: " + resolution_w_s);
-							Log.d(TAG, "resolution_h_s: " + resolution_h_s);
-						}
-						try {
-							int resolution_w = Integer.parseInt(resolution_w_s);
-							if( MyDebug.LOG )
-								Log.d(TAG, "resolution_w: " + resolution_w);
-							int resolution_h = Integer.parseInt(resolution_h_s);
-							if( MyDebug.LOG )
-								Log.d(TAG, "resolution_h: " + resolution_h);
-							// now find size in valid list
-							for(int i=0;i<sizes.size() && current_size_index==-1;i++) {
-					        	Camera.Size size = sizes.get(i);
-					        	if( size.width == resolution_w && size.height == resolution_h ) {
-					        		current_size_index = i;
-									if( MyDebug.LOG )
-										Log.d(TAG, "set current_size_index to: " + current_size_index);
-					        	}
-							}
-							if( current_size_index == -1 ) {
-								if( MyDebug.LOG )
-									Log.d(TAG, "failed to find valid size");
-							}
-						}
-						catch(NumberFormatException exception) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "resolution_value invalid format, can't parse w or h to int");
-						}
-					}
-				}
-
-				if( current_size_index == -1 ) {
-					// set to largest
-					Camera.Size current_size = null;
-					for(int i=0;i<sizes.size();i++) {
-			        	Camera.Size size = sizes.get(i);
-			        	if( current_size == null || size.width*size.height > current_size.width*current_size.height ) {
-			        		current_size_index = i;
-			        		current_size = size;
-			        	}
-			        }
-				}
-				if( current_size_index != -1 ) {
-					Camera.Size current_size = sizes.get(current_size_index);
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "Current size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
-
-		    		// now save, so it's available for PreferenceActivity
-					resolution_value = current_size.width + " " + current_size.height;
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "save new resolution_value: " + resolution_value);
-					}
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(getResolutionPreferenceKey(cameraId), resolution_value);
-					editor.apply();
-
-					// now set the size
-		        	parameters.setPictureSize(current_size.width, current_size.height);
-				}
-				
-				
-	    		/*if( MyDebug.LOG )
-	    			Log.d(TAG, "Current image quality: " + parameters.getJpegQuality());*/
-				int image_quality = getImageQuality();
-				parameters.setJpegQuality(image_quality);
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "image quality: " + image_quality);
-
-	    		if( MyDebug.LOG ) {
-	    			Log.d(TAG, "time after reading camera parameters: " + (System.currentTimeMillis() - debug_time));
-	    		}
-
-	    		// update parameters
-	    		camera.setParameters(parameters);
+				focusModeButton.setVisibility(View.VISIBLE);
 			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "focus not supported");
+				supported_focus_values = null;
+				focusModeButton.setVisibility(View.GONE);
+			}
+
+			// get available color effects
+			color_effects = parameters.getSupportedColorEffects();
+			String color_effect = setupValuesPref(color_effects, "preference_color_effect", Camera.Parameters.EFFECT_NONE);
+			if( color_effect != null ) {
+	        	parameters.setColorEffect(color_effect);
+			}
+
+			// get available scene modes
+			scene_modes = parameters.getSupportedSceneModes();
+			String scene_mode = setupValuesPref(scene_modes, "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
+			if( scene_mode != null ) {
+	        	parameters.setSceneMode(scene_mode);
+			}
+
+			// get available white balances
+			white_balances = parameters.getSupportedWhiteBalance();
+			String white_balance = setupValuesPref(white_balances, "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO);
+			if( white_balance != null ) {
+	        	parameters.setWhiteBalance(white_balance);
+			}
+
+			// get available sizes
+	        sizes = parameters.getSupportedPictureSizes();
+			if( MyDebug.LOG ) {
+				for(int i=0;i<sizes.size();i++) {
+		        	Camera.Size size = sizes.get(i);
+		        	Log.d(TAG, "supported picture size: " + size.width + " , " + size.height);
+				}
+			}
+			/*if( MyDebug.LOG ) {
+				List<Camera.Size> preview_sizes = parameters.getSupportedPreviewSizes();
+				for(int i=0;i<preview_sizes.size();i++) {
+		        	Camera.Size size = preview_sizes.get(i);
+		        	Log.d(TAG, "supported preview size: " + size.width + " , " + size.height);
+				}
+			}*/
+			current_size_index = -1;
+			String resolution_value = sharedPreferences.getString(getResolutionPreferenceKey(cameraId), "");
+			if( MyDebug.LOG )
+				Log.d(TAG, "resolution_value: " + resolution_value);
+			if( resolution_value.length() > 0 ) {
+				// parse the saved size, and make sure it is still valid
+				int index = resolution_value.indexOf(' ');
+				if( index == -1 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "resolution_value invalid format, can't find space");
+				}
+				else {
+					String resolution_w_s = resolution_value.substring(0, index);
+					String resolution_h_s = resolution_value.substring(index+1);
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "resolution_w_s: " + resolution_w_s);
+						Log.d(TAG, "resolution_h_s: " + resolution_h_s);
+					}
+					try {
+						int resolution_w = Integer.parseInt(resolution_w_s);
+						if( MyDebug.LOG )
+							Log.d(TAG, "resolution_w: " + resolution_w);
+						int resolution_h = Integer.parseInt(resolution_h_s);
+						if( MyDebug.LOG )
+							Log.d(TAG, "resolution_h: " + resolution_h);
+						// now find size in valid list
+						for(int i=0;i<sizes.size() && current_size_index==-1;i++) {
+				        	Camera.Size size = sizes.get(i);
+				        	if( size.width == resolution_w && size.height == resolution_h ) {
+				        		current_size_index = i;
+								if( MyDebug.LOG )
+									Log.d(TAG, "set current_size_index to: " + current_size_index);
+				        	}
+						}
+						if( current_size_index == -1 ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "failed to find valid size");
+						}
+					}
+					catch(NumberFormatException exception) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "resolution_value invalid format, can't parse w or h to int");
+					}
+				}
+			}
+
+			if( current_size_index == -1 ) {
+				// set to largest
+				Camera.Size current_size = null;
+				for(int i=0;i<sizes.size();i++) {
+		        	Camera.Size size = sizes.get(i);
+		        	if( current_size == null || size.width*size.height > current_size.width*current_size.height ) {
+		        		current_size_index = i;
+		        		current_size = size;
+		        	}
+		        }
+			}
+			if( current_size_index != -1 ) {
+				Camera.Size current_size = sizes.get(current_size_index);
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "Current size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
+
+	    		// now save, so it's available for PreferenceActivity
+				resolution_value = current_size.width + " " + current_size.height;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "save new resolution_value: " + resolution_value);
+				}
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getResolutionPreferenceKey(cameraId), resolution_value);
+				editor.apply();
+
+				// now set the size
+	        	parameters.setPictureSize(current_size.width, current_size.height);
+			}
+			
+			
+    		/*if( MyDebug.LOG )
+    			Log.d(TAG, "Current image quality: " + parameters.getJpegQuality());*/
+			int image_quality = getImageQuality();
+			parameters.setJpegQuality(image_quality);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "image quality: " + image_quality);
+
+    		if( MyDebug.LOG ) {
+    			Log.d(TAG, "time after reading camera parameters: " + (System.currentTimeMillis() - debug_time));
+    		}
+
+    		// update parameters
+    		camera.setParameters(parameters);
 
 		}
 
@@ -1319,7 +1317,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     		}
     		return;
     	}
-		is_taking_photo = true;
+
+    	// make sure that preview running (also needed to hide trash/share icons)
+        this.startCameraPreview();
+
+        is_taking_photo = true;
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String timer_value = sharedPreferences.getString("preference_timer", "0");
@@ -1351,11 +1353,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			if( MyDebug.LOG )
 				Log.d(TAG, "take photo at: " + take_photo_time);
 		    take_photo_toast = showToast(take_photo_toast, "Started timer");
-            // make sure that preview running (also needed to hide trash/share icons)
-            this.startCameraPreview();
-            if( camera != null ) { // check again, in case starting preview failed
-            	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
-            }
+        	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
 		}
 	}
 
@@ -1377,16 +1375,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			return;
 		}
 		
-        // make sure that preview running (also needed to hide trash/share icons)
-        this.startCameraPreview();
-		if( camera == null ) { // check in case preview failed
-			if( MyDebug.LOG )
-				Log.d(TAG, "camera not available after setting preview");
-			is_taking_photo_on_timer = false;
-			is_taking_photo = false;
-			return;
-		}
-
         if( is_video ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
@@ -1820,7 +1808,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "startCameraPreview");
 			debug_time = System.currentTimeMillis();
 		}
-		if( camera != null ) {
+		if( camera != null && !is_taking_photo ) {
 			camera.startPreview();
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
