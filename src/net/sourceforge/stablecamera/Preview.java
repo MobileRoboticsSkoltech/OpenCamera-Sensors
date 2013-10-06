@@ -352,6 +352,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
 			Camera.Parameters parameters = camera.getParameters();
+
+			// get available scene modes
+			// note, important to set scene mode first - apparently this can affect the other supported features
+			scene_modes = parameters.getSupportedSceneModes();
+			String scene_mode = setupValuesPref(scene_modes, "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
+			if( scene_mode != null ) {
+	        	parameters.setSceneMode(scene_mode);
+			}
+
 			this.has_zoom = parameters.isZoomSupported();
 			if( MyDebug.LOG )
 				Log.d(TAG, "has_zoom? " + has_zoom);
@@ -453,13 +462,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			String color_effect = setupValuesPref(color_effects, "preference_color_effect", Camera.Parameters.EFFECT_NONE);
 			if( color_effect != null ) {
 	        	parameters.setColorEffect(color_effect);
-			}
-
-			// get available scene modes
-			scene_modes = parameters.getSupportedSceneModes();
-			String scene_mode = setupValuesPref(scene_modes, "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
-			if( scene_mode != null ) {
-	        	parameters.setSceneMode(scene_mode);
 			}
 
 			// get available white balances
