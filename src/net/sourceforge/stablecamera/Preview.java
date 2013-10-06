@@ -825,10 +825,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
 
 		final float scale = getResources().getDisplayMetrics().density;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		if( camera != null && !this.is_preview_paused ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 			if( this.has_level_angle && sharedPreferences.getBoolean("preference_show_angle", true) ) {
 				p.setColor(Color.WHITE);
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
@@ -908,7 +908,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			p.setTextAlign(Paint.Align.CENTER);
 			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
 		}
-		if( camera != null ) {
+		if( camera != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
 			int pixels_offset_y = (int) (60 * scale + 0.5f); // convert dps to pixels
 			p.setColor(Color.WHITE);
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
