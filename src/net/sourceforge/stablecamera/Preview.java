@@ -869,19 +869,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
             	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
             	/*if( MyDebug.LOG )
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
-				p.setColor(Color.RED);
-				p.setTextSize(24 * scale + 0.5f); // convert dps to pixels
-				p.setTextAlign(Paint.Align.CENTER);
-				int pixels_offset_y = (int) (140 * scale + 0.5f); // convert dps to pixels
-				int pixels_offset_diff = (int) (24 * scale + 0.5f); // convert dps to pixels
-				canvas.drawText("" + time_s, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y - pixels_offset_diff, p);
-				long time_now = System.currentTimeMillis();
-				if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
-					long free_mb = MainActivity.freeMemory();
-					free_memory_gb = free_mb/1024.0f;
-					last_free_memory_time = time_now;
-				}
-				canvas.drawText("Remaining memory: " + String.format("%1.3f", free_memory_gb) + "MB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+    			p.setColor(Color.RED);
+    			p.setTextSize(24 * scale + 0.5f); // convert dps to pixels
+    			p.setTextAlign(Paint.Align.CENTER);
+    			int pixels_offset_y = (int) (164 * scale + 0.5f); // convert dps to pixels
+    			canvas.drawText("" + time_s, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
 			}
 		}
 		else if( camera == null ) {
@@ -899,14 +891,27 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
-		if( this.has_zoom ) {
+		if( this.has_zoom && camera != null ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			// Convert the dps to pixels, based on density scale
-			int pixels_offset = (int) (100 * scale + 0.5f); // convert dps to pixels
+			int pixels_offset_y = (int) (100 * scale + 0.5f); // convert dps to pixels
 			p.setColor(Color.WHITE);
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
-			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset, p);
+			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+		}
+		if( camera != null ) {
+			int pixels_offset_y = (int) (60 * scale + 0.5f); // convert dps to pixels
+			p.setColor(Color.WHITE);
+			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+			p.setTextAlign(Paint.Align.CENTER);
+			long time_now = System.currentTimeMillis();
+			if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
+				long free_mb = MainActivity.freeMemory();
+				free_memory_gb = free_mb/1024.0f;
+				last_free_memory_time = time_now;
+			}
+			canvas.drawText("Remaining memory: " + decimalFormat.format(free_memory_gb) + "MB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
 		}
 		
 		canvas.restore();
