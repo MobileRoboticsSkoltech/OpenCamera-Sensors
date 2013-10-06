@@ -52,6 +52,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("##.00");
+    private Camera.CameraInfo camera_info = new Camera.CameraInfo();
+
 	private boolean ui_placement_right = true;
 
 	private boolean app_is_paused = true;
@@ -778,25 +780,27 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			return;
 		if( camera == null )
 			return;
-	    Camera.CameraInfo info = new Camera.CameraInfo();
-	    Camera.getCameraInfo(cameraId, info);
+	    Camera.getCameraInfo(cameraId, camera_info);
 	    orientation = (orientation + 45) / 90 * 90;
 	    this.current_orientation = orientation % 360;
-	    this.current_rotation = 0;
-	    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-	    	current_rotation = (info.orientation - orientation + 360) % 360;
+	    int new_rotation = 0;
+	    if (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+	    	new_rotation = (camera_info.orientation - orientation + 360) % 360;
 	    }
 	    else {  // back-facing camera
-	    	current_rotation = (info.orientation + orientation) % 360;
+	    	new_rotation = (camera_info.orientation + orientation) % 360;
 	    }
-		/*if( MyDebug.LOG ) {
-			Log.d(TAG, "    current_orientation is " + current_orientation);
-			Log.d(TAG, "    info orientation is " + info.orientation);
-			Log.d(TAG, "    set Camera rotation to " + rotation);
-		}*/
-		Camera.Parameters parameters = camera.getParameters();
-		parameters.setRotation(current_rotation);
-		camera.setParameters(parameters);
+	    if( new_rotation != current_rotation ) {
+	    	this.current_rotation = new_rotation;
+			/*if( MyDebug.LOG ) {
+				Log.d(TAG, "    current_orientation is " + current_orientation);
+				Log.d(TAG, "    info orientation is " + info.orientation);
+				Log.d(TAG, "    set Camera rotation to " + current_rotation);
+			}*/
+			Camera.Parameters parameters = camera.getParameters();
+			parameters.setRotation(current_rotation);
+			camera.setParameters(parameters);
+	    }
 	 }
 
 	@Override
@@ -808,6 +812,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     			Log.d(TAG, "onDraw(): app is paused");*/
 			return;
 		}
+		/*if( true ) // test
+			return;*/
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
 
