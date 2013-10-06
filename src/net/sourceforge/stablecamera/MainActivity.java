@@ -752,9 +752,9 @@ public class MainActivity extends Activity {
         long blocks = statFs.getAvailableBlocks();
         long size = statFs.getBlockSize();
         long free  = (blocks*size) / 1048576;
-		if( MyDebug.LOG ) {
+		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
-		}
+		}*/
         return free;
     }
     
