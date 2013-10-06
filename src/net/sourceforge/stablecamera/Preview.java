@@ -916,7 +916,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				free_memory_gb = free_mb/1024.0f;
 				last_free_memory_time = time_now;
 			}
-			canvas.drawText("Remaining memory: " + decimalFormat.format(free_memory_gb) + "MB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+			canvas.drawText("Remaining memory: " + decimalFormat.format(free_memory_gb) + "GB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
 		}
 		if( !ApplicationProperties.FULL_VERSION ) {
 			int pixels_offset_y = (int) (60 * scale + 0.5f); // convert dps to pixels
