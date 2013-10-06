@@ -821,7 +821,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( camera != null && !this.is_preview_paused ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
-			if( this.has_level_angle ) {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+			if( this.has_level_angle && sharedPreferences.getBoolean("preference_show_angle", true) ) {
 				p.setColor(Color.WHITE);
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				//canvas.drawText("Angle: " + this.level_angle, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
