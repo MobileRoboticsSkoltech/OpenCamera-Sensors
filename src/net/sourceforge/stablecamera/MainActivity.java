@@ -49,6 +49,7 @@ public class MainActivity extends Activity {
 	private Preview preview = null;
 	private int current_orientation = 0;
 	private OrientationEventListener orientationEventListener = null;
+	private boolean supports_auto_stabilise = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +60,17 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
+		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		if( MyDebug.LOG ) {
-			ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 			Log.d(TAG, "standard max memory = " + activityManager.getMemoryClass() + "MB");
 			Log.d(TAG, "large max memory = " + activityManager.getLargeMemoryClass() + "MB");
 		}
+		//if( activityManager.getMemoryClass() >= 128 ) { // test
+		if( activityManager.getLargeMemoryClass() >= 128 ) {
+			supports_auto_stabilise = true;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_auto_stabilise? " + supports_auto_stabilise);
 
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
         getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -584,6 +591,7 @@ public class MainActivity extends Activity {
 		Intent intent = new Intent(this, MyPreferenceActivity.class);
 
 		intent.putExtra("cameraId", this.preview.getCameraId());
+		intent.putExtra("supports_auto_stabilise", this.supports_auto_stabilise);
 
 		putIntentExtra(intent, "color_effects", this.preview.getSupportedColorEffects());
 		putIntentExtra(intent, "scene_modes", this.preview.getSupportedSceneModes());
@@ -731,6 +739,10 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "getOutputMediaFile returns: " + mediaFile);
 		}
         return mediaFile;
+    }
+    
+    public boolean supportsAutoStabilise() {
+    	return this.supports_auto_stabilise;
     }
 
     @SuppressWarnings("deprecation")

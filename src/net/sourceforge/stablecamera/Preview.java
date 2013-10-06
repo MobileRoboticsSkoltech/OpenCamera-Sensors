@@ -1480,15 +1480,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     			if( MyDebug.LOG )
     				Log.d(TAG, "onPictureTaken");
 
-    			Activity activity = (Activity)Preview.this.getContext();
+				MainActivity main_activity = (MainActivity)Preview.this.getContext();
     			boolean image_capture_intent = false;
        	        Uri image_capture_intent_uri = null;
-    	        String action = activity.getIntent().getAction();
+    	        String action = main_activity.getIntent().getAction();
     	        if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) ) {
         			if( MyDebug.LOG )
         				Log.d(TAG, "from image capture intent");
         			image_capture_intent = true;
-        	        Bundle myExtras = activity.getIntent().getExtras();
+        	        Bundle myExtras = main_activity.getIntent().getExtras();
         	        if (myExtras != null) {
         	        	image_capture_intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
             			if( MyDebug.LOG )
@@ -1499,7 +1499,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	        Bitmap bitmap = null;
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Preview.this.getContext());
 				boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
-    			if( auto_stabilise && has_level_angle )
+    			if( auto_stabilise && has_level_angle && main_activity.supportsAutoStabilise() )
     			{
         			if( MyDebug.LOG )
         				Log.d(TAG, "auto stabilising... angle: " + level_angle);
@@ -1535,7 +1535,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         		    float rotated_size = (float)(w0*h0);
         		    float scale = (float)Math.sqrt(orig_size/rotated_size);
         			if( test_low_memory ) {
-        		    	scale *= 2.0f;
+        		    	//scale *= 2.0f; // test 20MP
+        		    	scale *= 1.613f; // test 13MP
         			}
         			if( MyDebug.LOG ) {
         				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
@@ -1629,7 +1630,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        			if( image_capture_intent_uri != null )
 	        			{
 	        			    // Save the bitmap to the specified URI (use a try/catch block)
-	        			    outputStream = activity.getContentResolver().openOutputStream(image_capture_intent_uri);
+	        			    outputStream = main_activity.getContentResolver().openOutputStream(image_capture_intent_uri);
 	        			}
 	        			else
 	        			{
@@ -1669,12 +1670,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				        			}
 				        		}
 	        				}
-	        				activity.setResult(Activity.RESULT_OK, new Intent("inline-data").putExtra("data", bitmap));
-            			    activity.finish();
+	        				main_activity.setResult(Activity.RESULT_OK, new Intent("inline-data").putExtra("data", bitmap));
+	        				main_activity.finish();
 	        			}
 	    			}
 	    			else {
-	    				MainActivity main_activity = (MainActivity)Preview.this.getContext();
 	        			picFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_IMAGE);
 	        	        if( picFile == null ) {
 	        	            Log.e(TAG, "Couldn't create media file; check storage permissions?");
@@ -1699,11 +1699,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         	    			Log.d(TAG, "onPictureTaken saved photo");
 
         	            if( picFile != null ) {
-            	            activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(picFile)));
+        	            	main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(picFile)));
         	            }
         	            if( image_capture_intent ) {
-            			    activity.setResult(Activity.RESULT_OK);
-            			    activity.finish();
+        	            	main_activity.setResult(Activity.RESULT_OK);
+        	            	main_activity.finish();
         	            }
         	        }
     			}

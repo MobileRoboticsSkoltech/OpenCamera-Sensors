@@ -31,6 +31,16 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		int cameraId = getIntent().getExtras().getInt("cameraId");
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
+		
+		boolean supports_auto_stabilise = getIntent().getExtras().getBoolean("supports_auto_stabilise");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);
+
+		if( !supports_auto_stabilise ) {
+			Preference pref = (Preference)findPreference("preference_auto_stabilise");
+        	PreferenceCategory pg = (PreferenceCategory)this.findPreference("preference_category_camera_effects");
+        	pg.removePreference(pref);
+		}
 
 		readFromIntent("color_effects", "preference_color_effect", Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
 		readFromIntent("scene_modes", "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
