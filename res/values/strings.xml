@@ -29,6 +29,8 @@
     <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
     <string name="preference_save_location">Save location</string>
     <string name="preference_save_location_summary">Name of folder to save the photo files in</string>
+    <string name="preference_show_angle">Show angle</string>
+    <string name="preference_show_angle_summary">Display the current device orientation angle on screen</string>
     
     <string name="preference_category_camera_quality">Camera Quality</string>
     <string name="preference_resolution">Camera Resolution</string>
