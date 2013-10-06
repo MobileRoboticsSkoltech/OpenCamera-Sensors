@@ -36,6 +36,10 @@ class MyDebug {
 	static final boolean LOG = true;
 }
 
+class ApplicationProperties {
+	static final boolean FULL_VERSION = true;
+}
+
 public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 	private SensorManager mSensorManager = null;
