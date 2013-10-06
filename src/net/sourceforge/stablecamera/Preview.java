@@ -798,15 +798,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    	new_rotation = (camera_info.orientation + orientation) % 360;
 	    }
 	    if( new_rotation != current_rotation ) {
-	    	this.current_rotation = new_rotation;
 			/*if( MyDebug.LOG ) {
 				Log.d(TAG, "    current_orientation is " + current_orientation);
-				Log.d(TAG, "    info orientation is " + info.orientation);
-				Log.d(TAG, "    set Camera rotation to " + current_rotation);
+				Log.d(TAG, "    info orientation is " + camera_info.orientation);
+				Log.d(TAG, "    set Camera rotation from " + current_rotation + " to " + new_rotation);
 			}*/
-			Camera.Parameters parameters = camera.getParameters();
-			parameters.setRotation(current_rotation);
-			camera.setParameters(parameters);
+	    	this.current_rotation = new_rotation;
 	    }
 	 }
 
@@ -1524,12 +1521,36 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         					bitmap.setPixel(x, y, col);
         				}
         			}*/
-        		    Matrix matrix = new Matrix();
-        		    /*{
-        		    	// test for low memory
+        			final boolean test_low_memory = false;
+        			if( test_low_memory ) {
         		    	level_angle = 45.0;
-            		    matrix.postScale(2.0f, 2.0f); // test for larger sizes
-        		    }*/
+        			}
+        		    Matrix matrix = new Matrix();
+        		    double level_angle_rad_abs = Math.abs( Math.toRadians(level_angle) );
+        		    int w1 = width, h1 = height;
+        		    double w0 = (w1 * Math.cos(level_angle_rad_abs) + h1 * Math.sin(level_angle_rad_abs));
+        		    double h0 = (w1 * Math.sin(level_angle_rad_abs) + h1 * Math.cos(level_angle_rad_abs));
+        		    // apply a scale so that the overall image size isn't increased
+        		    float orig_size = w1*h1;
+        		    float rotated_size = (float)(w0*h0);
+        		    float scale = (float)Math.sqrt(orig_size/rotated_size);
+        			if( test_low_memory ) {
+        		    	scale *= 2.0f;
+        			}
+        			if( MyDebug.LOG ) {
+        				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
+        				Log.d(TAG, "w1 = " + w1 + " , h1 = " + h1);
+        				Log.d(TAG, "scale = sqrt " + orig_size + " / " + rotated_size + " = " + scale);
+        			}
+        		    matrix.postScale(scale, scale);
+        		    w0 *= scale;
+        		    h0 *= scale;
+        		    w1 *= scale;
+        		    h1 *= scale;
+        			if( MyDebug.LOG ) {
+        				Log.d(TAG, "after scaling: w0 = " + w0 + " , h0 = " + h0);
+        				Log.d(TAG, "after scaling: w1 = " + w1 + " , h1 = " + h1);
+        			}
         		    Camera.CameraInfo info = new Camera.CameraInfo();
         		    Camera.getCameraInfo(cameraId, info);
         		    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
@@ -1544,14 +1565,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         		    	bitmap.recycle();
         		    	bitmap = new_bitmap;
         		    }
-        		    double level_angle_rad_abs = Math.abs( Math.toRadians(level_angle) );
-        		    int w1 = width, h1 = height;
-        		    double w0 = (w1 * Math.cos(level_angle_rad_abs) + h1 * Math.sin(level_angle_rad_abs));
-        		    double h0 = (w1 * Math.sin(level_angle_rad_abs) + h1 * Math.cos(level_angle_rad_abs));
+    	            System.gc();
         			if( MyDebug.LOG ) {
-        				Log.d(TAG, "rotated bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
-        				Log.d(TAG, "rotated bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
-        				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
+        				Log.d(TAG, "rotated and scaled bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
+        				Log.d(TAG, "rotated and scaled bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
         			}
         			double tan_theta = Math.tan(level_angle_rad_abs);
         			double sin_theta = Math.sin(level_angle_rad_abs);
@@ -1600,6 +1617,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
             		    	bitmap.recycle();
             		    	bitmap = new_bitmap;
             		    }
+        	            System.gc();
         			}
     			}
 
@@ -1724,6 +1742,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	    }
     	};
     	{
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "current_rotation: " + current_rotation);
+			Camera.Parameters parameters = camera.getParameters();
+			parameters.setRotation(current_rotation);
+			camera.setParameters(parameters);
+
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 			boolean enable_sound = sharedPreferences.getBoolean("preference_shutter_sound", true);
     		if( MyDebug.LOG )
