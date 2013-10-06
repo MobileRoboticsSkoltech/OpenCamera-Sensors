@@ -1,12 +1,18 @@
 package net.sourceforge.stablecamera;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
+import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.Log;
@@ -26,9 +32,9 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
 
-		readFromIntent("color_effects", "preference_color_effect", Camera.Parameters.EFFECT_NONE);
-		readFromIntent("scene_modes", "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
-		readFromIntent("white_balances", "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO);
+		readFromIntent("color_effects", "preference_color_effect", Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
+		readFromIntent("scene_modes", "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
+		readFromIntent("white_balances", "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
 
 		int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
 		int [] heights = getIntent().getExtras().getIntArray("resolution_heights");
@@ -68,12 +74,54 @@ public class MyPreferenceActivity extends PreferenceActivity {
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
         	// Camera.enableShutterSound requires JELLY_BEAN_MR1 or greater
         	CheckBoxPreference cbp = (CheckBoxPreference)findPreference("preference_shutter_sound");
-        	PreferenceScreen preferenceScreen = getPreferenceScreen();
-        	preferenceScreen.removePreference(cbp);
+        	PreferenceCategory pg = (PreferenceCategory)this.findPreference("preference_category_camera_controls");
+        	pg.removePreference(cbp);
+        }
+
+        {
+            final Preference pref = (Preference) findPreference("preference_online_help");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                	if( pref.getKey().equals("preference_online_help") ) {
+                		if( MyDebug.LOG )
+                			Log.d(TAG, "user clicked online help");
+            	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://stablecamera.sourceforge.net/"));
+            	        startActivity(browserIntent);
+                		return false;
+                	}
+                	return false;
+                }
+            });
+        }
+
+        {
+            final Preference pref = (Preference) findPreference("preference_buy");
+            if( ApplicationProperties.FULL_VERSION ) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "remove link to full version, as already the full version");
+            	PreferenceCategory pg = (PreferenceCategory)this.findPreference("preference_category_online");
+            	pg.removePreference(pref);
+            }
+            else {
+                pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference arg0) {
+                    	if( pref.getKey().equals("preference_buy") ) {
+                    		if( MyDebug.LOG )
+                    			Log.d(TAG, "user clicked buy full version");
+                	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getFullVersionLink()));
+                	        startActivity(browserIntent);
+                    		return false;
+                    	}
+                    	return false;
+                    }
+                });
+            }
         }
 	}
 	
-	private void readFromIntent(String intent_key, String preference_key, String default_value) {
+	private void readFromIntent(String intent_key, String preference_key, String default_value, String preference_category_key) {
 		String [] values = getIntent().getExtras().getStringArray(intent_key);
 		if( values != null && values.length > 0 ) {
 			if( MyDebug.LOG ) {
@@ -93,11 +141,13 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			lp.setValue(value);
 		}
 		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "remove preference " + preference_key + " from category " + preference_category_key);
 			@SuppressWarnings("deprecation")
 			ListPreference lp = (ListPreference)findPreference(preference_key);
         	@SuppressWarnings("deprecation")
-			PreferenceScreen preferenceScreen = getPreferenceScreen();
-        	preferenceScreen.removePreference(lp);
+        	PreferenceCategory pg = (PreferenceCategory)this.findPreference(preference_category_key);
+        	pg.removePreference(lp);
 		}
 	}
 }

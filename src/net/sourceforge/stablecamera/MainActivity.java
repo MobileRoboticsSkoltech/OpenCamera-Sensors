@@ -16,7 +16,9 @@ import android.preference.PreferenceManager;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -93,6 +95,25 @@ public class MainActivity extends Activity {
 				MainActivity.this.onOrientationChanged(orientation);
 			}
         };
+
+        if( !ApplicationProperties.FULL_VERSION ) {
+	        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+	        alertDialog.setTitle("Stable Camera Free");
+	        alertDialog.setMessage("Please buy the full version to remove this message, and the on-screen \"STABLE CAMERA FREE\" text.\n");
+	        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Continue", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                }
+            });
+	        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Buy Full Version", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+            		if( MyDebug.LOG )
+            			Log.d(TAG, "user clicked Buy Full Version");
+        	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getFullVersionLink()));
+        	        startActivity(browserIntent);
+                }
+            });
+	        alertDialog.show();
+        }
 	}
 
 	@Override
@@ -723,5 +744,9 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
 		}
         return free;
+    }
+    
+    public static String getFullVersionLink() {
+    	return "https://play.google.com/store/apps/details?id=net.sourceforge.stablecamera";
     }
 }

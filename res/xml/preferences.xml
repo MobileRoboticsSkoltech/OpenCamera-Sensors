@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     
-    <PreferenceCategory 
-        android:title="@string/preference_category_camera_effects">
+    <PreferenceCategory
+        android:key="preference_category_camera_effects"
+        android:title="@string/preference_category_camera_effects"
+        >
 
         <CheckBoxPreference
 	        android:key="preference_auto_stabilise"
@@ -11,18 +13,21 @@
 	        android:defaultValue="false"
 	        />
 	
+        <!--  if we move this to another PreferenceCategory, we should update code for the readFromIntent() call -->    
 	    <ListPreference 
 	        android:key="preference_color_effect"
 	        android:title="@string/preference_color_effect"
 	        android:summary="@string/preference_color_effect_summary"
 	        />
 	
+        <!--  if we move this to another PreferenceCategory, we should update code for the readFromIntent() call -->    
 	    <ListPreference 
 	        android:key="preference_scene_mode"
 	        android:title="@string/preference_scene_mode"
 	        android:summary="@string/preference_scene_mode_summary"
 	        />
 	
+        <!--  if we move this to another PreferenceCategory, we should update code for the readFromIntent() call -->    
 	    <ListPreference 
 	        android:key="preference_white_balance"
 	        android:title="@string/preference_white_balance"
@@ -38,8 +43,10 @@
 
 	</PreferenceCategory>
 
-    <PreferenceCategory 
-        android:title="@string/preference_category_camera_controls">
+    <PreferenceCategory
+        android:key="preference_category_camera_controls"
+        android:title="@string/preference_category_camera_controls"
+        >
 
 	    <ListPreference 
 	        android:key="preference_timer"
@@ -58,7 +65,8 @@
 	        android:entryValues="@array/preference_ui_placement_values"
 	        android:defaultValue="ui_right"
 	        />
-	
+
+	    <!--  if we move this to another PreferenceCategory, we should update code to remove this Preference -->	
 	    <CheckBoxPreference
 	        android:key="preference_pause_preview"
 	        android:title="@string/preference_pause_preview"
@@ -107,9 +115,9 @@
             android:defaultValue="true"
             />
     
-        	</PreferenceCategory>
+   	</PreferenceCategory>
 
-    <PreferenceCategory 
+    <PreferenceCategory
         android:title="@string/preference_category_camera_quality">
 
         <ListPreference 
@@ -127,4 +135,24 @@
     
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:key="preference_category_online"
+        android:title="@string/preference_category_online"
+        >
+
+        <Preference
+		    android:key="preference_online_help"  
+		    android:title="@string/preference_online_help"
+            android:summary="@string/preference_online_help"  
+		    />  
+
+        <!--  if we move this to another PreferenceCategory, we should update code to remove this Preference -->    
+        <Preference
+            android:key="preference_buy"  
+            android:title="@string/preference_buy"
+            android:summary="@string/preference_buy"  
+            />  
+
+    </PreferenceCategory>
+        
 </PreferenceScreen>

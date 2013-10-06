@@ -40,6 +40,10 @@
     <string name="preference_quality">Image quality</string>
     <string name="preference_quality_summary">Set the image quality of saved photo images (recommended value is 90%%)</string>
 
+    <string name="preference_category_online">Online</string>
+    <string name="preference_online_help">Online help</string>
+    <string name="preference_buy">Buy full version</string>
+    
     <string name="take_photo">Take Photo</string>
     <string name="switch_camera">Switch Camera</string>
     <string name="switch_video">Switch Video</string>
