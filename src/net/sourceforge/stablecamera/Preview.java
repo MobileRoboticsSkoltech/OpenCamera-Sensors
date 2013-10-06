@@ -302,7 +302,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		try {
 			camera = Camera.open(cameraId);
 		}
-		catch(Exception e) {
+		catch(RuntimeException e) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "Failed to open camera: " + e.getMessage());
 			e.printStackTrace();
@@ -327,7 +327,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			try {
 				camera.setPreviewDisplay(mHolder);
 			}
-			catch(Exception e) {
+			catch(IOException e) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "Failed to set preview display: " + e.getMessage());
 				e.printStackTrace();
@@ -629,12 +629,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
         // stop preview before making changes
         if( !this.is_preview_paused ) {
-	        try {
-	            camera.stopPreview();
-	        }
-	        catch(Exception e) {
-	            // ignore: tried to stop a non-existent preview
-	        }
+            camera.stopPreview();
         }
         // set preview size and make any resize, rotate or
         // reformatting changes here
@@ -654,7 +649,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			//camera.setPreviewCallback(this);
             camera.setPreviewDisplay(mHolder);
         }
-        catch(Exception e) {
+        catch(IOException e) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "Error setting preview display: " + e.getMessage());
         }
@@ -1437,15 +1432,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				takePictureWhenFocused();
 			}
         };
-        // wrap in try block just to be safe
-        try {
-        	camera.autoFocus(autoFocusCallback);
-        }
-        catch(Exception e) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "failed to autofocus");
-        	e.printStackTrace();
-        }
+    	camera.autoFocus(autoFocusCallback);
 	}
 
 	private void takePictureWhenFocused() {
@@ -1722,7 +1709,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	            System.gc();
     	    }
     	};
-    	try {
+    	{
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 			boolean enable_sound = sharedPreferences.getBoolean("preference_shutter_sound", true);
     		if( MyDebug.LOG )
@@ -1733,12 +1720,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     		camera.takePicture(shutterCallback, null, jpegPictureCallback);
 		    take_photo_toast = showToast(take_photo_toast, "Taking a photo...");
     	}
-        catch(Exception e) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "Camera takePicture failed: " + e.getMessage());
-            e.printStackTrace();
-    	    showToast(null, "Failed to take photo");
-        }
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
     }
@@ -1828,15 +1809,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			debug_time = System.currentTimeMillis();
 		}
 		if( camera != null ) {
-			try {
-				camera.startPreview();
-			}
-			catch(Exception e) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "Failed to start camera preview: " + e.getMessage());
-				e.printStackTrace();
-				closeCamera();
-			}
+			camera.startPreview();
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 			}
