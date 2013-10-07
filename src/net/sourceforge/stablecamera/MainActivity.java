@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -39,7 +40,7 @@ class MyDebug {
 }
 
 class ApplicationProperties {
-	static final boolean FULL_VERSION = true;
+	static final boolean FULL_VERSION = false;
 }
 
 public class MainActivity extends Activity {
@@ -162,7 +163,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "ui_placement: " + ui_placement);
 		/*
-		// old code for changing orientation (not yet updated for switch_video)
+		// old code for changing orientation (not yet updated for switch_video or gallery)
 		if( getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "display is in portrait orientation");
@@ -352,11 +353,20 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 
-			view = findViewById(R.id.focus_mode);
+			view = findViewById(R.id.gallery);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_top, R.id.preview);
 			layoutParams.addRule(align_bottom, 0);
 			layoutParams.addRule(left_of, R.id.settings);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+
+			view = findViewById(R.id.focus_mode);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_top, R.id.preview);
+			layoutParams.addRule(align_bottom, 0);
+			layoutParams.addRule(left_of, R.id.gallery);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -470,6 +480,15 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 
+			view = findViewById(R.id.gallery);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_top, R.id.preview);
+			layoutParams.addRule(align_bottom, 0);
+			layoutParams.addRule(left_of, 0);
+			layoutParams.addRule(right_of, R.id.focus_mode);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+
 			view = findViewById(R.id.settings);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_top, R.id.preview);
@@ -477,7 +496,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(align_left, 0);
 			layoutParams.addRule(align_right, 0);
 			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.focus_mode);
+			layoutParams.addRule(right_of, R.id.gallery);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 
@@ -616,6 +635,13 @@ public class MainActivity extends Activity {
 		this.startActivity(intent);
     }
     
+    public void clickedGallery(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedGallery");
+		Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		this.startActivity(intent);
+    }
+
     static private void putIntentExtra(Intent intent, String key, List<String> values) {
 		if( values != null ) {
 			String [] values_arr = new String[values.size()];

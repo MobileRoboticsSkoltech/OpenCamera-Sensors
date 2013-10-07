@@ -44,6 +44,18 @@
         />
 
     <ImageButton
+        android:id="@+id/gallery"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/gallery"
+        android:src="@drawable/gallery"
+        android:onClick="clickedGallery"
+        android:layout_toLeftOf="@+id/settings"
+        />
+
+    <ImageButton
         android:id="@+id/focus_mode"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -51,7 +63,7 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/focus_mode"
         android:onClick="clickedFocusMode"
-        android:layout_toLeftOf="@+id/settings"
+        android:layout_toLeftOf="@+id/gallery"
         />
 
     <ImageButton

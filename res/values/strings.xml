@@ -45,11 +45,12 @@
     <string name="preference_buy">Buy full version</string>
     
     <string name="take_photo">Take Photo</string>
+    <string name="gallery">Gallery</string>
+    <string name="focus_mode">Focus Mode</string>
+    <string name="flash_mode">Flash Mode</string>
     <string name="switch_camera">Switch Camera</string>
     <string name="switch_video">Switch Video</string>
-    <string name="flash_mode">Flash Mode</string>
-    <string name="focus_mode">Focus Mode</string>
-    <string name="share">Share Photo</string>
     <string name="trash">Delete Last Picture</string>
+    <string name="share">Share Photo</string>
     
 </resources>
