@@ -404,8 +404,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				if( flash_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing flash_value: " + flash_value);
-					updateFlash(flash_value);
-					if( current_flash_index == -1 ) {
+					if( !updateFlash(flash_value) ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "flash value no longer supported!");
 						updateFlash(0);
@@ -913,10 +912,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			long time_now = System.currentTimeMillis();
 			if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
 				long free_mb = MainActivity.freeMemory();
-				free_memory_gb = free_mb/1024.0f;
-				last_free_memory_time = time_now;
+				if( free_mb >= 0 ) {
+					free_memory_gb = free_mb/1024.0f;
+					last_free_memory_time = time_now;
+				}
 			}
-			canvas.drawText("Remaining memory: " + decimalFormat.format(free_memory_gb) + "GB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+			if( free_memory_gb >= 0.0f ) {
+				canvas.drawText("Remaining memory: " + decimalFormat.format(free_memory_gb) + "GB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+			}
 		}
 		if( !ApplicationProperties.FULL_VERSION ) {
 			int pixels_offset_y = (int) (60 * scale + 0.5f); // convert dps to pixels
@@ -1037,25 +1040,26 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 	}
 
-	private void updateFlash(String flash_value) {
+	private boolean updateFlash(String flash_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFlash(): " + flash_value);
-    	int new_flash_index = supported_flash_values.indexOf(flash_value);
-		if( MyDebug.LOG )
-			Log.d(TAG, "new_flash_index: " + new_flash_index);
-    	if( new_flash_index != -1 ) {
-    		updateFlash(new_flash_index);
-    	}
-    	else {
-    		this.current_flash_index = -1;
-    	}
+		if( supported_flash_values != null ) {
+	    	int new_flash_index = supported_flash_values.indexOf(flash_value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "new_flash_index: " + new_flash_index);
+	    	if( new_flash_index != -1 ) {
+	    		updateFlash(new_flash_index);
+	    		return true;
+	    	}
+		}
+    	return false;
 	}
 	
 	private void updateFlash(int new_flash_index) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFlash(): " + new_flash_index);
 		// updates the Flash button, and Flash camera mode
-		if( new_flash_index != current_flash_index ) {
+		if( supported_flash_values != null && new_flash_index != current_flash_index ) {
 			boolean initial = current_flash_index==-1;
 			current_flash_index = new_flash_index;
 			if( MyDebug.LOG )
@@ -1189,13 +1193,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private boolean updateFocus(String focus_value, boolean quiet) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + focus_value);
-    	int new_focus_index = supported_focus_values.indexOf(focus_value);
-		if( MyDebug.LOG )
-			Log.d(TAG, "new_focus_index: " + new_focus_index);
-    	if( new_focus_index != -1 ) {
-    		updateFocus(new_focus_index, quiet);
-    		return true;
-    	}
+		if( this.supported_focus_values != null ) {
+	    	int new_focus_index = supported_focus_values.indexOf(focus_value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "new_focus_index: " + new_focus_index);
+	    	if( new_focus_index != -1 ) {
+	    		updateFocus(new_focus_index, quiet);
+	    		return true;
+	    	}
+		}
     	return false;
 	}
 
@@ -1207,7 +1213,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + new_focus_index);
 		// updates the Focus button, and Focus camera mode
-		if( new_focus_index != current_focus_index ) {
+		if( this.supported_focus_values != null && new_focus_index != current_focus_index ) {
 			boolean initial = current_focus_index==-1;
 			current_focus_index = new_focus_index;
 			if( MyDebug.LOG )
@@ -1407,61 +1413,78 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         if( is_video ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
-        	this.camera.unlock();
-        	video_recorder = new MediaRecorder();
-        	video_recorder.setCamera(camera);
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-			boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
-        	video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-			if( record_audio ) {
-				video_recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-			}
-        	video_recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-			if( record_audio ) {
-				video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-			}
-        	video_recorder.setOrientationHint(this.current_rotation);
 			MainActivity main_activity = (MainActivity)Preview.this.getContext();
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
-			String videoFileName = videoFile.getAbsolutePath();
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "save to: " + videoFileName);
-        	video_recorder.setOutputFile(videoFileName);
-        	try {
-        		/*if( true ) // test
-        			throw new IOException();*/
-				video_recorder.prepare();
-            	video_recorder.start();
-            	video_start_time = System.currentTimeMillis();
-	    	    showToast(null, "Started recording video");
-	            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
+			if( videoFile == null ) {
+	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
+	    	    showToast(null, "Failed to save video file");
 			}
-        	catch(IOException e) {
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "failed to save video");
-				e.printStackTrace();
-	    	    showToast(null, "Failed to save video");
-	    		video_recorder.reset();
-	    		video_recorder.release(); 
-	    		video_recorder = null;
-				is_taking_photo = false;
-				is_taking_photo_on_timer = false;
-				this.reconnectCamera();
-			}
+			else {
+	        	this.camera.unlock();
+	        	video_recorder = new MediaRecorder();
+	        	video_recorder.setCamera(camera);
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+				boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
+	        	video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+				if( record_audio ) {
+					video_recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+				}
+	        	video_recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+	        	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+				if( record_audio ) {
+					video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+				}
+	        	video_recorder.setOrientationHint(this.current_rotation);
 
+	        	String videoFileName = videoFile.getAbsolutePath();
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "save to: " + videoFileName);
+	        	video_recorder.setOutputFile(videoFileName);
+	        	try {
+	        		/*if( true ) // test
+	        			throw new IOException();*/
+					video_recorder.prepare();
+	            	video_recorder.start();
+	            	video_start_time = System.currentTimeMillis();
+		    	    showToast(null, "Started recording video");
+		            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
+				}
+	        	catch(IOException e) {
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "failed to save video");
+					e.printStackTrace();
+		    	    showToast(null, "Failed to save video");
+		    		video_recorder.reset();
+		    		video_recorder.release(); 
+		    		video_recorder = null;
+					is_taking_photo = false;
+					is_taking_photo_on_timer = false;
+					this.reconnectCamera();
+				}
+			}
         	return;
 		}
 
-        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
-			@Override
-			public void onAutoFocus(boolean success, Camera camera) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "autofocus complete: " + success);
-				takePictureWhenFocused();
-			}
-        };
-    	camera.autoFocus(autoFocusCallback);
+        Camera.Parameters parameters = camera.getParameters();
+		String focus_mode = parameters.getFocusMode();
+		if( MyDebug.LOG )
+			Log.d(TAG, "focus_mode is " + focus_mode);
+		if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
+	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+				@Override
+				public void onAutoFocus(boolean success, Camera camera) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "autofocus complete: " + success);
+					takePictureWhenFocused();
+				}
+	        };
+			if( MyDebug.LOG )
+				Log.d(TAG, "start autofocus to take picture");
+	    	camera.autoFocus(autoFocusCallback);
+		}
+		else {
+			takePictureWhenFocused();
+		}
 	}
 
 	private void takePictureWhenFocused() {
@@ -1695,7 +1718,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    			else {
 	        			picFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_IMAGE);
 	        	        if( picFile == null ) {
-	        	            Log.e(TAG, "Couldn't create media file; check storage permissions?");
+	        	            Log.e(TAG, "Couldn't create media image file; check storage permissions?");
+	        	    	    showToast(null, "Failed to save image file");
 	        	            return;
 	        	        }
 	    	            picFileName = picFile.getAbsolutePath();

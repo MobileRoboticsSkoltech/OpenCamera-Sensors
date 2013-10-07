@@ -773,15 +773,21 @@ public class MainActivity extends Activity {
 
     @SuppressWarnings("deprecation")
 	public static long freeMemory() { // return free memory in MB
-        StatFs statFs = new StatFs(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
-        // cast to long to avoid overflow!
-        long blocks = statFs.getAvailableBlocks();
-        long size = statFs.getBlockSize();
-        long free  = (blocks*size) / 1048576;
-		/*if( MyDebug.LOG ) {
-			Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
-		}*/
-        return free;
+    	try {
+	        StatFs statFs = new StatFs(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+	        // cast to long to avoid overflow!
+	        long blocks = statFs.getAvailableBlocks();
+	        long size = statFs.getBlockSize();
+	        long free  = (blocks*size) / 1048576;
+			/*if( MyDebug.LOG ) {
+				Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
+			}*/
+	        return free;
+    	}
+    	catch(IllegalArgumentException e) {
+    		// can fail on emulator, at least!
+    		return -1;
+    	}
     }
     
     public static String getFullVersionLink() {
