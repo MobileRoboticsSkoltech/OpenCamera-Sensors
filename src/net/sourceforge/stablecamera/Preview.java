@@ -1250,8 +1250,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	else if( focus_value.equals("focus_mode_edof") ) {
     		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_EDOF);
     	}
-    	else if( focus_value.equals("drawable/focus_mode_continuous_video") ) {
+    	else if( focus_value.equals("focus_mode_continuous_video") ) {
     		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+    	}
+    	else {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "setFocus() received unknown focus value " + focus_value);
     	}
 		camera.setParameters(parameters);
 		tryAutoFocus();
