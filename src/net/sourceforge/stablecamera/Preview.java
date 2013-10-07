@@ -102,6 +102,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
 	private Toast switch_camera_toast = null;
+	private Toast switch_video_toast = null;
 	private Toast flash_toast = null;
 	private Toast focus_toast = null;
 	private Toast take_photo_toast = null;
@@ -987,6 +988,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				stopVideo();
 			}
 			this.is_video = false;
+			switch_video_toast = showToast(switch_video_toast, "Photo");
 		}
 		else {
 			if( is_taking_photo_on_timer ) {
@@ -1004,6 +1006,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 			else {
 				this.is_video = true;
+			}
+			
+			if( this.is_video ) {
+				switch_video_toast = showToast(switch_video_toast, "Video");
 			}
 		}
 		Activity activity = (Activity)this.getContext();
@@ -1535,8 +1541,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         		    float rotated_size = (float)(w0*h0);
         		    float scale = (float)Math.sqrt(orig_size/rotated_size);
         			if( test_low_memory ) {
-        		    	//scale *= 2.0f; // test 20MP
-        		    	scale *= 1.613f; // test 13MP
+        		    	scale *= 2.0f; // test 20MP
+        		    	//scale *= 1.613f; // test 13MP
         			}
         			if( MyDebug.LOG ) {
         				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
