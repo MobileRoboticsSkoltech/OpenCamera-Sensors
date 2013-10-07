@@ -437,8 +437,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				if( focus_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing focus_value: " + focus_value);
-					updateFocus(focus_value);
-					if( current_focus_index == -1 ) {
+					if( !updateFocus(focus_value) ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "focus value no longer supported!");
 						updateFocus(0);
@@ -988,6 +987,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				stopVideo();
 			}
 			this.is_video = false;
+			updateFocus("focus_mode_auto", true);
 			switch_video_toast = showToast(switch_video_toast, "Photo");
 		}
 		else {
@@ -1009,6 +1009,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 			
 			if( this.is_video ) {
+				updateFocus("focus_mode_continuous_video", true);
 				switch_video_toast = showToast(switch_video_toast, "Video");
 			}
 		}
@@ -1181,21 +1182,28 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 	}
 
-	private void updateFocus(String focus_value) {
+	private boolean updateFocus(String focus_value) {
+		return updateFocus(focus_value, false);
+	}
+
+	private boolean updateFocus(String focus_value, boolean quiet) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + focus_value);
     	int new_focus_index = supported_focus_values.indexOf(focus_value);
 		if( MyDebug.LOG )
 			Log.d(TAG, "new_focus_index: " + new_focus_index);
     	if( new_focus_index != -1 ) {
-    		updateFocus(new_focus_index);
+    		updateFocus(new_focus_index, quiet);
+    		return true;
     	}
-    	else {
-    		this.current_focus_index = -1;
-    	}
+    	return false;
 	}
-	
+
 	private void updateFocus(int new_focus_index) {
+		updateFocus(new_focus_index, false);
+	}
+
+	private void updateFocus(int new_focus_index, boolean quiet) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + new_focus_index);
 		// updates the Focus button, and Focus camera mode
@@ -1221,7 +1229,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 						Log.d(TAG, "    found entry: " + i);
 	    			int resource = getResources().getIdentifier(focus_icons[i], null, activity.getApplicationContext().getPackageName());
 	    			focusModeButton.setImageResource(resource);
-	    			if( !initial ) {
+	    			if( !initial && !quiet ) {
 	    				focus_toast = showToast(focus_toast, focus_entries[i]);
 	    			}
 	    			break;
