@@ -1417,7 +1417,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
 			if( videoFile == null ) {
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
-	    	    showToast(null, "Failed to save video file");
+	    		main_activity.runOnUiThread(new Runnable() {
+	    			public void run() {
+	    	    	    showToast(null, "Failed to save video file");
+	    			}
+	  			});
 			}
 			else {
 	        	this.camera.unlock();
@@ -1446,14 +1450,22 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					video_recorder.prepare();
 	            	video_recorder.start();
 	            	video_start_time = System.currentTimeMillis();
-		    	    showToast(null, "Started recording video");
+		    		main_activity.runOnUiThread(new Runnable() {
+		    			public void run() {
+				    	    showToast(null, "Started recording video");
+		    			}
+		  			});
 		            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
 				}
 	        	catch(IOException e) {
 		    		if( MyDebug.LOG )
 		    			Log.d(TAG, "failed to save video");
 					e.printStackTrace();
-		    	    showToast(null, "Failed to save video");
+		    		main_activity.runOnUiThread(new Runnable() {
+		    			public void run() {
+				    	    showToast(null, "Failed to save video");
+		    			}
+		  			});
 		    		video_recorder.reset();
 		    		video_recorder.release(); 
 		    		video_recorder = null;
@@ -1719,7 +1731,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        			picFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_IMAGE);
 	        	        if( picFile == null ) {
 	        	            Log.e(TAG, "Couldn't create media image file; check storage permissions?");
-	        	    	    showToast(null, "Failed to save image file");
+	    		    		main_activity.runOnUiThread(new Runnable() {
+	    		    			public void run() {
+	    	        	    	    showToast(null, "Failed to save image file");
+	    		    			}
+	    		  			});
 	        	            return;
 	        	        }
 	    	            picFileName = picFile.getAbsolutePath();
@@ -1753,13 +1769,21 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	    		if( MyDebug.LOG )
     	    			Log.e(TAG, "File not found: " + e.getMessage());
     	            e.getStackTrace();
-    	    	    showToast(null, "Failed to save photo");
+		    		main_activity.runOnUiThread(new Runnable() {
+		    			public void run() {
+		    	    	    showToast(null, "Failed to save photo");
+		    			}
+		  			});
     	        }
     	        catch(IOException e) {
     	    		if( MyDebug.LOG )
     	    			Log.e(TAG, "I/O error writing file: " + e.getMessage());
     	            e.getStackTrace();
-    	    	    showToast(null, "Failed to save photo");
+		    		main_activity.runOnUiThread(new Runnable() {
+		    			public void run() {
+		    	    	    showToast(null, "Failed to save photo");
+		    			}
+		  			});
     	        }
 
     	        is_taking_photo = false;
@@ -1798,7 +1822,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
             	camera.enableShutterSound(enable_sound);
             }
     		camera.takePicture(shutterCallback, null, jpegPictureCallback);
-		    take_photo_toast = showToast(take_photo_toast, "Taking a photo...");
+			Activity activity = (Activity)this.getContext();
+    		activity.runOnUiThread(new Runnable() {
+    			public void run() {
+    				take_photo_toast = showToast(take_photo_toast, "Taking a photo...");
+    			}
+  			});
     	}
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
