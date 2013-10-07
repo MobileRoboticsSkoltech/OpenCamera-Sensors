@@ -864,7 +864,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 			else if( this.video_recorder != null ) {
             	long video_time = (System.currentTimeMillis() - video_start_time);
-            	int ms = (int)(video_time % 1000);
+            	//int ms = (int)(video_time % 1000);
             	video_time /= 1000;
             	int secs = (int)(video_time % 60);
             	video_time /= 60;
