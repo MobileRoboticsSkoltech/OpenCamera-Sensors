@@ -80,7 +80,7 @@
         <item>ui_right</item>
     </string-array>
     <string-array name="preference_volume_keys_entries">
-        <item>Take photo</item>
+        <item>Take photo (or start/stop video recording)</item>
         <item>Zoom in/out</item>
         <item>Change device volume</item>
     </string-array>
