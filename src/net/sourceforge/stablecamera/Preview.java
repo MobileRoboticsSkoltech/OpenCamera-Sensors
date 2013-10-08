@@ -255,7 +255,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
     		catch (IOException e) {
         		if( MyDebug.LOG )
-        			Log.d(TAG, "failed to reconnect to camera");
+        			Log.e(TAG, "failed to reconnect to camera");
 				e.printStackTrace();
 	    	    showToast(null, "Failed to reconnect to camera");
 	    	    closeCamera();
@@ -314,7 +314,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		catch(RuntimeException e) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "Failed to open camera: " + e.getMessage());
+				Log.e(TAG, "Failed to open camera: " + e.getMessage());
 			e.printStackTrace();
 			camera = null;
 		}
@@ -339,7 +339,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 			catch(IOException e) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "Failed to set preview display: " + e.getMessage());
+					Log.e(TAG, "Failed to set preview display: " + e.getMessage());
 				e.printStackTrace();
 			}
 			if( MyDebug.LOG ) {
@@ -521,7 +521,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 						}
 						if( current_size_index == -1 ) {
 							if( MyDebug.LOG )
-								Log.d(TAG, "failed to find valid size");
+								Log.e(TAG, "failed to find valid size");
 						}
 					}
 					catch(NumberFormatException exception) {
@@ -659,7 +659,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         }
         catch(IOException e) {
     		if( MyDebug.LOG )
-    			Log.d(TAG, "Error setting preview display: " + e.getMessage());
+    			Log.e(TAG, "Error setting preview display: " + e.getMessage());
         }
         if( !this.is_preview_paused ) {
 			startCameraPreview();
@@ -1366,7 +1366,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
         catch(NumberFormatException e) {
     		if( MyDebug.LOG )
-    			Log.d(TAG, "failed to parse timer_value: " + timer_value);
+    			Log.e(TAG, "failed to parse timer_value: " + timer_value);
     		e.printStackTrace();
     		timer_delay = 0;
         }
@@ -1459,7 +1459,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				}
 	        	catch(IOException e) {
 		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "failed to save video");
+		    			Log.e(TAG, "failed to save video");
 					e.printStackTrace();
 		    		main_activity.runOnUiThread(new Runnable() {
 		    			public void run() {
@@ -1476,7 +1476,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        	catch(RuntimeException e) {
 	        		// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
 		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "runtime exception starting video recorder");
+		    			Log.e(TAG, "runtime exception starting video recorder");
 					e.printStackTrace();
 		    		main_activity.runOnUiThread(new Runnable() {
 		    			public void run() {
@@ -1566,6 +1566,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         	        }
     	        }
 
+    	        boolean success = false;
     	        Bitmap bitmap = null;
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Preview.this.getContext());
 				boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
@@ -1753,12 +1754,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    	        	    	    showToast(null, "Failed to save image file");
 	    		    			}
 	    		  			});
-	        	            return;
 	        	        }
-	    	            picFileName = picFile.getAbsolutePath();
-        	    		if( MyDebug.LOG )
-        	    			Log.d(TAG, "save to: " + picFileName);
-	    	            outputStream = new FileOutputStream(picFile);
+	        	        else {
+		    	            picFileName = picFile.getAbsolutePath();
+	        	    		if( MyDebug.LOG )
+	        	    			Log.d(TAG, "save to: " + picFileName);
+		    	            outputStream = new FileOutputStream(picFile);
+	        	        }
 	    			}
 	    			
 	    			if( outputStream != null ) {
@@ -1773,6 +1775,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         	    		if( MyDebug.LOG )
         	    			Log.d(TAG, "onPictureTaken saved photo");
 
+        				success = true;
         	            if( picFile != null ) {
         	            	main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(picFile)));
         	            }
@@ -1805,7 +1808,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
     	        is_taking_photo = false;
 				boolean pause_preview = sharedPreferences.getBoolean("preference_pause_preview", true);
-				if( pause_preview ) {
+				if( pause_preview && success ) {
 	    			setPreviewPaused(true);
 	    			preview_image_name = picFileName;
 				}
@@ -1816,7 +1819,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        		if( MyDebug.LOG )
 	        			Log.d(TAG, "onPictureTaken started preview");
 				}
-	            
+
 	            if( bitmap != null ) {
         		    bitmap.recycle();
         		    bitmap = null;
@@ -1878,7 +1881,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				File file = new File(preview_image_name);
 				if( !file.delete() ) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "failed to delete " + preview_image_name);
+						Log.e(TAG, "failed to delete " + preview_image_name);
 				}
 				else {
 					if( MyDebug.LOG )
@@ -2054,7 +2057,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		catch(NumberFormatException exception) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "image_quality_s invalid format: " + image_quality_s);
+				Log.e(TAG, "image_quality_s invalid format: " + image_quality_s);
 			image_quality = 90;
 		}
 		return image_quality;
