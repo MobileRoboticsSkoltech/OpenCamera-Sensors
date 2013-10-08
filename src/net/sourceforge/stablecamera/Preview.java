@@ -1473,6 +1473,23 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					is_taking_photo_on_timer = false;
 					this.reconnectCamera();
 				}
+	        	catch(RuntimeException e) {
+	        		// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "runtime exception starting video recorder");
+					e.printStackTrace();
+		    		main_activity.runOnUiThread(new Runnable() {
+		    			public void run() {
+				    	    showToast(null, "Failed to record video");
+		    			}
+		  			});
+		    		video_recorder.reset();
+		    		video_recorder.release(); 
+		    		video_recorder = null;
+					is_taking_photo = false;
+					is_taking_photo_on_timer = false;
+					this.reconnectCamera();
+				}
 			}
         	return;
 		}
