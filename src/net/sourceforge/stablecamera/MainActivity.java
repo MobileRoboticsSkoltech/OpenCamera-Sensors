@@ -740,7 +740,7 @@ public class MainActivity extends Activity {
         if( !mediaStorageDir.exists() ) {
             if( !mediaStorageDir.mkdirs() ) {
         		if( MyDebug.LOG )
-        			Log.d(TAG, "failed to create directory");
+        			Log.e(TAG, "failed to create directory");
                 return null;
             }
 	        this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(mediaStorageDir)));
