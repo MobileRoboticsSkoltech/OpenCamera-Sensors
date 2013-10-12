@@ -5,7 +5,7 @@
     <string name="action_settings">Settings</string>
 
     <string name="preference_category_camera_effects">Camera Effects</string>
-    <string name="preference_auto_stabilise">Whether to auto-stabilise</string>
+    <string name="preference_auto_stabilise">Auto-stabilise</string>
     <string name="preference_auto_stabilise_summary">Images will be rotated so they are automatically level (photos only) (may fail on devices with too low memory)</string>
     <string name="preference_color_effect">Apply a color effect</string>
     <string name="preference_color_effect_summary">Applies the selected color effect to the photo</string>
@@ -32,10 +32,10 @@
     <string name="preference_show_angle">Show angle</string>
     <string name="preference_show_angle_summary">Display the current device orientation angle on screen</string>
     <string name="preference_free_memory">Show free memory</string>
-    <string name="preference_free_memory_summary">Display the remaining device memory on screen</string>
+    <string name="preference_free_memory_summary">Display the remaining device storage space on screen</string>
     
     <string name="preference_category_camera_quality">Camera Quality</string>
-    <string name="preference_resolution">Camera Resolution</string>
+    <string name="preference_resolution">Camera resolution</string>
     <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
     <string name="preference_quality">Image quality</string>
     <string name="preference_quality_summary">Set the image quality of saved photo images (recommended value is 90%%)</string>
