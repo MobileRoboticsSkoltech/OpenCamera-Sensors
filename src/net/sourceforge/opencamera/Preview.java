@@ -28,6 +28,7 @@ import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -1429,11 +1430,25 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					video_recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
 				}
 				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-	        	video_recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+
+				/*video_recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 				if( record_audio ) {
 					video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 				}
-	        	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+	        	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);*/
+				CamcorderProfile profile = CamcorderProfile.get(this.cameraId, CamcorderProfile.QUALITY_HIGH);
+				if( record_audio ) {
+					video_recorder.setProfile(profile);
+				}
+				else {
+					// from http://stackoverflow.com/questions/5524672/is-it-possible-to-use-camcorderprofile-without-audio-source
+					video_recorder.setOutputFormat(profile.fileFormat);
+					video_recorder.setVideoFrameRate(profile.videoFrameRate);
+					video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+					video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
+					video_recorder.setVideoEncoder(profile.videoCodec);
+				}
+
 	        	video_recorder.setOrientationHint(this.current_rotation);
 
 	        	String videoFileName = videoFile.getAbsolutePath();
