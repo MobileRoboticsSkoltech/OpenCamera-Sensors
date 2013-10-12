@@ -436,16 +436,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				if( focus_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing focus_value: " + focus_value);
-					if( !updateFocus(focus_value) ) {
+					if( !updateFocus(focus_value, false, false) ) { // don't need to save, as this is the value that's already saved
 						if( MyDebug.LOG )
 							Log.d(TAG, "focus value no longer supported!");
-						updateFocus(0);
+						updateFocus(0, false, true);
 					}
 				}
 				else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found no existing focus_value");
-					updateFocus(0);
+					updateFocus(0, false, true);
 				}
 				focusModeButton.setVisibility(View.VISIBLE);
 			}
@@ -985,7 +985,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				stopVideo();
 			}
 			this.is_video = false;
-			updateFocus("focus_mode_auto", true);
+			updateFocus("focus_mode_auto", true, true);
 			switch_video_toast = showToast(switch_video_toast, "Photo");
 		}
 		else {
@@ -1007,7 +1007,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 			
 			if( this.is_video ) {
-				updateFocus("focus_mode_continuous_video", true);
+				updateFocus("focus_mode_continuous_video", true, true);
 				switch_video_toast = showToast(switch_video_toast, "Video");
 			}
 		}
@@ -1167,25 +1167,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "cycleFocusMode()");
 		if( this.supported_focus_values != null && this.supported_focus_values.size() > 1 ) {
 			int new_focus_index = (current_focus_index+1) % this.supported_focus_values.size();
-			updateFocus(new_focus_index);
-
-			// now save
-			String focus_value = supported_focus_values.get(current_focus_index);
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "save new focus_value: " + focus_value);
-			}
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString(getFocusPreferenceKey(cameraId), focus_value);
-			editor.apply();
+			updateFocus(new_focus_index, false, true);
 		}
 	}
-
-	private boolean updateFocus(String focus_value) {
-		return updateFocus(focus_value, false);
-	}
-
-	private boolean updateFocus(String focus_value, boolean quiet) {
+	
+	private boolean updateFocus(String focus_value, boolean quiet, boolean save) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + focus_value);
 		if( this.supported_focus_values != null ) {
@@ -1193,18 +1179,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			if( MyDebug.LOG )
 				Log.d(TAG, "new_focus_index: " + new_focus_index);
 	    	if( new_focus_index != -1 ) {
-	    		updateFocus(new_focus_index, quiet);
+	    		updateFocus(new_focus_index, quiet, save);
 	    		return true;
 	    	}
 		}
     	return false;
 	}
 
-	private void updateFocus(int new_focus_index) {
-		updateFocus(new_focus_index, false);
-	}
-
-	private void updateFocus(int new_focus_index, boolean quiet) {
+	private void updateFocus(int new_focus_index, boolean quiet, boolean save) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + new_focus_index);
 		// updates the Focus button, and Focus camera mode
@@ -1237,6 +1219,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    		}
 	    	}
 	    	this.setFocus(focus_value);
+
+	    	if( save ) {
+				// now save
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getFocusPreferenceKey(cameraId), focus_value);
+				editor.apply();
+	    	}
 		}
 	}
 
