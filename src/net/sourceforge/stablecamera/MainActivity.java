@@ -40,7 +40,7 @@ class MyDebug {
 }
 
 class ApplicationProperties {
-	static final boolean FULL_VERSION = false;
+	static final boolean FULL_VERSION = true;
 }
 
 public class MainActivity extends Activity {
