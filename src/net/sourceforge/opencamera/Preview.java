@@ -692,6 +692,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
             parameters.setPreviewSize(best_size.width, best_size.height);
     		if( MyDebug.LOG )
     			Log.d(TAG, "new preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
+
+    		/*List<int []> fps_ranges = parameters.getSupportedPreviewFpsRange();
+    		if( MyDebug.LOG ) {
+		        for(int [] fps_range : fps_ranges) {
+	    			Log.d(TAG, "    supported fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+		        }
+    		}
+    		int [] fps_range = fps_ranges.get(fps_ranges.size()-1);
+	        parameters.setPreviewFpsRange(fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX], fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);*/
             camera.setParameters(parameters);
         }
 	}
