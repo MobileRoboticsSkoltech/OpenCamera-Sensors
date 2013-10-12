@@ -64,6 +64,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private int cameraId = 0;
 	private boolean is_video = false;
 	private MediaRecorder video_recorder = null;
+	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
 
 	private boolean is_taking_photo = false;
@@ -880,7 +881,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					canvas.drawText("" + remaining_time, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 				}
 			}
-			else if( this.video_recorder != null ) {
+			else if( this.video_recorder != null && video_start_time_set ) {
             	long video_time = (System.currentTimeMillis() - video_start_time);
             	//int ms = (int)(video_time % 1000);
             	video_time /= 1000;
@@ -1477,6 +1478,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					video_recorder.prepare();
 	            	video_recorder.start();
 	            	video_start_time = System.currentTimeMillis();
+	            	video_start_time_set = true;
 		    		main_activity.runOnUiThread(new Runnable() {
 		    			public void run() {
 				    	    showToast(null, "Started recording video");
