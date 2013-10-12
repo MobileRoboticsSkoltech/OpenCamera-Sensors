@@ -683,6 +683,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         if( preview_sizes.size() > 0 ) {
 	        Camera.Size best_size = preview_sizes.get(0);
 	        for(Camera.Size size : preview_sizes) {
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "    supported preview size: " + size.width + ", " + size.height);
 	        	if( size.width*size.height > best_size.width*best_size.height ) {
 	        		best_size = size;
 	        	}
@@ -1414,15 +1416,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        	video_recorder.setCamera(camera);
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
-	        	video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 				if( record_audio ) {
 					video_recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
 				}
+				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 	        	video_recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-	        	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
 				if( record_audio ) {
 					video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 				}
+	        	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
 	        	video_recorder.setOrientationHint(this.current_rotation);
 
 	        	String videoFileName = videoFile.getAbsolutePath();
@@ -1432,6 +1434,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        	try {
 	        		/*if( true ) // test
 	        			throw new IOException();*/
+		        	video_recorder.setPreviewDisplay(mHolder.getSurface());
 					video_recorder.prepare();
 	            	video_recorder.start();
 	            	video_start_time = System.currentTimeMillis();
