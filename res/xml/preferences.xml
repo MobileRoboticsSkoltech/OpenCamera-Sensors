@@ -99,7 +99,7 @@
 	        android:dialogMessage="@string/preference_save_location_summary"
 	        android:inputType="text"
 	        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .@#£%&amp;-()!;~`{}$^_="
-            android:defaultValue="StableCamera"
+            android:defaultValue="OpenCamera"
 	        />
 
         <CheckBoxPreference

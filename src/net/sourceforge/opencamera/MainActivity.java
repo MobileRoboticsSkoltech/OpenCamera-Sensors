@@ -1,4 +1,4 @@
-package net.sourceforge.stablecamera;
+package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -692,7 +692,7 @@ public class MainActivity extends Activity {
 
     private File getImageFolder() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String folder_name = sharedPreferences.getString("preference_save_location", "StableCamera");
+		String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), folder_name);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "folder_name: " + folder_name);

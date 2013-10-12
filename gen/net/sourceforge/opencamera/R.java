@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package net.sourceforge.stablecamera;
+package net.sourceforge.opencamera;
 
 public final class R {
     public static final class array {

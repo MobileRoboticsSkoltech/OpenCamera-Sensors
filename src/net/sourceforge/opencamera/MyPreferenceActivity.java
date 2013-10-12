@@ -1,4 +1,4 @@
-package net.sourceforge.stablecamera;
+package net.sourceforge.opencamera;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -94,7 +94,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                 	if( pref.getKey().equals("preference_online_help") ) {
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked online help");
-            	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://stablecamera.sourceforge.net/"));
+            	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://opencamera.sourceforge.net/"));
             	        startActivity(browserIntent);
                 		return false;
                 	}

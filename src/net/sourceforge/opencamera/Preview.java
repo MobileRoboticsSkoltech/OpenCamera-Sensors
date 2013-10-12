@@ -1,4 +1,4 @@
-package net.sourceforge.stablecamera;
+package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.io.FileNotFoundException;
