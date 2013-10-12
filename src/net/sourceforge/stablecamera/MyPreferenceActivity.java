@@ -12,9 +12,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.util.Log;
 
 public class MyPreferenceActivity extends PreferenceActivity {
@@ -106,28 +104,20 @@ public class MyPreferenceActivity extends PreferenceActivity {
         }
 
         {
-            final Preference pref = (Preference) findPreference("preference_buy");
-            if( ApplicationProperties.FULL_VERSION ) {
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "remove link to full version, as already the full version");
-            	PreferenceCategory pg = (PreferenceCategory)this.findPreference("preference_category_online");
-            	pg.removePreference(pref);
-            }
-            else {
-                pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference arg0) {
-                    	if( pref.getKey().equals("preference_buy") ) {
-                    		if( MyDebug.LOG )
-                    			Log.d(TAG, "user clicked buy full version");
-                	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getFullVersionLink()));
-                	        startActivity(browserIntent);
-                    		return false;
-                    	}
-                    	return false;
-                    }
-                });
-            }
+            final Preference pref = (Preference) findPreference("preference_donate");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                	if( pref.getKey().equals("preference_donate") ) {
+                		if( MyDebug.LOG )
+                			Log.d(TAG, "user clicked to donate");
+            	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
+            	        startActivity(browserIntent);
+                		return false;
+                	}
+                	return false;
+                }
+            });
         }
 	}
 	

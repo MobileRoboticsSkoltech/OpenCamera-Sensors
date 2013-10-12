@@ -42,7 +42,7 @@
 
     <string name="preference_category_online">Online</string>
     <string name="preference_online_help">Online help</string>
-    <string name="preference_buy">Buy full version</string>
+    <string name="preference_donate">Donate to support development</string>
     
     <string name="take_photo">Take Photo</string>
     <string name="gallery">Gallery</string>

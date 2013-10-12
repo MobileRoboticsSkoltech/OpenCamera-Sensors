@@ -84,13 +84,13 @@ public final class R {
         public static final int gallery=0x7f070027;
         public static final int preference_auto_stabilise=0x7f070003;
         public static final int preference_auto_stabilise_summary=0x7f070004;
-        public static final int preference_buy=0x7f070025;
         public static final int preference_category_camera_controls=0x7f07000d;
         public static final int preference_category_camera_effects=0x7f070002;
         public static final int preference_category_camera_quality=0x7f07001e;
         public static final int preference_category_online=0x7f070023;
         public static final int preference_color_effect=0x7f070005;
         public static final int preference_color_effect_summary=0x7f070006;
+        public static final int preference_donate=0x7f070025;
         public static final int preference_free_memory=0x7f07001c;
         public static final int preference_free_memory_summary=0x7f07001d;
         public static final int preference_online_help=0x7f070024;

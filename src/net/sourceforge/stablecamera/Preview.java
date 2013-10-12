@@ -921,11 +921,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				canvas.drawText("Remaining memory: " + decimalFormat.format(free_memory_gb) + "GB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
 			}
 		}
-		if( !ApplicationProperties.FULL_VERSION ) {
-			int pixels_offset_y = (int) (60 * scale + 0.5f); // convert dps to pixels
-			p.setColor(Color.WHITE);
-			canvas.drawText("STABLE CAMERA FREE", canvas.getWidth() / 2, pixels_offset_y, p);
-		}
 		
 		canvas.restore();
 	}
