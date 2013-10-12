@@ -49,9 +49,6 @@ Please try the free version first, to ensure it works on your device!</p>
 <p>
 <a href="http://sourceforge.net/p/stablecamera/blog/">Stable Camera Blog</a> ~
 <a href="http://sourceforge.net/p/stablecamera/discussion/">Discussion Forums</a>
-<!--
-~
-<a href="https://sourceforge.net/p/stablecamera/code/">Code Repository (Git)</a>-->
 </p>
 
 <p><b>System requirements</b></p>
@@ -63,12 +60,10 @@ running Android 4.3. The auto-stabilise feature may not be available if the app 
 <p><b>Quickstart</b></p>
 
 <p>Simply point, and press the blue camera icon <img src="take_photo.png" width="32" height="32"> to take a photo. The camera
-will automatically focus before taking the picture. You can also focus at any time by touching on the screen.</p>
-
-<p>To zoom, either press use the zoom "-" and "+" control buttons, or do a multi-touch "pinch" gesture.</p>
-
-<p>You can also control via the volume keys on your phone or tablet - by default, pressing them will take a photo, but can change
-this to zoom in/out from the Settings (see below).</p>
+will automatically focus before taking the picture. You can also focus at any time by touching on the screen. To zoom, either
+press use the zoom "-" and "+" control buttons, or do a multi-touch "pinch" gesture. You can also control via the volume keys on
+your phone or tablet - by default, pressing them will take a photo, but can change this to zoom in/out from the Settings (see
+below).</p>
 
 <p>When you take a photo, the image will be displayed - to keep the photo, touch the screen (or take another photo). To delete it,
 press the trash icon <img src="trash.png" width="32" height="32">. To share an image, press the share icon
@@ -83,7 +78,8 @@ you want to switch off the display, do so on your device manually).</p>
 device has two cameras).</p>
 
 <p><img src="switch_video.png" width="32" height="32"><b>Switch to/from video</b> - Switches between taking photo mode, and
-recording video mode.</p>
+recording video mode. When in video mode, the take photo icon will change to the record video icon
+<img src="take_video.png" width="32" height="32">.</p>
 
 <p><img src="flash_auto.png" width="32" height="32"><b>Flash mode</b> - Click this to cycle through the available flash modes. Popup
 text will explain what each mode is. (Only available if the camera supports flash.)</p>
@@ -102,10 +98,14 @@ saved in the StableCamera folder).</p>
 photos look right whether you hold the device in "portrait" or "landscape" mode. But Stable Camera has the option to rotate the
 photos so they are perfectly level, so your shots come out looking perfectly level every time!</p>
 
-<p>Of course you won't always want this - perhaps you're going for artistic 45-degree shots - so this is an option. By default it
-is disabled.  To enable, go to the Settings, and enable "Whether to auto-stabilise". Note that this feature is memory intensive -
-it will not be available on devices with low memory. Even where it is available, there is a risk it may cause the app to fail on
-devices I haven't been able to test. If you do have problems, you'll have to disable the feature again.</p>
+<p><img src="Screenshot_2013-10-09-010_small.jpg" title="Screenshot of original camera view"> <img src="IMG_20131009_010_small.jpg" title="Final photo after auto-stabilising"></p>
+
+<p>The above shows a rather exaggerated example - in practice, you can probably take better photos, but this feature ensures they
+come out perfectly level, without you having to edit them afterwards in a photo editor. Of course you won't always want this -
+perhaps you're going for artistic 45-degree shots - so this is an option. By default it is disabled.  To enable, go to the
+Settings, and enable "Auto-stabilise". Note that this feature is memory intensive - it will not be available on devices with low
+memory. Even where it is available, there is a risk it may cause the app to fail on devices I haven't been able to test. If you do
+have problems, you'll have to disable the feature again.</p>
 
 <p>Also note that the feature reduces the available space in the image - because rotating an image makes it no longer fit into a
 rectangular image, so we have to crop it. So it's still advisable to try to hold the camera reasonably level when using this
@@ -113,16 +113,52 @@ feature.</p>
 
 <p><b>Settings</b></p>
 
+<p><b>Auto-stabilise</b> - Enable the auto-stabilise features for photos (see above). (Only available if the device has enough memory.)</p>
+
+<p><b>Apply a color effect</b> - Choose a color effect to apply. (Only available if the camera supports color effects.)</p>
+
+<p><b>Apply a scene mode</b> - Choose a scene mode to apply. (Only available if the camera supports scene modes.)</p>
+
+<p><b>Set the white balance</b> - Choose a method to control how the white balance is set. See
+<a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an explanation of white balance. (Only
+available if the camera supports different white balance settings.)</p>
+
+<p><b>Record audio?</b> - Whether to record audio when recording a video.</p>
+
+<p><b>Timer</b> - Set a timer for taking photos or recording video.</p>
+
+<p><b>UI placement</b> - Whether to optimise the user interface for left-handed or right-handed use.</p>
+
+<p><b>Pause after taking photo</b> - If ticked, after taking a photo the display will pause, with options to share or delete the
+photo.</p>
+
+<p><b>Shutter sound</b> - Whether to play a sound after taking a photo. (Requires Android 4.2 or higher to disable.)</p>
+
+<p><b>Volume keys</b> - You can set what happens when the volume keys are pressed: either take photo/video, zoom in/out, or just
+change the device's volume as normal.</p>
+
+<p><b>Save location</b> - Enter the folder to store the photos in. Note that specifying the full path of the folder isn't yet
+supported.</p>
+
+<p><b>Show angle</b> - Whether to display the orientation angle of the device.</p>
+
+<p><b>Show free memory</b> - Whether to display the remaining storage space of the device.</p>
+
+<p><b>Camera resolution</b> - Select the resolution of photo images taken by the camera. Note that if auto-stabilise is enabled,
+images will in general come out as a slightly lower resolution (due to the rotation and cropping that's required).</p>
+
+<p><b>Image quality</b> - The image quality of saved JPEG images. Higher means better quality, but the image files will take up
+more storage space.</p>
+
+<p><b>Online help</b> - Load this web page.</p>
+
+<p><b>Buy full version</b> - Loads the Google Play page for the full version (if you're using the free version).</p>
+
 <p><b>History</b></p><pre>
-Version 1.0 (Work in progress)
+Version 1.0 (2013/10/12)
 
 First release.
 </pre>
-
-<!--<p><b>Source code</b></p>
-
-<p>The source code is available fro, <a href="https://sourceforge.net/projects/stablecamera/files/">https://sourceforge.net/projects/stablecamera/files/</a>,
-released under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 or later</a>.-->
 
 <p><b>Contacting me (bugs etc)</b></p>
 
@@ -130,8 +166,21 @@ released under the <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3 or late
 
 <p><b>Additional credits</b></p>
 
-<!--<p>The application icon is derived from a public domain image,
-<a href="http://commons.wikimedia.org/wiki/File:Wikipedia_images_015.jpg">http://commons.wikimedia.org/wiki/File:Wikipedia_images_015.jpg</a>.</p>-->
+<p>The following third party files are used in Stable Camera:<ul>
+<li>Icon is from <a href="http://commons.wikimedia.org/wiki/File:Camera2_mgx.svg">http://commons.wikimedia.org/wiki/File:Camera2_mgx.svg</a> , by AlphaZeta, under CC0 (public domain).</li>
+<li>flash_off.png, flash_auto.png, flash_on.png from <a href="https://www.iconfinder.com/icons/62201/flash_icon#size=64">https://www.iconfinder.com/icons/62201/flash_icon#size=64</a> , by The Working Group - http://blog.twg.ca , under <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>.</li>
+<li>flash_red_eye.png from <a href="https://www.iconfinder.com/icons/103177/eye_see_view_watch_icon#size=128">https://www.iconfinder.com/icons/103177/eye_see_view_watch_icon#size=128</a> , by Designmodo, under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
+<li>flash_torch.png from <a href="https://www.iconfinder.com/icons/51924/bulb_light_icon#size=128">https://www.iconfinder.com/icons/51924/bulb_light_icon#size=128</a> , by IconFinder - http://www.iconfinder.net , by <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
+<li>focus_macro.png from <a href="https://www.iconfinder.com/icons/81105/macro_mb_icon#size=128">https://www.iconfinder.com/icons/81105/macro_mb_icon#size=128</a> , by Yankoa - http://yankoa.deviantart.com/ , under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
+<li>gallery.png from <a href="https://www.iconfinder.com/icons/6915/book_gallery_images_photos_pictures_icon#size=128">https://www.iconfinder.com/icons/6915/book_gallery_images_photos_pictures_icon#size=128</a> , by Alessandro Rei - http://www.kde-look.org/usermanager/search.php?username=mentalrey , under <a href="http://www.gnu.org/copyleft/gpl.html">GPL v3</a>.</li>
+<li>settings.png from <a href="https://www.iconfinder.com/icons/115801/settings_icon#size=128">https://www.iconfinder.com/icons/115801/settings_icon#size=128</a> , by Designmodo, under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
+<li>share.png from <a href="https://www.iconfinder.com/icons/111030/share_icon#size=128">https://www.iconfinder.com/icons/111030/share_icon#size=128</a> , by WPZOOM - http://www.wpzoom.com, under <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>.</li>
+<li>switch_camera.png from <a href="https://www.iconfinder.com/icons/103031/3d_rotate_icon#size=64">https://www.iconfinder.com/icons/103031/3d_rotate_icon#size=64</a> , by Valera Zvonko, under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
+<li>switch_video.png from <a href="https://www.iconfinder.com/icons/92787/film_photo_icon#size=32">https://www.iconfinder.com/icons/92787/film_photo_icon#size=32</a> , by FatCow Web Hosting - http://www.fatcow.com/ , under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
+<li>take_photo.png from <a href="https://www.iconfinder.com/icons/81087/mb_photo_icon#size=128">https://www.iconfinder.com/icons/81087/mb_photo_icon#size=128</a> , by Yankoa - http://yankoa.deviantart.com/ , under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
+<li>take_video.png from <a href="https://www.iconfinder.com/icons/81197/mb_rec_video_icon#size=128">https://www.iconfinder.com/icons/81197/mb_rec_video_icon#size=128</a> , by Yankoa - http://yankoa.deviantart.com/ , under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
+<li>trash.png from <a href="https://www.iconfinder.com/icons/115789/trash_icon#size=128">https://www.iconfinder.com/icons/115789/trash_icon#size=128</a> , by Designmodo, under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</li>
+</ul></p>
 
 <hr>
 <p><a href="http://sourceforge.net/p/stablecamera/">Stable Camera on Sourceforge.</a></p>
