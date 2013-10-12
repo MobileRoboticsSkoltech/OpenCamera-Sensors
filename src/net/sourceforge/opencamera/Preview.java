@@ -456,7 +456,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				supported_focus_values = null;
 				focusModeButton.setVisibility(View.GONE);
 			}
-
+			
 			// get available color effects
 			color_effects = parameters.getSupportedColorEffects();
 			String color_effect = setupValuesPref(color_effects, "preference_color_effect", Camera.Parameters.EFFECT_NONE);
@@ -576,6 +576,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     		// update parameters
     		camera.setParameters(parameters);
 
+    		// now switch to video if saved
+			boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "saved_is_video: " + saved_is_video);
+			}
+			if( saved_is_video != this.is_video ) {
+				this.switchVideo(false);
+			}
 		}
 
 		if( MyDebug.LOG ) {
@@ -989,7 +997,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 	}
 
-	public void switchVideo() {
+	public void switchVideo(boolean save) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
 		if( this.is_video ) {
@@ -1026,6 +1034,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		Activity activity = (Activity)this.getContext();
 		ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
 		view.setImageResource(is_video ? R.drawable.take_video : R.drawable.take_photo);
+    	if( save ) {
+			// now save
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putBoolean(getIsVideoPreferenceKey(), is_video);
+			editor.apply();
+    	}
 	}
 
 	public void cycleFlash() {
@@ -2166,5 +2181,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     // must be static, to safely call from other Activities
     public static String getResolutionPreferenceKey(int cameraId) {
     	return "camera_resolution_" + cameraId;
+    }
+    
+    public static String getIsVideoPreferenceKey() {
+    	return "is_video";
     }
 }

@@ -563,7 +563,7 @@ public class MainActivity extends Activity {
     public void clickedSwitchVideo(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchVideo");
-		this.preview.switchVideo();
+		this.preview.switchVideo(true);
     }
 
     public void clickedFlash(View view) {
