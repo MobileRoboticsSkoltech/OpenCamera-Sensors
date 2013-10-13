@@ -109,6 +109,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private Toast flash_toast = null;
 	private Toast focus_toast = null;
 	private Toast take_photo_toast = null;
+	private Toast stopstart_video_toast = null;
 	
 	private float ui_rotation = 0.0f;
 
@@ -236,11 +237,18 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( video_recorder != null ) { // check again, just to be safe
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
-    	    showToast(null, "Stopped recording video");
+    		stopstart_video_toast = showToast(stopstart_video_toast, "Stopped recording video");
 			is_taking_photo = false;
 			is_taking_photo_on_timer = false;
 			this.is_taking_photo_on_timer = false;
-    		video_recorder.stop();
+			try {
+				video_recorder.stop();
+			}
+			catch(RuntimeException e) {
+				// stop() can throw a RuntimeException if stop is called too soon after start - we have no way to detect this, so have to catch it
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "runtime exception when stopping video");
+			}
     		video_recorder.reset();
     		video_recorder.release(); 
     		video_recorder = null;
@@ -283,9 +291,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				stopVideo();
 			}
 			//camera.setPreviewCallback(null);
-			if( !this.is_preview_paused ) {
-				camera.stopPreview();
-			}
+			this.setPreviewPaused(false);
+			camera.stopPreview();
 			this.is_taking_photo = false;
 			this.is_taking_photo_on_timer = false;
 			this.is_preview_started = false;
@@ -992,7 +999,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( MyDebug.LOG )
 			Log.d(TAG, "found " + n_cameras + " cameras");
 		if( n_cameras > 1 ) {
-			this.setPreviewPaused(false);
 			closeCamera();
 			cameraId = (cameraId+1) % n_cameras;
 		    Camera.CameraInfo info = new Camera.CameraInfo();
@@ -1041,6 +1047,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			
 			if( this.is_video ) {
 				switch_video_toast = showToast(switch_video_toast, "Video");
+				if( this.is_preview_paused ) {
+					startCameraPreview();
+				}
 			}
 		}
 		
@@ -1398,7 +1407,16 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
     	if( is_taking_photo ) {
     		if( is_video ) {
-    			stopVideo();
+    			if( !video_start_time_set || System.currentTimeMillis() - video_start_time < 500 ) {
+    				// if user presses to stop too quickly, we ignore
+    				// firstly to reduce risk of corrupt video files when stopping too quickly (see RuntimeException we have to catch in stopVideo),
+    				// secondly, to reduce a backlog of events which slows things down, if user presses start/stop repeatedly too quickly
+    	    		if( MyDebug.LOG )
+    	    			Log.d(TAG, "ignore pressing stop video too quickly after start");
+    			}
+    			else {
+    				stopVideo();
+    			}
     		}
     		else {
 	    		if( MyDebug.LOG )
@@ -1508,10 +1526,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 	        	video_recorder.setOrientationHint(this.current_rotation);
 
-	        	String videoFileName = videoFile.getAbsolutePath();
+	        	String video_name = videoFile.getAbsolutePath();
 	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "save to: " + videoFileName);
-	        	video_recorder.setOutputFile(videoFileName);
+	    			Log.d(TAG, "save to: " + video_name);
+	        	video_recorder.setOutputFile(video_name);
 	        	try {
 	        		/*if( true ) // test
 	        			throw new IOException();*/
@@ -1522,7 +1540,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	            	video_start_time_set = true;
 		    		main_activity.runOnUiThread(new Runnable() {
 		    			public void run() {
-				    	    showToast(null, "Started recording video");
+		    				stopstart_video_toast = showToast(stopstart_video_toast, "Started recording video");
 		    			}
 		  			});
 		            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
