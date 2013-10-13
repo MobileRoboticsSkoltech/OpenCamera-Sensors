@@ -111,7 +111,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private Toast take_photo_toast = null;
 	private Toast stopstart_video_toast = null;
 	
-	private float ui_rotation = 0.0f;
+	private int ui_rotation = 0;
 
 	Preview(Context context) {
 		this(context, null);
@@ -854,10 +854,26 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		/*if( true ) // test
 			return;*/
+		if( MyDebug.LOG )
+			Log.d(TAG, "ui_rotation: " + ui_rotation);
+
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
-
+		
 		final float scale = getResources().getDisplayMetrics().density;
+		int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
+		// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
+		int text_extra_offset_y = 0;
+		if( ui_rotation == 0 ) {
+			text_extra_offset_y = (int)(0.5*text_y);
+		}
+		else if( ui_rotation == 180 ) {
+			text_extra_offset_y = (int)(2.5*text_y);
+		}
+		else if( ui_rotation == 90 || ui_rotation == 270 ) {
+			text_extra_offset_y = -(int)(0.5*text_y);
+		}
+
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		if( camera != null && !this.is_preview_paused ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
@@ -869,7 +885,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				//canvas.drawText("Angle: " + this.level_angle + " (" + this.current_orientation + ")", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 				// Convert the dps to pixels, based on density scale
 				int pixels_offset_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-				int pixels_offset_y = (int) (20 * scale + 0.5f); // convert dps to pixels
+				int pixels_offset_y = text_extra_offset_y;
 				if( getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
 					pixels_offset_x = 0;
 					p.setTextAlign(Paint.Align.CENTER);
@@ -935,14 +951,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( this.has_zoom && camera != null ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			// Convert the dps to pixels, based on density scale
-			int pixels_offset_y = (int) (100 * scale + 0.5f); // convert dps to pixels
+			int pixels_offset_y = 2*text_y+text_extra_offset_y;
 			p.setColor(Color.WHITE);
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
 		}
 		if( camera != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
-			int pixels_offset_y = (int) (60 * scale + 0.5f); // convert dps to pixels
+			int pixels_offset_y = 1*text_y+text_extra_offset_y;
 			p.setColor(Color.WHITE);
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
@@ -955,7 +971,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				}
 			}
 			if( free_memory_gb >= 0.0f ) {
-				canvas.drawText("Remaining memory: " + decimalFormat.format(free_memory_gb) + "GB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+				canvas.drawText("Free memory: " + decimalFormat.format(free_memory_gb) + "GB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
 			}
 		}
 		
@@ -2225,7 +2241,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		return clear_toast;
 	}
 	
-	public void setUIRotation(float ui_rotation) {
+	public void setUIRotation(int ui_rotation) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setUIRotation");
 		this.ui_rotation = ui_rotation;

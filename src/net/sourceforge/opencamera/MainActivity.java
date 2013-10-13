@@ -320,7 +320,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "    degrees = " + degrees);
 			Log.d(TAG, "    relative_orientation = " + relative_orientation);
 		}
-		float ui_rotation = (float)(360 - relative_orientation);
+		int ui_rotation = (360 - relative_orientation) % 360;
 		preview.setUIRotation(ui_rotation);
 		int align_left = RelativeLayout.ALIGN_LEFT;
 		int align_right = RelativeLayout.ALIGN_RIGHT;
