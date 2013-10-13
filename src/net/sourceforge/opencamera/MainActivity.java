@@ -17,6 +17,7 @@ import android.provider.MediaStore;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -97,6 +98,21 @@ public class MainActivity extends Activity {
 				MainActivity.this.onOrientationChanged(orientation);
 			}
         };
+
+        final String done_first_time_key = "done_first_time";
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
+        if( !has_done_first_time ) {
+	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            alertDialog.setTitle("Open Camera");
+            alertDialog.setMessage("Open Camera is completely free. If you like this app, please consider making a donation :) (see link in the Settings, or go to the Google Play page).\n\n(This message won't show in future.)");
+            alertDialog.setPositiveButton("OK", null);
+            alertDialog.show();
+
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putBoolean(done_first_time_key, true);
+			editor.apply();
+        }
 	}
 
 	@Override
