@@ -73,7 +73,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private TimerTask takePictureTimerTask = null;
 	private long take_photo_time = 0;
 
-	private boolean is_preview_paused = false;
+	private boolean is_preview_started = false;
+	private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
 	private String preview_image_name = null;
 
 	private int current_orientation = 0; // orientation received by onOrientationChanged
@@ -215,7 +216,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		// The Surface has been created, acquire the camera and tell it where
 		// to draw.
 		this.has_surface = true;
-		this.openCamera();
+		this.openCamera(false); // if setting up for the first time, we wait until the surfaceChanged call to start the preview
 		this.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
 	}
 
@@ -287,16 +288,18 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 			this.is_taking_photo = false;
 			this.is_taking_photo_on_timer = false;
+			this.is_preview_started = false;
 			camera.release();
 			camera = null;
 		}
 	}
 	
-	private void openCamera() {
+	private void openCamera(boolean start_preview) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera()");
 			Log.d(TAG, "cameraId: " + cameraId);
+			Log.d(TAG, "start_preview?: " + start_preview);
 			debug_time = System.currentTimeMillis();
 		}
 		if( !this.has_surface ) {
@@ -347,7 +350,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			if( MyDebug.LOG ) {
 				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
-			startCameraPreview();
+			if( start_preview ) {
+				startCameraPreview();
+			}
 			if( MyDebug.LOG ) {
 				//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 			}
@@ -650,6 +655,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         // stop preview before making changes
         if( !this.is_preview_paused ) {
             camera.stopPreview();
+			this.is_preview_started = false;
         }
         // set preview size and make any resize, rotate or
         // reformatting changes here
@@ -675,6 +681,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         }
         if( !this.is_preview_paused ) {
 			startCameraPreview();
+			tryAutoFocus(); // so we get the autofocus when starting up
         }
    	}
 	
@@ -996,7 +1003,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		    else {
 				switch_camera_toast = showToast(switch_camera_toast, "Back Camera");
 		    }
-			this.openCamera();
+			this.openCamera(true);
 			
 			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
 			updateFocusForVideo();
@@ -1870,6 +1877,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	        }
 
     	        is_taking_photo = false;
+    			is_preview_started = false; // preview automatically stopped due to taking photo
 				boolean pause_preview = sharedPreferences.getBoolean("preference_pause_preview", true);
 				if( pause_preview && success ) {
 	    			setPreviewPaused(true);
@@ -1970,6 +1978,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview surface not yet available");
 		}
+		else if( !this.is_preview_started ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "preview not yet started");
+		}
 		else if( is_taking_photo ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
@@ -2000,8 +2012,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "startCameraPreview");
 			debug_time = System.currentTimeMillis();
 		}
-		if( camera != null && !is_taking_photo ) {
+		if( camera != null && !is_taking_photo && !is_preview_started ) {
 			camera.startPreview();
+			this.is_preview_started = true;
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 			}
@@ -2133,7 +2146,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
 		this.ui_placement_right = ui_placement.equals("ui_right");
-		this.openCamera();
+		this.openCamera(true);
     }
 
     public void onPause() {
