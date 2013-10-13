@@ -321,7 +321,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			camera = null;
 		}
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "time after opening camera: " + (System.currentTimeMillis() - debug_time));
+			//Log.d(TAG, "time after opening camera: " + (System.currentTimeMillis() - debug_time));
 		}
 		if( camera != null ) {
 			Activity activity = (Activity)this.getContext();
@@ -333,7 +333,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				}
 	        }.enable();
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "time after setting orientation: " + (System.currentTimeMillis() - debug_time));
+				//Log.d(TAG, "time after setting orientation: " + (System.currentTimeMillis() - debug_time));
 			}
 
 			try {
@@ -345,11 +345,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				e.printStackTrace();
 			}
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
+				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
 			startCameraPreview();
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
+				//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 			}
 			
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
@@ -394,70 +394,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				zoomControls.setVisibility(View.GONE);
 			}
 
-			List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
-		    View flashButton = (View) activity.findViewById(R.id.flash);
-			current_flash_index = -1;
-			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "flash modes: " + supported_flash_modes);
-				supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
-
-				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
-				if( flash_value.length() > 0 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found existing flash_value: " + flash_value);
-					if( !updateFlash(flash_value) ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "flash value no longer supported!");
-						updateFlash(0);
-					}
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found no existing flash_value");
-					updateFlash(0);
-				}
-				flashButton.setVisibility(View.VISIBLE);
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "flash not supported");
-				supported_flash_values = null;
-				flashButton.setVisibility(View.GONE);
-			}
-
-			List<String> supported_focus_modes = parameters.getSupportedFocusModes(); // Android format
-		    View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
-			current_focus_index = -1;
-			if( supported_focus_modes != null && supported_focus_modes.size() > 1 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "focus modes: " + supported_focus_modes);
-				supported_focus_values = getSupportedFocusModes(supported_focus_modes); // convert to our format (also resorts)
-
-				String focus_value = sharedPreferences.getString(getFocusPreferenceKey(cameraId), "");
-				if( focus_value.length() > 0 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found existing focus_value: " + focus_value);
-					if( !updateFocus(focus_value, false, false) ) { // don't need to save, as this is the value that's already saved
-						if( MyDebug.LOG )
-							Log.d(TAG, "focus value no longer supported!");
-						updateFocus(0, false, true);
-					}
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found no existing focus_value");
-					updateFocus(0, false, true);
-				}
-				focusModeButton.setVisibility(View.VISIBLE);
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "focus not supported");
-				supported_focus_values = null;
-				focusModeButton.setVisibility(View.GONE);
-			}
-			
 			// get available color effects
 			color_effects = parameters.getSupportedColorEffects();
 			String color_effect = setupValuesPref(color_effects, "preference_color_effect", Camera.Parameters.EFFECT_NONE);
@@ -571,12 +507,77 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     			Log.d(TAG, "image quality: " + image_quality);
 
     		if( MyDebug.LOG ) {
-    			Log.d(TAG, "time after reading camera parameters: " + (System.currentTimeMillis() - debug_time));
+    			//Log.d(TAG, "time after reading camera parameters: " + (System.currentTimeMillis() - debug_time));
     		}
 
     		// update parameters
     		camera.setParameters(parameters);
 
+    		// we do flash and focus after setting parameters, as these are done by calling separate functions, that themselves set the parameters directly
+			List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
+		    View flashButton = (View) activity.findViewById(R.id.flash);
+			current_flash_index = -1;
+			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "flash modes: " + supported_flash_modes);
+				supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
+
+				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
+				if( flash_value.length() > 0 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found existing flash_value: " + flash_value);
+					if( !updateFlash(flash_value) ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "flash value no longer supported!");
+						updateFlash(0);
+					}
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found no existing flash_value");
+					updateFlash(0);
+				}
+				flashButton.setVisibility(View.VISIBLE);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "flash not supported");
+				supported_flash_values = null;
+				flashButton.setVisibility(View.GONE);
+			}
+
+			List<String> supported_focus_modes = parameters.getSupportedFocusModes(); // Android format
+		    View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
+			current_focus_index = -1;
+			if( supported_focus_modes != null && supported_focus_modes.size() > 1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "focus modes: " + supported_focus_modes);
+				supported_focus_values = getSupportedFocusModes(supported_focus_modes); // convert to our format (also resorts)
+
+				String focus_value = sharedPreferences.getString(getFocusPreferenceKey(cameraId), "");
+				if( focus_value.length() > 0 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found existing focus_value: " + focus_value);
+					if( !updateFocus(focus_value, false, false) ) { // don't need to save, as this is the value that's already saved
+						if( MyDebug.LOG )
+							Log.d(TAG, "focus value no longer supported!");
+						updateFocus(0, false, true);
+					}
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found no existing focus_value");
+					updateFocus(0, false, true);
+				}
+				focusModeButton.setVisibility(View.VISIBLE);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "focus not supported");
+				supported_focus_values = null;
+				focusModeButton.setVisibility(View.GONE);
+			}
+			
     		// now switch to video if saved
 			boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
 			if( MyDebug.LOG ) {
@@ -587,6 +588,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 		}
 
+		
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
 		}
@@ -995,18 +997,21 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				switch_camera_toast = showToast(switch_camera_toast, "Back Camera");
 		    }
 			this.openCamera();
+			
+			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
+			updateFocusForVideo();
 		}
 	}
 
 	public void switchVideo(boolean save) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
+		boolean old_is_video = is_video;
 		if( this.is_video ) {
 			if( video_recorder != null ) {
 				stopVideo();
 			}
 			this.is_video = false;
-			updateFocus("focus_mode_auto", true, true);
 			switch_video_toast = showToast(switch_video_toast, "Photo");
 		}
 		else {
@@ -1028,20 +1033,49 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			}
 			
 			if( this.is_video ) {
-				updateFocus("focus_mode_continuous_video", true, true);
 				switch_video_toast = showToast(switch_video_toast, "Video");
 			}
 		}
-		Activity activity = (Activity)this.getContext();
-		ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
-		view.setImageResource(is_video ? R.drawable.take_video : R.drawable.take_photo);
-    	if( save ) {
-			// now save
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putBoolean(getIsVideoPreferenceKey(), is_video);
-			editor.apply();
-    	}
+		
+		if( is_video != old_is_video ) {
+			updateFocusForVideo();
+
+			Activity activity = (Activity)this.getContext();
+			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
+			view.setImageResource(is_video ? R.drawable.take_video : R.drawable.take_photo);
+
+			if( save ) {
+				// now save
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putBoolean(getIsVideoPreferenceKey(), is_video);
+				editor.apply();
+	    	}
+		}
+	}
+	
+	private void updateFocusForVideo() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateFocusForVideo()");
+		if( this.supported_focus_values != null ) {
+			Camera.Parameters parameters = camera.getParameters();
+			String current_focus_mode = parameters.getFocusMode();
+			boolean focus_is_video = current_focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "current_focus_mode: " + current_focus_mode);
+				Log.d(TAG, "focus_is_video: " + focus_is_video + " , is_video: " + is_video);
+			}
+			if( focus_is_video != is_video ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "need to change focus mode");
+				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true);
+				if( MyDebug.LOG ) {
+					parameters = camera.getParameters();
+					current_focus_mode = parameters.getFocusMode();
+					Log.d(TAG, "new focus mode: " + current_focus_mode);
+				}
+			}
+		}
 	}
 
 	public void cycleFlash() {
@@ -1216,7 +1250,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 
 	private void updateFocus(int new_focus_index, boolean quiet, boolean save) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "updateFocus(): " + new_focus_index);
+			Log.d(TAG, "updateFocus(): " + new_focus_index + " current_focus_index: " + current_focus_index);
 		// updates the Focus button, and Focus camera mode
 		if( this.supported_focus_values != null && new_focus_index != current_focus_index ) {
 			boolean initial = current_focus_index==-1;
