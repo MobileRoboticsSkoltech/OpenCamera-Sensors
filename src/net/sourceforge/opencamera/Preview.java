@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -90,6 +91,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private int max_zoom_factor = 0;
 	private ScaleGestureDetector scaleGestureDetector;
 	private List<Integer> zoom_ratios = null;
+	private boolean touch_was_multitouch = false;
 
 	private List<String> supported_flash_values = null; // our "values" format
 	private int current_flash_index = -1; // this is an index into the supported_flash_values array, or -1 if no flash modes available
@@ -112,6 +114,15 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private Toast stopstart_video_toast = null;
 	
 	private int ui_rotation = 0;
+	
+	private boolean has_focus_area = false;
+	private int focus_screen_x = 0;
+	private int focus_screen_y = 0;
+	private long focus_complete_time = -1;
+	private int focus_success = FOCUS_WAITING;
+	private static final int FOCUS_WAITING = 0;
+	private static final int FOCUS_SUCCESS = 1;
+	private static final int FOCUS_FAILED = 2;
 
 	Preview(Context context) {
 		this(context, null);
@@ -151,9 +162,66 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
         //invalidate();
+		/*if( MyDebug.LOG ) {
+			Log.d(TAG, "touch event: " + event.getAction());
+		}*/
+		if( event.getPointerCount() != 1 ) {
+			//multitouch_time = System.currentTimeMillis();
+			touch_was_multitouch = true;
+			return true;
+		}
+		if( event.getAction() != MotionEvent.ACTION_UP ) {
+			if( event.getAction() == MotionEvent.ACTION_DOWN && event.getPointerCount() == 1 ) {
+				touch_was_multitouch = false;
+			}
+			return true;
+		}
+		if( touch_was_multitouch ) {
+			return true;
+		}
+		if( is_taking_photo ) {
+			return true;
+		}
 
 		// note, we always try to force start the preview (in case is_preview_paused has become false)
         startCameraPreview();
+
+        if( camera != null ) {
+            Camera.Parameters parameters = camera.getParameters();
+			String focus_mode = parameters.getFocusMode();
+            if( parameters.getMaxNumFocusAreas() == 0 ) {
+            	Log.d(TAG, "focus areas not supported");
+            }
+            else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
+				Log.d(TAG, "set focus area");
+				this.has_focus_area = true;
+				this.focus_complete_time = -1;
+				this.focus_success = FOCUS_WAITING;
+				this.focus_screen_x = (int)event.getX();
+				this.focus_screen_y = (int)event.getY();
+				float alpha = event.getX() / (float)this.getWidth();
+				float beta = event.getY() / (float)this.getHeight();
+				float focus_x = 2000.0f * alpha - 1000.0f;
+				float focus_y = 2000.0f * beta - 1000.0f;
+				int focus_size = 50;
+				Log.d(TAG, "x, y: " + event.getX() + ", " + event.getY());
+				Log.d(TAG, "alpha, beta: " + alpha + ", " + beta);
+				Log.d(TAG, "focus x, y: " + focus_x + ", " + focus_y);
+				Rect rect = new Rect();
+				rect.left = (int)focus_x - focus_size;
+				rect.right = (int)focus_x + focus_size;
+				rect.top = (int)focus_y - focus_size;
+				rect.bottom = (int)focus_y + focus_size;
+
+			    ArrayList<Camera.Area> focusAreas = new ArrayList<Camera.Area>();
+			    focusAreas.add(new Camera.Area(rect, 1000));
+
+			    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+			    parameters.setFocusAreas(focusAreas);
+			    camera.setParameters(parameters);
+            }
+        }
+        
 		tryAutoFocus();
 		return true;
     }
@@ -201,6 +269,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     				Log.d(TAG, "zoom was: " + parameters.getZoom());
     			parameters.setZoom((int)zoom_factor);
 	    		camera.setParameters(parameters);
+				has_focus_area = false;
 
         		//invalidate();
     		}
@@ -279,6 +348,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "closeCamera()");
 		}
+		has_focus_area = false;
 		if( is_taking_photo_on_timer ) {
 			takePictureTimerTask.cancel();
 			is_taking_photo_on_timer = false;
@@ -309,6 +379,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "start_preview?: " + start_preview);
 			debug_time = System.currentTimeMillis();
 		}
+		has_focus_area = false;
 		if( !this.has_surface ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "preview surface not yet available");
@@ -854,8 +925,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		/*if( true ) // test
 			return;*/
-		if( MyDebug.LOG )
-			Log.d(TAG, "ui_rotation: " + ui_rotation);
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "ui_rotation: " + ui_rotation);*/
 
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
@@ -976,6 +1047,21 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		
 		canvas.restore();
+		
+		if( this.has_focus_area ) {
+			int size = (int) (50 * scale + 0.5f); // convert dps to pixels
+			if( this.focus_success == FOCUS_SUCCESS )
+				p.setColor(Color.GREEN);
+			else if( this.focus_success == FOCUS_FAILED )
+				p.setColor(Color.RED);
+			else
+				p.setColor(Color.WHITE);
+			p.setStyle(Paint.Style.STROKE);
+			canvas.drawRect(focus_screen_x - size, focus_screen_y - size, focus_screen_x + size, focus_screen_y + size, p);
+			if( focus_complete_time != -1 && System.currentTimeMillis() > focus_complete_time + 1000 ) {
+				this.has_focus_area = false;
+			}
+		}
 	}
 
 	public void zoomIn() {
@@ -990,6 +1076,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "zoom was: " + parameters.getZoom());
 			parameters.setZoom((int)zoom_factor);
     		camera.setParameters(parameters);
+			has_focus_area = false;
         }
 	}
 	
@@ -1005,6 +1092,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "zoom was: " + parameters.getZoom());
 			parameters.setZoom((int)zoom_factor);
     		camera.setParameters(parameters);
+			has_focus_area = false;
         }
 	}
 
@@ -1497,6 +1585,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			is_taking_photo = false;
 			return;
 		}
+		has_focus_area = false;
 		
         if( is_video ) {
     		if( MyDebug.LOG )
@@ -2033,6 +2122,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 					public void onAutoFocus(boolean success, Camera camera) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "autofocus complete: " + success);
+						focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
+						focus_complete_time = System.currentTimeMillis();
 					}
 		        };
 				camera.autoFocus(autoFocusCallback);
