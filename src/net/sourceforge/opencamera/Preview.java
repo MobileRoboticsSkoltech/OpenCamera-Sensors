@@ -1019,7 +1019,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
-		if( this.has_zoom && camera != null ) {
+		if( this.has_zoom && camera != null && sharedPreferences.getBoolean("preference_show_zoom", true) ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			// Convert the dps to pixels, based on density scale
 			int pixels_offset_y = 2*text_y+text_extra_offset_y;

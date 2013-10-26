@@ -103,16 +103,23 @@
 	        />
 
         <CheckBoxPreference
-            android:key="preference_show_angle"
-            android:title="@string/preference_show_angle"
-            android:summary="@string/preference_show_angle_summary"
+            android:key="preference_show_zoom"
+            android:title="@string/preference_show_zoom"
+            android:summary="@string/preference_show_zoom_summary"
             android:defaultValue="true"
             />
     
-        <CheckBoxPreference
+	    <CheckBoxPreference
             android:key="preference_free_memory"
             android:title="@string/preference_free_memory"
             android:summary="@string/preference_free_memory_summary"
+            android:defaultValue="true"
+            />
+    
+	    <CheckBoxPreference
+            android:key="preference_show_angle"
+            android:title="@string/preference_show_angle"
+            android:summary="@string/preference_show_angle_summary"
             android:defaultValue="true"
             />
     
