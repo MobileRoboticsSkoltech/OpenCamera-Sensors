@@ -31,6 +31,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -72,6 +74,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private boolean is_taking_photo_on_timer = false;
 	private Timer takePictureTimer = new Timer();
 	private TimerTask takePictureTimerTask = null;
+	private Timer beepTimer = new Timer();
+	private TimerTask beepTimerTask = null;
 	private long take_photo_time = 0;
 
 	private boolean is_preview_started = false;
@@ -351,6 +355,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		has_focus_area = false;
 		if( is_taking_photo_on_timer ) {
 			takePictureTimerTask.cancel();
+			if( beepTimerTask != null ) {
+				beepTimerTask.cancel();
+			}
 			is_taking_photo_on_timer = false;
 			is_taking_photo = false;
 			if( MyDebug.LOG )
@@ -1134,6 +1141,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		else {
 			if( is_taking_photo_on_timer ) {
 				takePictureTimerTask.cancel();
+				if( beepTimerTask != null ) {
+					beepTimerTask.cancel();
+				}
 				is_taking_photo_on_timer = false;
 				is_taking_photo = false;
 				if( MyDebug.LOG )
@@ -1502,6 +1512,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		if( is_taking_photo_on_timer ) {
 			takePictureTimerTask.cancel();
+			if( beepTimerTask != null ) {
+				beepTimerTask.cancel();
+			}
 			is_taking_photo_on_timer = false;
 			is_taking_photo = false;
 			if( MyDebug.LOG )
@@ -1555,6 +1568,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     			Log.d(TAG, "timer_delay: " + timer_delay);
     		class TakePictureTimerTask extends TimerTask {
     			public void run() {
+    				if( beepTimerTask != null ) {
+    					beepTimerTask.cancel();
+    				}
         	        is_taking_photo_on_timer = false; // must be set to false now, to indicate that we can no longer try to cancel the timer task!
     				takePicture();
     			}
@@ -1565,9 +1581,25 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "take photo at: " + take_photo_time);
 		    take_photo_toast = showToast(take_photo_toast, "Started timer");
         	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
+
+    		if( sharedPreferences.getBoolean("preference_timer_beep", true) ) {
+	    		class BeepTimerTask extends TimerTask {
+	    			public void run() {
+	    			    try {
+	    			        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+	    					Activity activity = (Activity)getContext();
+	    			        Ringtone r = RingtoneManager.getRingtone(activity.getApplicationContext(), notification);
+	    			        r.play();
+	    			    }
+	    			    catch(Exception e) {
+	    			    }		
+	    			}
+	    		}
+	        	beepTimer.schedule(beepTimerTask = new BeepTimerTask(), 0, 1000);
+    		}
 		}
 	}
-
+	
 	private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");

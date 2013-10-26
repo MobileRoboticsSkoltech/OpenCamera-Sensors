@@ -58,7 +58,14 @@
 	        android:defaultValue="0"
 	        />
 
-	    <ListPreference 
+        <CheckBoxPreference
+            android:key="preference_timer_beep"
+            android:title="@string/preference_timer_beep"
+            android:summary="@string/preference_timer_beep_summary"
+            android:defaultValue="true"
+            />
+
+        <ListPreference 
 	        android:key="preference_ui_placement"
 	        android:title="@string/preference_ui_placement"
 	        android:summary="@string/preference_ui_placement_summary"
