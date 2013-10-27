@@ -194,10 +194,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
             Camera.Parameters parameters = camera.getParameters();
 			String focus_mode = parameters.getFocusMode();
             if( parameters.getMaxNumFocusAreas() == 0 ) {
-            	Log.d(TAG, "focus areas not supported");
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "focus areas not supported");
             }
             else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
-				Log.d(TAG, "set focus area");
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "set focus area");
 				this.has_focus_area = true;
 				this.focus_complete_time = -1;
 				this.focus_success = FOCUS_WAITING;
@@ -208,21 +210,47 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				float focus_x = 2000.0f * alpha - 1000.0f;
 				float focus_y = 2000.0f * beta - 1000.0f;
 				int focus_size = 50;
-				Log.d(TAG, "x, y: " + event.getX() + ", " + event.getY());
-				Log.d(TAG, "alpha, beta: " + alpha + ", " + beta);
-				Log.d(TAG, "focus x, y: " + focus_x + ", " + focus_y);
+        		if( MyDebug.LOG ) {
+        			Log.d(TAG, "x, y: " + event.getX() + ", " + event.getY());
+        			Log.d(TAG, "alpha, beta: " + alpha + ", " + beta);
+        			Log.d(TAG, "focus x, y: " + focus_x + ", " + focus_y);
+        		}
 				Rect rect = new Rect();
 				rect.left = (int)focus_x - focus_size;
 				rect.right = (int)focus_x + focus_size;
 				rect.top = (int)focus_y - focus_size;
 				rect.bottom = (int)focus_y + focus_size;
+				if( rect.left < -1000 ) {
+					rect.left = -1000;
+					rect.right = rect.left + 2*focus_size;
+				}
+				else if( rect.right > 1000 ) {
+					rect.right = 1000;
+					rect.left = rect.right - 2*focus_size;
+				}
+				if( rect.top < -1000 ) {
+					rect.top = -1000;
+					rect.bottom = rect.top + 2*focus_size;
+				}
+				else if( rect.bottom > 1000 ) {
+					rect.bottom = 1000;
+					rect.top = rect.bottom - 2*focus_size;
+				}
 
 			    ArrayList<Camera.Area> focusAreas = new ArrayList<Camera.Area>();
 			    focusAreas.add(new Camera.Area(rect, 1000));
 
 			    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 			    parameters.setFocusAreas(focusAreas);
-			    camera.setParameters(parameters);
+			    try {
+			    	camera.setParameters(parameters);
+			    }
+			    catch(RuntimeException e) {
+			    	// just in case something has gone wrong
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "failed to set parameters for focus area");
+	        		e.printStackTrace();
+			    }
             }
         }
         
