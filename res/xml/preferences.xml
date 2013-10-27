@@ -164,7 +164,7 @@
         <Preference
             android:key="preference_donate"  
             android:title="@string/preference_donate"
-            android:summary="@string/preference_donate"  
+            android:summary="@string/preference_donate_summary"  
             />  
 
     </PreferenceCategory>

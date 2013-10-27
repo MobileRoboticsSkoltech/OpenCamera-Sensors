@@ -105,7 +105,7 @@ public class MainActivity extends Activity {
         if( !has_done_first_time ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle("Open Camera");
-            alertDialog.setMessage("Open Camera is completely free. If you like this app, please consider making a donation :) (see link in the Settings, or go to the Google Play page).\n\n(This message won't show in future.)");
+            alertDialog.setMessage("Open Camera is completely free. If you like this app, please consider making a donation by buying my donate app :) (see link in the Settings, or go to the Google Play page for this app).\n\n(This message won't show in future.)");
             alertDialog.setPositiveButton("OK", null);
             alertDialog.show();
 

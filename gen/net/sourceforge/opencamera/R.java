@@ -79,9 +79,9 @@ public final class R {
     public static final class string {
         public static final int action_settings=0x7f070001;
         public static final int app_name=0x7f070000;
-        public static final int flash_mode=0x7f07002d;
-        public static final int focus_mode=0x7f07002c;
-        public static final int gallery=0x7f07002b;
+        public static final int flash_mode=0x7f07002e;
+        public static final int focus_mode=0x7f07002d;
+        public static final int gallery=0x7f07002c;
         public static final int preference_auto_stabilise=0x7f070003;
         public static final int preference_auto_stabilise_summary=0x7f070004;
         public static final int preference_category_camera_controls=0x7f07000d;
@@ -91,6 +91,7 @@ public final class R {
         public static final int preference_color_effect=0x7f070005;
         public static final int preference_color_effect_summary=0x7f070006;
         public static final int preference_donate=0x7f070029;
+        public static final int preference_donate_summary=0x7f07002a;
         public static final int preference_free_memory=0x7f07001e;
         public static final int preference_free_memory_summary=0x7f07001f;
         public static final int preference_online_help=0x7f070028;
@@ -122,11 +123,11 @@ public final class R {
         public static final int preference_volume_keys_summary=0x7f070019;
         public static final int preference_white_balance=0x7f070009;
         public static final int preference_white_balance_summary=0x7f07000a;
-        public static final int share=0x7f070031;
-        public static final int switch_camera=0x7f07002e;
-        public static final int switch_video=0x7f07002f;
-        public static final int take_photo=0x7f07002a;
-        public static final int trash=0x7f070030;
+        public static final int share=0x7f070032;
+        public static final int switch_camera=0x7f07002f;
+        public static final int switch_video=0x7f070030;
+        public static final int take_photo=0x7f07002b;
+        public static final int trash=0x7f070031;
     }
     public static final class style {
         /** 
