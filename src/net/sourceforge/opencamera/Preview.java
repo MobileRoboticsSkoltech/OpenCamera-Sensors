@@ -2346,6 +2346,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			private String text = "";
 			private Paint paint = new Paint();
 			private Rect bounds = new Rect();
+			private Rect rect = new Rect();
 
 			public RotatedTextView(String text, Context context) {
 				super(context);
@@ -2357,8 +2358,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			protected void onDraw(Canvas canvas) { 
 				final float scale = getResources().getDisplayMetrics().density;
 				paint.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				paint.setStyle(Paint.Style.FILL);
-				paint.setColor(Color.rgb(75, 75, 75));
 				paint.setShadowLayer(1, 0, 1, Color.BLACK);
 				paint.getTextBounds(text, 0, text.length(), bounds);
 				/*if( MyDebug.LOG ) {
@@ -2368,7 +2367,21 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				final int offset_y = (int) (32 * scale + 0.5f); // convert dps to pixels
 				canvas.save();
 				canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
-				canvas.drawRect(canvas.getWidth()/2 - bounds.width()/2 + bounds.left - padding, canvas.getHeight()/2 + bounds.top - padding + offset_y, canvas.getWidth()/2 - bounds.width()/2 + bounds.right + padding, canvas.getHeight()/2 + bounds.bottom + padding + offset_y, paint);
+
+				rect.left = canvas.getWidth()/2 - bounds.width()/2 + bounds.left - padding;
+				rect.top = canvas.getHeight()/2 + bounds.top - padding + offset_y;
+				rect.right = canvas.getWidth()/2 - bounds.width()/2 + bounds.right + padding;
+				rect.bottom = canvas.getHeight()/2 + bounds.bottom + padding + offset_y;
+
+				paint.setStyle(Paint.Style.FILL);
+				paint.setColor(Color.rgb(75, 75, 75));
+				canvas.drawRect(rect.left, rect.top, rect.right, rect.bottom, paint);
+
+				paint.setStyle(Paint.Style.STROKE);
+				paint.setColor(Color.rgb(150, 150, 150));
+				canvas.drawLine(rect.left, rect.top, rect.right, rect.top, paint);
+				canvas.drawLine(rect.left, rect.top, rect.left, rect.bottom, paint);
+
 				paint.setColor(Color.WHITE);
 				canvas.drawText(text, canvas.getWidth()/2 - bounds.width()/2, canvas.getHeight()/2 + offset_y, paint);
 				canvas.restore();
