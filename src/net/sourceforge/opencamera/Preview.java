@@ -240,7 +240,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			    ArrayList<Camera.Area> focusAreas = new ArrayList<Camera.Area>();
 			    focusAreas.add(new Camera.Area(rect, 1000));
 
-			    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 			    parameters.setFocusAreas(focusAreas);
 			    try {
 			    	camera.setParameters(parameters);
@@ -2170,24 +2169,20 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "currently taking a photo");
 		}
 		else {
-			Camera.Parameters parameters = camera.getParameters();
-			String focus_mode = parameters.getFocusMode();
+			// fine to call on any focus mode - if autofocus not supported, then it'll be a no-op
+			// this is also needed for the focus areas with continuous focus - so that we set focus_success to true
 			if( MyDebug.LOG )
-				Log.d(TAG, "focus_mode is " + focus_mode);
-			if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "try to start autofocus");
-		        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
-					@Override
-					public void onAutoFocus(boolean success, Camera camera) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "autofocus complete: " + success);
-						focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
-						focus_complete_time = System.currentTimeMillis();
-					}
-		        };
-				camera.autoFocus(autoFocusCallback);
-			}
+				Log.d(TAG, "try to start autofocus");
+	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+				@Override
+				public void onAutoFocus(boolean success, Camera camera) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "autofocus complete: " + success);
+					focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
+					focus_complete_time = System.currentTimeMillis();
+				}
+	        };
+			camera.autoFocus(autoFocusCallback);
 		}
     }
     
