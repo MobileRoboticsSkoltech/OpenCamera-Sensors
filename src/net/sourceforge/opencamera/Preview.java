@@ -123,10 +123,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private int focus_screen_x = 0;
 	private int focus_screen_y = 0;
 	private long focus_complete_time = -1;
-	private int focus_success = FOCUS_WAITING;
+	private int focus_success = FOCUS_DONE;
 	private static final int FOCUS_WAITING = 0;
 	private static final int FOCUS_SUCCESS = 1;
 	private static final int FOCUS_FAILED = 2;
+	private static final int FOCUS_DONE = 3;
 
 	Preview(Context context) {
 		this(context, null);
@@ -193,6 +194,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         if( camera != null ) {
             Camera.Parameters parameters = camera.getParameters();
 			String focus_mode = parameters.getFocusMode();
+    		this.has_focus_area = false;
             if( parameters.getMaxNumFocusAreas() == 0 ) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "focus areas not supported");
@@ -201,8 +203,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
         		if( MyDebug.LOG )
         			Log.d(TAG, "set focus area");
 				this.has_focus_area = true;
-				this.focus_complete_time = -1;
-				this.focus_success = FOCUS_WAITING;
 				this.focus_screen_x = (int)event.getX();
 				this.focus_screen_y = (int)event.getY();
 				float alpha = event.getX() / (float)this.getWidth();
@@ -300,12 +300,22 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     				Log.d(TAG, "zoom was: " + parameters.getZoom());
     			parameters.setZoom((int)zoom_factor);
 	    		camera.setParameters(parameters);
-				has_focus_area = false;
+	    		clearFocusAreas();
 
         		//invalidate();
     		}
     		return true;
     	}
+    }
+    
+    private void clearFocusAreas() {
+        Camera.Parameters parameters = camera.getParameters();
+		String focus_mode = parameters.getFocusMode();
+        if( parameters.getMaxNumFocusAreas() > 0 ) {
+        	parameters.setFocusAreas(null);
+        }
+		has_focus_area = false;
+		focus_success = FOCUS_DONE;
     }
 
     /*private void setCameraParameters() {
@@ -380,6 +390,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			Log.d(TAG, "closeCamera()");
 		}
 		has_focus_area = false;
+		focus_success = FOCUS_DONE;
 		if( is_taking_photo_on_timer ) {
 			takePictureTimerTask.cancel();
 			if( beepTimerTask != null ) {
@@ -414,6 +425,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			debug_time = System.currentTimeMillis();
 		}
 		has_focus_area = false;
+		focus_success = FOCUS_DONE;
 		if( !this.has_surface ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "preview surface not yet available");
@@ -1082,7 +1094,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		
 		canvas.restore();
 		
-		if( this.has_focus_area ) {
+		if( this.focus_success != FOCUS_DONE ) {
 			int size = (int) (50 * scale + 0.5f); // convert dps to pixels
 			if( this.focus_success == FOCUS_SUCCESS )
 				p.setColor(Color.GREEN);
@@ -1091,9 +1103,19 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			else
 				p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
-			canvas.drawRect(focus_screen_x - size, focus_screen_y - size, focus_screen_x + size, focus_screen_y + size, p);
+			int pos_x = 0;
+			int pos_y = 0;
+			if( has_focus_area ) {
+				pos_x = focus_screen_x;
+				pos_y = focus_screen_y;
+			}
+			else {
+				pos_x = canvas.getWidth() / 2;
+				pos_y = canvas.getHeight() / 2;
+			}
+			canvas.drawRect(pos_x - size, pos_y - size, pos_x + size, pos_y + size, p);
 			if( focus_complete_time != -1 && System.currentTimeMillis() > focus_complete_time + 1000 ) {
-				this.has_focus_area = false;
+				focus_success = FOCUS_DONE;
 			}
 		}
 	}
@@ -1110,7 +1132,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "zoom was: " + parameters.getZoom());
 			parameters.setZoom((int)zoom_factor);
     		camera.setParameters(parameters);
-			has_focus_area = false;
+    		clearFocusAreas();
         }
 	}
 	
@@ -1126,7 +1148,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "zoom was: " + parameters.getZoom());
 			parameters.setZoom((int)zoom_factor);
     		camera.setParameters(parameters);
-			has_focus_area = false;
+    		clearFocusAreas();
         }
 	}
 
@@ -1476,6 +1498,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     			Log.d(TAG, "setFocus() received unknown focus value " + focus_value);
     	}
 		camera.setParameters(parameters);
+		clearFocusAreas();
 		tryAutoFocus();
 	}
 
@@ -1644,8 +1667,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			is_taking_photo = false;
 			return;
 		}
-		has_focus_area = false;
-		
+		focus_success = FOCUS_DONE; // clear focus rectangle
+
         if( is_video ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
@@ -2169,20 +2192,27 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "currently taking a photo");
 		}
 		else {
-			// fine to call on any focus mode - if autofocus not supported, then it'll be a no-op
-			// this is also needed for the focus areas with continuous focus - so that we set focus_success to true
-			if( MyDebug.LOG )
-				Log.d(TAG, "try to start autofocus");
-	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
-				@Override
-				public void onAutoFocus(boolean success, Camera camera) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "autofocus complete: " + success);
-					focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
-					focus_complete_time = System.currentTimeMillis();
-				}
-	        };
-			camera.autoFocus(autoFocusCallback);
+        	// if a focus area is set, we always call autofocus even if it isn't supported, so we get the focus box
+			// otherwise, it's only worth doing it when autofocus has an effect (i.e., auto or macro mode)
+            Camera.Parameters parameters = camera.getParameters();
+			String focus_mode = parameters.getFocusMode();
+	        if( has_focus_area || focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "try to start autofocus");
+		        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+					@Override
+					public void onAutoFocus(boolean success, Camera camera) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "autofocus complete: " + success);
+						focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
+						focus_complete_time = System.currentTimeMillis();
+					}
+		        };
+	
+				this.focus_success = FOCUS_WAITING;
+	    		this.focus_complete_time = -1;
+				camera.autoFocus(autoFocusCallback);
+	        }
 		}
     }
     
