@@ -1154,6 +1154,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	public void switchCamera() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchCamera()");
+		if( is_taking_photo && !is_taking_photo_on_timer ) {
+			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
+			if( MyDebug.LOG )
+				Log.d(TAG, "currently taking a photo");
+			return;
+		}
 		int n_cameras = Camera.getNumberOfCameras();
 		if( MyDebug.LOG )
 			Log.d(TAG, "found " + n_cameras + " cameras");
@@ -1259,6 +1265,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	public void cycleFlash() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cycleFlash()");
+		if( is_taking_photo && !is_taking_photo_on_timer ) {
+			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
+			if( MyDebug.LOG )
+				Log.d(TAG, "currently taking a photo");
+			return;
+		}
 		if( this.supported_flash_values != null && this.supported_flash_values.size() > 1 ) {
 			int new_flash_index = (current_flash_index+1) % this.supported_flash_values.size();
 			updateFlash(new_flash_index);
@@ -1405,6 +1417,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	public void cycleFocusMode() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cycleFocusMode()");
+		if( is_taking_photo && !is_taking_photo_on_timer ) {
+			// just to be safe - otherwise problem that changing the focus mode will cancel the autofocus before taking a photo, so we never take a photo, but is_taking_photo remains true!
+			if( MyDebug.LOG )
+				Log.d(TAG, "currently taking a photo");
+			return;
+		}
 		if( this.supported_focus_values != null && this.supported_focus_values.size() > 1 ) {
 			int new_focus_index = (current_focus_index+1) % this.supported_focus_values.size();
 			updateFocus(new_focus_index, false, true);
@@ -2121,6 +2139,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
             if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
             	camera.enableShutterSound(enable_sound);
             }
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "about to call takePicture");
     		camera.takePicture(shutterCallback, null, jpegPictureCallback);
 			Activity activity = (Activity)this.getContext();
     		activity.runOnUiThread(new Runnable() {
