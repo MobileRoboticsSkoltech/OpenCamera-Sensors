@@ -310,7 +310,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     
     private void clearFocusAreas() {
         Camera.Parameters parameters = camera.getParameters();
-		String focus_mode = parameters.getFocusMode();
         if( parameters.getMaxNumFocusAreas() > 0 ) {
         	parameters.setFocusAreas(null);
         }
@@ -1474,6 +1473,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private void setFocus(String focus_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocus() " + focus_value);
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "null camera");
+			return;
+		}
 		Camera.Parameters parameters = camera.getParameters();
     	if( focus_value.equals("focus_mode_auto") ) {
     		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -2211,7 +2215,17 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	
 				this.focus_success = FOCUS_WAITING;
 	    		this.focus_complete_time = -1;
-				camera.autoFocus(autoFocusCallback);
+	    		try {
+	    			camera.autoFocus(autoFocusCallback);
+	    		}
+	    		catch(RuntimeException e) {
+	    			// just in case? We got a RuntimeException report here from 1 user on Google Play
+	    			focus_success = FOCUS_DONE;
+
+	    			if( MyDebug.LOG )
+						Log.d(TAG, "runtime exception from autofocus");
+	    			e.printStackTrace();
+	    		}
 	        }
 		}
     }
