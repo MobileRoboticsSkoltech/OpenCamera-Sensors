@@ -363,7 +363,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     		video_recorder = null;
     		reconnectCamera();
 		}
-		
 	}
 	
 	private void reconnectCamera() {
@@ -410,6 +409,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			this.is_taking_photo = false;
 			this.is_taking_photo_on_timer = false;
 			this.is_preview_started = false;
+			showGUI(true);
 			camera.release();
 			camera = null;
 		}
@@ -425,6 +425,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		showGUI(true);
 		if( !this.has_surface ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "preview surface not yet available");
@@ -1680,6 +1681,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "camera not available");
 			is_taking_photo_on_timer = false;
 			is_taking_photo = false;
+			showGUI(true);
 			return;
 		}
 		if( !this.has_surface ) {
@@ -1687,6 +1689,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "preview surface not yet available");
 			is_taking_photo_on_timer = false;
 			is_taking_photo = false;
+			showGUI(true);
 			return;
 		}
 		focus_success = FOCUS_DONE; // clear focus rectangle
@@ -1768,6 +1771,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		    		video_recorder = null;
 					is_taking_photo = false;
 					is_taking_photo_on_timer = false;
+					showGUI(true);
 					this.reconnectCamera();
 				}
 	        	catch(RuntimeException e) {
@@ -1785,12 +1789,14 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		    		video_recorder = null;
 					is_taking_photo = false;
 					is_taking_photo_on_timer = false;
+					showGUI(true);
 					this.reconnectCamera();
 				}
 			}
         	return;
 		}
 
+		showGUI(false);
         Camera.Parameters parameters = camera.getParameters();
 		String focus_mode = parameters.getFocusMode();
 		if( MyDebug.LOG )
@@ -1822,6 +1828,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "camera not available");
 			is_taking_photo_on_timer = false;
 			is_taking_photo = false;
+			showGUI(true);
 			return;
 		}
 		if( !this.has_surface ) {
@@ -1829,6 +1836,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 				Log.d(TAG, "preview surface not yet available");
 			is_taking_photo_on_timer = false;
 			is_taking_photo = false;
+			showGUI(true);
 			return;
 		}
 
@@ -2114,6 +2122,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
 	    	    	// (otherwise this can fail, at least on Nexus 7)
 		            startCameraPreview();
+					showGUI(true);
 	        		if( MyDebug.LOG )
 	        			Log.d(TAG, "onPictureTaken started preview");
 				}
@@ -2257,6 +2266,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 			debug_time = System.currentTimeMillis();
 		}
 		if( camera != null && !is_taking_photo && !is_preview_started ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "starting the camera preview");
 			camera.startPreview();
 			this.is_preview_started = true;
 			if( MyDebug.LOG ) {
@@ -2276,12 +2287,29 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( is_preview_paused ) {
 		    shareButton.setVisibility(View.VISIBLE);
 		    trashButton.setVisibility(View.VISIBLE);
+		    // shouldn't call showGUI(false), as should already have been disabled when we started to take a photo
 		}
 		else {
 			shareButton.setVisibility(View.GONE);
 		    trashButton.setVisibility(View.GONE);
 		    preview_image_name = null;
+			showGUI(true);
 		}
+    }
+    
+    private void showGUI(boolean show) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "showGUI: " + show);
+    	final int visibility = show ? View.VISIBLE : View.GONE;
+		Activity activity = (Activity)this.getContext();
+	    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
+	    View switchVideoButton = (View) activity.findViewById(R.id.switch_video);
+	    View flashButton = (View) activity.findViewById(R.id.flash);
+	    View focusButton = (View) activity.findViewById(R.id.focus_mode);
+	    switchCameraButton.setVisibility(visibility);
+	    switchVideoButton.setVisibility(visibility);
+	    flashButton.setVisibility(visibility);
+	    focusButton.setVisibility(visibility);
     }
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
