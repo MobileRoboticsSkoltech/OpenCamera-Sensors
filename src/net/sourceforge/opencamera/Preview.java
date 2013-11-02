@@ -106,6 +106,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	private List<String> color_effects = null;
 	private List<String> scene_modes = null;
 	private List<String> white_balances = null;
+	private List<String> exposures = null;
 
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
@@ -537,6 +538,30 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	        	parameters.setWhiteBalance(white_balance);
 			}
 
+			// get min/max exposure
+			exposures = null;
+			int min_exposure = parameters.getMinExposureCompensation();
+			int max_exposure = parameters.getMaxExposureCompensation();
+			if( min_exposure != 0 && max_exposure != 0 ) {
+				exposures = new Vector<String>();
+				for(int i=min_exposure;i<=max_exposure;i++) {
+					exposures.add("" + i);
+				}
+				String exposure_s = setupValuesPref(exposures, "preference_exposure", "0");
+				if( exposure_s != null ) {
+					try {
+						int exposure = Integer.parseInt(exposure_s);
+						if( MyDebug.LOG )
+							Log.d(TAG, "exposure: " + exposure);
+						parameters.setExposureCompensation(exposure);
+					}
+					catch(NumberFormatException exception) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "exposure invalid format, can't parse to int");
+					}
+				}
+			}
+
 			// get available sizes
 	        sizes = parameters.getSupportedPictureSizes();
 			if( MyDebug.LOG ) {
@@ -666,14 +691,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 						Log.d(TAG, "found no existing flash_value");
 					updateFlash(0);
 				}
-				flashButton.setVisibility(View.VISIBLE);
 			}
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "flash not supported");
 				supported_flash_values = null;
-				flashButton.setVisibility(View.GONE);
 			}
+			flashButton.setVisibility(supported_flash_values != null ? View.VISIBLE : View.GONE);
 
 			List<String> supported_focus_modes = parameters.getSupportedFocusModes(); // Android format
 		    View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
@@ -698,14 +722,13 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 						Log.d(TAG, "found no existing focus_value");
 					updateFocus(0, false, true);
 				}
-				focusModeButton.setVisibility(View.VISIBLE);
 			}
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "focus not supported");
 				supported_focus_values = null;
-				focusModeButton.setVisibility(View.GONE);
 			}
+			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);
 			
     		// now switch to video if saved
 			boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
@@ -2308,8 +2331,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 	    View focusButton = (View) activity.findViewById(R.id.focus_mode);
 	    switchCameraButton.setVisibility(visibility);
 	    switchVideoButton.setVisibility(visibility);
-	    flashButton.setVisibility(visibility);
-	    focusButton.setVisibility(visibility);
+	    if( supported_flash_values != null )
+	    	flashButton.setVisibility(visibility);
+	    if( supported_focus_values != null )
+	    	focusButton.setVisibility(visibility);
     }
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -2364,6 +2389,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedWhiteBalances");
 		return this.white_balances;
+    }
+    
+    List<String> getSupportedExposures() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedExposures");
+    	return this.exposures;
     }
 
     /*List<Camera.Size> getSupportedPictureSizes() {

@@ -35,7 +35,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -606,6 +606,7 @@ public class MainActivity extends Activity {
 		putIntentExtra(intent, "color_effects", this.preview.getSupportedColorEffects());
 		putIntentExtra(intent, "scene_modes", this.preview.getSupportedSceneModes());
 		putIntentExtra(intent, "white_balances", this.preview.getSupportedWhiteBalances());
+		putIntentExtra(intent, "exposures", this.preview.getSupportedExposures());
 
 		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
 		if( sizes != null ) {
