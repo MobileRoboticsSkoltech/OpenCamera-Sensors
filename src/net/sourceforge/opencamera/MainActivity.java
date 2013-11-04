@@ -785,4 +785,9 @@ public class MainActivity extends Activity {
     public static String getDonateLink() {
     	return "https://play.google.com/store/apps/details?id=harman.mark.donation";
     }
+
+    // for testing:
+    public Preview getPreview() {
+    	return this.preview;
+    }
 }

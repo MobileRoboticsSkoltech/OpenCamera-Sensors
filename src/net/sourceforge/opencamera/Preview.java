@@ -51,7 +51,7 @@ import android.widget.Toast;
 import android.widget.ZoomControls;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEventListener {
+public class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEventListener {
 	private static final String TAG = "Preview";
 
 	private Paint p = new Paint();
@@ -435,7 +435,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
 		}
 		if( this.app_is_paused ) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "app is paused");
+				Log.d(TAG, "don't open camera as app is paused");
 			}
 			return;
 		}
@@ -2421,7 +2421,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     	return this.current_size_index;
     }
     
-    int getCameraId() {
+    public int getCameraId() {
     	return this.cameraId;
     }
     
@@ -2550,5 +2550,20 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEvent
     
     public static String getIsVideoPreferenceKey() {
     	return "is_video";
+    }
+
+    // for testing:
+    public Camera getCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getCamera: " + camera);
+    	return this.camera;
+    }
+    
+    public boolean supportsFocus() {
+    	return this.supported_focus_values != null;
+    }
+
+    public boolean supportsFlash() {
+    	return this.supported_flash_values != null;
     }
 }
