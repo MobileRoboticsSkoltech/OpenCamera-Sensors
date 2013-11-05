@@ -129,6 +129,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private static final int FOCUS_SUCCESS = 1;
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
+	
+	// for testing:
+	public int count_cameraStartPreview = 0;
+	public int count_cameraAutoFocus = 0;
 
 	Preview(Context context) {
 		this(context, null);
@@ -310,12 +314,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     }
     
     private void clearFocusAreas() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearFocusAreas()");
         Camera.Parameters parameters = camera.getParameters();
         if( parameters.getMaxNumFocusAreas() > 0 ) {
         	parameters.setFocusAreas(null);
+        	camera.setParameters(parameters);
         }
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+        //Log.d(TAG, "camera parameters null? " + (camera.getParameters().getFocusAreas()==null));
     }
 
     /*private void setCameraParameters() {
@@ -2269,6 +2277,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	    		this.focus_complete_time = -1;
 	    		try {
 	    			camera.autoFocus(autoFocusCallback);
+	    			count_cameraAutoFocus++;
 	    		}
 	    		catch(RuntimeException e) {
 	    			// just in case? We got a RuntimeException report here from 1 user on Google Play
@@ -2291,6 +2300,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( camera != null && !is_taking_photo && !is_preview_started ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "starting the camera preview");
+	    	count_cameraStartPreview++;
 			camera.startPreview();
 			this.is_preview_started = true;
 			if( MyDebug.LOG ) {
@@ -2565,5 +2575,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
     public boolean supportsFlash() {
     	return this.supported_flash_values != null;
+    }
+    
+    public boolean hasFocusArea() {
+    	return this.has_focus_area;
     }
 }
