@@ -313,7 +313,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	}
     }
     
-    private void clearFocusAreas() {
+    public void clearFocusAreas() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearFocusAreas()");
         Camera.Parameters parameters = camera.getParameters();
