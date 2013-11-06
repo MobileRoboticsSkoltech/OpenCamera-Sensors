@@ -1844,6 +1844,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			if( MyDebug.LOG )
 				Log.d(TAG, "start autofocus to take picture");
 	    	camera.autoFocus(autoFocusCallback);
+			count_cameraAutoFocus++;
 		}
 		else {
 			takePictureWhenFocused();
@@ -2144,7 +2145,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
     	        is_taking_photo = false;
     			is_preview_started = false; // preview automatically stopped due to taking photo
-				boolean pause_preview = sharedPreferences.getBoolean("preference_pause_preview", true);
+				boolean pause_preview = sharedPreferences.getBoolean("preference_pause_preview", false);
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "pause_preview? " + pause_preview);
 				if( pause_preview && success ) {
 	    			setPreviewPaused(true);
 	    			preview_image_name = picFileName;
@@ -2579,5 +2582,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     
     public boolean hasFocusArea() {
     	return this.has_focus_area;
+    }
+    
+    public boolean isTakingPhoto() {
+    	return this.is_taking_photo;
+    }
+    
+    public boolean isPreviewStarted() {
+    	return this.is_preview_started;
     }
 }
