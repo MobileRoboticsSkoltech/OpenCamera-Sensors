@@ -55,6 +55,10 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		
+		boolean is_test = getIntent().getExtras().getBoolean("test_project");
+		if( MyDebug.LOG )
+			Log.d(TAG, "is_test: " + is_test);
 
 		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		if( MyDebug.LOG ) {
@@ -102,7 +106,7 @@ public class MainActivity extends Activity {
         final String done_first_time_key = "done_first_time";
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
-        if( !has_done_first_time ) {
+        if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle("Open Camera");
             alertDialog.setMessage("Open Camera is completely free. If you like this app, please consider making a donation by buying my donate app :) (see link in the Settings, or go to the Google Play page for this app).\n\n(This message won't show in future.)");
