@@ -2335,21 +2335,25 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		}
     }
     
-    private void showGUI(boolean show) {
+    private void showGUI(final boolean show) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "showGUI: " + show);
-    	final int visibility = show ? View.VISIBLE : View.GONE;
-		Activity activity = (Activity)this.getContext();
-	    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
-	    View switchVideoButton = (View) activity.findViewById(R.id.switch_video);
-	    View flashButton = (View) activity.findViewById(R.id.flash);
-	    View focusButton = (View) activity.findViewById(R.id.focus_mode);
-	    switchCameraButton.setVisibility(visibility);
-	    switchVideoButton.setVisibility(visibility);
-	    if( supported_flash_values != null )
-	    	flashButton.setVisibility(visibility);
-	    if( supported_focus_values != null )
-	    	focusButton.setVisibility(visibility);
+		final Activity activity = (Activity)this.getContext();
+		activity.runOnUiThread(new Runnable() {
+			public void run() {
+		    	final int visibility = show ? View.VISIBLE : View.GONE;
+			    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
+			    View switchVideoButton = (View) activity.findViewById(R.id.switch_video);
+			    View flashButton = (View) activity.findViewById(R.id.flash);
+			    View focusButton = (View) activity.findViewById(R.id.focus_mode);
+			    switchCameraButton.setVisibility(visibility);
+			    switchVideoButton.setVisibility(visibility);
+			    if( supported_flash_values != null )
+			    	flashButton.setVisibility(visibility);
+			    if( supported_focus_values != null )
+			    	focusButton.setVisibility(visibility);
+			}
+		});
     }
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
