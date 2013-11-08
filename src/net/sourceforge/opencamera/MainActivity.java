@@ -55,10 +55,13 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-		
-		boolean is_test = getIntent().getExtras().getBoolean("test_project");
-		if( MyDebug.LOG )
-			Log.d(TAG, "is_test: " + is_test);
+
+		boolean is_test = false;
+		if( getIntent() != null && getIntent().getExtras() != null ) {
+			is_test = getIntent().getExtras().getBoolean("test_project");
+			if( MyDebug.LOG )
+				Log.d(TAG, "is_test: " + is_test);
+		}
 
 		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		if( MyDebug.LOG ) {
