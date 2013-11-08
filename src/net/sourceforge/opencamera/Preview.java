@@ -2569,8 +2569,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
     // for testing:
     public Camera getCamera() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "getCamera: " + camera);
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "getCamera: " + camera);*/
     	return this.camera;
     }
     
@@ -2596,6 +2596,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	return this.is_taking_photo;
     }
     
+    public boolean isTakingPhotoOnTimer() {
+    	return this.is_taking_photo_on_timer;
+    }
+
     public boolean isPreviewStarted() {
     	return this.is_preview_started;
     }
