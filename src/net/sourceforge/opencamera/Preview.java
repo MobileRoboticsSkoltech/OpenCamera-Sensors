@@ -133,6 +133,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	// for testing:
 	public int count_cameraStartPreview = 0;
 	public int count_cameraAutoFocus = 0;
+	public int count_cameraTakePicture = 0;
+	public boolean test_low_memory = false;
 
 	Preview(Context context) {
 		this(context, null);
@@ -1273,7 +1275,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private void updateFocusForVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocusForVideo()");
-		if( this.supported_focus_values != null ) {
+		if( this.supported_focus_values != null && camera != null ) {
 			Camera.Parameters parameters = camera.getParameters();
 			String current_focus_mode = parameters.getFocusMode();
 			boolean focus_is_video = current_focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
@@ -1929,7 +1931,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
         					bitmap.setPixel(x, y, col);
         				}
         			}*/
-        			final boolean test_low_memory = false;
         			if( test_low_memory ) {
         		    	level_angle = 45.0;
         			}
@@ -2185,6 +2186,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
     		camera.takePicture(shutterCallback, null, jpegPictureCallback);
+    		count_cameraTakePicture++;
 			Activity activity = (Activity)this.getContext();
     		activity.runOnUiThread(new Runnable() {
     			public void run() {
@@ -2578,6 +2580,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
     public boolean supportsFlash() {
     	return this.supported_flash_values != null;
+    }
+    
+    public String getCurrentFlashValue() {
+    	if( this.current_flash_index == -1 )
+    		return null;
+    	return this.supported_flash_values.get(current_flash_index);
     }
     
     public boolean hasFocusArea() {
