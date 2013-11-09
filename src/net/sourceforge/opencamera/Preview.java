@@ -2451,7 +2451,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		this.closeCamera();
     }
 
-    private void showToast(final ToastBoxer clear_toast, final String message) {
+    public void showToast(final ToastBoxer clear_toast, final String message) {
 		class RotatedTextView extends View {
 			private String text = "";
 			private Paint paint = new Paint();

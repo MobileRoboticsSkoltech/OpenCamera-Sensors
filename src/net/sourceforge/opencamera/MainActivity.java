@@ -638,7 +638,14 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedGallery");
 		Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		this.startActivity(intent);
+		// from http://stackoverflow.com/questions/11073832/no-activity-found-to-handle-intent - needed to fix crash if no gallery app installed
+		//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("blah")); // test
+		if( intent.resolveActivity(getPackageManager()) != null ) {
+			this.startActivity(intent);
+		}
+		else{
+			preview.showToast(null, "No Gallery app available");
+		}
     }
 
     static private void putIntentExtra(Intent intent, String key, List<String> values) {

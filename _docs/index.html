@@ -109,7 +109,8 @@ text will explain what each mode is. (Only available if the camera supports flas
 Popup text will explain what each mode is. (Only available if the camera supports different focus modes.)</p>
 
 <p><img src="gallery.png" width="32" height="32"><b>Gallery</b> - Click to launch the Gallery app, to view your photos (by default
-saved in the OpenCamera folder).</p>
+saved in the OpenCamera folder). If you get the message "No Gallery app available", then you should install
+a Gallery app from Google Play (e.g., <a href="https://play.google.com/store/apps/details?id=com.moblynx.galleryics">Gallery ICS</a>).</p>
 
 <p><img src="settings.png" width="32" height="32"><b>Settings</b> - Click to open the <a href="#settings">Settings</a>.</p>
 
@@ -191,6 +192,7 @@ more storage space.</p>
 <p><b>History</b></p><pre>
 Version 1.2 (Work in progress)
 
+FIXED   Crash when launching gallery, if no Gallery app installed on device.
 FIXED   Selecting a focus area shouldn't switch to focus mode auto.
 FIXED   Focus area wasn't getting reset when it should (e.g., changing focus
         mode or zooming).
