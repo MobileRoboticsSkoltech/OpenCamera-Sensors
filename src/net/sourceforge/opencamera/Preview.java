@@ -70,8 +70,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
 
-	private boolean is_taking_photo = false;
-	private boolean is_taking_photo_on_timer = false;
+	private final int PHASE_NORMAL = 0;
+	private final int PHASE_TIMER = 1;
+	private final int PHASE_TAKING_PHOTO = 2;
+	private final int PHASE_PREVIEW_PAUSED = 3; // the paused state after taking a photo
+	private int phase = PHASE_NORMAL;
+	/*private boolean is_taking_photo = false;
+	private boolean is_taking_photo_on_timer = false;*/
 	private Timer takePictureTimer = new Timer();
 	private TimerTask takePictureTimerTask = null;
 	private Timer beepTimer = new Timer();
@@ -79,7 +84,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private long take_photo_time = 0;
 
 	private boolean is_preview_started = false;
-	private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
+	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
 	private String preview_image_name = null;
 
 	private int current_orientation = 0; // orientation received by onOrientationChanged
@@ -197,7 +202,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( touch_was_multitouch ) {
 			return true;
 		}
-		if( is_taking_photo ) {
+		if( this.isTakingPhotoOrOnTimer() ) {
 			return true;
 		}
 
@@ -364,9 +369,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
     		showToast(stopstart_video_toast, "Stopped recording video");
-			is_taking_photo = false;
-			is_taking_photo_on_timer = false;
-			this.is_taking_photo_on_timer = false;
+			/*is_taking_photo = false;
+			is_taking_photo_on_timer = false;*/
+    		this.phase = PHASE_NORMAL;
 			try {
 				video_recorder.stop();
 			}
@@ -406,13 +411,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		}
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
-		if( is_taking_photo_on_timer ) {
+		//if( is_taking_photo_on_timer ) {
+		if( this.isOnTimer() ) {
 			takePictureTimerTask.cancel();
 			if( beepTimerTask != null ) {
 				beepTimerTask.cancel();
 			}
-			is_taking_photo_on_timer = false;
-			is_taking_photo = false;
+			/*is_taking_photo_on_timer = false;
+			is_taking_photo = false;*/
+    		this.phase = PHASE_NORMAL;
 			if( MyDebug.LOG )
 				Log.d(TAG, "cancelled camera timer");
 		}
@@ -423,8 +430,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			//camera.setPreviewCallback(null);
 			this.setPreviewPaused(false);
 			camera.stopPreview();
-			this.is_taking_photo = false;
-			this.is_taking_photo_on_timer = false;
+			/*this.is_taking_photo = false;
+			this.is_taking_photo_on_timer = false;*/
+    		this.phase = PHASE_NORMAL;
 			this.is_preview_started = false;
 			showGUI(true);
 			camera.release();
@@ -816,7 +824,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
         }
 
         // stop preview before making changes
-        if( !this.is_preview_paused ) {
+        //if( !this.is_preview_paused ) {
+        if( this.phase != PHASE_PREVIEW_PAUSED ) {
             camera.stopPreview();
 			this.is_preview_started = false;
         }
@@ -842,7 +851,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		if( MyDebug.LOG )
     			Log.e(TAG, "Error setting preview display: " + e.getMessage());
         }
-        if( !this.is_preview_paused ) {
+        //if( !this.is_preview_paused ) {
+        if( this.phase != PHASE_PREVIEW_PAUSED ) {
 			startCameraPreview();
 			tryAutoFocus(); // so we get the autofocus when starting up
         }
@@ -1031,7 +1041,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		}
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		if( camera != null && !this.is_preview_paused ) {
+		//if( camera != null && !this.is_preview_paused ) {
+		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
 			if( this.has_level_angle && sharedPreferences.getBoolean("preference_show_angle", true) ) {
@@ -1058,7 +1069,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				}
 				canvas.drawText("Angle: " + decimalFormat.format(this.level_angle), canvas.getWidth() / 2 + pixels_offset_x, canvas.getHeight() - pixels_offset_y, p);
 			}
-			if( this.is_taking_photo_on_timer ) {
+			//if( this.is_taking_photo_on_timer ) {
+			if( this.isOnTimer() ) {
 				long remaining_time = (take_photo_time - System.currentTimeMillis() + 999)/1000;
 				if( MyDebug.LOG )
 					Log.d(TAG, "remaining_time: " + remaining_time);
@@ -1194,7 +1206,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public void switchCamera() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchCamera()");
-		if( is_taking_photo && !is_taking_photo_on_timer ) {
+		//if( is_taking_photo && !is_taking_photo_on_timer ) {
+		if( this.phase == PHASE_TAKING_PHOTO ) {
 			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
@@ -1233,18 +1246,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			showToast(switch_video_toast, "Photo");
 		}
 		else {
-			if( is_taking_photo_on_timer ) {
+			//if( is_taking_photo_on_timer ) {
+			if( this.isOnTimer() ) {
 				takePictureTimerTask.cancel();
 				if( beepTimerTask != null ) {
 					beepTimerTask.cancel();
 				}
-				is_taking_photo_on_timer = false;
-				is_taking_photo = false;
+				/*is_taking_photo_on_timer = false;
+				is_taking_photo = false;*/
+				this.phase = PHASE_NORMAL;
 				if( MyDebug.LOG )
 					Log.d(TAG, "cancelled camera timer");
 				this.is_video = true;
 			}
-			else if( this.is_taking_photo ) {
+			//else if( this.is_taking_photo ) {
+			else if( this.phase == PHASE_TAKING_PHOTO ) {
 				// wait until photo taken
 				if( MyDebug.LOG )
 					Log.d(TAG, "wait until photo taken");
@@ -1255,7 +1271,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			
 			if( this.is_video ) {
 				showToast(switch_video_toast, "Video");
-				if( this.is_preview_paused ) {
+				//if( this.is_preview_paused ) {
+				if( this.phase == PHASE_PREVIEW_PAUSED ) {
 					startCameraPreview();
 				}
 			}
@@ -1305,7 +1322,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public void cycleFlash() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cycleFlash()");
-		if( is_taking_photo && !is_taking_photo_on_timer ) {
+		//if( is_taking_photo && !is_taking_photo_on_timer ) {
+		if( this.phase == PHASE_TAKING_PHOTO ) {
 			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
@@ -1457,7 +1475,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public void cycleFocusMode() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cycleFocusMode()");
-		if( is_taking_photo && !is_taking_photo_on_timer ) {
+		//if( is_taking_photo && !is_taking_photo_on_timer ) {
+		if( this.phase == PHASE_TAKING_PHOTO ) {
 			// just to be safe - otherwise problem that changing the focus mode will cancel the autofocus before taking a photo, so we never take a photo, but is_taking_photo remains true!
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
@@ -1611,30 +1630,35 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not available");
-			is_taking_photo_on_timer = false;
-			is_taking_photo = false;
+			/*is_taking_photo_on_timer = false;
+			is_taking_photo = false;*/
+			this.phase = PHASE_NORMAL;
 			return;
 		}
 		if( !this.has_surface ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview surface not yet available");
-			is_taking_photo_on_timer = false;
-			is_taking_photo = false;
+			/*is_taking_photo_on_timer = false;
+			is_taking_photo = false;*/
+			this.phase = PHASE_NORMAL;
 			return;
 		}
-		if( is_taking_photo_on_timer ) {
+		//if( is_taking_photo_on_timer ) {
+		if( this.isOnTimer() ) {
 			takePictureTimerTask.cancel();
 			if( beepTimerTask != null ) {
 				beepTimerTask.cancel();
 			}
-			is_taking_photo_on_timer = false;
-			is_taking_photo = false;
+			/*is_taking_photo_on_timer = false;
+			is_taking_photo = false;*/
+			this.phase = PHASE_NORMAL;
 			if( MyDebug.LOG )
 				Log.d(TAG, "cancelled camera timer");
 		    showToast(take_photo_toast, "Cancelled timer");
 			return;
 		}
-    	if( is_taking_photo ) {
+    	//if( is_taking_photo ) {
+		if( this.phase == PHASE_TAKING_PHOTO ) {
     		if( is_video ) {
     			if( !video_start_time_set || System.currentTimeMillis() - video_start_time < 500 ) {
     				// if user presses to stop too quickly, we ignore
@@ -1657,8 +1681,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	// make sure that preview running (also needed to hide trash/share icons)
         this.startCameraPreview();
 
-        is_taking_photo = true;
-
+        //is_taking_photo = true;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String timer_value = sharedPreferences.getString("preference_timer", "0");
 		long timer_delay = 0;
@@ -1673,9 +1696,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
         }
 
 		if( timer_delay == 0 ) {
+	        this.phase = PHASE_TAKING_PHOTO;
 			takePicture();
 		}
 		else {
+	        this.phase = PHASE_TIMER;
     		if( MyDebug.LOG )
     			Log.d(TAG, "timer_delay: " + timer_delay);
     		class TakePictureTimerTask extends TimerTask {
@@ -1683,11 +1708,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     				if( beepTimerTask != null ) {
     					beepTimerTask.cancel();
     				}
-        	        is_taking_photo_on_timer = false; // must be set to false now, to indicate that we can no longer try to cancel the timer task!
+        	        //is_taking_photo_on_timer = false; // must be set to false now, to indicate that we can no longer try to cancel the timer task!
+        	        phase = PHASE_TAKING_PHOTO;
     				takePicture();
     			}
     		}
-    		is_taking_photo_on_timer = true;
+    		//is_taking_photo_on_timer = true;
     		take_photo_time = System.currentTimeMillis() + timer_delay;
 			if( MyDebug.LOG )
 				Log.d(TAG, "take photo at: " + take_photo_time);
@@ -1718,16 +1744,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not available");
-			is_taking_photo_on_timer = false;
-			is_taking_photo = false;
+			/*is_taking_photo_on_timer = false;
+			is_taking_photo = false;*/
+			this.phase = PHASE_NORMAL;
 			showGUI(true);
 			return;
 		}
 		if( !this.has_surface ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview surface not yet available");
-			is_taking_photo_on_timer = false;
-			is_taking_photo = false;
+			/*is_taking_photo_on_timer = false;
+			is_taking_photo = false;*/
+			this.phase = PHASE_NORMAL;
 			showGUI(true);
 			return;
 		}
@@ -1796,8 +1824,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		    		video_recorder.reset();
 		    		video_recorder.release(); 
 		    		video_recorder = null;
-					is_taking_photo = false;
-					is_taking_photo_on_timer = false;
+					/*is_taking_photo = false;
+					is_taking_photo_on_timer = false;*/
+					this.phase = PHASE_NORMAL;
 					showGUI(true);
 					this.reconnectCamera();
 				}
@@ -1810,8 +1839,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		    		video_recorder.reset();
 		    		video_recorder.release(); 
 		    		video_recorder = null;
-					is_taking_photo = false;
-					is_taking_photo_on_timer = false;
+					/*is_taking_photo = false;
+					is_taking_photo_on_timer = false;*/
+					this.phase = PHASE_NORMAL;
 					showGUI(true);
 					this.reconnectCamera();
 				}
@@ -1850,16 +1880,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not available");
-			is_taking_photo_on_timer = false;
-			is_taking_photo = false;
+			/*is_taking_photo_on_timer = false;
+			is_taking_photo = false;*/
+			this.phase = PHASE_NORMAL;
 			showGUI(true);
 			return;
 		}
 		if( !this.has_surface ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview surface not yet available");
-			is_taking_photo_on_timer = false;
-			is_taking_photo = false;
+			/*is_taking_photo_on_timer = false;
+			is_taking_photo = false;*/
+			this.phase = PHASE_NORMAL;
 			showGUI(true);
 			return;
 		}
@@ -2122,7 +2154,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	    	    showToast(null, "Failed to save photo");
     	        }
 
-    	        is_taking_photo = false;
+    	        //is_taking_photo = false;
+    	        phase = PHASE_NORMAL;
     			is_preview_started = false; // preview automatically stopped due to taking photo
 				boolean pause_preview = sharedPreferences.getBoolean("preference_pause_preview", false);
         		if( MyDebug.LOG )
@@ -2174,7 +2207,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public void clickedShare() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedShare");
-		if( is_preview_paused ) {
+		//if( is_preview_paused ) {
+		if( this.phase == PHASE_PREVIEW_PAUSED ) {
 			if( preview_image_name != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "Share: " + preview_image_name);
@@ -2192,7 +2226,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public void clickedTrash() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTrash");
-		if( is_preview_paused ) {
+		//if( is_preview_paused ) {
+		if( this.phase == PHASE_PREVIEW_PAUSED ) {
 			if( preview_image_name != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "Delete: " + preview_image_name);
@@ -2229,7 +2264,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview not yet started");
 		}
-		else if( is_taking_photo ) {
+		//else if( is_taking_photo ) {
+		else if( this.isTakingPhotoOrOnTimer() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
 		}
@@ -2275,7 +2311,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			Log.d(TAG, "startCameraPreview");
 			debug_time = System.currentTimeMillis();
 		}
-		if( camera != null && !is_taking_photo && !is_preview_started ) {
+		//if( camera != null && !is_taking_photo && !is_preview_started ) {
+		if( camera != null && !this.isTakingPhotoOrOnTimer() && !is_preview_started ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "starting the camera preview");
 	    	count_cameraStartPreview++;
@@ -2294,13 +2331,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		Activity activity = (Activity)this.getContext();
 	    View shareButton = (View) activity.findViewById(R.id.share);
 	    View trashButton = (View) activity.findViewById(R.id.trash);
-		is_preview_paused = paused;
-		if( is_preview_paused ) {
+		/*is_preview_paused = paused;
+		if( is_preview_paused ) {*/
+	    if( paused ) {
+	    	this.phase = PHASE_PREVIEW_PAUSED;
 		    shareButton.setVisibility(View.VISIBLE);
 		    trashButton.setVisibility(View.VISIBLE);
 		    // shouldn't call showGUI(false), as should already have been disabled when we started to take a photo
 		}
 		else {
+	    	this.phase = PHASE_NORMAL;
 			shareButton.setVisibility(View.GONE);
 		    trashButton.setVisibility(View.GONE);
 		    preview_image_name = null;
@@ -2575,12 +2615,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	return this.has_focus_area;
     }
     
-    public boolean isTakingPhoto() {
-    	return this.is_taking_photo;
+    public boolean isTakingPhotoOrOnTimer() {
+    	//return this.is_taking_photo;
+    	return this.phase == PHASE_TAKING_PHOTO || this.phase == PHASE_TIMER;
     }
     
-    public boolean isTakingPhotoOnTimer() {
-    	return this.is_taking_photo_on_timer;
+    public boolean isTakingPhoto() {
+    	return this.phase == PHASE_TAKING_PHOTO;
+    }
+
+    public boolean isOnTimer() {
+    	//return this.is_taking_photo_on_timer;
+    	return this.phase == PHASE_TIMER;
     }
 
     public boolean isPreviewStarted() {
