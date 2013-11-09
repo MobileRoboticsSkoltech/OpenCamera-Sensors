@@ -1041,7 +1041,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		}
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		//if( camera != null && !this.is_preview_paused ) {
 		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
@@ -1110,8 +1109,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			int pixels_offset = (int) (20 * scale + 0.5f); // convert dps to pixels
-			canvas.drawText("FAILED TO OPEN CAMERA", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
-			canvas.drawText("CAMERA MAY BE IN USE BY ANOTHER APPLICATION?", canvas.getWidth() / 2, canvas.getHeight() / 2 + pixels_offset, p);
+			canvas.drawText("FAILED TO OPEN CAMERA.", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
+			canvas.drawText("CAMERA MAY BE IN USE", canvas.getWidth() / 2, canvas.getHeight() / 2 + pixels_offset, p);
+			canvas.drawText("BY ANOTHER APPLICATION?", canvas.getWidth() / 2, canvas.getHeight() / 2 + 2*pixels_offset, p);
 			//canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, p);
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
