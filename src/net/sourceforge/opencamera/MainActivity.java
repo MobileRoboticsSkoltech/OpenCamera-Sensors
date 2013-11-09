@@ -35,7 +35,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 class MyDebug {
-	static final boolean LOG = true;
+	static final boolean LOG = false;
 }
 
 public class MainActivity extends Activity {
@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
         if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle("Open Camera");
-            alertDialog.setMessage("Open Camera is completely free. If you like this app, please consider making a donation by buying my donate app :) (see link in the Settings, or go to the Google Play page for this app).\n\n(This message won't show in future.)");
+            alertDialog.setMessage("Touch to focus, and press the blue camera button to take photos. For full instructions, click Online help from Settings. Open Camera is completely free. If you like this app, please consider buying my donate app :) (see link in Settings, or this app's Google Play page).\n\n(This message won't show in future.)");
             alertDialog.setPositiveButton("OK", null);
             alertDialog.show();
 
