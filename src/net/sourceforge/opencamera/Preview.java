@@ -1740,11 +1740,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
 			if( videoFile == null ) {
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
-	    		main_activity.runOnUiThread(new Runnable() {
-	    			public void run() {
-	    	    	    showToast(null, "Failed to save video file");
-	    			}
-	  			});
+	    	    showToast(null, "Failed to save video file");
 			}
 			else {
 	        	this.camera.unlock();
@@ -1789,22 +1785,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	            	video_recorder.start();
 	            	video_start_time = System.currentTimeMillis();
 	            	video_start_time_set = true;
-		    		main_activity.runOnUiThread(new Runnable() {
-		    			public void run() {
-		    				showToast(stopstart_video_toast, "Started recording video");
-		    			}
-		  			});
+    				showToast(stopstart_video_toast, "Started recording video");
 		            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
 				}
 	        	catch(IOException e) {
 		    		if( MyDebug.LOG )
 		    			Log.e(TAG, "failed to save video");
 					e.printStackTrace();
-		    		main_activity.runOnUiThread(new Runnable() {
-		    			public void run() {
-				    	    showToast(null, "Failed to save video");
-		    			}
-		  			});
+		    	    showToast(null, "Failed to save video");
 		    		video_recorder.reset();
 		    		video_recorder.release(); 
 		    		video_recorder = null;
@@ -1818,11 +1806,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		    		if( MyDebug.LOG )
 		    			Log.e(TAG, "runtime exception starting video recorder");
 					e.printStackTrace();
-		    		main_activity.runOnUiThread(new Runnable() {
-		    			public void run() {
-				    	    showToast(null, "Failed to record video");
-		    			}
-		  			});
+		    	    showToast(null, "Failed to record video");
 		    		video_recorder.reset();
 		    		video_recorder.release(); 
 		    		video_recorder = null;
@@ -2093,11 +2077,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	        			picFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_IMAGE);
 	        	        if( picFile == null ) {
 	        	            Log.e(TAG, "Couldn't create media image file; check storage permissions?");
-	        	            main_activity.runOnUiThread(new Runnable() {
-	    		    			public void run() {
-	    	        	    	    showToast(null, "Failed to save image file");
-	    		    			}
-	    		  			});
+	        	    	    showToast(null, "Failed to save image file");
 	        	        }
 	        	        else {
 		    	            picFileName = picFile.getAbsolutePath();
@@ -2133,21 +2113,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	    		if( MyDebug.LOG )
     	    			Log.e(TAG, "File not found: " + e.getMessage());
     	            e.getStackTrace();
-		    		main_activity.runOnUiThread(new Runnable() {
-		    			public void run() {
-		    	    	    showToast(null, "Failed to save photo");
-		    			}
-		  			});
+    	    	    showToast(null, "Failed to save photo");
     	        }
     	        catch(IOException e) {
     	    		if( MyDebug.LOG )
     	    			Log.e(TAG, "I/O error writing file: " + e.getMessage());
     	            e.getStackTrace();
-		    		main_activity.runOnUiThread(new Runnable() {
-		    			public void run() {
-		    	    	    showToast(null, "Failed to save photo");
-		    			}
-		  			});
+    	    	    showToast(null, "Failed to save photo");
     	        }
 
     	        is_taking_photo = false;
@@ -2193,12 +2165,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     			Log.d(TAG, "about to call takePicture");
     		camera.takePicture(shutterCallback, null, jpegPictureCallback);
     		count_cameraTakePicture++;
-			Activity activity = (Activity)this.getContext();
-    		activity.runOnUiThread(new Runnable() {
-    			public void run() {
-    				showToast(take_photo_toast, "Taking a photo...");
-    			}
-  			});
+			showToast(take_photo_toast, "Taking a photo...");
     	}
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
@@ -2534,18 +2501,24 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( MyDebug.LOG )
 			Log.d(TAG, "showToast");
 		final Activity activity = (Activity)this.getContext();
-		if( clear_toast != null && clear_toast.toast != null )
-			clear_toast.toast.cancel();
-		/*clear_toast = Toast.makeText(activity.getApplicationContext(), message, Toast.LENGTH_SHORT);
-		clear_toast.show();*/
+		// We get a crash on emulator at least if Toast constructor isn't run on main thread (e.g., the toast for taking a photo when on timer).
+		// Also see http://stackoverflow.com/questions/13267239/toast-from-a-non-ui-thread
+		activity.runOnUiThread(new Runnable() {
+			public void run() {
+				if( clear_toast != null && clear_toast.toast != null )
+					clear_toast.toast.cancel();
+				/*clear_toast = Toast.makeText(activity.getApplicationContext(), message, Toast.LENGTH_SHORT);
+				clear_toast.show();*/
 
-		Toast toast = new Toast(activity);
-		if( clear_toast != null )
-			clear_toast.toast = toast;
-		View text = new RotatedTextView(message, activity);
-		toast.setView(text);
-		toast.setDuration(Toast.LENGTH_SHORT);
-		toast.show();
+				Toast toast = new Toast(activity);
+				if( clear_toast != null )
+					clear_toast.toast = toast;
+				View text = new RotatedTextView(message, activity);
+				toast.setView(text);
+				toast.setDuration(Toast.LENGTH_SHORT);
+				toast.show();
+			}
+		});
 	}
 	
 	public void setUIRotation(int ui_rotation) {
