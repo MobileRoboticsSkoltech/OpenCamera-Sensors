@@ -111,12 +111,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
-	private Toast switch_camera_toast = null;
-	private Toast switch_video_toast = null;
-	private Toast flash_toast = null;
-	private Toast focus_toast = null;
-	private Toast take_photo_toast = null;
-	private Toast stopstart_video_toast = null;
+	class ToastBoxer {
+		public Toast toast = null;
+
+		ToastBoxer() {
+		}
+	}
+	private ToastBoxer switch_camera_toast = new ToastBoxer();
+	private ToastBoxer switch_video_toast = new ToastBoxer();
+	private ToastBoxer flash_toast = new ToastBoxer();
+	private ToastBoxer focus_toast = new ToastBoxer();
+	private ToastBoxer take_photo_toast = new ToastBoxer();
+	private ToastBoxer stopstart_video_toast = new ToastBoxer();
 	
 	private int ui_rotation = 0;
 	
@@ -357,7 +363,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( video_recorder != null ) { // check again, just to be safe
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
-    		stopstart_video_toast = showToast(stopstart_video_toast, "Stopped recording video");
+    		showToast(stopstart_video_toast, "Stopped recording video");
 			is_taking_photo = false;
 			is_taking_photo_on_timer = false;
 			this.is_taking_photo_on_timer = false;
@@ -1203,10 +1209,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		    Camera.CameraInfo info = new Camera.CameraInfo();
 		    Camera.getCameraInfo(cameraId, info);
 		    if( info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-				switch_camera_toast = showToast(switch_camera_toast, "Front Camera");
+				showToast(switch_camera_toast, "Front Camera");
 		    }
 		    else {
-				switch_camera_toast = showToast(switch_camera_toast, "Back Camera");
+				showToast(switch_camera_toast, "Back Camera");
 		    }
 			this.openCamera(true);
 			
@@ -1224,7 +1230,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				stopVideo();
 			}
 			this.is_video = false;
-			switch_video_toast = showToast(switch_video_toast, "Photo");
+			showToast(switch_video_toast, "Photo");
 		}
 		else {
 			if( is_taking_photo_on_timer ) {
@@ -1248,7 +1254,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			}
 			
 			if( this.is_video ) {
-				switch_video_toast = showToast(switch_video_toast, "Video");
+				showToast(switch_video_toast, "Video");
 				if( this.is_preview_paused ) {
 					startCameraPreview();
 				}
@@ -1364,7 +1370,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	    			int resource = getResources().getIdentifier(flash_icons[i], null, activity.getApplicationContext().getPackageName());
 	    			flashButton.setImageResource(resource);
 	    			if( !initial ) {
-	    				flash_toast = showToast(flash_toast, flash_entries[i]);
+	    				showToast(flash_toast, flash_entries[i]);
 	    			}
 	    			break;
 	    		}
@@ -1505,7 +1511,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	    			int resource = getResources().getIdentifier(focus_icons[i], null, activity.getApplicationContext().getPackageName());
 	    			focusModeButton.setImageResource(resource);
 	    			if( !initial && !quiet ) {
-	    				focus_toast = showToast(focus_toast, focus_entries[i]);
+	    				showToast(focus_toast, focus_entries[i]);
 	    			}
 	    			break;
 	    		}
@@ -1625,7 +1631,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			is_taking_photo = false;
 			if( MyDebug.LOG )
 				Log.d(TAG, "cancelled camera timer");
-		    take_photo_toast = showToast(take_photo_toast, "Cancelled timer");
+		    showToast(take_photo_toast, "Cancelled timer");
 			return;
 		}
     	if( is_taking_photo ) {
@@ -1685,7 +1691,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		take_photo_time = System.currentTimeMillis() + timer_delay;
 			if( MyDebug.LOG )
 				Log.d(TAG, "take photo at: " + take_photo_time);
-		    take_photo_toast = showToast(take_photo_toast, "Started timer");
+		    showToast(take_photo_toast, "Started timer");
         	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
 
     		if( sharedPreferences.getBoolean("preference_timer_beep", true) ) {
@@ -1785,7 +1791,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	            	video_start_time_set = true;
 		    		main_activity.runOnUiThread(new Runnable() {
 		    			public void run() {
-		    				stopstart_video_toast = showToast(stopstart_video_toast, "Started recording video");
+		    				showToast(stopstart_video_toast, "Started recording video");
 		    			}
 		  			});
 		            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
@@ -2087,7 +2093,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	        			picFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_IMAGE);
 	        	        if( picFile == null ) {
 	        	            Log.e(TAG, "Couldn't create media image file; check storage permissions?");
-	    		    		main_activity.runOnUiThread(new Runnable() {
+	        	            main_activity.runOnUiThread(new Runnable() {
 	    		    			public void run() {
 	    	        	    	    showToast(null, "Failed to save image file");
 	    		    			}
@@ -2190,7 +2196,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			Activity activity = (Activity)this.getContext();
     		activity.runOnUiThread(new Runnable() {
     			public void run() {
-    				take_photo_toast = showToast(take_photo_toast, "Taking a photo...");
+    				showToast(take_photo_toast, "Taking a photo...");
     			}
   			});
     	}
@@ -2478,7 +2484,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		this.closeCamera();
     }
 
-    private Toast showToast(Toast clear_toast, String message) {
+    private void showToast(final ToastBoxer clear_toast, final String message) {
 		class RotatedTextView extends View {
 			private String text = "";
 			private Paint paint = new Paint();
@@ -2527,19 +2533,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "showToast");
+		final Activity activity = (Activity)this.getContext();
+		if( clear_toast != null && clear_toast.toast != null )
+			clear_toast.toast.cancel();
+		/*clear_toast = Toast.makeText(activity.getApplicationContext(), message, Toast.LENGTH_SHORT);
+		clear_toast.show();*/
+
+		Toast toast = new Toast(activity);
 		if( clear_toast != null )
-			clear_toast.cancel();
-		Activity activity = (Activity)this.getContext();
-		//clear_toast = Toast.makeText(activity.getApplicationContext(), message, Toast.LENGTH_SHORT);
-		//clear_toast.show();
-
-		clear_toast = new Toast(activity);
+			clear_toast.toast = toast;
 		View text = new RotatedTextView(message, activity);
-		clear_toast.setView(text);
-		clear_toast.setDuration(Toast.LENGTH_SHORT);
-		clear_toast.show();
-
-		return clear_toast;
+		toast.setView(text);
+		toast.setDuration(Toast.LENGTH_SHORT);
+		toast.show();
 	}
 	
 	public void setUIRotation(int ui_rotation) {
