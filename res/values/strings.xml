@@ -34,7 +34,7 @@
     <string name="preference_save_location">Save location</string>
     <string name="preference_save_location_summary">Name of folder to save the photo files in</string>
     <string name="preference_show_zoom">Show zoom</string>
-    <string name="preference_show_zoom_summary">Display the current camera zoom level on screen</string>
+    <string name="preference_show_zoom_summary">Display the current camera zoom level on screen (when zoomed in)</string>
     <string name="preference_free_memory">Show free memory</string>
     <string name="preference_free_memory_summary">Display the remaining device storage space on screen</string>
     <string name="preference_show_angle">Show angle</string>

@@ -1118,12 +1118,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		}
 		if( this.has_zoom && camera != null && sharedPreferences.getBoolean("preference_show_zoom", true) ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
-			// Convert the dps to pixels, based on density scale
-			int pixels_offset_y = 2*text_y+text_extra_offset_y;
-			p.setColor(Color.WHITE);
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.CENTER);
-			canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+			// only show when actually zoomed in
+			if( zoom_ratio > 1.0f + 1.0e-5f ) {
+				// Convert the dps to pixels, based on density scale
+				int pixels_offset_y = 2*text_y+text_extra_offset_y;
+				p.setColor(Color.WHITE);
+				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+				p.setTextAlign(Paint.Align.CENTER);
+				canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+			}
 		}
 		if( camera != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
 			int pixels_offset_y = 1*text_y+text_extra_offset_y;
