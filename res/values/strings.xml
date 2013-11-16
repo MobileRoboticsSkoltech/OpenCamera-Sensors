@@ -45,7 +45,9 @@
     <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
     <string name="preference_quality">Image quality</string>
     <string name="preference_quality_summary">Set the image quality of saved photo images (recommended value is 90%%)</string>
-
+    <string name="video_quality">Video resolution</string>
+    <string name="video_quality_summary">Set the resolution of videos</string>
+    
     <string name="preference_category_online">Online</string>
     <string name="preference_online_help">Online help</string>
     <string name="preference_donate">Donate to support development</string>

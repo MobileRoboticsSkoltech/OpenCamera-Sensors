@@ -3,6 +3,7 @@ package net.sourceforge.opencamera;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
+import android.media.CamcorderProfile;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -78,6 +79,52 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			ListPreference lp = (ListPreference)findPreference("preference_quality");
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
+		}
+
+		int [] video_quality = getIntent().getExtras().getIntArray("video_quality");
+		if( video_quality != null ) {
+			CharSequence [] entries = new CharSequence[video_quality.length];
+			CharSequence [] values = new CharSequence[video_quality.length];
+			for(int i=0;i<video_quality.length;i++) {
+		        // if we add more, remember to update Preview.openCamera() code
+				switch( video_quality[i] ) {
+				case CamcorderProfile.QUALITY_1080P:
+					entries[i] = "Full HD 1920x1080";
+					break;
+				case CamcorderProfile.QUALITY_720P:
+					entries[i] = "HD 1280x720";
+					break;
+				case CamcorderProfile.QUALITY_480P:
+					entries[i] = "SD 720x480";
+					break;
+				case CamcorderProfile.QUALITY_CIF:
+					entries[i] = "CIF 352x288";
+					break;
+				case CamcorderProfile.QUALITY_QVGA:
+					entries[i] = "QVGA 320x240";
+					break;
+				case CamcorderProfile.QUALITY_QCIF:
+					entries[i] = "QCIF 176x144";
+					break;
+				default:
+					// unknown value?!
+					entries[i] = "Unknown";
+				}
+				values[i] = "" + video_quality[i];
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "video_quality values: " + values[i]);*/
+			}
+			ListPreference lp = (ListPreference)findPreference("video_quality");
+			lp.setEntries(entries);
+			lp.setEntryValues(values);
+			String video_quality_preference_key = Preview.getVideoQualityPreferenceKey(cameraId);
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String video_quality_value = sharedPreferences.getString(video_quality_preference_key, "");
+			if( MyDebug.LOG )
+				Log.d(TAG, "video_quality_value: " + video_quality_value);
+			lp.setValue(video_quality_value);
+			// now set the key, so we save for the correct cameraId
+			lp.setKey(video_quality_preference_key);
 		}
 
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ) {

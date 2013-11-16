@@ -155,7 +155,13 @@
 	        android:defaultValue="90"
 	        />
     
-    </PreferenceCategory>
+        <ListPreference 
+            android:key="video_quality"
+            android:title="@string/video_quality"
+            android:summary="@string/video_quality_summary"
+            />
+    
+	    </PreferenceCategory>
 
     <PreferenceCategory
         android:key="preference_category_online"

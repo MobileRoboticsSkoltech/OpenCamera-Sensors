@@ -35,7 +35,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -629,6 +629,17 @@ public class MainActivity extends Activity {
 			intent.putExtra("resolution_heights", heights);
 			int current_size_index = this.preview.getCurrentPictureSizeIndex();
 			intent.putExtra("current_resolution_index", current_size_index);
+		}
+		
+		List<Integer> video_quality = this.preview.getSupportedVideoQuality();
+		if( video_quality != null ) {
+			int [] video_quality_arr = new int[video_quality.size()];
+			int i=0;
+			for(Integer value: video_quality) {
+				video_quality_arr[i] = value.intValue();
+				i++;
+			}
+			intent.putExtra("video_quality", video_quality_arr);
 		}
 
 		this.startActivity(intent);

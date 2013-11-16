@@ -69,6 +69,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private MediaRecorder video_recorder = null;
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
+	private String video_name = null;
 
 	private final int PHASE_NORMAL = 0;
 	private final int PHASE_TIMER = 1;
@@ -115,7 +116,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
-
+	
+	private List<Integer> video_quality = null;
+	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
+	
 	class ToastBoxer {
 		public Toast toast = null;
 
@@ -384,6 +388,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		video_recorder.release(); 
     		video_recorder = null;
     		reconnectCamera();
+    		if( video_name != null ) {
+    			File file = new File(video_name);
+    			if( file != null ) {
+    				// need to scan when finished, so we update for the completed file
+    				Activity activity = (Activity)this.getContext();
+    				activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+    			}
+    		}
 		}
 	}
 	
@@ -687,6 +699,69 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		if( MyDebug.LOG ) {
     			//Log.d(TAG, "time after reading camera parameters: " + (System.currentTimeMillis() - debug_time));
     		}
+
+			// get available sizes
+	        video_quality = new Vector<Integer>();
+	        // if we add more, remember to update MyPreferenceActivity.onCreate() code
+	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) )
+	        	video_quality.add(CamcorderProfile.QUALITY_1080P);
+	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_720P) )
+	        	video_quality.add(CamcorderProfile.QUALITY_720P);
+	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_480P) )
+	        	video_quality.add(CamcorderProfile.QUALITY_480P);
+	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_CIF) )
+	        	video_quality.add(CamcorderProfile.QUALITY_CIF);
+	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QVGA) )
+	        	video_quality.add(CamcorderProfile.QUALITY_QVGA);
+	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QCIF) )
+	        	video_quality.add(CamcorderProfile.QUALITY_QCIF);
+			if( MyDebug.LOG ) {
+				for(int i=0;i<video_quality.size();i++) {
+		        	Log.d(TAG, "supported video quality: " + video_quality.get(i).intValue());
+				}
+			}
+
+			current_video_quality = -1;
+			String video_quality_value_s = sharedPreferences.getString(getVideoQualityPreferenceKey(cameraId), "");
+			if( MyDebug.LOG )
+				Log.d(TAG, "video_quality_value: " + video_quality_value_s);
+			if( video_quality_value_s.length() > 0 ) {
+				// parse the saved video quality, and make sure it is still valid
+				try {
+					int video_quality_value = Integer.parseInt(video_quality_value_s);
+					if( MyDebug.LOG )
+						Log.d(TAG, "video_quality_value: " + video_quality_value);
+					// now find value in valid list
+					for(int i=0;i<video_quality.size() && current_video_quality==-1;i++) {
+			        	Integer value = video_quality.get(i);
+			        	if( value.intValue() == video_quality_value ) {
+			        		current_video_quality = i;
+							if( MyDebug.LOG )
+								Log.d(TAG, "set current_video_quality to: " + current_video_quality);
+			        	}
+					}
+					if( current_video_quality == -1 ) {
+						if( MyDebug.LOG )
+							Log.e(TAG, "failed to find valid video_quality");
+					}
+				}
+				catch(NumberFormatException exception) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "video_quality invalid format, can't parse to int");
+				}
+			}
+			if( current_video_quality == -1 && video_quality.size() > 0 ) {
+				// default to highest quality
+				current_video_quality = 0;
+				if( MyDebug.LOG )
+					Log.d(TAG, "set video_quality value to " + video_quality.get(current_video_quality).intValue());
+			}
+			if( current_video_quality != -1 ) {
+	    		// now save, so it's available for PreferenceActivity
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getVideoQualityPreferenceKey(cameraId), "" + video_quality.get(current_video_quality).intValue());
+				editor.apply();
+			}
 
     		// update parameters
     		camera.setParameters(parameters);
@@ -1774,6 +1849,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	    	    showToast(null, "Failed to save video file");
 			}
 			else {
+				video_name = videoFile.getAbsolutePath();
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "save to: " + video_name);
 	        	this.camera.unlock();
 	        	video_recorder = new MediaRecorder();
 	        	video_recorder.setCamera(camera);
@@ -1789,7 +1867,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 					video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 				}
 	        	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);*/
-				CamcorderProfile profile = CamcorderProfile.get(this.cameraId, CamcorderProfile.QUALITY_HIGH);
+				CamcorderProfile profile = CamcorderProfile.get(this.cameraId, current_video_quality != -1 ? video_quality.get(current_video_quality).intValue() : CamcorderProfile.QUALITY_HIGH);
+	    		if( MyDebug.LOG ) {
+	    			Log.d(TAG, "current_video_quality: " + current_video_quality);
+	    			if( current_video_quality != -1 )
+	    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality).intValue());
+	    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+	    		}
 				if( record_audio ) {
 					video_recorder.setProfile(profile);
 				}
@@ -1817,7 +1901,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	            	video_start_time = System.currentTimeMillis();
 	            	video_start_time_set = true;
     				showToast(stopstart_video_toast, "Started recording video");
-		            main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(videoFile)));
+    				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
 				}
 	        	catch(IOException e) {
 		    		if( MyDebug.LOG )
@@ -2456,6 +2540,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	return this.current_size_index;
     }
     
+    List<Integer> getSupportedVideoQuality() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedVideoQuality");
+		return this.video_quality;
+    }
+    
     public int getCameraId() {
     	return this.cameraId;
     }
@@ -2587,6 +2677,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     // must be static, to safely call from other Activities
     public static String getResolutionPreferenceKey(int cameraId) {
     	return "camera_resolution_" + cameraId;
+    }
+    
+    public static String getVideoQualityPreferenceKey(int cameraId) {
+    	return "video_quality_" + cameraId;
     }
     
     public static String getIsVideoPreferenceKey() {
