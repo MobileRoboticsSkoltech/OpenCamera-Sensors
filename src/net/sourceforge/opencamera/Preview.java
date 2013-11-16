@@ -16,6 +16,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -34,6 +35,7 @@ import android.media.MediaRecorder;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -144,6 +146,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private static final int FOCUS_SUCCESS = 1;
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
+
+	private IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+	private boolean has_battery_frac = false;
+	private float battery_frac = 0.0f;
+	private long last_battery_time = 0;
 	
 	// for testing:
 	public int count_cameraStartPreview = 0;
@@ -1221,6 +1228,43 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			}
 		}
 		
+		{
+			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
+				// only check periodically - unclear if checking is costly in any way
+				Activity activity = (Activity)this.getContext();
+				Intent batteryStatus = activity.registerReceiver(null, battery_ifilter);
+				int battery_level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+				int battery_scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+				has_battery_frac = true;
+				battery_frac = battery_level/(float)battery_scale;
+				last_battery_time = System.currentTimeMillis();
+				if( MyDebug.LOG )
+					Log.d(TAG, "Battery status is " + battery_level + " / " + battery_scale + " : " + battery_frac);
+			}
+			//battery_frac = 0.2999f; // test
+			int battery_x = (int) (5 * scale + 0.5f); // convert dps to pixels
+			int battery_y = battery_x;
+			int battery_width = (int) (5 * scale + 0.5f); // convert dps to pixels
+			int battery_height = 4*battery_width;
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				int diff = canvas.getWidth() - canvas.getHeight();
+				battery_x += diff/2;
+				battery_y -= diff/2;
+			}
+			if( ui_rotation == 90 ) {
+				battery_y = canvas.getHeight() - battery_y - battery_height;
+			}
+			if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
+				battery_x = canvas.getWidth() - battery_x - battery_width;
+			}
+			p.setColor(Color.WHITE);
+			p.setStyle(Paint.Style.STROKE);
+			canvas.drawRect(battery_x, battery_y, battery_x+battery_width, battery_y+battery_height, p);
+			p.setColor(battery_frac >= 0.3f ? Color.GREEN : Color.RED);
+			p.setStyle(Paint.Style.FILL);
+			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
+		}
+
 		canvas.restore();
 		
 		if( this.focus_success != FOCUS_DONE ) {
@@ -1247,6 +1291,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				focus_success = FOCUS_DONE;
 			}
 		}
+		
 	}
 
 	public void zoomIn() {
