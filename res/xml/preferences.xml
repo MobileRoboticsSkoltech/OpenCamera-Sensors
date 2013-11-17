@@ -99,14 +99,14 @@
 	        android:defaultValue="ui_right"
 	        />
 
-	    <!--  if we move this to another PreferenceCategory, we should update code to remove this Preference -->	
 	    <CheckBoxPreference
 	        android:key="preference_pause_preview"
 	        android:title="@string/preference_pause_preview"
 	        android:summary="@string/preference_pause_preview_summary"
 	        android:defaultValue="false"
 	        />
-	
+
+        <!--  if we move this to another PreferenceCategory, we should update code to remove this Preference -->    
 	    <CheckBoxPreference
 	        android:key="preference_shutter_sound"
 	        android:title="@string/preference_shutter_sound"
