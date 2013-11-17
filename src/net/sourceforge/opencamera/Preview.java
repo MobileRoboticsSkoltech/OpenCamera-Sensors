@@ -1820,45 +1820,68 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		timer_delay = 0;
         }
 
+		String burst_mode_value = sharedPreferences.getString("preference_burst_mode", "1");
+		try {
+			n_burst = Integer.parseInt(burst_mode_value);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "n_burst: " + n_burst);
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "failed to parse burst_mode_value: " + burst_mode_value);
+    		e.printStackTrace();
+    		n_burst = 1;
+        }
+		remaining_burst_photos = n_burst-1;
+		
 		if( timer_delay == 0 ) {
 			takePicture();
 		}
 		else {
-	        this.phase = PHASE_TIMER;
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "timer_delay: " + timer_delay);
-    		class TakePictureTimerTask extends TimerTask {
-    			public void run() {
-    				if( beepTimerTask != null ) {
-    					beepTimerTask.cancel();
-    				}
-    				takePicture();
-    			}
-    		}
-    		take_photo_time = System.currentTimeMillis() + timer_delay;
-			if( MyDebug.LOG )
-				Log.d(TAG, "take photo at: " + take_photo_time);
-		    showToast(take_photo_toast, "Started timer");
-        	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
-
-    		if( sharedPreferences.getBoolean("preference_timer_beep", true) ) {
-	    		class BeepTimerTask extends TimerTask {
-	    			public void run() {
-	    			    try {
-	    			        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-	    					Activity activity = (Activity)getContext();
-	    			        Ringtone r = RingtoneManager.getRingtone(activity.getApplicationContext(), notification);
-	    			        r.play();
-	    			    }
-	    			    catch(Exception e) {
-	    			    }		
-	    			}
-	    		}
-	        	beepTimer.schedule(beepTimerTask = new BeepTimerTask(), 0, 1000);
-    		}
+			takePictureOnTimer(timer_delay, false);
 		}
 	}
 	
+	private void takePictureOnTimer(long timer_delay, boolean repeated) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "takePictureOnTimer");
+			Log.d(TAG, "timer_delay: " + timer_delay);
+		}
+        this.phase = PHASE_TIMER;
+		class TakePictureTimerTask extends TimerTask {
+			public void run() {
+				if( beepTimerTask != null ) {
+					beepTimerTask.cancel();
+				}
+				takePicture();
+			}
+		}
+		take_photo_time = System.currentTimeMillis() + timer_delay;
+		if( MyDebug.LOG )
+			Log.d(TAG, "take photo at: " + take_photo_time);
+		if( !repeated ) {
+			showToast(take_photo_toast, "Started timer");
+		}
+    	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		if( sharedPreferences.getBoolean("preference_timer_beep", true) ) {
+    		class BeepTimerTask extends TimerTask {
+    			public void run() {
+    			    try {
+    			        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    					Activity activity = (Activity)getContext();
+    			        Ringtone r = RingtoneManager.getRingtone(activity.getApplicationContext(), notification);
+    			        r.play();
+    			    }
+    			    catch(Exception e) {
+    			    }		
+    			}
+    		}
+        	beepTimer.schedule(beepTimerTask = new BeepTimerTask(), 0, 1000);
+		}
+	}
+
 	private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
@@ -1986,20 +2009,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( MyDebug.LOG )
 			Log.d(TAG, "focus_mode is " + focus_mode);
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String burst_mode_value = sharedPreferences.getString("preference_burst_mode", "1");
-		try {
-			n_burst = Integer.parseInt(burst_mode_value);
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "n_burst: " + n_burst);
-		}
-        catch(NumberFormatException e) {
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "failed to parse burst_mode_value: " + burst_mode_value);
-    		e.printStackTrace();
-    		n_burst = 1;
-        }
-		remaining_burst_photos = n_burst-1;
 		if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
 	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 				@Override
@@ -2338,9 +2347,29 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
 	            if( remaining_burst_photos > 0 ) {
 	            	remaining_burst_photos--;
-        	        phase = PHASE_TAKING_PHOTO;
-					showGUI(false);
-	            	takePictureWhenFocused();
+
+	        		String timer_value = sharedPreferences.getString("preference_burst_interval", "0");
+	        		long timer_delay = 0;
+	        		try {
+	        			timer_delay = Integer.parseInt(timer_value) * 1000;
+	        		}
+	                catch(NumberFormatException e) {
+	            		if( MyDebug.LOG )
+	            			Log.e(TAG, "failed to parse timer_value: " + timer_value);
+	            		e.printStackTrace();
+	            		timer_delay = 0;
+	                }
+
+	        		if( timer_delay == 0 ) {
+	        			// we go straight to taking a photo rather than refocusing, for speed
+	        			// need to manually set the phase and rehide the GUI
+	        	        phase = PHASE_TAKING_PHOTO;
+						showGUI(false);
+		            	takePictureWhenFocused();
+	        		}
+	        		else {
+	        			takePictureOnTimer(timer_delay, true);
+	        		}
 	            }
     	    }
     	};

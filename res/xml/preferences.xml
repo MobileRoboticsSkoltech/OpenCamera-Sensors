@@ -81,6 +81,15 @@
             android:defaultValue="1"
             />
 
+        <ListPreference
+            android:key="preference_burst_interval"
+            android:title="@string/preference_burst_interval"
+            android:summary="@string/preference_burst_interval_summary"
+            android:entries="@array/preference_burst_interval_entries"
+            android:entryValues="@array/preference_burst_interval_values"
+            android:defaultValue="0"
+            />
+
         <ListPreference 
 	        android:key="preference_ui_placement"
 	        android:title="@string/preference_ui_placement"

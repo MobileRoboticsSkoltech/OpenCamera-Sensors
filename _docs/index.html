@@ -43,7 +43,7 @@
 <li>Choice of camera and video resolution, and JPEG image quality.</li>
 <li>Video recording (with optional audio).</li>
 <li>Timer option.</li>
-<li>Burst mode.</li>
+<li>Burst mode, with configurable delay.</li>
 <li>Option to silence the shutter (requires Android 4.2).</li>
 <li>GUI works in any orientation without any pause when changing orientation. Option to optimise for left and right-handed users.</li>
 <li>Configurable volume keys (to take picture, or zoom).</li>
@@ -162,9 +162,13 @@ darker. Set to 0 for the default exposure. See
 
 <p><b>Timer</b> - Set a timer for taking photos or recording video.</p>
 
-<p><b>Timer beep</b> - Whether to beep when the timer is counting down.</p>
+<p><b>Timer beep</b> - Whether to beep when the timer is counting down, or for the burst mode delay (see below).</p>
 
 <p><b>Burst mode</b> - Take a repeated set of photos when the camera button is pressed.</p>
+
+<p><b>Burst mode interval</b> - Specify the delay (if any) between photos in burst mode. Note that if no delay is
+selected, the actual speed that the photos are taken at will depend on the performance of your device's camera. If
+a delay is selected, note that this does not include the time taken to auto-focus and take each photo.</p>
 
 <p><b>UI placement</b> - Whether to optimise the user interface for left-handed or right-handed use.</p>
 
@@ -204,7 +208,8 @@ Version 1.3 (Work in progress)
 FIXED   Video files may not have shown up properly in other apps, or over USB,
         until rebooting device.
 FIXED   Make sure filenames for images/videos are unique.
-ADDED   New burst mode option - take a repeated set of photos at once.
+ADDED   New burst mode option - take a repeated set of photos at once, or with
+        a delay.
 ADDED   Option for video resolution.
 ADDED   Display battery status on screen.
 UPDATED Only show zoom level (if that option is set) when actually zoomed in.

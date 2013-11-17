@@ -22,9 +22,11 @@
     <string name="preference_timer">Timer</string>
     <string name="preference_timer_summary">Set a timer for the camera</string>
     <string name="preference_timer_beep">Timer beep</string>
-    <string name="preference_timer_beep_summary">Whether to beep when timer is counting down</string>
+    <string name="preference_timer_beep_summary">Whether to beep when timer is counting down, or for burst mode delay</string>
     <string name="preference_burst_mode">Burst mode</string>
     <string name="preference_burst_mode_summary">Whether to take multiple photos</string>
+    <string name="preference_burst_interval">Burst mode interval</string>
+    <string name="preference_burst_interval_summary">Delay (if any) between taking photos in burst mode</string>
     <string name="preference_ui_placement">UI placement</string>
     <string name="preference_ui_placement_summary">Whether to have a left-handed or right-handed user interface</string>
     <string name="preference_pause_preview">Pause after taking photo</string>

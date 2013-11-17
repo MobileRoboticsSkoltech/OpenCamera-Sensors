@@ -87,6 +87,32 @@
         <item>5</item>
         <item>10</item>
     </string-array>
+    <string-array name="preference_burst_interval_entries">
+        <item>No delay</item>
+        <item>1s</item>
+        <item>2s</item>
+        <item>5s</item>
+        <item>10s</item>
+        <item>15s</item>
+        <item>20s</item>
+        <item>30s</item>
+        <item>60s</item>
+        <item>2m</item>
+        <item>5m</item>
+    </string-array>
+    <string-array name="preference_burst_interval_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+        <item>300</item>
+    </string-array>
     <string-array name="preference_ui_placement_entries">
         <item>Left-handed user interface</item>
         <item>Right-handed user interface</item>
