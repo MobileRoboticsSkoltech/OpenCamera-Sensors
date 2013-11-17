@@ -765,18 +765,26 @@ public class MainActivity extends Activity {
 
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile;
-        if( type == MEDIA_TYPE_IMAGE ) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-            "IMG_"+ timeStamp + ".jpg");
+        String index = "";
+        File mediaFile = null;
+        for(int count=1;count<=100;count++) {
+            if( type == MEDIA_TYPE_IMAGE ) {
+                mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                "IMG_"+ timeStamp + index + ".jpg");
+            }
+            else if( type == MEDIA_TYPE_VIDEO ) {
+                mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                "VID_"+ timeStamp + index + ".mp4");
+            }
+            else {
+                return null;
+            }
+            if( !mediaFile.exists() ) {
+            	break;
+            }
+            index = "_" + count; // try to find a unique filename
         }
-        else if( type == MEDIA_TYPE_VIDEO ) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-            "VID_"+ timeStamp + ".mp4");
-        }
-        else {
-            return null;
-        }
+        
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "getOutputMediaFile returns: " + mediaFile);

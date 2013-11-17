@@ -85,6 +85,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private Timer beepTimer = new Timer();
 	private TimerTask beepTimerTask = null;
 	private long take_photo_time = 0;
+	private int remaining_burst_photos = 0;
+	private int n_burst = 1;
 
 	private boolean is_preview_started = false;
 	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
@@ -1986,6 +1988,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		String focus_mode = parameters.getFocusMode();
 		if( MyDebug.LOG )
 			Log.d(TAG, "focus_mode is " + focus_mode);
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String burst_mode_value = sharedPreferences.getString("preference_burst_mode", "1");
+		try {
+			n_burst = Integer.parseInt(burst_mode_value);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "n_burst: " + n_burst);
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "failed to parse burst_mode_value: " + burst_mode_value);
+    		e.printStackTrace();
+    		n_burst = 1;
+        }
+		remaining_burst_photos = n_burst-1;
 		if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
 	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 				@Override
@@ -2027,6 +2044,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			showGUI(true);
 			return;
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
 
     	Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
     		// don't do anything here, but we need to implement the callback to get the shutter sound (at least on Galaxy Nexus and Nexus 7)
@@ -2286,30 +2305,46 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	    	    showToast(null, "Failed to save photo");
     	        }
 
-    	        //is_taking_photo = false;
-    	        phase = PHASE_NORMAL;
     			is_preview_started = false; // preview automatically stopped due to taking photo
-				boolean pause_preview = sharedPreferences.getBoolean("preference_pause_preview", false);
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "pause_preview? " + pause_preview);
-				if( pause_preview && success ) {
-	    			setPreviewPaused(true);
-	    			preview_image_name = picFileName;
-				}
-				else {
+    	        phase = PHASE_NORMAL; // need to set this even if remaining burst photos, so we can restart the preview
+	            if( remaining_burst_photos > 0 ) {
 	    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
 	    	    	// (otherwise this can fail, at least on Nexus 7)
 		            startCameraPreview();
-					showGUI(true);
 	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "onPictureTaken started preview");
-				}
+	        			Log.d(TAG, "burst mode photos remaining: onPictureTaken started preview");
+	            }
+	            else {
+	    	        phase = PHASE_NORMAL;
+					boolean pause_preview = sharedPreferences.getBoolean("preference_pause_preview", false);
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "pause_preview? " + pause_preview);
+					if( pause_preview && success ) {
+		    			setPreviewPaused(true);
+		    			preview_image_name = picFileName;
+					}
+					else {
+		    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
+		    	    	// (otherwise this can fail, at least on Nexus 7)
+			            startCameraPreview();
+						showGUI(true);
+		        		if( MyDebug.LOG )
+		        			Log.d(TAG, "onPictureTaken started preview");
+					}
+	            }
 
 	            if( bitmap != null ) {
         		    bitmap.recycle();
         		    bitmap = null;
 	            }
 	            System.gc();
+
+	            if( remaining_burst_photos > 0 ) {
+	            	remaining_burst_photos--;
+        	        phase = PHASE_TAKING_PHOTO;
+					showGUI(false);
+	            	takePictureWhenFocused();
+	            }
     	    }
     	};
     	{
@@ -2328,9 +2363,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
             }
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
+    		String toast_text = "";
+    		if( n_burst > 1 ) {
+    			int photo = (n_burst-remaining_burst_photos);
+    			toast_text = "Taking a photo... (" +  photo + " / " + n_burst + ")";
+    		}
+    		else {
+    			toast_text = "Taking a photo...";
+    		}
+    		if( MyDebug.LOG )
+    			Log.d(TAG, toast_text);
     		camera.takePicture(shutterCallback, null, jpegPictureCallback);
     		count_cameraTakePicture++;
-			showToast(take_photo_toast, "Taking a photo...");
+			showToast(take_photo_toast, toast_text);
     	}
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");

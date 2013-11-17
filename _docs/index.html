@@ -43,6 +43,7 @@
 <li>Choice of camera and video resolution, and JPEG image quality.</li>
 <li>Video recording (with optional audio).</li>
 <li>Timer option.</li>
+<li>Burst mode.</li>
 <li>Option to silence the shutter (requires Android 4.2).</li>
 <li>GUI works in any orientation without any pause when changing orientation. Option to optimise for left and right-handed users.</li>
 <li>Configurable volume keys (to take picture, or zoom).</li>
@@ -114,7 +115,7 @@ a Gallery app from Google Play (e.g., <a href="https://play.google.com/store/app
 
 <p>The on-screen display also shows the remaining battery left (green/red status bar in the corner), and optionally
 the zoom level (if zoomed in), the remaining free storage space on the device, and the current angle orientation
-of the camera.</p> 
+of the camera.</p>
 
 <p><img src="settings.png" width="32" height="32"><b>Settings</b> - Click to open the <a href="#settings">Settings</a>.</p>
 
@@ -163,6 +164,8 @@ darker. Set to 0 for the default exposure. See
 
 <p><b>Timer beep</b> - Whether to beep when the timer is counting down.</p>
 
+<p><b>Burst mode</b> - Take a repeated set of photos when the camera button is pressed.</p>
+
 <p><b>UI placement</b> - Whether to optimise the user interface for left-handed or right-handed use.</p>
 
 <p><b>Pause after taking photo</b> - If ticked, after taking a photo the display will pause, with options to share or delete the
@@ -200,6 +203,8 @@ Version 1.3 (Work in progress)
 
 FIXED   Video files may not have shown up properly in other apps, or over USB,
         until rebooting device.
+FIXED   Make sure filenames for images/videos are unique.
+ADDED   New burst mode option - take a repeated set of photos at once.
 ADDED   Option for video resolution.
 ADDED   Display battery status on screen.
 UPDATED Only show zoom level (if that option is set) when actually zoomed in.
