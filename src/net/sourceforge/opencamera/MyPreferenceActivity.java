@@ -12,7 +12,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
+import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -37,7 +37,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 
 		if( !supports_auto_stabilise ) {
 			Preference pref = (Preference)findPreference("preference_auto_stabilise");
-        	PreferenceCategory pg = (PreferenceCategory)this.findPreference("preference_category_camera_effects");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_effects");
         	pg.removePreference(pref);
 		}
 
@@ -130,7 +130,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
         	// Camera.enableShutterSound requires JELLY_BEAN_MR1 or greater
         	CheckBoxPreference cbp = (CheckBoxPreference)findPreference("preference_shutter_sound");
-        	PreferenceCategory pg = (PreferenceCategory)this.findPreference("preference_category_camera_controls");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_controls_more");
         	pg.removePreference(cbp);
         }
 
@@ -194,7 +194,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			@SuppressWarnings("deprecation")
 			ListPreference lp = (ListPreference)findPreference(preference_key);
         	@SuppressWarnings("deprecation")
-        	PreferenceCategory pg = (PreferenceCategory)this.findPreference(preference_category_key);
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference(preference_category_key);
         	pg.removePreference(lp);
 		}
 	}

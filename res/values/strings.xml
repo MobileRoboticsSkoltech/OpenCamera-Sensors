@@ -15,8 +15,6 @@
     <string name="preference_white_balance_summary">Choose a setting to adjust the white balance</string>
     <string name="preference_exposure">Set the exposure compensation</string>
     <string name="preference_exposure_summary">Set to 0 for the default exposure compensation.</string>
-    <string name="preference_record_audio">Record audio?</string>
-    <string name="preference_record_audio_summary">Whether to record audio when recording video</string>
 
     <string name="preference_category_camera_controls">Camera Controls</string>
     <string name="preference_timer">Timer</string>
@@ -27,6 +25,7 @@
     <string name="preference_burst_mode_summary">Whether to take multiple photos</string>
     <string name="preference_burst_interval">Burst mode interval</string>
     <string name="preference_burst_interval_summary">Delay (if any) between taking photos in burst mode</string>
+    <string name="preference_screen_camera_controls_more">More camera controls…</string>
     <string name="preference_ui_placement">UI placement</string>
     <string name="preference_ui_placement_summary">Whether to have a left-handed or right-handed user interface</string>
     <string name="preference_pause_preview">Pause after taking photo</string>
@@ -44,13 +43,16 @@
     <string name="preference_show_angle">Show angle</string>
     <string name="preference_show_angle_summary">Display the current device orientation angle on screen</string>
     
-    <string name="preference_category_camera_quality">Camera Quality</string>
+    <string name="preference_category_camera_quality">Photo and Video Settings</string>
+    <string name="preference_screen_camera_quality">Photo and video settings…</string>
     <string name="preference_resolution">Camera resolution</string>
     <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
     <string name="preference_quality">Image quality</string>
     <string name="preference_quality_summary">Set the image quality of saved photo images (recommended value is 90%%)</string>
     <string name="video_quality">Video resolution</string>
     <string name="video_quality_summary">Set the resolution of videos</string>
+    <string name="preference_record_audio">Record audio?</string>
+    <string name="preference_record_audio_summary">Whether to record audio when recording video</string>
     
     <string name="preference_category_online">Online</string>
     <string name="preference_online_help">Online help</string>
