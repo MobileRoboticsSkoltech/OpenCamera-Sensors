@@ -627,8 +627,6 @@ public class MainActivity extends Activity {
 			}
 			intent.putExtra("resolution_widths", widths);
 			intent.putExtra("resolution_heights", heights);
-			int current_size_index = this.preview.getCurrentPictureSizeIndex();
-			intent.putExtra("current_resolution_index", current_size_index);
 		}
 		
 		List<Integer> video_quality = this.preview.getSupportedVideoQuality();
@@ -732,7 +730,7 @@ public class MainActivity extends Activity {
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
 
-    private File getImageFolder() {
+    public File getImageFolder() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), folder_name);

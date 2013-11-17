@@ -2644,7 +2644,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	}
     	return sizes;
     }*/
-    List<Camera.Size> getSupportedPictureSizes() {
+    public List<Camera.Size> getSupportedPictureSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPictureSizes");
 		return this.sizes;
