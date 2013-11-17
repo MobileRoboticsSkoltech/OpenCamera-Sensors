@@ -1821,7 +1821,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
         }
 
 		if( timer_delay == 0 ) {
-	        this.phase = PHASE_TAKING_PHOTO;
 			takePicture();
 		}
 		else {
@@ -1833,12 +1832,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     				if( beepTimerTask != null ) {
     					beepTimerTask.cancel();
     				}
-        	        //is_taking_photo_on_timer = false; // must be set to false now, to indicate that we can no longer try to cancel the timer task!
-        	        phase = PHASE_TAKING_PHOTO;
     				takePicture();
     			}
     		}
-    		//is_taking_photo_on_timer = true;
     		take_photo_time = System.currentTimeMillis() + timer_delay;
 			if( MyDebug.LOG )
 				Log.d(TAG, "take photo at: " + take_photo_time);
@@ -1866,6 +1862,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
+        this.phase = PHASE_TAKING_PHOTO;
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not available");
