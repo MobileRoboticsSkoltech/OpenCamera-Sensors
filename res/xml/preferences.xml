@@ -152,6 +152,13 @@
 	            android:defaultValue="true"
 	            />
 
+	        <CheckBoxPreference
+	            android:key="preference_grid_3x3"
+	            android:title="@string/preference_grid_3x3"
+	            android:summary="@string/preference_grid_3x3_summary"
+	            android:defaultValue="false"
+	            />
+
         </PreferenceScreen>
    	</PreferenceCategory>
 

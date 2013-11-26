@@ -1107,6 +1107,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "ui_rotation: " + ui_rotation);*/
 
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		if( camera != null && sharedPreferences.getBoolean("preference_grid_3x3", false) ) {
+			p.setColor(Color.WHITE);
+			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(2.0f*canvas.getWidth()/3.0f, 0.0f, 2.0f*canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(0.0f, canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, canvas.getHeight()/3.0f, p);
+			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
+		}
+
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
 		
@@ -1124,7 +1133,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			text_extra_offset_y = -(int)(0.5*text_y);
 		}
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
