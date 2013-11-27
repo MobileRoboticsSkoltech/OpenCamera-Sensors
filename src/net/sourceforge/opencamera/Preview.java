@@ -2749,6 +2749,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				canvas.drawLine(rect.left, rect.top, rect.right, rect.top, paint);
 				canvas.drawLine(rect.left, rect.top, rect.left, rect.bottom, paint);
 
+				paint.setStyle(Paint.Style.FILL); // needed for Android 4.4!
 				paint.setColor(Color.WHITE);
 				canvas.drawText(text, canvas.getWidth()/2 - bounds.width()/2, canvas.getHeight()/2 + offset_y, paint);
 				canvas.restore();
