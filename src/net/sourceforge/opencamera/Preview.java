@@ -1352,11 +1352,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		if( MyDebug.LOG )
     			Log.d(TAG, "zoom in to " + zoom_factor);
 			Camera.Parameters parameters = camera.getParameters();
-			if( MyDebug.LOG )
-				Log.d(TAG, "zoom was: " + parameters.getZoom());
-			parameters.setZoom((int)zoom_factor);
-    		camera.setParameters(parameters);
-    		clearFocusAreas();
+			if( parameters.isZoomSupported() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "zoom was: " + parameters.getZoom());
+				parameters.setZoom((int)zoom_factor);
+				try {
+					camera.setParameters(parameters);
+				}
+	        	catch(RuntimeException e) {
+	        		// crash reported in v1.3 on device "PANTONE 5 SoftBank 107SH (SBM107SH)"
+		    		if( MyDebug.LOG )
+		    			Log.e(TAG, "runtime exception in zoomIn()");
+					e.printStackTrace();
+	        	}
+	    		clearFocusAreas();
+			}
         }
 	}
 	
@@ -1368,11 +1378,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			if( MyDebug.LOG )
 				Log.d(TAG, "zoom out to " + zoom_factor);
 			Camera.Parameters parameters = camera.getParameters();
-			if( MyDebug.LOG )
-				Log.d(TAG, "zoom was: " + parameters.getZoom());
-			parameters.setZoom((int)zoom_factor);
-    		camera.setParameters(parameters);
-    		clearFocusAreas();
+			if( parameters.isZoomSupported() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "zoom was: " + parameters.getZoom());
+				parameters.setZoom((int)zoom_factor);
+				try {
+					camera.setParameters(parameters);
+				}
+	        	catch(RuntimeException e) {
+	        		// see note for zoomIn()
+		    		if( MyDebug.LOG )
+		    			Log.e(TAG, "runtime exception in zoomOut()");
+					e.printStackTrace();
+	        	}
+	    		clearFocusAreas();
+			}
         }
 	}
 
