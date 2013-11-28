@@ -194,7 +194,45 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
         }
 	}
 
-    @Override
+	private ArrayList<Camera.Area> getAreas(float x, float y) {
+		float alpha = x / (float)this.getWidth();
+		float beta = y / (float)this.getHeight();
+		float focus_x = 2000.0f * alpha - 1000.0f;
+		float focus_y = 2000.0f * beta - 1000.0f;
+		int focus_size = 50;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "x, y: " + x + ", " + y);
+			Log.d(TAG, "alpha, beta: " + alpha + ", " + beta);
+			Log.d(TAG, "focus x, y: " + focus_x + ", " + focus_y);
+		}
+		Rect rect = new Rect();
+		rect.left = (int)focus_x - focus_size;
+		rect.right = (int)focus_x + focus_size;
+		rect.top = (int)focus_y - focus_size;
+		rect.bottom = (int)focus_y + focus_size;
+		if( rect.left < -1000 ) {
+			rect.left = -1000;
+			rect.right = rect.left + 2*focus_size;
+		}
+		else if( rect.right > 1000 ) {
+			rect.right = 1000;
+			rect.left = rect.right - 2*focus_size;
+		}
+		if( rect.top < -1000 ) {
+			rect.top = -1000;
+			rect.bottom = rect.top + 2*focus_size;
+		}
+		else if( rect.bottom > 1000 ) {
+			rect.bottom = 1000;
+			rect.top = rect.bottom - 2*focus_size;
+		}
+
+	    ArrayList<Camera.Area> areas = new ArrayList<Camera.Area>();
+	    areas.add(new Camera.Area(rect, 1000));
+	    return areas;
+	}
+
+	@Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
         //invalidate();
@@ -232,46 +270,40 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
             }
             else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
         		if( MyDebug.LOG )
-        			Log.d(TAG, "set focus area");
+        			Log.d(TAG, "set focus (and metering?) area");
 				this.has_focus_area = true;
 				this.focus_screen_x = (int)event.getX();
 				this.focus_screen_y = (int)event.getY();
-				float alpha = event.getX() / (float)this.getWidth();
-				float beta = event.getY() / (float)this.getHeight();
-				float focus_x = 2000.0f * alpha - 1000.0f;
-				float focus_y = 2000.0f * beta - 1000.0f;
-				int focus_size = 50;
-        		if( MyDebug.LOG ) {
-        			Log.d(TAG, "x, y: " + event.getX() + ", " + event.getY());
-        			Log.d(TAG, "alpha, beta: " + alpha + ", " + beta);
-        			Log.d(TAG, "focus x, y: " + focus_x + ", " + focus_y);
-        		}
-				Rect rect = new Rect();
-				rect.left = (int)focus_x - focus_size;
-				rect.right = (int)focus_x + focus_size;
-				rect.top = (int)focus_y - focus_size;
-				rect.bottom = (int)focus_y + focus_size;
-				if( rect.left < -1000 ) {
-					rect.left = -1000;
-					rect.right = rect.left + 2*focus_size;
-				}
-				else if( rect.right > 1000 ) {
-					rect.right = 1000;
-					rect.left = rect.right - 2*focus_size;
-				}
-				if( rect.top < -1000 ) {
-					rect.top = -1000;
-					rect.bottom = rect.top + 2*focus_size;
-				}
-				else if( rect.bottom > 1000 ) {
-					rect.bottom = 1000;
-					rect.top = rect.bottom - 2*focus_size;
-				}
 
-			    ArrayList<Camera.Area> focusAreas = new ArrayList<Camera.Area>();
-			    focusAreas.add(new Camera.Area(rect, 1000));
+				ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
+			    parameters.setFocusAreas(areas);
 
-			    parameters.setFocusAreas(focusAreas);
+			    // also set metering areas
+			    if( parameters.getMaxNumMeteringAreas() == 0 ) {
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "metering areas not supported");
+			    }
+			    else {
+			    	parameters.setMeteringAreas(areas);
+			    }
+
+			    try {
+			    	camera.setParameters(parameters);
+			    }
+			    catch(RuntimeException e) {
+			    	// just in case something has gone wrong
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "failed to set parameters for focus area");
+	        		e.printStackTrace();
+			    }
+            }
+            else {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "set metering area");
+        		// don't set has_focus_area in this mode
+				ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
+		    	parameters.setMeteringAreas(areas);
+
 			    try {
 			    	camera.setParameters(parameters);
 			    }
@@ -343,8 +375,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearFocusAreas()");
         Camera.Parameters parameters = camera.getParameters();
+        boolean update_parameters = false;
         if( parameters.getMaxNumFocusAreas() > 0 ) {
         	parameters.setFocusAreas(null);
+        	update_parameters = true;
+        }
+        if( parameters.getMaxNumMeteringAreas() > 0 ) {
+        	parameters.setMeteringAreas(null);
+        	update_parameters = true;
+        }
+        if( update_parameters ) {
         	camera.setParameters(parameters);
         }
 		has_focus_area = false;

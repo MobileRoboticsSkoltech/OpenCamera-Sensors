@@ -37,7 +37,7 @@
 <li>Zoom via multi-touch gesture and single-touch control.</li>
 <li>Flash on/off/auto/torch.</li>
 <li>Choice of focus modes (including macro).</li>
-<li>Touch to select focus area.</li>
+<li>Touch to select focus area and metering area (metering area is used to determine exposure).</li>
 <li>Choice of front/back camera.</li>
 <li>Choose scene modes, color effects, white balance and exposure compensation.</li>
 <li>Choice of camera and video resolution, and JPEG image quality.</li>
@@ -76,10 +76,11 @@ running Android 4.3. The auto-stabilise feature may not be available if the app 
 
 <p><b>Quickstart</b></p>
 
-<p>Simply point, and press the blue camera icon <img src="take_photo.png" width="32" height="32"> to take a photo. The camera
-will automatically focus before taking the picture. You can also focus at any time by touching on the screen (and if
-your device supports focus areas, you can touch the part of the screen you want to focus - a square will appear showing
-the focus area, and turn green if the auto-focus is successful). To zoom, either
+<p>Simply point, and press the blue camera icon <img src="take_photo.png" width="32" height="32"> to take a photo.
+The camera will automatically focus before taking the picture. You can also focus at any time by touching on the screen. If
+your device supports focus areas, you can touch the part of the screen you want to focus. Touching an area will also
+(if your device supports it) control the exposure level (e.g., so clicking on a bright area will adjust the exposure
+so that it becomes less bright). To zoom, either
 press use the zoom "-" and "+" control buttons, or do a multi-touch "pinch" gesture. You can also control via the volume keys on
 your phone or tablet - by default, pressing them will take a photo, but can change this to zoom in/out from the
 <a href="#settings">Settings</a>.</p>
@@ -95,6 +96,9 @@ press the trash icon <img src="trash.png" width="32" height="32">. To share an i
 you want to switch off the display, do so on your device manually).</p>
 
 <p><b>On-Screen User Interface</b></p>
+
+<p>A white square is shown (depending on the focus mode), which turns green to indicate that the auto-focus was
+successful, or red if it was not.</p>
 
 <p><img src="switch_camera.png" width="32" height="32"><b>Switch camera</b> - Switches between front and back camera (if your
 device has two cameras).</p>
@@ -222,6 +226,8 @@ Version 1.4 (Work in progress)
 
 FIXED   "Toast" pop-up messages looked poor on Android 4.4.
 ADDED   Option to display a 3x3 grid ("rule of thirds").
+ADDED   Touch to select focus area also now sets the metering area (used to
+        determine exposure).
 
 Version 1.3 (2013/11/18)
 
