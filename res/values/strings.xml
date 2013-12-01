@@ -15,6 +15,8 @@
     <string name="preference_white_balance_summary">Choose a setting to adjust the white balance</string>
     <string name="preference_exposure">Set the exposure compensation</string>
     <string name="preference_exposure_summary">Set to 0 for the default exposure compensation.</string>
+    <string name="preference_face_detection">Face detection</string>
+    <string name="preference_face_detection_summary">Whether to use face detection instead of focus areas.</string>
 
     <string name="preference_category_camera_controls">Camera Controls</string>
     <string name="preference_timer">Timer</string>

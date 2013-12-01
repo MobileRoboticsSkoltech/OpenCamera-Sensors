@@ -35,7 +35,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -609,6 +609,7 @@ public class MainActivity extends Activity {
 
 		intent.putExtra("cameraId", this.preview.getCameraId());
 		intent.putExtra("supports_auto_stabilise", this.supports_auto_stabilise);
+		intent.putExtra("supports_face_detection", this.preview.supportsFaceDetection());
 
 		putIntentExtra(intent, "color_effects", this.preview.getSupportedColorEffects());
 		putIntentExtra(intent, "scene_modes", this.preview.getSupportedSceneModes());

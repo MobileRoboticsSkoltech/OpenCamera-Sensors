@@ -45,7 +45,17 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		readFromIntent("scene_modes", "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
 		readFromIntent("white_balances", "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
 		readFromIntent("exposures", "preference_exposure", "0", "preference_category_camera_effects");
-		
+
+		boolean supports_face_detection = getIntent().getExtras().getBoolean("supports_face_detection");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_face_detection: " + supports_face_detection);
+
+		if( !supports_face_detection ) {
+			Preference pref = (Preference)findPreference("preference_face_detection");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_effects");
+        	pg.removePreference(pref);
+		}
+
 		int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
 		int [] heights = getIntent().getExtras().getIntArray("resolution_heights");
 		if( widths != null && heights != null ) {

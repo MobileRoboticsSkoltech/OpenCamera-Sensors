@@ -26,7 +26,9 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.hardware.Camera;
+import android.hardware.Camera.Face;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -59,6 +61,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("##.00");
     private Camera.CameraInfo camera_info = new Camera.CameraInfo();
+    private Matrix camera_to_preview_matrix = new Matrix();
+    private Matrix preview_to_camera_matrix = new Matrix();
+	private RectF face_rect = new RectF();
+    private int display_orientation = 0;
 
 	private boolean ui_placement_right = true;
 
@@ -138,7 +144,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private ToastBoxer stopstart_video_toast = new ToastBoxer();
 	
 	private int ui_rotation = 0;
-	
+
+	private boolean supports_face_detection = false;
+	private boolean using_face_detection = false;
+	private Face [] faces_detected = null;
 	private boolean has_focus_area = false;
 	private int focus_screen_x = 0;
 	private int focus_screen_y = 0;
@@ -193,16 +202,54 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		}
         }
 	}
+	
+	/*private void previewToCamera(float [] coords) {
+		float alpha = coords[0] / (float)this.getWidth();
+		float beta = coords[1] / (float)this.getHeight();
+		coords[0] = 2000.0f * alpha - 1000.0f;
+		coords[1] = 2000.0f * beta - 1000.0f;
+	}*/
+
+	/*private void cameraToPreview(float [] coords) {
+		float alpha = (coords[0] + 1000.0f) / 2000.0f;
+		float beta = (coords[1] + 1000.0f) / 2000.0f;
+		coords[0] = alpha * (float)this.getWidth();
+		coords[1] = beta * (float)this.getHeight();
+	}*/
+
+	private void calculateCameraToPreviewMatrix() {
+		camera_to_preview_matrix.reset();
+		// from http://developer.android.com/reference/android/hardware/Camera.Face.html#rect
+		Camera.getCameraInfo(cameraId, camera_info);
+		// Need mirror for front camera.
+		boolean mirror = (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
+		camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
+		// This is the value for android.hardware.Camera.setDisplayOrientation.
+		camera_to_preview_matrix.postRotate(display_orientation);
+		// Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
+		// UI coordinates range from (0, 0) to (width, height).
+		camera_to_preview_matrix.postScale(this.getWidth() / 2000f, this.getHeight() / 2000f);
+		camera_to_preview_matrix.postTranslate(this.getWidth() / 2f, this.getHeight() / 2f);
+	}
+
+	private void calculatePreviewToCameraMatrix() {
+		calculateCameraToPreviewMatrix();
+		if( !camera_to_preview_matrix.invert(preview_to_camera_matrix) ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "calculatePreviewToCameraMatrix failed to invert matrix!?");
+		}
+	}
 
 	private ArrayList<Camera.Area> getAreas(float x, float y) {
-		float alpha = x / (float)this.getWidth();
-		float beta = y / (float)this.getHeight();
-		float focus_x = 2000.0f * alpha - 1000.0f;
-		float focus_y = 2000.0f * beta - 1000.0f;
+		float [] coords = {x, y};
+		calculatePreviewToCameraMatrix();
+		preview_to_camera_matrix.mapPoints(coords);
+		float focus_x = coords[0];
+		float focus_y = coords[1];
+		
 		int focus_size = 50;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "x, y: " + x + ", " + y);
-			Log.d(TAG, "alpha, beta: " + alpha + ", " + beta);
 			Log.d(TAG, "focus x, y: " + focus_x + ", " + focus_y);
 		}
 		Rect rect = new Rect();
@@ -260,7 +307,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		// note, we always try to force start the preview (in case is_preview_paused has become false)
         startCameraPreview();
 
-        if( camera != null ) {
+        if( camera != null && !this.using_face_detection ) {
             Camera.Parameters parameters = camera.getParameters();
 			String focus_mode = parameters.getFocusMode();
     		this.has_focus_area = false;
@@ -607,6 +654,30 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			}
 			else {
 				zoomControls.setVisibility(View.GONE);
+			}
+			
+			// get face detection supported
+			this.faces_detected = null;
+			this.supports_face_detection = parameters.getMaxNumDetectedFaces() > 0;
+			if( this.supports_face_detection ) {
+				this.using_face_detection = sharedPreferences.getBoolean("preference_face_detection", false);
+			}
+			else {
+				this.using_face_detection = false;
+			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "supports_face_detection?: " + supports_face_detection);
+				Log.d(TAG, "using_face_detection?: " + using_face_detection);
+			}
+			if( this.using_face_detection ) {
+				class MyFaceDetectionListener implements Camera.FaceDetectionListener {
+				    @Override
+				    public void onFaceDetection(Face[] faces, Camera camera) {
+				    	faces_detected = new Face[faces.length];
+				    	System.arraycopy(faces, 0, faces_detected, 0, faces.length);				    	
+				    }
+				}
+				camera.setFaceDetectionListener(new MyFaceDetectionListener());
 			}
 
 			// get available color effects
@@ -1101,6 +1172,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			Log.d(TAG, "    setDisplayOrientation to " + result);
 		}
 	    camera.setDisplayOrientation(result);
+	    this.display_orientation = result;
 	}
 	
 	// for taking photos - from http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
@@ -1341,7 +1413,39 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				focus_success = FOCUS_DONE;
 			}
 		}
-		
+		if( this.using_face_detection && this.faces_detected != null ) {
+			p.setColor(Color.YELLOW);
+			p.setStyle(Paint.Style.STROKE);
+			for(Face face : faces_detected) {
+				// Android doc recommends filtering out faces with score less than 50
+				if( face.score >= 50 ) {
+					calculateCameraToPreviewMatrix();
+					face_rect.set(face.rect);
+					this.camera_to_preview_matrix.mapRect(face_rect);
+					/*int eye_radius = (int) (5 * scale + 0.5f); // convert dps to pixels
+					int mouth_radius = (int) (10 * scale + 0.5f); // convert dps to pixels
+					float [] top_left = {face.rect.left, face.rect.top};
+					float [] bottom_right = {face.rect.right, face.rect.bottom};
+					canvas.drawRect(top_left[0], top_left[1], bottom_right[0], bottom_right[1], p);*/
+					canvas.drawRect(face_rect, p);
+					/*if( face.leftEye != null ) {
+						float [] left_point = {face.leftEye.x, face.leftEye.y};
+						cameraToPreview(left_point);
+						canvas.drawCircle(left_point[0], left_point[1], eye_radius, p);
+					}
+					if( face.rightEye != null ) {
+						float [] right_point = {face.rightEye.x, face.rightEye.y};
+						cameraToPreview(right_point);
+						canvas.drawCircle(right_point[0], right_point[1], eye_radius, p);
+					}
+					if( face.mouth != null ) {
+						float [] mouth_point = {face.mouth.x, face.mouth.y};
+						cameraToPreview(mouth_point);
+						canvas.drawCircle(mouth_point[0], mouth_point[1], mouth_radius, p);
+					}*/
+				}
+			}
+		}
 	}
 
 	public void zoomIn() {
@@ -2592,6 +2696,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 			}
+			if( this.using_face_detection ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "start face detection");
+				camera.startFaceDetection();
+				faces_detected = null;
+			}
 		}
 		this.setPreviewPaused(false);
     }
@@ -2675,6 +2785,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
 		this.invalidate();
 	}
+
+    public boolean supportsFaceDetection() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsFaceDetection");
+    	return supports_face_detection;
+    }
 
     List<String> getSupportedColorEffects() {
 		if( MyDebug.LOG )
