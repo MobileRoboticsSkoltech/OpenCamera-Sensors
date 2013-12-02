@@ -3006,17 +3006,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	if( camera != null ) {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
     		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
-    		if( store_location ) {
-    	    	if( location != null ) {
-    	    		if( MyDebug.LOG )
-    	    			Log.d(TAG, "updating parameters from location...");
-    	            Camera.Parameters parameters = camera.getParameters();
-    	            parameters.setGpsAltitude(location.getAltitude());
-    	            parameters.setGpsLatitude(location.getLatitude());
-    	            parameters.setGpsLongitude(location.getLongitude());
-    	            parameters.setGpsTimestamp(location.getTime());
-    	            camera.setParameters(parameters);
-    	    	}
+    		if( store_location && location != null ) {
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "updating parameters from location...");
+	            Camera.Parameters parameters = camera.getParameters();
+	            parameters.setGpsAltitude(location.getAltitude());
+	            parameters.setGpsLatitude(location.getLatitude());
+	            parameters.setGpsLongitude(location.getLongitude());
+	            parameters.setGpsTimestamp(location.getTime());
+	            camera.setParameters(parameters);
     		}
     		else {
 	    		if( MyDebug.LOG )
