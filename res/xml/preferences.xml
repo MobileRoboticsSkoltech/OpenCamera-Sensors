@@ -192,7 +192,14 @@
 		        android:defaultValue="90"
 		        />
 	    
-	        <ListPreference 
+	        <CheckBoxPreference
+	            android:key="preference_location"
+	            android:title="@string/preference_location"
+	            android:summary="@string/preference_location_summary"
+	            android:defaultValue="true"
+	            />
+		    
+            <ListPreference 
 	            android:key="video_quality"
 	            android:title="@string/video_quality"
 	            android:summary="@string/video_quality_summary"

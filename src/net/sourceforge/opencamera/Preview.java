@@ -1392,6 +1392,30 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			p.setStyle(Paint.Style.FILL);
 			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
 		}
+		
+		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
+		if( store_location ) {
+			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
+			int location_y = (int) (11 * scale + 0.5f); // convert dps to pixels
+			int location_radius = (int) (6 * scale + 0.5f); // convert dps to pixels
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				int diff = canvas.getWidth() - canvas.getHeight();
+				location_x += diff/2;
+				location_y -= diff/2;
+			}
+			if( ui_rotation == 90 ) {
+				location_y = canvas.getHeight() - location_y - location_radius;
+			}
+			if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
+				location_x = canvas.getWidth() - location_x - location_radius;
+			}
+			p.setColor(location != null ? Color.GREEN : Color.YELLOW);
+			p.setStyle(Paint.Style.FILL);
+			canvas.drawCircle(location_x,  location_y, location_radius, p);
+			p.setColor(Color.BLACK);
+			p.setStyle(Paint.Style.STROKE);
+			canvas.drawCircle(location_x,  location_y, location_radius, p);
+		}
 
 		canvas.restore();
 		
@@ -2970,20 +2994,37 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     void locationChanged(Location location) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "locationChanged");
-		this.location = location;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
+		if( store_location ) {
+			this.location = location;
+		}
 		updateParametersFromLocation();
     }
     
     private void updateParametersFromLocation() {
-    	if( camera != null && location != null ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "updating parameters from location...");
-            Camera.Parameters parameters = camera.getParameters();
-            parameters.setGpsAltitude(location.getAltitude());
-            parameters.setGpsLatitude(location.getLatitude());
-            parameters.setGpsLongitude(location.getLongitude());
-            parameters.setGpsTimestamp(location.getTime());
-            camera.setParameters(parameters);
+    	if( camera != null ) {
+    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+    		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
+    		if( store_location ) {
+    	    	if( location != null ) {
+    	    		if( MyDebug.LOG )
+    	    			Log.d(TAG, "updating parameters from location...");
+    	            Camera.Parameters parameters = camera.getParameters();
+    	            parameters.setGpsAltitude(location.getAltitude());
+    	            parameters.setGpsLatitude(location.getLatitude());
+    	            parameters.setGpsLongitude(location.getLongitude());
+    	            parameters.setGpsTimestamp(location.getTime());
+    	            camera.setParameters(parameters);
+    	    	}
+    		}
+    		else {
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "removing location data from parameters...");
+	            Camera.Parameters parameters = camera.getParameters();
+	            parameters.removeGpsData();
+	            camera.setParameters(parameters);
+    		}
     	}
     }
 	

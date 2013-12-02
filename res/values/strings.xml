@@ -53,6 +53,8 @@
     <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
     <string name="preference_quality">Image quality</string>
     <string name="preference_quality_summary">Set the image quality of saved photo images (recommended value is 90%%)</string>
+    <string name="preference_location">Store location data</string>
+    <string name="preference_location_summary">Whether to store GPS location data in the photos</string>
     <string name="video_quality">Video resolution</string>
     <string name="video_quality_summary">Set the resolution of videos</string>
     <string name="preference_record_audio">Record audio?</string>
