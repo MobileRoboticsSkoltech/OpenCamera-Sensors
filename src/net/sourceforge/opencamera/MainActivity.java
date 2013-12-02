@@ -8,6 +8,9 @@ import java.util.List;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -42,6 +45,8 @@ public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 	private SensorManager mSensorManager = null;
 	private Sensor mSensorAccelerometer = null;
+	private LocationManager mLocationManager = null;
+	private LocationListener locationListener = null;
 	private Preview preview = null;
 	private int current_orientation = 0;
 	private OrientationEventListener orientationEventListener = null;
@@ -96,6 +101,8 @@ public class MainActivity extends Activity {
 				Log.d(TAG, "no support for accelerometer");
 		}
 
+		mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
 		preview = new Preview(this, savedInstanceState);
 		((FrameLayout) findViewById(R.id.preview)).addView(preview);
 		
@@ -137,9 +144,30 @@ public class MainActivity extends Activity {
         mSensorManager.registerListener(preview, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
 
-        layoutUI();
+		// Define a listener that responds to location updates
+		locationListener = new LocationListener() {
+		    public void onLocationChanged(Location location) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onLocationChanged");
+		    	preview.locationChanged(location);
+		    }
+
+		    public void onStatusChanged(String provider, int status, Bundle extras) {
+		    }
+
+		    public void onProviderEnabled(String provider) {
+		    }
+
+		    public void onProviderDisabled(String provider) {
+		    }
+		};
+		mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+		mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+		layoutUI();
 
         preview.onResume();
+
     }
 
     @Override
@@ -149,6 +177,7 @@ public class MainActivity extends Activity {
         super.onPause();
         mSensorManager.unregisterListener(preview);
         orientationEventListener.disable();
+        mLocationManager.removeUpdates(locationListener);
 		preview.onPause();
     }
 

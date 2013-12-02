@@ -32,6 +32,7 @@ import android.hardware.Camera.Face;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.media.Ringtone;
@@ -129,6 +130,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	
 	private List<Integer> video_quality = null;
 	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
+	
+	private Location location = null;
 	
 	class ToastBoxer {
 		public Toast toast = null;
@@ -949,7 +952,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			}
 			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);
 			
-    		// now switch to video if saved
+			// must be done after setting parameters, as this function may set parameters
+			updateParametersFromLocation();
+
+			// now switch to video if saved
 			boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "saved_is_video: " + saved_is_video);
@@ -2960,6 +2966,26 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			Log.d(TAG, "setUIRotation");
 		this.ui_rotation = ui_rotation;
 	}
+
+    void locationChanged(Location location) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "locationChanged");
+		this.location = location;
+		updateParametersFromLocation();
+    }
+    
+    private void updateParametersFromLocation() {
+    	if( camera != null && location != null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "updating parameters from location...");
+            Camera.Parameters parameters = camera.getParameters();
+            parameters.setGpsAltitude(location.getAltitude());
+            parameters.setGpsLatitude(location.getLatitude());
+            parameters.setGpsLongitude(location.getLongitude());
+            parameters.setGpsTimestamp(location.getTime());
+            camera.setParameters(parameters);
+    	}
+    }
 	
 	public boolean isVideo() {
 		return is_video;
