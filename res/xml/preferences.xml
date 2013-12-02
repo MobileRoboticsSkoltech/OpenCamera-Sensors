@@ -200,7 +200,7 @@
 	            />
 		    
             <ListPreference 
-	            android:key="video_quality"
+	            android:key="preference_video_quality"
 	            android:title="@string/video_quality"
 	            android:summary="@string/video_quality_summary"
 	            />

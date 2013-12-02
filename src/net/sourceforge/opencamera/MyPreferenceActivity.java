@@ -124,7 +124,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "video_quality values: " + values[i]);*/
 			}
-			ListPreference lp = (ListPreference)findPreference("video_quality");
+			ListPreference lp = (ListPreference)findPreference("preference_video_quality");
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
 			String video_quality_preference_key = Preview.getVideoQualityPreferenceKey(cameraId);
