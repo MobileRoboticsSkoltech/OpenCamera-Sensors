@@ -170,6 +170,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public int count_cameraStartPreview = 0;
 	public int count_cameraAutoFocus = 0;
 	public int count_cameraTakePicture = 0;
+	public boolean has_received_location = false;
+	public boolean has_set_location = false;
 	public boolean test_low_memory = false;
 
 	Preview(Context context) {
@@ -522,6 +524,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		}
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+        has_set_location = false;
 		//if( is_taking_photo_on_timer ) {
 		if( this.isOnTimer() ) {
 			takePictureTimerTask.cancel();
@@ -559,6 +562,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			Log.d(TAG, "start_preview?: " + start_preview);
 			debug_time = System.currentTimeMillis();
 		}
+        has_set_location = false;
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		showGUI(true);
@@ -2994,6 +2998,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     void locationChanged(Location location) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "locationChanged");
+		this.has_received_location = true;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
 		if( store_location ) {
@@ -3015,6 +3020,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	            parameters.setGpsLongitude(location.getLongitude());
 	            parameters.setGpsTimestamp(location.getTime());
 	            camera.setParameters(parameters);
+	            this.has_set_location = true;
     		}
     		else {
 	    		if( MyDebug.LOG )
@@ -3022,6 +3028,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	            Camera.Parameters parameters = camera.getParameters();
 	            parameters.removeGpsData();
 	            camera.setParameters(parameters);
+	            this.has_set_location = false;
     		}
     	}
     }
