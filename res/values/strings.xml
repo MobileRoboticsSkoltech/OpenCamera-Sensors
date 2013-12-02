@@ -57,7 +57,7 @@
     <string name="preference_location_summary">Whether to store GPS location data in the photos</string>
     <string name="video_quality">Video resolution</string>
     <string name="video_quality_summary">Set the resolution of videos</string>
-    <string name="preference_record_audio">Record audio?</string>
+    <string name="preference_record_audio">Record audio</string>
     <string name="preference_record_audio_summary">Whether to record audio when recording video</string>
     
     <string name="preference_category_online">Online</string>
