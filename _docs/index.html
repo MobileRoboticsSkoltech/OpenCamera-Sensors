@@ -50,6 +50,7 @@
 <li>Configurable volume keys (to take picture, or zoom).</li>
 <li>Choice of save location.</li>
 <li>On-screen display shows battery, remaining device memory, and orientation angle of camera; also option to overlay 3x3 grid for "rule of thirds".</li>
+<li>Optional GPS location tagging of photos.</li>
 <li>Completely free and ad-free, unlike most Android apps.</li>
 </ul></p>
 
@@ -122,7 +123,9 @@ a Gallery app from Google Play (e.g., <a href="https://play.google.com/store/app
 
 <p>The on-screen display also shows the remaining battery left (green/red status bar in the corner), and optionally
 the zoom level (if zoomed in), the remaining free storage space on the device, and the current angle orientation
-of the camera.</p>
+of the camera. If "Store location data" is enabled (on by default), then a circle next to the battery indicator
+will show the location status: it will turn green when the location is available (you can still take photos when
+the circle is yellow, it's just that location data won't be stored in the photo).</p>
 
 <p><a name="auto_stabilise"><b>Auto-stabilise feature</b></p>
 
@@ -216,6 +219,8 @@ images will in general come out as a slightly lower resolution (due to the rotat
 <p><b>Image quality</b> - The image quality of saved JPEG images. Higher means better quality, but the image files will take up
 more storage space.</p>
 
+<p><b>Store location data</b> - If selected, then photos will be tagged with the current location.</p>
+
 <p><b>Video resolution</b> - Select the resolution of videos taken by the camera.</p>
 
 <p><b>Record audio?</b> - Whether to record audio when recording a video.</p>
@@ -232,6 +237,8 @@ Version 1.4 (Work in progress)
 
 FIXED   "Toast" pop-up messages looked poor on Android 4.4.
 FIXED   Calculation for focus areas wasn't right for front facing cameras.
+ADDED   Images now tagged with current location (optional, on by default). Note
+        that Open Camera now requires Location permission, for this feature.
 ADDED   Option for face detection.
 ADDED   Touch to select focus area also now sets the metering area (used to
         determine exposure).
