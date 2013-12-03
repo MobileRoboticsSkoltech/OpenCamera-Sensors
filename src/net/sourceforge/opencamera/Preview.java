@@ -132,6 +132,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
 	
 	private Location location = null;
+	public boolean has_set_location = false;
 	private Bitmap location_bitmap = null;
 	private Rect location_dest = new Rect();
 
@@ -173,7 +174,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public int count_cameraAutoFocus = 0;
 	public int count_cameraTakePicture = 0;
 	public boolean has_received_location = false;
-	public boolean has_set_location = false;
 	public boolean test_low_memory = false;
 
 	Preview(Context context) {
@@ -1402,7 +1402,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		}
 		
 		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
-		if( store_location && location != null) {
+		if( store_location && has_set_location ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
 			int location_y = (int) (5 * scale + 0.5f); // convert dps to pixels
 			int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
@@ -3011,14 +3011,28 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	if( camera != null ) {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
     		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
-    		if( store_location && location != null ) {
-	    		if( MyDebug.LOG )
+    		// Android camera source claims we need to check lat/long != 0.0d
+    		if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "updating parameters from location...");
+	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude());
+	    		}
 	            Camera.Parameters parameters = camera.getParameters();
-	            parameters.setGpsAltitude(location.getAltitude());
+	            parameters.removeGpsData();
 	            parameters.setGpsLatitude(location.getLatitude());
 	            parameters.setGpsLongitude(location.getLongitude());
-	            parameters.setGpsTimestamp(location.getTime());
+	            parameters.setGpsProcessingMethod(location.getProvider()); // from http://boundarydevices.com/how-to-write-an-android-camera-app/
+	            if( location.hasAltitude() ) {
+		            parameters.setGpsAltitude(location.getAltitude());
+	            }
+	            else {
+	            	// Android camera source claims we need to fake one if not present
+	            	// and indeed, this is needed to fix crash on Nexus 7
+		            parameters.setGpsAltitude(0);
+	            }
+	            if( location.getTime() != 0 ) { // from Android camera source
+	            	parameters.setGpsTimestamp(location.getTime() / 1000);
+	            }
 	            camera.setParameters(parameters);
 	            this.has_set_location = true;
     		}
