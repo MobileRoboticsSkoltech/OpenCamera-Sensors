@@ -132,7 +132,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
 	
 	private Location location = null;
-	
+	private Bitmap location_bitmap = null;
+	private Rect location_dest = new Rect();
+
 	class ToastBoxer {
 		public Toast toast = null;
 
@@ -206,6 +208,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     			cameraId = 0;
     		}
         }
+
+    	location_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth);
 	}
 	
 	/*private void previewToCamera(float [] coords) {
@@ -1398,27 +1402,23 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		}
 		
 		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
-		if( store_location ) {
+		if( store_location && location != null) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
-			int location_y = (int) (11 * scale + 0.5f); // convert dps to pixels
-			int location_radius = (int) (6 * scale + 0.5f); // convert dps to pixels
+			int location_y = (int) (5 * scale + 0.5f); // convert dps to pixels
+			int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
 				int diff = canvas.getWidth() - canvas.getHeight();
 				location_x += diff/2;
 				location_y -= diff/2;
 			}
 			if( ui_rotation == 90 ) {
-				location_y = canvas.getHeight() - location_y - location_radius;
+				location_y = canvas.getHeight() - location_y - location_size;
 			}
 			if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
-				location_x = canvas.getWidth() - location_x - location_radius;
+				location_x = canvas.getWidth() - location_x - location_size;
 			}
-			p.setColor(location != null ? Color.GREEN : Color.YELLOW);
-			p.setStyle(Paint.Style.FILL);
-			canvas.drawCircle(location_x,  location_y, location_radius, p);
-			p.setColor(Color.BLACK);
-			p.setStyle(Paint.Style.STROKE);
-			canvas.drawCircle(location_x,  location_y, location_radius, p);
+			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
+			canvas.drawBitmap(location_bitmap, null, location_dest, p);
 		}
 
 		canvas.restore();

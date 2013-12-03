@@ -39,26 +39,27 @@ public final class R {
         public static final int activity_vertical_margin=0x7f060001;
     }
     public static final class drawable {
-        public static final int flash_auto=0x7f020000;
-        public static final int flash_off=0x7f020001;
-        public static final int flash_on=0x7f020002;
-        public static final int flash_red_eye=0x7f020003;
-        public static final int flash_torch=0x7f020004;
-        public static final int focus_mode_auto=0x7f020005;
-        public static final int focus_mode_continuous_video=0x7f020006;
-        public static final int focus_mode_edof=0x7f020007;
-        public static final int focus_mode_fixed=0x7f020008;
-        public static final int focus_mode_infinity=0x7f020009;
-        public static final int focus_mode_macro=0x7f02000a;
-        public static final int gallery=0x7f02000b;
-        public static final int ic_launcher=0x7f02000c;
-        public static final int settings=0x7f02000d;
-        public static final int share=0x7f02000e;
-        public static final int switch_camera=0x7f02000f;
-        public static final int switch_video=0x7f020010;
-        public static final int take_photo=0x7f020011;
-        public static final int take_video=0x7f020012;
-        public static final int trash=0x7f020013;
+        public static final int earth=0x7f020000;
+        public static final int flash_auto=0x7f020001;
+        public static final int flash_off=0x7f020002;
+        public static final int flash_on=0x7f020003;
+        public static final int flash_red_eye=0x7f020004;
+        public static final int flash_torch=0x7f020005;
+        public static final int focus_mode_auto=0x7f020006;
+        public static final int focus_mode_continuous_video=0x7f020007;
+        public static final int focus_mode_edof=0x7f020008;
+        public static final int focus_mode_fixed=0x7f020009;
+        public static final int focus_mode_infinity=0x7f02000a;
+        public static final int focus_mode_macro=0x7f02000b;
+        public static final int gallery=0x7f02000c;
+        public static final int ic_launcher=0x7f02000d;
+        public static final int settings=0x7f02000e;
+        public static final int share=0x7f02000f;
+        public static final int switch_camera=0x7f020010;
+        public static final int switch_video=0x7f020011;
+        public static final int take_photo=0x7f020012;
+        public static final int take_video=0x7f020013;
+        public static final int trash=0x7f020014;
     }
     public static final class id {
         public static final int action_settings=0x7f0a000b;
