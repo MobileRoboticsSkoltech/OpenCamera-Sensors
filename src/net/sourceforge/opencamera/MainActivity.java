@@ -145,24 +145,30 @@ public class MainActivity extends Activity {
         orientationEventListener.enable();
 
 		// Define a listener that responds to location updates
-		locationListener = new LocationListener() {
-		    public void onLocationChanged(Location location) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "onLocationChanged");
-		    	preview.locationChanged(location);
-		    }
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
+		if( store_location ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "create locationListener");
+			locationListener = new LocationListener() {
+			    public void onLocationChanged(Location location) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "onLocationChanged");
+			    	preview.locationChanged(location);
+			    }
 
-		    public void onStatusChanged(String provider, int status, Bundle extras) {
-		    }
+			    public void onStatusChanged(String provider, int status, Bundle extras) {
+			    }
 
-		    public void onProviderEnabled(String provider) {
-		    }
+			    public void onProviderEnabled(String provider) {
+			    }
 
-		    public void onProviderDisabled(String provider) {
-		    }
-		};
-		mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-		mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			    public void onProviderDisabled(String provider) {
+			    }
+			};
+			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+			mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		}
 
 		layoutUI();
 
@@ -177,7 +183,9 @@ public class MainActivity extends Activity {
         super.onPause();
         mSensorManager.unregisterListener(preview);
         orientationEventListener.disable();
-        mLocationManager.removeUpdates(locationListener);
+        if( this.locationListener != null ) {
+            mLocationManager.removeUpdates(locationListener);
+        }
 		preview.onPause();
     }
 
