@@ -146,7 +146,7 @@ public class MainActivity extends Activity {
 
 		// Define a listener that responds to location updates
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
+		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
 		if( store_location ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "create locationListener");

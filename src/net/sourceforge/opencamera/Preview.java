@@ -1401,7 +1401,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
 		}
 		
-		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
+		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
 		if( store_location && has_set_location ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
 			int location_y = (int) (5 * scale + 0.5f); // convert dps to pixels
@@ -3000,7 +3000,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			Log.d(TAG, "locationChanged");
 		this.has_received_location = true;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
+		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
 		if( store_location ) {
 			this.location = location;
 		}
@@ -3010,7 +3010,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     private void updateParametersFromLocation() {
     	if( camera != null ) {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-    		boolean store_location = sharedPreferences.getBoolean("preference_location", true);
+    		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
     		// Android camera source claims we need to check lat/long != 0.0d
     		if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
 	    		if( MyDebug.LOG ) {

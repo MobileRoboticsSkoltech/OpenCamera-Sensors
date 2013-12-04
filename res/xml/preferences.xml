@@ -196,7 +196,7 @@
 	            android:key="preference_location"
 	            android:title="@string/preference_location"
 	            android:summary="@string/preference_location_summary"
-	            android:defaultValue="true"
+	            android:defaultValue="false"
 	            />
 		    
             <ListPreference 
