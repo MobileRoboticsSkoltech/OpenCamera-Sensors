@@ -148,8 +148,6 @@ public class MainActivity extends Activity {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
 		if( store_location ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "create locationListener");
 			locationListener = new LocationListener() {
 			    public void onLocationChanged(Location location) {
 					if( MyDebug.LOG )
