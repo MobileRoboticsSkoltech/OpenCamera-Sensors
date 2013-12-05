@@ -34,6 +34,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.media.CamcorderProfile;
+import android.media.ExifInterface;
 import android.media.MediaRecorder;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -2496,6 +2497,64 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
         				success = true;
         	            if( picFile != null ) {
+        	            	if( bitmap != null ) {
+        	            		// need to update EXIF data!
+                	    		if( MyDebug.LOG )
+                	    			Log.d(TAG, "write temp file to record EXIF data");
+        	            		File tempFile = File.createTempFile("opencamera_exif", "");
+    		    	            OutputStream tempOutputStream = new FileOutputStream(tempFile);
+            	            	tempOutputStream.write(data);
+            	            	tempOutputStream.close();
+                	    		if( MyDebug.LOG )
+                	    			Log.d(TAG, "read back EXIF data");
+            	            	ExifInterface exif = new ExifInterface(tempFile.getAbsolutePath());
+            	            	String exif_aperture = exif.getAttribute(ExifInterface.TAG_APERTURE);
+            	            	String exif_datetime = exif.getAttribute(ExifInterface.TAG_DATETIME);
+            	            	String exif_exposure_time = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME);
+            	            	String exif_flash = exif.getAttribute(ExifInterface.TAG_FLASH);
+            	            	String exif_focal_length = exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH);
+            	            	String exif_gps_altitude = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE);
+            	            	String exif_gps_altitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF);
+            	            	String exif_gps_datestamp = exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP);
+            	            	String exif_gps_latitude = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
+            	            	String exif_gps_latitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
+            	            	String exif_gps_longitude = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
+            	            	String exif_gps_longitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
+            	            	String exif_gps_processing_method = exif.getAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD);
+            	            	String exif_gps_timestamp = exif.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP);
+            	            	// leave width/height, as this will have changed!
+            	            	String exif_iso = exif.getAttribute(ExifInterface.TAG_ISO);
+            	            	String exif_make = exif.getAttribute(ExifInterface.TAG_MAKE);
+            	            	String exif_model = exif.getAttribute(ExifInterface.TAG_MODEL);
+            	            	String exif_orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            	            	String exif_white_balance = exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE);
+                	    		if( MyDebug.LOG )
+                	    			Log.d(TAG, "now write new EXIF data");
+            	            	ExifInterface exif_new = new ExifInterface(picFile.getAbsolutePath());
+            	            	exif_new.setAttribute(ExifInterface.TAG_APERTURE, exif_aperture);
+            	            	exif_new.setAttribute(ExifInterface.TAG_DATETIME, exif_datetime);
+            	            	exif_new.setAttribute(ExifInterface.TAG_EXPOSURE_TIME, exif_exposure_time);
+            	            	exif_new.setAttribute(ExifInterface.TAG_FLASH, exif_flash);
+            	            	exif_new.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, exif_focal_length);
+            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, exif_gps_altitude);
+            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, exif_gps_altitude_ref);
+            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, exif_gps_datestamp);
+            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exif_gps_latitude);
+            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, exif_gps_latitude_ref);
+            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exif_gps_longitude);
+            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, exif_gps_longitude_ref);
+            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, exif_gps_processing_method);
+            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exif_gps_timestamp);
+            	            	// leave width/height, as this will have changed!
+            	            	exif_new.setAttribute(ExifInterface.TAG_ISO, exif_iso);
+            	            	exif_new.setAttribute(ExifInterface.TAG_MAKE, exif_make);
+            	            	exif_new.setAttribute(ExifInterface.TAG_MODEL, exif_model);
+            	            	exif_new.setAttribute(ExifInterface.TAG_ORIENTATION, exif_orientation);
+            	            	exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
+            	            	exif_new.saveAttributes();
+                	    		if( MyDebug.LOG )
+                	    			Log.d(TAG, "now saved EXIF data");
+        	            	}
         	            	main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(picFile)));
         	            }
         	            if( image_capture_intent ) {
