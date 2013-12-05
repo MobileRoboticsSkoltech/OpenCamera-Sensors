@@ -176,6 +176,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public int count_cameraTakePicture = 0;
 	public boolean has_received_location = false;
 	public boolean test_low_memory = false;
+	public String test_last_saved_image = null;
 
 	Preview(Context context) {
 		this(context, null);
@@ -2330,6 +2331,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
         		    float rotated_size = (float)(w0*h0);
         		    float scale = (float)Math.sqrt(orig_size/rotated_size);
         			if( test_low_memory ) {
+            			if( MyDebug.LOG )
+            				Log.d(TAG, "TESTING LOW MEMORY");
         		    	scale *= 2.0f; // test 20MP
         		    	//scale *= 1.613f; // test 13MP
         			}
@@ -2531,31 +2534,51 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
                 	    		if( MyDebug.LOG )
                 	    			Log.d(TAG, "now write new EXIF data");
             	            	ExifInterface exif_new = new ExifInterface(picFile.getAbsolutePath());
-            	            	exif_new.setAttribute(ExifInterface.TAG_APERTURE, exif_aperture);
-            	            	exif_new.setAttribute(ExifInterface.TAG_DATETIME, exif_datetime);
-            	            	exif_new.setAttribute(ExifInterface.TAG_EXPOSURE_TIME, exif_exposure_time);
-            	            	exif_new.setAttribute(ExifInterface.TAG_FLASH, exif_flash);
-            	            	exif_new.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, exif_focal_length);
-            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, exif_gps_altitude);
-            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, exif_gps_altitude_ref);
-            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, exif_gps_datestamp);
-            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exif_gps_latitude);
-            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, exif_gps_latitude_ref);
-            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exif_gps_longitude);
-            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, exif_gps_longitude_ref);
-            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, exif_gps_processing_method);
-            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exif_gps_timestamp);
-            	            	// leave width/height, as this will have changed!
-            	            	exif_new.setAttribute(ExifInterface.TAG_ISO, exif_iso);
-            	            	exif_new.setAttribute(ExifInterface.TAG_MAKE, exif_make);
-            	            	exif_new.setAttribute(ExifInterface.TAG_MODEL, exif_model);
-            	            	exif_new.setAttribute(ExifInterface.TAG_ORIENTATION, exif_orientation);
-            	            	exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
+            	            	if( exif_aperture != null )
+            	            		exif_new.setAttribute(ExifInterface.TAG_APERTURE, exif_aperture);
+            	            	if( exif_datetime != null )
+            	            		exif_new.setAttribute(ExifInterface.TAG_DATETIME, exif_datetime);
+            	            	if( exif_exposure_time != null )
+            	            		exif_new.setAttribute(ExifInterface.TAG_EXPOSURE_TIME, exif_exposure_time);
+            	            	if( exif_flash != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_FLASH, exif_flash);
+	            	            if( exif_focal_length != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, exif_focal_length);
+	            	            if( exif_gps_altitude != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, exif_gps_altitude);
+	            	            if( exif_gps_altitude_ref != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, exif_gps_altitude_ref);
+	            	            if( exif_gps_datestamp != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, exif_gps_datestamp);
+	            	            if( exif_gps_latitude != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exif_gps_latitude);
+	            	            if( exif_gps_latitude_ref != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, exif_gps_latitude_ref);
+	            	            if( exif_gps_longitude != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exif_gps_longitude);
+	            	            if( exif_gps_longitude_ref != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, exif_gps_longitude_ref);
+	            	            if( exif_gps_processing_method != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, exif_gps_processing_method);
+	            	            if( exif_gps_timestamp != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exif_gps_timestamp);
+	            	            	// leave width/height, as this will have changed!
+	            	            if( exif_iso != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_ISO, exif_iso);
+	            	            if( exif_make != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_MAKE, exif_make);
+	            	            if( exif_model != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_MODEL, exif_model);
+	            	            if( exif_orientation != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_ORIENTATION, exif_orientation);
+	            	            if( exif_white_balance != null )
+	            	            	exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
             	            	exif_new.saveAttributes();
                 	    		if( MyDebug.LOG )
                 	    			Log.d(TAG, "now saved EXIF data");
         	            	}
         	            	main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(picFile)));
+        	            	test_last_saved_image = picFileName;
         	            }
         	            if( image_capture_intent ) {
         	            	main_activity.setResult(Activity.RESULT_OK);
