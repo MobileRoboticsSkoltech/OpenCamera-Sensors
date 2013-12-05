@@ -2531,7 +2531,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
             	            	String exif_model = exif.getAttribute(ExifInterface.TAG_MODEL);
             	            	String exif_orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
             	            	String exif_white_balance = exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE);
-                	    		if( MyDebug.LOG )
+
+            					if( !tempFile.delete() ) {
+            						if( MyDebug.LOG )
+            							Log.e(TAG, "failed to delete temp " + tempFile.getAbsolutePath());
+            					}
+            	            	if( MyDebug.LOG )
                 	    			Log.d(TAG, "now write new EXIF data");
             	            	ExifInterface exif_new = new ExifInterface(picFile.getAbsolutePath());
             	            	if( exif_aperture != null )
