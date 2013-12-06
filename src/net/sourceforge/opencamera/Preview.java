@@ -101,7 +101,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private String preview_image_name = null;
 
 	private int current_orientation = 0; // orientation received by onOrientationChanged
-	private int current_rotation = 0; // orientation relative to camera's orientation
+	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setOrientation())
 	private boolean has_level_angle = false;
 	private double level_angle = 0.0f;
 	
@@ -2582,6 +2582,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
                 	    		if( MyDebug.LOG )
                 	    			Log.d(TAG, "now saved EXIF data");
         	            	}
+
         	            	main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(picFile)));
         	            	test_last_saved_image = picFileName;
         	            }
@@ -3137,7 +3138,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public boolean isVideo() {
 		return is_video;
 	}
-
+	
     // must be static, to safely call from other Activities
     public static String getFlashPreferenceKey(int cameraId) {
     	return "flash_value_" + cameraId;
@@ -3153,14 +3154,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	return "camera_resolution_" + cameraId;
     }
     
+    // must be static, to safely call from other Activities
     public static String getVideoQualityPreferenceKey(int cameraId) {
     	return "video_quality_" + cameraId;
     }
     
+    // must be static, to safely call from other Activities
     public static String getIsVideoPreferenceKey() {
     	return "is_video";
     }
-
+    
     // for testing:
     public Camera getCamera() {
 		/*if( MyDebug.LOG )
