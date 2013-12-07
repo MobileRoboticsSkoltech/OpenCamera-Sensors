@@ -167,6 +167,13 @@
 	            android:defaultValue="false"
 	            />
 
+            <CheckBoxPreference
+                android:key="preference_thumbnail_animation"
+                android:title="@string/preference_thumbnail_animation"
+                android:summary="@string/preference_thumbnail_animation_summary"
+                android:defaultValue="true"
+                />
+
         </PreferenceScreen>
    	</PreferenceCategory>
 

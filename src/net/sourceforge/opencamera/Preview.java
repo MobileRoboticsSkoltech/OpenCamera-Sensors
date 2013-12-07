@@ -99,6 +99,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private boolean is_preview_started = false;
 	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
 	private String preview_image_name = null;
+	private Bitmap thumbnail = null; // thumbnail of last picture taken
+	private boolean thumbnail_anim = false; // whether we are displaying the thumbnail animation
+	private long thumbnail_anim_start_ms = -1; // time that the thumbnail animation started
+	private Rect thumbnail_anim_src_rect = new Rect();
+	private Rect thumbnail_anim_dst_rect = new Rect();
 
 	private int current_orientation = 0; // orientation received by onOrientationChanged
 	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setOrientation())
@@ -1244,9 +1249,60 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
 		}
 
+		// note, no need to check preferences here, as we do that when setting thumbnail_anim
+		if( camera != null && this.thumbnail_anim && this.thumbnail != null ) {
+			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
+			final long duration = 500;
+			if( time > duration ) {
+				this.thumbnail_anim = false;
+			}
+			else {
+				thumbnail_anim_src_rect.left = 0;
+				thumbnail_anim_src_rect.top = 0;
+				thumbnail_anim_src_rect.right = this.thumbnail.getWidth();
+				thumbnail_anim_src_rect.bottom = this.thumbnail.getHeight();
+				Activity activity = (Activity)this.getContext();
+			    View galleryButton = (View) activity.findViewById(R.id.gallery);
+				float alpha = ((float)time)/(float)duration;
+
+				int st_x = canvas.getWidth()/2;
+				int st_y = canvas.getHeight()/2;
+				int nd_x = galleryButton.getLeft() + galleryButton.getWidth()/2;
+				int nd_y = galleryButton.getTop() + galleryButton.getHeight()/2;
+				int thumbnail_x = (int)( (1.0f-alpha)*st_x + alpha*nd_x );
+				int thumbnail_y = (int)( (1.0f-alpha)*st_y + alpha*nd_y );
+
+				float st_w = canvas.getWidth();
+				float st_h = canvas.getHeight();
+				/*if( ui_rotation == 90 || ui_rotation == 270 ) {
+					float dummy = st_w;
+					st_w = st_h;
+					st_h = dummy;
+				}*/
+				float nd_w = galleryButton.getWidth();
+				float nd_h = galleryButton.getHeight();
+				//int thumbnail_w = (int)( (1.0f-alpha)*st_w + alpha*nd_w );
+				//int thumbnail_h = (int)( (1.0f-alpha)*st_h + alpha*nd_h );
+				float correction_w = st_w/nd_w - 1.0f;
+				float correction_h = st_h/nd_h - 1.0f;
+				int thumbnail_w = (int)(st_w/(1.0f+alpha*correction_w));
+				int thumbnail_h = (int)(st_h/(1.0f+alpha*correction_h));
+				/*if( ui_rotation == 90 || ui_rotation == 270 ) {
+					int dummy = thumbnail_w;
+					thumbnail_w = thumbnail_h;
+					thumbnail_h = dummy;
+				}*/
+				thumbnail_anim_dst_rect.left = thumbnail_x - thumbnail_w/2;
+				thumbnail_anim_dst_rect.top = thumbnail_y - thumbnail_h/2;
+				thumbnail_anim_dst_rect.right = thumbnail_x + thumbnail_w/2;
+				thumbnail_anim_dst_rect.bottom = thumbnail_y + thumbnail_h/2;
+				canvas.drawBitmap(this.thumbnail, thumbnail_anim_src_rect, thumbnail_anim_dst_rect, p);
+			}
+		}
+		
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
-		
+
 		final float scale = getResources().getDisplayMetrics().density;
 		int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
 		// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
@@ -2276,7 +2332,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     			if( MyDebug.LOG )
     				Log.d(TAG, "onPictureTaken");
 
-				MainActivity main_activity = (MainActivity)Preview.this.getContext();
+        		if( thumbnail != null ) {
+        			thumbnail.recycle();
+        			thumbnail = null;
+        			thumbnail_anim = false;
+        		}
+
+        		MainActivity main_activity = (MainActivity)Preview.this.getContext();
     			boolean image_capture_intent = false;
        	        Uri image_capture_intent_uri = null;
     	        String action = main_activity.getIntent().getAction();
@@ -2298,6 +2360,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
     			if( auto_stabilise && has_level_angle && main_activity.supportsAutoStabilise() )
     			{
+    				//level_angle = -129;
         			if( MyDebug.LOG )
         				Log.d(TAG, "auto stabilising... angle: " + level_angle);
     				BitmapFactory.Options options = new BitmapFactory.Options();
@@ -2420,9 +2483,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
         			}
     			}
 
+    			String exif_orientation_s = null;
     			String picFileName = null;
+    			File picFile = null;
     	        try {
-	    			File picFile = null;
 	    			OutputStream outputStream = null;
 	    			if( image_capture_intent ) {
 	        			if( image_capture_intent_uri != null )
@@ -2530,6 +2594,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
             	            	String exif_make = exif.getAttribute(ExifInterface.TAG_MAKE);
             	            	String exif_model = exif.getAttribute(ExifInterface.TAG_MODEL);
             	            	String exif_orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            	            	exif_orientation_s = exif_orientation; // store for later use (for the thumbnail, to save rereading it)
             	            	String exif_white_balance = exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE);
 
             					if( !tempFile.delete() ) {
@@ -2637,6 +2702,91 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
         		    bitmap.recycle();
         		    bitmap = null;
 	            }
+
+	            if( success ) {
+	            	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
+	            	long time_s = System.currentTimeMillis();
+	                Camera.Parameters parameters = cam.getParameters();
+	        		Camera.Size size = parameters.getPictureSize();
+	        		int ratio = (int) Math.ceil((double) size.width / Preview.this.getWidth());
+    				BitmapFactory.Options options = new BitmapFactory.Options();
+    				options.inMutable = false;
+    				options.inPurgeable = true;
+    				options.inSampleSize = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality 
+    	    		if( MyDebug.LOG ) {
+    	    			Log.d(TAG, "    picture width   : " + size.width);
+    	    			Log.d(TAG, "    preview width   : " + Preview.this.getWidth());
+    	    			Log.d(TAG, "    ratio           : " + ratio);
+    	    			Log.d(TAG, "    inSampleSize    : " + options.inSampleSize);
+    	    			Log.d(TAG, "    current_rotation: " + current_rotation);
+    	    		}
+        			thumbnail = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+    				int thumbnail_rotation = current_rotation;
+    				Camera.getCameraInfo(cameraId, camera_info);
+    				if( camera_info.facing != Camera.CameraInfo.CAMERA_FACING_FRONT ) {
+        				// need to rotate in opposite direction
+    					thumbnail_rotation = (360 - thumbnail_rotation) % 360;
+    				}
+    				// now need to add the rotation from the Exif data
+					try {
+						if( exif_orientation_s == null ) {
+							// haven't already read the exif orientation
+		    	    		if( MyDebug.LOG )
+		    	    			Log.d(TAG, "    read exif orientation");
+		                	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
+			            	exif_orientation_s = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+						}
+	    	    		if( MyDebug.LOG )
+	    	    			Log.d(TAG, "    exif orientation string: " + exif_orientation_s);
+						int exif_orientation = 0;
+						// from http://jpegclub.org/exif_orientation.html
+						if( exif_orientation_s.equals("0") || exif_orientation_s.equals("1") ) {
+							// leave at 0
+						}
+						else if( exif_orientation_s.equals("3") ) {
+							exif_orientation = 180;
+						}
+						else if( exif_orientation_s.equals("6") ) {
+							exif_orientation = 90;
+						}
+						else if( exif_orientation_s.equals("8") ) {
+							exif_orientation = 270;
+						}
+						else {
+							// just leave at 0
+		    	    		if( MyDebug.LOG )
+		    	    			Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
+						}
+	    	    		if( MyDebug.LOG )
+	    	    			Log.d(TAG, "    exif orientation: " + exif_orientation);
+						thumbnail_rotation = (thumbnail_rotation + exif_orientation) % 360;
+					}
+					catch(IOException exception) {
+						if( MyDebug.LOG )
+							Log.e(TAG, "exif orientation ioexception");
+						exception.printStackTrace();
+					}
+    	    		if( MyDebug.LOG )
+    	    			Log.d(TAG, "    thumbnail orientation: " + thumbnail_rotation);
+
+        			if( thumbnail_rotation != 0 ) {
+        				Matrix m = new Matrix();
+        				m.setRotate(thumbnail_rotation, thumbnail.getWidth() * 0.5f, thumbnail.getHeight() * 0.5f);
+        				Bitmap rotated_thumbnail = Bitmap.createBitmap(thumbnail, 0, 0,thumbnail.getWidth(), thumbnail.getHeight(), m, true);
+        				if( rotated_thumbnail != thumbnail ) {
+        					thumbnail.recycle();
+        					thumbnail = rotated_thumbnail;
+        				}
+        			}
+
+        			if( sharedPreferences.getBoolean("preference_thumbnail_animation", true) ) {
+            			thumbnail_anim = true;
+            			thumbnail_anim_start_ms = System.currentTimeMillis();
+        			}
+    	    		if( MyDebug.LOG )
+    	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
+	            }
+
 	            System.gc();
 
 	            if( remaining_burst_photos > 0 ) {
@@ -2693,9 +2843,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     		}
     		if( MyDebug.LOG )
     			Log.d(TAG, toast_text);
-    		camera.takePicture(shutterCallback, null, jpegPictureCallback);
-    		count_cameraTakePicture++;
-			showToast(take_photo_toast, toast_text);
+    		try {
+    			camera.takePicture(shutterCallback, null, jpegPictureCallback);
+        		count_cameraTakePicture++;
+    			showToast(take_photo_toast, toast_text);
+    		}
+    		catch(RuntimeException e) {
+    			// just in case? We got a RuntimeException report here from 1 user on Google Play; I also encountered it myself once of Galaxy Nexus when starting up
+    			if( MyDebug.LOG )
+					Log.e(TAG, "runtime exception from takePicture");
+    			e.printStackTrace();
+	    	    showToast(null, "Failed to take picture");
+    		}
     	}
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
@@ -2795,7 +2954,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	    			focus_success = FOCUS_DONE;
 
 	    			if( MyDebug.LOG )
-						Log.d(TAG, "runtime exception from autofocus");
+						Log.e(TAG, "runtime exception from autoFocus");
 	    			e.printStackTrace();
 	    		}
 	        }
@@ -3003,6 +3162,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPause");
 		this.app_is_paused = true;
+		if( this.thumbnail != null ) {
+			this.thumbnail.recycle();
+			this.thumbnail = null;
+			this.thumbnail_anim = false;
+		}
 		this.closeCamera();
     }
 
