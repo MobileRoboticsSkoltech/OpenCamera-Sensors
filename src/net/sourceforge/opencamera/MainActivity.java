@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -14,17 +15,25 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Images.ImageColumns;
+import android.provider.MediaStore.Video;
+import android.provider.MediaStore.Video.VideoColumns;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -679,17 +688,121 @@ public class MainActivity extends Activity {
 		this.startActivity(intent);
     }
     
+    class Media {
+    	public Uri uri;
+    	public long date;
+    	
+    	Media(Uri uri, long date) {
+    		this.uri = uri;
+    		this.date = date;
+    	}
+    }
+    
+    private Media getLatestMedia(boolean video) {
+    	Media media = null;
+		Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+		Uri query = baseUri.buildUpon().appendQueryParameter("limit", "1").build();
+		String[] projection = video ? new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN} : new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN};
+		String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg'";
+		String order = video ? VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC" : ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
+		Cursor cursor = null;
+		try {
+			cursor = getContentResolver().query(query, projection, selection, null, order);
+			if( cursor != null && cursor.moveToFirst() ) {
+				long id = cursor.getLong(0);
+				long date = cursor.getLong(1);
+				Uri uri = ContentUris.withAppendedId(baseUri, id);
+				if( MyDebug.LOG )
+					Log.d(TAG, "found most recent uri for " + (video ? "video" : "images") + ": " + uri);
+				media = new Media(uri, date);
+			}
+		}
+		finally {
+			if( cursor != null ) {
+				cursor.close();
+			}
+		}
+		return media;
+    }
+    
     public void clickedGallery(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedGallery");
-		Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		// from http://stackoverflow.com/questions/11073832/no-activity-found-to-handle-intent - needed to fix crash if no gallery app installed
-		//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("blah")); // test
-		if( intent.resolveActivity(getPackageManager()) != null ) {
+		//Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		Uri uri = null;
+		Media image_media = getLatestMedia(false);
+		Media video_media = getLatestMedia(true);
+		if( image_media != null && video_media == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "only found images");
+			uri = image_media.uri;
+		}
+		else if( image_media == null && video_media != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "only found videos");
+			uri = video_media.uri;
+		}
+		else if( image_media != null && video_media != null ) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "found images and videos");
+				Log.d(TAG, "latest image date: " + image_media.date);
+				Log.d(TAG, "latest video date: " + video_media.date);
+			}
+			if( image_media.date >= video_media.date ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "latest image is newer");
+				uri = image_media.uri;
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "latest video is newer");
+				uri = video_media.uri;
+			}
+		}
+
+		if( uri != null ) {
+			// check uri exists
+			if( MyDebug.LOG )
+				Log.d(TAG, "found most recent uri: " + uri);
+			try {
+				ContentResolver cr = getContentResolver();
+				ParcelFileDescriptor pfd = cr.openFileDescriptor(uri, "r");
+				if( pfd == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "uri no longer exists (1): " + uri);
+					uri = null;
+				}
+				pfd.close();
+			}
+			catch(IOException e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "uri no longer exists (2): " + uri);
+				uri = null;
+			}
+		}
+		if( uri == null ) {
+			uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "launch uri:" + uri);
+		final String REVIEW_ACTION = "com.android.camera.action.REVIEW";
+		try {
+			// REVIEW_ACTION means we can view video files without autoplaying
+			Intent intent = new Intent(REVIEW_ACTION, uri);
 			this.startActivity(intent);
 		}
-		else{
-			preview.showToast(null, "No Gallery app available");
+		catch(ActivityNotFoundException e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "REVIEW_ACTION intent didn't work, try ACTION_VIEW");
+			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+			// from http://stackoverflow.com/questions/11073832/no-activity-found-to-handle-intent - needed to fix crash if no gallery app installed
+			//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("blah")); // test
+			if( intent.resolveActivity(getPackageManager()) != null ) {
+				this.startActivity(intent);
+			}
+			else{
+				preview.showToast(null, "No Gallery app available");
+			}
 		}
     }
 
