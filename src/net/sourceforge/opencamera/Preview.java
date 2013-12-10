@@ -102,8 +102,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private Bitmap thumbnail = null; // thumbnail of last picture taken
 	private boolean thumbnail_anim = false; // whether we are displaying the thumbnail animation
 	private long thumbnail_anim_start_ms = -1; // time that the thumbnail animation started
-	private Rect thumbnail_anim_src_rect = new Rect();
-	private Rect thumbnail_anim_dst_rect = new Rect();
+	private RectF thumbnail_anim_src_rect = new RectF();
+	private RectF thumbnail_anim_dst_rect = new RectF();
+	private Matrix thumbnail_anim_matrix = new Matrix();
 
 	private int current_orientation = 0; // orientation received by onOrientationChanged
 	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setOrientation())
@@ -1274,11 +1275,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 
 				float st_w = canvas.getWidth();
 				float st_h = canvas.getHeight();
-				/*if( ui_rotation == 90 || ui_rotation == 270 ) {
-					float dummy = st_w;
-					st_w = st_h;
-					st_h = dummy;
-				}*/
 				float nd_w = galleryButton.getWidth();
 				float nd_h = galleryButton.getHeight();
 				//int thumbnail_w = (int)( (1.0f-alpha)*st_w + alpha*nd_w );
@@ -1287,16 +1283,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				float correction_h = st_h/nd_h - 1.0f;
 				int thumbnail_w = (int)(st_w/(1.0f+alpha*correction_w));
 				int thumbnail_h = (int)(st_h/(1.0f+alpha*correction_h));
-				/*if( ui_rotation == 90 || ui_rotation == 270 ) {
-					int dummy = thumbnail_w;
-					thumbnail_w = thumbnail_h;
-					thumbnail_h = dummy;
-				}*/
 				thumbnail_anim_dst_rect.left = thumbnail_x - thumbnail_w/2;
 				thumbnail_anim_dst_rect.top = thumbnail_y - thumbnail_h/2;
 				thumbnail_anim_dst_rect.right = thumbnail_x + thumbnail_w/2;
 				thumbnail_anim_dst_rect.bottom = thumbnail_y + thumbnail_h/2;
-				canvas.drawBitmap(this.thumbnail, thumbnail_anim_src_rect, thumbnail_anim_dst_rect, p);
+				//canvas.drawBitmap(this.thumbnail, thumbnail_anim_src_rect, thumbnail_anim_dst_rect, p);
+				thumbnail_anim_matrix.setRectToRect(thumbnail_anim_src_rect, thumbnail_anim_dst_rect, Matrix.ScaleToFit.FILL);
+				//thumbnail_anim_matrix.reset();
+				if( ui_rotation == 90 || ui_rotation == 270 ) {
+					float ratio = ((float)thumbnail.getWidth())/(float)thumbnail.getHeight();
+					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, thumbnail.getWidth()/2, thumbnail.getHeight()/2);
+				}
+				thumbnail_anim_matrix.preRotate(ui_rotation, thumbnail.getWidth()/2, thumbnail.getHeight()/2);
+				canvas.drawBitmap(this.thumbnail, thumbnail_anim_matrix, p);
 			}
 		}
 		
@@ -2149,6 +2148,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
+		this.thumbnail_anim = false;
         this.phase = PHASE_TAKING_PHOTO;
 		if( camera == null ) {
 			if( MyDebug.LOG )
@@ -2331,12 +2331,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	            System.gc();
     			if( MyDebug.LOG )
     				Log.d(TAG, "onPictureTaken");
-
-        		if( thumbnail != null ) {
-        			thumbnail.recycle();
-        			thumbnail = null;
-        			thumbnail_anim = false;
-        		}
 
         		MainActivity main_activity = (MainActivity)Preview.this.getContext();
     			boolean image_capture_intent = false;
@@ -2720,14 +2714,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	    			Log.d(TAG, "    inSampleSize    : " + options.inSampleSize);
     	    			Log.d(TAG, "    current_rotation: " + current_rotation);
     	    		}
+    	    		if( thumbnail != null ) {
+    	    			thumbnail.recycle();
+    	    		}
         			thumbnail = BitmapFactory.decodeByteArray(data, 0, data.length, options);
-    				int thumbnail_rotation = current_rotation;
-    				Camera.getCameraInfo(cameraId, camera_info);
-    				if( camera_info.facing != Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-        				// need to rotate in opposite direction
-    					thumbnail_rotation = (360 - thumbnail_rotation) % 360;
-    				}
-    				// now need to add the rotation from the Exif data
+        			int thumbnail_rotation = 0;
+    				// now get the rotation from the Exif data
 					try {
 						if( exif_orientation_s == null ) {
 							// haven't already read the exif orientation
@@ -2783,6 +2775,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
             			thumbnail_anim = true;
             			thumbnail_anim_start_ms = System.currentTimeMillis();
         			}
+        			ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
+    			    galleryButton.setImageBitmap(thumbnail);
     	    		if( MyDebug.LOG )
     	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 	            }
@@ -3162,14 +3156,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPause");
 		this.app_is_paused = true;
-		if( this.thumbnail != null ) {
-			this.thumbnail.recycle();
-			this.thumbnail = null;
-			this.thumbnail_anim = false;
-		}
 		this.closeCamera();
     }
-
+    
     public void showToast(final ToastBoxer clear_toast, final String message) {
 		class RotatedTextView extends View {
 			private String text = "";
