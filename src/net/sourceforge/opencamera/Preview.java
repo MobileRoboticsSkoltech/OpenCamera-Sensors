@@ -35,6 +35,7 @@ import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.ExifInterface;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -507,6 +508,56 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     				// need to scan when finished, so we update for the completed file
     				Activity activity = (Activity)this.getContext();
     				activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+    			}
+    			// create thumbnail
+    			{
+	            	long time_s = System.currentTimeMillis();
+    	    		if( thumbnail != null ) {
+    	    			thumbnail.recycle();
+    	    		}
+    	    	    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+					try {
+						retriever.setDataSource(video_name);
+						thumbnail = retriever.getFrameAtTime(-1);
+					}
+    	    	    catch(IllegalArgumentException ex) {
+    	    	    	// corrupt video file?
+    	    	    }
+    	    	    catch(RuntimeException ex) {
+    	    	    	// corrupt video file?
+    	    	    }
+    	    	    finally {
+    	    	    	try {
+    	    	    		retriever.release();
+    	    	    	}
+    	    	    	catch(RuntimeException ex) {
+    	    	    		// ignore
+    	    	    	}
+    	    	    }
+    	    	    if( thumbnail != null ) {
+    	    	    	Activity activity = (Activity)this.getContext();
+    	    	    	ImageButton galleryButton = (ImageButton) activity.findViewById(R.id.gallery);
+    	    	    	int width = thumbnail.getWidth();
+    	    	    	int height = thumbnail.getHeight();
+    					if( MyDebug.LOG )
+    						Log.d(TAG, "    video thumbnail size " + width + " x " + height);
+    	    	    	if( width > galleryButton.getWidth() ) {
+    	    	    		float scale = (float) galleryButton.getWidth() / width;
+    	    	    		int new_width = Math.round(scale * width);
+    	    	    		int new_height = Math.round(scale * height);
+        					if( MyDebug.LOG )
+        						Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
+    	    	    		Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
+    	        		    // careful, as scaled_thumbnail is sometimes not a copy!
+    	        		    if( scaled_thumbnail != thumbnail ) {
+    	        		    	thumbnail.recycle();
+    	        		    	thumbnail = scaled_thumbnail;
+    	        		    }
+    	    	    	}
+    	    	    	galleryButton.setImageBitmap(thumbnail);
+    	    	    }
+					if( MyDebug.LOG )
+						Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
     			}
     			video_name = null;
     		}
