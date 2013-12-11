@@ -508,6 +508,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     				Activity activity = (Activity)this.getContext();
     				activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
     			}
+    			video_name = null;
     		}
 		}
 	}
@@ -2218,10 +2219,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				}
 
 	        	video_recorder.setOrientationHint(this.current_rotation);
-
-	        	String video_name = videoFile.getAbsolutePath();
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "save to: " + video_name);
 	        	video_recorder.setOutputFile(video_name);
 	        	try {
 	        		/*if( true ) // test
