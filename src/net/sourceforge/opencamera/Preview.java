@@ -2943,7 +2943,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 						Log.d(TAG, "successsfully deleted " + preview_image_name);
 					Activity activity = (Activity)this.getContext();
     	    	    showToast(null, "Photo deleted");
-    	            activity.sendBroadcast(new Intent(Intent. ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+    	            activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
 				}
 			}
 			startCameraPreview();
