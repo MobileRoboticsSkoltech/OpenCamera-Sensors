@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -111,6 +113,42 @@ public class MainActivity extends Activity {
 		}
 
 		mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+		// set thumbnail
+		{
+	    	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
+	    	Media media = getLatestMedia();
+	    	if( media != null ) {
+	    		Bitmap thumbnail = null;
+	    		if( media.video ) {
+	    			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
+	    		}
+	    		else {
+	    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+	    		}
+	    		if( thumbnail != null ) {
+		    		if( media.orientation != 0 ) {
+		    			if( MyDebug.LOG )
+		    				Log.d(TAG, "thumbnail size is " + thumbnail.getWidth() + " x " + thumbnail.getHeight());
+		    			Matrix matrix = new Matrix();
+		    			matrix.setRotate(media.orientation, thumbnail.getWidth() * 0.5f, thumbnail.getHeight() * 0.5f);
+		    			try {
+		    				Bitmap rotated_thumbnail = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(), thumbnail.getHeight(), matrix, true);
+    	        		    // careful, as rotated_thumbnail is sometimes not a copy!
+    	        		    if( rotated_thumbnail != thumbnail ) {
+    	        		    	thumbnail.recycle();
+    	        		    	thumbnail = rotated_thumbnail;
+    	        		    }
+		    			}
+		    			catch(Throwable t) {
+			    			if( MyDebug.LOG )
+			    				Log.d(TAG, "failed to rotate thumbnail");
+		    			}
+		    		}
+	    			galleryButton.setImageBitmap(thumbnail);
+	    		}
+	    	}
+		}
 
 		preview = new Preview(this, savedInstanceState);
 		((FrameLayout) findViewById(R.id.preview)).addView(preview);
@@ -689,12 +727,18 @@ public class MainActivity extends Activity {
     }
     
     class Media {
+    	public long id;
+    	public boolean video;
     	public Uri uri;
     	public long date;
-    	
-    	Media(Uri uri, long date) {
+    	public int orientation;
+
+    	Media(long id, boolean video, Uri uri, long date, int orientation) {
+    		this.id = id;
+    		this.video = video;
     		this.uri = uri;
     		this.date = date;
+    		this.orientation = orientation;
     	}
     }
     
@@ -702,7 +746,7 @@ public class MainActivity extends Activity {
     	Media media = null;
 		Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 		Uri query = baseUri.buildUpon().appendQueryParameter("limit", "1").build();
-		String[] projection = video ? new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN} : new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN};
+		String [] projection = video ? new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN} : new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.ORIENTATION};
 		String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg'";
 		String order = video ? VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC" : ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
 		Cursor cursor = null;
@@ -711,10 +755,11 @@ public class MainActivity extends Activity {
 			if( cursor != null && cursor.moveToFirst() ) {
 				long id = cursor.getLong(0);
 				long date = cursor.getLong(1);
+				int orientation = video ? 0 : cursor.getInt(2);
 				Uri uri = ContentUris.withAppendedId(baseUri, id);
 				if( MyDebug.LOG )
 					Log.d(TAG, "found most recent uri for " + (video ? "video" : "images") + ": " + uri);
-				media = new Media(uri, date);
+				media = new Media(id, video, uri, date, orientation);
 			}
 		}
 		finally {
@@ -725,22 +770,19 @@ public class MainActivity extends Activity {
 		return media;
     }
     
-    public void clickedGallery(View view) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "clickedGallery");
-		//Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		Uri uri = null;
+    private Media getLatestMedia() {
 		Media image_media = getLatestMedia(false);
 		Media video_media = getLatestMedia(true);
+		Media media = null;
 		if( image_media != null && video_media == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "only found images");
-			uri = image_media.uri;
+			media = image_media;
 		}
 		else if( image_media == null && video_media != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "only found videos");
-			uri = video_media.uri;
+			media = video_media;
 		}
 		else if( image_media != null && video_media != null ) {
 			if( MyDebug.LOG ) {
@@ -751,13 +793,25 @@ public class MainActivity extends Activity {
 			if( image_media.date >= video_media.date ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "latest image is newer");
-				uri = image_media.uri;
+				media = image_media;
 			}
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "latest video is newer");
-				uri = video_media.uri;
+				media = video_media;
 			}
+		}
+		return media;
+    }
+    
+    public void clickedGallery(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedGallery");
+		//Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		Uri uri = null;
+		Media media = getLatestMedia();
+		if( media != null ) {
+			uri = media.uri;
 		}
 
 		if( uri != null ) {
