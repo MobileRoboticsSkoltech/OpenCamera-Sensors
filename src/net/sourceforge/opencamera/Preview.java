@@ -353,7 +353,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			    }
 
 			    try {
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "set focus areas parameters");
 			    	camera.setParameters(parameters);
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "done");
 			    }
 			    catch(RuntimeException e) {
 			    	// just in case something has gone wrong
@@ -2972,11 +2976,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				Log.d(TAG, "currently taking a photo");
 		}
 		else {
-        	// if a focus area is set, we always call autofocus even if it isn't supported, so we get the focus box
-			// otherwise, it's only worth doing it when autofocus has an effect (i.e., auto or macro mode)
+			// it's only worth doing autofocus when autofocus has an effect (i.e., auto or macro mode)
             Camera.Parameters parameters = camera.getParameters();
 			String focus_mode = parameters.getFocusMode();
-	        if( has_focus_area || focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
+	        if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "try to start autofocus");
 		        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
@@ -3003,6 +3006,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 						Log.e(TAG, "runtime exception from autoFocus");
 	    			e.printStackTrace();
 	    		}
+	        }
+	        else if( has_focus_area ) {
+	        	// do this so we get the focus box, for focus modes that support focus area, but don't support autofocus
+				focus_success = FOCUS_SUCCESS;
+				focus_complete_time = System.currentTimeMillis();
 	        }
 		}
     }
