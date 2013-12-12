@@ -2755,6 +2755,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     				options.inMutable = false;
     				options.inPurgeable = true;
     				options.inSampleSize = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality 
+        			if( !sharedPreferences.getBoolean("preference_thumbnail_animation", true) ) {
+        				// can use lower resolution if we don't have the thumbnail animation
+        				options.inSampleSize *= 4;
+        			}
     	    		if( MyDebug.LOG ) {
     	    			Log.d(TAG, "    picture width   : " + size.width);
     	    			Log.d(TAG, "    preview width   : " + Preview.this.getWidth());
