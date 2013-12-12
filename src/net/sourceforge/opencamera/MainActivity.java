@@ -114,41 +114,7 @@ public class MainActivity extends Activity {
 
 		mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
-		// set thumbnail
-		{
-	    	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
-	    	Media media = getLatestMedia();
-	    	if( media != null ) {
-	    		Bitmap thumbnail = null;
-	    		if( media.video ) {
-	    			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
-	    		}
-	    		else {
-	    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
-	    		}
-	    		if( thumbnail != null ) {
-		    		if( media.orientation != 0 ) {
-		    			if( MyDebug.LOG )
-		    				Log.d(TAG, "thumbnail size is " + thumbnail.getWidth() + " x " + thumbnail.getHeight());
-		    			Matrix matrix = new Matrix();
-		    			matrix.setRotate(media.orientation, thumbnail.getWidth() * 0.5f, thumbnail.getHeight() * 0.5f);
-		    			try {
-		    				Bitmap rotated_thumbnail = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(), thumbnail.getHeight(), matrix, true);
-    	        		    // careful, as rotated_thumbnail is sometimes not a copy!
-    	        		    if( rotated_thumbnail != thumbnail ) {
-    	        		    	thumbnail.recycle();
-    	        		    	thumbnail = rotated_thumbnail;
-    	        		    }
-		    			}
-		    			catch(Throwable t) {
-			    			if( MyDebug.LOG )
-			    				Log.d(TAG, "failed to rotate thumbnail");
-		    			}
-		    		}
-	    			galleryButton.setImageBitmap(thumbnail);
-	    		}
-	    	}
-		}
+		updateGalleryIcon();
 
 		preview = new Preview(this, savedInstanceState);
 		((FrameLayout) findViewById(R.id.preview)).addView(preview);
@@ -804,6 +770,58 @@ public class MainActivity extends Activity {
 		return media;
     }
     
+    public void updateGalleryIcon() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateGalleryIcon");
+    	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
+    	Media media = getLatestMedia();
+		Bitmap thumbnail = null;
+    	if( media != null ) {
+    		if( media.video ) {
+    			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
+    		}
+    		else {
+    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+    		}
+    		if( thumbnail != null ) {
+	    		if( media.orientation != 0 ) {
+	    			if( MyDebug.LOG )
+	    				Log.d(TAG, "thumbnail size is " + thumbnail.getWidth() + " x " + thumbnail.getHeight());
+	    			Matrix matrix = new Matrix();
+	    			matrix.setRotate(media.orientation, thumbnail.getWidth() * 0.5f, thumbnail.getHeight() * 0.5f);
+	    			try {
+	    				Bitmap rotated_thumbnail = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(), thumbnail.getHeight(), matrix, true);
+	        		    // careful, as rotated_thumbnail is sometimes not a copy!
+	        		    if( rotated_thumbnail != thumbnail ) {
+	        		    	thumbnail.recycle();
+	        		    	thumbnail = rotated_thumbnail;
+	        		    }
+	    			}
+	    			catch(Throwable t) {
+		    			if( MyDebug.LOG )
+		    				Log.d(TAG, "failed to rotate thumbnail");
+	    			}
+	    		}
+    		}
+    	}
+    	if( thumbnail != null ) {
+			galleryButton.setImageBitmap(thumbnail);
+    	}
+    	else {
+    	    int bottom = galleryButton.getPaddingBottom();
+    	    int top = galleryButton.getPaddingTop();
+    	    int right = galleryButton.getPaddingRight();
+    	    int left = galleryButton.getPaddingLeft();
+    	    /*if( MyDebug.LOG )
+    			Log.d(TAG, "padding: " + bottom);*/
+    	    galleryButton.setImageBitmap(null);
+    		galleryButton.setBackgroundResource(R.drawable.gallery);
+    		// workaround for setBackgroundResource also resetting padding, Android bug
+    		// unfortunately doesn't work?!
+    		galleryButton.setPadding(left, top, right, bottom);
+    	}
+    }
+    
     public void clickedGallery(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedGallery");
@@ -883,6 +901,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTrash");
     	this.preview.clickedTrash();
+    	this.updateGalleryIcon();
     }
 
     private void takePicture() {
