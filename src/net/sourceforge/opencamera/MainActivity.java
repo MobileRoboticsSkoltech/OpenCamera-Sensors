@@ -68,6 +68,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "onCreate");
 		}
+    	long time_s = System.currentTimeMillis();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -140,6 +141,10 @@ public class MainActivity extends Activity {
 			editor.putBoolean(done_first_time_key, true);
 			editor.apply();
         }
+        
+        
+		if( MyDebug.LOG )
+			Log.d(TAG, "time for Activity startup: " + (System.currentTimeMillis() - time_s));
 	}
 
 	@Override
@@ -773,6 +778,7 @@ public class MainActivity extends Activity {
     public void updateGalleryIcon() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateGalleryIcon");
+    	long time_s = System.currentTimeMillis();
     	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
     	Media media = getLatestMedia();
 		Bitmap thumbnail = null;
@@ -820,6 +826,8 @@ public class MainActivity extends Activity {
     		// unfortunately doesn't work?!
     		galleryButton.setPadding(left, top, right, bottom);
     	}
+		if( MyDebug.LOG )
+			Log.d(TAG, "time to update gallery icon: " + (System.currentTimeMillis() - time_s));
     }
     
     public void clickedGallery(View view) {
