@@ -2407,6 +2407,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     			if( auto_stabilise && has_level_angle && main_activity.supportsAutoStabilise() )
     			{
     				//level_angle = -129;
+    				while( level_angle < -90 )
+    					level_angle += 180;
+    				while( level_angle > 90 )
+    					level_angle -= 180;
         			if( MyDebug.LOG )
         				Log.d(TAG, "auto stabilising... angle: " + level_angle);
     				BitmapFactory.Options options = new BitmapFactory.Options();
