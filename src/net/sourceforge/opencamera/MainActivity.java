@@ -191,7 +191,9 @@ public class MainActivity extends Activity {
 
 		layoutUI();
 
-        preview.onResume();
+		updateGalleryIcon(); // update in case images deleted whilst idle
+
+		preview.onResume();
 
     }
 
