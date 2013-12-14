@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -67,6 +69,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     private Matrix camera_to_preview_matrix = new Matrix();
     private Matrix preview_to_camera_matrix = new Matrix();
 	private RectF face_rect = new RectF();
+	private Rect text_bounds = new Rect();
     private int display_orientation = 0;
 
 	private boolean ui_placement_right = true;
@@ -1376,10 +1379,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
 			if( this.has_level_angle && sharedPreferences.getBoolean("preference_show_angle", true) ) {
-				p.setColor(Color.WHITE);
+				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				//canvas.drawText("Angle: " + this.level_angle, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
-				//canvas.drawText("Angle: " + this.level_angle + " (" + this.current_orientation + ")", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
 				// Convert the dps to pixels, based on density scale
 				int pixels_offset_x = (int) (50 * scale + 0.5f); // convert dps to pixels
 				int pixels_offset_y = text_extra_offset_y;
@@ -1395,9 +1396,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				if( Math.abs(this.level_angle) <= 1.0 ) {
-					p.setColor(Color.GREEN);
+					color = Color.GREEN;
 				}
-				canvas.drawText("Angle: " + decimalFormat.format(this.level_angle), canvas.getWidth() / 2 + pixels_offset_x, canvas.getHeight() - pixels_offset_y, p);
+				drawTextWithBackground(canvas, p, "Angle: " + decimalFormat.format(this.level_angle), color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, canvas.getHeight() - pixels_offset_y);
 			}
 			//if( this.is_taking_photo_on_timer ) {
 			if( this.isOnTimer() ) {
@@ -1405,10 +1406,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				if( MyDebug.LOG )
 					Log.d(TAG, "remaining_time: " + remaining_time);
 				if( remaining_time >= 0 ) {
-					p.setColor(Color.RED);
 					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
-					canvas.drawText("" + remaining_time, canvas.getWidth() / 2, canvas.getHeight() / 2, p);
+					drawTextWithBackground(canvas, p, "" + remaining_time, Color.RED, Color.rgb(75, 75, 75), canvas.getWidth() / 2, canvas.getHeight() / 2);
 				}
 			}
 			else if( this.video_recorder != null && video_start_time_set ) {
@@ -1424,11 +1424,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
             	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
             	/*if( MyDebug.LOG )
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
-    			p.setColor(Color.RED);
     			p.setTextSize(24 * scale + 0.5f); // convert dps to pixels
     			p.setTextAlign(Paint.Align.CENTER);
     			int pixels_offset_y = (int) (164 * scale + 0.5f); // convert dps to pixels
-    			canvas.drawText("" + time_s, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+				drawTextWithBackground(canvas, p, "" + time_s, Color.RED, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
 			}
 		}
 		else if( camera == null ) {
@@ -1453,15 +1452,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			if( zoom_ratio > 1.0f + 1.0e-5f ) {
 				// Convert the dps to pixels, based on density scale
 				int pixels_offset_y = 2*text_y+text_extra_offset_y;
-				p.setColor(Color.WHITE);
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.CENTER);
-				canvas.drawText("Zoom: " + zoom_ratio +"x", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+				drawTextWithBackground(canvas, p, "Zoom: " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
 			}
 		}
 		if( camera != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
 			int pixels_offset_y = 1*text_y+text_extra_offset_y;
-			p.setColor(Color.WHITE);
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			long time_now = System.currentTimeMillis();
@@ -1473,7 +1470,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				}
 			}
 			if( free_memory_gb >= 0.0f ) {
-				canvas.drawText("Free memory: " + decimalFormat.format(free_memory_gb) + "GB", canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y, p);
+				drawTextWithBackground(canvas, p, "Free memory: " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
 			}
 		}
 		
@@ -1533,6 +1530,28 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
 			canvas.drawBitmap(location_bitmap, null, location_dest, p);
 		}
+		
+		{
+			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+			p.setTextAlign(Paint.Align.LEFT);
+			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
+			int location_y = (int) (15 * scale + 0.5f); // convert dps to pixels
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				int diff = canvas.getWidth() - canvas.getHeight();
+				location_x += diff/2;
+				location_y -= diff/2;
+			}
+			if( ui_rotation == 90 ) {
+				location_y = canvas.getHeight() - location_y;
+			}
+			if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
+				location_x = canvas.getWidth() - location_x;
+				p.setTextAlign(Paint.Align.RIGHT);
+			}
+	        Calendar c = Calendar.getInstance();
+	        String current_time = DateFormat.getTimeInstance().format(c.getTime());
+	        drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y);
+	    }
 
 		canvas.restore();
 		
@@ -1559,6 +1578,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			if( focus_complete_time != -1 && System.currentTimeMillis() > focus_complete_time + 1000 ) {
 				focus_success = FOCUS_DONE;
 			}
+			p.setStyle(Paint.Style.FILL); // reset
 		}
 		if( this.using_face_detection && this.faces_detected != null ) {
 			p.setColor(Color.YELLOW);
@@ -1592,7 +1612,35 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 					}*/
 				}
 			}
+			p.setStyle(Paint.Style.FILL); // reset
 		}
+	}
+
+	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
+		final float scale = getResources().getDisplayMetrics().density;
+		p.setStyle(Paint.Style.FILL);
+		paint.setColor(background);
+		paint.setAlpha(127);
+		paint.getTextBounds(text, 0, text.length(), text_bounds);
+		final int padding = (int) (2 * scale + 0.5f); // convert dps to pixels
+		if( paint.getTextAlign() == Paint.Align.RIGHT || paint.getTextAlign() == Paint.Align.CENTER ) {
+			float width = paint.measureText(text); // n.b., need to use measureText rather than getTextBounds here
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "width: " + width);*/
+			if( paint.getTextAlign() == Paint.Align.CENTER )
+				width /= 2.0f;
+			text_bounds.left -= width;
+			text_bounds.right -= width;
+		}
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "text_bounds left-right: " + text_bounds.left + " , " + text_bounds.right);*/
+		text_bounds.left += location_x - padding;
+		text_bounds.top += location_y - padding;
+		text_bounds.right += location_x + padding;
+		text_bounds.bottom += location_y + padding;
+		canvas.drawRect(text_bounds, paint);
+		paint.setColor(foreground);
+		canvas.drawText(text, location_x, location_y, paint);
 	}
 
 	public void zoomIn() {
