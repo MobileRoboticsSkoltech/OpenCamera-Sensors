@@ -812,6 +812,7 @@ public class MainActivity extends Activity {
     		}
     	}
     	if( thumbnail != null ) {
+	    	galleryButton.setImageResource(android.R.color.transparent);
 			galleryButton.setImageBitmap(thumbnail);
     	}
     	else {
@@ -822,8 +823,8 @@ public class MainActivity extends Activity {
     	    /*if( MyDebug.LOG )
     			Log.d(TAG, "padding: " + bottom);*/
     	    galleryButton.setImageBitmap(null);
-    		galleryButton.setBackgroundResource(R.drawable.gallery);
-    		// workaround for setBackgroundResource also resetting padding, Android bug
+    		galleryButton.setImageResource(R.drawable.gallery);
+    		// workaround for setImageResource also resetting padding, Android bug
     		// unfortunately doesn't work?!
     		galleryButton.setPadding(left, top, right, bottom);
     	}
