@@ -186,6 +186,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public int count_cameraTakePicture = 0;
 	public boolean has_received_location = false;
 	public boolean test_low_memory = false;
+	public boolean test_have_angle = false;
+	public float test_angle = 0.0f;
 	public String test_last_saved_image = null;
 
 	Preview(Context context) {
@@ -2458,6 +2460,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     			if( auto_stabilise && has_level_angle && main_activity.supportsAutoStabilise() )
     			{
     				//level_angle = -129;
+    				if( test_have_angle )
+    					level_angle = test_angle;
     				while( level_angle < -90 )
     					level_angle += 180;
     				while( level_angle > 90 )
