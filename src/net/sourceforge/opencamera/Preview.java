@@ -1132,7 +1132,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			startCameraPreview();
 			tryAutoFocus(); // so we get the autofocus when starting up
         }
-   	}
+
+		MainActivity main_activity = (MainActivity)Preview.this.getContext();
+		main_activity.layoutUI(); // need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed
+	}
 	
 	private void setPreviewSize() {
 		if( MyDebug.LOG )

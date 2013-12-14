@@ -205,7 +205,7 @@ public class MainActivity extends Activity {
 		preview.onPause();
     }
 
-    private void layoutUI() {
+    public void layoutUI() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "layoutUI");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -604,6 +604,7 @@ public class MainActivity extends Activity {
 		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "onOrientationChanged()");
 			Log.d(TAG, "orientation: " + orientation);
+			Log.d(TAG, "current_orientation: " + current_orientation);
 		}*/
 		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
 			return;
