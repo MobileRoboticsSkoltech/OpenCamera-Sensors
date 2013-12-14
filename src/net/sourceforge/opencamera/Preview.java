@@ -544,8 +544,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	    	    	}
     	    	    }
     	    	    if( thumbnail != null ) {
-    	    	    	Activity activity = (Activity)this.getContext();
-    	    	    	ImageButton galleryButton = (ImageButton) activity.findViewById(R.id.gallery);
+    	    			MainActivity main_activity = (MainActivity)Preview.this.getContext();
+    	    	    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
     	    	    	int width = thumbnail.getWidth();
     	    	    	int height = thumbnail.getHeight();
     					if( MyDebug.LOG )
@@ -563,8 +563,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     	        		    	thumbnail = scaled_thumbnail;
     	        		    }
     	    	    	}
-    	    	    	galleryButton.setImageResource(android.R.color.transparent);
-    	    	    	galleryButton.setImageBitmap(thumbnail);
+    	    	    	main_activity.updateGalleryIconToBitmap(thumbnail);
     	    	    }
 					if( MyDebug.LOG )
 						Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
@@ -2891,9 +2890,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
             			thumbnail_anim = true;
             			thumbnail_anim_start_ms = System.currentTimeMillis();
         			}
-        			ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
-        	    	galleryButton.setImageResource(android.R.color.transparent);
-    			    galleryButton.setImageBitmap(thumbnail);
+	    	    	main_activity.updateGalleryIconToBitmap(thumbnail);
     	    		if( MyDebug.LOG )
     	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 	            }

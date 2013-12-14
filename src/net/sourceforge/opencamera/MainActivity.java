@@ -63,6 +63,9 @@ public class MainActivity extends Activity {
 	private OrientationEventListener orientationEventListener = null;
 	private boolean supports_auto_stabilise = false;
 
+	// for testing:
+	public boolean gallery_icon_is_thumbnail = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if( MyDebug.LOG ) {
@@ -776,11 +779,36 @@ public class MainActivity extends Activity {
 		return media;
     }
     
+
+    public void updateGalleryIconToBlank() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateGalleryIconToBlank");
+    	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
+	    int bottom = galleryButton.getPaddingBottom();
+	    int top = galleryButton.getPaddingTop();
+	    int right = galleryButton.getPaddingRight();
+	    int left = galleryButton.getPaddingLeft();
+	    /*if( MyDebug.LOG )
+			Log.d(TAG, "padding: " + bottom);*/
+	    galleryButton.setImageBitmap(null);
+		galleryButton.setImageResource(R.drawable.gallery);
+		// workaround for setImageResource also resetting padding, Android bug
+		galleryButton.setPadding(left, top, right, bottom);
+		gallery_icon_is_thumbnail = false;
+    }
+    
+    public void updateGalleryIconToBitmap(Bitmap bitmap) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateGalleryIconToBitmap");
+    	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
+		galleryButton.setImageBitmap(bitmap);
+		gallery_icon_is_thumbnail = true;
+    }
+    
     public void updateGalleryIcon() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateGalleryIcon");
     	long time_s = System.currentTimeMillis();
-    	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
     	Media media = getLatestMedia();
 		Bitmap thumbnail = null;
     	if( media != null ) {
@@ -812,21 +840,14 @@ public class MainActivity extends Activity {
     		}
     	}
     	if( thumbnail != null ) {
-	    	galleryButton.setImageResource(android.R.color.transparent);
-			galleryButton.setImageBitmap(thumbnail);
+			if( MyDebug.LOG )
+				Log.d(TAG, "set gallery button to thumbnail");
+			updateGalleryIconToBitmap(thumbnail);
     	}
     	else {
-    	    int bottom = galleryButton.getPaddingBottom();
-    	    int top = galleryButton.getPaddingTop();
-    	    int right = galleryButton.getPaddingRight();
-    	    int left = galleryButton.getPaddingLeft();
-    	    /*if( MyDebug.LOG )
-    			Log.d(TAG, "padding: " + bottom);*/
-    	    galleryButton.setImageBitmap(null);
-    		galleryButton.setImageResource(R.drawable.gallery);
-    		// workaround for setImageResource also resetting padding, Android bug
-    		// unfortunately doesn't work?!
-    		galleryButton.setPadding(left, top, right, bottom);
+			if( MyDebug.LOG )
+				Log.d(TAG, "set gallery button to blank");
+			updateGalleryIconToBlank();
     	}
 		if( MyDebug.LOG )
 			Log.d(TAG, "time to update gallery icon: " + (System.currentTimeMillis() - time_s));
@@ -911,7 +932,9 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTrash");
     	this.preview.clickedTrash();
-    	this.updateGalleryIcon();
+    	// calling updateGalleryIcon() has problem that it still returns the latest image that we've just deleted! So better to force setting to blank
+    	//this.updateGalleryIcon();
+		this.updateGalleryIconToBlank();
     }
 
     private void takePicture() {
