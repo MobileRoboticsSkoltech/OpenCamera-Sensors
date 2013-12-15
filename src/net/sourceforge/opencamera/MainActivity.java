@@ -64,6 +64,7 @@ public class MainActivity extends Activity {
 	private boolean supports_auto_stabilise = false;
 
 	// for testing:
+	private boolean is_test = false;
 	public boolean gallery_icon_is_thumbnail = false;
 
 	@Override
@@ -76,7 +77,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-		boolean is_test = false;
 		if( getIntent() != null && getIntent().getExtras() != null ) {
 			is_test = getIntent().getExtras().getBoolean("test_project");
 			if( MyDebug.LOG )
@@ -888,25 +888,28 @@ public class MainActivity extends Activity {
 		if( uri == null ) {
 			uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 		}
-		if( MyDebug.LOG )
-			Log.d(TAG, "launch uri:" + uri);
-		final String REVIEW_ACTION = "com.android.camera.action.REVIEW";
-		try {
-			// REVIEW_ACTION means we can view video files without autoplaying
-			Intent intent = new Intent(REVIEW_ACTION, uri);
-			this.startActivity(intent);
-		}
-		catch(ActivityNotFoundException e) {
+		if( !is_test ) {
+			// don't do if testing, as unclear how to exit activity to finish test (for testGallery())
 			if( MyDebug.LOG )
-				Log.d(TAG, "REVIEW_ACTION intent didn't work, try ACTION_VIEW");
-			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-			// from http://stackoverflow.com/questions/11073832/no-activity-found-to-handle-intent - needed to fix crash if no gallery app installed
-			//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("blah")); // test
-			if( intent.resolveActivity(getPackageManager()) != null ) {
+				Log.d(TAG, "launch uri:" + uri);
+			final String REVIEW_ACTION = "com.android.camera.action.REVIEW";
+			try {
+				// REVIEW_ACTION means we can view video files without autoplaying
+				Intent intent = new Intent(REVIEW_ACTION, uri);
 				this.startActivity(intent);
 			}
-			else{
-				preview.showToast(null, "No Gallery app available");
+			catch(ActivityNotFoundException e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "REVIEW_ACTION intent didn't work, try ACTION_VIEW");
+				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+				// from http://stackoverflow.com/questions/11073832/no-activity-found-to-handle-intent - needed to fix crash if no gallery app installed
+				//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("blah")); // test
+				if( intent.resolveActivity(getPackageManager()) != null ) {
+					this.startActivity(intent);
+				}
+				else{
+					preview.showToast(null, "No Gallery app available");
+				}
 			}
 		}
     }
