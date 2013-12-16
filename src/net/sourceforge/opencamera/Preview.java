@@ -2808,7 +2808,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
         		    bitmap = null;
 	            }
 
-	            if( success ) {
+	            if( success && picFile != null ) {
 	            	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
 	            	long time_s = System.currentTimeMillis();
 	                Camera.Parameters parameters = cam.getParameters();
