@@ -49,7 +49,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
