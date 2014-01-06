@@ -14,6 +14,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -987,6 +988,24 @@ public class MainActivity extends Activity {
         return super.dispatchKeyEvent(event);
     }
 
+    public void broadcastFile(File file) {
+    	// ACTION_MEDIA_MOUNTED no longer allowed on Android 4.4! Gives: SecurityException: Permission Denial: not allowed to send broadcast android.intent.action.MEDIA_MOUNTED
+    	/*if( file.isDirectory() )
+    		this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(file)));
+    	else
+    		this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));*/
+    	MediaScannerConnection.scanFile(this, new String[] { file.getAbsolutePath() }, null,
+    			new MediaScannerConnection.OnScanCompletedListener() {
+		 		public void onScanCompleted(String path, Uri uri) {
+		 			if( MyDebug.LOG ) {
+		 				Log.d("ExternalStorage", "Scanned " + path + ":");
+		 				Log.d("ExternalStorage", "-> uri=" + uri);
+		 			}
+		 		}
+			}
+		);
+	}
+    
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
 
@@ -1018,7 +1037,7 @@ public class MainActivity extends Activity {
         			Log.e(TAG, "failed to create directory");
                 return null;
             }
-	        this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(mediaStorageDir)));
+            broadcastFile(mediaStorageDir);
         }
 
         // Create a media file name

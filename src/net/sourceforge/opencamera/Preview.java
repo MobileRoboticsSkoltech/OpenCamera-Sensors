@@ -515,8 +515,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
     			File file = new File(video_name);
     			if( file != null ) {
     				// need to scan when finished, so we update for the completed file
-    				Activity activity = (Activity)this.getContext();
-    				activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+    				MainActivity main_activity = (MainActivity)this.getContext();
+    	            main_activity.broadcastFile(file);
     			}
     			// create thumbnail
     			{
@@ -2753,7 +2753,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
                 	    			Log.d(TAG, "now saved EXIF data");
         	            	}
 
-        	            	main_activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(picFile)));
+            	            main_activity.broadcastFile(picFile);
         	            	test_last_saved_image = picFileName;
         	            }
         	            if( image_capture_intent ) {
@@ -3003,9 +3003,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "successsfully deleted " + preview_image_name);
-					Activity activity = (Activity)this.getContext();
     	    	    showToast(null, "Photo deleted");
-    	            activity.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+					MainActivity main_activity = (MainActivity)this.getContext();
+    	            main_activity.broadcastFile(file);
 				}
 			}
 			startCameraPreview();
