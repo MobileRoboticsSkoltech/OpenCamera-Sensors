@@ -2402,8 +2402,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	        };
 			if( MyDebug.LOG )
 				Log.d(TAG, "start autofocus to take picture");
-	    	camera.autoFocus(autoFocusCallback);
-			count_cameraAutoFocus++;
+    		try {
+    	    	camera.autoFocus(autoFocusCallback);
+    			count_cameraAutoFocus++;
+    		}
+    		catch(RuntimeException e) {
+    			// just in case? We got a RuntimeException report here from 1 user on Google Play:
+    			// 21 Dec 2013, Xperia Go, Android 4.1
+    			autoFocusCallback.onAutoFocus(false, camera);
+
+    			if( MyDebug.LOG )
+					Log.e(TAG, "runtime exception from autoFocus when trying to take photo");
+    			e.printStackTrace();
+    		}
 		}
 		else {
 			takePictureWhenFocused();
@@ -3071,7 +3082,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	    		}
 	    		catch(RuntimeException e) {
 	    			// just in case? We got a RuntimeException report here from 1 user on Google Play
-	    			focus_success = FOCUS_DONE;
+	    			autoFocusCallback.onAutoFocus(false, camera);
 
 	    			if( MyDebug.LOG )
 						Log.e(TAG, "runtime exception from autoFocus");
