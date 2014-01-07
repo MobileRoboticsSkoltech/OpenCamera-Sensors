@@ -713,8 +713,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		    this.zoom_factor = 0;
 			if( this.has_zoom ) {
 				this.max_zoom_factor = parameters.getMaxZoom();
-				this.zoom_ratios = parameters.getZoomRatios();
+				try {
+					this.zoom_ratios = parameters.getZoomRatios();
+				}
+				catch(NumberFormatException e) {
+	        		// crash java.lang.NumberFormatException: Invalid int: " 500" reported in v1.4 on device "es209ra", Android 4.1, 3 Jan 2014
+					// this is from java.lang.Integer.invalidInt(Integer.java:138) - unclear if this is a bug in Open Camera, all we can do for now is catch it
+		    		if( MyDebug.LOG )
+		    			Log.e(TAG, "NumberFormatException in getZoomRatios()");
+					e.printStackTrace();
+					this.has_zoom = false;
+					this.zoom_ratios = null;
+				}
+			}
 
+			if( this.has_zoom ) {
 			    zoomControls.setIsZoomInEnabled(true);
 		        zoomControls.setIsZoomOutEnabled(true);
 		        zoomControls.setZoomSpeed(20);
