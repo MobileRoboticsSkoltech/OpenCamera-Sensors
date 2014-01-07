@@ -989,21 +989,27 @@ public class MainActivity extends Activity {
     }
 
     public void broadcastFile(File file) {
-    	// ACTION_MEDIA_MOUNTED no longer allowed on Android 4.4! Gives: SecurityException: Permission Denial: not allowed to send broadcast android.intent.action.MEDIA_MOUNTED
-    	/*if( file.isDirectory() )
-    		this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(file)));
-    	else
-    		this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));*/
-    	MediaScannerConnection.scanFile(this, new String[] { file.getAbsolutePath() }, null,
-    			new MediaScannerConnection.OnScanCompletedListener() {
-		 		public void onScanCompleted(String path, Uri uri) {
-		 			if( MyDebug.LOG ) {
-		 				Log.d("ExternalStorage", "Scanned " + path + ":");
-		 				Log.d("ExternalStorage", "-> uri=" + uri);
-		 			}
-		 		}
-			}
-		);
+    	// note that the new method means that the new folder shows up as a file when connected to a PC via MTP (at least tested on Windows 8)
+    	if( file.isDirectory() ) {
+    		//this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(file)));
+        	// ACTION_MEDIA_MOUNTED no longer allowed on Android 4.4! Gives: SecurityException: Permission Denial: not allowed to send broadcast android.intent.action.MEDIA_MOUNTED
+    		// note that we don't actually need to broadcast anything, the folder and contents appear straight away (both in Gallery on device, and on a PC when connecting via MTP)
+    		// also note that we definitely don't want to broadcast ACTION_MEDIA_SCANNER_SCAN_FILE or use scanFile() for folders, as this means the folder shows up as a file on a PC via MTP (and isn't fixed by rebooting!)
+    	}
+    	else {
+        	// both of these work fine, but using MediaScannerConnection.scanFile() seems to be preferred over sending an intent
+    		//this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+        	MediaScannerConnection.scanFile(this, new String[] { file.getAbsolutePath() }, null,
+        			new MediaScannerConnection.OnScanCompletedListener() {
+    		 		public void onScanCompleted(String path, Uri uri) {
+    		 			if( MyDebug.LOG ) {
+    		 				Log.d("ExternalStorage", "Scanned " + path + ":");
+    		 				Log.d("ExternalStorage", "-> uri=" + uri);
+    		 			}
+    		 		}
+    			}
+    		);
+    	}
 	}
     
     public static final int MEDIA_TYPE_IMAGE = 1;
