@@ -635,9 +635,29 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			Log.d(TAG, "start_preview?: " + start_preview);
 			debug_time = System.currentTimeMillis();
 		}
+		// need to init everything now, in case we don't open the camera (but these may already be initialised from an earlier call - e.g., if we are now switching to another camera)
         has_set_location = false;
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		scene_modes = null;
+		has_zoom = false;
+		zoom_factor = 0;
+		max_zoom_factor = 0;
+		zoom_ratios = null;
+		faces_detected = null;
+		supports_face_detection = false;
+		using_face_detection = false;
+		color_effects = null;
+		white_balances = null;
+		exposures = null;
+		sizes = null;
+		current_size_index = -1;
+		video_quality = null;
+		current_video_quality = -1;
+		supported_flash_values = null;
+		current_flash_index = -1;
+		supported_focus_values = null;
+		current_focus_index = -1;
 		showGUI(true);
 		if( !this.has_surface ) {
 			if( MyDebug.LOG ) {
@@ -1664,7 +1684,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public void zoomIn() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "zoomIn()");
-    	if(zoom_factor < max_zoom_factor) {
+		// problem where we crashed due to calling this function with null camera should be fixed now, but check again just to be safe
+    	if(zoom_factor < max_zoom_factor && camera != null) {
     		zoom_factor++;
     		if( MyDebug.LOG )
     			Log.d(TAG, "zoom in to " + zoom_factor);
@@ -1690,7 +1711,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	public void zoomOut() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "zoomOut()");
-		if(zoom_factor > 0) {
+		// problem where we crashed due to calling this function with null camera should be fixed now, but check again just to be safe
+		if(zoom_factor > 0 && camera != null) {
 			zoom_factor--;
 			if( MyDebug.LOG )
 				Log.d(TAG, "zoom out to " + zoom_factor);
