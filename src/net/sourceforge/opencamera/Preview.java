@@ -3138,7 +3138,17 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			if( this.using_face_detection ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "start face detection");
-				camera.startFaceDetection();
+				try {
+					camera.startFaceDetection();
+				}
+				catch(RuntimeException e) {
+					// I didn't think this could happen, as we only call startFaceDetection() after we've called takePicture() or stopPreview(), which the Android docs say stops the face detection
+					// however I had a crash reported on Google Play for Open Camera v1.4
+					// 2 Jan 2014, "maxx_ax5", Android 4.0.3-4.0.4
+					// startCameraPreview() was called after taking photo in burst mode, but I tested with burst mode and face detection, and can't reproduce the crash on Galaxy Nexus
+					if( MyDebug.LOG )
+						Log.d(TAG, "face detection already started");
+				}
 				faces_detected = null;
 			}
 		}
