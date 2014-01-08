@@ -707,12 +707,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			if( MyDebug.LOG ) {
 				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
-			if( start_preview ) {
-				startCameraPreview();
-			}
-			if( MyDebug.LOG ) {
-				//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
-			}
 			
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
@@ -1064,6 +1058,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 			
 			// must be done after setting parameters, as this function may set parameters
 			updateParametersFromLocation();
+
+			if( start_preview ) {
+				// must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
+				// doesn't seem to affect the startup time for the preview (start_preview is false when opening the camera for the first time, anyway)
+				startCameraPreview();
+			}
+			if( MyDebug.LOG ) {
+				//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
+			}
 
 			// now switch to video if saved
 			boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
