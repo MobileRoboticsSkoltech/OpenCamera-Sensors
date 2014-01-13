@@ -61,6 +61,8 @@
     <string name="video_quality_summary">Set the resolution of videos</string>
     <string name="preference_record_audio">Record audio</string>
     <string name="preference_record_audio_summary">Whether to record audio when recording video</string>
+    <string name="preference_record_audio_src">Audio source</string>
+    <string name="preference_record_audio_src_summary">Microphone to use for recording audio</string>
     
     <string name="preference_category_online">Online</string>
     <string name="preference_online_help">Online help</string>

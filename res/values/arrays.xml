@@ -131,4 +131,12 @@
         <item>volume_zoom</item>
         <item>volume_nothing</item>
     </string-array>
+    <string-array name="preference_record_audio_src_entries">
+        <item>Camcorder</item>
+        <item>External mic (if present)</item>
+    </string-array>
+    <string-array name="preference_record_audio_src_values">
+        <item>audio_src_camcorder</item>
+        <item>audio_src_mic</item>
+    </string-array>
 </resources>

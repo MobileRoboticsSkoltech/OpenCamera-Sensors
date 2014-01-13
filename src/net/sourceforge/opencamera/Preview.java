@@ -2336,7 +2336,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
 				if( record_audio ) {
-					video_recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+	        		String pref_audio_src = sharedPreferences.getString("preference_record_audio_src", "audio_src_camcorder");
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "pref_audio_src: " + pref_audio_src);
+	        		int audio_source = MediaRecorder.AudioSource.CAMCORDER;
+	        		if( pref_audio_src.equals("audio_src_mic") ) {
+		        		audio_source = MediaRecorder.AudioSource.MIC;
+	        		}
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "audio_source: " + audio_source);
+					video_recorder.setAudioSource(audio_source);
 				}
 				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
