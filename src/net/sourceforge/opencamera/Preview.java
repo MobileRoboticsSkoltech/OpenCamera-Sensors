@@ -177,8 +177,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean has_battery_frac = false;
 	private float battery_frac = 0.0f;
 	private long last_battery_time = 0;
-	
-	// for determining compass direction
+
+	// accelerometer and geomagnetic sensor info
+	private final float sensor_alpha = 0.8f; // for filter
     private boolean has_gravity = false;
     private float [] gravity = new float[3];
     private boolean has_geomagnetic = false;
@@ -1457,9 +1458,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 				else {
 					p.setTextAlign(Paint.Align.CENTER);
-				}
-				if( Math.abs(this.level_angle) <= 1.0 ) {
-					color = Color.GREEN;
 				}
 				float geo_angle = (float)Math.toDegrees(this.geo_direction[0]);
 				if( geo_angle < 0.0f ) {
@@ -3244,12 +3242,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
     	this.has_gravity = true;
     	for(int i=0;i<3;i++) {
-    		this.gravity[i] = event.values[i];
+    		//this.gravity[i] = event.values[i];
+    		this.gravity[i] = sensor_alpha * this.gravity[i] + (1.0f-sensor_alpha) * event.values[i];
     	}
     	calculateGeoDirection();
     	
-		double x = event.values[0];
-		double y = event.values[1];
+		double x = gravity[0];
+		double y = gravity[1];
 		this.has_level_angle = true;
 		this.level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
 		if( this.level_angle < -0.0 ) {
@@ -3263,24 +3262,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			this.level_angle -= 360.0;
 		}
 
-		/*double x = Math.abs(event.values[0]);
-		double y = Math.abs(event.values[1]);
-		this.has_level_angle = true;
-		this.level_angle = Math.atan2(x, y) * 180.0 / Math.PI;
-		if( this.level_angle > 45.0 ) {
-			this.level_angle = 90.0 - this.level_angle;
-		}
-		if( event.values[1] < 0.0 ) {
-			this.level_angle = - this.level_angle;
-		}*/
-
 		this.invalidate();
 	}
 
     public void onMagneticSensorChanged(SensorEvent event) {
     	this.has_geomagnetic = true;
     	for(int i=0;i<3;i++) {
-    		this.geomagnetic[i] = event.values[i];
+    		//this.geomagnetic[i] = event.values[i];
+    		this.geomagnetic[i] = sensor_alpha * this.geomagnetic[i] + (1.0f-sensor_alpha) * event.values[i];
     	}
     	calculateGeoDirection();
     }
