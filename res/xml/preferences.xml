@@ -160,6 +160,13 @@
 	            android:defaultValue="true"
 	            />
 
+            <CheckBoxPreference
+                android:key="preference_show_geo_direction"
+                android:title="@string/preference_show_geo_direction"
+                android:summary="@string/preference_show_geo_direction_summary"
+                android:defaultValue="true"
+                />
+
 	        <CheckBoxPreference
 	            android:key="preference_grid_3x3"
 	            android:title="@string/preference_grid_3x3"

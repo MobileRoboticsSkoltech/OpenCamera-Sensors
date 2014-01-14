@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -31,9 +30,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.hardware.Camera.Face;
-import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.ExifInterface;
@@ -60,11 +58,11 @@ import android.widget.Toast;
 import android.widget.ZoomControls;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-public class Preview extends SurfaceView implements SurfaceHolder.Callback, SensorEventListener {
+public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final String TAG = "Preview";
 
 	private Paint p = new Paint();
-	private DecimalFormat decimalFormat = new DecimalFormat("##.00");
+	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
     private Camera.CameraInfo camera_info = new Camera.CameraInfo();
     private Matrix camera_to_preview_matrix = new Matrix();
     private Matrix preview_to_camera_matrix = new Matrix();
@@ -180,7 +178,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 	private float battery_frac = 0.0f;
 	private long last_battery_time = 0;
 	
-	// for testing:
+	// for determining compass direction
+    private boolean has_gravity = false;
+    private float [] gravity = new float[3];
+    private boolean has_geomagnetic = false;
+    private float [] geomagnetic = new float[3];
+    private float [] deviceRotation = new float[9];
+    private float [] cameraRotation = new float[9];
+    private float [] deviceInclination = new float[9];
+    private boolean has_geo_direction = false;
+    private float [] geo_direction = new float[3];
+
+    // for testing:
 	public int count_cameraStartPreview = 0;
 	public int count_cameraAutoFocus = 0;
 	public int count_cameraTakePicture = 0;
@@ -1419,27 +1428,45 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
-			if( this.has_level_angle && sharedPreferences.getBoolean("preference_show_angle", true) ) {
+			boolean draw_angle = this.has_level_angle && sharedPreferences.getBoolean("preference_show_angle", true);
+			boolean draw_geo_direction = this.has_geo_direction && sharedPreferences.getBoolean("preference_show_geo_direction", true);
+			if( draw_angle ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				// Convert the dps to pixels, based on density scale
-				int pixels_offset_x = (int) (50 * scale + 0.5f); // convert dps to pixels
+				int pixels_offset_x = 0;
 				int pixels_offset_y = text_extra_offset_y;
-				if( getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
-					pixels_offset_x = 0;
-					p.setTextAlign(Paint.Align.CENTER);
-				}
-				else if( ui_placement_right ) {
-					pixels_offset_x = - pixels_offset_x;
-					p.setTextAlign(Paint.Align.RIGHT);
+				if( draw_geo_direction ) {
+					pixels_offset_x = - (int) (80 * scale + 0.5f); // convert dps to pixels
+					p.setTextAlign(Paint.Align.LEFT);
 				}
 				else {
-					p.setTextAlign(Paint.Align.LEFT);
+					p.setTextAlign(Paint.Align.CENTER);
 				}
 				if( Math.abs(this.level_angle) <= 1.0 ) {
 					color = Color.GREEN;
 				}
-				drawTextWithBackground(canvas, p, "Angle: " + decimalFormat.format(this.level_angle), color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, canvas.getHeight() - pixels_offset_y);
+				String string = "Angle: " + decimalFormat.format(this.level_angle) + (char)0x00B0;
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, canvas.getHeight() - pixels_offset_y);
+			}
+			if( draw_geo_direction ) {
+				int color = Color.WHITE;
+				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+				int pixels_offset_y = text_extra_offset_y;
+				if( draw_angle ) {
+					p.setTextAlign(Paint.Align.LEFT);
+				}
+				else {
+					p.setTextAlign(Paint.Align.CENTER);
+				}
+				if( Math.abs(this.level_angle) <= 1.0 ) {
+					color = Color.GREEN;
+				}
+				float geo_angle = (float)Math.toDegrees(this.geo_direction[0]);
+				if( geo_angle < 0.0f ) {
+					geo_angle += 360.0f;
+				}
+				String string = " Direction: " + Math.round(geo_angle) + (char)0x00B0;
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
 			}
 			//if( this.is_taking_photo_on_timer ) {
 			if( this.isOnTimer() ) {
@@ -3211,13 +3238,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		});
     }
 
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
-
-    public void onSensorChanged(SensorEvent event) {
+    public void onAccelerometerSensorChanged(SensorEvent event) {
 		/*if( MyDebug.LOG )
-    	Log.d(TAG, "onSensorChanged: " + event.values[0] + ", " + event.values[1] + ", " + event.values[2]);*/
+    	Log.d(TAG, "onAccelerometerSensorChanged: " + event.values[0] + ", " + event.values[1] + ", " + event.values[2]);*/
 
+    	this.has_gravity = true;
+    	for(int i=0;i<3;i++) {
+    		this.gravity[i] = event.values[i];
+    	}
+    	calculateGeoDirection();
+    	
 		double x = event.values[0];
 		double y = event.values[1];
 		this.has_level_angle = true;
@@ -3247,6 +3277,30 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback, Sens
 		this.invalidate();
 	}
 
+    public void onMagneticSensorChanged(SensorEvent event) {
+    	this.has_geomagnetic = true;
+    	for(int i=0;i<3;i++) {
+    		this.geomagnetic[i] = event.values[i];
+    	}
+    	calculateGeoDirection();
+    }
+    
+    private void calculateGeoDirection() {
+    	if( !this.has_gravity || !this.has_geomagnetic ) {
+    		return;
+    	}
+    	if( !SensorManager.getRotationMatrix(this.deviceRotation, this.deviceInclination, this.gravity, this.geomagnetic) ) {
+    		return;
+    	}
+        SensorManager.remapCoordinateSystem(this.deviceRotation, SensorManager.AXIS_X, SensorManager.AXIS_Z, this.cameraRotation);
+    	this.has_geo_direction = true;
+    	SensorManager.getOrientation(cameraRotation, geo_direction);
+    	//SensorManager.getOrientation(deviceRotation, geo_direction);
+		/*if( MyDebug.LOG ) {
+			Log.d(TAG, "geo_direction: " + (geo_direction[0]*180/Math.PI) + ", " + (geo_direction[1]*180/Math.PI) + ", " + (geo_direction[2]*180/Math.PI));
+		}*/
+    }
+    
     public boolean supportsFaceDetection() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsFaceDetection");

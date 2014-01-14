@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -57,6 +59,7 @@ public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 	private SensorManager mSensorManager = null;
 	private Sensor mSensorAccelerometer = null;
+	private Sensor mSensorMagnetic = null;
 	private LocationManager mLocationManager = null;
 	private LocationListener locationListener = null;
 	private Preview preview = null;
@@ -116,6 +119,15 @@ public class MainActivity extends Activity {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no support for accelerometer");
 		}
+		if( mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "found magnetic sensor");
+			mSensorMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "no support for magnetic sensor");
+		}
 
 		mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
@@ -158,12 +170,35 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	private SensorEventListener accelerometerListener = new SensorEventListener() {
+		@Override
+		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		}
+
+		@Override
+		public void onSensorChanged(SensorEvent event) {
+			preview.onAccelerometerSensorChanged(event);
+		}
+	};
+	
+	private SensorEventListener magneticListener = new SensorEventListener() {
+		@Override
+		public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		}
+
+		@Override
+		public void onSensorChanged(SensorEvent event) {
+			preview.onMagneticSensorChanged(event);
+		}
+	};
+	
     @Override
     protected void onResume() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
         super.onResume();
-        mSensorManager.registerListener(preview, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(accelerometerListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
 
 		// Define a listener that responds to location updates
@@ -203,7 +238,8 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPause");
         super.onPause();
-        mSensorManager.unregisterListener(preview);
+        mSensorManager.unregisterListener(accelerometerListener);
+        mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
         if( this.locationListener != null ) {
             mLocationManager.removeUpdates(locationListener);
