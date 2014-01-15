@@ -61,6 +61,9 @@ import android.widget.ZoomControls;
 public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final String TAG = "Preview";
 
+	private static final String TAG_GPS_IMG_DIRECTION = "GPSImgDirection";
+	private static final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
+
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
     private Camera.CameraInfo camera_info = new Camera.CameraInfo();
@@ -2820,7 +2823,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, exif_gps_processing_method);
 	            	            if( exif_gps_timestamp != null )
 	            	            	exif_new.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exif_gps_timestamp);
-	            	            	// leave width/height, as this will have changed!
+            	            	// leave width/height, as this will have changed!
 	            	            if( exif_iso != null )
 	            	            	exif_new.setAttribute(ExifInterface.TAG_ISO, exif_iso);
 	            	            if( exif_make != null )
@@ -2831,9 +2834,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            	            	exif_new.setAttribute(ExifInterface.TAG_ORIENTATION, exif_orientation);
 	            	            if( exif_white_balance != null )
 	            	            	exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
+	            	            setGPSDirectionExif(exif_new);
             	            	exif_new.saveAttributes();
                 	    		if( MyDebug.LOG )
                 	    			Log.d(TAG, "now saved EXIF data");
+        	            	}
+        	            	else if( Preview.this.has_geo_direction && sharedPreferences.getBoolean("preference_location", false) ) {
+            	            	if( MyDebug.LOG )
+                	    			Log.d(TAG, "add GPS direction exif info");
+            	            	long time_s = System.currentTimeMillis();
+            	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
+	            	            setGPSDirectionExif(exif);
+            	            	exif.saveAttributes();
+                	    		if( MyDebug.LOG ) {
+                	    			Log.d(TAG, "done adding GPS direction exif info, time taken: " + (System.currentTimeMillis() - time_s));
+                	    		}
         	            	}
 
             	            main_activity.broadcastFile(picFile);
@@ -3050,6 +3065,24 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
     }
+
+	private void setGPSDirectionExif(ExifInterface exif) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+    	if( this.has_geo_direction && sharedPreferences.getBoolean("preference_location", false) ) {
+			float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
+			if( geo_angle < 0.0f ) {
+				geo_angle += 360.0f;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "save geo_angle: " + geo_angle);
+			// see http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/GPS.html
+			String GPSImgDirection_string = Math.round(geo_angle*100) + "/100";
+			if( MyDebug.LOG )
+				Log.d(TAG, "GPSImgDirection_string: " + GPSImgDirection_string);
+		   	exif.setAttribute(TAG_GPS_IMG_DIRECTION, GPSImgDirection_string);
+		   	exif.setAttribute(TAG_GPS_IMG_DIRECTION_REF, "M");
+    	}
+	}
 
 	public void clickedShare() {
 		if( MyDebug.LOG )
