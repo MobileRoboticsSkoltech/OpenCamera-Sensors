@@ -1011,11 +1011,18 @@ public class MainActivity extends Activity {
                 	takePicture();
                     return true;
         		}
-        		else if ( volume_keys.equals("volume_zoom") ) {
+        		else if( volume_keys.equals("volume_zoom") ) {
         			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
         				this.preview.zoomIn();
         			else
         				this.preview.zoomOut();
+                    return true;
+        		}
+        		else if( volume_keys.equals("volume_exposure") ) {
+        			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+        				this.preview.changeExposure(1);
+        			else
+        				this.preview.changeExposure(-1);
                     return true;
         		}
         		// else do nothing

@@ -136,6 +136,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private List<String> scene_modes = null;
 	private List<String> white_balances = null;
 	private List<String> exposures = null;
+	private int min_exposure = 0;
+	private int max_exposure = 0;
 
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
@@ -160,6 +162,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private ToastBoxer focus_toast = new ToastBoxer();
 	private ToastBoxer take_photo_toast = new ToastBoxer();
 	private ToastBoxer stopstart_video_toast = new ToastBoxer();
+	private ToastBoxer change_exposure_toast = new ToastBoxer();
 	
 	private int ui_rotation = 0;
 
@@ -663,6 +666,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		color_effects = null;
 		white_balances = null;
 		exposures = null;
+		min_exposure = 0;
+		max_exposure = 0;
 		sizes = null;
 		current_size_index = -1;
 		video_quality = null;
@@ -816,9 +821,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 			// get min/max exposure
 			exposures = null;
-			int min_exposure = parameters.getMinExposureCompensation();
-			int max_exposure = parameters.getMaxExposureCompensation();
-			if( min_exposure != 0 && max_exposure != 0 ) {
+			min_exposure = parameters.getMinExposureCompensation();
+			max_exposure = parameters.getMaxExposureCompensation();
+			if( min_exposure != 0 || max_exposure != 0 ) {
 				exposures = new Vector<String>();
 				for(int i=min_exposure;i<=max_exposure;i++) {
 					exposures.add("" + i);
@@ -1764,6 +1769,40 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    		clearFocusAreas();
 			}
         }
+	}
+	
+	public void changeExposure(int change) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "changeExposure()");
+		if( change != 0 && camera != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
+			Camera.Parameters parameters = camera.getParameters();
+			int current_exposure = parameters.getExposureCompensation();
+			int new_exposure = current_exposure + change;
+			if( new_exposure < min_exposure )
+				new_exposure = min_exposure;
+			if( new_exposure > max_exposure )
+				new_exposure = max_exposure;
+			if( new_exposure != current_exposure ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "change exposure from " + current_exposure + " to " + new_exposure);
+				parameters.setExposureCompensation(new_exposure);
+				try {
+					camera.setParameters(parameters);
+					// now save
+					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString("preference_exposure", "" + new_exposure);
+					editor.apply();
+		    		showToast(change_exposure_toast, "Exposure compensation " + new_exposure);
+				}
+	        	catch(RuntimeException e) {
+	        		// just to be safe
+		    		if( MyDebug.LOG )
+		    			Log.e(TAG, "runtime exception in changeExposure()");
+					e.printStackTrace();
+	        	}
+			}
+		}
 	}
 
 	public void switchCamera() {
