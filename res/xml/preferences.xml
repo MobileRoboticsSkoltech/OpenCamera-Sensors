@@ -6,7 +6,7 @@
         android:title="@string/preference_category_camera_effects"
         >
 
-        <!--  if we move this to another PreferenceCategory, we should update code for the findPreference() call -->
+        <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
         <CheckBoxPreference
 	        android:key="preference_auto_stabilise"
 	        android:title="@string/preference_auto_stabilise"
@@ -14,28 +14,28 @@
 	        android:defaultValue="false"
 	        />
 	
-        <!--  if we move this to another PreferenceCategory, we should update code for the readFromIntent() call -->
+        <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
 	    <ListPreference 
 	        android:key="preference_color_effect"
 	        android:title="@string/preference_color_effect"
 	        android:summary="@string/preference_color_effect_summary"
 	        />
 	
-        <!--  if we move this to another PreferenceCategory, we should update code for the readFromIntent() call -->
+        <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
 	    <ListPreference 
 	        android:key="preference_scene_mode"
 	        android:title="@string/preference_scene_mode"
 	        android:summary="@string/preference_scene_mode_summary"
 	        />
 	
-        <!--  if we move this to another PreferenceCategory, we should update code for the readFromIntent() call -->
+        <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
 	    <ListPreference 
 	        android:key="preference_white_balance"
 	        android:title="@string/preference_white_balance"
 	        android:summary="@string/preference_white_balance_summary"
 	        />
 
-        <!--  if we move this to another PreferenceCategory, we should update code for the readFromIntent() call -->
+        <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
         <!--
 	   	<ListPreference
 	        android:key="preference_exposure"
@@ -44,7 +44,7 @@
 	        />
         -->
 
-        <!--  if we move this to another PreferenceCategory, we should update code for the findPreference() call -->
+        <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
         <CheckBoxPreference
             android:key="preference_face_detection"
             android:title="@string/preference_face_detection"
@@ -113,7 +113,7 @@
 		        android:defaultValue="false"
 		        />
 	
-	        <!--  if we move this to another PreferenceCategory, we should update code to remove this Preference -->
+	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
 		    <CheckBoxPreference
 		        android:key="preference_shutter_sound"
 		        android:title="@string/preference_shutter_sound"
@@ -195,6 +195,7 @@
 	        android:title="@string/preference_screen_camera_quality"
 	        android:persistent="false">
 	
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
 	        <ListPreference 
 		        android:key="preference_resolution"
 		        android:title="@string/preference_resolution"
@@ -215,7 +216,8 @@
 	            android:defaultValue="false"
 	            />
 		    
-            <ListPreference 
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+	        <ListPreference 
 	            android:key="preference_video_quality"
 	            android:title="@string/video_quality"
 	            android:summary="@string/video_quality_summary"
