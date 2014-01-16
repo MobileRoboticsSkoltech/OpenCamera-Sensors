@@ -73,6 +73,7 @@
     
     <string name="take_photo">Take Photo</string>
     <string name="gallery">Gallery</string>
+    <string name="exposure">Exposure</string>
     <string name="focus_mode">Focus Mode</string>
     <string name="flash_mode">Flash Mode</string>
     <string name="switch_camera">Switch Camera</string>

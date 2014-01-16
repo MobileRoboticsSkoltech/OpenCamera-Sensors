@@ -44,7 +44,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		readFromIntent("color_effects", "preference_color_effect", Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
 		readFromIntent("scene_modes", "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
 		readFromIntent("white_balances", "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
-		readFromIntent("exposures", "preference_exposure", "0", "preference_category_camera_effects");
+		//readFromIntent("exposures", "preference_exposure", "0", "preference_category_camera_effects");
 
 		boolean supports_face_detection = getIntent().getExtras().getBoolean("supports_face_detection");
 		if( MyDebug.LOG )

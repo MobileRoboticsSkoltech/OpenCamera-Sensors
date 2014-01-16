@@ -116,6 +116,13 @@ text will explain what each mode is. (Only available if the camera supports flas
 <p><img src="focus_mode_auto.png" width="32" height="32"><b>Focus mode</b> - Click this to cycle through the available focus modes.
 Popup text will explain what each mode is. (Only available if the camera supports different focus modes.)</p>
 
+<p><img src="exposure.png" width="32" height="32"><b>Exposure compensation</b> - Clicking this will bring up a
+slider which can be used to control the exposure compensation. A higher value increases the exposure, so that
+pictures come out brighter in low light; a lower value makes pictures darker. Set to 0 for the default exposure.
+To get rid of the slider, either click the Exposure button again, or click elsewhere on the screen.
+See <a href="http://en.wikipedia.org/wiki/Exposure_compensation">Exposure compensation</a>.
+(Only available if the camera supports control of the exposure.)</p>
+
 <p><b>Gallery</b> - Click to launch the Gallery app, to view the most recent
 photo/video (by default saved in the OpenCamera folder). If you get the message "No Gallery app available", then you should install
 a Gallery app from Google Play (e.g., <a href="https://play.google.com/store/apps/details?id=com.moblynx.galleryics">Gallery ICS</a>).</p>
@@ -164,11 +171,11 @@ if the device has enough memory.)</p>
 <a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an explanation of white balance. (Only
 available if the camera supports different white balance settings.)</p>
 
-<p><b>Set the exposure compensation</b> - A higher value increases the exposure,
+<!--<p><b>Set the exposure compensation</b> - A higher value increases the exposure,
 so that pictures come out brighter in low light; a lower value makes pictures
 darker. Set to 0 for the default exposure. See
 <a href="http://en.wikipedia.org/wiki/Exposure_compensation">Exposure compensation</a>.
-(Only available if the camera supports control of the exposure.)</p>
+(Only available if the camera supports control of the exposure.)</p>-->
 
 <p><b>Face detection</b> - If this is enabled, then the camera will automatically try to detect faces, and use
 them for the focus, metering (exposure) and white balance. Faces will be drawn as yellow squares when detected.
@@ -251,6 +258,11 @@ ADDED   Option to display compass direction of camera on-screen (defaults to
         on, disable it in options if you don't like it).
 ADDED   Option to choose microphone for recording audio (support for external
         microphones).
+UPDATED Exposure compensation is now set via a new button in the on-screen GUI
+        (the black and white +/- symbol) instead of the settings. Clicking this
+        will bring up a slider to adjust the exposure compensation. To get rid
+        of the slider, either click the Exposure button again, or click
+        elsewhere on the screen.
 UPDATED Geotagging now stores image compass direction (GPSImgDirection,
         GPSImgDirectionRef).
 UPDATED Display degree symbol for displayed on-screen angles.

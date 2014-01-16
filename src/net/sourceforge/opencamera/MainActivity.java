@@ -50,6 +50,8 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 class MyDebug {
 	static final boolean LOG = true;
@@ -455,11 +457,20 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 
-			view = findViewById(R.id.focus_mode);
+			view = findViewById(R.id.exposure);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_top, R.id.preview);
 			layoutParams.addRule(align_bottom, 0);
 			layoutParams.addRule(left_of, R.id.gallery);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+
+			view = findViewById(R.id.focus_mode);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_top, R.id.preview);
+			layoutParams.addRule(align_bottom, 0);
+			layoutParams.addRule(left_of, R.id.exposure);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -533,6 +544,9 @@ public class MainActivity extends Activity {
 			else {
 				view.setRotation(0.0f);
 			}
+
+			view = findViewById(R.id.seekbar);
+			view.setRotation(ui_rotation);
 		}
 		else {
 			View view = findViewById(R.id.switch_camera);
@@ -573,12 +587,21 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 
-			view = findViewById(R.id.gallery);
+			view = findViewById(R.id.exposure);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_top, R.id.preview);
 			layoutParams.addRule(align_bottom, 0);
 			layoutParams.addRule(left_of, 0);
 			layoutParams.addRule(right_of, R.id.focus_mode);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+
+			view = findViewById(R.id.gallery);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_top, R.id.preview);
+			layoutParams.addRule(align_bottom, 0);
+			layoutParams.addRule(left_of, 0);
+			layoutParams.addRule(right_of, R.id.exposure);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 
@@ -631,6 +654,9 @@ public class MainActivity extends Activity {
 			else {
 				view.setRotation(0.0f);
 			}
+
+			view = findViewById(R.id.seekbar);
+			view.setRotation(ui_rotation);
 		}
 		
 		{
@@ -696,6 +722,42 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "clickedFocusMode");
     	this.preview.cycleFocusMode();
     }
+
+    void clearSeekBar() {
+		SeekBar seek_bar = ((SeekBar)findViewById(R.id.seekbar));
+		seek_bar.setVisibility(View.GONE);
+    }
+    
+    public void clickedExposure(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedExposure");
+		SeekBar seek_bar = ((SeekBar)findViewById(R.id.seekbar));
+		int visibility = seek_bar.getVisibility();
+		if( visibility == View.GONE && preview.getCamera() != null && preview.supportsExposures() ) {
+			final int min_exposure = preview.getMinimumExposure();
+			seek_bar.setVisibility(View.VISIBLE);
+			seek_bar.setMax( preview.getMaximumExposure() - min_exposure );
+			seek_bar.setProgress( preview.getCurrentExposure() - min_exposure );
+			seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+					preview.setExposure(min_exposure + progress);
+				}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {
+				}
+
+				@Override
+				public void onStopTrackingTouch(SeekBar seekBar) {
+				}
+			});
+		}
+		else if( visibility == View.VISIBLE ) {
+			clearSeekBar();
+		}
+    }
     
     public void clickedSettings(View view) {
 		if( MyDebug.LOG )
@@ -710,7 +772,7 @@ public class MainActivity extends Activity {
 		putIntentExtra(intent, "color_effects", this.preview.getSupportedColorEffects());
 		putIntentExtra(intent, "scene_modes", this.preview.getSupportedSceneModes());
 		putIntentExtra(intent, "white_balances", this.preview.getSupportedWhiteBalances());
-		putIntentExtra(intent, "exposures", this.preview.getSupportedExposures());
+		//putIntentExtra(intent, "exposures", this.preview.getSupportedExposures());
 
 		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
 		if( sizes != null ) {
@@ -817,7 +879,6 @@ public class MainActivity extends Activity {
 		}
 		return media;
     }
-    
 
     public void updateGalleryIconToBlank() {
 		if( MyDebug.LOG )

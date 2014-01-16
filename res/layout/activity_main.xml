@@ -56,6 +56,18 @@
         />
 
     <ImageButton
+        android:id="@+id/exposure"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/exposure"
+        android:src="@drawable/exposure"
+        android:onClick="clickedExposure"
+        android:layout_toLeftOf="@+id/gallery"
+        />
+
+    <ImageButton
         android:id="@+id/focus_mode"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -63,7 +75,7 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/focus_mode"
         android:onClick="clickedFocusMode"
-        android:layout_toLeftOf="@+id/gallery"
+        android:layout_toLeftOf="@+id/exposure"
         />
 
     <ImageButton
@@ -78,18 +90,6 @@
         />
 
     <ImageButton
-        android:id="@+id/switch_camera"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/switch_camera"
-        android:src="@drawable/switch_camera"
-        android:onClick="clickedSwitchCamera"
-        android:layout_toLeftOf="@+id/flash"
-        />
-
-    <ImageButton
         android:id="@+id/switch_video"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -98,7 +98,19 @@
         android:contentDescription="@string/switch_video"
         android:src="@drawable/switch_video"
         android:onClick="clickedSwitchVideo"
-        android:layout_toLeftOf="@+id/switch_camera"
+        android:layout_toLeftOf="@+id/flash"
+        />
+
+    <ImageButton
+        android:id="@+id/switch_camera"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/switch_camera"
+        android:src="@drawable/switch_camera"
+        android:onClick="clickedSwitchCamera"
+        android:layout_toLeftOf="@+id/switch_video"
         />
 
     <!-- should be at left-most -->
@@ -127,5 +139,14 @@
         android:layout_toLeftOf="@+id/trash"
         android:visibility="gone"
         />
-    
+
+    <SeekBar
+        android:id="@+id/seekbar"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        />
+
 </RelativeLayout>

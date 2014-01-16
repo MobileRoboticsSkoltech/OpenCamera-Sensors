@@ -321,6 +321,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	@Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
+		MainActivity main_activity = (MainActivity)this.getContext();
+		main_activity.clearSeekBar();
         //invalidate();
 		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "touch event: " + event.getAction());
@@ -614,6 +616,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
         has_set_location = false;
+		MainActivity main_activity = (MainActivity)this.getContext();
+		main_activity.clearSeekBar();
 		//if( is_taking_photo_on_timer ) {
 		if( this.isOnTimer() ) {
 			takePictureTimerTask.cancel();
@@ -842,6 +846,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					}
 				}
 			}
+		    View exposureButton = (View) activity.findViewById(R.id.exposure);
+		    exposureButton.setVisibility(exposures != null ? View.VISIBLE : View.GONE);
 
 			// get available sizes
 	        sizes = parameters.getSupportedPictureSizes();
@@ -1778,6 +1784,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Camera.Parameters parameters = camera.getParameters();
 			int current_exposure = parameters.getExposureCompensation();
 			int new_exposure = current_exposure + change;
+			setExposure(new_exposure);
+		}
+	}
+
+	public void setExposure(int new_exposure) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setExposure()");
+		if( camera != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
+			Camera.Parameters parameters = camera.getParameters();
+			int current_exposure = parameters.getExposureCompensation();
 			if( new_exposure < min_exposure )
 				new_exposure = min_exposure;
 			if( new_exposure > max_exposure )
@@ -3384,6 +3400,26 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedWhiteBalances");
 		return this.white_balances;
+    }
+    
+    boolean supportsExposures() {
+    	return this.exposures != null;
+    }
+    
+    int getMinimumExposure() {
+    	return this.min_exposure;
+    }
+    
+    int getMaximumExposure() {
+    	return this.max_exposure;
+    }
+    
+    int getCurrentExposure() {
+    	if( camera == null )
+    		return 0;
+		Camera.Parameters parameters = camera.getParameters();
+		int current_exposure = parameters.getExposureCompensation();
+		return current_exposure;
     }
     
     List<String> getSupportedExposures() {
