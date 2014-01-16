@@ -77,6 +77,11 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			// now set the key, so we save for the correct cameraId
 			lp.setKey(resolution_preference_key);
 		}
+		else {
+			Preference pref = (Preference)findPreference("preference_resolution");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
+        	pg.removePreference(pref);
+		}
 
 		{
 			final int n_quality = 100;
@@ -135,6 +140,11 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			lp.setValue(video_quality_value);
 			// now set the key, so we save for the correct cameraId
 			lp.setKey(video_quality_preference_key);
+		}
+		else {
+			Preference pref = (Preference)findPreference("preference_video_quality");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
+        	pg.removePreference(pref);
 		}
 
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
