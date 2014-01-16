@@ -3316,12 +3316,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    View switchVideoButton = (View) activity.findViewById(R.id.switch_video);
 			    View flashButton = (View) activity.findViewById(R.id.flash);
 			    View focusButton = (View) activity.findViewById(R.id.focus_mode);
+			    View exposureButton = (View) activity.findViewById(R.id.exposure);
 			    switchCameraButton.setVisibility(visibility);
 			    switchVideoButton.setVisibility(visibility);
 			    if( supported_flash_values != null )
 			    	flashButton.setVisibility(visibility);
 			    if( supported_focus_values != null )
 			    	focusButton.setVisibility(visibility);
+			    if( exposures != null )
+			    	exposureButton.setVisibility(visibility);
 			}
 		});
     }
@@ -3404,7 +3407,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return this.white_balances;
     }
     
-    boolean supportsExposures() {
+    public boolean supportsExposures() {
     	return this.exposures != null;
     }
     
