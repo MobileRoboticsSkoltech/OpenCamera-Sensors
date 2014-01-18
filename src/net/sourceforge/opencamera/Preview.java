@@ -1392,6 +1392,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "ui_rotation: " + ui_rotation);*/
 
+		Activity activity = (Activity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		if( camera != null && sharedPreferences.getBoolean("preference_grid_3x3", false) ) {
 			p.setColor(Color.WHITE);
@@ -1413,7 +1414,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				thumbnail_anim_src_rect.top = 0;
 				thumbnail_anim_src_rect.right = this.thumbnail.getWidth();
 				thumbnail_anim_src_rect.bottom = this.thumbnail.getHeight();
-				Activity activity = (Activity)this.getContext();
 			    View galleryButton = (View) activity.findViewById(R.id.gallery);
 				float alpha = ((float)time)/(float)duration;
 
@@ -1456,15 +1456,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		final float scale = getResources().getDisplayMetrics().density;
 		int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
 		// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
-		int text_extra_offset_y = 0;
+		int text_base_y = 0;
 		if( ui_rotation == 0 ) {
-			text_extra_offset_y = (int)(0.5*text_y);
+			text_base_y = canvas.getHeight() - (int)(0.5*text_y);
 		}
 		else if( ui_rotation == 180 ) {
-			text_extra_offset_y = (int)(2.5*text_y);
+			text_base_y = canvas.getHeight() - (int)(2.5*text_y);
 		}
 		else if( ui_rotation == 90 || ui_rotation == 270 ) {
-			text_extra_offset_y = -(int)(0.5*text_y);
+			//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
+			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
+			// align with "top" of the take_photo button, but remember to take the rotation into account!
+			int diff_x = view.getLeft() - canvas.getWidth()/2;
+			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
 		}
 
 		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED ) {
@@ -1476,7 +1480,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				int pixels_offset_x = 0;
-				int pixels_offset_y = text_extra_offset_y;
 				if( draw_geo_direction ) {
 					pixels_offset_x = - (int) (80 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
@@ -1488,12 +1491,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					color = Color.GREEN;
 				}
 				String string = "Angle: " + decimalFormat.format(this.level_angle) + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, canvas.getHeight() - pixels_offset_y);
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y);
 			}
 			if( draw_geo_direction ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				int pixels_offset_y = text_extra_offset_y;
 				if( draw_angle ) {
 					p.setTextAlign(Paint.Align.LEFT);
 				}
@@ -1505,7 +1507,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					geo_angle += 360.0f;
 				}
 				String string = " Direction: " + Math.round(geo_angle) + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y);
 			}
 			//if( this.is_taking_photo_on_timer ) {
 			if( this.isOnTimer() ) {
@@ -1558,14 +1560,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			// only show when actually zoomed in
 			if( zoom_ratio > 1.0f + 1.0e-5f ) {
 				// Convert the dps to pixels, based on density scale
-				int pixels_offset_y = 2*text_y+text_extra_offset_y;
+				int pixels_offset_y = 2*text_y;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.CENTER);
-				drawTextWithBackground(canvas, p, "Zoom: " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
+				drawTextWithBackground(canvas, p, "Zoom: " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
 		if( camera != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
-			int pixels_offset_y = 1*text_y+text_extra_offset_y;
+			int pixels_offset_y = 1*text_y;
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			long time_now = System.currentTimeMillis();
@@ -1577,14 +1579,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 			}
 			if( free_memory_gb >= 0.0f ) {
-				drawTextWithBackground(canvas, p, "Free memory: " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
+				drawTextWithBackground(canvas, p, "Free memory: " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
 		
 		{
 			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
-				Activity activity = (Activity)this.getContext();
 				Intent batteryStatus = activity.registerReceiver(null, battery_ifilter);
 				int battery_level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
 				int battery_scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
