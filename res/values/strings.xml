@@ -6,7 +6,7 @@
 
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-stabilise</string>
-    <string name="preference_auto_stabilise_summary">Images will be rotated so they are automatically level (photos only) (may fail on devices with too low memory)</string>
+    <string name="preference_auto_stabilise_summary">Images will be rotated so they are automatically level (photos only) (slower to take photos, and may fail on devices with too low memory)</string>
     <string name="preference_color_effect">Apply a color effect</string>
     <string name="preference_color_effect_summary">Applies the selected color effect to the photo</string>
     <string name="preference_scene_mode">Apply a scene mode</string>
