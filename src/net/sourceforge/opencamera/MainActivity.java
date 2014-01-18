@@ -431,14 +431,18 @@ public class MainActivity extends Activity {
 		preview.setUIRotation(ui_rotation);
 		int align_left = RelativeLayout.ALIGN_LEFT;
 		int align_right = RelativeLayout.ALIGN_RIGHT;
-		int left_of = RelativeLayout.LEFT_OF;
-		int right_of = RelativeLayout.RIGHT_OF;
 		int align_top = RelativeLayout.ALIGN_TOP;
 		int align_bottom = RelativeLayout.ALIGN_BOTTOM;
+		int left_of = RelativeLayout.LEFT_OF;
+		int right_of = RelativeLayout.RIGHT_OF;
+		int above = RelativeLayout.ABOVE;
+		int below = RelativeLayout.BELOW;
 		if( ( relative_orientation == 0 && ui_placement_right ) || ( relative_orientation == 180 && ui_placement_right ) || relative_orientation == 90 || relative_orientation == 270) {
 			if( !ui_placement_right && ( relative_orientation == 90 || relative_orientation == 270 ) ) {
 				align_top = RelativeLayout.ALIGN_BOTTOM;
 				align_bottom = RelativeLayout.ALIGN_TOP;
+				above = RelativeLayout.BELOW;
+				below = RelativeLayout.ABOVE;
 			}
 			View view = findViewById(R.id.settings);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -547,6 +551,14 @@ public class MainActivity extends Activity {
 			else {
 				view.setRotation(0.0f);
 			}
+
+			view = findViewById(R.id.zoom_seekbar);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_left, 0);
+			layoutParams.addRule(align_right, R.id.zoom);
+			layoutParams.addRule(above, R.id.zoom);
+			layoutParams.addRule(below, 0);
+			view.setLayoutParams(layoutParams);
 		}
 		else {
 			View view = findViewById(R.id.switch_camera);
@@ -654,6 +666,14 @@ public class MainActivity extends Activity {
 			else {
 				view.setRotation(0.0f);
 			}
+
+			view = findViewById(R.id.zoom_seekbar);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_left, R.id.zoom);
+			layoutParams.addRule(align_right, 0);
+			layoutParams.addRule(above, R.id.zoom);
+			layoutParams.addRule(below, 0);
+			view.setLayoutParams(layoutParams);
 		}
 		
 		{
