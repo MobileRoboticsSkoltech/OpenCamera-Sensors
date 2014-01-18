@@ -1766,7 +1766,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 	}
 	
-	private void zoomTo(int new_zoom_factor, boolean update_seek_bar) {
+	public void zoomTo(int new_zoom_factor, boolean update_seek_bar) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "ZoomTo(): " + new_zoom_factor);
 		if( new_zoom_factor < 0 )
@@ -1802,7 +1802,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
 	public void changeExposure(int change, boolean update_seek_bar) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "changeExposure()");
+			Log.d(TAG, "changeExposure(): " + change);
 		if( change != 0 && camera != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
 			Camera.Parameters parameters = camera.getParameters();
 			int current_exposure = parameters.getExposureCompensation();
@@ -1813,7 +1813,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	public void setExposure(int new_exposure, boolean update_seek_bar) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setExposure()");
+			Log.d(TAG, "setExposure(): " + new_exposure);
 		if( camera != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
 			Camera.Parameters parameters = camera.getParameters();
 			int current_exposure = parameters.getExposureCompensation();
