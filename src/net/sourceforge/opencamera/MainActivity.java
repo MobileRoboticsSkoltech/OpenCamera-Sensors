@@ -46,12 +46,14 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.ZoomControls;
 
 class MyDebug {
 	static final boolean LOG = true;
@@ -134,6 +136,7 @@ public class MainActivity extends Activity {
 		mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
 		updateGalleryIcon();
+		clearSeekBar();
 
 		preview = new Preview(this, savedInstanceState);
 		((FrameLayout) findViewById(R.id.preview)).addView(preview);
@@ -544,9 +547,6 @@ public class MainActivity extends Activity {
 			else {
 				view.setRotation(0.0f);
 			}
-
-			view = findViewById(R.id.seekbar);
-			view.setRotation(ui_rotation);
 		}
 		else {
 			View view = findViewById(R.id.switch_camera);
@@ -654,13 +654,13 @@ public class MainActivity extends Activity {
 			else {
 				view.setRotation(0.0f);
 			}
-
-			view = findViewById(R.id.seekbar);
-			view.setRotation(ui_rotation);
 		}
 		
 		{
-			// set seekbar size
+			// set seekbar info
+			View view = findViewById(R.id.seekbar);
+			view.setRotation(ui_rotation);
+
 			int width_dp = 0;
 			if( ui_rotation == 0 || ui_rotation == 180 ) {
 				width_dp = 300;
@@ -672,11 +672,31 @@ public class MainActivity extends Activity {
 			final float scale = getResources().getDisplayMetrics().density;
 			int width_pixels = (int) (width_dp * scale + 0.5f); // convert dps to pixels
 			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
-			View view = findViewById(R.id.seekbar);
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
 			view.setLayoutParams(lp);
+
+			view = findViewById(R.id.seekbar_zoom);
+			view.setRotation(ui_rotation);
+			view.setAlpha(0.5f);
+			// n.b., using left_of etc doesn't work properly when using rotation (as the amount of space reserved is based on the UI elements before being rotated)
+			if( ui_rotation == 0 ) {
+				view.setTranslationX(0);
+				view.setTranslationY(height_pixels);
+			}
+			else if( ui_rotation == 90 ) {
+				view.setTranslationX(-height_pixels);
+				view.setTranslationY(0);
+			}
+			else if( ui_rotation == 180 ) {
+				view.setTranslationX(0);
+				view.setTranslationY(-height_pixels);
+			}
+			else if( ui_rotation == 270 ) {
+				view.setTranslationX(height_pixels);
+				view.setTranslationY(0);
+			}
 		}
 		
 		{
@@ -744,8 +764,17 @@ public class MainActivity extends Activity {
     }
 
     void clearSeekBar() {
+		View view = findViewById(R.id.seekbar);
+		view.setVisibility(View.GONE);
+		view = findViewById(R.id.seekbar_zoom);
+		view.setVisibility(View.GONE);
+    }
+    
+    void setSeekBarExposure() {
 		SeekBar seek_bar = ((SeekBar)findViewById(R.id.seekbar));
-		seek_bar.setVisibility(View.GONE);
+		final int min_exposure = preview.getMinimumExposure();
+		seek_bar.setMax( preview.getMaximumExposure() - min_exposure );
+		seek_bar.setProgress( preview.getCurrentExposure() - min_exposure );
     }
     
     public void clickedExposure(View view) {
@@ -756,13 +785,12 @@ public class MainActivity extends Activity {
 		if( visibility == View.GONE && preview.getCamera() != null && preview.supportsExposures() ) {
 			final int min_exposure = preview.getMinimumExposure();
 			seek_bar.setVisibility(View.VISIBLE);
-			seek_bar.setMax( preview.getMaximumExposure() - min_exposure );
-			seek_bar.setProgress( preview.getCurrentExposure() - min_exposure );
+			setSeekBarExposure();
 			seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
 				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-					preview.setExposure(min_exposure + progress);
+					preview.setExposure(min_exposure + progress, false);
 				}
 
 				@Override
@@ -773,6 +801,19 @@ public class MainActivity extends Activity {
 				public void onStopTrackingTouch(SeekBar seekBar) {
 				}
 			});
+
+			ZoomControls seek_bar_zoom = (ZoomControls)findViewById(R.id.seekbar_zoom);
+			seek_bar_zoom.setVisibility(View.VISIBLE);
+			seek_bar_zoom.setOnZoomInClickListener(new OnClickListener(){
+	            public void onClick(View v){
+	            	preview.changeExposure(1, true);
+	            }
+	        });
+			seek_bar_zoom.setOnZoomOutClickListener(new OnClickListener(){
+		    	public void onClick(View v){
+	            	preview.changeExposure(-1, true);
+		        }
+		    });
 		}
 		else if( visibility == View.VISIBLE ) {
 			clearSeekBar();
@@ -1101,9 +1142,9 @@ public class MainActivity extends Activity {
         		}
         		else if( volume_keys.equals("volume_exposure") ) {
         			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-        				this.preview.changeExposure(1);
+        				this.preview.changeExposure(1, true);
         			else
-        				this.preview.changeExposure(-1);
+        				this.preview.changeExposure(-1, true);
                     return true;
         		}
         		// else do nothing

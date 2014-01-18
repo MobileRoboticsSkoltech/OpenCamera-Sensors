@@ -1779,18 +1779,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 	}
 	
-	public void changeExposure(int change) {
+	public void changeExposure(int change, boolean update_seek_bar) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "changeExposure()");
 		if( change != 0 && camera != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
 			Camera.Parameters parameters = camera.getParameters();
 			int current_exposure = parameters.getExposureCompensation();
 			int new_exposure = current_exposure + change;
-			setExposure(new_exposure);
+			setExposure(new_exposure, update_seek_bar);
 		}
 	}
 
-	public void setExposure(int new_exposure) {
+	public void setExposure(int new_exposure, boolean update_seek_bar) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExposure()");
 		if( camera != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
@@ -1812,6 +1812,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					editor.putString("preference_exposure", "" + new_exposure);
 					editor.apply();
 		    		showToast(change_exposure_toast, "Exposure compensation " + new_exposure);
+		    		if( update_seek_bar ) {
+		    			MainActivity main_activity = (MainActivity)this.getContext();
+		    			main_activity.setSeekBarExposure();
+		    		}
 				}
 	        	catch(RuntimeException e) {
 	        		// just to be safe
