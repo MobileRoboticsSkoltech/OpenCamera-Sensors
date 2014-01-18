@@ -660,6 +660,26 @@ public class MainActivity extends Activity {
 		}
 		
 		{
+			// set seekbar size
+			int width_dp = 0;
+			if( ui_rotation == 0 || ui_rotation == 180 ) {
+				width_dp = 300;
+			}
+			else {
+				width_dp = 200;
+			}
+			int height_dp = 50;
+			final float scale = getResources().getDisplayMetrics().density;
+			int width_pixels = (int) (width_dp * scale + 0.5f); // convert dps to pixels
+			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
+			View view = findViewById(R.id.seekbar);
+			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+		}
+		
+		{
 			// set icon for taking photos vs videos
 			ImageButton view = (ImageButton)findViewById(R.id.take_photo);
 			if( preview != null ) {
