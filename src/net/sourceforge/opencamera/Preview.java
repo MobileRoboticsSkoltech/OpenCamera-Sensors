@@ -56,8 +56,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.Toast;
 import android.widget.ZoomControls;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 public class Preview extends SurfaceView implements SurfaceHolder.Callback {
@@ -597,8 +599,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         if( camera != null ) { // just to be safe
     		try {
 				camera.reconnect();
-		        this.startCameraPreview();
+				// must set preview size before starting camera preview
 	    		setPreviewSize();
+		        this.startCameraPreview();
 			}
     		catch (IOException e) {
         		if( MyDebug.LOG )
@@ -748,6 +751,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "has_zoom? " + has_zoom);
 		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
+		    SeekBar zoomSeekBar = (SeekBar) activity.findViewById(R.id.zoom_seekbar);
 		    this.zoom_factor = 0;
 			if( this.has_zoom ) {
 				this.max_zoom_factor = parameters.getMaxZoom();
@@ -775,16 +779,34 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		            	zoomIn();
 		            }
 		        });
-
 			    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
 			    	public void onClick(View v){
 			    		zoomOut();
 			        }
 			    });
 				zoomControls.setVisibility(View.VISIBLE);
+				
+				zoomSeekBar.setMax(max_zoom_factor);
+				zoomSeekBar.setProgress(max_zoom_factor-zoom_factor);
+				zoomSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						zoomTo(max_zoom_factor-progress, false);
+					}
+
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {
+					}
+
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {
+					}
+				});
+				zoomSeekBar.setVisibility(View.VISIBLE);
 			}
 			else {
 				zoomControls.setVisibility(View.GONE);
+				zoomSeekBar.setVisibility(View.GONE);
 			}
 			
 			// get face detection supported
@@ -1086,10 +1108,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			updateParametersFromLocation();
 
 			if( start_preview ) {
-				// must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
-				// doesn't seem to affect the startup time for the preview (start_preview is false when opening the camera for the first time, anyway)
-				startCameraPreview();
+				// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
+				// doesn't seem to affect the startup time for the preview (start_preview is false when opening the camera for the first time, anyway).
+				// Must set preview size before starting camera preview
 	    		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
+				startCameraPreview();
 			}
 			if( MyDebug.LOG ) {
 				//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
@@ -1255,6 +1278,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }*/
         Point display_size = new Point();
         display.getSize(display_size);
+		if( MyDebug.LOG )
+			Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
         double targetRatio = ((double)display_size.x) / (double)display_size.y;
 		if( MyDebug.LOG )
 			Log.d(TAG, "targetRatio: " + targetRatio);
@@ -1728,50 +1753,46 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public void zoomIn() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "zoomIn()");
-		// problem where we crashed due to calling this function with null camera should be fixed now, but check again just to be safe
-    	if(zoom_factor < max_zoom_factor && camera != null) {
-    		zoom_factor++;
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "zoom in to " + zoom_factor);
-			Camera.Parameters parameters = camera.getParameters();
-			if( parameters.isZoomSupported() ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "zoom was: " + parameters.getZoom());
-				parameters.setZoom((int)zoom_factor);
-				try {
-					camera.setParameters(parameters);
-				}
-	        	catch(RuntimeException e) {
-	        		// crash reported in v1.3 on device "PANTONE 5 SoftBank 107SH (SBM107SH)"
-		    		if( MyDebug.LOG )
-		    			Log.e(TAG, "runtime exception in zoomIn()");
-					e.printStackTrace();
-	        	}
-	    		clearFocusAreas();
-			}
+    	if( zoom_factor < max_zoom_factor ) {
+			zoomTo(zoom_factor+1, true);
         }
 	}
 	
 	public void zoomOut() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "zoomOut()");
+		if( zoom_factor > 0 ) {
+			zoomTo(zoom_factor-1, true);
+        }
+	}
+	
+	private void zoomTo(int new_zoom_factor, boolean update_seek_bar) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "ZoomTo(): " + new_zoom_factor);
+		if( new_zoom_factor < 0 )
+			new_zoom_factor = 0;
+		if( new_zoom_factor > max_zoom_factor )
+			new_zoom_factor = max_zoom_factor;
 		// problem where we crashed due to calling this function with null camera should be fixed now, but check again just to be safe
-		if(zoom_factor > 0 && camera != null) {
-			zoom_factor--;
-			if( MyDebug.LOG )
-				Log.d(TAG, "zoom out to " + zoom_factor);
+    	if(new_zoom_factor != zoom_factor && camera != null) {
 			Camera.Parameters parameters = camera.getParameters();
 			if( parameters.isZoomSupported() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "zoom was: " + parameters.getZoom());
-				parameters.setZoom((int)zoom_factor);
+				parameters.setZoom((int)new_zoom_factor);
 				try {
 					camera.setParameters(parameters);
+					zoom_factor = new_zoom_factor;
+					if( update_seek_bar ) {
+						Activity activity = (Activity)this.getContext();
+					    SeekBar zoomSeekBar = (SeekBar) activity.findViewById(R.id.zoom_seekbar);
+						zoomSeekBar.setProgress(max_zoom_factor-zoom_factor);
+					}
 				}
 	        	catch(RuntimeException e) {
-	        		// see note for zoomIn()
+	        		// crash reported in v1.3 on device "PANTONE 5 SoftBank 107SH (SBM107SH)"
 		    		if( MyDebug.LOG )
-		    			Log.e(TAG, "runtime exception in zoomOut()");
+		    			Log.e(TAG, "runtime exception in ZoomTo()");
 					e.printStackTrace();
 	        	}
 	    		clearFocusAreas();

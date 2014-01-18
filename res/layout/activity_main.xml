@@ -32,6 +32,14 @@
         android:alpha="0.5"
         />
 
+    <SeekBar
+        android:id="@+id/zoom_seekbar"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_above="@id/zoom"
+        android:layout_alignRight="@+id/zoom"
+        />
+    
     <ImageButton
         android:id="@+id/settings"
         android:layout_width="50dp"
