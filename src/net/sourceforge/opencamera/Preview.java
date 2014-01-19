@@ -420,48 +420,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	@Override
     	public boolean onScale(ScaleGestureDetector detector) {
     		if( Preview.this.camera != null && Preview.this.has_zoom ) {
-    			float zoom_ratio = Preview.this.zoom_ratios.get(zoom_factor)/100.0f;
-    			zoom_ratio *= detector.getScaleFactor();
-
-    			if( zoom_ratio <= 1.0f ) {
-    				zoom_factor = 0;
-    			}
-    			else if( zoom_ratio >= zoom_ratios.get(max_zoom_factor)/100.0f ) {
-    				zoom_factor = max_zoom_factor;
-    			}
-    			else {
-    				// find the closest zoom level
-    				if( detector.getScaleFactor() > 1.0f ) {
-    					// zooming in
-        				for(int i=zoom_factor;i<zoom_ratios.size();i++) {
-        					if( zoom_ratios.get(i)/100.0f >= zoom_ratio ) {
-        						zoom_factor = i;
-        						break;
-        					}
-        				}
-    				}
-    				else {
-    					// zooming out
-        				for(int i=zoom_factor;i>0;i--) {
-        					if( zoom_ratios.get(i)/100.0f <= zoom_ratio ) {
-        						zoom_factor = i;
-        						break;
-        					}
-        				}
-    				}
-    			}
-    			if( MyDebug.LOG ) {
-    				Log.d(TAG, "ScaleListener.onScale zoom_ratio is now " + zoom_ratio);
-    				Log.d(TAG, "    chosen new zoom_factor " + zoom_factor + " ratio " + zoom_ratios.get(zoom_factor)/100.0f);
-    			}
-    			Camera.Parameters parameters = camera.getParameters();
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "zoom was: " + parameters.getZoom());
-    			parameters.setZoom((int)zoom_factor);
-	    		camera.setParameters(parameters);
-	    		clearFocusAreas();
-
-        		//invalidate();
+    			Preview.this.scaleZoom(detector.getScaleFactor());
     		}
     		return true;
     	}
@@ -1751,6 +1710,47 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		canvas.drawText(text, location_x, location_y, paint);
 	}
 
+	public void scaleZoom(float scale_factor) {
+		if( this.camera != null && this.has_zoom ) {
+			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
+			zoom_ratio *= scale_factor;
+
+			int new_zoom_factor = zoom_factor;
+			if( zoom_ratio <= 1.0f ) {
+				new_zoom_factor = 0;
+			}
+			else if( zoom_ratio >= zoom_ratios.get(max_zoom_factor)/100.0f ) {
+				new_zoom_factor = max_zoom_factor;
+			}
+			else {
+				// find the closest zoom level
+				if( scale_factor > 1.0f ) {
+					// zooming in
+    				for(int i=zoom_factor;i<zoom_ratios.size();i++) {
+    					if( zoom_ratios.get(i)/100.0f >= zoom_ratio ) {
+    						new_zoom_factor = i;
+    						break;
+    					}
+    				}
+				}
+				else {
+					// zooming out
+    				for(int i=zoom_factor;i>0;i--) {
+    					if( zoom_ratios.get(i)/100.0f <= zoom_ratio ) {
+    						new_zoom_factor = i;
+    						break;
+    					}
+    				}
+				}
+			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "ScaleListener.onScale zoom_ratio is now " + zoom_ratio);
+				Log.d(TAG, "    chosen new zoom_factor " + new_zoom_factor + " ratio " + zoom_ratios.get(new_zoom_factor)/100.0f);
+			}
+			zoomTo(new_zoom_factor, true);
+		}
+	}
+	
 	public void zoomIn() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "zoomIn()");
