@@ -1711,6 +1711,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	public void scaleZoom(float scale_factor) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "scaleZoom() " + scale_factor);
 		if( this.camera != null && this.has_zoom ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			zoom_ratio *= scale_factor;
@@ -1728,6 +1730,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					// zooming in
     				for(int i=zoom_factor;i<zoom_ratios.size();i++) {
     					if( zoom_ratios.get(i)/100.0f >= zoom_ratio ) {
+    						if( MyDebug.LOG )
+    							Log.d(TAG, "zoom int, found new zoom by comparing " + zoom_ratios.get(i)/100.0f + " >= " + zoom_ratio);
     						new_zoom_factor = i;
     						break;
     					}
@@ -1735,8 +1739,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 				else {
 					// zooming out
-    				for(int i=zoom_factor;i>0;i--) {
+    				for(int i=zoom_factor;i>=0;i--) {
     					if( zoom_ratios.get(i)/100.0f <= zoom_ratio ) {
+    						if( MyDebug.LOG )
+    							Log.d(TAG, "zoom out, found new zoom by comparing " + zoom_ratios.get(i)/100.0f + " <= " + zoom_ratio);
     						new_zoom_factor = i;
     						break;
     					}
@@ -1745,6 +1751,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "ScaleListener.onScale zoom_ratio is now " + zoom_ratio);
+				Log.d(TAG, "    old zoom_factor " + zoom_factor + " ratio " + zoom_ratios.get(zoom_factor)/100.0f);
 				Log.d(TAG, "    chosen new zoom_factor " + new_zoom_factor + " ratio " + zoom_ratios.get(new_zoom_factor)/100.0f);
 			}
 			zoomTo(new_zoom_factor, true);
