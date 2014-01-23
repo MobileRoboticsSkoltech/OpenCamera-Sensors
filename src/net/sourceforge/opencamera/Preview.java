@@ -114,6 +114,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private RectF thumbnail_anim_src_rect = new RectF();
 	private RectF thumbnail_anim_dst_rect = new RectF();
 	private Matrix thumbnail_anim_matrix = new Matrix();
+	private int [] gui_location = new int[2];
 
 	private int current_orientation = 0; // orientation received by onOrientationChanged
 	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setOrientation())
@@ -1426,7 +1427,20 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
 			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
 			// align with "top" of the take_photo button, but remember to take the rotation into account!
-			int diff_x = view.getLeft() - canvas.getWidth()/2;
+			view.getLocationOnScreen(gui_location);
+			int view_left = gui_location[0];
+			this.getLocationOnScreen(gui_location);
+			int this_left = gui_location[0];
+			int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
+    		/*if( MyDebug.LOG ) {
+    			Log.d(TAG, "view left: " + view_left);
+    			Log.d(TAG, "this left: " + this_left);
+    			Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
+    		}*/
+			if( canvas.getWidth()/2 + diff_x > canvas.getWidth() ) {
+				// in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
+				diff_x = canvas.getWidth()/2;
+			}
 			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
 		}
 
