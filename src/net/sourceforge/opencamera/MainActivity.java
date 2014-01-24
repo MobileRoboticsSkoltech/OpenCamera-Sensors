@@ -37,7 +37,6 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -45,10 +44,10 @@ import android.view.Menu;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -139,7 +138,7 @@ public class MainActivity extends Activity {
 		clearSeekBar();
 
 		preview = new Preview(this, savedInstanceState);
-		((FrameLayout) findViewById(R.id.preview)).addView(preview);
+		((ViewGroup) findViewById(R.id.preview)).addView(preview);
 		
         orientationEventListener = new OrientationEventListener(this) {
 			@Override
@@ -665,6 +664,8 @@ public class MainActivity extends Activity {
 
 				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "exposure seekbar onProgressChanged");
 					preview.setExposure(min_exposure + progress, false);
 				}
 

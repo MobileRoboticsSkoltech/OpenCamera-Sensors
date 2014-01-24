@@ -6,10 +6,11 @@
     tools:context=".MainActivity" >
 
     <FrameLayout
-         android:id="@+id/preview"
-         android:layout_width="fill_parent"
-         android:layout_height="fill_parent"
-         />
+        android:id="@+id/preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        />
     
     <ImageButton
         android:id="@+id/take_photo"
@@ -20,7 +21,7 @@
         android:contentDescription="@string/take_photo"
         android:src="@drawable/take_photo"
         android:onClick="clickedTakePhoto"
-        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
         />
 
     <ZoomControls

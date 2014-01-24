@@ -82,6 +82,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean app_is_paused = true;
 	private SurfaceHolder mHolder = null;
 	private boolean has_surface = false;
+	private boolean has_aspect_ratio = false;
+	private double aspect_ratio = 0.0f;
 	private Camera camera = null;
 	private int cameraId = 0;
 	private boolean is_video = false;
@@ -457,7 +459,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		// The Surface has been created, acquire the camera and tell it where
 		// to draw.
 		this.has_surface = true;
-		this.openCamera(false); // if setting up for the first time, we wait until the surfaceChanged call to start the preview
+		this.openCamera();
 		this.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
 	}
 
@@ -612,12 +614,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	private void openCamera(boolean start_preview) {
+	private void openCamera() {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera()");
 			Log.d(TAG, "cameraId: " + cameraId);
-			Log.d(TAG, "start_preview?: " + start_preview);
 			debug_time = System.currentTimeMillis();
 		}
 		// need to init everything now, in case we don't open the camera (but these may already be initialised from an earlier call - e.g., if we are now switching to another camera)
@@ -683,6 +684,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				//Log.d(TAG, "time after setting orientation: " + (System.currentTimeMillis() - debug_time));
 			}
 
+			if( MyDebug.LOG )
+				Log.d(TAG, "call setPreviewDisplay");
 			try {
 				camera.setPreviewDisplay(mHolder);
 			}
@@ -694,7 +697,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG ) {
 				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
-			
+
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
 			Camera.Parameters parameters = camera.getParameters();
@@ -841,13 +844,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		        	Log.d(TAG, "supported picture size: " + size.width + " , " + size.height);
 				}
 			}
-			/*if( MyDebug.LOG ) {
-				List<Camera.Size> preview_sizes = parameters.getSupportedPreviewSizes();
-				for(int i=0;i<preview_sizes.size();i++) {
-		        	Camera.Size size = preview_sizes.get(i);
-		        	Log.d(TAG, "supported preview size: " + size.width + " , " + size.height);
-				}
-			}*/
 			current_size_index = -1;
 			String resolution_value = sharedPreferences.getString(getResolutionPreferenceKey(cameraId), "");
 			if( MyDebug.LOG )
@@ -1067,13 +1063,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			// must be done after setting parameters, as this function may set parameters
 			updateParametersFromLocation();
 
-			if( start_preview ) {
-				// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
-				// doesn't seem to affect the startup time for the preview (start_preview is false when opening the camera for the first time, anyway).
-				// Must set preview size before starting camera preview
-	    		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
-				startCameraPreview();
-			}
+			// Must set preview size before starting camera preview
+    		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
+			// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
+			startCameraPreview();
 			if( MyDebug.LOG ) {
 				//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 			}
@@ -1086,9 +1079,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( saved_is_video != this.is_video ) {
 				this.switchVideo(false);
 			}
+
+			tryAutoFocus(); // so we get the autofocus when starting up
 		}
 
-		
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
 		}
@@ -1136,8 +1130,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "surfaceChanged " + w + ", " + h);
-        // If your preview can change or rotate, take care of those events here.
-        // Make sure to stop the preview before resizing or reformatting it.
+		// surface size is now changed to match the aspect ratio of camera preview - so we shouldn't change the preview to match the surface size, so no need to restart preview here
 
         if( mHolder.getSurface() == null ) {
             // preview surface does not exist
@@ -1145,40 +1138,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
         if( camera == null ) {
             return;
-        }
-
-        // stop preview before making changes
-        //if( !this.is_preview_paused ) {
-        if( this.phase != PHASE_PREVIEW_PAUSED ) {
-            camera.stopPreview();
-			this.is_preview_started = false;
-        }
-        // set preview size and make any resize, rotate or
-        // reformatting changes here
-
-        /*Camera.Parameters parameters = camera.getParameters();
-		if( MyDebug.LOG )
-			Log.d(TAG, "current preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
-        parameters.setPreviewSize(w, h);
-        camera.setParameters(parameters);
-		if( MyDebug.LOG )
-			Log.d(TAG, "new preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);*/
-
-        this.setPreviewSize();
- 
-        // start preview with new settings
-        try {
-			//camera.setPreviewCallback(this);
-            camera.setPreviewDisplay(mHolder);
-        }
-        catch(IOException e) {
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "Error setting preview display: " + e.getMessage());
-        }
-        //if( !this.is_preview_paused ) {
-        if( this.phase != PHASE_PREVIEW_PAUSED ) {
-			startCameraPreview();
-			tryAutoFocus(); // so we get the autofocus when starting up
         }
 
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
@@ -1209,6 +1168,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             parameters.setPreviewSize(best_size.width, best_size.height);
     		if( MyDebug.LOG )
     			Log.d(TAG, "new preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
+    		this.setAspectRatio( ((double)parameters.getPreviewSize().width) / (double)parameters.getPreviewSize().height );
 
     		/*List<int []> fps_ranges = parameters.getSupportedPreviewFpsRange();
     		if( MyDebug.LOG ) {
@@ -1272,6 +1232,62 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             }
         }
         return optimalSize;
+    }
+
+    @Override
+    protected void onMeasure(int widthSpec, int heightSpec) {
+    	if( !this.has_aspect_ratio ) {
+    		super.onMeasure(widthSpec, heightSpec);
+    		return;
+    	}
+        int previewWidth = MeasureSpec.getSize(widthSpec);
+        int previewHeight = MeasureSpec.getSize(heightSpec);
+
+        // Get the padding of the border background.
+        int hPadding = getPaddingLeft() + getPaddingRight();
+        int vPadding = getPaddingTop() + getPaddingBottom();
+
+        // Resize the preview frame with correct aspect ratio.
+        previewWidth -= hPadding;
+        previewHeight -= vPadding;
+
+        boolean widthLonger = previewWidth > previewHeight;
+        int longSide = (widthLonger ? previewWidth : previewHeight);
+        int shortSide = (widthLonger ? previewHeight : previewWidth);
+        if (longSide > shortSide * aspect_ratio) {
+            longSide = (int) ((double) shortSide * aspect_ratio);
+        } else {
+            shortSide = (int) ((double) longSide / aspect_ratio);
+        }
+        if (widthLonger) {
+            previewWidth = longSide;
+            previewHeight = shortSide;
+        } else {
+            previewWidth = shortSide;
+            previewHeight = longSide;
+        }
+
+
+        // Add the padding of the border.
+        previewWidth += hPadding;
+        previewHeight += vPadding;
+
+        // Ask children to follow the new preview dimension.
+        super.onMeasure(MeasureSpec.makeMeasureSpec(previewWidth, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(previewHeight, MeasureSpec.EXACTLY));
+    }
+
+    private void setAspectRatio(double ratio) {
+        if( ratio <= 0.0 )
+        	throw new IllegalArgumentException();
+
+        has_aspect_ratio = true;
+        if( aspect_ratio != ratio ) {
+        	aspect_ratio = ratio;
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "new aspect ratio: " + aspect_ratio);
+            requestLayout();
+        }
     }
 
     // for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
@@ -1894,7 +1910,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    else {
 				showToast(switch_camera_toast, "Back Camera");
 		    }
-			this.openCamera(true);
+			this.openCamera();
 			
 			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
 			updateFocusForVideo();
@@ -3538,7 +3554,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
 		this.ui_placement_right = ui_placement.equals("ui_right");
-		this.openCamera(true);
+		this.openCamera();
     }
 
     public void onPause() {
