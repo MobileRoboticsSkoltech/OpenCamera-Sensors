@@ -1192,10 +1192,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         double minDiff = Double.MAX_VALUE;
 		Activity activity = (Activity)this.getContext();
         Display display = activity.getWindowManager().getDefaultDisplay();
-        /*int targetHeight = Math.min(display.getHeight(), display.getWidth());
-        if( targetHeight <= 0 ) {
-            targetHeight = display.getHeight();
-        }*/
         Point display_size = new Point();
         display.getSize(display_size);
 		if( MyDebug.LOG )
@@ -1220,17 +1216,22 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             }
         }
         if( optimalSize == null ) {
-        	// can't find match for aspect ratio, so find one closest to screen size, ignoring the aspect ratio
+        	// can't find match for aspect ratio, so find closest one
     		if( MyDebug.LOG )
     			Log.d(TAG, "no preview size matches the aspect ratio");
             minDiff = Double.MAX_VALUE;
             for(Camera.Size size : sizes) {
-                if( Math.abs(size.height - targetHeight) < minDiff ) {
+                double ratio = (double)size.width / size.height;
+                if( Math.abs(ratio - targetRatio) < minDiff ) {
                     optimalSize = size;
-                    minDiff = Math.abs(size.height - targetHeight);
+                    minDiff = Math.abs(ratio - targetRatio);
                 }
             }
         }
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "chose optimalSize: " + optimalSize.width + " x " + optimalSize.height);
+			Log.d(TAG, "optimalSize ratio: " + ((double)optimalSize.width / optimalSize.height));
+		}
         return optimalSize;
     }
 
