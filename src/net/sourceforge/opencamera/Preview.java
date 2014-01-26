@@ -44,6 +44,7 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -1078,7 +1079,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				this.switchVideo(false);
 			}
 
-			tryAutoFocus(); // so we get the autofocus when starting up
+	    	final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					tryAutoFocus(); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
+				}
+			}, 500);
 		}
 
 		if( MyDebug.LOG ) {
