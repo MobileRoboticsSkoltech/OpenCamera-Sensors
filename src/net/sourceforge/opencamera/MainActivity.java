@@ -400,12 +400,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(align_parent_top, 0);
 			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
 			view.setLayoutParams(layoutParams);
-			if( relative_orientation != 0 ) {
-				view.setRotation(180.0f);
-			}
-			else {
-				view.setRotation(0.0f);
-			}
+			view.setRotation(180.0f); // should always match the zoom_seekbar, so that zoom in and out are in the same directions
 
 			view = findViewById(R.id.zoom_seekbar);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -515,12 +510,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(align_parent_top, 0);
 			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
 			view.setLayoutParams(layoutParams);
-			if( relative_orientation == 180 ) {
-				view.setRotation(180.0f);
-			}
-			else {
-				view.setRotation(0.0f);
-			}
+			view.setRotation(180.0f); // should always match the zoom_seekbar, so that zoom in and out are in the same directions
 
 			view = findViewById(R.id.zoom_seekbar);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
