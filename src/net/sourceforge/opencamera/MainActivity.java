@@ -20,6 +20,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
@@ -972,9 +973,15 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTrash");
     	this.preview.clickedTrash();
-    	// calling updateGalleryIcon() has problem that it still returns the latest image that we've just deleted! So better to force setting to blank
-    	//this.updateGalleryIcon();
-		this.updateGalleryIconToBlank();
+    	// Calling updateGalleryIcon() immediately has problem that it still returns the latest image that we've just deleted!
+    	// But works okay if we call after a delay. 100ms works fine on Nexus 7 and Galaxy Nexus, but set to 500 just to be safe.
+    	final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+		    	updateGalleryIcon();
+			}
+		}, 500);
     }
 
     private void takePicture() {
