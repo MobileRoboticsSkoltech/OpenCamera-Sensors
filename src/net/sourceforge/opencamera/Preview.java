@@ -501,9 +501,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			// create thumbnail
     			{
 	            	long time_s = System.currentTimeMillis();
-    	    		if( thumbnail != null ) {
-    	    			thumbnail.recycle();
-    	    		}
+	            	Bitmap old_thumbnail = thumbnail;
     	    	    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 					try {
 						retriever.setDataSource(video_name);
@@ -523,7 +521,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	    	    		// ignore
     	    	    	}
     	    	    }
-    	    	    if( thumbnail != null ) {
+    	    	    if( thumbnail != null && thumbnail != old_thumbnail ) {
     	    			MainActivity main_activity = (MainActivity)Preview.this.getContext();
     	    	    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
     	    	    	int width = thumbnail.getWidth();
@@ -544,6 +542,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	        		    }
     	    	    	}
     	    	    	main_activity.updateGalleryIconToBitmap(thumbnail);
+        	    		if( old_thumbnail != null ) {
+        	    			// only recycle after we've set the new thumbnail
+        	    			old_thumbnail.recycle();
+        	    		}
     	    	    }
 					if( MyDebug.LOG )
 						Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
@@ -3044,9 +3046,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	    			Log.d(TAG, "    inSampleSize    : " + options.inSampleSize);
     	    			Log.d(TAG, "    current_rotation: " + current_rotation);
     	    		}
-    	    		if( thumbnail != null ) {
-    	    			thumbnail.recycle();
-    	    		}
+    	    		Bitmap old_thumbnail = thumbnail;
         			thumbnail = BitmapFactory.decodeByteArray(data, 0, data.length, options);
         			int thumbnail_rotation = 0;
     				// now get the rotation from the Exif data
@@ -3106,6 +3106,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             			thumbnail_anim_start_ms = System.currentTimeMillis();
         			}
 	    	    	main_activity.updateGalleryIconToBitmap(thumbnail);
+    	    		if( old_thumbnail != null ) {
+    	    			// only recycle after we've set the new thumbnail
+    	    			old_thumbnail.recycle();
+    	    		}
     	    		if( MyDebug.LOG )
     	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 	            }
