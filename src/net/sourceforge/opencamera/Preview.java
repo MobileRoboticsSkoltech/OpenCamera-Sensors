@@ -359,11 +359,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             Camera.Parameters parameters = camera.getParameters();
 			String focus_mode = parameters.getFocusMode();
     		this.has_focus_area = false;
-            if( parameters.getMaxNumFocusAreas() == 0 ) {
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "focus areas not supported");
-            }
-            else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
+            if( parameters.getMaxNumFocusAreas() != 0 && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "set focus (and metering?) area");
 				this.has_focus_area = true;
@@ -396,7 +392,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        		e.printStackTrace();
 			    }
             }
-            else {
+            else if( parameters.getMaxNumMeteringAreas() != 0 ) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "set metering area");
         		// don't set has_focus_area in this mode

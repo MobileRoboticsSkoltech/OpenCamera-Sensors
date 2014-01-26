@@ -254,10 +254,14 @@ if it supports an external microphone, you may be able to use this by selecting 
 
 Version 1.7 (Work in progress)
 
-UPDATED More fixes for aspect ratio - the preview display should now always
+FIXED   More fixes for aspect ratio - the preview display should now always
         have a 1:1 aspect ratio (on some devices this may mean black bars are
         shown, if there isn't a match between the camera's available preview
         sizes, and the aspect ratio of the device's display).
+FIXED   If camera doesn't support focus areas, but does support metering areas,
+        still set the metering area.
+FIXED   Was sometimes trying to set metering areas when metering areas not
+        supported by device.
 
 Version 1.6 (2014/01/20)
 
