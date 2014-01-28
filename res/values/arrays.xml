@@ -113,14 +113,6 @@
         <item>120</item>
         <item>300</item>
     </string-array>
-    <string-array name="preference_ui_placement_entries">
-        <item>Left-handed user interface</item>
-        <item>Right-handed user interface</item>
-    </string-array>
-    <string-array name="preference_ui_placement_values">
-        <item>ui_left</item>
-        <item>ui_right</item>
-    </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Take photo (or start/stop video recording)</item>
         <item>Zoom in/out</item>
@@ -132,6 +124,14 @@
         <item>volume_zoom</item>
         <item>volume_exposure</item>
         <item>volume_nothing</item>
+    </string-array>
+    <string-array name="preference_ui_placement_entries">
+        <item>Left-handed user interface</item>
+        <item>Right-handed user interface</item>
+    </string-array>
+    <string-array name="preference_ui_placement_values">
+        <item>ui_left</item>
+        <item>ui_right</item>
     </string-array>
     <string-array name="preference_record_audio_src_entries">
         <item>Camcorder</item>
