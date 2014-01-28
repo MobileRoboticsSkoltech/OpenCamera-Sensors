@@ -1195,13 +1195,27 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         	return null;
         Camera.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
-		Activity activity = (Activity)this.getContext();
-        Display display = activity.getWindowManager().getDefaultDisplay();
         Point display_size = new Point();
-        display.getSize(display_size);
-		if( MyDebug.LOG )
-			Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
-        double targetRatio = ((double)display_size.x) / (double)display_size.y;
+        {
+    		Activity activity = (Activity)this.getContext();
+            Display display = activity.getWindowManager().getDefaultDisplay();
+            display.getSize(display_size);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
+        }
+        double targetRatio = 0.0f;
+        {
+        	// base target ratio from display size - means preview will fill the device's display as much as possible
+        	// but if the preview's aspect ratio differs from the actual photo/video size, the preview will show a cropped version of what is actually taken
+            targetRatio = ((double)display_size.x) / (double)display_size.y;
+        }
+        /*{
+        	Camera.Parameters parameters = camera.getParameters();
+        	Camera.Size picture_size = parameters.getPictureSize();
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "picture_size: " + picture_size.width + " x " + picture_size.height);
+            targetRatio = ((double)picture_size.width) / (double)picture_size.height;
+        }*/
 		if( MyDebug.LOG )
 			Log.d(TAG, "targetRatio: " + targetRatio);
         int targetHeight = Math.min(display_size.y, display_size.x);
@@ -1459,9 +1473,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			Log.d(TAG, "this left: " + this_left);
     			Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
     		}*/
-			if( canvas.getWidth()/2 + diff_x > canvas.getWidth() ) {
+			int max_x = canvas.getWidth();
+			if( ui_rotation == 90 ) {
+				// so we don't interfere with the top bar info (time, etc)
+				max_x -= (int)(1.5*text_y);
+			}
+			if( canvas.getWidth()/2 + diff_x > max_x ) {
 				// in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
-				diff_x = canvas.getWidth()/2;
+				diff_x = max_x - canvas.getWidth()/2;
 			}
 			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
 		}
