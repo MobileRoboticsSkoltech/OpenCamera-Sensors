@@ -2587,6 +2587,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        	video_recorder.setOrientationHint(this.current_rotation);
 	        	video_recorder.setOutputFile(video_name);
 	        	try {
+	        		showGUI(false);
 	        		/*if( true ) // test
 	        			throw new IOException();*/
 		        	video_recorder.setPreviewDisplay(mHolder.getSurface());
@@ -3446,12 +3447,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    View focusButton = (View) activity.findViewById(R.id.focus_mode);
 			    View exposureButton = (View) activity.findViewById(R.id.exposure);
 			    switchCameraButton.setVisibility(visibility);
-			    switchVideoButton.setVisibility(visibility);
+			    if( !is_video )
+			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
 			    if( supported_flash_values != null )
 			    	flashButton.setVisibility(visibility);
 			    if( supported_focus_values != null )
 			    	focusButton.setVisibility(visibility);
-			    if( exposures != null )
+			    if( exposures != null && !is_video ) // still allow exposure when recording video
 			    	exposureButton.setVisibility(visibility);
 			}
 		});
