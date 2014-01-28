@@ -28,14 +28,14 @@
     <string name="preference_burst_interval">Burst mode interval</string>
     <string name="preference_burst_interval_summary">Delay (if any) between taking photos in burst mode</string>
     <string name="preference_screen_camera_controls_more">More camera controls…</string>
-    <string name="preference_ui_placement">UI placement</string>
-    <string name="preference_ui_placement_summary">Whether to have a left-handed or right-handed user interface</string>
     <string name="preference_pause_preview">Pause after taking photo</string>
     <string name="preference_pause_preview_summary">Whether to pause the screen after taking a photo, with the option to share or delete the photo</string>
     <string name="preference_shutter_sound">Shutter sound</string>
     <string name="preference_shutter_sound_summary">Whether to play a sound when taking a photo (requires Android 4.2 or greater to disable)</string>
     <string name="preference_volume_keys">Volume keys</string>
     <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
+    <string name="preference_ui_placement">UI placement</string>
+    <string name="preference_ui_placement_summary">Whether to have a left-handed or right-handed user interface</string>
     <string name="preference_save_location">Save location</string>
     <string name="preference_save_location_summary">Name of folder to save the photo files in</string>
     <string name="preference_show_zoom">Show zoom</string>
