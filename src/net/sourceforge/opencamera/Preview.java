@@ -1062,21 +1062,22 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			// must be done after setting parameters, as this function may set parameters
 			updateParametersFromLocation();
 
-			// Must set preview size before starting camera preview
-    		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
-			// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
-			startCameraPreview();
-			if( MyDebug.LOG ) {
-				//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
-			}
-
 			// now switch to video if saved
 			boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "saved_is_video: " + saved_is_video);
 			}
 			if( saved_is_video != this.is_video ) {
-				this.switchVideo(false);
+				this.switchVideo(false, false);
+			}
+
+			// Must set preview size before starting camera preview
+			// and must do it after setting photo vs video mode
+    		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
+			// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
+			startCameraPreview();
+			if( MyDebug.LOG ) {
+				//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 			}
 
 	    	final Handler handler = new Handler();
@@ -1155,6 +1156,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( camera == null ) {
 			return;
 		}
+		if( is_preview_started ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "setPreviewSize() shouldn't be called when preview is running");
+			throw new RuntimeException();
+		}
 		// set optimal preview size
     	Camera.Parameters parameters = camera.getParameters();
 		if( MyDebug.LOG )
@@ -1186,7 +1192,48 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             camera.setParameters(parameters);
         }
 	}
+	
+	public CamcorderProfile getCamcorderProfile() {
+    	CamcorderProfile profile = CamcorderProfile.get(this.cameraId, current_video_quality != -1 ? video_quality.get(current_video_quality).intValue() : CamcorderProfile.QUALITY_HIGH);
+    	return profile;
+	}
 
+	public double getTargetRatio(Point display_size) {
+        double targetRatio = 0.0f;
+		Activity activity = (Activity)this.getContext();
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
+		String preview_size = sharedPreferences.getString("preference_preview_size", "preference_preview_size_display");
+		if( preview_size.equals("preference_preview_size_wysiwyg") ) {
+	        if( this.is_video ) {
+	        	if( MyDebug.LOG )
+	        		Log.d(TAG, "set preview aspect ratio from photo size (wysiwyg)");
+	        	CamcorderProfile profile = getCamcorderProfile();
+	        	if( MyDebug.LOG )
+	        		Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+	        	targetRatio = ((double)profile.videoFrameWidth) / (double)profile.videoFrameHeight;
+	        }
+	        else {
+	        	if( MyDebug.LOG )
+	        		Log.d(TAG, "set preview aspect ratio from video size (wysiwyg)");
+	        	Camera.Parameters parameters = camera.getParameters();
+	        	Camera.Size picture_size = parameters.getPictureSize();
+	        	if( MyDebug.LOG )
+	        		Log.d(TAG, "picture_size: " + picture_size.width + " x " + picture_size.height);
+	        	targetRatio = ((double)picture_size.width) / (double)picture_size.height;
+	        }
+		}
+		else {
+        	if( MyDebug.LOG )
+        		Log.d(TAG, "set preview aspect ratio from display size");
+        	// base target ratio from display size - means preview will fill the device's display as much as possible
+        	// but if the preview's aspect ratio differs from the actual photo/video size, the preview will show a cropped version of what is actually taken
+            targetRatio = ((double)display_size.x) / (double)display_size.y;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "targetRatio: " + targetRatio);
+		return targetRatio;
+	}
+	
 	public Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getOptimalPreviewSize()");
@@ -1196,28 +1243,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         Camera.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
         Point display_size = new Point();
+		Activity activity = (Activity)this.getContext();
         {
-    		Activity activity = (Activity)this.getContext();
             Display display = activity.getWindowManager().getDefaultDisplay();
             display.getSize(display_size);
     		if( MyDebug.LOG )
     			Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
         }
-        double targetRatio = 0.0f;
-        {
-        	// base target ratio from display size - means preview will fill the device's display as much as possible
-        	// but if the preview's aspect ratio differs from the actual photo/video size, the preview will show a cropped version of what is actually taken
-            targetRatio = ((double)display_size.x) / (double)display_size.y;
-        }
-        /*{
-        	Camera.Parameters parameters = camera.getParameters();
-        	Camera.Size picture_size = parameters.getPictureSize();
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "picture_size: " + picture_size.width + " x " + picture_size.height);
-            targetRatio = ((double)picture_size.width) / (double)picture_size.height;
-        }*/
-		if( MyDebug.LOG )
-			Log.d(TAG, "targetRatio: " + targetRatio);
+        double targetRatio = getTargetRatio(display_size);
         int targetHeight = Math.min(display_size.y, display_size.x);
         if( targetHeight <= 0 ) {
             targetHeight = display_size.y;
@@ -1942,7 +1975,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	public void switchVideo(boolean save) {
+	public void switchVideo(boolean save, boolean update_preview_size) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
 		boolean old_is_video = is_video;
@@ -1980,9 +2013,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( this.is_video ) {
 				showToast(switch_video_toast, "Video");
 				//if( this.is_preview_paused ) {
-				if( this.phase == PHASE_PREVIEW_PAUSED ) {
-					startCameraPreview();
-				}
 			}
 		}
 		
@@ -2000,6 +2030,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				editor.putBoolean(getIsVideoPreferenceKey(), is_video);
 				editor.apply();
 	    	}
+			
+			if( update_preview_size ) {
+				if( this.is_preview_started ) {
+					camera.stopPreview();
+					this.is_preview_started = false;
+				}
+				setPreviewSize();				
+				// always start the camera preview, even if it was previously paused
+		        this.startCameraPreview();
+			}
 		}
 	}
 	
@@ -2527,7 +2567,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 				}
 	        	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);*/
-				CamcorderProfile profile = CamcorderProfile.get(this.cameraId, current_video_quality != -1 ? video_quality.get(current_video_quality).intValue() : CamcorderProfile.QUALITY_HIGH);
+	        	CamcorderProfile profile = getCamcorderProfile();
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "current_video_quality: " + current_video_quality);
 	    			if( current_video_quality != -1 )

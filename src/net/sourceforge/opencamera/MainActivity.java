@@ -73,7 +73,7 @@ public class MainActivity extends Activity {
 
 	// for testing:
 	private boolean is_test = false;
-	public boolean gallery_icon_is_thumbnail = false;
+	public Bitmap gallery_bitmap = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -613,7 +613,7 @@ public class MainActivity extends Activity {
     public void clickedSwitchVideo(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchVideo");
-		this.preview.switchVideo(true);
+		this.preview.switchVideo(true, true);
     }
 
     public void clickedFlash(View view) {
@@ -822,7 +822,7 @@ public class MainActivity extends Activity {
 		galleryButton.setImageResource(R.drawable.gallery);
 		// workaround for setImageResource also resetting padding, Android bug
 		galleryButton.setPadding(left, top, right, bottom);
-		gallery_icon_is_thumbnail = false;
+		gallery_bitmap = null;
     }
     
     public void updateGalleryIconToBitmap(Bitmap bitmap) {
@@ -830,7 +830,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "updateGalleryIconToBitmap");
     	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
 		galleryButton.setImageBitmap(bitmap);
-		gallery_icon_is_thumbnail = true;
+		gallery_bitmap = bitmap;
     }
     
     public void updateGalleryIcon() {

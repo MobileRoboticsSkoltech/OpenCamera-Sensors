@@ -28,6 +28,8 @@
     <string name="preference_burst_interval">Burst mode interval</string>
     <string name="preference_burst_interval_summary">Delay (if any) between taking photos in burst mode</string>
     <string name="preference_screen_camera_controls_more">More camera controls…</string>
+    <string name="preference_preview_size">Preview size</string>
+    <string name="preference_preview_size_summary">How to choose the preview size</string>
     <string name="preference_pause_preview">Pause after taking photo</string>
     <string name="preference_pause_preview_summary">Whether to pause the screen after taking a photo, with the option to share or delete the photo</string>
     <string name="preference_shutter_sound">Shutter sound</string>
