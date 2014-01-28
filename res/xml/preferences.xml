@@ -97,15 +97,6 @@
 	        android:title="@string/preference_screen_camera_controls_more"
 	        android:persistent="false">
 
-	        <ListPreference 
-		        android:key="preference_ui_placement"
-		        android:title="@string/preference_ui_placement"
-		        android:summary="@string/preference_ui_placement_summary"
-		        android:entries="@array/preference_ui_placement_entries"
-		        android:entryValues="@array/preference_ui_placement_values"
-		        android:defaultValue="ui_right"
-		        />
-	
 		    <CheckBoxPreference
 		        android:key="preference_pause_preview"
 		        android:title="@string/preference_pause_preview"
@@ -141,6 +132,15 @@
 	            android:defaultValue="OpenCamera"
 		        />
 	
+            <ListPreference 
+                android:key="preference_ui_placement"
+                android:title="@string/preference_ui_placement"
+                android:summary="@string/preference_ui_placement_summary"
+                android:entries="@array/preference_ui_placement_entries"
+                android:entryValues="@array/preference_ui_placement_values"
+                android:defaultValue="ui_right"
+                />
+    
 	        <CheckBoxPreference
 	            android:key="preference_show_zoom"
 	            android:title="@string/preference_show_zoom"
