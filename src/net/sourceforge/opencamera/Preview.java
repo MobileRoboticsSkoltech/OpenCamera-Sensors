@@ -560,8 +560,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         if( camera != null ) { // just to be safe
     		try {
 				camera.reconnect();
-				// must set preview size before starting camera preview
-	    		setPreviewSize();
 		        this.startCameraPreview();
 			}
     		catch (IOException e) {
@@ -1421,7 +1419,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "ui_rotation: " + ui_rotation);*/
 
-		Activity activity = (Activity)this.getContext();
+		MainActivity main_activity = (MainActivity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		if( camera != null && sharedPreferences.getBoolean("preference_grid_3x3", false) ) {
 			p.setColor(Color.WHITE);
@@ -1443,7 +1441,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				thumbnail_anim_src_rect.top = 0;
 				thumbnail_anim_src_rect.right = this.thumbnail.getWidth();
 				thumbnail_anim_src_rect.bottom = this.thumbnail.getHeight();
-			    View galleryButton = (View) activity.findViewById(R.id.gallery);
+			    View galleryButton = (View) main_activity.findViewById(R.id.gallery);
 				float alpha = ((float)time)/(float)duration;
 
 				int st_x = canvas.getWidth()/2;
@@ -1494,7 +1492,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		else if( ui_rotation == 90 || ui_rotation == 270 ) {
 			//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
-			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
+			ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 			// align with "top" of the take_photo button, but remember to take the rotation into account!
 			view.getLocationOnScreen(gui_location);
 			int view_left = gui_location[0];
@@ -1619,7 +1617,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			p.setTextAlign(Paint.Align.CENTER);
 			long time_now = System.currentTimeMillis();
 			if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
-				long free_mb = MainActivity.freeMemory();
+				long free_mb = main_activity.freeMemory();
 				if( free_mb >= 0 ) {
 					free_memory_gb = free_mb/1024.0f;
 					last_free_memory_time = time_now;
@@ -1633,7 +1631,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
-				Intent batteryStatus = activity.registerReceiver(null, battery_ifilter);
+				Intent batteryStatus = main_activity.registerReceiver(null, battery_ifilter);
 				int battery_level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
 				int battery_scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 				has_battery_frac = true;

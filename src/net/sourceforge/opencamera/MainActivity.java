@@ -1056,7 +1056,18 @@ public class MainActivity extends Activity {
     public File getImageFolder() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), folder_name);
+		File file = null;
+		if( folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
+			// ignore final '/' character
+			folder_name = folder_name.substring(0, folder_name.length()-1);
+		}
+		//if( folder_name.contains("/") ) {
+		if( folder_name.startsWith("/") ) {
+			file = new File(folder_name);
+		}
+		else {
+	        file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), folder_name);
+		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "folder_name: " + folder_name);
 			Log.d(TAG, "full path: " + file);
@@ -1118,9 +1129,10 @@ public class MainActivity extends Activity {
     }
 
     @SuppressWarnings("deprecation")
-	public static long freeMemory() { // return free memory in MB
+	public long freeMemory() { // return free memory in MB
     	try {
-	        StatFs statFs = new StatFs(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+    		File image_folder = this.getImageFolder();
+	        StatFs statFs = new StatFs(image_folder.getAbsolutePath());
 	        // cast to long to avoid overflow!
 	        long blocks = statFs.getAvailableBlocks();
 	        long size = statFs.getBlockSize();
