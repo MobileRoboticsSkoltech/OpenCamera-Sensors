@@ -48,7 +48,7 @@
 <li>Option to silence the shutter (requires Android 4.2).</li>
 <li>GUI works in any orientation without any pause when changing orientation. Option to optimise for left and right-handed users.</li>
 <li>Configurable volume keys (to take picture, zoom, or change exposure compensation).</li>
-<li>Choice of save location, including support for external SD cards (untested).</li>
+<li>Choice of save folder, including support for external SD cards (SD card support is untested).</li>
 <li>Configurable on-screen display shows battery, time, remaining device memory, orientation and direction of camera; also option to overlay 3x3 grid for "rule of thirds".</li>
 <li>Preview aspect ratio can be set either to maximise the preview display size, or match the aspect ratio of the photo/video resolution (so what you see is what is actually recorded).</li>
 <li>Optional GPS location tagging (geotagging) of photos, including compass direction (GPSImgDirection, GPSImgDirectionRef).</li>
@@ -281,8 +281,8 @@ FIXED   If camera doesn't support focus areas, but does support metering areas,
         still set the metering area.
 FIXED   Was sometimes trying to set metering areas when metering areas not
         supported by device.
-FIXED   If image is deleted after taking the photo, the preview is now properly
-        updated to what is now the most recent photo or video.
+FIXED   If image is deleted after taking the photo, the thumbnail is now
+        properly updated to what is now the most recent photo or video.
 UPDATED Save folder can now be an absolute path, allowing possibility to save
         on external SD cards (though you need to know what the path is, which
         typically varies depending on device; I am unable to test this, so
