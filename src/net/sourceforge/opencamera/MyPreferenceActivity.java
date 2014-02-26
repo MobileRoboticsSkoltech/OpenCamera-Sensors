@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
@@ -179,8 +180,17 @@ public class MyPreferenceActivity extends PreferenceActivity {
                 	if( pref.getKey().equals("preference_donate") ) {
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked to donate");
-            	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
-            	        startActivity(browserIntent);
+            	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateMarketLink()));
+            	        try {
+            	        	startActivity(browserIntent);
+            	        }
+            			catch(ActivityNotFoundException e) {
+            				// needed in case market:// not supported
+            				if( MyDebug.LOG )
+            					Log.d(TAG, "can't launch market:// intent");
+                	        browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
+            	        	startActivity(browserIntent);
+            			}
                 		return false;
                 	}
                 	return false;

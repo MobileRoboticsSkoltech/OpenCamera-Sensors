@@ -56,7 +56,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -1150,6 +1150,10 @@ public class MainActivity extends Activity {
     
     public static String getDonateLink() {
     	return "https://play.google.com/store/apps/details?id=harman.mark.donation";
+    }
+
+    public static String getDonateMarketLink() {
+    	return "market://details?id=harman.mark.donation";
     }
 
     // for testing:
