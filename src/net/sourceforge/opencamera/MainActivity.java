@@ -1152,9 +1152,9 @@ public class MainActivity extends Activity {
     	return "https://play.google.com/store/apps/details?id=harman.mark.donation";
     }
 
-    public static String getDonateMarketLink() {
+    /*public static String getDonateMarketLink() {
     	return "market://details?id=harman.mark.donation";
-    }
+    }*/
 
     // for testing:
     public Preview getPreview() {
