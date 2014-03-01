@@ -35,6 +35,8 @@
         android:id="@+id/zoom_seekbar"
         android:layout_width="150dp"
         android:layout_height="50dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         />
     
     <ImageButton
