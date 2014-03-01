@@ -154,8 +154,8 @@ public class MainActivity extends Activity {
         if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle("Open Camera");
-            alertDialog.setMessage("Touch to focus, and press the blue camera button to take photos. For full instructions, click Online help from Settings. Open Camera is completely free. If you like this app, please consider buying my donate app :) (see link in Settings, or this app's Google Play page).\n\n(This message won't show in future.)");
-            alertDialog.setPositiveButton("OK", null);
+            alertDialog.setMessage("Touch to focus, and press the blue camera button to take photos. For more help, click Online help from Settings. Open Camera is completely free. If you like this app, please consider buying my donate app :) (see link in Settings, or Online help).\n\nPrivacy Policy: Location permission is required for geotagging, but this is disabled by default. If enabled, your location is encoded in the saved files (and it is only used for this purpose).\n\n(This message won't show again.)");
+            alertDialog.setPositiveButton("OK (This message won't show again)", null);
             alertDialog.show();
 
 			SharedPreferences.Editor editor = sharedPreferences.edit();
