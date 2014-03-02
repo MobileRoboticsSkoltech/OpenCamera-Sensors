@@ -3634,7 +3634,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		this.app_is_paused = true;
 		this.closeCamera();
     }
-    
+
+	public void onSaveInstanceState(Bundle state) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onSaveInstanceState");
+		if( MyDebug.LOG )
+			Log.d(TAG, "save cameraId: " + cameraId);
+    	state.putInt("cameraId", cameraId);
+	}
+
     public void showToast(final ToastBoxer clear_toast, final String message) {
 		class RotatedTextView extends View {
 			private String text = "";

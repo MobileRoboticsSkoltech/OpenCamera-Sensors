@@ -1002,10 +1002,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "onSaveInstanceState");
 	    super.onSaveInstanceState(state);
 	    if( this.preview != null ) {
-		    int cameraId = preview.getCameraId();
-			if( MyDebug.LOG )
-				Log.d(TAG, "save cameraId: " + cameraId);
-	    	state.putInt("cameraId", cameraId);
+	    	preview.onSaveInstanceState(state);
 	    }
 	}
 
