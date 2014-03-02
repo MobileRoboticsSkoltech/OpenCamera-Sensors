@@ -147,6 +147,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private int min_exposure = 0;
 	private int max_exposure = 0;
 
+	private List<Camera.Size> supported_preview_sizes = null;
+	
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 	
@@ -1001,7 +1003,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "flash modes: " + supported_flash_modes);
-				supported_flash_values = getSupportedFlashModes(supported_flash_modes); // convert to our format (also resorts)
+				supported_flash_values = convertFlashModesToValues(supported_flash_modes); // convert to our format (also resorts)
 
 				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
 				if( flash_value.length() > 0 ) {
@@ -1032,7 +1034,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( supported_focus_modes != null && supported_focus_modes.size() > 1 ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "focus modes: " + supported_focus_modes);
-				supported_focus_values = getSupportedFocusModes(supported_focus_modes); // convert to our format (also resorts)
+				supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
 
 				String focus_value = sharedPreferences.getString(getFocusPreferenceKey(cameraId), "");
 				if( focus_value.length() > 0 ) {
@@ -1163,17 +1165,17 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	Camera.Parameters parameters = camera.getParameters();
 		if( MyDebug.LOG )
 			Log.d(TAG, "current preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
-        List<Camera.Size> preview_sizes = parameters.getSupportedPreviewSizes();
-        if( preview_sizes.size() > 0 ) {
-	        /*Camera.Size best_size = preview_sizes.get(0);
-	        for(Camera.Size size : preview_sizes) {
+        supported_preview_sizes = parameters.getSupportedPreviewSizes();
+        if( supported_preview_sizes.size() > 0 ) {
+	        /*Camera.Size best_size = supported_preview_sizes.get(0);
+	        for(Camera.Size size : supported_preview_sizes) {
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "    supported preview size: " + size.width + ", " + size.height);
 	        	if( size.width*size.height > best_size.width*best_size.height ) {
 	        		best_size = size;
 	        	}
 	        }*/
-        	Camera.Size best_size = getOptimalPreviewSize(preview_sizes);
+        	Camera.Size best_size = getOptimalPreviewSize(supported_preview_sizes);
             parameters.setPreviewSize(best_size.width, best_size.height);
     		if( MyDebug.LOG )
     			Log.d(TAG, "new preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
@@ -2165,9 +2167,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		camera.setParameters(parameters);
 	}
 
-	private List<String> getSupportedFlashModes(List<String> supported_flash_modes) {
+	private List<String> convertFlashModesToValues(List<String> supported_flash_modes) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "getSupportedFlashModes()");
+			Log.d(TAG, "convertFlashModesToValues()");
 		List<String> output_modes = new Vector<String>();
 		if( supported_flash_modes != null ) {
 			/*for(String flash_mode : supported_flash_modes) {
@@ -2329,9 +2331,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		tryAutoFocus();
 	}
 
-	private List<String> getSupportedFocusModes(List<String> supported_focus_modes) {
+	private List<String> convertFocusModesToValues(List<String> supported_focus_modes) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "getSupportedFocusModes()");
+			Log.d(TAG, "convertFocusModesToValues()");
 		List<String> output_modes = new Vector<String>();
 		if( supported_focus_modes != null ) {
 			// also resort as well as converting
@@ -3563,18 +3565,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.exposures;
     }
 
-    /*List<Camera.Size> getSupportedPictureSizes() {
+    public List<Camera.Size> getSupportedPreviewSizes() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "getSupportedPictureSizes");
-    	if( this.camera == null )
-    		return new Vector<Camera.Size>();
-		Camera.Parameters parameters = camera.getParameters();
-    	List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
-    	for(Camera.Size size : sizes) {
-			Log.d(TAG, "    size: " + size.width + " x " + size.height);
-    	}
-    	return sizes;
-    }*/
+			Log.d(TAG, "getSupportedPreviewSizes");
+    	return this.supported_preview_sizes;
+    }
+    
     public List<Camera.Size> getSupportedPictureSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPictureSizes");
@@ -3593,6 +3589,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return this.video_quality;
     }
     
+	public List<String> getSupportedFlashValues() {
+		return supported_flash_values;
+	}
+
+	public List<String> getSupportedFocusValues() {
+		return supported_focus_values;
+	}
+
     public int getCameraId() {
     	return this.cameraId;
     }

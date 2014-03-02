@@ -702,6 +702,20 @@ public class MainActivity extends Activity {
 		putIntentExtra(intent, "white_balances", this.preview.getSupportedWhiteBalances());
 		//putIntentExtra(intent, "exposures", this.preview.getSupportedExposures());
 
+		List<Camera.Size> preview_sizes = this.preview.getSupportedPreviewSizes();
+		if( preview_sizes != null ) {
+			int [] widths = new int[preview_sizes.size()];
+			int [] heights = new int[preview_sizes.size()];
+			int i=0;
+			for(Camera.Size size: preview_sizes) {
+				widths[i] = size.width;
+				heights[i] = size.height;
+				i++;
+			}
+			intent.putExtra("preview_widths", widths);
+			intent.putExtra("preview_heights", heights);
+		}
+		
 		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
 		if( sizes != null ) {
 			int [] widths = new int[sizes.size()];
@@ -726,6 +740,8 @@ public class MainActivity extends Activity {
 			}
 			intent.putExtra("video_quality", video_quality_arr);
 		}
+		putIntentExtra(intent, "flash_values", this.preview.getSupportedFlashValues());
+		putIntentExtra(intent, "focus_values", this.preview.getSupportedFocusValues());
 
 		this.startActivity(intent);
     }

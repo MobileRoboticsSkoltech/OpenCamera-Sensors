@@ -268,6 +268,12 @@
             android:summary="@string/preference_donate_summary"  
             />  
 
+        <Preference
+            android:key="preference_about"  
+            android:title="@string/preference_about"
+            android:summary="@string/preference_about_summary"  
+            />  
+        
     </PreferenceCategory>
         
 </PreferenceScreen>

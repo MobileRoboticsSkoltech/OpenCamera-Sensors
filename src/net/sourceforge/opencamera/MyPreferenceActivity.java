@@ -1,7 +1,15 @@
 package net.sourceforge.opencamera;
 
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.net.Uri;
@@ -15,10 +23,11 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
 
 public class MyPreferenceActivity extends PreferenceActivity {
 	private static final String TAG = "MyPreferenceActivity";
-
+	
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +36,11 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences); // n.b., deprecated because we're not using a fragment...
 
-		int cameraId = getIntent().getExtras().getInt("cameraId");
+		final int cameraId = getIntent().getExtras().getInt("cameraId");
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
 		
-		boolean supports_auto_stabilise = getIntent().getExtras().getBoolean("supports_auto_stabilise");
+		final boolean supports_auto_stabilise = getIntent().getExtras().getBoolean("supports_auto_stabilise");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);
 
@@ -46,7 +55,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		readFromIntent("white_balances", "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
 		//readFromIntent("exposures", "preference_exposure", "0", "preference_category_camera_effects");
 
-		boolean supports_face_detection = getIntent().getExtras().getBoolean("supports_face_detection");
+		final boolean supports_face_detection = getIntent().getExtras().getBoolean("supports_face_detection");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_face_detection: " + supports_face_detection);
 
@@ -56,8 +65,11 @@ public class MyPreferenceActivity extends PreferenceActivity {
         	pg.removePreference(pref);
 		}
 
-		int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
-		int [] heights = getIntent().getExtras().getIntArray("resolution_heights");
+		final int [] preview_widths = getIntent().getExtras().getIntArray("preview_widths");
+		final int [] preview_heights = getIntent().getExtras().getIntArray("preview_heights");
+
+		final int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
+		final int [] heights = getIntent().getExtras().getIntArray("resolution_heights");
 		if( widths != null && heights != null ) {
 			CharSequence [] entries = new CharSequence[widths.length];
 			CharSequence [] values = new CharSequence[widths.length];
@@ -96,7 +108,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			lp.setEntryValues(values);
 		}
 
-		int [] video_quality = getIntent().getExtras().getIntArray("video_quality");
+		final int [] video_quality = getIntent().getExtras().getIntArray("video_quality");
 		if( video_quality != null ) {
 			CharSequence [] entries = new CharSequence[video_quality.length];
 			CharSequence [] values = new CharSequence[video_quality.length];
@@ -192,6 +204,169 @@ public class MyPreferenceActivity extends PreferenceActivity {
             			}*/
             	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
         	        	startActivity(browserIntent);
+                		return false;
+                	}
+                	return false;
+                }
+            });
+        }
+
+        {
+            final Preference pref = (Preference) findPreference("preference_about");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                	if( pref.getKey().equals("preference_about") ) {
+                		if( MyDebug.LOG )
+                			Log.d(TAG, "user clicked about");
+            	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceActivity.this);
+                        alertDialog.setTitle("About");
+                        final StringBuilder about_string = new StringBuilder();
+                        String version = "UNKNOWN_VERSION";
+						try {
+	                        PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+	                        version = pInfo.versionName;
+						}
+						catch(NameNotFoundException e) {
+	                		if( MyDebug.LOG )
+	                			Log.d(TAG, "NameNotFoundException exception trying to get version number");
+							e.printStackTrace();
+						}
+                        about_string.append("Open Camera v");
+                        about_string.append(version);
+                        about_string.append("\nAndroid API version: ");
+                        about_string.append(Build.VERSION.SDK_INT);
+                        {
+                    		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+                            about_string.append("\nStandard max heap? (MB): ");
+                            about_string.append(activityManager.getMemoryClass());
+                            about_string.append("\nLarge max heap? (MB): ");
+                            about_string.append(activityManager.getLargeMemoryClass());
+                        }
+                        {
+                            Point display_size = new Point();
+                            Display display = MyPreferenceActivity.this.getWindowManager().getDefaultDisplay();
+                            display.getSize(display_size);
+                            about_string.append("\nDisplay size: ");
+                            about_string.append(display_size.x);
+                            about_string.append("x");
+                            about_string.append(display_size.y);
+                        }
+                        about_string.append("\nCurrent camera ID: ");
+                        about_string.append(cameraId);
+                        if( preview_widths != null && preview_heights != null ) {
+                            about_string.append("\nPreview resolutions: ");
+                			for(int i=0;i<preview_widths.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(preview_widths[i]);
+                				about_string.append("x");
+                				about_string.append(preview_heights[i]);
+                			}
+                        }
+                        if( widths != null && heights != null ) {
+                            about_string.append("\nPhoto resolutions: ");
+                			for(int i=0;i<widths.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(widths[i]);
+                				about_string.append("x");
+                				about_string.append(heights[i]);
+                			}
+                        }
+                        if( video_quality != null ) {
+                            about_string.append("\nVideo quality: ");
+                			for(int i=0;i<video_quality.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(video_quality[i]);
+                			}
+                        }
+                        about_string.append("\nAuto-stabilise?: ");
+                        about_string.append(getString(supports_auto_stabilise ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nFace detection?: ");
+                        about_string.append(getString(supports_face_detection ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nFlash modes: ");
+                		String [] flash_values = getIntent().getExtras().getStringArray("flash_values");
+                		if( flash_values != null && flash_values.length > 0 ) {
+                			for(int i=0;i<flash_values.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(flash_values[i]);
+                			}
+                		}
+                		else {
+                            about_string.append("None");
+                		}
+                        about_string.append("\nFocus modes: ");
+                		String [] focus_values = getIntent().getExtras().getStringArray("focus_values");
+                		if( focus_values != null && focus_values.length > 0 ) {
+                			for(int i=0;i<focus_values.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(focus_values[i]);
+                			}
+                		}
+                		else {
+                            about_string.append("None");
+                		}
+                        about_string.append("\nColor effects: ");
+                		String [] color_effects_values = getIntent().getExtras().getStringArray("color_effects");
+                		if( color_effects_values != null && color_effects_values.length > 0 ) {
+                			for(int i=0;i<color_effects_values.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(color_effects_values[i]);
+                			}
+                		}
+                		else {
+                            about_string.append("None");
+                		}
+                        about_string.append("\nScene modes: ");
+                		String [] scene_modes_values = getIntent().getExtras().getStringArray("scene_modes");
+                		if( scene_modes_values != null && scene_modes_values.length > 0 ) {
+                			for(int i=0;i<scene_modes_values.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(scene_modes_values[i]);
+                			}
+                		}
+                		else {
+                            about_string.append("None");
+                		}
+                        about_string.append("\nWhite balances: ");
+                		String [] white_balances_values = getIntent().getExtras().getStringArray("white_balances");
+                		if( white_balances_values != null && white_balances_values.length > 0 ) {
+                			for(int i=0;i<white_balances_values.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(white_balances_values[i]);
+                			}
+                		}
+                		else {
+                            about_string.append("None");
+                		}
+                        
+                        alertDialog.setMessage(about_string);
+                        alertDialog.setPositiveButton(R.string.about_ok, null);
+                        alertDialog.setNegativeButton(R.string.about_copy_to_clipboard, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                        		if( MyDebug.LOG )
+                        			Log.d(TAG, "user clicked copy to clipboard");
+							 	ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE); 
+							 	ClipData clip = ClipData.newPlainText("OpenCamera About", about_string);
+							 	clipboard.setPrimaryClip(clip);
+                            }
+                        });
+                        alertDialog.show();
                 		return false;
                 	}
                 	return false;

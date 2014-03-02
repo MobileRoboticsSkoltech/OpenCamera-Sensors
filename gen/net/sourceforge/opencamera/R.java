@@ -91,14 +91,20 @@ public final class R {
         public static final int main=0x7f090000;
     }
     public static final class string {
+        public static final int about_available=0x7f070048;
+        public static final int about_copy_to_clipboard=0x7f07004a;
+        public static final int about_not_available=0x7f070049;
+        public static final int about_ok=0x7f070047;
         public static final int action_settings=0x7f070001;
         public static final int app_name=0x7f070000;
-        public static final int exposure=0x7f070047;
-        public static final int flash_mode=0x7f070049;
-        public static final int focus_mode=0x7f070048;
-        public static final int gallery=0x7f070046;
+        public static final int exposure=0x7f07004d;
+        public static final int flash_mode=0x7f07004f;
+        public static final int focus_mode=0x7f07004e;
+        public static final int gallery=0x7f07004c;
         public static final int intro_ok=0x7f070003;
         public static final int intro_text=0x7f070002;
+        public static final int preference_about=0x7f070045;
+        public static final int preference_about_summary=0x7f070046;
         public static final int preference_auto_stabilise=0x7f070005;
         public static final int preference_auto_stabilise_summary=0x7f070006;
         public static final int preference_burst_interval=0x7f070018;
@@ -162,11 +168,11 @@ public final class R {
         public static final int preference_volume_keys_summary=0x7f070022;
         public static final int preference_white_balance=0x7f07000b;
         public static final int preference_white_balance_summary=0x7f07000c;
-        public static final int share=0x7f07004d;
-        public static final int switch_camera=0x7f07004a;
-        public static final int switch_video=0x7f07004b;
-        public static final int take_photo=0x7f070045;
-        public static final int trash=0x7f07004c;
+        public static final int share=0x7f070053;
+        public static final int switch_camera=0x7f070050;
+        public static final int switch_video=0x7f070051;
+        public static final int take_photo=0x7f07004b;
+        public static final int trash=0x7f070052;
         public static final int video_quality=0x7f07003b;
         public static final int video_quality_summary=0x7f07003c;
     }

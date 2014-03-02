@@ -70,10 +70,16 @@
     <string name="preference_record_audio_src">Audio source</string>
     <string name="preference_record_audio_src_summary">Microphone to use for recording audio</string>
     
-    <string name="preference_category_online">Online</string>
+    <string name="preference_category_online">Misc</string>
     <string name="preference_online_help">Online help</string>
     <string name="preference_donate">Donate to support development</string>
     <string name="preference_donate_summary">If you like this app, please consider making a donation. You can do this by purchasing my "donation app" - click this option will open up the page for my donation app. Thanks!</string>
+    <string name="preference_about">About</string>
+    <string name="preference_about_summary">App and debug information</string>
+    <string name="about_ok">OK</string>
+    <string name="about_available">Available</string>
+    <string name="about_not_available">Not available</string>
+    <string name="about_copy_to_clipboard">Copy to clipboard</string>
     
     <string name="take_photo">Take Photo</string>
     <string name="gallery">Gallery</string>
