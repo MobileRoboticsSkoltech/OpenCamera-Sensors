@@ -247,6 +247,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     				Log.d(TAG, "cameraID not valid for " + Camera.getNumberOfCameras() + " cameras!");
     			cameraId = 0;
     		}
+    		zoom_factor = savedInstanceState.getInt("zoom_factor", 0);
+			if( MyDebug.LOG )
+				Log.d(TAG, "found zoom_factor: " + zoom_factor);
         }
 
     	location_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth);
@@ -626,7 +629,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		focus_success = FOCUS_DONE;
 		scene_modes = null;
 		has_zoom = false;
-		zoom_factor = 0;
 		max_zoom_factor = 0;
 		zoom_ratios = null;
 		faces_detected = null;
@@ -714,7 +716,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "has_zoom? " + has_zoom);
 		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
 		    SeekBar zoomSeekBar = (SeekBar) activity.findViewById(R.id.zoom_seekbar);
-		    this.zoom_factor = 0;
 			if( this.has_zoom ) {
 				this.max_zoom_factor = parameters.getMaxZoom();
 				try {
@@ -1069,6 +1070,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			if( saved_is_video != this.is_video ) {
 				this.switchVideo(false, false);
+			}
+
+			// must be done after setting parameters, as this function may set parameters
+			if( this.has_zoom && zoom_factor != 0 ) {
+				int new_zoom_factor = zoom_factor;
+				zoom_factor = 0; // force zoomTo to actually update the zoom!
+				zoomTo(new_zoom_factor, true);
 			}
 
 			// Must set preview size before starting camera preview
@@ -1968,6 +1976,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    else {
 				showToast(switch_camera_toast, "Back Camera");
 		    }
+		    //zoom_factor = 0; // reset zoom when switching camera
 			this.openCamera();
 			
 			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
@@ -3641,6 +3650,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "save cameraId: " + cameraId);
     	state.putInt("cameraId", cameraId);
+		if( MyDebug.LOG )
+			Log.d(TAG, "save zoom_factor: " + zoom_factor);
+    	state.putInt("zoom_factor", zoom_factor);
 	}
 
     public void showToast(final ToastBoxer clear_toast, final String message) {
