@@ -140,8 +140,8 @@ the zoom level (if zoomed in), the remaining free storage space on the device, a
 of the camera. If "Store location data" is enabled (off by default), then a small "earth" icon
 <img src="earth.png" width="24" height="24"> will appear next to
 the battery indicator when the location is available (you can still take photos when the earth icon doesn't show,
-it's just that location data won't be stored in the photo). If the location isn't available, a red dash will be
-shown through the earth icon.</p>
+it's just that location data won't be stored in the photo). A dot shows to the top-right of the earth icon to
+indicate the accuracy (green for accurate, yellow for less accurate). If the location isn't available, a red dash will be shown through the earth icon.</p>
 
 <p><a name="auto_stabilise"><b>Auto-stabilise feature</b></p>
 
@@ -281,6 +281,8 @@ Version 1.8 (Work in progress)
 FIXED   Crash if save folder was empty.
 ADDED   Added privacy policy (for location permission/geotagging) to intro
         window text (needed for Nokia Store).
+UPDATED Display yellow or green dot next to earth icon to indicate location
+        accuracy.
 UPDATED Display earth icon with red dash through it, if geotagging is enabled,
         but the app doesn't have a location.
 UPDATED Current zoom is now saved when app goes idle, or switching cameras.

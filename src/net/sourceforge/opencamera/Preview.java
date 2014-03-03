@@ -157,6 +157,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
 	private Location location = null;
 	public boolean has_set_location = false;
+	private float location_accuracy = 0.0f;
 	private Bitmap location_bitmap = null;
 	private Bitmap location_off_bitmap = null;
 	private Rect location_dest = new Rect();
@@ -1695,6 +1696,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
 			if( has_set_location ) {
 				canvas.drawBitmap(location_bitmap, null, location_dest, p);
+				int indicator_x = location_x + location_size;
+				int indicator_y = location_y;
+				p.setStyle(Paint.Style.FILL_AND_STROKE);
+				p.setColor(location_accuracy < 25.01f ? Color.GREEN : Color.YELLOW);
+				canvas.drawCircle(indicator_x, indicator_y, location_size/10, p);
 			}
 			else {
 				canvas.drawBitmap(location_off_bitmap, null, location_dest, p);
@@ -3759,7 +3765,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "updating parameters from location...");
-	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude());
+	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
 	    		}
 	            Camera.Parameters parameters = camera.getParameters();
 	            parameters.removeGpsData();
@@ -3779,6 +3785,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            }
 	            camera.setParameters(parameters);
 	            this.has_set_location = true;
+	            this.location_accuracy = location.getAccuracy();
     		}
     		else {
 	    		if( MyDebug.LOG )
