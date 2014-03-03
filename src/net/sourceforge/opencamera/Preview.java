@@ -158,6 +158,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private Location location = null;
 	public boolean has_set_location = false;
 	private Bitmap location_bitmap = null;
+	private Bitmap location_off_bitmap = null;
 	private Rect location_dest = new Rect();
 
 	class ToastBoxer {
@@ -253,6 +254,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 
     	location_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth);
+    	location_off_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth_off);
 	}
 	
 	/*private void previewToCamera(float [] coords) {
@@ -1675,7 +1677,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		
 		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
-		if( store_location && has_set_location ) {
+		if( store_location ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
 			int location_y = (int) (5 * scale + 0.5f); // convert dps to pixels
 			int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
@@ -1691,7 +1693,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				location_x = canvas.getWidth() - location_x - location_size;
 			}
 			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
-			canvas.drawBitmap(location_bitmap, null, location_dest, p);
+			if( has_set_location ) {
+				canvas.drawBitmap(location_bitmap, null, location_dest, p);
+			}
+			else {
+				canvas.drawBitmap(location_off_bitmap, null, location_dest, p);
+			}
 		}
 		
 		{
