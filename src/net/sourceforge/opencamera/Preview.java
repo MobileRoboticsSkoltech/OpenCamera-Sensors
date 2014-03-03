@@ -190,6 +190,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final int FOCUS_SUCCESS = 1;
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
+	private String set_flash_after_autofocus = "";
 
 	private IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 	private boolean has_battery_frac = false;
@@ -420,7 +421,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             }
         }
         
-		tryAutoFocus();
+		tryAutoFocus(false);
 		return true;
     }
 
@@ -577,7 +578,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    	    showToast(null, "Failed to reconnect to camera");
 	    	    closeCamera();
 			}
-			tryAutoFocus();
+			tryAutoFocus(false);
 		}
 	}
 
@@ -1095,7 +1096,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			handler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					tryAutoFocus(); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
+					tryAutoFocus(true); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
 				}
 			}, 500);
 		}
@@ -2170,6 +2171,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private void setFlash(String flash_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFlash() " + flash_value);
+		set_flash_after_autofocus = ""; // this overrides any previously saved setting, for during the startup autofocus
 		Camera.Parameters parameters = camera.getParameters();
     	if( flash_value.equals("flash_off") ) {
     		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
@@ -2350,7 +2352,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	}
 		camera.setParameters(parameters);
 		clearFocusAreas();
-		tryAutoFocus();
+		tryAutoFocus(false);
 	}
 
 	private List<String> convertFocusModesToValues(List<String> supported_focus_modes) {
@@ -3309,7 +3311,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				activity.startActivity(Intent.createChooser(intent, "Photo"));
 			}
 			startCameraPreview();
-			tryAutoFocus();
+			tryAutoFocus(false);
 		}
 	}
 
@@ -3328,18 +3330,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 				else {
 					if( MyDebug.LOG )
-						Log.d(TAG, "successsfully deleted " + preview_image_name);
+						Log.d(TAG, "successfully deleted " + preview_image_name);
     	    	    showToast(null, "Photo deleted");
 					MainActivity main_activity = (MainActivity)this.getContext();
     	            main_activity.broadcastFile(file);
 				}
 			}
 			startCameraPreview();
-			tryAutoFocus();
+			tryAutoFocus(false);
 		}
     }
 
-    private void tryAutoFocus() {
+    private void tryAutoFocus(final boolean startup) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "tryAutoFocus");
 		if( camera == null ) {
@@ -3366,6 +3368,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "try to start autofocus");
+    			String old_flash = parameters.getFlashMode();
+    			set_flash_after_autofocus = "";
+    			if( startup && old_flash != Camera.Parameters.FLASH_MODE_OFF ) {
+        			set_flash_after_autofocus = old_flash;
+    				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+    				camera.setParameters(parameters);
+    			}
 		        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 					@Override
 					public void onAutoFocus(boolean success, Camera camera) {
@@ -3373,6 +3382,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 							Log.d(TAG, "autofocus complete: " + success);
 						focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
 						focus_complete_time = System.currentTimeMillis();
+		    			if( startup && set_flash_after_autofocus.length() > 0 ) {
+		    				if( MyDebug.LOG )
+		    					Log.d(TAG, "set flash back to: " + set_flash_after_autofocus);
+		    				Camera.Parameters parameters = camera.getParameters();
+		    				parameters.setFlashMode(set_flash_after_autofocus);
+		    				set_flash_after_autofocus = "";
+		    				camera.setParameters(parameters);
+		    			}
 					}
 		        };
 	
