@@ -2173,6 +2173,23 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "setFlash() " + flash_value);
 		set_flash_after_autofocus = ""; // this overrides any previously saved setting, for during the startup autofocus
 		Camera.Parameters parameters = camera.getParameters();
+		String flash_mode = convertFlashValueToMode(flash_value);
+    	if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
+    		parameters.setFlashMode(flash_mode);
+    		camera.setParameters(parameters);
+    	}
+	}
+
+	// this returns the flash mode indicated by the UI, rather than from the camera parameters (may be different, e.g., in startup autofocus!)
+	public String getCurrentFlashMode() {
+		if( current_flash_index == -1 )
+			return null;
+		String flash_value = supported_flash_values.get(current_flash_index);
+		String flash_mode = convertFlashValueToMode(flash_value);
+		return flash_mode;
+	}
+
+	private String convertFlashValueToMode(String flash_value) {
 		String flash_mode = "";
     	if( flash_value.equals("flash_off") ) {
     		flash_mode = Camera.Parameters.FLASH_MODE_OFF;
@@ -2189,12 +2206,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	else if( flash_value.equals("flash_red_eye") ) {
     		flash_mode = Camera.Parameters.FLASH_MODE_RED_EYE;
     	}
-    	if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
-    		parameters.setFlashMode(flash_mode);
-    		camera.setParameters(parameters);
-    	}
+    	return flash_mode;
 	}
-
+	
 	private List<String> convertFlashModesToValues(List<String> supported_flash_modes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFlashModesToValues()");
