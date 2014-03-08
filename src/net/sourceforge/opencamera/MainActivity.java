@@ -232,8 +232,14 @@ public class MainActivity extends Activity {
 			    public void onProviderDisabled(String provider) {
 			    }
 			};
-			mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-			mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			
+			// see https://sourceforge.net/p/opencamera/tickets/1/
+			if( mLocationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER) ) {
+				mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+			}
+			if( mLocationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER) ) {
+				mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+			}
 		}
 
 		layoutUI();
