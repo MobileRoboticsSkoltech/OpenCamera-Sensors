@@ -90,6 +90,7 @@ public class MainActivity extends Activity {
 			if( MyDebug.LOG )
 				Log.d(TAG, "is_test: " + is_test);
 		}
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		if( MyDebug.LOG ) {
@@ -105,13 +106,6 @@ public class MainActivity extends Activity {
 
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
         getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        // set screen to max brightness - see http://stackoverflow.com/questions/11978042/android-screen-brightness-max-value
-        {
-	        WindowManager.LayoutParams layout = getWindow().getAttributes();
-	        layout.screenBrightness = 1.0f;
-	        getWindow().setAttributes(layout); 
-        }
 
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		if( mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null ) {
@@ -149,7 +143,6 @@ public class MainActivity extends Activity {
         };
 
         final String done_first_time_key = "done_first_time";
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
         if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
@@ -201,12 +194,26 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
         super.onResume();
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        // set screen to max brightness - see http://stackoverflow.com/questions/11978042/android-screen-brightness-max-value
+		// done here rather than onCreate, so that changing it in preferences takes effect without restarting app
+		{
+	        WindowManager.LayoutParams layout = getWindow().getAttributes();
+			if( sharedPreferences.getBoolean("preference_max_brightness", true) ) {
+		        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
+	        }
+			else {
+		        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+			}
+	        getWindow().setAttributes(layout); 
+		}
+
         mSensorManager.registerListener(accelerometerListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
 
 		// Define a listener that responds to location updates
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
 		if( store_location ) {
 			locationListener = new LocationListener() {

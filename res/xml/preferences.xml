@@ -192,7 +192,14 @@
                 android:defaultValue="true"
                 />
 
-        </PreferenceScreen>
+            <CheckBoxPreference
+                android:key="preference_max_brightness"
+                android:title="@string/preference_max_brightness"
+                android:summary="@string/preference_max_brightness_summary"
+                android:defaultValue="true"
+                />
+
+            </PreferenceScreen>
    	</PreferenceCategory>
 
     <PreferenceCategory

@@ -54,7 +54,9 @@
     <string name="preference_grid_3x3_summary">Display a 3x3 grid ("rule of thirds")</string>
     <string name="preference_thumbnail_animation">Show thumbnail animation</string>
     <string name="preference_thumbnail_animation_summary">Display moving thumbnail animation when taking a photo</string>
-
+    <string name="preference_max_brightness">Force maximum brightness</string>
+    <string name="preference_max_brightness_summary">Force screen display to be at maximum brightness, rather than device default</string>
+    
     <string name="preference_category_camera_quality">Photo and Video Settings</string>
     <string name="preference_screen_camera_quality">Photo and video settings…</string>
     <string name="preference_resolution">Camera resolution</string>
