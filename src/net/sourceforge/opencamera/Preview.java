@@ -3444,6 +3444,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( camera != null && !this.isTakingPhotoOrOnTimer() && !is_preview_started ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "starting the camera preview");
+			{
+				if( MyDebug.LOG )
+					Log.d(TAG, "setRecordingHint: " + is_video);
+				Camera.Parameters parameters = camera.getParameters();
+				parameters.setRecordingHint(this.is_video);
+	            camera.setParameters(parameters);
+			}
 	    	count_cameraStartPreview++;
 			camera.startPreview();
 			this.is_preview_started = true;
