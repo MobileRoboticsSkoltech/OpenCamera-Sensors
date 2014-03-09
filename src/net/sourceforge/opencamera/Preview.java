@@ -123,6 +123,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setOrientation())
 	private boolean has_level_angle = false;
 	private double level_angle = 0.0f;
+	private double orig_level_angle = 0.0f;
 	
 	private float free_memory_gb = -1.0f;
 	private long last_free_memory_time = 0;
@@ -1530,6 +1531,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
 		}
 
+		final double close_angle = 1.0f;
 		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
@@ -1546,7 +1548,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				else {
 					p.setTextAlign(Paint.Align.CENTER);
 				}
-				if( Math.abs(this.level_angle) <= 1.0 ) {
+				if( Math.abs(this.level_angle) <= close_angle ) {
 					color = Color.GREEN;
 				}
 				String string = "Angle: " + decimalFormat.format(this.level_angle) + (char)0x00B0;
@@ -1732,6 +1734,36 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		canvas.restore();
 		
+		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED && has_level_angle && sharedPreferences.getBoolean("preference_show_angle_line", false) ) {
+			// n.b., must draw this without canvas rotation
+			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
+			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
+			double angle = - this.orig_level_angle;
+			// see http://android-developers.blogspot.co.uk/2010/09/one-screen-turn-deserves-another.html
+		    int rotation = main_activity.getWindowManager().getDefaultDisplay().getRotation();
+		    switch (rotation) {
+	    	case Surface.ROTATION_90:
+	    	case Surface.ROTATION_270:
+	    		angle += 90.0;
+	    		break;
+		    }
+			/*if( MyDebug.LOG ) {
+				Log.d(TAG, "orig_level_angle: " + orig_level_angle);
+				Log.d(TAG, "angle: " + angle);
+			}*/
+			int off_x = (int) (radius * Math.cos( Math.toRadians(angle) ));
+			int off_y = (int) (radius * Math.sin( Math.toRadians(angle) ));
+			int cx = canvas.getWidth()/2;
+			int cy = canvas.getHeight()/2;
+			if( Math.abs(this.level_angle) <= close_angle ) { // n.b., use level_angle, not angle or orig_level_angle
+				p.setColor(Color.GREEN);
+			}
+			else {
+				p.setColor(Color.WHITE);
+			}
+			canvas.drawLine(cx - off_x, cy - off_y, cx + off_x, cy + off_y, p);
+		}
+
 		if( this.focus_success != FOCUS_DONE ) {
 			int size = (int) (50 * scale + 0.5f); // convert dps to pixels
 			if( this.focus_success == FOCUS_SUCCESS )
@@ -3543,6 +3575,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( this.level_angle < -0.0 ) {
 			this.level_angle += 360.0;
 		}
+		this.orig_level_angle = this.level_angle;
 		this.level_angle -= (float)this.current_orientation;
 		if( this.level_angle < -180.0 ) {
 			this.level_angle += 360.0;

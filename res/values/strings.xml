@@ -48,6 +48,8 @@
     <string name="preference_free_memory_summary">Display the remaining device storage space on screen</string>
     <string name="preference_show_angle">Show angle</string>
     <string name="preference_show_angle_summary">Display the current device orientation angle on screen</string>
+    <string name="preference_show_angle_line">Show angle line</string>
+    <string name="preference_show_angle_line_summary">Display horizontal level line</string>
     <string name="preference_show_geo_direction">Show compass direction</string>
     <string name="preference_show_geo_direction_summary">Display the compass direction of the device on screen</string>
     <string name="preference_grid_3x3">Show 3x3 grid</string>

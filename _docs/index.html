@@ -239,6 +239,8 @@ device, so you'll have to look this up yourself (it's usually something inside /
 
 <p><b>Show angle</b> - Whether to display the orientation angle of the device's camera.</p>
 
+<p><b>Show angle line</b> - Whether to display a horizontal "level" line that visually indicates the orientation of the device.</p>
+
 <p><b>Show compass direction</b> - Whether to display the compass direction of the device's camera.</p>
 
 <p><b>Show 3x3 grid</b> - Whether to display a 3x3 grid on the camera preview (helps with applying the
@@ -286,11 +288,13 @@ FIXED   Crash on startup if Network or GPS location providers not available,
 FIXED   Crash if specified save folder was an empty string.
 FIXED   Don't ever turn on flash during autofocus when app is launched.
 ADDED   Option to not force screen display to maximum brightness.
+ADDED   Option to display horizontal "level" line.
 ADDED   Support for hardware menu button (now opens settings).
 ADDED   Added privacy policy (for location permission/geotagging) to intro
         window text (needed for Nokia Store).
 ADDED   Uses setRecordingHint, may improve performance of starting video
         recording.
+ADDED   New About option in Settings, providing debug info.
 UPDATED Display yellow or green dot next to earth icon to indicate location
         accuracy.
 UPDATED Display earth icon with red dash through it, if geotagging is enabled,
@@ -298,7 +302,6 @@ UPDATED Display earth icon with red dash through it, if geotagging is enabled,
 UPDATED Current zoom is now saved when app goes idle, or switching cameras.
 UPDATED Offset zoom slider slightly so as to not interfere with Google Now
         swipe.
-ADDED   New About option in Settings, providing debug info.
 
 Version 1.7 (2014/01/29)
 
@@ -314,14 +317,14 @@ FIXED   Was sometimes trying to set metering areas when metering areas not
         supported by device.
 FIXED   If image is deleted after taking the photo, the thumbnail is now
         properly updated to what is now the most recent photo or video.
+ADDED   New option to set preview aspect ratio to match the picture/video
+        aspect ratio (WYSIWIG).
 UPDATED Save folder can now be an absolute path, allowing possibility to save
         on external SD cards (though you need to know what the path is, which
         typically varies depending on device; I am unable to test this, so
         please let me know if it does or doesn't work).
 UPDATED Zoom -/+ control now matches the zoom slider orientation.
 UPDATED Hide some icons when taking video, as they don't do anything.
-ADDED   New option to set preview aspect ratio to match the picture/video
-        aspect ratio (WYSIWIG).
 
 Version 1.6 (2014/01/20)
 

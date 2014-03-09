@@ -164,12 +164,19 @@
 	            android:defaultValue="true"
 	            />
 	    
-		    <CheckBoxPreference
-	            android:key="preference_show_angle"
-	            android:title="@string/preference_show_angle"
-	            android:summary="@string/preference_show_angle_summary"
-	            android:defaultValue="true"
-	            />
+            <CheckBoxPreference
+                android:key="preference_show_angle"
+                android:title="@string/preference_show_angle"
+                android:summary="@string/preference_show_angle_summary"
+                android:defaultValue="true"
+                />
+
+            <CheckBoxPreference
+                android:key="preference_show_angle_line"
+                android:title="@string/preference_show_angle_line"
+                android:summary="@string/preference_show_angle_line_summary"
+                android:defaultValue="false"
+                />
 
             <CheckBoxPreference
                 android:key="preference_show_geo_direction"
