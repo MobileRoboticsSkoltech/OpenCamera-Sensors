@@ -192,6 +192,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
 	private String set_flash_after_autofocus = "";
+	private boolean successfully_focused = false;
+	private long successfully_focused_time = -1;
 
 	private IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 	private boolean has_battery_frac = false;
@@ -422,7 +424,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             }
         }
         
-		tryAutoFocus(false);
+		tryAutoFocus(false, true);
 		return true;
     }
 
@@ -454,6 +456,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		successfully_focused = false;
         //Log.d(TAG, "camera parameters null? " + (camera.getParameters().getFocusAreas()==null));
     }
 
@@ -579,7 +582,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    	    showToast(null, "Failed to reconnect to camera");
 	    	    closeCamera();
 			}
-			tryAutoFocus(false);
+			tryAutoFocus(false, false);
 		}
 	}
 
@@ -589,6 +592,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		successfully_focused = false;
         has_set_location = false;
 		MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.clearSeekBar();
@@ -632,6 +636,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         has_set_location = false;
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		successfully_focused = false;
 		scene_modes = null;
 		has_zoom = false;
 		max_zoom_factor = 0;
@@ -1097,7 +1102,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			handler.postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					tryAutoFocus(true); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
+					tryAutoFocus(true, false); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
 				}
 			}, 500);
 		}
@@ -2402,7 +2407,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	}
 		camera.setParameters(parameters);
 		clearFocusAreas();
-		tryAutoFocus(false);
+		tryAutoFocus(false, false);
 	}
 
 	private List<String> convertFocusModesToValues(List<String> supported_focus_modes) {
@@ -2713,7 +2718,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "focus_mode is " + focus_mode);
 
-		if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
+		if( this.successfully_focused && System.currentTimeMillis() < this.successfully_focused_time + 5000 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "recently focused successfully, so no need to refocus");
+			takePictureWhenFocused();
+		}
+		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
 	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 				@Override
 				public void onAutoFocus(boolean success, Camera camera) {
@@ -2765,6 +2775,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			showGUI(true);
 			return;
 		}
+		successfully_focused = false; // so next photo taken will require an autofocus
 		if( MyDebug.LOG )
 			Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
 
@@ -3361,7 +3372,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				activity.startActivity(Intent.createChooser(intent, "Photo"));
 			}
 			startCameraPreview();
-			tryAutoFocus(false);
+			tryAutoFocus(false, false);
 		}
 	}
 
@@ -3387,11 +3398,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 			}
 			startCameraPreview();
-			tryAutoFocus(false);
+			tryAutoFocus(false, false);
 		}
     }
 
-    private void tryAutoFocus(final boolean startup) {
+    private void tryAutoFocus(final boolean startup, final boolean manual) {
+    	// manual: whether user has requested autofocus (by touching screen)
 		if( MyDebug.LOG )
 			Log.d(TAG, "tryAutoFocus");
 		if( camera == null ) {
@@ -3432,6 +3444,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 							Log.d(TAG, "autofocus complete: " + success);
 						focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
 						focus_complete_time = System.currentTimeMillis();
+						if( manual && success ) {
+							successfully_focused = true;
+							successfully_focused_time = focus_complete_time;
+						}
 		    			if( startup && set_flash_after_autofocus.length() > 0 ) {
 		    				if( MyDebug.LOG )
 		    					Log.d(TAG, "set flash back to: " + set_flash_after_autofocus);
@@ -3445,6 +3461,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
 				this.focus_success = FOCUS_WAITING;
 	    		this.focus_complete_time = -1;
+	    		this.successfully_focused = false;
 	    		try {
 	    			camera.autoFocus(autoFocusCallback);
 	    			count_cameraAutoFocus++;
