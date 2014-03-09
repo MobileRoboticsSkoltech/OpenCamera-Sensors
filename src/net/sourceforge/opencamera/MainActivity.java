@@ -179,7 +179,7 @@ public class MainActivity extends Activity {
             return true;
         }
         return super.onKeyDown(keyCode, event); 
-    } 
+    }
 
 	private SensorEventListener accelerometerListener = new SensorEventListener() {
 		@Override
