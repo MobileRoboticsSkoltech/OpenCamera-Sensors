@@ -167,6 +167,20 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	public boolean onKeyDown(int keyCode, KeyEvent event) { 
+		if( MyDebug.LOG )
+			Log.d(TAG, "onKeyDown: " + keyCode);
+        if( keyCode == KeyEvent.KEYCODE_MENU ) {
+        	// needed to support hardware menu button
+        	// tested successfully on Samsung S3 (via RTL)
+        	// see http://stackoverflow.com/questions/8264611/how-to-detect-when-user-presses-menu-key-on-their-android-device
+			View view = findViewById(R.id.settings);
+        	clickedSettings(view);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event); 
+    } 
+
 	private SensorEventListener accelerometerListener = new SensorEventListener() {
 		@Override
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
