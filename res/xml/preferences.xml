@@ -185,13 +185,15 @@
                 android:defaultValue="true"
                 />
 
-	        <CheckBoxPreference
-	            android:key="preference_grid_3x3"
-	            android:title="@string/preference_grid_3x3"
-	            android:summary="@string/preference_grid_3x3_summary"
-	            android:defaultValue="false"
-	            />
-
+            <ListPreference 
+                android:key="preference_grid"
+                android:title="@string/preference_grid"
+                android:summary="@string/preference_grid_summary"
+                android:entries="@array/preference_grid_entries"
+                android:entryValues="@array/preference_grid_values"
+                android:defaultValue="preference_grid_none"
+                />
+	        
             <CheckBoxPreference
                 android:key="preference_thumbnail_animation"
                 android:title="@string/preference_thumbnail_animation"

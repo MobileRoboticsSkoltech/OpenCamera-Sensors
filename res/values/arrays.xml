@@ -141,6 +141,16 @@
         <item>ui_left</item>
         <item>ui_right</item>
     </string-array>
+    <string-array name="preference_grid_entries">
+        <item>None</item>
+        <item>Display a 3x3 grid ("rule of thirds")</item>
+        <item>Display a 4x2 grid</item>
+	</string-array>
+    <string-array name="preference_grid_values">
+        <item>preference_grid_none</item>
+        <item>preference_grid_3x3</item>
+        <item>preference_grid_4x2</item>
+        </string-array>
     <string-array name="preference_record_audio_src_entries">
         <item>Camcorder</item>
         <item>External mic (if present)</item>

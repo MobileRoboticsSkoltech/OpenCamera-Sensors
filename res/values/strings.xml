@@ -52,8 +52,8 @@
     <string name="preference_show_angle_line_summary">Display horizontal level line</string>
     <string name="preference_show_geo_direction">Show compass direction</string>
     <string name="preference_show_geo_direction_summary">Display the compass direction of the device on screen</string>
-    <string name="preference_grid_3x3">Show 3x3 grid</string>
-    <string name="preference_grid_3x3_summary">Display a 3x3 grid ("rule of thirds")</string>
+    <string name="preference_grid">Show a grid</string>
+    <string name="preference_grid_summary">Display one of various grids</string>
     <string name="preference_thumbnail_animation">Show thumbnail animation</string>
     <string name="preference_thumbnail_animation_summary">Display moving thumbnail animation when taking a photo</string>
     <string name="preference_max_brightness">Force maximum brightness</string>

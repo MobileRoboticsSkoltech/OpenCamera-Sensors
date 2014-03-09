@@ -1441,12 +1441,24 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		MainActivity main_activity = (MainActivity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		if( camera != null && sharedPreferences.getBoolean("preference_grid_3x3", false) ) {
+		final float scale = getResources().getDisplayMetrics().density;
+		if( camera != null && sharedPreferences.getString("preference_grid", "preference_grid_none").equals("preference_grid_3x3") ) {
 			p.setColor(Color.WHITE);
 			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(2.0f*canvas.getWidth()/3.0f, 0.0f, 2.0f*canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(0.0f, canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, canvas.getHeight()/3.0f, p);
 			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
+		}
+		if( camera != null && sharedPreferences.getString("preference_grid", "preference_grid_none").equals("preference_grid_4x2") ) {
+			p.setColor(Color.GRAY);
+			canvas.drawLine(canvas.getWidth()/4.0f, 0.0f, canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(canvas.getWidth()/2.0f, 0.0f, canvas.getWidth()/2.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(3.0f*canvas.getWidth()/4.0f, 0.0f, 3.0f*canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
+			canvas.drawLine(0.0f, canvas.getHeight()/2.0f, canvas.getWidth()-1.0f, canvas.getHeight()/2.0f, p);
+			p.setColor(Color.WHITE);
+			int crosshairs_radius = (int) (20 * scale + 0.5f); // convert dps to pixels
+			canvas.drawLine(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f - crosshairs_radius, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f + crosshairs_radius, p);
+			canvas.drawLine(canvas.getWidth()/2.0f - crosshairs_radius, canvas.getHeight()/2.0f, canvas.getWidth()/2.0f + crosshairs_radius, canvas.getHeight()/2.0f, p);
 		}
 
 		// note, no need to check preferences here, as we do that when setting thumbnail_anim
@@ -1500,7 +1512,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
 
-		final float scale = getResources().getDisplayMetrics().density;
 		int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
 		// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
 		int text_base_y = 0;

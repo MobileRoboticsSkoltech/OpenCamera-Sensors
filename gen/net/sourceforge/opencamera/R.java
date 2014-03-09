@@ -19,10 +19,12 @@ public final class R {
         public static final int preference_burst_interval_values=0x7f05000b;
         public static final int preference_burst_mode_entries=0x7f050008;
         public static final int preference_burst_mode_values=0x7f050009;
+        public static final int preference_grid_entries=0x7f050012;
+        public static final int preference_grid_values=0x7f050013;
         public static final int preference_preview_size_entries=0x7f05000c;
         public static final int preference_preview_size_values=0x7f05000d;
-        public static final int preference_record_audio_src_entries=0x7f050012;
-        public static final int preference_record_audio_src_values=0x7f050013;
+        public static final int preference_record_audio_src_entries=0x7f050014;
+        public static final int preference_record_audio_src_values=0x7f050015;
         public static final int preference_timer_entries=0x7f050006;
         public static final int preference_timer_values=0x7f050007;
         public static final int preference_ui_placement_entries=0x7f050010;
@@ -126,8 +128,8 @@ public final class R {
         public static final int preference_face_detection_summary=0x7f070010;
         public static final int preference_free_memory=0x7f070029;
         public static final int preference_free_memory_summary=0x7f07002a;
-        public static final int preference_grid_3x3=0x7f070031;
-        public static final int preference_grid_3x3_summary=0x7f070032;
+        public static final int preference_grid=0x7f070031;
+        public static final int preference_grid_summary=0x7f070032;
         public static final int preference_location=0x7f07003d;
         public static final int preference_location_summary=0x7f07003e;
         public static final int preference_max_brightness=0x7f070035;
