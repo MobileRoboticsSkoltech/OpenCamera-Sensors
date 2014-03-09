@@ -3444,7 +3444,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 							Log.d(TAG, "autofocus complete: " + success);
 						focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
 						focus_complete_time = System.currentTimeMillis();
-						if( manual && success ) {
+						MainActivity main_activity = (MainActivity)Preview.this.getContext();
+						if( manual && ( success || main_activity.is_test ) ) {
 							successfully_focused = true;
 							successfully_focused_time = focus_complete_time;
 						}

@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 	private boolean supports_auto_stabilise = false;
 
 	// for testing:
-	private boolean is_test = false;
+	public boolean is_test = false;
 	public Bitmap gallery_bitmap = null;
 
 	@Override
