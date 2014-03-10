@@ -3889,9 +3889,17 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            if( location.getTime() != 0 ) { // from Android camera source
 	            	parameters.setGpsTimestamp(location.getTime() / 1000);
 	            }
-	            camera.setParameters(parameters);
-	            this.has_set_location = true;
-	            this.location_accuracy = location.getAccuracy();
+	            try {
+		            camera.setParameters(parameters);
+		            this.has_set_location = true;
+		            this.location_accuracy = location.getAccuracy();
+	            }
+			    catch(RuntimeException e) {
+			    	// received this crash from Google Play
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "failed to set parameters for gps info");
+	        		e.printStackTrace();
+			    }
     		}
     		else {
 	    		if( MyDebug.LOG )
