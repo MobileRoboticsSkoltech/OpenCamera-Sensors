@@ -714,11 +714,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Camera.Parameters parameters = camera.getParameters();
 
 			// get available scene modes
-			// note, important to set scene mode first - apparently this can affect the other supported features
+			// important, from docs:
+			// "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance).
+			// For example, suppose originally flash mode is on and supported flash modes are on/off. In night
+			// scene mode, both flash mode and supported flash mode may be changed to off. After setting scene
+			// mode, applications should call getParameters to know if some parameters are changed."
 			scene_modes = parameters.getSupportedSceneModes();
 			String scene_mode = setupValuesPref(scene_modes, "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
-			if( scene_mode != null ) {
+			if( scene_mode != null && !parameters.getSceneMode().equals(scene_mode) ) {
 	        	parameters.setSceneMode(scene_mode);
+	        	// need to read back parameters, see comment above
+	        	camera.setParameters(parameters);
+				parameters = camera.getParameters();
 			}
 
 			this.has_zoom = parameters.isZoomSupported();
