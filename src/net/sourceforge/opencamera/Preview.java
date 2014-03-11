@@ -3882,6 +3882,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    		}
 	            Camera.Parameters parameters = camera.getParameters();
 	            parameters.removeGpsData();
+	            parameters.setGpsTimestamp(System.currentTimeMillis() / 1000); // initialise to a value (from Android camera source)
 	            parameters.setGpsLatitude(location.getLatitude());
 	            parameters.setGpsLongitude(location.getLongitude());
 	            parameters.setGpsProcessingMethod(location.getProvider()); // from http://boundarydevices.com/how-to-write-an-android-camera-app/
