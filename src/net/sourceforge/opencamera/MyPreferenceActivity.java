@@ -16,12 +16,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.Display;
 
@@ -181,6 +184,23 @@ public class MyPreferenceActivity extends PreferenceActivity {
                 	return false;
                 }
             });
+        }
+
+        {
+        	EditTextPreference edit = (EditTextPreference)findPreference("preference_save_location");
+        	InputFilter filter = new InputFilter() { 
+        		// whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
+        		String disallowed = "|\\?*<\":>";
+                public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) { 
+                    for(int i=start;i<end;i++) { 
+                    	if( disallowed.indexOf( source.charAt(i) ) != -1 ) {
+                            return ""; 
+                    	}
+                    } 
+                    return null; 
+                }
+        	}; 
+        	edit.getEditText().setFilters(new InputFilter[]{filter});         	
         }
 
         {

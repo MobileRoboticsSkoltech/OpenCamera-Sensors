@@ -130,14 +130,13 @@
 	            android:defaultValue="volume_take_photo"
 	            />
 	    
-		    <EditTextPreference
+	        <EditTextPreference
 	            android:key="preference_save_location"
 	            android:title="@string/preference_save_location"
 	            android:summary="@string/preference_save_location_summary"
 		        android:dialogTitle="@string/preference_save_location"
 		        android:dialogMessage="@string/preference_save_location_summary"
 		        android:inputType="text"
-		        android:digits="/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .@#£%&amp;-()!;~`{}$^_="
 	            android:defaultValue="OpenCamera"
 		        />
 	
