@@ -3451,8 +3451,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( MyDebug.LOG )
 					Log.d(TAG, "try to start autofocus");
     			String old_flash = parameters.getFlashMode();
+				if( MyDebug.LOG )
+					Log.d(TAG, "old_flash: " + old_flash);
     			set_flash_after_autofocus = "";
-    			if( startup && old_flash != Camera.Parameters.FLASH_MODE_OFF ) {
+    			// getFlashMode() may return null if flash not supported!
+    			if( startup && old_flash != null && old_flash != Camera.Parameters.FLASH_MODE_OFF ) {
         			set_flash_after_autofocus = old_flash;
     				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
     				camera.setParameters(parameters);
