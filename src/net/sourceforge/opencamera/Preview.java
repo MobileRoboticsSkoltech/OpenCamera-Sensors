@@ -3559,8 +3559,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setRecordingHint: " + is_video);
 				Camera.Parameters parameters = camera.getParameters();
-				parameters.setRecordingHint(this.is_video);
-	            camera.setParameters(parameters);
+				// calling setParameters here with continuous video focus mode causes preview to not restart on Galaxy Nexus?! (fine on my Nexus 7)
+				// issue seems to specifically be with setParameters (i.e., the problem occurs even if we don't setRecordingHint)
+				String focus_mode = parameters.getFocusMode();
+	            if( focus_mode != null && !focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
+					parameters.setRecordingHint(this.is_video);
+		            camera.setParameters(parameters);
+	            }
 			}
 	    	count_cameraStartPreview++;
 			camera.startPreview();
