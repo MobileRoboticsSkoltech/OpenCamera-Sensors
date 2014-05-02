@@ -367,6 +367,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		// note, we always try to force start the preview (in case is_preview_paused has become false)
         startCameraPreview();
+        cancelAutoFocus();
 
         if( camera != null && !this.using_face_detection ) {
             Camera.Parameters parameters = camera.getParameters();
@@ -441,6 +442,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     public void clearFocusAreas() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearFocusAreas()");
+		if( camera == null ) {
+			return;
+		}
+        cancelAutoFocus();
         Camera.Parameters parameters = camera.getParameters();
         boolean update_parameters = false;
         if( parameters.getMaxNumFocusAreas() > 0 ) {
@@ -594,6 +599,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		focus_success = FOCUS_DONE;
 		successfully_focused = false;
         has_set_location = false;
+		has_received_location = false;
 		MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.clearSeekBar();
 		//if( is_taking_photo_on_timer ) {
@@ -634,6 +640,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		// need to init everything now, in case we don't open the camera (but these may already be initialised from an earlier call - e.g., if we are now switching to another camera)
         has_set_location = false;
+		has_received_location = false;
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		successfully_focused = false;
@@ -1077,9 +1084,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);
 			
-			// must be done after setting parameters, as this function may set parameters
-			updateParametersFromLocation();
-
 			// now switch to video if saved
 			boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
 			if( MyDebug.LOG ) {
@@ -1988,6 +1992,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExposure(): " + new_exposure);
 		if( camera != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
+	        cancelAutoFocus();
 			Camera.Parameters parameters = camera.getParameters();
 			int current_exposure = parameters.getExposureCompensation();
 			if( new_exposure < min_exposure )
@@ -2227,6 +2232,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFlash() " + flash_value);
 		set_flash_after_autofocus = ""; // this overrides any previously saved setting, for during the startup autofocus
+        cancelAutoFocus();
 		Camera.Parameters parameters = camera.getParameters();
 		String flash_mode = convertFlashValueToMode(flash_value);
     	if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
@@ -2400,6 +2406,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "null camera");
 			return;
 		}
+        cancelAutoFocus();
 		Camera.Parameters parameters = camera.getParameters();
     	if( focus_value.equals("focus_mode_auto") ) {
     		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -2627,7 +2634,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		focus_success = FOCUS_DONE; // clear focus rectangle
 
-        if( is_video ) {
+		updateParametersFromLocation();
+
+		if( is_video ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
 			MainActivity main_activity = (MainActivity)Preview.this.getContext();
@@ -3465,21 +3474,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					public void onAutoFocus(boolean success, Camera camera) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "autofocus complete: " + success);
-						focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
-						focus_complete_time = System.currentTimeMillis();
-						MainActivity main_activity = (MainActivity)Preview.this.getContext();
-						if( manual && ( success || main_activity.is_test ) ) {
-							successfully_focused = true;
-							successfully_focused_time = focus_complete_time;
-						}
-		    			if( startup && set_flash_after_autofocus.length() > 0 ) {
-		    				if( MyDebug.LOG )
-		    					Log.d(TAG, "set flash back to: " + set_flash_after_autofocus);
-		    				Camera.Parameters parameters = camera.getParameters();
-		    				parameters.setFlashMode(set_flash_after_autofocus);
-		    				set_flash_after_autofocus = "";
-		    				camera.setParameters(parameters);
-		    			}
+						autoFocusCompleted(manual, success, false);
 					}
 		        };
 	
@@ -3504,6 +3499,44 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				focus_success = FOCUS_SUCCESS;
 				focus_complete_time = System.currentTimeMillis();
 	        }
+		}
+    }
+    
+    private void cancelAutoFocus() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cancelAutoFocus");
+        if( camera != null ) {
+    		camera.cancelAutoFocus();
+    		autoFocusCompleted(false, false, true);
+        }
+    }
+    
+    private void autoFocusCompleted(boolean manual, boolean success, boolean cancelled) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "autoFocusCompleted");
+			Log.d(TAG, "    manual? " + manual);
+			Log.d(TAG, "    success? " + success);
+			Log.d(TAG, "    cancelled? " + cancelled);
+		}
+		if( cancelled ) {
+			focus_success = FOCUS_DONE;
+		}
+		else {
+			focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
+			focus_complete_time = System.currentTimeMillis();
+		}
+		MainActivity main_activity = (MainActivity)Preview.this.getContext();
+		if( manual && !cancelled && ( success || main_activity.is_test ) ) {
+			successfully_focused = true;
+			successfully_focused_time = focus_complete_time;
+		}
+		if( set_flash_after_autofocus.length() > 0 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set flash back to: " + set_flash_after_autofocus);
+			Camera.Parameters parameters = camera.getParameters();
+			parameters.setFlashMode(set_flash_after_autofocus);
+			set_flash_after_autofocus = "";
+			camera.setParameters(parameters);
 		}
     }
     
@@ -3869,8 +3902,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
 		if( store_location ) {
 			this.location = location;
+    		// Android camera source claims we need to check lat/long != 0.0d
+    		if( location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+	    		if( MyDebug.LOG ) {
+	    			Log.d(TAG, "received location:");
+	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
+	    		}
+	            this.has_set_location = true;
+	            this.location_accuracy = location.getAccuracy();
+    		}
 		}
-		updateParametersFromLocation();
     }
     
     private void updateParametersFromLocation() {
@@ -3902,8 +3943,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            }
 	            try {
 		            camera.setParameters(parameters);
-		            this.has_set_location = true;
-		            this.location_accuracy = location.getAccuracy();
 	            }
 			    catch(RuntimeException e) {
 			    	// received this crash from Google Play
@@ -3919,6 +3958,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            parameters.removeGpsData();
 	            camera.setParameters(parameters);
 	            this.has_set_location = false;
+	    		has_received_location = false;
     		}
     	}
     }
