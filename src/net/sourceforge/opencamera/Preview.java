@@ -757,21 +757,26 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 
 			if( this.has_zoom ) {
-			    zoomControls.setIsZoomInEnabled(true);
-		        zoomControls.setIsZoomOutEnabled(true);
-		        zoomControls.setZoomSpeed(20);
-
-		        zoomControls.setOnZoomInClickListener(new OnClickListener(){
-		            public void onClick(View v){
-		            	zoomIn();
-		            }
-		        });
-			    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
-			    	public void onClick(View v){
-			    		zoomOut();
-			        }
-			    });
-				zoomControls.setVisibility(View.VISIBLE);
+				if( sharedPreferences.getBoolean("preference_show_zoom_controls", true) ) {
+				    zoomControls.setIsZoomInEnabled(true);
+			        zoomControls.setIsZoomOutEnabled(true);
+			        zoomControls.setZoomSpeed(20);
+	
+			        zoomControls.setOnZoomInClickListener(new OnClickListener(){
+			            public void onClick(View v){
+			            	zoomIn();
+			            }
+			        });
+				    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
+				    	public void onClick(View v){
+				    		zoomOut();
+				        }
+				    });
+					zoomControls.setVisibility(View.VISIBLE);
+				}
+				else {
+					zoomControls.setVisibility(View.INVISIBLE); // must be INVISIBLE not GONE, so we can still position the zoomSeekBar relative to it
+				}
 				
 				zoomSeekBar.setMax(max_zoom_factor);
 				zoomSeekBar.setProgress(max_zoom_factor-zoom_factor);
