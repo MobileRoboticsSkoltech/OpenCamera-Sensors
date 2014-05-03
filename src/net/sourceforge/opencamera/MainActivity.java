@@ -56,7 +56,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -757,16 +757,34 @@ public class MainActivity extends Activity {
 			intent.putExtra("resolution_heights", heights);
 		}
 		
-		List<Integer> video_quality = this.preview.getSupportedVideoQuality();
+		List<String> video_quality = this.preview.getSupportedVideoQuality();
 		if( video_quality != null ) {
-			int [] video_quality_arr = new int[video_quality.size()];
+			String [] video_quality_arr = new String[video_quality.size()];
+			String [] video_quality_string_arr = new String[video_quality.size()];
 			int i=0;
-			for(Integer value: video_quality) {
-				video_quality_arr[i] = value.intValue();
+			for(String value: video_quality) {
+				video_quality_arr[i] = value;
+				video_quality_string_arr[i] = this.preview.getCamcorderProfileDescription(value);
 				i++;
 			}
 			intent.putExtra("video_quality", video_quality_arr);
+			intent.putExtra("video_quality_string", video_quality_string_arr);
 		}
+
+		List<Camera.Size> video_sizes = this.preview.getSupportedVideoSizes();
+		if( video_sizes != null ) {
+			int [] widths = new int[video_sizes.size()];
+			int [] heights = new int[video_sizes.size()];
+			int i=0;
+			for(Camera.Size size: video_sizes) {
+				widths[i] = size.width;
+				heights[i] = size.height;
+				i++;
+			}
+			intent.putExtra("video_widths", widths);
+			intent.putExtra("video_heights", heights);
+		}
+		
 		putIntentExtra(intent, "flash_values", this.preview.getSupportedFlashValues());
 		putIntentExtra(intent, "focus_values", this.preview.getSupportedFocusValues());
 

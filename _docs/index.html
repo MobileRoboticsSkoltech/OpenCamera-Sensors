@@ -41,7 +41,7 @@
 <li>Face detection option.</li>
 <li>Choice of front/back camera.</li>
 <li>Choose scene modes, color effects, white balance and exposure compensation.</li>
-<li>Choice of camera and video resolution, and JPEG image quality.</li>
+<li>Choice of camera and video resolution, and JPEG image quality. Support for all resolutions offered by the camera (including 4K Ultra HD video, if available).</li>
 <li>Video recording (with optional audio).</li>
 <li>Timer option.</li>
 <li>Burst mode, with configurable delay.</li>
@@ -227,11 +227,11 @@ device, so you'll have to look this up yourself (it's usually something inside /
 
 <p><b>Preview size</b> - By default, Open Camera makes the camera preview (the image that is displayed on the
 phone/tablet's display) as large as possible, trying to fill the available space. However if the resolution of the
-photo/video is a different aspect ratio to that of your device, this will result in the preview being cropped. If
-instead you select "Match photo/video size (WYSIWYG)", then the aspect ratio of the preview will match that of the
-photo/video resolution. The advantage is that what you see in the preview will match what will be in the resultant
-photo or video ("What-You-See-Is-What-You-Get") - though this may mean you will have "black bars" on the display in
-order to do this.</p>
+photo is a different aspect ratio to that of your device, this will result in the preview being cropped. If
+instead you select "Match photo size (WYSIWYG)", then the aspect ratio of the preview will match that of the
+photo resolution. The advantage is that what you see in the preview will match what will be in the resultant
+photo ("What-You-See-Is-What-You-Get") - though this may mean you will have "black bars" on the display in
+order to do this. (Note that when in video mode, the preview is always in WYSIWYG mode.)</p>
 
 <p><b>UI placement</b> - Whether to optimise the user interface for left-handed or right-handed use.</p>
 
@@ -302,7 +302,13 @@ Version 1.10 (Work in progress)
 
 FIXED   Preview wouldn't restart after taking photo with continuous focus, on
         Galaxy Nexus.
+FIXED   Problems with aspect ratio when not using WYSIWYG preview mode and
+        recording video.
 ADDED   Option to not display the -/+ zoom control.
+UPDATED All available video resolutions offered by the camera are now supported
+        (including 4K Ultra HD, if available).
+UPDATED Picture and video resolution preferences display aspect ratio and
+        megapixels of each resolution.
 UPDATED Reorganised preferences into new On screen GUI page.
 UPDATED Don't change camera settings whilst camera is autofocusing (may help
         problems/crashes on some devices).

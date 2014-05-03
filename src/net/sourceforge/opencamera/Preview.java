@@ -152,9 +152,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
 	private List<Camera.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
-	
-	private List<Integer> video_quality = null;
+
+	// video_quality can either be:
+	// - an int, in which case it refers to a CamcorderProfile
+	// - of the form [CamcorderProfile]_r[width]x[height] - we use the CamcorderProfile as a base, and override the video resolution - this is needed to support resolutions which don't have corresponding camcorder profiles (e.g., 4K/UHD)
+	private List<String> video_quality = null;
 	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
+	private List<Camera.Size> video_sizes = null;
 	
 	private Location location = null;
 	public boolean has_set_location = false;
@@ -961,25 +965,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		}
 
 			// get available sizes
-	        video_quality = new Vector<Integer>();
-	        // if we add more, remember to update MyPreferenceActivity.onCreate() code
-	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) )
-	        	video_quality.add(CamcorderProfile.QUALITY_1080P);
-	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_720P) )
-	        	video_quality.add(CamcorderProfile.QUALITY_720P);
-	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_480P) )
-	        	video_quality.add(CamcorderProfile.QUALITY_480P);
-	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_CIF) )
-	        	video_quality.add(CamcorderProfile.QUALITY_CIF);
-	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QVGA) )
-	        	video_quality.add(CamcorderProfile.QUALITY_QVGA);
-	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QCIF) )
-	        	video_quality.add(CamcorderProfile.QUALITY_QCIF);
-			if( MyDebug.LOG ) {
-				for(int i=0;i<video_quality.size();i++) {
-		        	Log.d(TAG, "supported video quality: " + video_quality.get(i).intValue());
-				}
-			}
+    		initialiseVideoQuality(parameters);
 
 			current_video_quality = -1;
 			String video_quality_value_s = sharedPreferences.getString(getVideoQualityPreferenceKey(cameraId), "");
@@ -987,39 +973,29 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "video_quality_value: " + video_quality_value_s);
 			if( video_quality_value_s.length() > 0 ) {
 				// parse the saved video quality, and make sure it is still valid
-				try {
-					int video_quality_value = Integer.parseInt(video_quality_value_s);
-					if( MyDebug.LOG )
-						Log.d(TAG, "video_quality_value: " + video_quality_value);
-					// now find value in valid list
-					for(int i=0;i<video_quality.size() && current_video_quality==-1;i++) {
-			        	Integer value = video_quality.get(i);
-			        	if( value.intValue() == video_quality_value ) {
-			        		current_video_quality = i;
-							if( MyDebug.LOG )
-								Log.d(TAG, "set current_video_quality to: " + current_video_quality);
-			        	}
-					}
-					if( current_video_quality == -1 ) {
+				// now find value in valid list
+				for(int i=0;i<video_quality.size() && current_video_quality==-1;i++) {
+		        	if( video_quality.get(i).equals(video_quality_value_s) ) {
+		        		current_video_quality = i;
 						if( MyDebug.LOG )
-							Log.e(TAG, "failed to find valid video_quality");
-					}
+							Log.d(TAG, "set current_video_quality to: " + current_video_quality);
+		        	}
 				}
-				catch(NumberFormatException exception) {
+				if( current_video_quality == -1 ) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "video_quality invalid format, can't parse to int");
+						Log.e(TAG, "failed to find valid video_quality");
 				}
 			}
 			if( current_video_quality == -1 && video_quality.size() > 0 ) {
 				// default to highest quality
 				current_video_quality = 0;
 				if( MyDebug.LOG )
-					Log.d(TAG, "set video_quality value to " + video_quality.get(current_video_quality).intValue());
+					Log.d(TAG, "set video_quality value to " + video_quality.get(current_video_quality));
 			}
 			if( current_video_quality != -1 ) {
 	    		// now save, so it's available for PreferenceActivity
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getVideoQualityPreferenceKey(cameraId), "" + video_quality.get(current_video_quality).intValue());
+				editor.putString(getVideoQualityPreferenceKey(cameraId), video_quality.get(current_video_quality));
 				editor.apply();
 			}
 
@@ -1227,9 +1203,178 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 	}
 	
+	private void addCustomResolutions(int min_resolution, int max_resolution, int base_profile) {
+		if( video_sizes == null ) {
+			return;
+		}
+        for(Camera.Size size : video_sizes) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "    supported video size: " + size.width + ", " + size.height);
+    		if( size.width * size.height > min_resolution ) {
+    			if( max_resolution == -1 || ( size.width * size.height < max_resolution ) ) {
+    	        	video_quality.add("" + base_profile + "_r" + size.width + "x" + size.height);
+    			}
+    		}
+        }
+	}
+	
+	private void initialiseVideoQuality(Camera.Parameters parameters) {
+        video_quality = new Vector<String>();
+    	video_sizes = parameters.getSupportedVideoSizes(); 
+    	if( video_sizes == null ) {
+    		// if null, we should use the preview sizes - see http://stackoverflow.com/questions/14263521/android-getsupportedvideosizes-allways-returns-null
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "take video_sizes from preview sizes");
+    		video_sizes = parameters.getSupportedPreviewSizes();
+    	}
+        // if we add more, remember to update MyPreferenceActivity.onCreate() code
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) ) {
+        	addCustomResolutions(1920*1080, -1, CamcorderProfile.QUALITY_1080P);
+        	video_quality.add("" + CamcorderProfile.QUALITY_1080P);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_720P) ) {
+        	addCustomResolutions(1280*720, 1920*1080, CamcorderProfile.QUALITY_720P);
+        	video_quality.add("" + CamcorderProfile.QUALITY_720P);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_480P) ) {
+        	addCustomResolutions(720*480, 1280*720, CamcorderProfile.QUALITY_480P);
+        	video_quality.add("" + CamcorderProfile.QUALITY_480P);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_CIF) ) {
+        	addCustomResolutions(352*288, 720*480, CamcorderProfile.QUALITY_CIF);
+        	video_quality.add("" + CamcorderProfile.QUALITY_CIF);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QVGA) ) {
+        	addCustomResolutions(320*240, 352*288, CamcorderProfile.QUALITY_QVGA);
+        	video_quality.add("" + CamcorderProfile.QUALITY_QVGA);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QCIF) ) {
+        	addCustomResolutions(176*144, 320*240, CamcorderProfile.QUALITY_QCIF);
+        	video_quality.add("" + CamcorderProfile.QUALITY_QCIF);
+        }
+		if( MyDebug.LOG ) {
+			for(int i=0;i<video_quality.size();i++) {
+	        	Log.d(TAG, "supported video quality: " + video_quality.get(i));
+			}
+		}
+	}
+	
+	private CamcorderProfile getCamcorderProfile(String quality) {
+		if( MyDebug.LOG )
+			Log.e(TAG, "getCamcorderProfile(): " + quality);
+		CamcorderProfile camcorder_profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH); // default
+		try {
+			String profile_string = quality;
+			int index = profile_string.indexOf('_');
+			if( index != -1 ) {
+				profile_string = quality.substring(0, index);
+				if( MyDebug.LOG )
+					Log.e(TAG, "    profile_string: " + profile_string);
+			}
+			int profile = Integer.parseInt(profile_string);
+			camcorder_profile = CamcorderProfile.get(profile);
+			if( index != -1 && index+1 < quality.length() ) {
+				String override_string = quality.substring(index+1);
+				if( MyDebug.LOG )
+					Log.e(TAG, "    override_string: " + override_string);
+				if( override_string.charAt(0) == 'r' && override_string.length() >= 4 ) {
+					index = override_string.indexOf('x');
+					if( index == -1 ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "override_string invalid format, can't find x");
+					}
+					else {
+						String resolution_w_s = override_string.substring(1, index); // skip first 'r'
+						String resolution_h_s = override_string.substring(index+1);
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "resolution_w_s: " + resolution_w_s);
+							Log.d(TAG, "resolution_h_s: " + resolution_h_s);
+						}
+						// copy to local variable first, so that if we fail to parse height, we don't set the width either
+						int resolution_w = Integer.parseInt(resolution_w_s);
+						int resolution_h = Integer.parseInt(resolution_h_s);
+						camcorder_profile.videoFrameWidth = resolution_w;
+						camcorder_profile.videoFrameHeight = resolution_h;
+					}
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "unknown override_string initial code, or otherwise invalid format");
+				}
+			}
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "failed to parse video quality: " + quality);
+    		e.printStackTrace();
+        }
+		return camcorder_profile;
+	}
+	
 	public CamcorderProfile getCamcorderProfile() {
-    	CamcorderProfile profile = CamcorderProfile.get(this.cameraId, current_video_quality != -1 ? video_quality.get(current_video_quality).intValue() : CamcorderProfile.QUALITY_HIGH);
-    	return profile;
+		if( current_video_quality != -1 ) {
+			return getCamcorderProfile(video_quality.get(current_video_quality));
+		}
+		return CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+	}
+	
+	private static String formatFloatToString(final float f) {
+		final int i=(int)f;
+		if( f == i )
+			return Integer.toString(i);
+		return String.format("%.2f", f);
+	}
+
+	private static int greatestCommonFactor(int a, int b) {
+	    while( b > 0 ) {
+	        int temp = b;
+	        b = a % b;
+	        a = temp;
+	    }
+	    return a;
+	}
+	
+	private static String getAspectRatio(int width, int height) {
+		int gcf = greatestCommonFactor(width, height);
+		width /= gcf;
+		height /= gcf;
+		return width + ":" + height;
+	}
+	
+	public static String getAspectRatioMPString(int width, int height) {
+		float mp = (width*height)/1000000.0f;
+		return "(" + getAspectRatio(width, height) + ", " + formatFloatToString(mp) + "MP)";
+	}
+	
+	public String getCamcorderProfileDescription(String quality) {
+		CamcorderProfile profile = getCamcorderProfile(quality);
+		String type = "";
+		if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
+			type = "4K Ultra HD ";
+		}
+		else if( profile.videoFrameWidth == 1920 && profile.videoFrameHeight == 1080 ) {
+			type = "Full HD ";
+		}
+		else if( profile.videoFrameWidth == 1280 && profile.videoFrameHeight == 720 ) {
+			type = "HD ";
+		}
+		else if( profile.videoFrameWidth == 720 && profile.videoFrameHeight == 480 ) {
+			type = "SD ";
+		}
+		else if( profile.videoFrameWidth == 640 && profile.videoFrameHeight == 480 ) {
+			type = "VGA ";
+		}
+		else if( profile.videoFrameWidth == 352 && profile.videoFrameHeight == 288 ) {
+			type = "CIF ";
+		}
+		else if( profile.videoFrameWidth == 320 && profile.videoFrameHeight == 240 ) {
+			type = "QVGA ";
+		}
+		else if( profile.videoFrameWidth == 176 && profile.videoFrameHeight == 144 ) {
+			type = "QCIF ";
+		}
+		String desc = type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(profile.videoFrameWidth, profile.videoFrameHeight);
+		return desc;
 	}
 
 	public double getTargetRatio(Point display_size) {
@@ -1237,10 +1382,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		Activity activity = (Activity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
 		String preview_size = sharedPreferences.getString("preference_preview_size", "preference_preview_size_display");
-		if( preview_size.equals("preference_preview_size_wysiwyg") ) {
+		// should always use wysiwig for video mode, otherwise we get incorrect aspect ratio shown when recording video (at least on Galaxy Nexus, e.g., at 640x480)
+		if( preview_size.equals("preference_preview_size_wysiwyg") || this.is_video ) {
 	        if( this.is_video ) {
 	        	if( MyDebug.LOG )
-	        		Log.d(TAG, "set preview aspect ratio from photo size (wysiwyg)");
+	        		Log.d(TAG, "set preview aspect ratio from video size (wysiwyg)");
 	        	CamcorderProfile profile = getCamcorderProfile();
 	        	if( MyDebug.LOG )
 	        		Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
@@ -1248,7 +1394,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        }
 	        else {
 	        	if( MyDebug.LOG )
-	        		Log.d(TAG, "set preview aspect ratio from video size (wysiwyg)");
+	        		Log.d(TAG, "set preview aspect ratio from photo size (wysiwyg)");
 	        	Camera.Parameters parameters = camera.getParameters();
 	        	Camera.Size picture_size = parameters.getPictureSize();
 	        	if( MyDebug.LOG )
@@ -2682,7 +2828,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "current_video_quality: " + current_video_quality);
 	    			if( current_video_quality != -1 )
-	    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality).intValue());
+	    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality));
 	    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
 	    		}
 				if( record_audio ) {
@@ -3764,10 +3910,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.current_size_index;
     }
     
-    List<Integer> getSupportedVideoQuality() {
+    List<String> getSupportedVideoQuality() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedVideoQuality");
 		return this.video_quality;
+    }
+    
+    public List<Camera.Size> getSupportedVideoSizes() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedVideoSizes");
+		return this.video_sizes;
     }
     
 	public List<String> getSupportedFlashValues() {

@@ -11,7 +11,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Point;
 import android.hardware.Camera;
-import android.media.CamcorderProfile;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -70,6 +69,8 @@ public class MyPreferenceActivity extends PreferenceActivity {
 
 		final int [] preview_widths = getIntent().getExtras().getIntArray("preview_widths");
 		final int [] preview_heights = getIntent().getExtras().getIntArray("preview_heights");
+		final int [] video_widths = getIntent().getExtras().getIntArray("video_widths");
+		final int [] video_heights = getIntent().getExtras().getIntArray("video_heights");
 
 		final int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
 		final int [] heights = getIntent().getExtras().getIntArray("resolution_heights");
@@ -77,7 +78,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			CharSequence [] entries = new CharSequence[widths.length];
 			CharSequence [] values = new CharSequence[widths.length];
 			for(int i=0;i<widths.length;i++) {
-				entries[i] = widths[i] + " x " + heights[i];
+				entries[i] = widths[i] + " x " + heights[i] + " " + Preview.getAspectRatioMPString(widths[i], heights[i]);
 				values[i] = widths[i] + " " + heights[i];
 			}
 			ListPreference lp = (ListPreference)findPreference("preference_resolution");
@@ -111,38 +112,14 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			lp.setEntryValues(values);
 		}
 
-		final int [] video_quality = getIntent().getExtras().getIntArray("video_quality");
-		if( video_quality != null ) {
+		final String [] video_quality = getIntent().getExtras().getStringArray("video_quality");
+		final String [] video_quality_string = getIntent().getExtras().getStringArray("video_quality_string");
+		if( video_quality != null && video_quality_string != null ) {
 			CharSequence [] entries = new CharSequence[video_quality.length];
 			CharSequence [] values = new CharSequence[video_quality.length];
 			for(int i=0;i<video_quality.length;i++) {
-		        // if we add more, remember to update Preview.openCamera() code
-				switch( video_quality[i] ) {
-				case CamcorderProfile.QUALITY_1080P:
-					entries[i] = "Full HD 1920x1080";
-					break;
-				case CamcorderProfile.QUALITY_720P:
-					entries[i] = "HD 1280x720";
-					break;
-				case CamcorderProfile.QUALITY_480P:
-					entries[i] = "SD 720x480";
-					break;
-				case CamcorderProfile.QUALITY_CIF:
-					entries[i] = "CIF 352x288";
-					break;
-				case CamcorderProfile.QUALITY_QVGA:
-					entries[i] = "QVGA 320x240";
-					break;
-				case CamcorderProfile.QUALITY_QCIF:
-					entries[i] = "QCIF 176x144";
-					break;
-				default:
-					// unknown value?!
-					entries[i] = "Unknown";
-				}
-				values[i] = "" + video_quality[i];
-				/*if( MyDebug.LOG )
-					Log.d(TAG, "video_quality values: " + values[i]);*/
+				entries[i] = video_quality_string[i];
+				values[i] = video_quality[i];
 			}
 			ListPreference lp = (ListPreference)findPreference("preference_video_quality");
 			lp.setEntries(entries);
@@ -303,6 +280,17 @@ public class MyPreferenceActivity extends PreferenceActivity {
                     				about_string.append(", ");
                 				}
                 				about_string.append(video_quality[i]);
+                			}
+                        }
+                        if( video_widths != null && video_heights != null ) {
+                            about_string.append("\nVideo resolutions: ");
+                			for(int i=0;i<video_widths.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(video_widths[i]);
+                				about_string.append("x");
+                				about_string.append(video_heights[i]);
                 			}
                         }
                         about_string.append("\nAuto-stabilise?: ");

@@ -115,7 +115,7 @@
     </string-array>
     <string-array name="preference_preview_size_entries">
         <item>Maximise preview size</item>
-        <item>Match photo/video size (WYSIWYG)</item>
+        <item>Match photo size (WYSIWYG)</item>
     </string-array>
     <string-array name="preference_preview_size_values">
         <item>preference_preview_size_display</item>
