@@ -1208,8 +1208,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			return;
 		}
         for(Camera.Size size : video_sizes) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "    supported video size: " + size.width + ", " + size.height);
     		if( size.width * size.height > min_resolution ) {
     			if( max_resolution == -1 || ( size.width * size.height < max_resolution ) ) {
     	        	video_quality.add("" + base_profile + "_r" + size.width + "x" + size.height);
@@ -1219,6 +1217,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 	
 	private void initialiseVideoQuality(Camera.Parameters parameters) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initialiseVideoQuality()");
         video_quality = new Vector<String>();
     	video_sizes = parameters.getSupportedVideoSizes(); 
     	if( video_sizes == null ) {
@@ -1227,6 +1227,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			Log.d(TAG, "take video_sizes from preview sizes");
     		video_sizes = parameters.getSupportedPreviewSizes();
     	}
+		if( MyDebug.LOG ) {
+			for(Camera.Size size : video_sizes) {
+    			Log.d(TAG, "    supported video size: " + size.width + ", " + size.height);
+			}
+        }
         // if we add more, remember to update MyPreferenceActivity.onCreate() code
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) ) {
         	addCustomResolutions(1920*1080, -1, CamcorderProfile.QUALITY_1080P);
