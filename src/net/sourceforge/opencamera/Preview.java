@@ -1224,7 +1224,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	if( video_sizes == null ) {
     		// if null, we should use the preview sizes - see http://stackoverflow.com/questions/14263521/android-getsupportedvideosizes-allways-returns-null
     		if( MyDebug.LOG )
-    			Log.e(TAG, "take video_sizes from preview sizes");
+    			Log.d(TAG, "take video_sizes from preview sizes");
     		video_sizes = parameters.getSupportedPreviewSizes();
     	}
         // if we add more, remember to update MyPreferenceActivity.onCreate() code
