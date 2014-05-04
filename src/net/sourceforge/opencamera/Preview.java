@@ -1232,7 +1232,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			Log.d(TAG, "    supported video size: " + size.width + ", " + size.height);
 			}
         }
-        // if we add more, remember to update MyPreferenceActivity.onCreate() code
+        /*if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH) ) {
+        	video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
+        }*/
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) ) {
         	addCustomResolutions(1920*1080, -1, CamcorderProfile.QUALITY_1080P);
         	video_quality.add("" + CamcorderProfile.QUALITY_1080P);
@@ -1267,7 +1269,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private CamcorderProfile getCamcorderProfile(String quality) {
 		if( MyDebug.LOG )
 			Log.e(TAG, "getCamcorderProfile(): " + quality);
-		CamcorderProfile camcorder_profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH); // default
+		CamcorderProfile camcorder_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH); // default
 		try {
 			String profile_string = quality;
 			int index = profile_string.indexOf('_');
@@ -1277,7 +1279,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					Log.e(TAG, "    profile_string: " + profile_string);
 			}
 			int profile = Integer.parseInt(profile_string);
-			camcorder_profile = CamcorderProfile.get(profile);
+			camcorder_profile = CamcorderProfile.get(cameraId, profile);
 			if( index != -1 && index+1 < quality.length() ) {
 				String override_string = quality.substring(index+1);
 				if( MyDebug.LOG )
@@ -1317,10 +1319,17 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 	
 	public CamcorderProfile getCamcorderProfile() {
+		/*if( true ) {
+			// test for UHD 4K
+			CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
+			profile.videoFrameWidth = 3840;
+			profile.videoFrameHeight = 2160;
+			return profile;
+		}*/
 		if( current_video_quality != -1 ) {
 			return getCamcorderProfile(video_quality.get(current_video_quality));
 		}
-		return CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+		return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
 	}
 	
 	private static String formatFloatToString(final float f) {
@@ -1353,6 +1362,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
 	public String getCamcorderProfileDescription(String quality) {
 		CamcorderProfile profile = getCamcorderProfile(quality);
+		String highest = "";
+		if( profile.quality == CamcorderProfile.QUALITY_HIGH ) {
+			highest = "Highest: ";
+		}
 		String type = "";
 		if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
 			type = "4K Ultra HD ";
@@ -1378,7 +1391,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		else if( profile.videoFrameWidth == 176 && profile.videoFrameHeight == 144 ) {
 			type = "QCIF ";
 		}
-		String desc = type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(profile.videoFrameWidth, profile.videoFrameHeight);
+		String desc = highest + type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(profile.videoFrameWidth, profile.videoFrameHeight);
 		return desc;
 	}
 
