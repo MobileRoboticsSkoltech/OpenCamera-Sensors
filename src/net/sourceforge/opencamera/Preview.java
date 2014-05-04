@@ -155,7 +155,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	// video_quality can either be:
 	// - an int, in which case it refers to a CamcorderProfile
-	// - of the form [CamcorderProfile]_r[width]x[height] - we use the CamcorderProfile as a base, and override the video resolution - this is needed to support resolutions which don't have corresponding camcorder profiles (e.g., 4K/UHD)
+	// - of the form [CamcorderProfile]_r[width]x[height] - we use the CamcorderProfile as a base, and override the video resolution - this is needed to support resolutions which don't have corresponding camcorder profiles
 	private List<String> video_quality = null;
 	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
 	private List<Camera.Size> video_sizes = null;
@@ -1319,13 +1319,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 	
 	public CamcorderProfile getCamcorderProfile() {
-		/*if( true ) {
-			// test for UHD 4K
+		// 4K UHD video is not yet supported by Android API (at least testing on Samsung S5 and Note 3, they do not return it via getSupportedVideoSizes(), nor via a CamcorderProfile (either QUALITY_HIGH, or anything else)
+		// but it does work if we explicitly set the resolution (at least tested on an S5)
+		MainActivity main_activity = (MainActivity)Preview.this.getContext();
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		if( cameraId == 0 && sharedPreferences.getBoolean("preference_force_video_4k", false) && main_activity.supportsForceVideo4K() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "force 4K UHD video");
 			CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
 			profile.videoFrameWidth = 3840;
 			profile.videoFrameHeight = 2160;
 			return profile;
-		}*/
+		}
 		if( current_video_quality != -1 ) {
 			return getCamcorderProfile(video_quality.get(current_video_quality));
 		}
@@ -2894,7 +2899,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    		if( MyDebug.LOG )
 		    			Log.e(TAG, "runtime exception starting video recorder");
 					e.printStackTrace();
-		    	    showToast(null, "Failed to record video");
+					String error_message = "";
+					if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
+						error_message = "Sorry, 4K UHD not supported on your device";
+					}
+					else {
+						error_message = "Failed to record video";
+					}
+		    	    showToast(null, error_message);
 		    		video_recorder.reset();
 		    		video_recorder.release(); 
 		    		video_recorder = null;
@@ -2991,7 +3003,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     				Log.d(TAG, "onPictureTaken");
 
         		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-    			boolean image_capture_intent = false;
+        		boolean image_capture_intent = false;
        	        Uri image_capture_intent_uri = null;
     	        String action = main_activity.getIntent().getAction();
     	        if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) ) {

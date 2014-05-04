@@ -70,6 +70,7 @@ public class MainActivity extends Activity {
 	private int current_orientation = 0;
 	private OrientationEventListener orientationEventListener = null;
 	private boolean supports_auto_stabilise = false;
+	private boolean supports_force_video_4k = false;
 
 	// for testing:
 	public boolean is_test = false;
@@ -103,6 +104,14 @@ public class MainActivity extends Activity {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_auto_stabilise? " + supports_auto_stabilise);
+
+		// hack to rule out phones unlikely to have 4K video, so no point even offering the option!
+		// both S5 and Note 3 have 128MB standard and 512MB large heap (tested via Samsung RTL)
+		if( activityManager.getLargeMemoryClass() >= 512 ) {
+			supports_force_video_4k = true;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_force_video_4k? " + supports_force_video_4k);
 
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
         getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -722,6 +731,7 @@ public class MainActivity extends Activity {
 
 		intent.putExtra("cameraId", this.preview.getCameraId());
 		intent.putExtra("supports_auto_stabilise", this.supports_auto_stabilise);
+		intent.putExtra("supports_force_video_4k", this.supports_force_video_4k);
 		intent.putExtra("supports_face_detection", this.preview.supportsFaceDetection());
 
 		putIntentExtra(intent, "color_effects", this.preview.getSupportedColorEffects());
@@ -1184,6 +1194,10 @@ public class MainActivity extends Activity {
     
     public boolean supportsAutoStabilise() {
     	return this.supports_auto_stabilise;
+    }
+
+    public boolean supportsForceVideo4K() {
+    	return this.supports_force_video_4k;
     }
 
     @SuppressWarnings("deprecation")

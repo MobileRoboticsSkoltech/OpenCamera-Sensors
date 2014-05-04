@@ -139,6 +139,21 @@ public class MyPreferenceActivity extends PreferenceActivity {
         	pg.removePreference(pref);
 		}
 
+		final boolean supports_force_video_4k = getIntent().getExtras().getBoolean("supports_force_video_4k");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_force_video_4k: " + supports_force_video_4k);
+		if( !supports_force_video_4k || video_quality == null || video_quality_string == null ) {
+			Preference pref = (Preference)findPreference("preference_force_video_4k");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
+        	pg.removePreference(pref);
+		}
+
+		if( !supports_auto_stabilise ) {
+			Preference pref = (Preference)findPreference("preference_auto_stabilise");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_effects");
+        	pg.removePreference(pref);
+		}
+
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
         	// Camera.enableShutterSound requires JELLY_BEAN_MR1 or greater
         	CheckBoxPreference cbp = (CheckBoxPreference)findPreference("preference_shutter_sound");
