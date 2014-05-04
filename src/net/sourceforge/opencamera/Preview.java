@@ -1329,6 +1329,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
 			profile.videoFrameWidth = 3840;
 			profile.videoFrameHeight = 2160;
+			profile.videoBitRate = (int)(profile.videoBitRate*2.8); // need a higher bitrate for the better quality - this is roughly based on the bitrate used by an S5's native camera app at 4K (47.6 Mbps, compared to 16.9 Mbps which is what's returned by the QUALITY_HIGH profile)
 			return profile;
 		}
 		if( current_video_quality != -1 ) {
@@ -2853,6 +2854,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    			if( current_video_quality != -1 )
 	    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality));
 	    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+	    			Log.d(TAG, "bit rate " + profile.videoBitRate);
 	    		}
 				if( record_audio ) {
 					video_recorder.setProfile(profile);

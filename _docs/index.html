@@ -41,7 +41,7 @@
 <li>Face detection option.</li>
 <li>Choice of front/back camera.</li>
 <li>Choose scene modes, color effects, white balance and exposure compensation.</li>
-<li>Choice of camera and video resolution, and JPEG image quality. Support for all resolutions offered by the camera. Also support for 4K UHD (3840x2160) video on some devices.</li>
+<li>Choice of camera and video resolution, and JPEG image quality. Support for all resolutions offered by the camera. Also support for 4K UHD (3840x2160) video on some devices (experimental).</li>
 <li>Video recording (with optional audio).</li>
 <li>Timer option.</li>
 <li>Burst mode, with configurable delay.</li>
@@ -271,12 +271,12 @@ as a standalone app).</p>
 
 <p><b>Video resolution</b> - Select the resolution of videos taken by the camera.</p>
 
-<p><b>Force 4K UHD video</b> - Enable recording in 4K UHD (3840x2160) on the back camera (if ticked, this overrides the setting in
+<p><b>Force 4K UHD video (experimental)</b> - Enable recording in 4K UHD (3840x2160) on the back camera (if ticked, this overrides the setting in
 "Video resolution"). Note that 4K video isn't fully supported by the standard Android API yet, so there is no way for Open Camera to
 determine if your device supports 4K video. If you enable this on a device that doesn't support it, you may either get an error
-message when you try to record, or it may succeed but create a video where the resolution isn't 4K. So please test this out first.
-I've tested this successfully on a Samsung Galaxy S5 and Note 3. (If this option doesn't show up at all, it's because Open Camera
-thinks this is a device that probably doesn't support 4K video.)</p>
+message when you try to record, or it may succeed but create a video where the resolution isn't 4K, or may even result in a crash! So
+please test this out first. I've tested this successfully on a Samsung Galaxy S5 and Note 3. (If this option doesn't show up at all, it's
+because Open Camera thinks this is a device that probably doesn't support 4K video.)</p>
 
 <p><b>Record audio</b> - Whether to record audio when recording a video.</p>
 
@@ -313,11 +313,11 @@ FIXED   Problems with aspect ratio when not using WYSIWYG preview mode and
         recording video.
 FIXED   Camcorder profile was always being initialised from the back camera,
         even when recording video with the front camera.
-ADDED   New option to support 4K UHD (3840x2160) video (Settings->Photo and
-        video settings->Force 4K UHD video). Note that 4K video isn't properly
-        supported by Android API, so this option may show even if it isn't
-        supported on your device. I've successfully tested this on a Samsung
-        Galaxy S5 and Note 3.
+ADDED   New (experimental!) option to support 4K UHD (3840x2160) video
+        (Settings->Photo and video settings->Force 4K UHD video). Note that 4K
+        video isn't properly supported by Android API, so this option may show
+        even if it isn't supported on your device, and may not work or even
+        crash. I've successfully tested this on a Samsung Galaxy S5 and Note 3.
 ADDED   Option to not display the -/+ zoom control.
 UPDATED All available video resolutions offered by the camera are now supported.
 UPDATED Picture and video resolution preferences display aspect ratio and
