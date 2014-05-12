@@ -3525,10 +3525,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		String toast_text = "";
     		if( n_burst > 1 ) {
     			int photo = (n_burst-remaining_burst_photos);
-    			toast_text = "Taking a photo... (" +  photo + " / " + n_burst + ")";
+    			toast_text = "Taking photo... (" +  photo + " / " + n_burst + ")";
     		}
     		else {
-    			toast_text = "Taking a photo...";
+    			toast_text = "Taking photo...";
     		}
     		if( MyDebug.LOG )
     			Log.d(TAG, toast_text);
