@@ -1073,6 +1073,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( saved_is_video != this.is_video ) {
 				this.switchVideo(false, false);
 			}
+			else {
+				showPhotoVideoToast();
+			}
 
 			// must be done after setting parameters, as this function may set parameters
 			if( this.has_zoom && zoom_factor != 0 ) {
@@ -2232,6 +2235,29 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			updateFocusForVideo();
 		}
 	}
+	
+	private void showPhotoVideoToast() {
+		String toast_string = "";
+		if( this.is_video ) {
+			CamcorderProfile profile = getCamcorderProfile();
+			String bitrate_string = "";
+			if( profile.videoBitRate > 10000000 )
+				bitrate_string = profile.videoBitRate/1000000 + "Mbps";
+			else if( profile.videoBitRate > 10000 )
+				bitrate_string = profile.videoBitRate/1000 + "Kbps";
+			else
+				bitrate_string = profile.videoBitRate + "bps";
+			toast_string = "Video: " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
+		}
+		else {
+			toast_string = "Photo";
+			if( current_size_index != -1 && sizes != null ) {
+				Camera.Size current_size = sizes.get(current_size_index);
+				toast_string += " " + current_size.width + "x" + current_size.height;
+			}
+		}
+		showToast(switch_video_toast, toast_string);
+	}
 
 	public void switchVideo(boolean save, boolean update_preview_size) {
 		if( MyDebug.LOG )
@@ -2242,7 +2268,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				stopVideo();
 			}
 			this.is_video = false;
-			showToast(switch_video_toast, "Photo");
+			showPhotoVideoToast();
 		}
 		else {
 			//if( is_taking_photo_on_timer ) {
@@ -2269,8 +2295,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			
 			if( this.is_video ) {
-				showToast(switch_video_toast, "Video");
-				//if( this.is_preview_paused ) {
+				showPhotoVideoToast();
 			}
 		}
 		
