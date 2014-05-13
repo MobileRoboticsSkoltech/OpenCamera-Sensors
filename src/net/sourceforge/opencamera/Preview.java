@@ -140,6 +140,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	private List<String> supported_focus_values = null; // our "values" format
 	private int current_focus_index = -1; // this is an index into the supported_focus_values array, or -1 if no focus modes available
+	
+	private boolean is_exposure_locked_supported = false;
+	private boolean is_exposure_locked = false;
 
 	private List<String> color_effects = null;
 	private List<String> scene_modes = null;
@@ -177,6 +180,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private ToastBoxer switch_video_toast = new ToastBoxer();
 	private ToastBoxer flash_toast = new ToastBoxer();
 	private ToastBoxer focus_toast = new ToastBoxer();
+	private ToastBoxer exposure_lock_toast = new ToastBoxer();
 	private ToastBoxer take_photo_toast = new ToastBoxer();
 	private ToastBoxer stopstart_video_toast = new ToastBoxer();
 	private ToastBoxer change_exposure_toast = new ToastBoxer();
@@ -722,7 +726,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
-			Camera.Parameters parameters = camera.getParameters();
+		    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
+		    switchCameraButton.setVisibility(Camera.getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
+
+		    Camera.Parameters parameters = camera.getParameters();
 
 			// get available scene modes
 			// important, from docs:
@@ -852,7 +859,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				for(int i=min_exposure;i<=max_exposure;i++) {
 					exposures.add("" + i);
 				}
-				String exposure_s = setupValuesPref(exposures, "preference_exposure", "0");
+				String exposure_s = setupValuesPref(exposures, getExposurePreferenceKey(), "0");
 				if( exposure_s != null ) {
 					try {
 						int exposure = Integer.parseInt(exposure_s);
@@ -866,7 +873,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					}
 				}
 			}
-		    View exposureButton = (View) activity.findViewById(R.id.exposure);
+			View exposureButton = (View) activity.findViewById(R.id.exposure);
 		    exposureButton.setVisibility(exposures != null ? View.VISIBLE : View.GONE);
 
 			// get available sizes
@@ -1002,7 +1009,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		// update parameters
     		camera.setParameters(parameters);
 
-    		// we do flash and focus after setting parameters, as these are done by calling separate functions, that themselves set the parameters directly
+    		// we do the following after setting parameters, as these are done by calling separate functions, that themselves set the parameters directly
 			List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
 		    View flashButton = (View) activity.findViewById(R.id.flash);
 			current_flash_index = -1;
@@ -1064,7 +1071,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				supported_focus_values = null;
 			}
 			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);
-			
+
+		    this.is_exposure_locked_supported = parameters.isAutoExposureLockSupported();
+		    View exposureLockButton = (View) activity.findViewById(R.id.exposure_lock);
+		    exposureLockButton.setVisibility(is_exposure_locked_supported ? View.VISIBLE : View.GONE);
+		    if( is_exposure_locked_supported ) {
+		    	is_exposure_locked = parameters.getAutoExposureLock();
+				setExposureLocked();
+		    }
+
 			// now switch to video if saved
 			boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
 			if( MyDebug.LOG ) {
@@ -2186,7 +2201,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					// now save
 					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString("preference_exposure", "" + new_exposure);
+					editor.putString(getExposurePreferenceKey(), "" + new_exposure);
 					editor.apply();
 		    		showToast(change_exposure_toast, "Exposure compensation " + new_exposure);
 		    		if( update_seek_bar ) {
@@ -2635,6 +2650,39 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		tryAutoFocus(false, false);
 	}
 
+	public void toggleExposureLock() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "toggleExposureLock()");
+		// n.b., need to allow when recording video, so no check on PHASE_TAKING_PHOTO
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "null camera");
+			return;
+		}
+		if( is_exposure_locked_supported ) {
+			is_exposure_locked = !is_exposure_locked;
+			setExposureLocked();
+			showToast(exposure_lock_toast, is_exposure_locked ? "Exposure Locked" : "Exposure Unlocked");
+		}
+	}
+
+	private void setExposureLocked() {
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "null camera");
+			return;
+		}
+		if( is_exposure_locked_supported ) {
+	        cancelAutoFocus();
+			Camera.Parameters parameters = camera.getParameters();
+			parameters.setAutoExposureLock(is_exposure_locked);
+			camera.setParameters(parameters);
+			Activity activity = (Activity)this.getContext();
+		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
+			exposureLockButton.setImageResource(is_exposure_locked ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+		}
+	}
+	
 	private List<String> convertFocusModesToValues(List<String> supported_focus_modes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFocusModesToValues()");
@@ -3831,7 +3879,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    View flashButton = (View) activity.findViewById(R.id.flash);
 			    View focusButton = (View) activity.findViewById(R.id.focus_mode);
 			    View exposureButton = (View) activity.findViewById(R.id.exposure);
-			    switchCameraButton.setVisibility(visibility);
+			    View exposureLockButton = (View) activity.findViewById(R.id.exposure_lock);
+			    if( Camera.getNumberOfCameras() > 1 )
+			    	switchCameraButton.setVisibility(visibility);
 			    if( !is_video )
 			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
 			    if( supported_flash_values != null )
@@ -3840,6 +3890,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    	focusButton.setVisibility(visibility);
 			    if( exposures != null && !is_video ) // still allow exposure when recording video
 			    	exposureButton.setVisibility(visibility);
+			    if( is_exposure_locked_supported && !is_video ) // still allow exposure lock when recording video
+			    	exposureLockButton.setVisibility(visibility);
 			}
 		});
     }
@@ -4209,6 +4261,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     // must be static, to safely call from other Activities
     public static String getIsVideoPreferenceKey() {
     	return "is_video";
+    }
+    
+    // must be static, to safely call from other Activities
+    public static String getExposurePreferenceKey() {
+    	return "preference_exposure";
     }
     
     // for testing:

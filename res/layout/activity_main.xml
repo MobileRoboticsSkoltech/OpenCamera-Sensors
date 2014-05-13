@@ -62,6 +62,16 @@
         />
 
     <ImageButton
+        android:id="@+id/exposure_lock"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/exposure_lock"
+        android:onClick="clickedExposureLock"
+        />
+
+    <ImageButton
         android:id="@+id/exposure"
         android:layout_width="50dp"
         android:layout_height="50dp"
