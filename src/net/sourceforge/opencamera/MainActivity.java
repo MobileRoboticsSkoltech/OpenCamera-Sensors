@@ -762,6 +762,9 @@ public class MainActivity extends Activity {
 		putIntentExtra(intent, "scene_modes", this.preview.getSupportedSceneModes());
 		putIntentExtra(intent, "white_balances", this.preview.getSupportedWhiteBalances());
 		//putIntentExtra(intent, "exposures", this.preview.getSupportedExposures());
+		if( this.preview.getCamera() != null ) {
+			intent.putExtra("parameters_string", this.preview.getCamera().getParameters().flatten());
+		}
 
 		List<Camera.Size> preview_sizes = this.preview.getSupportedPreviewSizes();
 		if( preview_sizes != null ) {

@@ -377,6 +377,15 @@ public class MyPreferenceActivity extends PreferenceActivity {
                 		else {
                             about_string.append("None");
                 		}
+
+                		about_string.append("\nParameters: ");
+                		String parameters_string = getIntent().getExtras().getString("parameters_string");
+                		if( parameters_string != null ) {
+                			about_string.append(parameters_string);
+                		}
+                		else {
+                            about_string.append("None");
+                		}
                         
                         alertDialog.setMessage(about_string);
                         alertDialog.setPositiveButton(R.string.about_ok, null);
