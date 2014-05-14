@@ -36,6 +36,13 @@
 	        />
 
         <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
+        <ListPreference 
+            android:key="preference_iso"
+            android:title="@string/preference_iso"
+            android:summary="@string/preference_iso_summary"
+            />
+
+        	    <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
         <!--
 	   	<ListPreference
 	        android:key="preference_exposure"

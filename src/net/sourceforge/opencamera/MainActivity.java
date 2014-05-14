@@ -56,7 +56,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -761,6 +761,8 @@ public class MainActivity extends Activity {
 		putIntentExtra(intent, "color_effects", this.preview.getSupportedColorEffects());
 		putIntentExtra(intent, "scene_modes", this.preview.getSupportedSceneModes());
 		putIntentExtra(intent, "white_balances", this.preview.getSupportedWhiteBalances());
+		putIntentExtra(intent, "isos", this.preview.getSupportedISOs());
+		intent.putExtra("iso_key", this.preview.getISOKey());
 		//putIntentExtra(intent, "exposures", this.preview.getSupportedExposures());
 		if( this.preview.getCamera() != null ) {
 			intent.putExtra("parameters_string", this.preview.getCamera().getParameters().flatten());

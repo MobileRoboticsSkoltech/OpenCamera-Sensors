@@ -55,6 +55,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		readFromIntent("color_effects", "preference_color_effect", Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
 		readFromIntent("scene_modes", "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
 		readFromIntent("white_balances", "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
+		readFromIntent("isos", "preference_iso", "auto", "preference_category_camera_effects");
 		//readFromIntent("exposures", "preference_exposure", "0", "preference_category_camera_effects");
 
 		final boolean supports_face_detection = getIntent().getExtras().getBoolean("supports_face_detection");
@@ -376,6 +377,23 @@ public class MyPreferenceActivity extends PreferenceActivity {
                 		}
                 		else {
                             about_string.append("None");
+                		}
+                        about_string.append("\nISOs: ");
+                		String [] isos = getIntent().getExtras().getStringArray("isos");
+                		if( isos != null && isos.length > 0 ) {
+                			for(int i=0;i<isos.length;i++) {
+                				if( i > 0 ) {
+                    				about_string.append(", ");
+                				}
+                				about_string.append(isos[i]);
+                			}
+                		}
+                		else {
+                            about_string.append("None");
+                		}
+                		String iso_key = getIntent().getExtras().getString("iso_key");
+                		if( iso_key != null ) {
+                			about_string.append("\nISO key: " + iso_key);
                 		}
 
                 		about_string.append("\nParameters: ");

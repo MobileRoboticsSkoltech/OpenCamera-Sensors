@@ -10,6 +10,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -147,6 +148,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private List<String> color_effects = null;
 	private List<String> scene_modes = null;
 	private List<String> white_balances = null;
+	private String iso_key = null;
+	private List<String> isos = null;
 	private List<String> exposures = null;
 	private int min_exposure = 0;
 	private int max_exposure = 0;
@@ -661,6 +664,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		using_face_detection = false;
 		color_effects = null;
 		white_balances = null;
+		isos = null;
 		exposures = null;
 		min_exposure = 0;
 		max_exposure = 0;
@@ -848,6 +852,47 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			String white_balance = setupValuesPref(white_balances, "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO);
 			if( white_balance != null ) {
 	        	parameters.setWhiteBalance(white_balance);
+			}
+			
+			// get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting
+			{
+				String iso_values = parameters.get("iso-values");
+				if( iso_values == null ) {
+					iso_values = parameters.get("iso-mode-values"); // Galaxy Nexus
+					if( iso_values == null ) {
+						iso_values = parameters.get("iso-speed-values"); // Micromax A101
+						if( iso_values == null )
+							iso_values = parameters.get("nv-picture-iso-values"); // LG dual P990
+					}
+				}
+				if( iso_values != null && iso_values.length() > 0 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "iso_values: " + iso_values);
+					String [] isos_array = iso_values.split(",");					
+					if( isos_array != null && isos_array.length > 0 ) {
+						isos = new ArrayList<String>();				
+						for(int i=0;i< isos_array.length;i++) {
+							isos.add(isos_array[i]);
+						}
+					}
+				}
+			}
+			iso_key = "iso";
+			if( parameters.get(iso_key) == null ) {
+				iso_key = "iso-speed"; // Micromax A101
+				if( parameters.get(iso_key) == null ) {
+					iso_key = "nv-picture-iso"; // LG dual P990
+					if( parameters.get(iso_key) == null )
+						iso_key = null; // not supported
+				}
+			}
+			if( iso_key != null ) {
+				String iso = setupValuesPref(isos, "preference_iso", "auto");
+				if( iso != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "set: " + iso_key + " to: " + iso);
+		        	parameters.set(iso_key, iso);
+				}
 			}
 
 			// get min/max exposure
@@ -1119,6 +1164,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
+			if( camera != null ) {
+				Log.d(TAG, "camera parameters: " + camera.getParameters().flatten());
+			}
 		}
 	}
 
@@ -1360,7 +1408,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		final int i=(int)f;
 		if( f == i )
 			return Integer.toString(i);
-		return String.format("%.2f", f);
+		return String.format(Locale.getDefault(), "%.2f", f);
 	}
 
 	private static int greatestCommonFactor(int a, int b) {
@@ -3975,19 +4023,39 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return this.white_balances;
     }
     
+    String getISOKey() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getISOKey");
+    	return this.iso_key;
+    }
+    
+    List<String> getSupportedISOs() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedISOs");
+		return this.isos;
+    }
+    
     public boolean supportsExposures() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsExposures");
     	return this.exposures != null;
     }
     
     int getMinimumExposure() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getMinimumExposure");
     	return this.min_exposure;
     }
     
     int getMaximumExposure() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getMaximumExposure");
     	return this.max_exposure;
     }
     
     int getCurrentExposure() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getCurrentExposure");
     	if( camera == null )
     		return 0;
 		Camera.Parameters parameters = camera.getParameters();
