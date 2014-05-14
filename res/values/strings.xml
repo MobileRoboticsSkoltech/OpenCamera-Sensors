@@ -16,26 +16,26 @@
     <string name="preference_white_balance">Set the white balance</string>
     <string name="preference_white_balance_summary">Choose a setting to adjust the white balance</string>
     <string name="preference_iso">Set the ISO</string>
-    <string name="preference_iso_summary">Choose an ISO setting (higher means more sensitive to light) (may not work on some devices)</string>
+    <string name="preference_iso_summary">A higher value means more sensitive to light (may not work on some devices)</string>
     <string name="preference_exposure">Set the exposure compensation</string>
     <string name="preference_exposure_summary">Set to 0 for the default exposure compensation.</string>
     <string name="preference_face_detection">Face detection</string>
-    <string name="preference_face_detection_summary">Whether to use face detection instead of focus areas.</string>
+    <string name="preference_face_detection_summary">Use face detection instead of focus areas.</string>
 
     <string name="preference_category_camera_controls">Camera Controls</string>
     <string name="preference_timer">Timer</string>
     <string name="preference_timer_summary">Set a timer for the camera</string>
     <string name="preference_timer_beep">Timer beep</string>
-    <string name="preference_timer_beep_summary">Whether to beep when timer is counting down, or for burst mode delay</string>
+    <string name="preference_timer_beep_summary">Beep when timer is counting down or for burst mode delay</string>
     <string name="preference_burst_mode">Burst mode</string>
-    <string name="preference_burst_mode_summary">Whether to take multiple photos</string>
+    <string name="preference_burst_mode_summary">Take multiple photos in succession</string>
     <string name="preference_burst_interval">Burst mode interval</string>
     <string name="preference_burst_interval_summary">Delay (if any) between taking photos in burst mode</string>
     <string name="preference_screen_camera_controls_more">More camera controls…</string>
     <string name="preference_pause_preview">Pause after taking photo</string>
-    <string name="preference_pause_preview_summary">Whether to pause the screen after taking a photo, with the option to share or delete the photo</string>
+    <string name="preference_pause_preview_summary">Pause the screen after taking a photo, with the option to share or delete the photo</string>
     <string name="preference_shutter_sound">Shutter sound</string>
-    <string name="preference_shutter_sound_summary">Whether to play a sound when taking a photo (requires Android 4.2 or greater to disable)</string>
+    <string name="preference_shutter_sound_summary">Play a sound when taking a photo (requires Android 4.2 or greater to disable)</string>
     <string name="preference_volume_keys">Volume keys</string>
     <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
     <string name="preference_screen_gui">On screen GUI…</string>
@@ -48,7 +48,7 @@
     <string name="preference_show_zoom">Show zoom</string>
     <string name="preference_show_zoom_summary">Display the current camera zoom level on screen (when zoomed in)</string>
     <string name="preference_show_zoom_controls">Show zoom -/+ controls</string>
-    <string name="preference_show_zoom_controls_summary">Whether to show the -/+ buttons for zoom control</string>
+    <string name="preference_show_zoom_controls_summary">Show the -/+ buttons for zoom control</string>
     <string name="preference_free_memory">Show free memory</string>
     <string name="preference_free_memory_summary">Display the remaining device storage space on screen</string>
     <string name="preference_show_angle">Show angle</string>
@@ -71,13 +71,13 @@
     <string name="preference_quality">Image quality</string>
     <string name="preference_quality_summary">Set the image quality of saved photo images (recommended value is 90%%)</string>
     <string name="preference_location">Store location data (Geotagging)</string>
-    <string name="preference_location_summary">Whether to store GPS location data in the photos</string>
+    <string name="preference_location_summary">Store GPS location data in the photos</string>
     <string name="video_quality">Video resolution</string>
     <string name="video_quality_summary">Set the resolution of videos</string>
     <string name="preference_force_video_4k">Force 4K UHD video (experimental)</string>
     <string name="preference_force_video_4k_summary">Enable 3840x2160 resolution for video recording on back camera - this will only work if your device supports it, and may crash if not!</string>
     <string name="preference_record_audio">Record audio</string>
-    <string name="preference_record_audio_summary">Whether to record audio when recording video</string>
+    <string name="preference_record_audio_summary">Record audio when recording video</string>
     <string name="preference_record_audio_src">Audio source</string>
     <string name="preference_record_audio_src_summary">Microphone to use for recording audio</string>
     
