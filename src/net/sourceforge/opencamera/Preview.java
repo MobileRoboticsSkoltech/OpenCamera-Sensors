@@ -167,7 +167,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private List<Camera.Size> video_sizes = null;
 	
 	private Location location = null;
-	public boolean has_set_location = false;
+	private boolean has_set_location = false;
 	private float location_accuracy = 0.0f;
 	private Bitmap location_bitmap = null;
 	private Bitmap location_off_bitmap = null;
@@ -1427,12 +1427,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return width + ":" + height;
 	}
 	
-	public static String getAspectRatioMPString(int width, int height) {
+	static String getAspectRatioMPString(int width, int height) {
 		float mp = (width*height)/1000000.0f;
 		return "(" + getAspectRatio(width, height) + ", " + formatFloatToString(mp) + "MP)";
 	}
 	
-	public String getCamcorderProfileDescription(String quality) {
+	String getCamcorderProfileDescription(String quality) {
 		CamcorderProfile profile = getCamcorderProfile(quality);
 		String highest = "";
 		if( profile.quality == CamcorderProfile.QUALITY_HIGH ) {
@@ -2267,7 +2267,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	public void switchCamera() {
+	void switchCamera() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchCamera()");
 		//if( is_taking_photo && !is_taking_photo_on_timer ) {
@@ -2322,7 +2322,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		showToast(switch_video_toast, toast_string);
 	}
 
-	public void switchVideo(boolean save, boolean update_preview_size) {
+	void switchVideo(boolean save, boolean update_preview_size) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
 		boolean old_is_video = is_video;
@@ -2413,7 +2413,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	public void cycleFlash() {
+	void cycleFlash() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cycleFlash()");
 		//if( is_taking_photo && !is_taking_photo_on_timer ) {
@@ -2586,7 +2586,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return output_modes;
 	}
 
-	public void cycleFocusMode() {
+	void cycleFocusMode() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cycleFocusMode()");
 		//if( is_taking_photo && !is_taking_photo_on_timer ) {
@@ -2698,7 +2698,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		tryAutoFocus(false, false);
 	}
 
-	public void toggleExposureLock() {
+	void toggleExposureLock() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "toggleExposureLock()");
 		// n.b., need to allow when recording video, so no check on PHASE_TAKING_PHOTO
@@ -2772,7 +2772,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return output_modes;
 	}
 	
-	public void takePicturePressed() {
+	void takePicturePressed() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicturePressed");
 		if( camera == null ) {
@@ -3688,7 +3688,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	}
 	}
 
-	public void clickedShare() {
+	void clickedShare() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedShare");
 		//if( is_preview_paused ) {
@@ -3707,7 +3707,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	public void clickedTrash() {
+	void clickedTrash() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTrash");
 		//if( is_preview_paused ) {
@@ -3944,7 +3944,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		});
     }
 
-    public void onAccelerometerSensorChanged(SensorEvent event) {
+    void onAccelerometerSensorChanged(SensorEvent event) {
 		/*if( MyDebug.LOG )
     	Log.d(TAG, "onAccelerometerSensorChanged: " + event.values[0] + ", " + event.values[1] + ", " + event.values[2]);*/
 
@@ -3974,7 +3974,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		this.invalidate();
 	}
 
-    public void onMagneticSensorChanged(SensorEvent event) {
+    void onMagneticSensorChanged(SensorEvent event) {
     	this.has_geomagnetic = true;
     	for(int i=0;i<3;i++) {
     		//this.geomagnetic[i] = event.values[i];
@@ -4069,7 +4069,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.exposures;
     }
 
-    public List<Camera.Size> getSupportedPreviewSizes() {
+    List<Camera.Size> getSupportedPreviewSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPreviewSizes");
     	return this.supported_preview_sizes;
@@ -4093,17 +4093,17 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return this.video_quality;
     }
     
-    public List<Camera.Size> getSupportedVideoSizes() {
+    List<Camera.Size> getSupportedVideoSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedVideoSizes");
 		return this.video_sizes;
     }
     
-	public List<String> getSupportedFlashValues() {
+	List<String> getSupportedFlashValues() {
 		return supported_flash_values;
 	}
 
-	public List<String> getSupportedFocusValues() {
+	List<String> getSupportedFocusValues() {
 		return supported_focus_values;
 	}
 
@@ -4128,7 +4128,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return image_quality;
     }
     
-    public void onResume() {
+    void onResume() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
 		this.app_is_paused = false;
@@ -4138,14 +4138,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		this.openCamera();
     }
 
-    public void onPause() {
+    void onPause() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPause");
 		this.app_is_paused = true;
 		this.closeCamera();
     }
 
-	public void onSaveInstanceState(Bundle state) {
+	void onSaveInstanceState(Bundle state) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSaveInstanceState");
 		if( MyDebug.LOG )
@@ -4227,7 +4227,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		});
 	}
 	
-	public void setUIRotation(int ui_rotation) {
+	void setUIRotation(int ui_rotation) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setUIRotation");
 		this.ui_rotation = ui_rotation;
@@ -4401,5 +4401,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
     public boolean isPreviewStarted() {
     	return this.is_preview_started;
+    }
+    
+    public boolean hasSetLocation() {
+    	return this.has_set_location;
     }
 }
