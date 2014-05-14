@@ -4283,6 +4283,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.supported_flash_values != null;
     }
     
+    public boolean supportsExposureLock() {
+    	return this.is_exposure_locked_supported;
+    }
+    
     public String getCurrentFlashValue() {
     	if( this.current_flash_index == -1 )
     		return null;
