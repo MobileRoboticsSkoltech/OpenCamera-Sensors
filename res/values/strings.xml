@@ -16,7 +16,7 @@
     <string name="preference_white_balance">Set the white balance</string>
     <string name="preference_white_balance_summary">Choose a setting to adjust the white balance</string>
     <string name="preference_iso">Set the ISO</string>
-    <string name="preference_iso_summary">Choose an ISO setting (higher means more sensitive to light)</string>
+    <string name="preference_iso_summary">Choose an ISO setting (higher means more sensitive to light) (may not work on some devices)</string>
     <string name="preference_exposure">Set the exposure compensation</string>
     <string name="preference_exposure_summary">Set to 0 for the default exposure compensation.</string>
     <string name="preference_face_detection">Face detection</string>
