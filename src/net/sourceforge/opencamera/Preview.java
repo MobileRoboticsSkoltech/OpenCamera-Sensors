@@ -742,7 +742,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			// scene mode, both flash mode and supported flash mode may be changed to off. After setting scene
 			// mode, applications should call getParameters to know if some parameters are changed."
 			scene_modes = parameters.getSupportedSceneModes();
-			String scene_mode = setupValuesPref(scene_modes, "preference_scene_mode", Camera.Parameters.SCENE_MODE_AUTO);
+			String scene_mode = setupValuesPref(scene_modes, getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
 			if( scene_mode != null && !parameters.getSceneMode().equals(scene_mode) ) {
 	        	parameters.setSceneMode(scene_mode);
 	        	// need to read back parameters, see comment above
@@ -842,14 +842,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 			// get available color effects
 			color_effects = parameters.getSupportedColorEffects();
-			String color_effect = setupValuesPref(color_effects, "preference_color_effect", Camera.Parameters.EFFECT_NONE);
+			String color_effect = setupValuesPref(color_effects, getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
 			if( color_effect != null ) {
 	        	parameters.setColorEffect(color_effect);
 			}
 
 			// get available white balances
 			white_balances = parameters.getSupportedWhiteBalance();
-			String white_balance = setupValuesPref(white_balances, "preference_white_balance", Camera.Parameters.WHITE_BALANCE_AUTO);
+			String white_balance = setupValuesPref(white_balances, getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
 			if( white_balance != null ) {
 	        	parameters.setWhiteBalance(white_balance);
 			}
@@ -887,7 +887,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 			}
 			if( iso_key != null ) {
-				String iso = setupValuesPref(isos, "preference_iso", "auto");
+				String iso = setupValuesPref(isos, getISOPreferenceKey(), "auto");
 				if( iso != null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "set: " + iso_key + " to: " + iso);
@@ -4335,7 +4335,27 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     public static String getExposurePreferenceKey() {
     	return "preference_exposure";
     }
-    
+
+    // must be static, to safely call from other Activities
+    public static String getColorEffectPreferenceKey() {
+    	return "preference_color_effect";
+    }
+
+    // must be static, to safely call from other Activities
+    public static String getSceneModePreferenceKey() {
+    	return "preference_scene_mode";
+    }
+
+    // must be static, to safely call from other Activities
+    public static String getWhiteBalancePreferenceKey() {
+    	return "preference_white_balance";
+    }
+
+    // must be static, to safely call from other Activities
+    public static String getISOPreferenceKey() {
+    	return "preference_iso";
+    }
+
     // for testing:
     public Camera getCamera() {
 		/*if( MyDebug.LOG )
