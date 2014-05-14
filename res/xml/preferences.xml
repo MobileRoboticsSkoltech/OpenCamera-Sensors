@@ -6,14 +6,6 @@
         android:title="@string/preference_category_camera_effects"
         >
 
-        <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
-        <CheckBoxPreference
-	        android:key="preference_auto_stabilise"
-	        android:title="@string/preference_auto_stabilise"
-	        android:summary="@string/preference_auto_stabilise_summary"
-	        android:defaultValue="false"
-	        />
-	
         <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
 	    <ListPreference 
 	        android:key="preference_color_effect"
@@ -42,7 +34,7 @@
             android:summary="@string/preference_iso_summary"
             />
 
-        	    <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
+   	    <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
         <!--
 	   	<ListPreference
 	        android:key="preference_exposure"
@@ -50,6 +42,14 @@
 	        android:summary="@string/preference_exposure_summary"
 	        />
         -->
+
+        <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
+        <CheckBoxPreference
+            android:key="preference_auto_stabilise"
+            android:title="@string/preference_auto_stabilise"
+            android:summary="@string/preference_auto_stabilise_summary"
+            android:defaultValue="false"
+            />
 
         <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
         <CheckBoxPreference
