@@ -3866,8 +3866,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setRecordingHint: " + is_video);
 				Camera.Parameters parameters = camera.getParameters();
-				// calling setParameters here with continuous video focus mode causes preview to not restart on Galaxy Nexus?! (fine on my Nexus 7)
-				// issue seems to specifically be with setParameters (i.e., the problem occurs even if we don't setRecordingHint)
+				// Calling setParameters here with continuous video focus mode causes preview to not restart on Galaxy Nexus?! (fine on my Nexus 7).
+				// The issue seems to specifically be with setParameters (i.e., the problem occurs even if we don't setRecordingHint).
+				// In addition, I had a report of a bug on HTC Desire X, Android 4.0.4 where the saved video was corrupted.
+				// This worked fine in 1.7, then not in 1.8 and 1.9, then was fixed again in 1.10
+				// The only thing in common to 1.7->1.8 and 1.9-1.10, that seems relevant, was adding this code to setRecordingHint() and setParameters() (unclear which would have been the problem),
+				// so we should be very careful about enabling this code again!
 				String focus_mode = parameters.getFocusMode();
 	            if( focus_mode != null && !focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
 					parameters.setRecordingHint(this.is_video);
