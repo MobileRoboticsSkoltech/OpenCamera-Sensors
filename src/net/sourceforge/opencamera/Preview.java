@@ -629,6 +629,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( video_recorder != null ) {
 				stopVideo();
 			}
+			if( this.is_video ) {
+				// make sure we're into continuous video mode for closing
+				// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
+				// so to be safe, we always reset to continuous video mode
+				this.updateFocusForVideo(false);
+			}
 			//camera.setPreviewCallback(null);
 			this.setPreviewPaused(false);
 			camera.stopPreview();
@@ -1098,16 +1104,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( focus_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing focus_value: " + focus_value);
-					if( !updateFocus(focus_value, false, false) ) { // don't need to save, as this is the value that's already saved
+					if( !updateFocus(focus_value, false, false, true) ) { // don't need to save, as this is the value that's already saved
 						if( MyDebug.LOG )
 							Log.d(TAG, "focus value no longer supported!");
-						updateFocus(0, false, true);
+						updateFocus(0, false, true, true);
 					}
 				}
 				else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found no existing focus_value");
-					updateFocus(0, false, true);
+					updateFocus(0, false, true, true);
 				}
 			}
 			else {
@@ -2295,7 +2301,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			this.openCamera();
 			
 			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
-			updateFocusForVideo();
+			updateFocusForVideo(true);
 		}
 	}
 	
@@ -2363,7 +2369,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		
 		if( is_video != old_is_video ) {
-			updateFocusForVideo();
+			updateFocusForVideo(true);
 
 			Activity activity = (Activity)this.getContext();
 			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
@@ -2389,7 +2395,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	private void updateFocusForVideo() {
+	private void updateFocusForVideo(boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocusForVideo()");
 		if( this.supported_focus_values != null && camera != null ) {
@@ -2403,7 +2409,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( focus_is_video != is_video ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "need to change focus mode");
-				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true);
+				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true, auto_focus);
 				if( MyDebug.LOG ) {
 					parameters = camera.getParameters();
 					current_focus_mode = parameters.getFocusMode();
@@ -2598,11 +2604,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		if( this.supported_focus_values != null && this.supported_focus_values.size() > 1 ) {
 			int new_focus_index = (current_focus_index+1) % this.supported_focus_values.size();
-			updateFocus(new_focus_index, false, true);
+			updateFocus(new_focus_index, false, true, true);
 		}
 	}
 	
-	private boolean updateFocus(String focus_value, boolean quiet, boolean save) {
+	private boolean updateFocus(String focus_value, boolean quiet, boolean save, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + focus_value);
 		if( this.supported_focus_values != null ) {
@@ -2610,14 +2616,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "new_focus_index: " + new_focus_index);
 	    	if( new_focus_index != -1 ) {
-	    		updateFocus(new_focus_index, quiet, save);
+	    		updateFocus(new_focus_index, quiet, save, auto_focus);
 	    		return true;
 	    	}
 		}
     	return false;
 	}
 
-	private void updateFocus(int new_focus_index, boolean quiet, boolean save) {
+	private void updateFocus(int new_focus_index, boolean quiet, boolean save, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + new_focus_index + " current_focus_index: " + current_focus_index);
 		// updates the Focus button, and Focus camera mode
@@ -2649,7 +2655,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    			break;
 	    		}
 	    	}
-	    	this.setFocus(focus_value);
+	    	this.setFocus(focus_value, auto_focus);
 
 	    	if( save ) {
 				// now save
@@ -2661,7 +2667,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	private void setFocus(String focus_value) {
+	private void setFocus(String focus_value, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocus() " + focus_value);
 		if( camera == null ) {
@@ -2695,7 +2701,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	}
 		camera.setParameters(parameters);
 		clearFocusAreas();
-		tryAutoFocus(false, false);
+		if( auto_focus ) {
+			tryAutoFocus(false, false);
+		}
 	}
 
 	void toggleExposureLock() {
