@@ -1124,11 +1124,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);
 
 		    this.is_exposure_locked_supported = parameters.isAutoExposureLockSupported();
-		    View exposureLockButton = (View) activity.findViewById(R.id.exposure_lock);
+		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
 		    exposureLockButton.setVisibility(is_exposure_locked_supported ? View.VISIBLE : View.GONE);
+	    	is_exposure_locked = false;
 		    if( is_exposure_locked_supported ) {
-		    	is_exposure_locked = parameters.getAutoExposureLock();
-				setExposureLocked();
+		    	// exposure lock should always default to false, as doesn't make sense to save it - we can't really preserve a "lock" after the camera is reopened
+		    	// also note that it isn't safe to lock the exposure before starting the preview
+				exposureLockButton.setImageResource(is_exposure_locked ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
 		    }
 
 			// now switch to video if saved
