@@ -893,6 +893,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 			}
 			if( iso_key != null ) {
+				if( isos == null ) {
+					// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
+					isos = new ArrayList<String>();
+					isos.add("auto");
+					isos.add("100");
+					isos.add("200");
+					isos.add("400");
+					isos.add("800");
+					isos.add("1600");
+				}
 				String iso = setupValuesPref(isos, getISOPreferenceKey(), "auto");
 				if( iso != null ) {
 					if( MyDebug.LOG )
