@@ -247,8 +247,18 @@ public class MyPreferenceActivity extends PreferenceActivity {
 						}
                         about_string.append("Open Camera v");
                         about_string.append(version);
+                        about_string.append("\n(c) 2013-2014 Mark Harman");
+                        about_string.append("\nReleased under the GPL v3 or later");
                         about_string.append("\nAndroid API version: ");
                         about_string.append(Build.VERSION.SDK_INT);
+                        about_string.append("\nDevice manufacturer: ");
+                        about_string.append(Build.MANUFACTURER);
+                        about_string.append("\nDevice model: ");
+                        about_string.append(Build.MODEL);
+                        about_string.append("\nDevice code-name: ");
+                        about_string.append(Build.HARDWARE);
+                        about_string.append("\nDevice variant: ");
+                        about_string.append(Build.DEVICE);
                         {
                     		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
                             about_string.append("\nStandard max heap? (MB): ");
