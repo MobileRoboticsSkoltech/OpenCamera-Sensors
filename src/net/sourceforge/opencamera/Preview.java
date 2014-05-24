@@ -1303,14 +1303,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			Log.d(TAG, "new preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
     		this.setAspectRatio( ((double)parameters.getPreviewSize().width) / (double)parameters.getPreviewSize().height );
 
-    		/*List<int []> fps_ranges = parameters.getSupportedPreviewFpsRange();
-    		if( MyDebug.LOG ) {
-		        for(int [] fps_range : fps_ranges) {
-	    			Log.d(TAG, "    supported fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-		        }
-    		}
-    		int [] fps_range = fps_ranges.get(fps_ranges.size()-1);
-	        parameters.setPreviewFpsRange(fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX], fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);*/
             camera.setParameters(parameters);
         }
 	}
@@ -2423,11 +2415,31 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
         }
         if( selected_min_fps == -1 ) {
-    		int [] fps_range = fps_ranges.get(fps_ranges.size()-1);
-	    	if( MyDebug.LOG ) {
-    			Log.d(TAG, "    can't find match for fps range, so choose best: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-	    	}
-	        parameters.setPreviewFpsRange(fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX], fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+        	selected_diff = -1;
+        	int selected_dist = -1;
+            for(int [] fps_range : fps_ranges) {
+    			int min_fps = fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX];
+    			int max_fps = fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX];
+    			int diff = max_fps - min_fps;
+    			int dist = -1;
+    			if( max_fps < profile.videoFrameRate*1000 )
+    				dist = profile.videoFrameRate*1000 - max_fps;
+    			else
+    				dist = min_fps - profile.videoFrameRate*1000;
+    	    	if( MyDebug.LOG ) {
+        			Log.d(TAG, "    supported fps range: " + min_fps + " to " + max_fps + " has dist " + dist + " and diff " + diff);
+    	    	}
+    			if( selected_dist == -1 || dist < selected_dist || ( dist == selected_dist && diff < selected_diff ) ) {
+    				selected_min_fps = min_fps;
+    				selected_max_fps = max_fps;
+    				selected_dist = dist;
+    				selected_diff = diff;
+    			}
+            }
+	    	if( MyDebug.LOG )
+	    		Log.d(TAG, "    can't find match for fps range, so choose closest: " + selected_min_fps + " to " + selected_max_fps);
+	        parameters.setPreviewFpsRange(selected_min_fps, selected_max_fps);
+	        camera.setParameters(parameters);
         }
         else {
 	    	if( MyDebug.LOG ) {
