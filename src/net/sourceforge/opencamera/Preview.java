@@ -3975,7 +3975,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
         if( camera != null ) {
-    		camera.cancelAutoFocus();
+			try {
+	    		camera.cancelAutoFocus();
+			}
+			catch(RuntimeException e) {
+				// had a report of crash on some devices, see comment at https://sourceforge.net/p/opencamera/tickets/4/ made on 20140520
+				if( MyDebug.LOG )
+					Log.d(TAG, "camera.cancelAutoFocus() failed");
+	    		e.printStackTrace();
+			}
     		autoFocusCompleted(false, false, true);
         }
     }
