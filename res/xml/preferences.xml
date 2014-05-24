@@ -275,7 +275,25 @@
 	            android:summary="@string/preference_force_video_4k_summary"
 	            android:defaultValue="false"
 	            />
-	        	    
+
+            <ListPreference 
+                android:key="preference_video_bitrate"
+                android:title="@string/preference_video_bitrate"
+                android:summary="@string/preference_video_bitrate_summary"
+                android:entries="@array/preference_video_bitrate_entries"
+                android:entryValues="@array/preference_video_bitrate_values"
+                android:defaultValue="default"
+                />
+
+            <ListPreference 
+                android:key="preference_video_fps"
+                android:title="@string/preference_video_fps"
+                android:summary="@string/preference_video_fps_summary"
+                android:entries="@array/preference_video_fps_entries"
+                android:entryValues="@array/preference_video_fps_values"
+                android:defaultValue="default"
+                />
+
 	        <CheckBoxPreference
 	            android:key="preference_record_audio"
 	            android:title="@string/preference_record_audio"

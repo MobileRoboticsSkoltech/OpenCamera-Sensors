@@ -43,7 +43,7 @@
 <li>Choose scene modes, color effects, white balance, ISO and exposure compensation.</li>
 <li>Support for exposure lock.</li>
 <li>Choice of camera and video resolution, and JPEG image quality. Support for all resolutions offered by the camera. Also support for 4K UHD (3840x2160) video on some devices (experimental - may not work on some devices!).</li>
-<li>Video recording (with optional audio).</li>
+<li>Video recording (with optional audio, and support for changing frame rate and bitrate).</li>
 <li>Timer option.</li>
 <li>Burst mode, with configurable delay.</li>
 <li>Option to silence the shutter (requires Android 4.2).</li>
@@ -299,6 +299,18 @@ message when you try to record, or it may succeed but create a video where the r
 please test this out first. I've tested this successfully on a Samsung Galaxy S5 and Note 3. (If this option doesn't show up at all, it's
 because Open Camera thinks this is a device that probably doesn't support 4K video.)</p>
 
+<p><b>Video bitrate (approx)</b> - If set to a value other than "default", the default video bitrate is overridden. Higher values mean better
+quality video, but the files take up more disk space. Note that some values may be unsupported by your device, and may
+cause the recording to fail - in some cases, this can cause problems with the camera that require a reboot to fix. So
+please test before using. Also note that the bitrate setting is approximate - the resultant video file will typically be slightly different
+to that requested.</p>
+
+<p><b>Video frame rate (approx)</b> - If set to a value other than "default", the camera will try to match this frame
+rate. Note that this is very approximate, as frame rate depends on many factors such as your device and lighting
+conditions, so there is no guarantee that the resultant video's frame rate will match with the requested value. Also note
+that some frame rate values may be unsupported by your device, and cause the recording to fail, so please test before
+using.</p>
+
 <p><b>Record audio</b> - Whether to record audio when recording a video.</p>
 
 <p><b>Audio source</b> - Select the audio source for recording video. The effect of this depends on your device -
@@ -327,6 +339,14 @@ helpful to email me the "About" information - please go to Settings/About, then 
 can paste the information into an email (or Google Keep, or wherever) to send to me.</p>
 
 <p><b>History</b></p><pre>
+
+Version 1.13 (Work in progress)
+
+ADDED   Options for video bitrate and frame rate. Note that both of these are
+        approximate settings, and whether they can be achieved may depend on
+        your device, and other conditions such as lighting. Also note that
+        setting non-default values for bitrate of frame rate may cause video
+        recording to fail, if the values are not supported.
 
 Version 1.12 (2014/05/19)
 

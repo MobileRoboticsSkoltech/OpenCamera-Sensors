@@ -151,6 +151,74 @@
         <item>preference_grid_3x3</item>
         <item>preference_grid_4x2</item>
         </string-array>
+    <string-array name="preference_video_bitrate_entries">
+        <item>Default</item>
+        <item>100Kbit</item>
+        <item>200Kbit</item>
+        <item>500Kbit</item>
+        <item>1Mbit</item>
+        <item>2Mbit</item>
+        <item>3Mbit</item>
+        <item>4Mbit</item>
+        <item>5Mbit</item>
+        <item>6Mbit</item>
+        <item>7Mbit</item>
+        <item>8Mbit</item>
+        <item>9Mbit</item>
+        <item>10Mbit</item>
+        <item>15Mbit</item>
+        <item>20Mbit</item>
+        <item>30Mbit</item>
+        <item>40Mbit</item>
+        <item>50Mbit</item>
+        <item>60Mbit</item>
+        <item>70Mbit</item>
+        <item>80Mbit</item>
+        <item>90Mbit</item>
+        <item>100Mbit</item>
+        </string-array>
+    <string-array name="preference_video_bitrate_values">
+        <item>default</item>
+        <item>100000</item>
+        <item>200000</item>
+        <item>500000</item>
+        <item>1000000</item>
+        <item>2000000</item>
+        <item>3000000</item>
+        <item>4000000</item>
+        <item>5000000</item>
+        <item>6000000</item>
+        <item>7000000</item>
+        <item>8000000</item>
+        <item>9000000</item>
+        <item>10000000</item>
+        <item>15000000</item>
+        <item>20000000</item>
+        <item>30000000</item>
+        <item>40000000</item>
+        <item>50000000</item>
+        <item>60000000</item>
+        <item>70000000</item>
+        <item>80000000</item>
+        <item>90000000</item>
+        <item>100000000</item>
+    </string-array>
+    <string-array name="preference_video_fps_entries">
+        <item>Default</item>
+        <item>15</item>
+        <item>24</item>
+        <item>25</item>
+        <item>30</item>
+        <item>60</item>
+        </string-array>
+    <string-array name="preference_video_fps_values">
+        <item>default</item>
+        <item>15</item>
+        <item>24</item>
+        <item>25</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
     <string-array name="preference_record_audio_src_entries">
         <item>Camcorder</item>
         <item>External mic (if present)</item>

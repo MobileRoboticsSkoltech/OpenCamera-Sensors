@@ -93,6 +93,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
 	private String video_name = null;
+	private int [] current_fps_range = new int[2];
 
 	private final int PHASE_NORMAL = 0;
 	private final int PHASE_TIMER = 1;
@@ -520,7 +521,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		video_recorder.reset();
     		video_recorder.release(); 
     		video_recorder = null;
-    		reconnectCamera();
+			reconnectCamera(false);
     		if( video_name != null ) {
     			File file = new File(video_name);
     			if( file != null ) {
@@ -585,7 +586,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	private void reconnectCamera() {
+	private void reconnectCamera(boolean quiet) {
         if( camera != null ) { // just to be safe
     		try {
 				camera.reconnect();
@@ -598,7 +599,29 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    	    showToast(null, "Failed to reconnect to camera");
 	    	    closeCamera();
 			}
-			tryAutoFocus(false, false);
+    		try {
+    			tryAutoFocus(false, false);
+    		}
+    		catch(RuntimeException e) {
+    			if( MyDebug.LOG )
+    				Log.e(TAG, "tryAutoFocus() threw exception: " + e.getMessage());
+    			e.printStackTrace();
+    			// this happens on Nexus 7 if trying to record video at bitrate 50Mbits or higher - it's fair enough that it fails, but we need to recover without a crash!
+    			// not safe to call closeCamera, as any call to getParameters may cause a RuntimeException
+    			this.is_preview_started = false;
+    			camera.release();
+    			camera = null;
+    			if( !quiet ) {
+    	        	CamcorderProfile profile = getCamcorderProfile();
+					String features = getErrorFeatures(profile);
+					String error_message = "Error, video file may be corrupted";
+					if( features.length() > 0 ) {
+						error_message += ", " + features + " not supported on your device";
+					}
+    				showToast(null, error_message);
+    			}
+    			openCamera();
+    		}
 		}
 	}
 
@@ -1067,6 +1090,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				editor.apply();
 			}
 
+    		parameters.getPreviewFpsRange(current_fps_range);
+	    	if( MyDebug.LOG ) {
+				Log.d(TAG, "    current fps range: " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+	    	}
+
     		// update parameters
     		camera.setParameters(parameters);
 
@@ -1407,19 +1435,49 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		// but it does work if we explicitly set the resolution (at least tested on an S5)
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		CamcorderProfile profile = null;
 		if( cameraId == 0 && sharedPreferences.getBoolean("preference_force_video_4k", false) && main_activity.supportsForceVideo4K() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "force 4K UHD video");
-			CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
+			profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
 			profile.videoFrameWidth = 3840;
 			profile.videoFrameHeight = 2160;
 			profile.videoBitRate = (int)(profile.videoBitRate*2.8); // need a higher bitrate for the better quality - this is roughly based on the bitrate used by an S5's native camera app at 4K (47.6 Mbps, compared to 16.9 Mbps which is what's returned by the QUALITY_HIGH profile)
-			return profile;
 		}
-		if( current_video_quality != -1 ) {
-			return getCamcorderProfile(video_quality.get(current_video_quality));
+		else if( current_video_quality != -1 ) {
+			profile = getCamcorderProfile(video_quality.get(current_video_quality));
 		}
-		return CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
+		else {
+			profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
+		}
+
+		String bitrate_value = sharedPreferences.getString("preference_video_bitrate", "default");
+		if( !bitrate_value.equals("default") ) {
+			try {
+				int bitrate = Integer.parseInt(bitrate_value);
+				if( MyDebug.LOG )
+					Log.d(TAG, "bitrate: " + bitrate);
+				profile.videoBitRate = bitrate;
+			}
+			catch(NumberFormatException exception) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "bitrate invalid format, can't parse to int: " + bitrate_value);
+			}
+		}
+		String fps_value = sharedPreferences.getString("preference_video_fps", "default");
+		if( !fps_value.equals("default") ) {
+			try {
+				int fps = Integer.parseInt(fps_value);
+				if( MyDebug.LOG )
+					Log.d(TAG, "fps: " + fps);
+				profile.videoFrameRate = fps;
+			}
+			catch(NumberFormatException exception) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "fps invalid format, can't parse to int: " + fps_value);
+			}
+		}
+		return profile;
 	}
 	
 	private static String formatFloatToString(final float f) {
@@ -2323,9 +2381,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( this.is_video ) {
 			CamcorderProfile profile = getCamcorderProfile();
 			String bitrate_string = "";
-			if( profile.videoBitRate > 10000000 )
+			if( profile.videoBitRate >= 10000000 )
 				bitrate_string = profile.videoBitRate/1000000 + "Mbps";
-			else if( profile.videoBitRate > 10000 )
+			else if( profile.videoBitRate >= 10000 )
 				bitrate_string = profile.videoBitRate/1000 + "Kbps";
 			else
 				bitrate_string = profile.videoBitRate + "bps";
@@ -2341,6 +2399,45 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		showToast(switch_video_toast, toast_string);
 	}
 
+	private void matchPreviewFpsToVideo() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "matchPreviewFpsToVideo()");
+		CamcorderProfile profile = getCamcorderProfile();
+		Camera.Parameters parameters = camera.getParameters();
+
+		List<int []> fps_ranges = parameters.getSupportedPreviewFpsRange();
+		int selected_min_fps = -1, selected_max_fps = -1, selected_diff = -1;
+        for(int [] fps_range : fps_ranges) {
+	    	if( MyDebug.LOG ) {
+    			Log.d(TAG, "    supported fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+	    	}
+			int min_fps = fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX];
+			int max_fps = fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX];
+			if( min_fps <= profile.videoFrameRate*1000 && max_fps >= profile.videoFrameRate*1000 ) {
+    			int diff = max_fps - min_fps;
+    			if( selected_diff == -1 || diff < selected_diff ) {
+    				selected_min_fps = min_fps;
+    				selected_max_fps = max_fps;
+    				selected_diff = diff;
+    			}
+			}
+        }
+        if( selected_min_fps == -1 ) {
+    		int [] fps_range = fps_ranges.get(fps_ranges.size()-1);
+	    	if( MyDebug.LOG ) {
+    			Log.d(TAG, "    can't find match for fps range, so choose best: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+	    	}
+	        parameters.setPreviewFpsRange(fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX], fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+        }
+        else {
+	    	if( MyDebug.LOG ) {
+    			Log.d(TAG, "    chosen fps range: " + selected_min_fps + " to " + selected_max_fps);
+	    	}
+	        parameters.setPreviewFpsRange(selected_min_fps, selected_max_fps);
+	        camera.setParameters(parameters);
+        }
+	}
+	
 	void switchVideo(boolean save, boolean update_preview_size) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
@@ -2401,7 +2498,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					camera.stopPreview();
 					this.is_preview_started = false;
 				}
-				setPreviewSize();				
+				setPreviewSize();
+				if( !is_video ) {
+					// if is_video is true, we set the preview fps range in startCameraPreview()
+					if( MyDebug.LOG )
+						Log.d(TAG, "    reset preview to current fps range: " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+					Camera.Parameters parameters = camera.getParameters();
+			        parameters.setPreviewFpsRange(current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX], current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+			        camera.setParameters(parameters);
+				}
 				// always start the camera preview, even if it was previously paused
 		        this.startCameraPreview();
 			}
@@ -2430,6 +2535,41 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 			}
 		}
+	}
+	
+	private String getErrorFeatures(CamcorderProfile profile) {
+		boolean was_4k = false, was_bitrate = false, was_fps = false;
+		if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
+			was_4k = true;
+		}
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String bitrate_value = sharedPreferences.getString("preference_video_bitrate", "default");
+		if( !bitrate_value.equals("default") ) {
+			was_bitrate = true;
+		}
+		String fps_value = sharedPreferences.getString("preference_video_fps", "default");
+		if( !fps_value.equals("default") ) {
+			was_fps = true;
+		}
+		String features = "";
+		if( was_4k || was_bitrate || was_fps ) {
+			if( was_4k ) {
+				features = "4K UHD";
+			}
+			if( was_bitrate ) {
+				if( features.length() == 0 )
+					features = "Bitrate";
+				else
+					features += "/Bitrate";
+			}
+			if( was_fps ) {
+				if( features.length() == 0 )
+					features = "Frame rate";
+				else
+					features += "/Frame rate";
+			}
+		}
+		return features;
 	}
 
 	void cycleFlash() {
@@ -2966,7 +3106,23 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				video_name = videoFile.getAbsolutePath();
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + video_name);
-	        	this.camera.unlock();
+
+	        	CamcorderProfile profile = getCamcorderProfile();
+	    		if( MyDebug.LOG ) {
+	    			Log.d(TAG, "current_video_quality: " + current_video_quality);
+	    			if( current_video_quality != -1 )
+	    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality));
+	    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+	    			Log.d(TAG, "bit rate " + profile.videoBitRate);
+	    			int [] fps_range = new int[2];
+	                Camera.Parameters parameters = camera.getParameters();
+	        		parameters.getPreviewFpsRange(fps_range);
+	    	    	if( MyDebug.LOG ) {
+	    				Log.d(TAG, "    recording with preview fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+	    	    	}
+	    		}
+
+	    		this.camera.unlock();
 	        	video_recorder = new MediaRecorder();
 	        	video_recorder.setCamera(camera);
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
@@ -2985,19 +3141,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
-				/*video_recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-				if( record_audio ) {
-					video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-				}
-	        	video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);*/
-	        	CamcorderProfile profile = getCamcorderProfile();
-	    		if( MyDebug.LOG ) {
-	    			Log.d(TAG, "current_video_quality: " + current_video_quality);
-	    			if( current_video_quality != -1 )
-	    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality));
-	    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
-	    			Log.d(TAG, "bit rate " + profile.videoBitRate);
-	    		}
 				if( record_audio ) {
 					video_recorder.setProfile(profile);
 				}
@@ -3036,7 +3179,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					is_taking_photo_on_timer = false;*/
 					this.phase = PHASE_NORMAL;
 					showGUI(true);
-					this.reconnectCamera();
+					this.reconnectCamera(true);
 				}
 	        	catch(RuntimeException e) {
 	        		// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
@@ -3044,8 +3187,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    			Log.e(TAG, "runtime exception starting video recorder");
 					e.printStackTrace();
 					String error_message = "";
-					if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
-						error_message = "Sorry, 4K UHD not supported on your device";
+					String features = getErrorFeatures(profile);
+					if( features.length() > 0 ) {
+						error_message = "Sorry, " + features + " not supported on your device";
 					}
 					else {
 						error_message = "Failed to record video";
@@ -3058,7 +3202,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					is_taking_photo_on_timer = false;*/
 					this.phase = PHASE_NORMAL;
 					showGUI(true);
-					this.reconnectCamera();
+					this.reconnectCamera(true);
 				}
 			}
         	return;
@@ -3891,6 +4035,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		            camera.setParameters(parameters);
 	            }
 			}
+    		if( this.is_video ) {
+				matchPreviewFpsToVideo();
+    		}
+    		// else, we reset the preview fps to default in switchVideo
 	    	count_cameraStartPreview++;
 			camera.startPreview();
 			this.is_preview_started = true;
