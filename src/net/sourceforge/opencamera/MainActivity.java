@@ -107,7 +107,8 @@ public class MainActivity extends Activity {
 
 		// hack to rule out phones unlikely to have 4K video, so no point even offering the option!
 		// both S5 and Note 3 have 128MB standard and 512MB large heap (tested via Samsung RTL)
-		if( activityManager.getLargeMemoryClass() >= 512 ) {
+		// also added the check for having 128MB standard heap, to support modded LG G2, which has 128MB standard, 256MB large - see https://sourceforge.net/p/opencamera/tickets/9/
+		if( activityManager.getMemoryClass() >= 128 || activityManager.getLargeMemoryClass() >= 512 ) {
 			supports_force_video_4k = true;
 		}
 		if( MyDebug.LOG )
