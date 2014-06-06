@@ -180,14 +180,66 @@ public class MainActivity extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) { 
 		if( MyDebug.LOG )
 			Log.d(TAG, "onKeyDown: " + keyCode);
-        if( keyCode == KeyEvent.KEYCODE_MENU ) {
-        	// needed to support hardware menu button
-        	// tested successfully on Samsung S3 (via RTL)
-        	// see http://stackoverflow.com/questions/8264611/how-to-detect-when-user-presses-menu-key-on-their-android-device
-			View view = findViewById(R.id.settings);
-        	clickedSettings(view);
-            return true;
-        }
+		switch( keyCode ) {
+        case KeyEvent.KEYCODE_VOLUME_UP:
+        case KeyEvent.KEYCODE_VOLUME_DOWN:
+	        {
+	    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+	    		String volume_keys = sharedPreferences.getString("preference_volume_keys", "volume_take_photo");
+	    		if( volume_keys.equals("volume_take_photo") ) {
+	            	takePicture();
+	                return true;
+	    		}
+	    		else if( volume_keys.equals("volume_zoom") ) {
+	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+	    				this.preview.zoomIn();
+	    			else
+	    				this.preview.zoomOut();
+	                return true;
+	    		}
+	    		else if( volume_keys.equals("volume_exposure") ) {
+	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+	    				this.preview.changeExposure(1, true);
+	    			else
+	    				this.preview.changeExposure(-1, true);
+	                return true;
+	    		}
+	    		// else do nothing
+	    		break;
+	        }
+		case KeyEvent.KEYCODE_MENU:
+			{
+	        	// needed to support hardware menu button
+	        	// tested successfully on Samsung S3 (via RTL)
+	        	// see http://stackoverflow.com/questions/8264611/how-to-detect-when-user-presses-menu-key-on-their-android-device
+				View view = findViewById(R.id.settings);
+	        	clickedSettings(view);
+	            return true;
+			}
+		case KeyEvent.KEYCODE_CAMERA:
+			{
+				if( event.getRepeatCount() == 0 ) {
+					View view = findViewById(R.id.take_photo);
+					clickedTakePhoto(view);
+		            return true;
+				}
+			}
+		case KeyEvent.KEYCODE_FOCUS:
+			{
+				preview.requestAutoFocus();
+	            return true;
+			}
+		case KeyEvent.KEYCODE_ZOOM_IN:
+			{
+				preview.zoomIn();
+	            return true;
+			}
+		case KeyEvent.KEYCODE_ZOOM_OUT:
+			{
+				preview.zoomOut();
+	            return true;
+			}
+		}
         return super.onKeyDown(keyCode, event); 
     }
 
@@ -1090,39 +1142,6 @@ public class MainActivity extends Activity {
 	    	preview.onSaveInstanceState(state);
 	    }
 	}
-
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if( event.getAction() == KeyEvent.ACTION_DOWN ) {
-            int keyCode = event.getKeyCode();
-            switch( keyCode ) {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-        		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        		String volume_keys = sharedPreferences.getString("preference_volume_keys", "volume_take_photo");
-        		if( volume_keys.equals("volume_take_photo") ) {
-                	takePicture();
-                    return true;
-        		}
-        		else if( volume_keys.equals("volume_zoom") ) {
-        			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-        				this.preview.zoomIn();
-        			else
-        				this.preview.zoomOut();
-                    return true;
-        		}
-        		else if( volume_keys.equals("volume_exposure") ) {
-        			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-        				this.preview.changeExposure(1, true);
-        			else
-        				this.preview.changeExposure(-1, true);
-                    return true;
-        		}
-        		// else do nothing
-            }
-        }
-        return super.dispatchKeyEvent(event);
-    }
 
     public void broadcastFile(File file) {
     	// note that the new method means that the new folder shows up as a file when connected to a PC via MTP (at least tested on Windows 8)

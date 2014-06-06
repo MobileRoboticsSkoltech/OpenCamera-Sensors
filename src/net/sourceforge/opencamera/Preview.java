@@ -763,6 +763,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    switchCameraButton.setVisibility(Camera.getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
 
 		    Camera.Parameters parameters = camera.getParameters();
+		    
+		    /*{
+		    	// test for Samsung Galaxy cameras
+		    	// from http://forum.xda-developers.com/showpost.php?p=39210051&postcount=27
+		    	parameters.set("mode", "m"); 
+	        	// read back parameters, just to be safe
+	        	camera.setParameters(parameters);
+				parameters = camera.getParameters();
+		    }*/
 
 			// get available scene modes
 			// important, from docs:
@@ -3909,6 +3918,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			tryAutoFocus(false, false);
 		}
     }
+	
+	void requestAutoFocus() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "requestAutoFocus");
+		cancelAutoFocus();
+		tryAutoFocus(false, true);
+	}
 
     private void tryAutoFocus(final boolean startup, final boolean manual) {
     	// manual: whether user has requested autofocus (by touching screen)
