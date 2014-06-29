@@ -4035,13 +4035,27 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			successfully_focused = true;
 			successfully_focused_time = focus_complete_time;
 		}
-		if( set_flash_after_autofocus.length() > 0 ) {
+		if( set_flash_after_autofocus.length() > 0 && camera != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set flash back to: " + set_flash_after_autofocus);
 			Camera.Parameters parameters = camera.getParameters();
 			parameters.setFlashMode(set_flash_after_autofocus);
 			set_flash_after_autofocus = "";
 			camera.setParameters(parameters);
+		}
+		if( this.using_face_detection ) {
+			// On some devices such as mtk6589, face detection dooes not resume as written in documentation so we have
+			// to cancelfocus when focus is finished
+			if( camera != null ) {
+				try {
+					camera.cancelAutoFocus();
+				}
+				catch(RuntimeException e) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "camera.cancelAutoFocus() failed");
+					e.printStackTrace();
+				}
+			}
 		}
     }
     
