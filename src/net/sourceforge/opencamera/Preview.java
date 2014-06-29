@@ -2462,6 +2462,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	void switchVideo(boolean save, boolean update_preview_size) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
+		if( this.camera == null ) {
+			return;
+		}
 		boolean old_is_video = is_video;
 		if( this.is_video ) {
 			if( video_recorder != null ) {
