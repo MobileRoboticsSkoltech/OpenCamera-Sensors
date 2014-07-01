@@ -1047,12 +1047,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putString(getResolutionPreferenceKey(cameraId), resolution_value);
 				editor.apply();
-
-				// now set the size
-	        	parameters.setPictureSize(current_size.width, current_size.height);
 			}
-			
-			
+			// size set later in setPreviewSize()
+
     		/*if( MyDebug.LOG )
     			Log.d(TAG, "Current image quality: " + parameters.getJpegQuality());*/
 			int image_quality = getImageQuality();
@@ -1284,6 +1281,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private void setPreviewSize() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewSize()");
+		// also now sets picture size
 		if( camera == null ) {
 			return;
 		}
@@ -1292,8 +1290,34 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "setPreviewSize() shouldn't be called when preview is running");
 			throw new RuntimeException();
 		}
-		// set optimal preview size
+		// first set picture size (for photo mode, must be done now so we can set the picture size from this; for video, doesn't really matter when we set it)
     	Camera.Parameters parameters = camera.getParameters();
+    	if( this.is_video ) {
+    		// In theory, the picture size shouldn't matter in video mode, but the stock Android camera sets a picture size
+    		// which is the largest that matches the video's aspect ratio.
+    		// This seems necessary to work around an aspect ratio bug introduced in Android 4.4.3: http://code.google.com/p/android/issues/detail?id=70830
+    		// which results in distorted aspect ratio on preview and recorded video!
+        	CamcorderProfile profile = getCamcorderProfile();
+        	if( MyDebug.LOG )
+        		Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+        	double targetRatio = ((double)profile.videoFrameWidth) / (double)profile.videoFrameHeight;
+        	Camera.Size best_size = getOptimalVideoPictureSize(sizes, targetRatio);
+            parameters.setPictureSize(best_size.width, best_size.height);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "set picture size for video: " + parameters.getPictureSize().width + ", " + parameters.getPictureSize().height);
+    	}
+    	else {
+    		if( current_size_index != -1 ) {
+    			Camera.Size current_size = sizes.get(current_size_index);
+    			parameters.setPictureSize(current_size.width, current_size.height);
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "set picture size for photo: " + parameters.getPictureSize().width + ", " + parameters.getPictureSize().height);
+    		}
+    	}
+    	// need to set parameteres, so that picture size is set
+        camera.setParameters(parameters);
+    	parameters = camera.getParameters();
+		// set optimal preview size
 		if( MyDebug.LOG )
 			Log.d(TAG, "current preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
         supported_preview_sizes = parameters.getSupportedPreviewSizes();
@@ -1544,7 +1568,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return desc;
 	}
 
-	public double getTargetRatio(Point display_size) {
+	public double getTargetRatioForPreview(Point display_size) {
         double targetRatio = 0.0f;
 		Activity activity = (Activity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -1581,7 +1605,22 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "targetRatio: " + targetRatio);
 		return targetRatio;
 	}
-	
+
+	public Camera.Size getClosestSize(List<Camera.Size> sizes, double targetRatio) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getClosestSize()");
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+        for(Camera.Size size : sizes) {
+            double ratio = (double)size.width / size.height;
+            if( Math.abs(ratio - targetRatio) < minDiff ) {
+                optimalSize = size;
+                minDiff = Math.abs(ratio - targetRatio);
+            }
+        }
+        return optimalSize;
+	}
+
 	public Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getOptimalPreviewSize()");
@@ -1598,7 +1637,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		if( MyDebug.LOG )
     			Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
         }
-        double targetRatio = getTargetRatio(display_size);
+        double targetRatio = getTargetRatioForPreview(display_size);
         int targetHeight = Math.min(display_size.y, display_size.x);
         if( targetHeight <= 0 ) {
             targetHeight = display_size.y;
@@ -1619,14 +1658,38 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         	// can't find match for aspect ratio, so find closest one
     		if( MyDebug.LOG )
     			Log.d(TAG, "no preview size matches the aspect ratio");
-            minDiff = Double.MAX_VALUE;
-            for(Camera.Size size : sizes) {
-                double ratio = (double)size.width / size.height;
-                if( Math.abs(ratio - targetRatio) < minDiff ) {
-                    optimalSize = size;
-                    minDiff = Math.abs(ratio - targetRatio);
-                }
+    		optimalSize = getClosestSize(sizes, targetRatio);
+        }
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "chose optimalSize: " + optimalSize.width + " x " + optimalSize.height);
+			Log.d(TAG, "optimalSize ratio: " + ((double)optimalSize.width / optimalSize.height));
+		}
+        return optimalSize;
+    }
+
+	public Camera.Size getOptimalVideoPictureSize(List<Camera.Size> sizes, double targetRatio) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getOptimalVideoPictureSize()");
+		final double ASPECT_TOLERANCE = 0.05;
+        if( sizes == null )
+        	return null;
+        Camera.Size optimalSize = null;
+        // Try to find largest size that matches aspect ratio
+        for(Camera.Size size : sizes) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "    supported preview size: " + size.width + ", " + size.height);
+            double ratio = (double)size.width / size.height;
+            if( Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE )
+            	continue;
+            if( optimalSize == null || size.width > optimalSize.width ) {
+                optimalSize = size;
             }
+        }
+        if( optimalSize == null ) {
+        	// can't find match for aspect ratio, so find closest one
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "no picture size matches the aspect ratio");
+    		optimalSize = getClosestSize(sizes, targetRatio);
         }
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "chose optimalSize: " + optimalSize.width + " x " + optimalSize.height);
