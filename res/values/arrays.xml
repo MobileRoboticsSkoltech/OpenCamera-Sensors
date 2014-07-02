@@ -25,6 +25,7 @@
         <item>drawable/focus_mode_auto</item>
         <item>drawable/focus_mode_infinity</item>
         <item>drawable/focus_mode_macro</item>
+        <item>drawable/focus_mode_manual</item>
         <item>drawable/focus_mode_fixed</item>
         <item>drawable/focus_mode_edof</item>
         <item>drawable/focus_mode_continuous_video</item>
@@ -33,6 +34,7 @@
         <item>Focus Auto</item>
         <item>Focus Infinity</item>
         <item>Focus Macro</item>
+        <item>Focus Manual</item>
         <item>Focus Fixed</item>
         <item>Focus EDOF</item>
         <item>Focus Continuous</item>
@@ -41,6 +43,7 @@
         <item>focus_mode_auto</item>
         <item>focus_mode_infinity</item>
         <item>focus_mode_macro</item>
+        <item>focus_mode_manual</item>
         <item>focus_mode_fixed</item>
         <item>focus_mode_edof</item>
         <item>focus_mode_continuous_video</item>

@@ -2895,7 +2895,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    			break;
 	    		}
 	    	}
-	    	this.setFocus(focus_value, auto_focus);
+	    	this.setFocusValue(focus_value, auto_focus);
 
 	    	if( save ) {
 				// now save
@@ -2906,10 +2906,23 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    	}
 		}
 	}
-
-	private void setFocus(String focus_value, boolean auto_focus) {
+	
+	public String getFocusValue() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setFocus() " + focus_value);
+			Log.d(TAG, "getFocusValue()");
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "null camera");
+			return null;
+		}
+		if( this.supported_focus_values != null && this.current_focus_index != -1 )
+			return this.supported_focus_values.get(current_focus_index);
+		return null;
+	}
+
+	private void setFocusValue(String focus_value, boolean auto_focus) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFocusValue() " + focus_value);
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "null camera");
@@ -2917,7 +2930,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
         cancelAutoFocus();
 		Camera.Parameters parameters = camera.getParameters();
-    	if( focus_value.equals("focus_mode_auto") ) {
+    	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_manual") ) {
     		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
     	}
     	else if( focus_value.equals("focus_mode_infinity") ) {
@@ -2937,10 +2950,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	}
     	else {
     		if( MyDebug.LOG )
-    			Log.d(TAG, "setFocus() received unknown focus value " + focus_value);
+    			Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
     	}
 		camera.setParameters(parameters);
 		clearFocusAreas();
+		// n.b., we reset even for manual focus mode
 		if( auto_focus ) {
 			tryAutoFocus(false, false);
 		}
@@ -2988,8 +3002,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			// first one will be the default choice
 			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
 				output_modes.add("focus_mode_auto");
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.d(TAG, " supports focus_mode_auto");
+				}
 			}
 			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_INFINITY) ) {
 				output_modes.add("focus_mode_infinity");
@@ -3000,6 +3015,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				output_modes.add("focus_mode_macro");
 				if( MyDebug.LOG )
 					Log.d(TAG, " supports focus_mode_macro");
+			}
+			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
+				output_modes.add("focus_mode_manual");
+				if( MyDebug.LOG ) {
+					Log.d(TAG, " supports focus_mode_manual");
+				}
 			}
 			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_FIXED) ) {
 				output_modes.add("focus_mode_fixed");
@@ -3296,17 +3317,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 
 		showGUI(false);
-        Camera.Parameters parameters = camera.getParameters();
+        /*Camera.Parameters parameters = camera.getParameters();
 		String focus_mode = parameters.getFocusMode();
 		if( MyDebug.LOG )
-			Log.d(TAG, "focus_mode is " + focus_mode);
+			Log.d(TAG, "focus_mode is " + focus_mode);*/
+		String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "focus_value is " + focus_value);
 
 		if( this.successfully_focused && System.currentTimeMillis() < this.successfully_focused_time + 5000 ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "recently focused successfully, so no need to refocus");
 			takePictureWhenFocused();
 		}
-		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
+		//else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
+		else if( focus_value != null && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) ) {
 	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 				@Override
 				public void onAutoFocus(boolean success, Camera camera) {
@@ -3994,8 +4019,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
     private void tryAutoFocus(final boolean startup, final boolean manual) {
     	// manual: whether user has requested autofocus (by touching screen)
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "tryAutoFocus");
+			Log.d(TAG, "startup? " + startup);
+			Log.d(TAG, "manual? " + manual);
+		}
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no camera");

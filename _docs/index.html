@@ -37,7 +37,7 @@
 <li>Option to auto-stabilise so your pictures are perfectly level no matter what (<a href="#auto_stabilise">see below</a>).</li>
 <li>Zoom via multi-touch gesture and single-touch control.</li>
 <li>Flash on/off/auto/torch.</li>
-<li>Choice of focus modes (including macro).</li>
+<li>Choice of focus modes (including macro, and a "manual" focus mode which only focuses when you touch the screen).</li>
 <li>Touch to select focus area and metering area (metering area is used to determine exposure).</li>
 <li>Face detection option.</li>
 <li>Choice of front/back camera.</li>
@@ -88,7 +88,7 @@ older version of Open Camera).</li>
 available for Nokia X). You can also
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=2WCE756ZME9JG&lc=GB&item_name=Open%20Camera%20donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest">donate through Paypal</a>
 (Paypal account not required, supports debit or credit card) or <a href="http://www.bitcoin.org/">Bitcoin</a> (Bitcoin address <b>1LKCFto9SQGqtcvqZxHkqDPqNjSnfMmsow</b>).
-Thanks!</p>
+Thanks! Donations can be used for: purchasing hardware for porting/testing; app store fees; beer money :)</p>
 
 <hr>
 <p>
@@ -159,7 +159,8 @@ recording video mode. When in video mode, the take photo icon will change to the
 text will explain what each mode is. (Only available if the camera supports flash.)</p>
 
 <p><img src="focus_mode_auto.png" width="32" height="32"><b>Focus mode</b> - Click this to cycle through the available focus modes.
-Popup text will explain what each mode is. (Only available if the camera supports different focus modes.)</p>
+Popup text will explain what each mode is. (Only available if the camera supports different focus modes.) A special mode is "Focus Manual",
+which means the camera will never refocus when taking a photo, instead you should touch the screen to manually focus.</p>
 
 <p><img src="exposure.png" width="32" height="32"><b>Exposure compensation</b> - Clicking this will bring up a
 slider and plus/minus buttons which can be used to control the exposure compensation. A higher value increases
@@ -377,6 +378,8 @@ FIXED   Problem with face detection not resuming after focusing on mtk6589.
 FIXED   Workaround for aspect ratio bug introduced in Android 4.4.3:
         http://code.google.com/p/android/issues/detail?id=70830
         Problem that this caused with aspect ratio with video recording.
+ADDED   New "manual" focus mode - focusing happens when you touch the screen,
+        but it doesn't do automatic focusing when taking a photo.
 ADDED   Support for more hardware buttons: camera button to take photo/video;
         focus button; zoom in/out buttons.
 UPDATED Expanded number of devices which show the "Force 4K UHD video
