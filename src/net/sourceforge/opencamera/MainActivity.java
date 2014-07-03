@@ -116,6 +116,8 @@ public class MainActivity extends Activity {
 
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
         getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
+        getWindow().addFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		if( mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null ) {
