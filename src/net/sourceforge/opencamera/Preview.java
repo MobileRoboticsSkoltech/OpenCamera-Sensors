@@ -527,7 +527,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			if( file != null ) {
     				// need to scan when finished, so we update for the completed file
     				MainActivity main_activity = (MainActivity)this.getContext();
-    	            main_activity.broadcastFile(file);
+    	            main_activity.broadcastFile(file, false, true);
     			}
     			// create thumbnail
     			{
@@ -3730,7 +3730,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
                 	    		}
         	            	}
 
-            	            main_activity.broadcastFile(picFile);
+            	            main_activity.broadcastFile(picFile, true, false);
         	            	test_last_saved_image = picFileName;
         	            }
         	            if( image_capture_intent ) {
@@ -4002,7 +4002,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 						Log.d(TAG, "successfully deleted " + preview_image_name);
     	    	    showToast(null, "Photo deleted");
 					MainActivity main_activity = (MainActivity)this.getContext();
-    	            main_activity.broadcastFile(file);
+    	            main_activity.broadcastFile(file, false, false);
 				}
 			}
 			startCameraPreview();

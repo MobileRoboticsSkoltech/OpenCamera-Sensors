@@ -56,7 +56,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -1143,7 +1143,7 @@ public class MainActivity extends Activity {
 	    }
 	}
 
-    public void broadcastFile(File file) {
+    public void broadcastFile(File file, boolean is_new_picture, boolean is_new_video) {
     	// note that the new method means that the new folder shows up as a file when connected to a PC via MTP (at least tested on Windows 8)
     	if( file.isDirectory() ) {
     		//this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(file)));
@@ -1164,6 +1164,14 @@ public class MainActivity extends Activity {
     		 		}
     			}
     		);
+        	if( is_new_picture ) {
+        		this.sendBroadcast(new Intent(Camera.ACTION_NEW_PICTURE, Uri.fromFile(file)));
+        		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
+        		this.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", Uri.fromFile(file)));
+        	}
+        	else if( is_new_video ) {
+        		this.sendBroadcast(new Intent(Camera.ACTION_NEW_VIDEO, Uri.fromFile(file)));
+        	}
     	}
 	}
     
@@ -1209,7 +1217,7 @@ public class MainActivity extends Activity {
         			Log.e(TAG, "failed to create directory");
                 return null;
             }
-            broadcastFile(mediaStorageDir);
+            broadcastFile(mediaStorageDir, false, false);
         }
 
         // Create a media file name
