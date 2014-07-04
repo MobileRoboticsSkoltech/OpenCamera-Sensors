@@ -1501,7 +1501,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( MyDebug.LOG )
 					Log.d(TAG, "fps invalid format, can't parse to int: " + fps_value);
 			}
-		}
+		}		
 		return profile;
 	}
 	
@@ -3249,6 +3249,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
+				boolean store_location = sharedPreferences.getBoolean("preference_location", false);
+				// Android camera source claims we need to check lat/long != 0.0d
+				if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+		    		if( MyDebug.LOG ) {
+		    			Log.d(TAG, "set video location: lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
+		    		}
+					video_recorder.setLocation((float)location.getLatitude(), (float)location.getLongitude());
+				}
+
 				if( record_audio ) {
 					video_recorder.setProfile(profile);
 				}
@@ -3260,6 +3269,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
 					video_recorder.setVideoEncoder(profile.videoCodec);
 				}
+	    		if( MyDebug.LOG ) {
+	    			Log.d(TAG, "video fileformat: " + profile.fileFormat);
+	    		}
 
 	        	video_recorder.setOrientationHint(this.current_rotation);
 	        	video_recorder.setOutputFile(video_name);

@@ -54,7 +54,7 @@
 <li>Choice of save folder (though note <a href="http://www.androidpolice.com/2014/02/17/external-blues-google-has-brought-big-changes-to-sd-cards-in-kitkat-and-even-samsung-may-be-implementing-them/">Google have blocked write access to external SD cards in Android 4.4</a>).</li>
 <li>Configurable on-screen display shows battery, time, remaining device memory, orientation and direction of camera; also option to overlay a choice of grids (including "rule of thirds").</li>
 <li>Preview aspect ratio can be set either to maximise the preview display size, or match the aspect ratio of the photo/video resolution (so what you see is what is actually recorded).</li>
-<li>Optional GPS location tagging (geotagging) of photos, including compass direction (GPSImgDirection, GPSImgDirectionRef).</li>
+<li>Optional GPS location tagging (geotagging) of photos and videos; for photos this includes compass direction (GPSImgDirection, GPSImgDirectionRef).</li>
 <li>Support for external microphones (may not be supported by all devices).</li>
 <li>Small file size.</li>
 <li>Completely free and ad-free, unlike most Android apps.</li>
@@ -314,9 +314,10 @@ images will in general come out as a slightly lower resolution (due to the rotat
 <p><b>Image quality</b> - The image quality of saved JPEG images. Higher means better quality, but the image files will take up
 more storage space.</p>
 
-<p><b>Store location data (Geotagging)</b> - If selected, then photos will be tagged with the current location, and compass direction
-(note that if Open Camera is called via another app, the compass direction won't be saved - this is only supported when Open Camera is run
-as a standalone app).</p>
+<p><b>Store location data (Geotagging)</b> - If selected, then photos will be tagged with the current
+location, and  compass direction (note that if Open Camera is called via another app, the compass direction
+won't be saved - this is only supported when Open Camera is run as a standalone app). Location data will also
+be stored in videos (though only for devices that record in MPEG4 or 3GPP formats).</p>
 
 <p><b>Video resolution</b> - Select the resolution of videos taken by the camera.</p>
 
@@ -388,6 +389,8 @@ ADDED   New "manual" focus mode - focusing happens when you touch the screen,
         but it doesn't do automatic focusing when taking a photo.
 ADDED   Support for more hardware buttons: camera button to take photo/video;
         focus button; zoom in/out buttons.
+ADDED   Location data now stored in videos too, if geotagging option is enabled
+        (only for MPEG4 and 3GPP video formats).
 UPDATED Open Camera now remains active rather than being blocked by a "screen
         lock" (face/PIN unlock still required to go to Gallery or Settings).
 UPDATED Broadcast Camera.ACTION_NEW_PICTURE and com.android.camera.NEW_PICTURE
