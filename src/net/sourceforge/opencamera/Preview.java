@@ -666,6 +666,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 	
 	void pausePreview() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "pausePreview()");
 		this.setPreviewPaused(false);
 		camera.stopPreview();
 		this.phase = PHASE_NORMAL;
@@ -776,6 +778,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	/* Should only be called after camera first opened, or after preview is paused.
 	 */
 	void setupCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setupCamera()");
 		Activity activity = (Activity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
