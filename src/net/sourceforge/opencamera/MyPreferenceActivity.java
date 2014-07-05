@@ -38,11 +38,12 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences); // n.b., deprecated because we're not using a fragment...
 
-		final int cameraId = getIntent().getExtras().getInt("cameraId");
+		final Bundle bundle = getIntent().getExtras();
+		final int cameraId = bundle.getInt("cameraId");
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
 		
-		final boolean supports_auto_stabilise = getIntent().getExtras().getBoolean("supports_auto_stabilise");
+		final boolean supports_auto_stabilise = bundle.getBoolean("supports_auto_stabilise");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);
 
@@ -52,13 +53,13 @@ public class MyPreferenceActivity extends PreferenceActivity {
         	pg.removePreference(pref);
 		}
 
-		readFromIntent("color_effects", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
-		readFromIntent("scene_modes", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
-		readFromIntent("white_balances", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
-		readFromIntent("isos", Preview.getISOPreferenceKey(), "auto", "preference_category_camera_effects");
-		//readFromIntent("exposures", "preference_exposure", "0", "preference_category_camera_effects");
+		readFromBundle(bundle, "color_effects", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
+		readFromBundle(bundle, "scene_modes", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
+		readFromBundle(bundle, "white_balances", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
+		readFromBundle(bundle, "isos", Preview.getISOPreferenceKey(), "auto", "preference_category_camera_effects");
+		//readFromBundle(bundle, "exposures", "preference_exposure", "0", "preference_category_camera_effects");
 
-		final boolean supports_face_detection = getIntent().getExtras().getBoolean("supports_face_detection");
+		final boolean supports_face_detection = bundle.getBoolean("supports_face_detection");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_face_detection: " + supports_face_detection);
 
@@ -68,13 +69,13 @@ public class MyPreferenceActivity extends PreferenceActivity {
         	pg.removePreference(pref);
 		}
 
-		final int [] preview_widths = getIntent().getExtras().getIntArray("preview_widths");
-		final int [] preview_heights = getIntent().getExtras().getIntArray("preview_heights");
-		final int [] video_widths = getIntent().getExtras().getIntArray("video_widths");
-		final int [] video_heights = getIntent().getExtras().getIntArray("video_heights");
+		final int [] preview_widths = bundle.getIntArray("preview_widths");
+		final int [] preview_heights = bundle.getIntArray("preview_heights");
+		final int [] video_widths = bundle.getIntArray("video_widths");
+		final int [] video_heights = bundle.getIntArray("video_heights");
 
-		final int [] widths = getIntent().getExtras().getIntArray("resolution_widths");
-		final int [] heights = getIntent().getExtras().getIntArray("resolution_heights");
+		final int [] widths = bundle.getIntArray("resolution_widths");
+		final int [] heights = bundle.getIntArray("resolution_heights");
 		if( widths != null && heights != null ) {
 			CharSequence [] entries = new CharSequence[widths.length];
 			CharSequence [] values = new CharSequence[widths.length];
@@ -113,8 +114,8 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			lp.setEntryValues(values);
 		}
 
-		final String [] video_quality = getIntent().getExtras().getStringArray("video_quality");
-		final String [] video_quality_string = getIntent().getExtras().getStringArray("video_quality_string");
+		final String [] video_quality = bundle.getStringArray("video_quality");
+		final String [] video_quality_string = bundle.getStringArray("video_quality_string");
 		if( video_quality != null && video_quality_string != null ) {
 			CharSequence [] entries = new CharSequence[video_quality.length];
 			CharSequence [] values = new CharSequence[video_quality.length];
@@ -140,7 +141,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
         	pg.removePreference(pref);
 		}
 
-		final boolean supports_force_video_4k = getIntent().getExtras().getBoolean("supports_force_video_4k");
+		final boolean supports_force_video_4k = bundle.getBoolean("supports_force_video_4k");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_force_video_4k: " + supports_force_video_4k);
 		if( !supports_force_video_4k || video_quality == null || video_quality_string == null ) {
@@ -318,7 +319,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                         about_string.append("\nFace detection?: ");
                         about_string.append(getString(supports_face_detection ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nFlash modes: ");
-                		String [] flash_values = getIntent().getExtras().getStringArray("flash_values");
+                		String [] flash_values = bundle.getStringArray("flash_values");
                 		if( flash_values != null && flash_values.length > 0 ) {
                 			for(int i=0;i<flash_values.length;i++) {
                 				if( i > 0 ) {
@@ -331,7 +332,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                             about_string.append("None");
                 		}
                         about_string.append("\nFocus modes: ");
-                		String [] focus_values = getIntent().getExtras().getStringArray("focus_values");
+                		String [] focus_values = bundle.getStringArray("focus_values");
                 		if( focus_values != null && focus_values.length > 0 ) {
                 			for(int i=0;i<focus_values.length;i++) {
                 				if( i > 0 ) {
@@ -344,7 +345,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                             about_string.append("None");
                 		}
                         about_string.append("\nColor effects: ");
-                		String [] color_effects_values = getIntent().getExtras().getStringArray("color_effects");
+                		String [] color_effects_values = bundle.getStringArray("color_effects");
                 		if( color_effects_values != null && color_effects_values.length > 0 ) {
                 			for(int i=0;i<color_effects_values.length;i++) {
                 				if( i > 0 ) {
@@ -357,7 +358,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                             about_string.append("None");
                 		}
                         about_string.append("\nScene modes: ");
-                		String [] scene_modes_values = getIntent().getExtras().getStringArray("scene_modes");
+                		String [] scene_modes_values = bundle.getStringArray("scene_modes");
                 		if( scene_modes_values != null && scene_modes_values.length > 0 ) {
                 			for(int i=0;i<scene_modes_values.length;i++) {
                 				if( i > 0 ) {
@@ -370,7 +371,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                             about_string.append("None");
                 		}
                         about_string.append("\nWhite balances: ");
-                		String [] white_balances_values = getIntent().getExtras().getStringArray("white_balances");
+                		String [] white_balances_values = bundle.getStringArray("white_balances");
                 		if( white_balances_values != null && white_balances_values.length > 0 ) {
                 			for(int i=0;i<white_balances_values.length;i++) {
                 				if( i > 0 ) {
@@ -383,7 +384,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                             about_string.append("None");
                 		}
                         about_string.append("\nISOs: ");
-                		String [] isos = getIntent().getExtras().getStringArray("isos");
+                		String [] isos = bundle.getStringArray("isos");
                 		if( isos != null && isos.length > 0 ) {
                 			for(int i=0;i<isos.length;i++) {
                 				if( i > 0 ) {
@@ -395,13 +396,13 @@ public class MyPreferenceActivity extends PreferenceActivity {
                 		else {
                             about_string.append("None");
                 		}
-                		String iso_key = getIntent().getExtras().getString("iso_key");
+                		String iso_key = bundle.getString("iso_key");
                 		if( iso_key != null ) {
                 			about_string.append("\nISO key: " + iso_key);
                 		}
 
                 		about_string.append("\nParameters: ");
-                		String parameters_string = getIntent().getExtras().getString("parameters_string");
+                		String parameters_string = bundle.getString("parameters_string");
                 		if( parameters_string != null ) {
                 			about_string.append(parameters_string);
                 		}
@@ -429,8 +430,11 @@ public class MyPreferenceActivity extends PreferenceActivity {
         }
 	}
 	
-	private void readFromIntent(String intent_key, String preference_key, String default_value, String preference_category_key) {
-		String [] values = getIntent().getExtras().getStringArray(intent_key);
+	private void readFromBundle(Bundle bundle, String intent_key, String preference_key, String default_value, String preference_category_key) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "readFromBundle: " + intent_key);
+		}
+		String [] values = bundle.getStringArray(intent_key);
 		if( values != null && values.length > 0 ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, intent_key + " values:");
