@@ -659,16 +659,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				this.updateFocusForVideo(false);
 			}
 			//camera.setPreviewCallback(null);
-			this.setPreviewPaused(false);
-			camera.stopPreview();
-			/*this.is_taking_photo = false;
-			this.is_taking_photo_on_timer = false;*/
-    		this.phase = PHASE_NORMAL;
-			this.is_preview_started = false;
-			showGUI(true);
+			pausePreview();
 			camera.release();
 			camera = null;
 		}
+	}
+	
+	void pausePreview() {
+		this.setPreviewPaused(false);
+		camera.stopPreview();
+		this.phase = PHASE_NORMAL;
+		this.is_preview_started = false;
+		showGUI(true);
 	}
 	
 	private void openCamera() {
@@ -757,461 +759,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
 
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-
 		    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
 		    switchCameraButton.setVisibility(Camera.getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
 
-		    Camera.Parameters parameters = camera.getParameters();
-		    
-		    /*{
-		    	// test for Samsung Galaxy cameras
-		    	// from http://forum.xda-developers.com/showpost.php?p=39210051&postcount=27
-		    	parameters.set("mode", "m"); 
-	        	// read back parameters, just to be safe
-	        	camera.setParameters(parameters);
-				parameters = camera.getParameters();
-		    }*/
-
-			// get available scene modes
-			// important, from docs:
-			// "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance).
-			// For example, suppose originally flash mode is on and supported flash modes are on/off. In night
-			// scene mode, both flash mode and supported flash mode may be changed to off. After setting scene
-			// mode, applications should call getParameters to know if some parameters are changed."
-			scene_modes = parameters.getSupportedSceneModes();
-			String scene_mode = setupValuesPref(scene_modes, getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
-			if( scene_mode != null && !parameters.getSceneMode().equals(scene_mode) ) {
-	        	parameters.setSceneMode(scene_mode);
-	        	// need to read back parameters, see comment above
-	        	camera.setParameters(parameters);
-				parameters = camera.getParameters();
-			}
-
-			this.has_zoom = parameters.isZoomSupported();
-			if( MyDebug.LOG )
-				Log.d(TAG, "has_zoom? " + has_zoom);
-		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
-		    SeekBar zoomSeekBar = (SeekBar) activity.findViewById(R.id.zoom_seekbar);
-			if( this.has_zoom ) {
-				this.max_zoom_factor = parameters.getMaxZoom();
-				try {
-					this.zoom_ratios = parameters.getZoomRatios();
-				}
-				catch(NumberFormatException e) {
-	        		// crash java.lang.NumberFormatException: Invalid int: " 500" reported in v1.4 on device "es209ra", Android 4.1, 3 Jan 2014
-					// this is from java.lang.Integer.invalidInt(Integer.java:138) - unclear if this is a bug in Open Camera, all we can do for now is catch it
-		    		if( MyDebug.LOG )
-		    			Log.e(TAG, "NumberFormatException in getZoomRatios()");
-					e.printStackTrace();
-					this.has_zoom = false;
-					this.zoom_ratios = null;
-				}
-			}
-
-			if( this.has_zoom ) {
-				if( sharedPreferences.getBoolean("preference_show_zoom_controls", true) ) {
-				    zoomControls.setIsZoomInEnabled(true);
-			        zoomControls.setIsZoomOutEnabled(true);
-			        zoomControls.setZoomSpeed(20);
-	
-			        zoomControls.setOnZoomInClickListener(new OnClickListener(){
-			            public void onClick(View v){
-			            	zoomIn();
-			            }
-			        });
-				    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
-				    	public void onClick(View v){
-				    		zoomOut();
-				        }
-				    });
-					zoomControls.setVisibility(View.VISIBLE);
-				}
-				else {
-					zoomControls.setVisibility(View.INVISIBLE); // must be INVISIBLE not GONE, so we can still position the zoomSeekBar relative to it
-				}
-				
-				zoomSeekBar.setMax(max_zoom_factor);
-				zoomSeekBar.setProgress(max_zoom_factor-zoom_factor);
-				zoomSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-					@Override
-					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-						zoomTo(max_zoom_factor-progress, false);
-					}
-
-					@Override
-					public void onStartTrackingTouch(SeekBar seekBar) {
-					}
-
-					@Override
-					public void onStopTrackingTouch(SeekBar seekBar) {
-					}
-				});
-				zoomSeekBar.setVisibility(View.VISIBLE);
-			}
-			else {
-				zoomControls.setVisibility(View.GONE);
-				zoomSeekBar.setVisibility(View.GONE);
-			}
-			
-			// get face detection supported
-			this.faces_detected = null;
-			this.supports_face_detection = parameters.getMaxNumDetectedFaces() > 0;
-			if( this.supports_face_detection ) {
-				this.using_face_detection = sharedPreferences.getBoolean("preference_face_detection", false);
-			}
-			else {
-				this.using_face_detection = false;
-			}
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "supports_face_detection?: " + supports_face_detection);
-				Log.d(TAG, "using_face_detection?: " + using_face_detection);
-			}
-			if( this.using_face_detection ) {
-				class MyFaceDetectionListener implements Camera.FaceDetectionListener {
-				    @Override
-				    public void onFaceDetection(Face[] faces, Camera camera) {
-				    	faces_detected = new Face[faces.length];
-				    	System.arraycopy(faces, 0, faces_detected, 0, faces.length);				    	
-				    }
-				}
-				camera.setFaceDetectionListener(new MyFaceDetectionListener());
-			}
-
-			// get available color effects
-			color_effects = parameters.getSupportedColorEffects();
-			String color_effect = setupValuesPref(color_effects, getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
-			if( color_effect != null ) {
-	        	parameters.setColorEffect(color_effect);
-			}
-
-			// get available white balances
-			white_balances = parameters.getSupportedWhiteBalance();
-			String white_balance = setupValuesPref(white_balances, getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
-			if( white_balance != null ) {
-	        	parameters.setWhiteBalance(white_balance);
-			}
-			
-			// get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting
-			{
-				String iso_values = parameters.get("iso-values");
-				if( iso_values == null ) {
-					iso_values = parameters.get("iso-mode-values"); // Galaxy Nexus
-					if( iso_values == null ) {
-						iso_values = parameters.get("iso-speed-values"); // Micromax A101
-						if( iso_values == null )
-							iso_values = parameters.get("nv-picture-iso-values"); // LG dual P990
-					}
-				}
-				if( iso_values != null && iso_values.length() > 0 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "iso_values: " + iso_values);
-					String [] isos_array = iso_values.split(",");					
-					if( isos_array != null && isos_array.length > 0 ) {
-						isos = new ArrayList<String>();				
-						for(int i=0;i< isos_array.length;i++) {
-							isos.add(isos_array[i]);
-						}
-					}
-				}
-			}
-			iso_key = "iso";
-			if( parameters.get(iso_key) == null ) {
-				iso_key = "iso-speed"; // Micromax A101
-				if( parameters.get(iso_key) == null ) {
-					iso_key = "nv-picture-iso"; // LG dual P990
-					if( parameters.get(iso_key) == null )
-						iso_key = null; // not supported
-				}
-			}
-			if( iso_key != null ) {
-				if( isos == null ) {
-					// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
-					isos = new ArrayList<String>();
-					isos.add("auto");
-					isos.add("100");
-					isos.add("200");
-					isos.add("400");
-					isos.add("800");
-					isos.add("1600");
-				}
-				String iso = setupValuesPref(isos, getISOPreferenceKey(), "auto");
-				if( iso != null ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "set: " + iso_key + " to: " + iso);
-		        	parameters.set(iso_key, iso);
-				}
-			}
-
-			// get min/max exposure
-			exposures = null;
-			min_exposure = parameters.getMinExposureCompensation();
-			max_exposure = parameters.getMaxExposureCompensation();
-			if( min_exposure != 0 || max_exposure != 0 ) {
-				exposures = new Vector<String>();
-				for(int i=min_exposure;i<=max_exposure;i++) {
-					exposures.add("" + i);
-				}
-				String exposure_s = setupValuesPref(exposures, getExposurePreferenceKey(), "0");
-				if( exposure_s != null ) {
-					try {
-						int exposure = Integer.parseInt(exposure_s);
-						if( MyDebug.LOG )
-							Log.d(TAG, "exposure: " + exposure);
-						parameters.setExposureCompensation(exposure);
-					}
-					catch(NumberFormatException exception) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "exposure invalid format, can't parse to int");
-					}
-				}
-			}
-			View exposureButton = (View) activity.findViewById(R.id.exposure);
-		    exposureButton.setVisibility(exposures != null ? View.VISIBLE : View.GONE);
-
-			// get available sizes
-	        sizes = parameters.getSupportedPictureSizes();
-			if( MyDebug.LOG ) {
-				for(int i=0;i<sizes.size();i++) {
-		        	Camera.Size size = sizes.get(i);
-		        	Log.d(TAG, "supported picture size: " + size.width + " , " + size.height);
-				}
-			}
-			current_size_index = -1;
-			String resolution_value = sharedPreferences.getString(getResolutionPreferenceKey(cameraId), "");
-			if( MyDebug.LOG )
-				Log.d(TAG, "resolution_value: " + resolution_value);
-			if( resolution_value.length() > 0 ) {
-				// parse the saved size, and make sure it is still valid
-				int index = resolution_value.indexOf(' ');
-				if( index == -1 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "resolution_value invalid format, can't find space");
-				}
-				else {
-					String resolution_w_s = resolution_value.substring(0, index);
-					String resolution_h_s = resolution_value.substring(index+1);
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "resolution_w_s: " + resolution_w_s);
-						Log.d(TAG, "resolution_h_s: " + resolution_h_s);
-					}
-					try {
-						int resolution_w = Integer.parseInt(resolution_w_s);
-						if( MyDebug.LOG )
-							Log.d(TAG, "resolution_w: " + resolution_w);
-						int resolution_h = Integer.parseInt(resolution_h_s);
-						if( MyDebug.LOG )
-							Log.d(TAG, "resolution_h: " + resolution_h);
-						// now find size in valid list
-						for(int i=0;i<sizes.size() && current_size_index==-1;i++) {
-				        	Camera.Size size = sizes.get(i);
-				        	if( size.width == resolution_w && size.height == resolution_h ) {
-				        		current_size_index = i;
-								if( MyDebug.LOG )
-									Log.d(TAG, "set current_size_index to: " + current_size_index);
-				        	}
-						}
-						if( current_size_index == -1 ) {
-							if( MyDebug.LOG )
-								Log.e(TAG, "failed to find valid size");
-						}
-					}
-					catch(NumberFormatException exception) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "resolution_value invalid format, can't parse w or h to int");
-					}
-				}
-			}
-
-			if( current_size_index == -1 ) {
-				// set to largest
-				Camera.Size current_size = null;
-				for(int i=0;i<sizes.size();i++) {
-		        	Camera.Size size = sizes.get(i);
-		        	if( current_size == null || size.width*size.height > current_size.width*current_size.height ) {
-		        		current_size_index = i;
-		        		current_size = size;
-		        	}
-		        }
-			}
-			if( current_size_index != -1 ) {
-				Camera.Size current_size = sizes.get(current_size_index);
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "Current size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
-
-	    		// now save, so it's available for PreferenceActivity
-				resolution_value = current_size.width + " " + current_size.height;
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "save new resolution_value: " + resolution_value);
-				}
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getResolutionPreferenceKey(cameraId), resolution_value);
-				editor.apply();
-			}
-			// size set later in setPreviewSize()
-
-    		/*if( MyDebug.LOG )
-    			Log.d(TAG, "Current image quality: " + parameters.getJpegQuality());*/
-			int image_quality = getImageQuality();
-			parameters.setJpegQuality(image_quality);
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "image quality: " + image_quality);
-
-    		if( MyDebug.LOG ) {
-    			//Log.d(TAG, "time after reading camera parameters: " + (System.currentTimeMillis() - debug_time));
-    		}
-
-			// get available sizes
-    		initialiseVideoQuality(parameters);
-
-			current_video_quality = -1;
-			String video_quality_value_s = sharedPreferences.getString(getVideoQualityPreferenceKey(cameraId), "");
-			if( MyDebug.LOG )
-				Log.d(TAG, "video_quality_value: " + video_quality_value_s);
-			if( video_quality_value_s.length() > 0 ) {
-				// parse the saved video quality, and make sure it is still valid
-				// now find value in valid list
-				for(int i=0;i<video_quality.size() && current_video_quality==-1;i++) {
-		        	if( video_quality.get(i).equals(video_quality_value_s) ) {
-		        		current_video_quality = i;
-						if( MyDebug.LOG )
-							Log.d(TAG, "set current_video_quality to: " + current_video_quality);
-		        	}
-				}
-				if( current_video_quality == -1 ) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "failed to find valid video_quality");
-				}
-			}
-			if( current_video_quality == -1 && video_quality.size() > 0 ) {
-				// default to highest quality
-				current_video_quality = 0;
-				if( MyDebug.LOG )
-					Log.d(TAG, "set video_quality value to " + video_quality.get(current_video_quality));
-			}
-			if( current_video_quality != -1 ) {
-	    		// now save, so it's available for PreferenceActivity
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getVideoQualityPreferenceKey(cameraId), video_quality.get(current_video_quality));
-				editor.apply();
-			}
-
-    		parameters.getPreviewFpsRange(current_fps_range);
-	    	if( MyDebug.LOG ) {
-				Log.d(TAG, "    current fps range: " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-	    	}
-
-    		// update parameters
-    		camera.setParameters(parameters);
-
-    		// we do the following after setting parameters, as these are done by calling separate functions, that themselves set the parameters directly
-			List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
-		    View flashButton = (View) activity.findViewById(R.id.flash);
-			current_flash_index = -1;
-			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "flash modes: " + supported_flash_modes);
-				supported_flash_values = convertFlashModesToValues(supported_flash_modes); // convert to our format (also resorts)
-
-				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
-				if( flash_value.length() > 0 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found existing flash_value: " + flash_value);
-					if( !updateFlash(flash_value) ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "flash value no longer supported!");
-						updateFlash(0);
-					}
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found no existing flash_value");
-					updateFlash(0);
-				}
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "flash not supported");
-				supported_flash_values = null;
-			}
-			flashButton.setVisibility(supported_flash_values != null ? View.VISIBLE : View.GONE);
-
-			List<String> supported_focus_modes = parameters.getSupportedFocusModes(); // Android format
-		    View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
-			current_focus_index = -1;
-			if( supported_focus_modes != null && supported_focus_modes.size() > 1 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "focus modes: " + supported_focus_modes);
-				supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
-
-				String focus_value = sharedPreferences.getString(getFocusPreferenceKey(cameraId), "");
-				if( focus_value.length() > 0 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found existing focus_value: " + focus_value);
-					if( !updateFocus(focus_value, false, false, true) ) { // don't need to save, as this is the value that's already saved
-						if( MyDebug.LOG )
-							Log.d(TAG, "focus value no longer supported!");
-						updateFocus(0, false, true, true);
-					}
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found no existing focus_value");
-					updateFocus(0, false, true, true);
-				}
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "focus not supported");
-				supported_focus_values = null;
-			}
-			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);
-
-		    this.is_exposure_locked_supported = parameters.isAutoExposureLockSupported();
-		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
-		    exposureLockButton.setVisibility(is_exposure_locked_supported ? View.VISIBLE : View.GONE);
-	    	is_exposure_locked = false;
-		    if( is_exposure_locked_supported ) {
-		    	// exposure lock should always default to false, as doesn't make sense to save it - we can't really preserve a "lock" after the camera is reopened
-		    	// also note that it isn't safe to lock the exposure before starting the preview
-				exposureLockButton.setImageResource(is_exposure_locked ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
-		    }
-
-			// now switch to video if saved
-			boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "saved_is_video: " + saved_is_video);
-			}
-			if( saved_is_video != this.is_video ) {
-				this.switchVideo(false, false);
-			}
-			else {
-				showPhotoVideoToast();
-			}
-
-			// must be done after setting parameters, as this function may set parameters
-			if( this.has_zoom && zoom_factor != 0 ) {
-				int new_zoom_factor = zoom_factor;
-				zoom_factor = 0; // force zoomTo to actually update the zoom!
-				zoomTo(new_zoom_factor, true);
-			}
-
-			// Must set preview size before starting camera preview
-			// and must do it after setting photo vs video mode
-    		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
-			// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
-			startCameraPreview();
-			if( MyDebug.LOG ) {
-				//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
-			}
-
-	    	final Handler handler = new Handler();
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					tryAutoFocus(true, false); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
-				}
-			}, 500);
+		    setupCamera();
 		}
 
 		if( MyDebug.LOG ) {
@@ -1220,6 +771,464 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "camera parameters: " + camera.getParameters().flatten());
 			}
 		}
+	}
+	
+	/* Should only be called after camera first opened, or after preview is paused.
+	 */
+	void setupCamera() {
+		Activity activity = (Activity)this.getContext();
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+
+	    Camera.Parameters parameters = camera.getParameters();
+	    
+	    /*{
+	    	// test for Samsung Galaxy cameras
+	    	// from http://forum.xda-developers.com/showpost.php?p=39210051&postcount=27
+	    	parameters.set("mode", "m"); 
+        	// read back parameters, just to be safe
+        	camera.setParameters(parameters);
+			parameters = camera.getParameters();
+	    }*/
+
+		// get available scene modes
+		// important, from docs:
+		// "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance).
+		// For example, suppose originally flash mode is on and supported flash modes are on/off. In night
+		// scene mode, both flash mode and supported flash mode may be changed to off. After setting scene
+		// mode, applications should call getParameters to know if some parameters are changed."
+		scene_modes = parameters.getSupportedSceneModes();
+		String scene_mode = setupValuesPref(scene_modes, getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
+		if( scene_mode != null && !parameters.getSceneMode().equals(scene_mode) ) {
+        	parameters.setSceneMode(scene_mode);
+        	// need to read back parameters, see comment above
+        	camera.setParameters(parameters);
+			parameters = camera.getParameters();
+		}
+
+		this.has_zoom = parameters.isZoomSupported();
+		if( MyDebug.LOG )
+			Log.d(TAG, "has_zoom? " + has_zoom);
+	    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
+	    SeekBar zoomSeekBar = (SeekBar) activity.findViewById(R.id.zoom_seekbar);
+		if( this.has_zoom ) {
+			this.max_zoom_factor = parameters.getMaxZoom();
+			try {
+				this.zoom_ratios = parameters.getZoomRatios();
+			}
+			catch(NumberFormatException e) {
+        		// crash java.lang.NumberFormatException: Invalid int: " 500" reported in v1.4 on device "es209ra", Android 4.1, 3 Jan 2014
+				// this is from java.lang.Integer.invalidInt(Integer.java:138) - unclear if this is a bug in Open Camera, all we can do for now is catch it
+	    		if( MyDebug.LOG )
+	    			Log.e(TAG, "NumberFormatException in getZoomRatios()");
+				e.printStackTrace();
+				this.has_zoom = false;
+				this.zoom_ratios = null;
+			}
+		}
+
+		if( this.has_zoom ) {
+			if( sharedPreferences.getBoolean("preference_show_zoom_controls", true) ) {
+			    zoomControls.setIsZoomInEnabled(true);
+		        zoomControls.setIsZoomOutEnabled(true);
+		        zoomControls.setZoomSpeed(20);
+
+		        zoomControls.setOnZoomInClickListener(new OnClickListener(){
+		            public void onClick(View v){
+		            	zoomIn();
+		            }
+		        });
+			    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
+			    	public void onClick(View v){
+			    		zoomOut();
+			        }
+			    });
+				zoomControls.setVisibility(View.VISIBLE);
+			}
+			else {
+				zoomControls.setVisibility(View.INVISIBLE); // must be INVISIBLE not GONE, so we can still position the zoomSeekBar relative to it
+			}
+			
+			zoomSeekBar.setMax(max_zoom_factor);
+			zoomSeekBar.setProgress(max_zoom_factor-zoom_factor);
+			zoomSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+					zoomTo(max_zoom_factor-progress, false);
+				}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {
+				}
+
+				@Override
+				public void onStopTrackingTouch(SeekBar seekBar) {
+				}
+			});
+			zoomSeekBar.setVisibility(View.VISIBLE);
+		}
+		else {
+			zoomControls.setVisibility(View.GONE);
+			zoomSeekBar.setVisibility(View.GONE);
+		}
+		
+		// get face detection supported
+		this.faces_detected = null;
+		this.supports_face_detection = parameters.getMaxNumDetectedFaces() > 0;
+		if( this.supports_face_detection ) {
+			this.using_face_detection = sharedPreferences.getBoolean("preference_face_detection", false);
+		}
+		else {
+			this.using_face_detection = false;
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "supports_face_detection?: " + supports_face_detection);
+			Log.d(TAG, "using_face_detection?: " + using_face_detection);
+		}
+		if( this.using_face_detection ) {
+			class MyFaceDetectionListener implements Camera.FaceDetectionListener {
+			    @Override
+			    public void onFaceDetection(Face[] faces, Camera camera) {
+			    	faces_detected = new Face[faces.length];
+			    	System.arraycopy(faces, 0, faces_detected, 0, faces.length);				    	
+			    }
+			}
+			camera.setFaceDetectionListener(new MyFaceDetectionListener());
+		}
+
+		// get available color effects
+		color_effects = parameters.getSupportedColorEffects();
+		String color_effect = setupValuesPref(color_effects, getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
+		if( color_effect != null ) {
+        	parameters.setColorEffect(color_effect);
+		}
+
+		// get available white balances
+		white_balances = parameters.getSupportedWhiteBalance();
+		String white_balance = setupValuesPref(white_balances, getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
+		if( white_balance != null ) {
+        	parameters.setWhiteBalance(white_balance);
+		}
+		
+		// get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting
+		{
+			String iso_values = parameters.get("iso-values");
+			if( iso_values == null ) {
+				iso_values = parameters.get("iso-mode-values"); // Galaxy Nexus
+				if( iso_values == null ) {
+					iso_values = parameters.get("iso-speed-values"); // Micromax A101
+					if( iso_values == null )
+						iso_values = parameters.get("nv-picture-iso-values"); // LG dual P990
+				}
+			}
+			if( iso_values != null && iso_values.length() > 0 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "iso_values: " + iso_values);
+				String [] isos_array = iso_values.split(",");					
+				if( isos_array != null && isos_array.length > 0 ) {
+					isos = new ArrayList<String>();				
+					for(int i=0;i< isos_array.length;i++) {
+						isos.add(isos_array[i]);
+					}
+				}
+			}
+		}
+		iso_key = "iso";
+		if( parameters.get(iso_key) == null ) {
+			iso_key = "iso-speed"; // Micromax A101
+			if( parameters.get(iso_key) == null ) {
+				iso_key = "nv-picture-iso"; // LG dual P990
+				if( parameters.get(iso_key) == null )
+					iso_key = null; // not supported
+			}
+		}
+		if( iso_key != null ) {
+			if( isos == null ) {
+				// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
+				isos = new ArrayList<String>();
+				isos.add("auto");
+				isos.add("100");
+				isos.add("200");
+				isos.add("400");
+				isos.add("800");
+				isos.add("1600");
+			}
+			String iso = setupValuesPref(isos, getISOPreferenceKey(), "auto");
+			if( iso != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set: " + iso_key + " to: " + iso);
+	        	parameters.set(iso_key, iso);
+			}
+		}
+
+		// get min/max exposure
+		exposures = null;
+		min_exposure = parameters.getMinExposureCompensation();
+		max_exposure = parameters.getMaxExposureCompensation();
+		if( min_exposure != 0 || max_exposure != 0 ) {
+			exposures = new Vector<String>();
+			for(int i=min_exposure;i<=max_exposure;i++) {
+				exposures.add("" + i);
+			}
+			String exposure_s = setupValuesPref(exposures, getExposurePreferenceKey(), "0");
+			if( exposure_s != null ) {
+				try {
+					int exposure = Integer.parseInt(exposure_s);
+					if( MyDebug.LOG )
+						Log.d(TAG, "exposure: " + exposure);
+					parameters.setExposureCompensation(exposure);
+				}
+				catch(NumberFormatException exception) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "exposure invalid format, can't parse to int");
+				}
+			}
+		}
+		View exposureButton = (View) activity.findViewById(R.id.exposure);
+	    exposureButton.setVisibility(exposures != null ? View.VISIBLE : View.GONE);
+
+		// get available sizes
+        sizes = parameters.getSupportedPictureSizes();
+		if( MyDebug.LOG ) {
+			for(int i=0;i<sizes.size();i++) {
+	        	Camera.Size size = sizes.get(i);
+	        	Log.d(TAG, "supported picture size: " + size.width + " , " + size.height);
+			}
+		}
+		current_size_index = -1;
+		String resolution_value = sharedPreferences.getString(getResolutionPreferenceKey(cameraId), "");
+		if( MyDebug.LOG )
+			Log.d(TAG, "resolution_value: " + resolution_value);
+		if( resolution_value.length() > 0 ) {
+			// parse the saved size, and make sure it is still valid
+			int index = resolution_value.indexOf(' ');
+			if( index == -1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "resolution_value invalid format, can't find space");
+			}
+			else {
+				String resolution_w_s = resolution_value.substring(0, index);
+				String resolution_h_s = resolution_value.substring(index+1);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "resolution_w_s: " + resolution_w_s);
+					Log.d(TAG, "resolution_h_s: " + resolution_h_s);
+				}
+				try {
+					int resolution_w = Integer.parseInt(resolution_w_s);
+					if( MyDebug.LOG )
+						Log.d(TAG, "resolution_w: " + resolution_w);
+					int resolution_h = Integer.parseInt(resolution_h_s);
+					if( MyDebug.LOG )
+						Log.d(TAG, "resolution_h: " + resolution_h);
+					// now find size in valid list
+					for(int i=0;i<sizes.size() && current_size_index==-1;i++) {
+			        	Camera.Size size = sizes.get(i);
+			        	if( size.width == resolution_w && size.height == resolution_h ) {
+			        		current_size_index = i;
+							if( MyDebug.LOG )
+								Log.d(TAG, "set current_size_index to: " + current_size_index);
+			        	}
+					}
+					if( current_size_index == -1 ) {
+						if( MyDebug.LOG )
+							Log.e(TAG, "failed to find valid size");
+					}
+				}
+				catch(NumberFormatException exception) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "resolution_value invalid format, can't parse w or h to int");
+				}
+			}
+		}
+
+		if( current_size_index == -1 ) {
+			// set to largest
+			Camera.Size current_size = null;
+			for(int i=0;i<sizes.size();i++) {
+	        	Camera.Size size = sizes.get(i);
+	        	if( current_size == null || size.width*size.height > current_size.width*current_size.height ) {
+	        		current_size_index = i;
+	        		current_size = size;
+	        	}
+	        }
+		}
+		if( current_size_index != -1 ) {
+			Camera.Size current_size = sizes.get(current_size_index);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "Current size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
+
+    		// now save, so it's available for PreferenceActivity
+			resolution_value = current_size.width + " " + current_size.height;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "save new resolution_value: " + resolution_value);
+			}
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putString(getResolutionPreferenceKey(cameraId), resolution_value);
+			editor.apply();
+		}
+		// size set later in setPreviewSize()
+
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "Current image quality: " + parameters.getJpegQuality());*/
+		int image_quality = getImageQuality();
+		parameters.setJpegQuality(image_quality);
+		if( MyDebug.LOG )
+			Log.d(TAG, "image quality: " + image_quality);
+
+		if( MyDebug.LOG ) {
+			//Log.d(TAG, "time after reading camera parameters: " + (System.currentTimeMillis() - debug_time));
+		}
+
+		// get available sizes
+		initialiseVideoQuality(parameters);
+
+		current_video_quality = -1;
+		String video_quality_value_s = sharedPreferences.getString(getVideoQualityPreferenceKey(cameraId), "");
+		if( MyDebug.LOG )
+			Log.d(TAG, "video_quality_value: " + video_quality_value_s);
+		if( video_quality_value_s.length() > 0 ) {
+			// parse the saved video quality, and make sure it is still valid
+			// now find value in valid list
+			for(int i=0;i<video_quality.size() && current_video_quality==-1;i++) {
+	        	if( video_quality.get(i).equals(video_quality_value_s) ) {
+	        		current_video_quality = i;
+					if( MyDebug.LOG )
+						Log.d(TAG, "set current_video_quality to: " + current_video_quality);
+	        	}
+			}
+			if( current_video_quality == -1 ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to find valid video_quality");
+			}
+		}
+		if( current_video_quality == -1 && video_quality.size() > 0 ) {
+			// default to highest quality
+			current_video_quality = 0;
+			if( MyDebug.LOG )
+				Log.d(TAG, "set video_quality value to " + video_quality.get(current_video_quality));
+		}
+		if( current_video_quality != -1 ) {
+    		// now save, so it's available for PreferenceActivity
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putString(getVideoQualityPreferenceKey(cameraId), video_quality.get(current_video_quality));
+			editor.apply();
+		}
+
+		parameters.getPreviewFpsRange(current_fps_range);
+    	if( MyDebug.LOG ) {
+			Log.d(TAG, "    current fps range: " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+    	}
+
+		// update parameters
+		camera.setParameters(parameters);
+
+		// we do the following after setting parameters, as these are done by calling separate functions, that themselves set the parameters directly
+		List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
+	    View flashButton = (View) activity.findViewById(R.id.flash);
+		current_flash_index = -1;
+		if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "flash modes: " + supported_flash_modes);
+			supported_flash_values = convertFlashModesToValues(supported_flash_modes); // convert to our format (also resorts)
+
+			String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
+			if( flash_value.length() > 0 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "found existing flash_value: " + flash_value);
+				if( !updateFlash(flash_value) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "flash value no longer supported!");
+					updateFlash(0);
+				}
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "found no existing flash_value");
+				updateFlash(0);
+			}
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "flash not supported");
+			supported_flash_values = null;
+		}
+		flashButton.setVisibility(supported_flash_values != null ? View.VISIBLE : View.GONE);
+
+		List<String> supported_focus_modes = parameters.getSupportedFocusModes(); // Android format
+	    View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
+		current_focus_index = -1;
+		if( supported_focus_modes != null && supported_focus_modes.size() > 1 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "focus modes: " + supported_focus_modes);
+			supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
+
+			String focus_value = sharedPreferences.getString(getFocusPreferenceKey(cameraId), "");
+			if( focus_value.length() > 0 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "found existing focus_value: " + focus_value);
+				if( !updateFocus(focus_value, false, false, true) ) { // don't need to save, as this is the value that's already saved
+					if( MyDebug.LOG )
+						Log.d(TAG, "focus value no longer supported!");
+					updateFocus(0, false, true, true);
+				}
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "found no existing focus_value");
+				updateFocus(0, false, true, true);
+			}
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "focus not supported");
+			supported_focus_values = null;
+		}
+		focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);
+
+	    this.is_exposure_locked_supported = parameters.isAutoExposureLockSupported();
+	    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
+	    exposureLockButton.setVisibility(is_exposure_locked_supported ? View.VISIBLE : View.GONE);
+    	is_exposure_locked = false;
+	    if( is_exposure_locked_supported ) {
+	    	// exposure lock should always default to false, as doesn't make sense to save it - we can't really preserve a "lock" after the camera is reopened
+	    	// also note that it isn't safe to lock the exposure before starting the preview
+			exposureLockButton.setImageResource(is_exposure_locked ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+	    }
+
+		// now switch to video if saved
+		boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "saved_is_video: " + saved_is_video);
+		}
+		if( saved_is_video != this.is_video ) {
+			this.switchVideo(false, false);
+		}
+		else {
+			showPhotoVideoToast();
+		}
+
+		// must be done after setting parameters, as this function may set parameters
+		if( this.has_zoom && zoom_factor != 0 ) {
+			int new_zoom_factor = zoom_factor;
+			zoom_factor = 0; // force zoomTo to actually update the zoom!
+			zoomTo(new_zoom_factor, true);
+		}
+
+		// Must set preview size before starting camera preview
+		// and must do it after setting photo vs video mode
+		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
+		// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
+		startCameraPreview();
+		if( MyDebug.LOG ) {
+			//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
+		}
+
+    	final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				tryAutoFocus(true, false); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
+			}
+		}, 500);
 	}
 
 	private String setupValuesPref(List<String> values, String key, String default_value) {
