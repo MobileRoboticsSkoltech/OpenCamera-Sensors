@@ -38,6 +38,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -114,10 +115,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_force_video_4k? " + supports_force_video_4k);
 
-		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
-        getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
-        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
-        getWindow().addFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        setWindowFlagsForCamera();
 
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		if( mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null ) {
@@ -274,18 +272,6 @@ public class MainActivity extends Activity {
         super.onResume();
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        // set screen to max brightness - see http://stackoverflow.com/questions/11978042/android-screen-brightness-max-value
-		// done here rather than onCreate, so that changing it in preferences takes effect without restarting app
-		{
-	        WindowManager.LayoutParams layout = getWindow().getAttributes();
-			if( sharedPreferences.getBoolean("preference_max_brightness", true) ) {
-		        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
-	        }
-			else {
-		        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
-			}
-	        getWindow().setAttributes(layout); 
-		}
 
         mSensorManager.registerListener(accelerometerListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
@@ -885,6 +871,29 @@ public class MainActivity extends Activity {
 		this.startActivity(intent);
     }
     
+    private void setWindowFlagsForCamera() {
+		// force to landscape mode
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
+        getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
+        getWindow().addFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        // set screen to max brightness - see http://stackoverflow.com/questions/11978042/android-screen-brightness-max-value
+		// done here rather than onCreate, so that changing it in preferences takes effect without restarting app
+		{
+	        WindowManager.LayoutParams layout = getWindow().getAttributes();
+			if( sharedPreferences.getBoolean("preference_max_brightness", true) ) {
+		        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
+	        }
+			else {
+		        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+			}
+	        getWindow().setAttributes(layout); 
+		}
+    }
+
     class Media {
     	public long id;
     	public boolean video;
