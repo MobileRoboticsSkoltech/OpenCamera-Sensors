@@ -165,4 +165,11 @@
         android:layout_centerVertical="true"
         />
 
+    <FrameLayout
+        android:id="@+id/prefs_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        />
+    
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ClipData;
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.net.Uri;
@@ -19,7 +21,7 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.text.InputFilter;
@@ -27,18 +29,18 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.Display;
 
-public class MyPreferenceActivity extends PreferenceActivity {
+public class MyPreferenceActivity extends PreferenceFragment {
 	private static final String TAG = "MyPreferenceActivity";
 	
-	@SuppressWarnings("deprecation")
+	//@SuppressWarnings("deprecation")
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.preferences); // n.b., deprecated because we're not using a fragment...
+		addPreferencesFromResource(R.xml.preferences);
 
-		final Bundle bundle = getIntent().getExtras();
+		final Bundle bundle = getArguments();
 		final int cameraId = bundle.getInt("cameraId");
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
@@ -87,7 +89,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
 			String resolution_preference_key = Preview.getResolutionPreferenceKey(cameraId);
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 			String resolution_value = sharedPreferences.getString(resolution_preference_key, "");
 			if( MyDebug.LOG )
 				Log.d(TAG, "resolution_value: " + resolution_value);
@@ -127,7 +129,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
 			String video_quality_preference_key = Preview.getVideoQualityPreferenceKey(cameraId);
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 			String video_quality_value = sharedPreferences.getString(video_quality_preference_key, "");
 			if( MyDebug.LOG )
 				Log.d(TAG, "video_quality_value: " + video_quality_value);
@@ -227,12 +229,12 @@ public class MyPreferenceActivity extends PreferenceActivity {
                 	if( pref.getKey().equals("preference_about") ) {
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked about");
-            	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceActivity.this);
+            	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceActivity.this.getActivity());
                         alertDialog.setTitle("About");
                         final StringBuilder about_string = new StringBuilder();
                         String version = "UNKNOWN_VERSION";
 						try {
-	                        PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+	                        PackageInfo pInfo = MyPreferenceActivity.this.getActivity().getPackageManager().getPackageInfo(MyPreferenceActivity.this.getActivity().getPackageName(), 0);
 	                        version = pInfo.versionName;
 						}
 						catch(NameNotFoundException e) {
@@ -255,7 +257,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                         about_string.append("\nDevice variant: ");
                         about_string.append(Build.DEVICE);
                         {
-                    		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+                    		ActivityManager activityManager = (ActivityManager) getActivity().getSystemService(Activity.ACTIVITY_SERVICE);
                             about_string.append("\nStandard max heap? (MB): ");
                             about_string.append(activityManager.getMemoryClass());
                             about_string.append("\nLarge max heap? (MB): ");
@@ -263,7 +265,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                         }
                         {
                             Point display_size = new Point();
-                            Display display = MyPreferenceActivity.this.getWindowManager().getDefaultDisplay();
+                            Display display = MyPreferenceActivity.this.getActivity().getWindowManager().getDefaultDisplay();
                             display.getSize(display_size);
                             about_string.append("\nDisplay size: ");
                             about_string.append(display_size.x);
@@ -416,7 +418,7 @@ public class MyPreferenceActivity extends PreferenceActivity {
                             public void onClick(DialogInterface dialog, int id) {
                         		if( MyDebug.LOG )
                         			Log.d(TAG, "user clicked copy to clipboard");
-							 	ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE); 
+							 	ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Activity.CLIPBOARD_SERVICE); 
 							 	ClipData clip = ClipData.newPlainText("OpenCamera About", about_string);
 							 	clipboard.setPrimaryClip(clip);
                             }
@@ -442,11 +444,10 @@ public class MyPreferenceActivity extends PreferenceActivity {
 					Log.d(TAG, values[i]);
 				}
 			}
-			@SuppressWarnings("deprecation")
 			ListPreference lp = (ListPreference)findPreference(preference_key);
 			lp.setEntries(values);
 			lp.setEntryValues(values);
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 			String value = sharedPreferences.getString(preference_key, default_value);
 			if( MyDebug.LOG )
 				Log.d(TAG, "    value: " + values);
@@ -455,11 +456,14 @@ public class MyPreferenceActivity extends PreferenceActivity {
 		else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "remove preference " + preference_key + " from category " + preference_category_key);
-			@SuppressWarnings("deprecation")
 			ListPreference lp = (ListPreference)findPreference(preference_key);
-        	@SuppressWarnings("deprecation")
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference(preference_category_key);
         	pg.removePreference(lp);
 		}
+	}
+	
+	public void onResume() {
+		super.onResume();
+		getView().setBackgroundColor(Color.WHITE);
 	}
 }

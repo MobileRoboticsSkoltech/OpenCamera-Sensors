@@ -792,21 +792,19 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSettings");
 
-		Intent intent = new Intent(this, MyPreferenceActivity.class);
+		Bundle bundle = new Bundle();
+		bundle.putInt("cameraId", this.preview.getCameraId());
+		bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);
+		bundle.putBoolean("supports_force_video_4k", this.supports_force_video_4k);
+		bundle.putBoolean("supports_face_detection", this.preview.supportsFaceDetection());
 
-		intent.putExtra("cameraId", this.preview.getCameraId());
-		intent.putExtra("supports_auto_stabilise", this.supports_auto_stabilise);
-		intent.putExtra("supports_force_video_4k", this.supports_force_video_4k);
-		intent.putExtra("supports_face_detection", this.preview.supportsFaceDetection());
-
-		putIntentExtra(intent, "color_effects", this.preview.getSupportedColorEffects());
-		putIntentExtra(intent, "scene_modes", this.preview.getSupportedSceneModes());
-		putIntentExtra(intent, "white_balances", this.preview.getSupportedWhiteBalances());
-		putIntentExtra(intent, "isos", this.preview.getSupportedISOs());
-		intent.putExtra("iso_key", this.preview.getISOKey());
-		//putIntentExtra(intent, "exposures", this.preview.getSupportedExposures());
+		putBundleExtra(bundle, "color_effects", this.preview.getSupportedColorEffects());
+		putBundleExtra(bundle, "scene_modes", this.preview.getSupportedSceneModes());
+		putBundleExtra(bundle, "white_balances", this.preview.getSupportedWhiteBalances());
+		putBundleExtra(bundle, "isos", this.preview.getSupportedISOs());
+		bundle.putString("iso_key", this.preview.getISOKey());
 		if( this.preview.getCamera() != null ) {
-			intent.putExtra("parameters_string", this.preview.getCamera().getParameters().flatten());
+			bundle.putString("parameters_string", this.preview.getCamera().getParameters().flatten());
 		}
 
 		List<Camera.Size> preview_sizes = this.preview.getSupportedPreviewSizes();
@@ -819,8 +817,8 @@ public class MainActivity extends Activity {
 				heights[i] = size.height;
 				i++;
 			}
-			intent.putExtra("preview_widths", widths);
-			intent.putExtra("preview_heights", heights);
+			bundle.putIntArray("preview_widths", widths);
+			bundle.putIntArray("preview_heights", heights);
 		}
 		
 		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
@@ -833,8 +831,8 @@ public class MainActivity extends Activity {
 				heights[i] = size.height;
 				i++;
 			}
-			intent.putExtra("resolution_widths", widths);
-			intent.putExtra("resolution_heights", heights);
+			bundle.putIntArray("resolution_widths", widths);
+			bundle.putIntArray("resolution_heights", heights);
 		}
 		
 		List<String> video_quality = this.preview.getSupportedVideoQuality();
@@ -847,8 +845,8 @@ public class MainActivity extends Activity {
 				video_quality_string_arr[i] = this.preview.getCamcorderProfileDescription(value);
 				i++;
 			}
-			intent.putExtra("video_quality", video_quality_arr);
-			intent.putExtra("video_quality_string", video_quality_string_arr);
+			bundle.putStringArray("video_quality", video_quality_arr);
+			bundle.putStringArray("video_quality_string", video_quality_string_arr);
 		}
 
 		List<Camera.Size> video_sizes = this.preview.getSupportedVideoSizes();
@@ -861,14 +859,53 @@ public class MainActivity extends Activity {
 				heights[i] = size.height;
 				i++;
 			}
-			intent.putExtra("video_widths", widths);
-			intent.putExtra("video_heights", heights);
+			bundle.putIntArray("video_widths", widths);
+			bundle.putIntArray("video_heights", heights);
 		}
 		
-		putIntentExtra(intent, "flash_values", this.preview.getSupportedFlashValues());
-		putIntentExtra(intent, "focus_values", this.preview.getSupportedFocusValues());
+		putBundleExtra(bundle, "flash_values", this.preview.getSupportedFlashValues());
+		putBundleExtra(bundle, "focus_values", this.preview.getSupportedFocusValues());
 
-		this.startActivity(intent);
+		setWindowFlagsForSettings();
+		MyPreferenceActivity fragment = new MyPreferenceActivity();
+		fragment.setArguments(bundle);
+        getFragmentManager().beginTransaction().add(R.id.prefs_container, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commit();
+    }
+    
+    @Override
+    public void onBackPressed() {
+        final MyPreferenceActivity fragment = (MyPreferenceActivity)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
+        if( fragment != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "close settings");
+			setWindowFlagsForCamera();
+
+			// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
+			// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
+			boolean need_reopen = false;
+			if( preview.getCamera() != null ) {
+				Camera.Parameters parameters = preview.getCamera().getParameters();
+				if( MyDebug.LOG )
+					Log.d(TAG, "scene mode was: " + parameters.getSceneMode());
+				String key = Preview.getSceneModePreferenceKey();
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+				String value = sharedPreferences.getString(key, Camera.Parameters.SCENE_MODE_AUTO);
+				if( !value.equals(parameters.getSceneMode()) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "scene mode changed to: " + value);
+					need_reopen = true;
+				}
+			}
+			if( need_reopen ) {
+				preview.onPause();
+				preview.onResume();
+			}
+			else {
+				preview.pausePreview();
+				preview.setupCamera();
+			}
+        }
+        super.onBackPressed();        
     }
     
     private void setWindowFlagsForCamera() {
@@ -893,7 +930,22 @@ public class MainActivity extends Activity {
 	        getWindow().setAttributes(layout); 
 		}
     }
+    
+    private void setWindowFlagsForSettings() {
+		// allow screen rotation
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+		// revert to standard screen blank behaviour
+        getWindow().clearFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // settings should still be protected by screen lock
+        getWindow().clearFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
+		{
+	        WindowManager.LayoutParams layout = getWindow().getAttributes();
+	        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+	        getWindow().setAttributes(layout); 
+		}
+    }
+    
     class Media {
     	public long id;
     	public boolean video;
@@ -1104,7 +1156,7 @@ public class MainActivity extends Activity {
 		}
     }
 
-    static private void putIntentExtra(Intent intent, String key, List<String> values) {
+    static private void putBundleExtra(Bundle bundle, String key, List<String> values) {
 		if( values != null ) {
 			String [] values_arr = new String[values.size()];
 			int i=0;
@@ -1112,9 +1164,8 @@ public class MainActivity extends Activity {
 				values_arr[i] = value;
 				i++;
 			}
-			intent.putExtra(key, values_arr);
+			bundle.putStringArray(key, values_arr);
 		}
-
     }
 
     public void clickedShare(View view) {
