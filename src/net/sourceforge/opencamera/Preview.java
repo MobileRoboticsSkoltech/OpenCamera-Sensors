@@ -1308,7 +1308,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	if( this.is_video ) {
     		// In theory, the picture size shouldn't matter in video mode, but the stock Android camera sets a picture size
     		// which is the largest that matches the video's aspect ratio.
-    		// This seems necessary to work around an aspect ratio bug introduced in Android 4.4.3: http://code.google.com/p/android/issues/detail?id=70830
+    		// This seems necessary to work around an aspect ratio bug introduced in Android 4.4.3 (on Nexus 7 at least): http://code.google.com/p/android/issues/detail?id=70830
     		// which results in distorted aspect ratio on preview and recorded video!
         	CamcorderProfile profile = getCamcorderProfile();
         	if( MyDebug.LOG )
