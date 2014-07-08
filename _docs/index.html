@@ -274,13 +274,13 @@ device, so you'll have to look this up yourself (it's usually something inside /
 
 <p><b>On screen GUI...</b> - Select to access the following controls:</p>
 
-<p><b>Preview size</b> - By default, Open Camera makes the camera preview (the image that is displayed on the
-phone/tablet's display) as large as possible, trying to fill the available space. However if the resolution of the
-photo is a different aspect ratio to that of your device, this will result in the preview being cropped. If
-instead you select "Match photo size (WYSIWYG)", then the aspect ratio of the preview will match that of the
-photo resolution. The advantage is that what you see in the preview will match what will be in the resultant
-photo ("What-You-See-Is-What-You-Get") - though this may mean you will have "black bars" on the display in
-order to do this. (Note that when in video mode, the preview is always in WYSIWYG mode.)</p>
+<p><b>Preview size</b> - By default, Open Camera matches the aspect ratio of the preview (the image that is displayed on
+the phone/tablet's display) with that of the photo resolution ("Match photo size (WYSIWYG)" mode). The advantage is that
+what you see in the preview will match what will be in the resultant photo ("What-You-See-Is-What-You-Get") - though this
+may mean you will have "black bars" on the display in order to do this. If instead you select "Maximise preview size", then the
+camera preview will be as large as possible, trying to fill the available space. However if the resolution of the
+photo is a different aspect ratio to that of your device, this will result in the preview being cropped.
+(Note that when in video mode, the preview is always in WYSIWYG mode.)</p>
 
 <p><b>UI placement</b> - Whether to optimise the user interface for left-handed or right-handed use.</p>
 
@@ -397,6 +397,7 @@ UPDATED Open Camera now remains active rather than being blocked by a "screen
         lock" (face/PIN unlock still required to go to Gallery or Settings).
 UPDATED Broadcast Camera.ACTION_NEW_PICTURE and com.android.camera.NEW_PICTURE
         intents for new photos, and Camera.ACTION_NEW_VIDEO for new videos.
+UPDATED WYSIWYG mode is now the default setting for the preview size.
 UPDATED Expanded number of devices which show the "Force 4K UHD video
         (experimental)" option (remember, 4K isn't officially supported by
         Android API and this option is experimental - if this option shows, it

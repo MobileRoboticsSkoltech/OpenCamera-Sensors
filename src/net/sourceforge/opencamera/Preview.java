@@ -1585,7 +1585,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         double targetRatio = 0.0f;
 		Activity activity = (Activity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
-		String preview_size = sharedPreferences.getString("preference_preview_size", "preference_preview_size_display");
+		String preview_size = sharedPreferences.getString("preference_preview_size", "preference_preview_size_wysiwyg");
 		// should always use wysiwig for video mode, otherwise we get incorrect aspect ratio shown when recording video (at least on Galaxy Nexus, e.g., at 640x480)
 		// also not using wysiwyg mode with video caused corruption on Samsung cameras (tested with Samsung S3, Android 4.3, front camera, infinity focus)
 		if( preview_size.equals("preference_preview_size_wysiwyg") || this.is_video ) {
