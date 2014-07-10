@@ -32,7 +32,6 @@ import android.view.Display;
 public class MyPreferenceActivity extends PreferenceFragment {
 	private static final String TAG = "MyPreferenceActivity";
 	
-	//@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		if( MyDebug.LOG )
