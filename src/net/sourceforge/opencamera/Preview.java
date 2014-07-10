@@ -1772,6 +1772,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	void setCameraDisplayOrientation(Activity activity) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setCameraDisplayOrientation()");
+		if( camera == null )
+			return;
 	    Camera.CameraInfo info = new Camera.CameraInfo();
 	    Camera.getCameraInfo(cameraId, info);
 	    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
