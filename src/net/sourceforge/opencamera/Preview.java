@@ -1769,7 +1769,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
     // for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
 	// note, if orientation is locked to landscape this is only called when setting up the activity, and will always have the same orientation
-	private void setCameraDisplayOrientation(Activity activity) {
+	void setCameraDisplayOrientation(Activity activity) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setCameraDisplayOrientation()");
 	    Camera.CameraInfo info = new Camera.CameraInfo();

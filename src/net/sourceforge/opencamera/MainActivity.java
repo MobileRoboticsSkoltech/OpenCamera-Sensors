@@ -23,6 +23,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
+//import android.preference.EditTextPreference;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images.ImageColumns;
@@ -36,9 +37,11 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -48,8 +51,8 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -152,6 +155,15 @@ public class MainActivity extends Activity {
 			}
         };
 
+        /*View galleryButton = (View)findViewById(R.id.gallery);
+        galleryButton.setOnLongClickListener(new View.OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				//preview.showToast(null, "Long click");
+				longClickedGallery();
+				return true;
+			}
+        });*/
         final String done_first_time_key = "done_first_time";
 		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
         if( !has_done_first_time && !is_test ) {
@@ -692,6 +704,16 @@ public class MainActivity extends Activity {
 		    }
 		}
 	}
+    
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onConfigurationChanged()");
+		// configuration change can include screen orientation (landscape/portrait) when not locked (when settings is open)
+		// needed if app is paused/resumed when settings is open and device is in portrait mode
+        preview.setCameraDisplayOrientation(this);
+        super.onConfigurationChanged(newConfig);
+    }
 
     public void clickedTakePhoto(View view) {
 		if( MyDebug.LOG )
@@ -766,12 +788,12 @@ public class MainActivity extends Activity {
 
 			ZoomControls seek_bar_zoom = (ZoomControls)findViewById(R.id.seekbar_zoom);
 			seek_bar_zoom.setVisibility(View.VISIBLE);
-			seek_bar_zoom.setOnZoomInClickListener(new OnClickListener(){
+			seek_bar_zoom.setOnZoomInClickListener(new View.OnClickListener(){
 	            public void onClick(View v){
 	            	preview.changeExposure(1, true);
 	            }
 	        });
-			seek_bar_zoom.setOnZoomOutClickListener(new OnClickListener(){
+			seek_bar_zoom.setOnZoomOutClickListener(new View.OnClickListener(){
 		    	public void onClick(View v){
 	            	preview.changeExposure(-1, true);
 		        }
@@ -1154,6 +1176,83 @@ public class MainActivity extends Activity {
 				}
 			}
 		}
+    }
+    
+    private void longClickedGallery() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "longClickedGallery");
+		final int theme = android.R.style.Theme_Black_NoTitleBar_Fullscreen;
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, theme);
+        //AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, android.R.style.Theme_Light_NoTitleBar_Fullscreen);
+        //AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Save location");
+        CharSequence [] items = new CharSequence[1];
+        final int select_index = 0;
+        items[select_index] = "Specify new folder";
+		alertDialog.setItems(items, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if( which == select_index ) {
+					/*class MyEditTextPreference extends EditTextPreference {
+						public MyEditTextPreference(Context context) {
+							super(context);
+						}
+						public void show() {
+							this.showDialog(null);
+						}
+					};
+					MyEditTextPreference editTextPref = new MyEditTextPreference(MainActivity.this);
+					editTextPref.setTitle(R.string.preference_save_location);
+					editTextPref.setSummary(R.string.preference_save_location_summary);
+					editTextPref.setEnabled(true);
+					editTextPref.show();*/
+					AlertDialog.Builder inputDialog = new AlertDialog.Builder(MainActivity.this);
+					inputDialog.setTitle(R.string.preference_save_location);
+					inputDialog.setMessage(R.string.preference_save_location_summary);
+					final EditText input = new EditText(MainActivity.this);
+					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+					String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
+					input.setText(folder_name);
+					inputDialog.setView(input);
+					inputDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int whichButton) {
+							String save_folder = input.getText().toString();
+							if( MyDebug.LOG )
+								Log.d(TAG, "changed save_folder to: " + save_folder);
+							SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+							SharedPreferences.Editor editor = sharedPreferences.edit();
+							editor.putString("preference_save_location", save_folder);
+							editor.apply();
+							setWindowFlagsForCamera();
+						}
+					});
+					inputDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int whichButton) {
+							setWindowFlagsForCamera();
+						}
+					});
+					inputDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface arg0) {
+					        setWindowFlagsForCamera();
+						}
+					});
+					inputDialog.show();
+				}
+				else {
+					setWindowFlagsForCamera();
+				}
+			}
+        });
+		alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface arg0) {
+		        setWindowFlagsForCamera();
+			}
+		});
+        alertDialog.show();
+		//getWindow().setLayout(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+		setWindowFlagsForSettings();
     }
 
     static private void putBundleExtra(Bundle bundle, String key, List<String> values) {
