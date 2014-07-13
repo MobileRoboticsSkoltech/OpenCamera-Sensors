@@ -35,8 +35,15 @@
     <string name="taking_photo">Taking photo</string>
     <string name="failed_to_take_picture">Failed to take picture</string>
     <string name="photo_deleted">Photo deleted</string>
-    
     <string name="no_gallery_app">No gallery app available</string>
+    
+    <string name="angle">Angle</string>
+    <string name="direction">Direction</string>
+    <string name="failed_to_open_camera_1">FAILED TO OPEN CAMERA.</string>
+    <string name="failed_to_open_camera_2">CAMERA MAY BE IN USE</string>
+    <string name="failed_to_open_camera_3">BY ANOTHER APPLICATION?</string>
+    <string name="zoom">Zoom</string>
+    <string name="free_memory">Free memory</string>
     
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-stabilise</string>

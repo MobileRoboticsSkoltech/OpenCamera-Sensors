@@ -1975,7 +1975,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( Math.abs(this.level_angle) <= close_angle ) {
 					color = Color.GREEN;
 				}
-				String string = "Angle: " + decimalFormat.format(this.level_angle) + (char)0x00B0;
+				String string = getResources().getString(R.string.angle) + ": " + decimalFormat.format(this.level_angle) + (char)0x00B0;
 				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y);
 			}
 			if( draw_geo_direction ) {
@@ -1991,7 +1991,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( geo_angle < 0.0f ) {
 					geo_angle += 360.0f;
 				}
-				String string = " Direction: " + Math.round(geo_angle) + (char)0x00B0;
+				String string = " " + getResources().getString(R.string.direction) + ": " + Math.round(geo_angle) + (char)0x00B0;
 				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y);
 			}
 			//if( this.is_taking_photo_on_timer ) {
@@ -2033,9 +2033,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			int pixels_offset = (int) (20 * scale + 0.5f); // convert dps to pixels
-			canvas.drawText("FAILED TO OPEN CAMERA.", canvas.getWidth() / 2, canvas.getHeight() / 2, p);
-			canvas.drawText("CAMERA MAY BE IN USE", canvas.getWidth() / 2, canvas.getHeight() / 2 + pixels_offset, p);
-			canvas.drawText("BY ANOTHER APPLICATION?", canvas.getWidth() / 2, canvas.getHeight() / 2 + 2*pixels_offset, p);
+			canvas.drawText(getResources().getString(R.string.failed_to_open_camera_1), canvas.getWidth() / 2, canvas.getHeight() / 2, p);
+			canvas.drawText(getResources().getString(R.string.failed_to_open_camera_2), canvas.getWidth() / 2, canvas.getHeight() / 2 + pixels_offset, p);
+			canvas.drawText(getResources().getString(R.string.failed_to_open_camera_3), canvas.getWidth() / 2, canvas.getHeight() / 2 + 2*pixels_offset, p);
 			//canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, p);
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
@@ -2048,7 +2048,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				int pixels_offset_y = 2*text_y;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.CENTER);
-				drawTextWithBackground(canvas, p, "Zoom: " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
 		if( camera != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
@@ -2064,7 +2064,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 			}
 			if( free_memory_gb >= 0.0f ) {
-				drawTextWithBackground(canvas, p, "Free memory: " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+				drawTextWithBackground(canvas, p, getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
 		
