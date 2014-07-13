@@ -2456,6 +2456,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 	
 	private void showPhotoVideoToast() {
+		MainActivity main_activity = (MainActivity)Preview.this.getContext();
+		if( main_activity.cameraInBackground() )
+			return;
 		String toast_string = "";
 		if( this.is_video ) {
 			CamcorderProfile profile = getCamcorderProfile();

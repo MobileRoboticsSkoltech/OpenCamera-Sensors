@@ -76,6 +76,7 @@ public class MainActivity extends Activity {
 	private boolean supports_auto_stabilise = false;
 	private boolean supports_force_video_4k = false;
 	private ArrayList<String> save_location_history = new ArrayList<String>();
+	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
 
 	// for testing:
 	public boolean is_test = false;
@@ -946,9 +947,18 @@ public class MainActivity extends Activity {
 		}
     }
     
+    boolean cameraInBackground() {
+    	return this.camera_in_background;
+    }
+    
+    MyPreferenceActivity getPreferenceFragment() {
+        MyPreferenceActivity fragment = (MyPreferenceActivity)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
+        return fragment;
+    }
+    
     @Override
     public void onBackPressed() {
-        final MyPreferenceActivity fragment = (MyPreferenceActivity)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
+        final MyPreferenceActivity fragment = getPreferenceFragment();
         if( fragment != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "close settings");
@@ -979,6 +989,8 @@ public class MainActivity extends Activity {
 			}
 	        getWindow().setAttributes(layout); 
 		}
+
+		camera_in_background = false;
     }
     
     private void setWindowFlagsForSettings() {
@@ -994,6 +1006,8 @@ public class MainActivity extends Activity {
 	        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
 	        getWindow().setAttributes(layout); 
 		}
+
+		camera_in_background = true;
     }
     
     class Media {
