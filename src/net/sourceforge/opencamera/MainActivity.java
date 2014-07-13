@@ -1206,7 +1206,7 @@ public class MainActivity extends Activity {
 		}
     }
     
-    private void updateFolderHistory() {
+    public void updateFolderHistory() {
 		String folder_name = getSaveLocation();
 		updateFolderHistory(folder_name);
     }
