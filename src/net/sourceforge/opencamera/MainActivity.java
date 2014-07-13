@@ -916,6 +916,35 @@ public class MainActivity extends Activity {
 		fragment.setArguments(bundle);
         getFragmentManager().beginTransaction().add(R.id.prefs_container, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commit();
     }
+
+    public void updateForSettings() {
+		updateFolderHistory();
+
+		// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
+		// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
+		boolean need_reopen = false;
+		if( preview.getCamera() != null ) {
+			Camera.Parameters parameters = preview.getCamera().getParameters();
+			if( MyDebug.LOG )
+				Log.d(TAG, "scene mode was: " + parameters.getSceneMode());
+			String key = Preview.getSceneModePreferenceKey();
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String value = sharedPreferences.getString(key, Camera.Parameters.SCENE_MODE_AUTO);
+			if( !value.equals(parameters.getSceneMode()) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "scene mode changed to: " + value);
+				need_reopen = true;
+			}
+		}
+		if( need_reopen ) {
+			preview.onPause();
+			preview.onResume();
+		}
+		else {
+			preview.pausePreview();
+			preview.setupCamera();
+		}
+    }
     
     @Override
     public void onBackPressed() {
@@ -924,33 +953,7 @@ public class MainActivity extends Activity {
 			if( MyDebug.LOG )
 				Log.d(TAG, "close settings");
 			setWindowFlagsForCamera();
-			
-			updateFolderHistory();
-
-			// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
-			// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
-			boolean need_reopen = false;
-			if( preview.getCamera() != null ) {
-				Camera.Parameters parameters = preview.getCamera().getParameters();
-				if( MyDebug.LOG )
-					Log.d(TAG, "scene mode was: " + parameters.getSceneMode());
-				String key = Preview.getSceneModePreferenceKey();
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-				String value = sharedPreferences.getString(key, Camera.Parameters.SCENE_MODE_AUTO);
-				if( !value.equals(parameters.getSceneMode()) ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "scene mode changed to: " + value);
-					need_reopen = true;
-				}
-			}
-			if( need_reopen ) {
-				preview.onPause();
-				preview.onResume();
-			}
-			else {
-				preview.pausePreview();
-				preview.setupCamera();
-			}
+			updateForSettings();
         }
         super.onBackPressed();        
     }
@@ -1552,4 +1555,8 @@ public class MainActivity extends Activity {
     public Preview getPreview() {
     	return this.preview;
     }
+
+	public ArrayList<String> getSaveLocationHistory() {
+		return this.save_location_history;
+	}
 }
