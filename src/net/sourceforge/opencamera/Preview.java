@@ -173,7 +173,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private Bitmap location_bitmap = null;
 	private Bitmap location_off_bitmap = null;
 	private Rect location_dest = new Rect();
-
+	
 	class ToastBoxer {
 		public Toast toast = null;
 
@@ -4502,15 +4502,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
     public void showToast(final ToastBoxer clear_toast, final String message) {
 		class RotatedTextView extends View {
-			private String text = "";
+			private String [] lines = null;
 			private Paint paint = new Paint();
 			private Rect bounds = new Rect();
+			private Rect sub_bounds = new Rect();
 			private Rect rect = new Rect();
 
 			public RotatedTextView(String text, Context context) {
 				super(context);
 
-				this.text = text;
+				this.lines = text.split("\n");
 			}
 
 			@Override 
@@ -4518,10 +4519,30 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				final float scale = getResources().getDisplayMetrics().density;
 				paint.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				paint.setShadowLayer(1, 0, 1, Color.BLACK);
-				paint.getTextBounds(text, 0, text.length(), bounds);
+				//paint.getTextBounds(text, 0, text.length(), bounds);
+				boolean first_line = true;
+				for(String line : lines) {
+					paint.getTextBounds(line, 0, line.length(), sub_bounds);
+					/*if( MyDebug.LOG ) {
+						Log.d(TAG, "line: " + line + " sub_bounds: " + sub_bounds);
+					}*/
+					if( first_line ) {
+						bounds.set(sub_bounds);
+						first_line = false;
+					}
+					else {
+						bounds.top = Math.min(sub_bounds.top, bounds.top);
+						bounds.bottom = Math.max(sub_bounds.bottom, bounds.bottom);
+						bounds.left = Math.min(sub_bounds.left, bounds.left);
+						bounds.right = Math.max(sub_bounds.right, bounds.right);
+					}
+				}
 				/*if( MyDebug.LOG ) {
 					Log.d(TAG, "bounds: " + bounds);
 				}*/
+				int height = bounds.bottom - bounds.top + 2;
+				bounds.bottom += ((lines.length-1) * height)/2;
+				bounds.top -= ((lines.length-1) * height)/2;
 				final int padding = (int) (14 * scale + 0.5f); // convert dps to pixels
 				final int offset_y = (int) (32 * scale + 0.5f); // convert dps to pixels
 				canvas.save();
@@ -4543,7 +4564,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 				paint.setStyle(Paint.Style.FILL); // needed for Android 4.4!
 				paint.setColor(Color.WHITE);
-				canvas.drawText(text, canvas.getWidth()/2 - bounds.width()/2, canvas.getHeight()/2 + offset_y, paint);
+				int ypos = canvas.getHeight()/2 + offset_y - ((lines.length-1) * height)/2;
+				for(String line : lines) {
+					canvas.drawText(line, canvas.getWidth()/2 - bounds.width()/2, ypos, paint);
+					ypos += height;
+				}
 				canvas.restore();
 			} 
 		}

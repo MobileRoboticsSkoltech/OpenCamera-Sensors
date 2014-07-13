@@ -3,6 +3,7 @@ package net.sourceforge.opencamera;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +53,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -75,6 +75,7 @@ public class MainActivity extends Activity {
 	private OrientationEventListener orientationEventListener = null;
 	private boolean supports_auto_stabilise = false;
 	private boolean supports_force_video_4k = false;
+	private ArrayList<String> save_location_history = new ArrayList<String>();
 
 	// for testing:
 	public boolean is_test = false;
@@ -120,6 +121,23 @@ public class MainActivity extends Activity {
 
         setWindowFlagsForCamera();
 
+        // read save locations
+        save_location_history.clear();
+        int save_location_history_size = sharedPreferences.getInt("save_location_history_size", 0);
+		if( MyDebug.LOG )
+			Log.d(TAG, "save_location_history_size: " + save_location_history_size);
+        for(int i=0;i<save_location_history_size;i++) {
+        	String string = sharedPreferences.getString("save_location_history_" + i, null);
+        	if( string != null ) {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "save_location_history " + i + ": " + string);
+        		save_location_history.add(string);
+        	}
+        }
+        // also update, just in case a new folder has been set
+		updateFolderHistory();
+		//updateFolderHistory("/sdcard/Pictures/OpenCameraTest");
+
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		if( mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null ) {
 			if( MyDebug.LOG )
@@ -155,7 +173,7 @@ public class MainActivity extends Activity {
 			}
         };
 
-        /*View galleryButton = (View)findViewById(R.id.gallery);
+        View galleryButton = (View)findViewById(R.id.gallery);
         galleryButton.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
@@ -163,7 +181,8 @@ public class MainActivity extends Activity {
 				longClickedGallery();
 				return true;
 			}
-        });*/
+        });
+        
         final String done_first_time_key = "done_first_time";
 		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
         if( !has_done_first_time && !is_test ) {
@@ -177,7 +196,7 @@ public class MainActivity extends Activity {
 			editor.putBoolean(done_first_time_key, true);
 			editor.apply();
         }
-        
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for Activity startup: " + (System.currentTimeMillis() - time_s));
 	}
@@ -224,8 +243,7 @@ public class MainActivity extends Activity {
 	        	// needed to support hardware menu button
 	        	// tested successfully on Samsung S3 (via RTL)
 	        	// see http://stackoverflow.com/questions/8264611/how-to-detect-when-user-presses-menu-key-on-their-android-device
-				View view = findViewById(R.id.settings);
-	        	clickedSettings(view);
+				openSettings();
 	            return true;
 			}
 		case KeyEvent.KEYCODE_CAMERA:
@@ -813,7 +831,12 @@ public class MainActivity extends Activity {
     public void clickedSettings(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSettings");
-
+		openSettings();
+    }
+    
+    private void openSettings() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "openSettings");
 		Bundle bundle = new Bundle();
 		bundle.putInt("cameraId", this.preview.getCameraId());
 		bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);
@@ -901,6 +924,8 @@ public class MainActivity extends Activity {
 			if( MyDebug.LOG )
 				Log.d(TAG, "close settings");
 			setWindowFlagsForCamera();
+			
+			updateFolderHistory();
 
 			// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
 			// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
@@ -1178,22 +1203,92 @@ public class MainActivity extends Activity {
 		}
     }
     
+    private void updateFolderHistory() {
+		String folder_name = getSaveLocation();
+		updateFolderHistory(folder_name);
+    }
+    
+    private void updateFolderHistory(String folder_name) {
+		while( save_location_history.remove(folder_name) ) {
+		}
+		save_location_history.add(folder_name);
+		while( save_location_history.size() > 6 ) {
+			save_location_history.remove(0);
+		}
+		writeSaveLocations();
+    }
+    
+    private void writeSaveLocations() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "writeSaveLocations");
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putInt("save_location_history_size", save_location_history.size());
+		if( MyDebug.LOG )
+			Log.d(TAG, "save_location_history_size = " + save_location_history.size());
+        for(int i=0;i<save_location_history.size();i++) {
+        	String string = save_location_history.get(i);
+    		editor.putString("save_location_history_" + i, string);
+        }
+		editor.apply();
+    }
+    
     private void longClickedGallery() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "longClickedGallery");
+		if( save_location_history.size() <= 1 ) {
+			return;
+		}
 		final int theme = android.R.style.Theme_Black_NoTitleBar_Fullscreen;
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, theme);
         //AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, android.R.style.Theme_Light_NoTitleBar_Fullscreen);
         //AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("Save location");
-        CharSequence [] items = new CharSequence[1];
-        final int select_index = 0;
-        items[select_index] = "Specify new folder";
+        alertDialog.setTitle("Choose save location:");
+        CharSequence [] items = new CharSequence[save_location_history.size()+1];
+        int index=0;
+        // save_location_history is stored in order most-recent-last
+        for(int i=0;i<save_location_history.size();i++) {
+        	items[index++] = save_location_history.get(save_location_history.size() - 1 - i);
+        }
+        final int clear_index = index;
+        items[clear_index] = "Clear folder history";
 		alertDialog.setItems(items, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				if( which == select_index ) {
-					/*class MyEditTextPreference extends EditTextPreference {
+				if( which == clear_index ) {
+				    new AlertDialog.Builder(MainActivity.this)
+			        	.setIcon(android.R.drawable.ic_dialog_alert)
+			        	.setTitle("Clear folder history")
+			        	.setMessage("Clear folder history?")
+			        	.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			        		@Override
+					        public void onClick(DialogInterface dialog, int which) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "clear save history");
+								save_location_history.clear();
+								updateFolderHistory(); // to re-add the current choice, and save
+					        }
+			        	})
+			        	.setNegativeButton("No", null)
+			        	.show();
+					setWindowFlagsForCamera();
+				}
+				else {
+					if( which >= 0 && which < save_location_history.size() ) {
+						String save_folder = save_location_history.get(save_location_history.size() - 1 - which);
+						if( MyDebug.LOG )
+							Log.d(TAG, "changed save_folder from history to: " + save_folder);
+						preview.showToast(null, "Changed save_folder to:\n" + save_folder);
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString("preference_save_location", save_folder);
+						editor.apply();
+						updateFolderHistory(); // to move new selection to most recent
+					}
+					setWindowFlagsForCamera();
+				}
+				/*if( which == select_index ) {
+					class MyEditTextPreference extends EditTextPreference {
 						public MyEditTextPreference(Context context) {
 							super(context);
 						}
@@ -1206,7 +1301,7 @@ public class MainActivity extends Activity {
 					editTextPref.setSummary(R.string.preference_save_location_summary);
 					editTextPref.setEnabled(true);
 					editTextPref.show();*/
-					AlertDialog.Builder inputDialog = new AlertDialog.Builder(MainActivity.this);
+					/*AlertDialog.Builder inputDialog = new AlertDialog.Builder(MainActivity.this);
 					inputDialog.setTitle(R.string.preference_save_location);
 					inputDialog.setMessage(R.string.preference_save_location_summary);
 					final EditText input = new EditText(MainActivity.this);
@@ -1238,10 +1333,12 @@ public class MainActivity extends Activity {
 						}
 					});
 					inputDialog.show();
+					
+					openSettings();
 				}
 				else {
 					setWindowFlagsForCamera();
-				}
+				}*/
 			}
         });
 		alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -1339,9 +1436,14 @@ public class MainActivity extends Activity {
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
 
-    public File getImageFolder() {
+    private String getSaveLocation() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
+		return folder_name;
+    }
+    
+    public File getImageFolder() {
+		String folder_name = getSaveLocation();
 		File file = null;
 		if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
 			// ignore final '/' character
