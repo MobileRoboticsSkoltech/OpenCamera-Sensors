@@ -1221,6 +1221,11 @@ public class MainActivity extends Activity {
 		writeSaveLocations();
     }
     
+    public void clearFolderHistory() {
+		save_location_history.clear();
+		updateFolderHistory(); // to re-add the current choice, and save
+    }
+    
     private void writeSaveLocations() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "writeSaveLocations");
@@ -1268,8 +1273,7 @@ public class MainActivity extends Activity {
 					        public void onClick(DialogInterface dialog, int which) {
 								if( MyDebug.LOG )
 									Log.d(TAG, "clear save history");
-								save_location_history.clear();
-								updateFolderHistory(); // to re-add the current choice, and save
+								clearFolderHistory();
 					        }
 			        	})
 			        	.setNegativeButton("No", null)
