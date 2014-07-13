@@ -274,6 +274,11 @@ You can also use this option to save to an external SD card, though unfortunatel
 device, so you'll have to look this up yourself (it's usually something inside /mnt/ - a file explorer app such as
 <a href="https://play.google.com/store/apps/details?id=com.estrongs.android.pop">ES File Explorer</a> may help).</p>
 
+<p><b>Show camera when locked</b> - If you have a lock screen on your device (e.g., PIN to unlock), Open Camera by
+default will show above the lock screen - i.e., if locked, you won't have to enter the PIN to use Open Camera. The
+device still needs to be unlocked in order to go to the Settings or Gallery. If you would prefer Open Camera to always
+be unavailable when your device is locked, you can disable this option.</p>
+
 <p><b>On screen GUI...</b> - Select to access the following controls:</p>
 
 <p><b>Preview size</b> - By default, Open Camera matches the aspect ratio of the preview (the image that is displayed on
@@ -399,6 +404,8 @@ UPDATED Significantly improved speed for opening and closing settings (now
         launched as a Fragment rather than a separate Activity).
 UPDATED Open Camera now remains active rather than being blocked by a "screen
         lock" (face/PIN unlock still required to go to Gallery or Settings).
+        This behaviour can be switched off by going to Settings/More Camera
+        Controls/Show camera when locked.
 UPDATED Broadcast Camera.ACTION_NEW_PICTURE and com.android.camera.NEW_PICTURE
         intents for new photos, and Camera.ACTION_NEW_VIDEO for new videos.
 UPDATED WYSIWYG mode is now the default setting for the preview size.

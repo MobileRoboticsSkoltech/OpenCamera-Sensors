@@ -969,14 +969,20 @@ public class MainActivity extends Activity {
     }
     
     private void setWindowFlagsForCamera() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
 		// force to landscape mode
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
         getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
-        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
-        getWindow().addFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+		if( sharedPreferences.getBoolean("preference_show_when_locked", true) ) {
+	        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
+			getWindow().addFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+		}
+		else {
+	        getWindow().clearFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+		}
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // set screen to max brightness - see http://stackoverflow.com/questions/11978042/android-screen-brightness-max-value
 		// done here rather than onCreate, so that changing it in preferences takes effect without restarting app
 		{
