@@ -187,7 +187,7 @@ public class MainActivity extends Activity {
 		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
         if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.setTitle("Open Camera");
+            alertDialog.setTitle(R.string.app_name);
             alertDialog.setMessage(R.string.intro_text);
             alertDialog.setPositiveButton(R.string.intro_ok, null);
             alertDialog.show();
@@ -1200,7 +1200,7 @@ public class MainActivity extends Activity {
 					this.startActivity(intent);
 				}
 				else{
-					preview.showToast(null, "No Gallery app available");
+					preview.showToast(null, R.string.no_gallery_app);
 				}
 			}
 		}
@@ -1251,7 +1251,7 @@ public class MainActivity extends Activity {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, theme);
         //AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, android.R.style.Theme_Light_NoTitleBar_Fullscreen);
         //AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("Choose save location:");
+        alertDialog.setTitle(R.string.choose_save_location);
         CharSequence [] items = new CharSequence[save_location_history.size()+1];
         int index=0;
         // save_location_history is stored in order most-recent-last
@@ -1259,16 +1259,16 @@ public class MainActivity extends Activity {
         	items[index++] = save_location_history.get(save_location_history.size() - 1 - i);
         }
         final int clear_index = index;
-        items[clear_index] = "Clear folder history";
+        items[clear_index] = getResources().getString(R.string.clear_folder_history);
 		alertDialog.setItems(items, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				if( which == clear_index ) {
 				    new AlertDialog.Builder(MainActivity.this)
 			        	.setIcon(android.R.drawable.ic_dialog_alert)
-			        	.setTitle("Clear folder history")
-			        	.setMessage("Clear folder history?")
-			        	.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			        	.setTitle(R.string.clear_folder_history)
+			        	.setMessage(R.string.clear_folder_history_question)
+			        	.setPositiveButton(R.string.answer_yes, new DialogInterface.OnClickListener() {
 			        		@Override
 					        public void onClick(DialogInterface dialog, int which) {
 								if( MyDebug.LOG )
@@ -1276,7 +1276,7 @@ public class MainActivity extends Activity {
 								clearFolderHistory();
 					        }
 			        	})
-			        	.setNegativeButton("No", null)
+			        	.setNegativeButton(R.string.answer_no, null)
 			        	.show();
 					setWindowFlagsForCamera();
 				}
@@ -1285,7 +1285,7 @@ public class MainActivity extends Activity {
 						String save_folder = save_location_history.get(save_location_history.size() - 1 - which);
 						if( MyDebug.LOG )
 							Log.d(TAG, "changed save_folder from history to: " + save_folder);
-						preview.showToast(null, "Changed save_folder to:\n" + save_folder);
+						preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder);
 						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
 						editor.putString("preference_save_location", save_folder);

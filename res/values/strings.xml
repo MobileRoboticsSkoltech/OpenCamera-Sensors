@@ -6,6 +6,38 @@
     <string name="intro_text">Touch to focus, and press the blue camera button to take photos. For more help, click Online help from Settings. Open Camera is completely free. If you like this app, please consider buying my donate app :) (see link in Settings, or Online help).\n\nPrivacy Policy: Location permission is required for geotagging, but this is disabled by default. If enabled, your location is encoded in the saved files (and it is only used for this purpose).\n\n(This message won\'t show again.)</string>
     <string name="intro_ok">OK (This message won\'t show again)</string>
     
+    <string name="answer_yes">Yes</string>
+    <string name="answer_no">No</string>
+    
+    <string name="choose_save_location">Choose save location:</string>
+    <string name="clear_folder_history">Clear folder history</string>
+    <string name="clear_folder_history_question">Clear folder history?</string>
+    <string name="changed_save_location">Changed save location to:</string>
+    <string name="stopped_recording_video">Stopped recording video</string>
+    <string name="failed_to_reconnect_camera">Failed to reconnect to camera</string>
+    <string name="video_may_be_corrupted">Error, video file may be corrupted</string>
+    <string name="not_supported">not supported on your device</string> <!--  intentionally starts lower case -->
+    <string name="exposure_compensation">Exposure compensation</string>
+    <string name="front_camera">Front Camera</string>
+    <string name="back_camera">Back Camera</string>
+    <string name="photo">Photo</string>
+    <string name="video">Video</string>
+    <string name="exposure_locked">Exposure Locked</string>
+    <string name="exposure_unlocked">Exposure unlocked</string>
+    <string name="cancelled_timer">Cancelled timer</string>
+    <string name="started_timer">Started timer</string>
+    <string name="failed_to_save_video">Failed to save video file</string>
+    <string name="failed_to_record_video">Failed to record video</string>
+    <string name="started_recording_video">Started recording video</string>
+    <string name="sorry">Sorry</string>
+    <string name="failed_to_save_image">Failed to save image file</string>
+    <string name="failed_to_save_photo">Failed to save photo</string>
+    <string name="taking_photo">Taking photo</string>
+    <string name="failed_to_take_picture">Failed to take picture</string>
+    <string name="photo_deleted">Photo deleted</string>
+    
+    <string name="no_gallery_app">No gallery app available</string>
+    
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-stabilise</string>
     <string name="preference_auto_stabilise_summary">Images will be rotated so they are automatically level (photos only) (slower to take photos, and may fail on devices with too low memory)</string>

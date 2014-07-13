@@ -506,7 +506,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( video_recorder != null ) { // check again, just to be safe
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
-    		showToast(stopstart_video_toast, "Stopped recording video");
+    		showToast(stopstart_video_toast, R.string.stopped_recording_video);
 			/*is_taking_photo = false;
 			is_taking_photo_on_timer = false;*/
     		this.phase = PHASE_NORMAL;
@@ -596,7 +596,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         		if( MyDebug.LOG )
         			Log.e(TAG, "failed to reconnect to camera");
 				e.printStackTrace();
-	    	    showToast(null, "Failed to reconnect to camera");
+	    	    showToast(null, R.string.failed_to_reconnect_camera);
 	    	    closeCamera();
 			}
     		try {
@@ -614,9 +614,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			if( !quiet ) {
     	        	CamcorderProfile profile = getCamcorderProfile();
 					String features = getErrorFeatures(profile);
-					String error_message = "Error, video file may be corrupted";
+					String error_message = getResources().getString(R.string.video_may_be_corrupted);
 					if( features.length() > 0 ) {
-						error_message += ", " + features + " not supported on your device";
+						error_message += ", " + features + " " + getResources().getString(R.string.not_supported);
 					}
     				showToast(null, error_message);
     			}
@@ -2407,7 +2407,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					SharedPreferences.Editor editor = sharedPreferences.edit();
 					editor.putString(getExposurePreferenceKey(), "" + new_exposure);
 					editor.apply();
-		    		showToast(change_exposure_toast, "Exposure compensation " + new_exposure);
+		    		showToast(change_exposure_toast, getResources().getString(R.string.exposure_compensation) + " " + new_exposure);
 		    		if( update_seek_bar ) {
 		    			MainActivity main_activity = (MainActivity)this.getContext();
 		    			main_activity.setSeekBarExposure();
@@ -2442,10 +2442,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    Camera.CameraInfo info = new Camera.CameraInfo();
 		    Camera.getCameraInfo(cameraId, info);
 		    if( info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-				showToast(switch_camera_toast, "Front Camera");
+				showToast(switch_camera_toast, R.string.front_camera);
 		    }
 		    else {
-				showToast(switch_camera_toast, "Back Camera");
+				showToast(switch_camera_toast, R.string.back_camera);
 		    }
 		    //zoom_factor = 0; // reset zoom when switching camera
 			this.openCamera();
@@ -2466,10 +2466,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				bitrate_string = profile.videoBitRate/1000 + "Kbps";
 			else
 				bitrate_string = profile.videoBitRate + "bps";
-			toast_string = "Video: " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
+			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
 		}
 		else {
-			toast_string = "Photo";
+			toast_string = getResources().getString(R.string.photo);
 			if( current_size_index != -1 && sizes != null ) {
 				Camera.Size current_size = sizes.get(current_size_index);
 				toast_string += " " + current_size.width + "x" + current_size.height;
@@ -2987,7 +2987,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( is_exposure_locked_supported ) {
 			is_exposure_locked = !is_exposure_locked;
 			setExposureLocked();
-			showToast(exposure_lock_toast, is_exposure_locked ? "Exposure Locked" : "Exposure Unlocked");
+			showToast(exposure_lock_toast, is_exposure_locked ? R.string.exposure_locked : R.string.exposure_unlocked);
 		}
 	}
 
@@ -3086,7 +3086,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			this.phase = PHASE_NORMAL;
 			if( MyDebug.LOG )
 				Log.d(TAG, "cancelled camera timer");
-		    showToast(take_photo_toast, "Cancelled timer");
+		    showToast(take_photo_toast, R.string.cancelled_timer);
 			return;
 		}
     	//if( is_taking_photo ) {
@@ -3167,7 +3167,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "take photo at: " + take_photo_time);
 		if( !repeated ) {
-			showToast(take_photo_toast, "Started timer");
+			showToast(take_photo_toast, R.string.started_timer);
 		}
     	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
 
@@ -3223,7 +3223,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
 			if( videoFile == null ) {
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
-	    	    showToast(null, "Failed to save video file");
+	    	    showToast(null, R.string.failed_to_save_video);
 			}
 			else {
 				video_name = videoFile.getAbsolutePath();
@@ -3299,14 +3299,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            	video_recorder.start();
 	            	video_start_time = System.currentTimeMillis();
 	            	video_start_time_set = true;
-    				showToast(stopstart_video_toast, "Started recording video");
+    				showToast(stopstart_video_toast, R.string.started_recording_video);
     				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
 				}
 	        	catch(IOException e) {
 		    		if( MyDebug.LOG )
 		    			Log.e(TAG, "failed to save video");
 					e.printStackTrace();
-		    	    showToast(null, "Failed to save video");
+		    	    showToast(null, R.string.failed_to_save_video);
 		    		video_recorder.reset();
 		    		video_recorder.release(); 
 		    		video_recorder = null;
@@ -3324,10 +3324,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					String error_message = "";
 					String features = getErrorFeatures(profile);
 					if( features.length() > 0 ) {
-						error_message = "Sorry, " + features + " not supported on your device";
+						error_message = getResources().getString(R.string.sorry) + ", " + features + " " + getResources().getString(R.string.not_supported);
 					}
 					else {
-						error_message = "Failed to record video";
+						error_message = getResources().getString(R.string.failed_to_record_video);
 					}
 		    	    showToast(null, error_message);
 		    		video_recorder.reset();
@@ -3637,7 +3637,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        			picFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_IMAGE);
 	        	        if( picFile == null ) {
 	        	            Log.e(TAG, "Couldn't create media image file; check storage permissions?");
-	        	    	    showToast(null, "Failed to save image file");
+	        	    	    showToast(null, R.string.failed_to_save_image);
 	        	        }
 	        	        else {
 		    	            picFileName = picFile.getAbsolutePath();
@@ -3770,13 +3770,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	    		if( MyDebug.LOG )
     	    			Log.e(TAG, "File not found: " + e.getMessage());
     	            e.getStackTrace();
-    	    	    showToast(null, "Failed to save photo");
+    	    	    showToast(null, R.string.failed_to_save_photo);
     	        }
     	        catch(IOException e) {
     	    		if( MyDebug.LOG )
     	    			Log.e(TAG, "I/O error writing file: " + e.getMessage());
     	            e.getStackTrace();
-    	    	    showToast(null, "Failed to save photo");
+    	    	    showToast(null, R.string.failed_to_save_photo);
     	        }
 
     			is_preview_started = false; // preview automatically stopped due to taking photo
@@ -3950,10 +3950,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		String toast_text = "";
     		if( n_burst > 1 ) {
     			int photo = (n_burst-remaining_burst_photos);
-    			toast_text = "Taking photo... (" +  photo + " / " + n_burst + ")";
+    			toast_text = getResources().getString(R.string.taking_photo) + "... (" +  photo + " / " + n_burst + ")";
     		}
     		else {
-    			toast_text = "Taking photo...";
+    			toast_text = getResources().getString(R.string.taking_photo) + "...";
     		}
     		if( MyDebug.LOG )
     			Log.d(TAG, toast_text);
@@ -3967,7 +3967,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			if( MyDebug.LOG )
 					Log.e(TAG, "runtime exception from takePicture");
     			e.printStackTrace();
-	    	    showToast(null, "Failed to take picture");
+	    	    showToast(null, R.string.failed_to_take_picture);
     		}
     	}
 		if( MyDebug.LOG )
@@ -4027,7 +4027,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "successfully deleted " + preview_image_name);
-    	    	    showToast(null, "Photo deleted");
+    	    	    showToast(null, R.string.photo_deleted);
 					MainActivity main_activity = (MainActivity)this.getContext();
     	            main_activity.broadcastFile(file, false, false);
 				}
@@ -4500,6 +4500,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	state.putInt("zoom_factor", zoom_factor);
 	}
 
+    public void showToast(final ToastBoxer clear_toast, final int message_id) {
+    	showToast(clear_toast, getResources().getString(message_id));
+    }
+	
     public void showToast(final ToastBoxer clear_toast, final String message) {
 		class RotatedTextView extends View {
 			private String [] lines = null;
