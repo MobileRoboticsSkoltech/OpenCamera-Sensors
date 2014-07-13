@@ -236,7 +236,11 @@ public class MainActivity extends Activity {
 	    				this.preview.changeExposure(-1, true);
 	                return true;
 	    		}
-	    		// else do nothing
+	    		else if( volume_keys.equals("volume_really_nothing") ) {
+	    			// do nothing, but still return true so we don't change volume either
+	    			return true;
+	    		}
+	    		// else do nothing here, but still allow changing of volume (i.e., the default behaviour)
 	    		break;
 	        }
 		case KeyEvent.KEYCODE_MENU:

@@ -129,12 +129,14 @@
         <item>Zoom in/out</item>
         <item>Change exposure level</item>
         <item>Change device volume</item>
-    </string-array>
+        <item>Do nothing</item>
+        </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
         <item>volume_zoom</item>
         <item>volume_exposure</item>
-        <item>volume_nothing</item>
+        <item>volume_nothing</item><!-- actually means change device volume! -->
+        <item>volume_really_nothing</item>
     </string-array>
     <string-array name="preference_ui_placement_entries">
         <item>Left-handed user interface</item>
