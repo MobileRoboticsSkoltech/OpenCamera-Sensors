@@ -9,8 +9,10 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -1083,7 +1085,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 
 		// get available sizes
-		initialiseVideoQuality(parameters);
+		initialiseVideoSizes(parameters);
+		initialiseVideoQuality();
 
 		current_video_quality = -1;
 		String video_quality_value_s = sharedPreferences.getString(getVideoQualityPreferenceKey(cameraId), "");
@@ -1366,10 +1369,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 	}
 	
-	private void initialiseVideoQuality(Camera.Parameters parameters) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "initialiseVideoQuality()");
-        video_quality = new Vector<String>();
+	// for testing
+	public void setVideoSizes(List<Camera.Size> video_sizes) {
+		this.video_sizes = video_sizes;
+	}
+	
+	private void initialiseVideoSizes(Camera.Parameters parameters) {
     	video_sizes = parameters.getSupportedVideoSizes(); 
     	if( video_sizes == null ) {
     		// if null, we should use the preview sizes - see http://stackoverflow.com/questions/14263521/android-getsupportedvideosizes-allways-returns-null
@@ -1382,30 +1387,62 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			Log.d(TAG, "    supported video size: " + size.width + ", " + size.height);
 			}
         }
-        /*if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH) ) {
-        	video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
-        }*/
+	}
+
+	private void initialiseVideoQuality() {
+		Set<Integer> profiles = new HashSet<Integer>();
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH) ) {
+        	profiles.add(CamcorderProfile.QUALITY_HIGH);
+        }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) ) {
+        	profiles.add(CamcorderProfile.QUALITY_1080P);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_720P) ) {
+        	profiles.add(CamcorderProfile.QUALITY_720P);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_480P) ) {
+        	profiles.add(CamcorderProfile.QUALITY_480P);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_CIF) ) {
+        	profiles.add(CamcorderProfile.QUALITY_CIF);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QVGA) ) {
+        	profiles.add(CamcorderProfile.QUALITY_QVGA);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QCIF) ) {
+        	profiles.add(CamcorderProfile.QUALITY_QCIF);
+        }
+        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_LOW) ) {
+        	profiles.add(CamcorderProfile.QUALITY_LOW);
+        }
+        initialiseVideoQualityFromProfiles(profiles);
+	}
+
+	public void initialiseVideoQualityFromProfiles(Set<Integer> profiles) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initialiseVideoQuality()");
+        video_quality = new Vector<String>();
+        if( profiles.contains(CamcorderProfile.QUALITY_1080P) ) {
         	addCustomResolutions(1920*1080, -1, CamcorderProfile.QUALITY_1080P);
         	video_quality.add("" + CamcorderProfile.QUALITY_1080P);
         }
-        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_720P) ) {
+        if( profiles.contains(CamcorderProfile.QUALITY_720P) ) {
         	addCustomResolutions(1280*720, 1920*1080, CamcorderProfile.QUALITY_720P);
         	video_quality.add("" + CamcorderProfile.QUALITY_720P);
         }
-        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_480P) ) {
+        if( profiles.contains(CamcorderProfile.QUALITY_480P) ) {
         	addCustomResolutions(720*480, 1280*720, CamcorderProfile.QUALITY_480P);
         	video_quality.add("" + CamcorderProfile.QUALITY_480P);
         }
-        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_CIF) ) {
+        if( profiles.contains(CamcorderProfile.QUALITY_CIF) ) {
         	addCustomResolutions(352*288, 720*480, CamcorderProfile.QUALITY_CIF);
         	video_quality.add("" + CamcorderProfile.QUALITY_CIF);
         }
-        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QVGA) ) {
+        if( profiles.contains(CamcorderProfile.QUALITY_QVGA) ) {
         	addCustomResolutions(320*240, 352*288, CamcorderProfile.QUALITY_QVGA);
         	video_quality.add("" + CamcorderProfile.QUALITY_QVGA);
         }
-        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QCIF) ) {
+        if( profiles.contains(CamcorderProfile.QUALITY_QCIF) ) {
         	addCustomResolutions(176*144, 320*240, CamcorderProfile.QUALITY_QCIF);
         	video_quality.add("" + CamcorderProfile.QUALITY_QCIF);
         }
@@ -4434,7 +4471,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.current_size_index;
     }
     
-    List<String> getSupportedVideoQuality() {
+    public List<String> getSupportedVideoQuality() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedVideoQuality");
 		return this.video_quality;
