@@ -1356,19 +1356,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 	}
 	
-	private void addCustomResolutions(int min_resolution, int max_resolution, int base_profile) {
-		if( video_sizes == null ) {
-			return;
-		}
-        for(Camera.Size size : video_sizes) {
-    		if( size.width * size.height > min_resolution ) {
-    			if( max_resolution == -1 || ( size.width * size.height < max_resolution ) ) {
-    	        	video_quality.add("" + base_profile + "_r" + size.width + "x" + size.height);
-    			}
-    		}
-        }
-	}
-	
 	// for testing
 	public void setVideoSizes(List<Camera.Size> video_sizes) {
 		this.video_sizes = video_sizes;
@@ -1418,6 +1405,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         initialiseVideoQualityFromProfiles(profiles);
 	}
 
+	private void addCustomResolutions(int min_resolution, int max_resolution, int base_profile) {
+		if( video_sizes == null ) {
+			return;
+		}
+        for(Camera.Size size : video_sizes) {
+    		if( size.width * size.height > min_resolution ) {
+    			if( max_resolution == -1 || ( size.width * size.height < max_resolution ) ) {
+    	        	video_quality.add("" + base_profile + "_r" + size.width + "x" + size.height);
+    			}
+    		}
+        }
+	}
+	
 	public void initialiseVideoQualityFromProfiles(Set<Integer> profiles) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initialiseVideoQuality()");
