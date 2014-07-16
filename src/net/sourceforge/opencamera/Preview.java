@@ -1405,15 +1405,32 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         initialiseVideoQualityFromProfiles(profiles);
 	}
 
-	private void addCustomResolutions(int min_resolution, int max_resolution, int base_profile) {
+	private void addVideoResolutions(boolean done_video_size[], int base_profile) {
 		if( video_sizes == null ) {
 			return;
 		}
-        for(Camera.Size size : video_sizes) {
-    		if( size.width * size.height > min_resolution ) {
-    			if( max_resolution == -1 || ( size.width * size.height < max_resolution ) ) {
-    	        	video_quality.add("" + base_profile + "_r" + size.width + "x" + size.height);
-    			}
+		CamcorderProfile profile = CamcorderProfile.get(cameraId, base_profile);
+		int min_resolution_w = profile.videoFrameWidth;
+		int min_resolution_h = profile.videoFrameHeight;
+		if( MyDebug.LOG )
+			Log.d(TAG, "profile " + base_profile + " is resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+    	for(int i=0;i<video_sizes.size();i++) {
+    		if( done_video_size[i] )
+    			continue;
+    		Camera.Size size = video_sizes.get(i);
+    		if( size.width == min_resolution_w && size.height == min_resolution_h ) {
+    			String str = "" + base_profile;
+            	video_quality.add(str);
+	        	done_video_size[i] = true;
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "added: " + str);
+    		}
+    		else if( base_profile == CamcorderProfile.QUALITY_LOW || size.width * size.height >= min_resolution_w*min_resolution_h ) {
+    			String str = "" + base_profile + "_r" + size.width + "x" + size.height;
+	        	video_quality.add(str);
+	        	done_video_size[i] = true;
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "added: " + str);
     		}
         }
 	}
@@ -1422,29 +1439,51 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initialiseVideoQuality()");
         video_quality = new Vector<String>();
+        boolean done_video_size[] = null;
+        if( video_sizes != null ) {
+        	done_video_size = new boolean[video_sizes.size()];
+        	for(int i=0;i<video_sizes.size();i++)
+        		done_video_size[i] = false;
+        }
+        if( profiles.contains(CamcorderProfile.QUALITY_HIGH) ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "supports QUALITY_HIGH");
+    		addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_HIGH);
+        }
         if( profiles.contains(CamcorderProfile.QUALITY_1080P) ) {
-        	addCustomResolutions(1920*1080, -1, CamcorderProfile.QUALITY_1080P);
-        	video_quality.add("" + CamcorderProfile.QUALITY_1080P);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "supports QUALITY_1080P");
+    		addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_1080P);
         }
         if( profiles.contains(CamcorderProfile.QUALITY_720P) ) {
-        	addCustomResolutions(1280*720, 1920*1080, CamcorderProfile.QUALITY_720P);
-        	video_quality.add("" + CamcorderProfile.QUALITY_720P);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "supports QUALITY_720P");
+    		addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_720P);
         }
         if( profiles.contains(CamcorderProfile.QUALITY_480P) ) {
-        	addCustomResolutions(720*480, 1280*720, CamcorderProfile.QUALITY_480P);
-        	video_quality.add("" + CamcorderProfile.QUALITY_480P);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "supports QUALITY_480P");
+    		addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_480P);
         }
         if( profiles.contains(CamcorderProfile.QUALITY_CIF) ) {
-        	addCustomResolutions(352*288, 720*480, CamcorderProfile.QUALITY_CIF);
-        	video_quality.add("" + CamcorderProfile.QUALITY_CIF);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "supports QUALITY_CIF");
+    		addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_CIF);
         }
         if( profiles.contains(CamcorderProfile.QUALITY_QVGA) ) {
-        	addCustomResolutions(320*240, 352*288, CamcorderProfile.QUALITY_QVGA);
-        	video_quality.add("" + CamcorderProfile.QUALITY_QVGA);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "supports QUALITY_QVGA");
+    		addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_QVGA);
         }
         if( profiles.contains(CamcorderProfile.QUALITY_QCIF) ) {
-        	addCustomResolutions(176*144, 320*240, CamcorderProfile.QUALITY_QCIF);
-        	video_quality.add("" + CamcorderProfile.QUALITY_QCIF);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "supports QUALITY_QCIF");
+    		addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_QCIF);
+        }
+        if( profiles.contains(CamcorderProfile.QUALITY_LOW) ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "supports QUALITY_LOW");
+    		addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_LOW);
         }
 		if( MyDebug.LOG ) {
 			for(int i=0;i<video_quality.size();i++) {
