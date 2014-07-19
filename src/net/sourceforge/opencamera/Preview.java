@@ -9,6 +9,8 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -1355,10 +1357,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             camera.setParameters(parameters);
         }
 	}
+
+	private void sortVideoSizes() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "sortVideoSizes()");
+		Collections.sort(this.video_sizes, new Comparator<Camera.Size>() {
+			public int compare(final Camera.Size a, final Camera.Size b) {
+				return b.width * b.height - a.width * a.height;
+			}
+		});
+	}
 	
 	// for testing
 	public void setVideoSizes(List<Camera.Size> video_sizes) {
 		this.video_sizes = video_sizes;
+		this.sortVideoSizes();
 	}
 	
 	private void initialiseVideoSizes(Camera.Parameters parameters) {
@@ -1369,6 +1382,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			Log.d(TAG, "take video_sizes from preview sizes");
     		video_sizes = parameters.getSupportedPreviewSizes();
     	}
+		this.sortVideoSizes();
 		if( MyDebug.LOG ) {
 			for(Camera.Size size : video_sizes) {
     			Log.d(TAG, "    supported video size: " + size.width + ", " + size.height);
