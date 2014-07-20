@@ -110,6 +110,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private TimerTask takePictureTimerTask = null;
 	private Timer beepTimer = new Timer();
 	private TimerTask beepTimerTask = null;
+	private Timer restartVideoTimer = new Timer();
+	private TimerTask restartVideoTimerTask = null;
 	private long take_photo_time = 0;
 	private int remaining_burst_photos = 0;
 	private int n_burst = 1;
@@ -503,6 +505,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "stopVideo()");
 		MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.unlockScreen();
+		if( restartVideoTimerTask != null ) {
+			restartVideoTimerTask.cancel();
+		}
 		if( video_recorder != null ) { // check again, just to be safe
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
@@ -581,6 +586,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			}
     			video_name = null;
     		}
+		}
+	}
+	
+	private void restartVideo() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "restartVideo()");
+		if( video_recorder != null ) {
+    		stopVideo();
 		}
 	}
 	
@@ -3227,7 +3240,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
         catch(NumberFormatException e) {
     		if( MyDebug.LOG )
-    			Log.e(TAG, "failed to parse timer_value: " + timer_value);
+    			Log.e(TAG, "failed to parse preference_timer value: " + timer_value);
     		e.printStackTrace();
     		timer_delay = 0;
         }
@@ -3240,7 +3253,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
         catch(NumberFormatException e) {
     		if( MyDebug.LOG )
-    			Log.e(TAG, "failed to parse burst_mode_value: " + burst_mode_value);
+    			Log.e(TAG, "failed to parse preference_burst_mode value: " + burst_mode_value);
     		e.printStackTrace();
     		n_burst = 1;
         }
@@ -3409,6 +3422,36 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            	video_start_time_set = true;
     				showToast(stopstart_video_toast, R.string.started_recording_video);
     				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
+
+    				// handle restart timer
+    				String timer_value = sharedPreferences.getString("preference_video_max_duration", "0");
+    				long timer_delay = 0;
+    				try {
+    					timer_delay = Integer.parseInt(timer_value) * 1000;
+    				}
+    		        catch(NumberFormatException e) {
+    		    		if( MyDebug.LOG )
+    		    			Log.e(TAG, "failed to parse preference_video_max_duration value: " + timer_value);
+    		    		e.printStackTrace();
+    		    		timer_delay = 0;
+    		        }
+    				
+    				if( timer_delay > 0 ) {
+        				class RestartVideoTimerTask extends TimerTask {
+        					public void run() {
+        			    		if( MyDebug.LOG )
+        			    			Log.e(TAG, "stop video on timer");
+        						Activity activity = (Activity)Preview.this.getContext();
+        						// need to run on UI thread, as stopVideo->MainActivity.updateGalleryIconToBitmap must be run on UI thread
+        						activity.runOnUiThread(new Runnable() {
+        							public void run() {
+        								restartVideo();
+        							}
+        						});
+        					}
+        				}
+        		    	restartVideoTimer.schedule(restartVideoTimerTask = new RestartVideoTimerTask(), timer_delay);
+    				}
 				}
 	        	catch(IOException e) {
 		    		if( MyDebug.LOG )
@@ -4021,7 +4064,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        		}
 	                catch(NumberFormatException e) {
 	            		if( MyDebug.LOG )
-	            			Log.e(TAG, "failed to parse timer_value: " + timer_value);
+	            			Log.e(TAG, "failed to parse preference_burst_interval value: " + timer_value);
 	            		e.printStackTrace();
 	            		timer_delay = 0;
 	                }

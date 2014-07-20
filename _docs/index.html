@@ -355,6 +355,9 @@ conditions, so there is no guarantee that the resultant video's frame rate will 
 that some frame rate values may be unsupported by your device, and cause the recording to fail, so please test before
 using.</p>
 
+<p><b>Max duration of video</b> - This option can be used to set a maximum duration of the video. If set, video recording
+will stop after the specified time (unless already stopped earlier).</p>
+
 <p><b>Record audio</b> - Whether to record audio when recording a video.</p>
 
 <p><b>Audio source</b> - Select the audio source for recording video. The effect of this depends on your device -
@@ -410,6 +413,8 @@ ADDED   Location data now stored in videos too, if geotagging option is enabled
 ADDED   Option for volume keys to do nothing (not even changing the device
         volume).
 ADDED   Option to lock screen when recording video (swipe to unlock).
+ADDED   Option to limit duration of recording video (automatically stops after
+        specified time).
 UPDATED Significantly improved speed for opening and closing settings (now
         launched as a Fragment rather than a separate Activity).
 UPDATED Open Camera now remains active rather than being blocked by a "screen
