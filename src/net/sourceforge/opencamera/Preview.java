@@ -178,12 +178,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private Bitmap location_off_bitmap = null;
 	private Rect location_dest = new Rect();
 	
-	class ToastBoxer {
-		public Toast toast = null;
-
-		ToastBoxer() {
-		}
-	}
 	private ToastBoxer switch_camera_toast = new ToastBoxer();
 	private ToastBoxer switch_video_toast = new ToastBoxer();
 	private ToastBoxer flash_toast = new ToastBoxer();

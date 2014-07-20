@@ -83,6 +83,8 @@ public class MainActivity extends Activity {
 	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
     private GestureDetector gestureDetector;
     private boolean screen_is_locked = false;
+
+    private ToastBoxer screen_locked_toast = new ToastBoxer();
     
 	// for testing:
 	public boolean is_test = false;
@@ -972,7 +974,7 @@ public class MainActivity extends Activity {
     public void onBackPressed() {
         final MyPreferenceActivity fragment = getPreferenceFragment();
         if( screen_is_locked ) {
-			preview.showToast(null, R.string.screen_is_locked);
+			preview.showToast(screen_locked_toast, R.string.screen_is_locked);
         	return;
         }
         if( fragment != null ) {
@@ -1474,7 +1476,7 @@ public class MainActivity extends Activity {
                 float dist2 = xdist*xdist + ydist*ydist;
                 float vel2 = velocityX*velocityX + velocityY*velocityY;
                 if( dist2 > swipeMinDistance*swipeMinDistance && vel2 > swipeThresholdVelocity*swipeThresholdVelocity ) {
-                	preview.showToast(null, R.string.unlocked);
+                	preview.showToast(screen_locked_toast, R.string.unlocked);
                 	unlockScreen();
                 }
             }
@@ -1485,7 +1487,7 @@ public class MainActivity extends Activity {
 
         @Override
         public boolean onDown(MotionEvent e) {
-			preview.showToast(null, R.string.screen_is_locked);
+			preview.showToast(screen_locked_toast, R.string.screen_is_locked);
 			return true;
         }
     }	
