@@ -507,6 +507,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private void stopVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopVideo()");
+		MainActivity main_activity = (MainActivity)this.getContext();
+		main_activity.unlockScreen();
 		if( video_recorder != null ) { // check again, just to be safe
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
@@ -530,7 +532,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			File file = new File(video_name);
     			if( file != null ) {
     				// need to scan when finished, so we update for the completed file
-    				MainActivity main_activity = (MainActivity)this.getContext();
     	            main_activity.broadcastFile(file, false, true);
     			}
     			// create thumbnail
@@ -557,7 +558,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	    	    	}
     	    	    }
     	    	    if( thumbnail != null && thumbnail != old_thumbnail ) {
-    	    			MainActivity main_activity = (MainActivity)Preview.this.getContext();
     	    	    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
     	    	    	int width = thumbnail.getWidth();
     	    	    	int height = thumbnail.getHeight();
@@ -2121,10 +2121,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
             	/*if( MyDebug.LOG )
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
-    			p.setTextSize(24 * scale + 0.5f); // convert dps to pixels
+            	if( main_activity.isScreenLocked() ) {
+            		time_s += " " + getResources().getString(R.string.screen_lock_message);
+            	}
+    			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
     			p.setTextAlign(Paint.Align.CENTER);
-    			int pixels_offset_y = (int) (164 * scale + 0.5f); // convert dps to pixels
-				drawTextWithBackground(canvas, p, "" + time_s, Color.RED, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
+    			//int pixels_offset_y = (int) (164 * scale + 0.5f); // convert dps to pixels
+				//drawTextWithBackground(canvas, p, "" + time_s, Color.RED, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
+				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom label
+				drawTextWithBackground(canvas, p, "" + time_s, Color.RED, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
 		else if( camera == null ) {
@@ -3398,6 +3403,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        	video_recorder.setOutputFile(video_name);
 	        	try {
 	        		showGUI(false);
+	    			if( sharedPreferences.getBoolean("preference_lock_video", false) ) {
+	    				main_activity.lockScreen();
+	    			}
 	        		/*if( true ) // test
 	        			throw new IOException();*/
 		        	video_recorder.setPreviewDisplay(mHolder.getSurface());

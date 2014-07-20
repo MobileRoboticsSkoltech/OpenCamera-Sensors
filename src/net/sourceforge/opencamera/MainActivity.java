@@ -45,11 +45,15 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -77,7 +81,9 @@ public class MainActivity extends Activity {
 	private boolean supports_force_video_4k = false;
 	private ArrayList<String> save_location_history = new ArrayList<String>();
 	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
-
+    private GestureDetector gestureDetector;
+    private boolean screen_is_locked = false;
+    
 	// for testing:
 	public boolean is_test = false;
 	public Bitmap gallery_bitmap = null;
@@ -167,7 +173,7 @@ public class MainActivity extends Activity {
 		preview = new Preview(this, savedInstanceState);
 		((ViewGroup) findViewById(R.id.preview)).addView(preview);
 		
-        orientationEventListener = new OrientationEventListener(this) {
+		orientationEventListener = new OrientationEventListener(this) {
 			@Override
 			public void onOrientationChanged(int orientation) {
 				MainActivity.this.onOrientationChanged(orientation);
@@ -184,6 +190,8 @@ public class MainActivity extends Activity {
 			}
         });
         
+        gestureDetector = new GestureDetector(this, new MyGestureDetector());
+
         final String done_first_time_key = "done_first_time";
 		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
         if( !has_done_first_time && !is_test ) {
@@ -201,7 +209,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for Activity startup: " + (System.currentTimeMillis() - time_s));
 	}
-
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -963,6 +971,10 @@ public class MainActivity extends Activity {
     @Override
     public void onBackPressed() {
         final MyPreferenceActivity fragment = getPreferenceFragment();
+        if( screen_is_locked ) {
+			preview.showToast(null, R.string.screen_is_locked);
+        	return;
+        }
         if( fragment != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "close settings");
@@ -1421,6 +1433,62 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "takePicture");
     	this.preview.takePicturePressed();
     }
+    
+    void lockScreen() {
+		((ViewGroup) findViewById(R.id.locker)).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View arg0, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+                //return true;
+            }
+		});
+		screen_is_locked = true;
+    }
+    
+    void unlockScreen() {
+		((ViewGroup) findViewById(R.id.locker)).setOnTouchListener(null);
+		screen_is_locked = false;
+    }
+    
+    boolean isScreenLocked() {
+    	return screen_is_locked;
+    }
+
+    class MyGestureDetector extends SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            try {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "from " + e1.getX() + " , " + e1.getY() + " to " + e2.getX() + " , " + e2.getY());
+        		final ViewConfiguration vc = ViewConfiguration.get(MainActivity.this);
+        		//final int swipeMinDistance = 4*vc.getScaledPagingTouchSlop();
+    			final float scale = getResources().getDisplayMetrics().density;
+    			final int swipeMinDistance = (int) (160 * scale + 0.5f); // convert dps to pixels
+        		final int swipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
+        		if( MyDebug.LOG ) {
+        			Log.d(TAG, "from " + e1.getX() + " , " + e1.getY() + " to " + e2.getX() + " , " + e2.getY());
+        			Log.d(TAG, "swipeMinDistance: " + swipeMinDistance);
+        		}
+                float xdist = e1.getX() - e2.getX();
+                float ydist = e1.getY() - e2.getY();
+                float dist2 = xdist*xdist + ydist*ydist;
+                float vel2 = velocityX*velocityX + velocityY*velocityY;
+                if( dist2 > swipeMinDistance*swipeMinDistance && vel2 > swipeThresholdVelocity*swipeThresholdVelocity ) {
+                	preview.showToast(null, R.string.unlocked);
+                	unlockScreen();
+                }
+            }
+            catch(Exception e) {
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+			preview.showToast(null, R.string.screen_is_locked);
+			return true;
+        }
+    }	
 
 	@Override
 	protected void onSaveInstanceState(Bundle state) {

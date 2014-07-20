@@ -279,6 +279,12 @@ default will show above the lock screen - i.e., if locked, you won't have to ent
 device still needs to be unlocked in order to go to the Settings or Gallery. If you would prefer Open Camera to always
 be unavailable when your device is locked, you can disable this option.</p>
 
+<p><b>Lock screen when recording video</b> - if enabled, the GUI will be locked when recording video (i.e., the GUI
+won't respond to touch presses). You can use this to prevent accidental presses that might change settings or stop
+recording. To unlock the GUI, swipe the screen (in any direction). Note that this won't prevent the video being
+stopped if you press your device's Home, Recent Apps or Power button (it is not possible for apps to override the
+behaviour of these buttons).</p>
+
 <p><b>On screen GUI...</b> - Select to access the following controls:</p>
 
 <p><b>Preview size</b> - By default, Open Camera matches the aspect ratio of the preview (the image that is displayed on
@@ -403,6 +409,7 @@ ADDED   Location data now stored in videos too, if geotagging option is enabled
         (only for MPEG4 and 3GPP video formats).
 ADDED   Option for volume keys to do nothing (not even changing the device
         volume).
+ADDED   Option to lock screen when recording video (swipe to unlock).
 UPDATED Significantly improved speed for opening and closing settings (now
         launched as a Fragment rather than a separate Activity).
 UPDATED Open Camera now remains active rather than being blocked by a "screen
@@ -416,6 +423,8 @@ UPDATED Expanded number of devices which show the "Force 4K UHD video
         (experimental)" option (remember, 4K isn't officially supported by
         Android API and this option is experimental - if this option shows, it
         doesn't necessarily mean it will work on your device).
+UPDATED Video time is now shown with smaller font and off-centre, so as to not
+        obscure the view so much.
 
 Version 1.13 (2014/05/24)
 

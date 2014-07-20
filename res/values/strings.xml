@@ -36,6 +36,8 @@
     <string name="failed_to_take_picture">Failed to take picture</string>
     <string name="photo_deleted">Photo deleted</string>
     <string name="no_gallery_app">No gallery app available</string>
+    <string name="screen_is_locked">Screen is locked - swipe the screen to unlock</string>
+    <string name="unlocked">Unlocked</string>
     
     <string name="angle">Angle</string>
     <string name="direction">Direction</string>
@@ -44,6 +46,7 @@
     <string name="failed_to_open_camera_3">BY ANOTHER APPLICATION?</string>
     <string name="zoom">Zoom</string>
     <string name="free_memory">Free memory</string>
+    <string name="screen_lock_message">[LOCKED: Swipe to unlock]</string>
     
     <string name="preference_category_camera_effects">Camera Effects</string>
     <string name="preference_auto_stabilise">Auto-stabilise</string>
@@ -86,6 +89,8 @@
     <string name="preference_save_location_summary">Name of folder to save the photo/video files in (can also be a full path)</string>
     <string name="preference_show_when_locked">Show camera when locked</string>
     <string name="preference_show_when_locked_summary">If enabled, Open Camera will still show above any lockscreen (you\'ll still have to unlock to access Settings, Gallery etc)</string>
+    <string name="preference_lock_video">Lock screen when recording video</string>
+    <string name="preference_lock_video_summary">When recording video, the GUI will be locked to prevent accidentally stopping recording. Swipe the screen to unlock. Note that video recording will always stop if the app goes into background or the screen is blanked.</string>
     <string name="preference_show_zoom">Show zoom</string>
     <string name="preference_show_zoom_summary">Display the current camera zoom level on screen (when zoomed in)</string>
     <string name="preference_show_zoom_controls">Show zoom -/+ controls</string>
