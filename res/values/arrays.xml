@@ -270,6 +270,32 @@
         <item>2700</item>
         <item>3600</item>
     </string-array>
+    <string-array name="preference_video_restart_entries">
+        <item>Don\'t restart</item>
+        <item>Repeat 1 time</item>
+        <item>Repeat 2 times</item>
+        <item>Repeat 3 times</item>
+        <item>Repeat 4 times</item>
+        <item>Repeat 5 times</item>
+        <item>Repeat 6 times</item>
+        <item>Repeat 7 times</item>
+        <item>Repeat 8 times</item>
+        <item>Repeat 9 times</item>
+        <item>Repeat 10 times</item>
+        </string-array>
+    <string-array name="preference_video_restart_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
     <string-array name="preference_record_audio_src_entries">
         <item>Camcorder</item>
         <item>External mic (if present)</item>

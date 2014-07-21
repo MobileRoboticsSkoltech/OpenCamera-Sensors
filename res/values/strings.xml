@@ -14,6 +14,7 @@
     <string name="clear_folder_history_question">Clear folder history?</string>
     <string name="changed_save_location">Changed save location to:</string>
     <string name="stopped_recording_video">Stopped recording video</string>
+    <string name="repeats_to_go">repeats to go</string> <!--  intentionally starts lower case -->
     <string name="failed_to_reconnect_camera">Failed to reconnect to camera</string>
     <string name="video_may_be_corrupted">Error, video file may be corrupted</string>
     <string name="not_supported">not supported on your device</string> <!--  intentionally starts lower case -->
@@ -128,6 +129,8 @@
     <string name="preference_video_fps_summary">Set the frame rate (FPS) of videos (may be approx, not guaranteed to be achieved, and may cause video recording to fail if frame rate not supported)</string>
     <string name="preference_video_max_duration">Maximum duration of video</string>
     <string name="preference_video_max_duration_summary">The video recording will stop after the specified duration.</string>
+    <string name="preference_video_restart">Restart video after max duration</string>
+    <string name="preference_video_restart_summary">If the video has stopped after hitting the maximum duration (if set), this option will make the video restart, up to the specified number of times.</string>
     <string name="preference_record_audio">Record audio</string>
     <string name="preference_record_audio_summary">Record audio when recording video</string>
     <string name="preference_record_audio_src">Audio source</string>

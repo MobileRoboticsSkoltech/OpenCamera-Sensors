@@ -115,6 +115,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private long take_photo_time = 0;
 	private int remaining_burst_photos = 0;
 	private int n_burst = 1;
+	private int remaining_restart_video = 0;
 
 	private boolean is_preview_started = false;
 	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
@@ -500,18 +501,25 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		this.closeCamera();
 	}
 	
-	private void stopVideo() {
+	private void stopVideo(boolean from_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopVideo()");
-		MainActivity main_activity = (MainActivity)this.getContext();
+		final MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.unlockScreen();
 		if( restartVideoTimerTask != null ) {
 			restartVideoTimerTask.cancel();
 		}
+		if( !from_restart ) {
+			remaining_restart_video = 0;
+		}
 		if( video_recorder != null ) { // check again, just to be safe
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
-    		showToast(stopstart_video_toast, R.string.stopped_recording_video);
+			String toast = getResources().getString(R.string.stopped_recording_video);
+			if( remaining_restart_video > 0 ) {
+				toast += " (" + remaining_restart_video + " " + getResources().getString(R.string.repeats_to_go) + ")";
+			}
+    		showToast(stopstart_video_toast, toast);
 			/*is_taking_photo = false;
 			is_taking_photo_on_timer = false;*/
     		this.phase = PHASE_NORMAL;
@@ -575,7 +583,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	        		    	thumbnail = scaled_thumbnail;
     	        		    }
     	    	    	}
-    	    	    	main_activity.updateGalleryIconToBitmap(thumbnail);
+						main_activity.runOnUiThread(new Runnable() {
+							public void run() {
+		    	    	    	main_activity.updateGalleryIconToBitmap(thumbnail);
+							}
+						});
         	    		if( old_thumbnail != null ) {
         	    			// only recycle after we've set the new thumbnail
         	    			old_thumbnail.recycle();
@@ -593,7 +605,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "restartVideo()");
 		if( video_recorder != null ) {
-    		stopVideo();
+    		stopVideo(true);
+
+			// handle restart
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "remaining_restart_video is: " + remaining_restart_video);
+			if( remaining_restart_video > 0 ) {
+				if( is_video ) {
+					takePicture();
+					// must decrement after calling takePicture(), so that takePicture() doesn't reset the value of remaining_restart_video
+					remaining_restart_video--;
+				}
+				else {
+					remaining_restart_video = 0;
+				}
+			}
 		}
 	}
 	
@@ -661,7 +687,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		if( camera != null ) {
 			if( video_recorder != null ) {
-				stopVideo();
+				stopVideo(false);
 			}
 			if( this.is_video ) {
 				// make sure we're into continuous video mode for closing
@@ -2664,7 +2690,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		boolean old_is_video = is_video;
 		if( this.is_video ) {
 			if( video_recorder != null ) {
-				stopVideo();
+				stopVideo(false);
 			}
 			this.is_video = false;
 			showPhotoVideoToast();
@@ -3218,7 +3244,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	    			Log.d(TAG, "ignore pressing stop video too quickly after start");
     			}
     			else {
-    				stopVideo();
+    				stopVideo(false);
     			}
     		}
     		else {
@@ -3306,7 +3332,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         	beepTimer.schedule(beepTimerTask = new BeepTimerTask(), 0, 1000);
 		}
 	}
-
+	
 	private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
@@ -3435,19 +3461,25 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		    		e.printStackTrace();
     		    		timer_delay = 0;
     		        }
-    				
+
     				if( timer_delay > 0 ) {
-        				class RestartVideoTimerTask extends TimerTask {
+    					if( remaining_restart_video == 0 ) {
+        					String restart_value = sharedPreferences.getString("preference_video_restart", "0");
+        					try {
+        						remaining_restart_video = Integer.parseInt(restart_value);
+        					}
+        			        catch(NumberFormatException e) {
+        			    		if( MyDebug.LOG )
+        			    			Log.e(TAG, "failed to parse preference_video_restart value: " + restart_value);
+        			    		e.printStackTrace();
+        			    		remaining_restart_video = 0;
+        			        }
+    					}
+    					class RestartVideoTimerTask extends TimerTask {
         					public void run() {
         			    		if( MyDebug.LOG )
         			    			Log.e(TAG, "stop video on timer");
-        						Activity activity = (Activity)Preview.this.getContext();
-        						// need to run on UI thread, as stopVideo->MainActivity.updateGalleryIconToBitmap must be run on UI thread
-        						activity.runOnUiThread(new Runnable() {
-        							public void run() {
-        								restartVideo();
-        							}
-        						});
+        			    		restartVideo();
         					}
         				}
         		    	restartVideoTimer.schedule(restartVideoTimerTask = new RestartVideoTimerTask(), timer_delay);
