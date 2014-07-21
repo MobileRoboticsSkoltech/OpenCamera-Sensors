@@ -852,6 +852,8 @@ public class MainActivity extends Activity {
     private void openSettings() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "openSettings");
+		preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
+		
 		Bundle bundle = new Bundle();
 		bundle.putInt("cameraId", this.preview.getCameraId());
 		bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);

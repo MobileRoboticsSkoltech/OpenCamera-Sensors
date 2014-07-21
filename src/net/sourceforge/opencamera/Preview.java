@@ -501,7 +501,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		this.closeCamera();
 	}
 	
-	private void stopVideo(boolean from_restart) {
+	void stopVideo(boolean from_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopVideo()");
 		final MainActivity main_activity = (MainActivity)this.getContext();
