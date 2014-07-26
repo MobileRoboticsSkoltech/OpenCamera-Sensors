@@ -386,7 +386,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             Camera.Parameters parameters = camera.getParameters();
 			String focus_mode = parameters.getFocusMode();
     		this.has_focus_area = false;
-            if( parameters.getMaxNumFocusAreas() != 0 && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
+			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
+            if( parameters.getMaxNumFocusAreas() != 0 && focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "set focus (and metering?) area");
 				this.has_focus_area = true;
@@ -2775,7 +2776,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( this.supported_focus_values != null && camera != null ) {
 			Camera.Parameters parameters = camera.getParameters();
 			String current_focus_mode = parameters.getFocusMode();
-			boolean focus_is_video = current_focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
+			boolean focus_is_video = current_focus_mode != null && current_focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "current_focus_mode: " + current_focus_mode);
 				Log.d(TAG, "focus_is_video: " + focus_is_video + " , is_video: " + is_video);
@@ -4394,6 +4396,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				// The only thing in common to 1.7->1.8 and 1.9-1.10, that seems relevant, was adding this code to setRecordingHint() and setParameters() (unclear which would have been the problem),
 				// so we should be very careful about enabling this code again!
 				String focus_mode = parameters.getFocusMode();
+				// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
 	            if( focus_mode != null && !focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
 					parameters.setRecordingHint(this.is_video);
 		            camera.setParameters(parameters);

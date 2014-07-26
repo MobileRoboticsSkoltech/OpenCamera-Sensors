@@ -395,6 +395,9 @@ Version 1.15 (Work in progress)
 
 FIXED   Crash when exiting settings, if camera wasn't opened (bug introduced in
         v1.14).
+FIXED   More crashes due to camera drivers that aren't following Android API
+        specs (Parameters.getFocusMode() should always be non-null, but isn't
+        on some devices!)
 
 Version 1.14 (2014/07/22)
 
