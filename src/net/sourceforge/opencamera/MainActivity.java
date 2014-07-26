@@ -64,7 +64,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -953,7 +953,7 @@ public class MainActivity extends Activity {
 				need_reopen = true;
 			}
 		}
-		if( need_reopen ) {
+		if( need_reopen || preview.getCamera() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
 			preview.onResume();
 		}

@@ -129,7 +129,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private int [] gui_location = new int[2];
 
 	private int current_orientation = 0; // orientation received by onOrientationChanged
-	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setOrientation())
+	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setRotation())
 	private boolean has_level_angle = false;
 	private double level_angle = 0.0f;
 	private double orig_level_angle = 0.0f;
@@ -705,6 +705,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	void pausePreview() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "pausePreview()");
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
+			return;
+		}
 		this.setPreviewPaused(false);
 		camera.stopPreview();
 		this.phase = PHASE_NORMAL;
@@ -817,6 +822,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	void setupCamera() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setupCamera()");
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
+			return;
+		}
 		Activity activity = (Activity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
