@@ -377,12 +377,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( touch_was_multitouch ) {
 			return true;
 		}
-		if( this.isTakingPhotoOrOnTimer() ) {
+		if( !this.is_video && this.isTakingPhotoOrOnTimer() ) {
+			// if video, okay to refocus when recording
 			return true;
 		}
 
 		// note, we always try to force start the preview (in case is_preview_paused has become false)
-        startCameraPreview();
+		// except if recording video (firstly, the preview should be running; secondly, we don't want to reset the phase!)
+		if( !this.is_video ) {
+			startCameraPreview();
+		}
         cancelAutoFocus();
 
         if( camera != null && !this.using_face_detection ) {
@@ -3469,6 +3473,45 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	    		this.camera.unlock();
 	        	video_recorder = new MediaRecorder();
+	        	/*video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+					@Override
+					public void onInfo(MediaRecorder mr, int what, int extra) {
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "MediaRecorder info: " + what);
+							if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED )
+								Log.d(TAG, "max duration reached");
+							else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED )
+								Log.d(TAG, "max duration reached");
+						}
+						if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+							MainActivity main_activity = (MainActivity)Preview.this.getContext();
+							main_activity.runOnUiThread(new Runnable() {
+								public void run() {
+									// we run on main thread to avoid problem of camera closing at the same time
+						    		showToast(null, "Max duration reached");
+									stopVideo(false);
+								}
+							});
+						}
+					}
+				});
+	        	video_recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+					public void onError(MediaRecorder mr, int what, int extra) {
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "MediaRecorder error: " + what);
+							if( what == MediaRecorder.MEDIA_ERROR_SERVER_DIED  )
+								Log.d(TAG, "error: server died");
+						}
+						MainActivity main_activity = (MainActivity)Preview.this.getContext();
+						main_activity.runOnUiThread(new Runnable() {
+							public void run() {
+								// we run on main thread to avoid problem of camera closing at the same time
+					    		showToast(null, "Error, video halted");
+								stopVideo(false);
+							}
+						});
+					}
+				});*/
 	        	video_recorder.setCamera(camera);
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
@@ -4360,7 +4403,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "preview not yet started");
 		}
 		//else if( is_taking_photo ) {
-		else if( this.isTakingPhotoOrOnTimer() ) {
+		else if( !this.is_video && this.isTakingPhotoOrOnTimer() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
 		}
