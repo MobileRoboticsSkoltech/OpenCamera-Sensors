@@ -245,6 +245,8 @@ public class MyPreferenceActivity extends PreferenceFragment {
                         about_string.append(version);
                         about_string.append("\n(c) 2013-2014 Mark Harman");
                         about_string.append("\nReleased under the GPL v3 or later");
+                        about_string.append("\nPackage: ");
+                        about_string.append(MyPreferenceActivity.this.getActivity().getPackageName());
                         about_string.append("\nAndroid API version: ");
                         about_string.append(Build.VERSION.SDK_INT);
                         about_string.append("\nDevice manufacturer: ");
