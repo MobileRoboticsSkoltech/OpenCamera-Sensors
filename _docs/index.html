@@ -371,6 +371,10 @@ period, broken up into multiple video files. If a max duration has not been set,
 <p><b>Audio source</b> - Select the audio source for recording video. The effect of this depends on your device -
 if it supports an external microphone, you may be able to use this by selecting "External mic".</p>
 
+<p><b>Flash while recording video</b> - If enabled, the camera flash will flash every second while recording video. This
+isn't something most people will need, but it can be useful if the phone is being operated remotely, as a signal that the
+video is still recording.</p>
+
 <p><b>Misc:</b></p>
 
 <p><b>Online help</b> - Load this web page.</p>
@@ -402,6 +406,7 @@ FIXED   Crash when exiting settings, if camera wasn't opened (bug introduced in
 FIXED   More crashes due to camera drivers that aren't following Android API
         specs (Parameters.getFocusMode() should always be non-null, but isn't
         on some devices!)
+ADDED   New option Flash while recording video.
 
 Version 1.14 (2014/07/22)
 

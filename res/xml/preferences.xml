@@ -341,7 +341,14 @@
                 android:entryValues="@array/preference_record_audio_src_values"
                 android:defaultValue="audio_src_camcorder"
                 />
-	        
+
+            <CheckBoxPreference
+                android:key="preference_video_flash"
+                android:title="@string/preference_video_flash"
+                android:summary="@string/preference_video_flash_summary"
+                android:defaultValue="false"
+                />
+
         </PreferenceScreen>
     </PreferenceCategory>
 

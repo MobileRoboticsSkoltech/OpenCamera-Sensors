@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.hardware.Camera.Face;
+import android.hardware.Camera.Parameters;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -112,6 +113,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private TimerTask beepTimerTask = null;
 	private Timer restartVideoTimer = new Timer();
 	private TimerTask restartVideoTimerTask = null;
+	private Timer flashVideoTimer = new Timer();
+	private TimerTask flashVideoTimerTask = null;
 	private long take_photo_time = 0;
 	private int remaining_burst_photos = 0;
 	private int n_burst = 1;
@@ -509,6 +512,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		main_activity.unlockScreen();
 		if( restartVideoTimerTask != null ) {
 			restartVideoTimerTask.cancel();
+			restartVideoTimerTask = null;
+		}
+		if( flashVideoTimerTask != null ) {
+			flashVideoTimerTask.cancel();
+			flashVideoTimerTask = null;
 		}
 		if( !from_restart ) {
 			remaining_restart_video = 0;
@@ -677,8 +685,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		//if( is_taking_photo_on_timer ) {
 		if( this.isOnTimer() ) {
 			takePictureTimerTask.cancel();
+			takePictureTimerTask = null;
 			if( beepTimerTask != null ) {
 				beepTimerTask.cancel();
+				beepTimerTask = null;
 			}
 			/*is_taking_photo_on_timer = false;
 			is_taking_photo = false;*/
@@ -2710,8 +2720,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			//if( is_taking_photo_on_timer ) {
 			if( this.isOnTimer() ) {
 				takePictureTimerTask.cancel();
+				takePictureTimerTask = null;
 				if( beepTimerTask != null ) {
 					beepTimerTask.cancel();
+					beepTimerTask = null;
 				}
 				/*is_taking_photo_on_timer = false;
 				is_taking_photo = false;*/
@@ -3234,8 +3246,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		//if( is_taking_photo_on_timer ) {
 		if( this.isOnTimer() ) {
 			takePictureTimerTask.cancel();
+			takePictureTimerTask = null;
 			if( beepTimerTask != null ) {
 				beepTimerTask.cancel();
+				beepTimerTask = null;
 			}
 			/*is_taking_photo_on_timer = false;
 			is_taking_photo = false;*/
@@ -3315,8 +3329,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			public void run() {
 				if( beepTimerTask != null ) {
 					beepTimerTask.cancel();
+					beepTimerTask = null;
 				}
-				takePicture();
+				MainActivity main_activity = (MainActivity)Preview.this.getContext();
+				main_activity.runOnUiThread(new Runnable() {
+					public void run() {
+						// we run on main thread to avoid problem of camera closing at the same time
+						// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
+						if( camera != null && takePictureTimerTask != null )
+							takePicture();
+						else {
+							if( MyDebug.LOG )
+								Log.d(TAG, "takePictureTimerTask: don't take picture, as already cancelled");
+						}
+					}
+				});
 			}
 		}
 		take_photo_time = System.currentTimeMillis() + timer_delay;
@@ -3343,6 +3370,45 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		}
         	beepTimer.schedule(beepTimerTask = new BeepTimerTask(), 0, 1000);
 		}
+	}
+	
+	private void flashVideo() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "flashVideo");
+		Camera.Parameters parameters = camera.getParameters();
+		String flash_mode = parameters.getFlashMode();
+		// getFlashMode() may return null if flash not supported!
+		if( flash_mode == null )
+			return;
+		String flash_mode_ui = getCurrentFlashMode();
+		if( flash_mode_ui == null )
+			return;
+		if( flash_mode_ui.equals("flash_torch") )
+			return;
+		if( flash_mode.equals(Parameters.FLASH_MODE_TORCH) ) {
+			// shouldn't happen? but set to what the UI is
+	        cancelAutoFocus();
+			String flash_mode_from_ui = convertFlashValueToMode(flash_mode_ui);
+	    	if( flash_mode_from_ui.length() > 0 ) {
+	    		parameters.setFlashMode(flash_mode_from_ui);
+	    		camera.setParameters(parameters);
+	    	}
+			return;
+		}
+		// turn on torch
+        cancelAutoFocus();
+		parameters.setFlashMode(Parameters.FLASH_MODE_TORCH);
+		camera.setParameters(parameters);
+		try {
+			Thread.sleep(100);
+		}
+		catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		// turn off torch
+        cancelAutoFocus();
+		parameters.setFlashMode(flash_mode);
+		camera.setParameters(parameters);
 	}
 	
 	private void takePicture() {
@@ -3491,10 +3557,45 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         					public void run() {
         			    		if( MyDebug.LOG )
         			    			Log.e(TAG, "stop video on timer");
-        			    		restartVideo();
+        						MainActivity main_activity = (MainActivity)Preview.this.getContext();
+        						main_activity.runOnUiThread(new Runnable() {
+        							public void run() {
+        								// we run on main thread to avoid problem of camera closing at the same time
+        								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
+        								if( camera != null && restartVideoTimerTask != null )
+        									restartVideo();
+        								else {
+        									if( MyDebug.LOG )
+        										Log.d(TAG, "restartVideoTimerTask: don't restart video, as already cancelled");
+        								}
+        							}
+        						});
         					}
         				}
         		    	restartVideoTimer.schedule(restartVideoTimerTask = new RestartVideoTimerTask(), timer_delay);
+    				}
+
+    				if( sharedPreferences.getBoolean("preference_video_flash", false) && supportsFlash() ) {
+    					class FlashVideoTimerTask extends TimerTask {
+        					public void run() {
+        			    		if( MyDebug.LOG )
+        			    			Log.e(TAG, "FlashVideoTimerTask");
+        						MainActivity main_activity = (MainActivity)Preview.this.getContext();
+        						main_activity.runOnUiThread(new Runnable() {
+        							public void run() {
+        								// we run on main thread to avoid problem of camera closing at the same time
+        								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
+        								if( camera != null && flashVideoTimerTask != null )
+        									flashVideo();
+        								else {
+        									if( MyDebug.LOG )
+        										Log.d(TAG, "flashVideoTimerTask: don't flash video, as already cancelled");
+        								}
+        							}
+        						});
+        					}
+    					}
+        		    	flashVideoTimer.schedule(flashVideoTimerTask = new FlashVideoTimerTask(), 0, 1000);
     				}
 				}
 	        	catch(IOException e) {
