@@ -275,6 +275,14 @@ public class MyPreferenceActivity extends PreferenceFragment {
                         }
                         about_string.append("\nCurrent camera ID: ");
                         about_string.append(cameraId);
+                        {
+                        	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MyPreferenceActivity.this.getActivity());
+                        	String last_video_error = sharedPreferences.getString("last_video_error", "");
+                        	if( last_video_error != null && last_video_error.length() > 0 ) {
+                                about_string.append("\nLast video error: ");
+                                about_string.append(last_video_error);
+                        	}
+                        }
                         if( preview_widths != null && preview_heights != null ) {
                             about_string.append("\nPreview resolutions: ");
                 			for(int i=0;i<preview_widths.length;i++) {

@@ -537,6 +537,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			is_taking_photo_on_timer = false;*/
     		this.phase = PHASE_NORMAL;
 			try {
+				video_recorder.setOnErrorListener(null);
+				video_recorder.setOnInfoListener(null);
 				video_recorder.stop();
 			}
 			catch(RuntimeException e) {
@@ -3415,6 +3417,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		camera.setParameters(parameters);
 	}
 	
+	private void onVideoError(int message_id, int what, int extra, String debug_value) {
+		if( message_id != 0 )
+			showToast(null, message_id);
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString("last_video_error", debug_value);
+		editor.apply();
+		stopVideo(false);
+	}
+	
 	private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
@@ -3473,23 +3485,32 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	    		this.camera.unlock();
 	        	video_recorder = new MediaRecorder();
-	        	/*video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+	        	video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
 					@Override
 					public void onInfo(MediaRecorder mr, int what, int extra) {
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "MediaRecorder info: " + what);
-							if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED )
-								Log.d(TAG, "max duration reached");
-							else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED )
-								Log.d(TAG, "max duration reached");
-						}
+						if( MyDebug.LOG )
+							Log.d(TAG, "MediaRecorder info: " + what + " extra: " + extra);
 						if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+							int message_id = 0;
+							if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "max duration reached");
+								message_id = R.string.video_max_duration;
+							}
+							else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "max filesize reached");
+								message_id = R.string.video_max_filesize;
+							}
+							final int final_message_id = message_id;
+							final int final_what = what;
+							final int final_extra = extra;
 							MainActivity main_activity = (MainActivity)Preview.this.getContext();
 							main_activity.runOnUiThread(new Runnable() {
 								public void run() {
 									// we run on main thread to avoid problem of camera closing at the same time
-						    		showToast(null, "Max duration reached");
-									stopVideo(false);
+									String debug_value = "info_" + final_what + "_" + final_extra;
+									onVideoError(final_message_id, final_what, final_extra, debug_value);
 								}
 							});
 						}
@@ -3497,21 +3518,28 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				});
 	        	video_recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
 					public void onError(MediaRecorder mr, int what, int extra) {
+						int message_id = R.string.video_error_unknown;
 						if( MyDebug.LOG ) {
-							Log.d(TAG, "MediaRecorder error: " + what);
-							if( what == MediaRecorder.MEDIA_ERROR_SERVER_DIED  )
-								Log.d(TAG, "error: server died");
+							Log.d(TAG, "MediaRecorder error: " + what + " extra: " + extra);
 						}
+						if( what == MediaRecorder.MEDIA_ERROR_SERVER_DIED  ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "error: server died");
+							message_id = R.string.video_error_server_died;
+						}
+						final int final_message_id = message_id;
+						final int final_what = what;
+						final int final_extra = extra;
 						MainActivity main_activity = (MainActivity)Preview.this.getContext();
 						main_activity.runOnUiThread(new Runnable() {
 							public void run() {
 								// we run on main thread to avoid problem of camera closing at the same time
-					    		showToast(null, "Error, video halted");
-								stopVideo(false);
+								String debug_value = "error_" + final_what + "_" + final_extra;
+								onVideoError(final_message_id, final_what, final_extra, debug_value);
 							}
 						});
 					}
-				});*/
+				});
 	        	video_recorder.setCamera(camera);
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);

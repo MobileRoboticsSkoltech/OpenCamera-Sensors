@@ -18,6 +18,10 @@
     <string name="failed_to_reconnect_camera">Failed to reconnect to camera</string>
     <string name="video_may_be_corrupted">Error, video file may be corrupted</string>
     <string name="not_supported">not supported on your device</string> <!--  intentionally starts lower case -->
+    <string name="video_error_unknown">Unknown error, video halted</string>
+    <string name="video_error_server_died">Server died, video halted</string>
+    <string name="video_max_duration">Video reached max duration</string>
+    <string name="video_max_filesize">Video reached max filesize</string>
     <string name="exposure_compensation">Exposure compensation</string>
     <string name="front_camera">Front Camera</string>
     <string name="back_camera">Back Camera</string>

@@ -406,6 +406,10 @@ FIXED   Crash when exiting settings, if camera wasn't opened (bug introduced in
 FIXED   More crashes due to camera drivers that aren't following Android API
         specs (Parameters.getFocusMode() should always be non-null, but isn't
         on some devices!)
+FIXED   If video failed due to error (e.g., hitting device max filesize,
+        running out of space, of other errors), Open Camera now stops properly
+        rather than thinking the video is still recording. Last video error is
+        also stored in the about/debug window.
 ADDED   New option Flash while recording video.
 UPDATED Touch to set focus/metering now works while recording video.
 
