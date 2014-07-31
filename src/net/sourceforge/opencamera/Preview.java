@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -62,6 +63,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -1951,11 +1953,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "    degrees = " + degrees);
 
 	    int result = 0;
-	    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+	    if( info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
 	        result = (info.orientation + degrees) % 360;
 	        result = (360 - result) % 360;  // compensate the mirror
 	    }
-	    else {  // back-facing
+	    else {
 	        result = (info.orientation - degrees + 360) % 360;
 	    }
 		if( MyDebug.LOG ) {
@@ -1980,10 +1982,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    orientation = (orientation + 45) / 90 * 90;
 	    this.current_orientation = orientation % 360;
 	    int new_rotation = 0;
-	    if (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+	    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
 	    	new_rotation = (camera_info.orientation - orientation + 360) % 360;
 	    }
-	    else {  // back-facing camera
+	    else {
 	    	new_rotation = (camera_info.orientation + orientation) % 360;
 	    }
 	    if( new_rotation != current_rotation ) {
@@ -1994,7 +1996,76 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}*/
 	    	this.current_rotation = new_rotation;
 	    }
-	 }
+	}
+
+	private int getDeviceDefaultOrientation() {
+	    WindowManager windowManager = (WindowManager)this.getContext().getSystemService(Context.WINDOW_SERVICE);
+	    Configuration config = getResources().getConfiguration();
+	    int rotation = windowManager.getDefaultDisplay().getRotation();
+	    if( ( (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) &&
+	    		config.orientation == Configuration.ORIENTATION_LANDSCAPE )
+	    		|| ( (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) &&    
+	            config.orientation == Configuration.ORIENTATION_PORTRAIT ) ) {
+	    	return Configuration.ORIENTATION_LANDSCAPE;
+	    }
+	    else { 
+	    	return Configuration.ORIENTATION_PORTRAIT;
+	    }
+	}
+
+	/* Returns the rotation to use for images/videos, taking the preference_lock_orientation into account.
+	 */
+	private int getImageVideoRotation() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getImageVideoRotation() from current_rotation " + current_rotation);
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
+		if( lock_orientation.equals("landscape") ) {
+		    int device_orientation = getDeviceDefaultOrientation();
+		    Camera.getCameraInfo(cameraId, camera_info);
+		    int result = 0;
+		    if( device_orientation == Configuration.ORIENTATION_PORTRAIT ) {
+		    	// should be equivalent to onOrientationChanged(270)
+			    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
+			    	result = (camera_info.orientation + 90) % 360;
+			    }
+			    else {
+			    	result = (camera_info.orientation + 270) % 360;
+			    }
+		    }
+		    else {
+		    	// should be equivalent to onOrientationChanged(0)
+		    	result = camera_info.orientation;
+		    }
+			if( MyDebug.LOG )
+				Log.d(TAG, "getImageVideoRotation() lock to landscape, returns " + result);
+		    return result;
+		}
+		else if( lock_orientation.equals("portrait") ) {
+		    Camera.getCameraInfo(cameraId, camera_info);
+		    int result = 0;
+		    int device_orientation = getDeviceDefaultOrientation();
+		    if( device_orientation == Configuration.ORIENTATION_PORTRAIT ) {
+		    	// should be equivalent to onOrientationChanged(0)
+		    	result = camera_info.orientation;
+		    }
+		    else {
+		    	// should be equivalent to onOrientationChanged(90)
+			    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
+			    	result = (camera_info.orientation + 270) % 360;
+			    }
+			    else {
+			    	result = (camera_info.orientation + 90) % 360;
+			    }
+		    }
+			if( MyDebug.LOG )
+				Log.d(TAG, "getImageVideoRotation() lock to portrait, returns " + result);
+		    return result;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "getImageVideoRotation() returns current_rotation " + current_rotation);
+		return this.current_rotation;
+	}
 
 	@Override
 	public void onDraw(Canvas canvas) {
@@ -2645,6 +2716,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Camera.Size current_size = sizes.get(current_size_index);
 				toast_string += " " + current_size.width + "x" + current_size.height;
 			}
+		}
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
+		if( lock_orientation.equals("landscape") ) {
+			toast_string += "\nLocked to landscape";
+		}
+		else if( lock_orientation.equals("portrait") ) {
+			toast_string += "\nLocked to portrait";
 		}
 		showToast(switch_video_toast, toast_string);
 	}
@@ -3581,7 +3660,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    			Log.d(TAG, "video fileformat: " + profile.fileFormat);
 	    		}
 
-	        	video_recorder.setOrientationHint(this.current_rotation);
+	        	video_recorder.setOrientationHint(getImageVideoRotation());
 	        	video_recorder.setOutputFile(video_name);
 	        	try {
 	        		showGUI(false);
@@ -4198,7 +4277,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	    			Log.d(TAG, "    preview width   : " + Preview.this.getWidth());
     	    			Log.d(TAG, "    ratio           : " + ratio);
     	    			Log.d(TAG, "    inSampleSize    : " + options.inSampleSize);
-    	    			Log.d(TAG, "    current_rotation: " + current_rotation);
     	    		}
     	    		Bitmap old_thumbnail = thumbnail;
         			thumbnail = BitmapFactory.decodeByteArray(data, 0, data.length, options);
@@ -4299,10 +4377,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	    }
     	};
     	{
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "current_rotation: " + current_rotation);
 			Camera.Parameters parameters = camera.getParameters();
-			parameters.setRotation(current_rotation);
+			parameters.setRotation(getImageVideoRotation());
 			camera.setParameters(parameters);
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());

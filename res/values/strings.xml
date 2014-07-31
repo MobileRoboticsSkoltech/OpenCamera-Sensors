@@ -66,6 +66,8 @@
     <string name="preference_iso_summary">A higher value means more sensitive to light (may not work on some devices)</string>
     <string name="preference_exposure">Set the exposure compensation</string>
     <string name="preference_exposure_summary">Set to 0 for the default exposure compensation.</string>
+    <string name="preference_lock_orientation">Lock photo/video orientation</string>
+    <string name="preference_lock_orientation_summary">If set, the orientation of the device will be ignored, and the orientation of the photo/video will be with respect to the specified orientation.</string>
     <string name="preference_face_detection">Face detection</string>
     <string name="preference_face_detection_summary">Use face detection instead of focus areas.</string>
 

@@ -48,6 +48,16 @@
         <item>focus_mode_edof</item>
         <item>focus_mode_continuous_video</item>
     </string-array>
+    <string-array name="preference_lock_orientation_entries">
+        <item>No lock</item>
+        <item>Lock to landscape</item>
+        <item>Lock to portrait</item>
+    </string-array>
+    <string-array name="preference_lock_orientation_values">
+        <item>none</item>
+        <item>landscape</item>
+        <item>portrait</item>
+    </string-array>
     <string-array name="preference_timer_entries">
         <item>No timer</item>
         <item>1s</item>

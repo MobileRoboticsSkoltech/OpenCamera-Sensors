@@ -240,6 +240,11 @@ See <a href="http://digital-photography-school.com/iso-settings">here</a> for mo
 <p><b>Auto-stabilise</b> - Enable the auto-stabilise features for photos (see <a href="#auto_stabilise">above</a>). (Only available
 if the device has enough memory.)</p>
 
+<p><b>Lock photo/video orientation</b> - Normally the orientation of the photo/video will be rotated by some multiple of
+90 degree such that the orientation looks right - e.g. if your device is held in portrait, the resultant image/video will
+be in portrait. This option allows fixing the camera to either be in portrait or landscape. Note that if auto-stabilise
+is also enabled, it will have the effect of aligning photos to the nearest 90 degrees.</p>
+
 <p><b>Face detection</b> - If this is enabled, then the camera will automatically try to detect faces, and use
 them for the focus, metering (exposure) and white balance. Faces will be drawn as yellow squares when detected.
 Note that if this option is enabled, then you will not be able to touch to manually select the focus area, and
@@ -410,6 +415,7 @@ FIXED   If video failed due to error (e.g., hitting device max filesize,
         running out of space, of other errors), Open Camera now stops properly
         rather than thinking the video is still recording. Last video error is
         also stored in the about/debug window.
+ADDED   New option to lock orientation to portrait or landscape.
 ADDED   New option Flash while recording video.
 UPDATED Touch to set focus/metering now works while recording video.
 
