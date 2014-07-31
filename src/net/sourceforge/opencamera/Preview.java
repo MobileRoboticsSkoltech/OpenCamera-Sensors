@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -2699,6 +2700,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( main_activity.cameraInBackground() )
 			return;
 		String toast_string = "";
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		if( this.is_video ) {
 			CamcorderProfile profile = getCamcorderProfile();
 			String bitrate_string = "";
@@ -2708,7 +2710,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				bitrate_string = profile.videoBitRate/1000 + "Kbps";
 			else
 				bitrate_string = profile.videoBitRate + "bps";
+
+			String timer_value = sharedPreferences.getString("preference_video_max_duration", "0");
 			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
+			if( timer_value.length() > 0 && !timer_value.equals("0") ) {
+				String [] entries_array = getResources().getStringArray(R.array.preference_video_max_duration_entries);
+				String [] values_array = getResources().getStringArray(R.array.preference_video_max_duration_values);
+				int index = Arrays.asList(values_array).indexOf(timer_value);
+				String entry = entries_array[index];
+				toast_string += "\nMax duration: " + entry;
+			}
 		}
 		else {
 			toast_string = getResources().getString(R.string.photo);
@@ -2717,7 +2728,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				toast_string += " " + current_size.width + "x" + current_size.height;
 			}
 		}
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
 		if( lock_orientation.equals("landscape") ) {
 			toast_string += "\nLocked to landscape";
