@@ -552,7 +552,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		video_recorder.reset();
     		video_recorder.release(); 
     		video_recorder = null;
-			reconnectCamera(false);
+			reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
     		if( video_name != null ) {
     			File file = new File(video_name);
     			if( file != null ) {
@@ -715,10 +715,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				// so to be safe, we always reset to continuous video mode
 				this.updateFocusForVideo(false);
 			}
-			//camera.setPreviewCallback(null);
-			pausePreview();
-			camera.release();
-			camera = null;
+			// need to check for camera being non-null again - if an error occurred stopping the video, we will have closed the camera, and may not be able to reopen
+			if( camera != null ) {
+				//camera.setPreviewCallback(null);
+				pausePreview();
+				camera.release();
+				camera = null;
+			}
 		}
 	}
 	
@@ -1584,7 +1587,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
 	private CamcorderProfile getCamcorderProfile(String quality) {
 		if( MyDebug.LOG )
-			Log.e(TAG, "getCamcorderProfile(): " + quality);
+			Log.d(TAG, "getCamcorderProfile(): " + quality);
 		CamcorderProfile camcorder_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH); // default
 		try {
 			String profile_string = quality;
@@ -4517,7 +4520,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "preview not yet started");
 		}
 		//else if( is_taking_photo ) {
-		else if( !this.is_video && this.isTakingPhotoOrOnTimer() ) {
+		else if( !(manual && this.is_video) && this.isTakingPhotoOrOnTimer() ) {
+			// if taking a video, we allow manual autofocuses
+			// autofocus may cause problem if there is a video corruption problem, see testTakeVideoBitrate() on Nexus 7 at 30Mbs or 50Mbs, where the startup autofocus would cause a problem here
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
 		}
@@ -5032,7 +5037,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 
 		if( MyDebug.LOG )
-			Log.d(TAG, "showToast");
+			Log.d(TAG, "showToast: " + message);
 		final Activity activity = (Activity)this.getContext();
 		// We get a crash on emulator at least if Toast constructor isn't run on main thread (e.g., the toast for taking a photo when on timer).
 		// Also see http://stackoverflow.com/questions/13267239/toast-from-a-non-ui-thread
