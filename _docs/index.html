@@ -47,7 +47,7 @@
 <li>Choice of front/back camera.</li>
 <li>Choose scene modes, color effects, white balance, ISO and exposure compensation.</li>
 <li>Support for exposure lock.</li>
-<li>Video recording (with optional audio, and support for changing frame rate and bitrate).</li>
+<li>Video recording (with optional audio, and support for video stabilization, and changing frame rate and bitrate).</li>
 <li>Choice of camera and video resolution, and JPEG image quality. Support for all resolutions offered by the camera. Also support for 4K UHD (3840x2160) video on some devices (experimental - may not work on some devices!).</li>
 <li>Option to lock orientation to portrait or landscape for photo or video.</li>
 <li>Timer option.</li>
@@ -353,6 +353,9 @@ because Open Camera thinks this is a device that probably doesn't support 4K vid
 please let me know so I can fix this.) Also note that on some devices, 4K resolutions may show up in the list of available
 video resolutions anyway.</p>
 
+<p><b>Enable video stabilization</b> - Video stabilization reduces the shaking due to the motion of the camera in
+both the preview and in recorded videos.</p>
+
 <p><b>Video bitrate (approx)</b> - If set to a value other than "default", the default video bitrate is overridden. Higher values mean better
 quality video, but the files take up more disk space. Note that some values may be unsupported by your device, and may
 cause the recording to fail - in some cases, this can cause problems with the camera that require a reboot to fix. So
@@ -409,6 +412,7 @@ Version 1.16 (Work in progress)
 
 FIXED   Device freeze when recording video on some Samsung devices (e.g.,
         Galaxy S2).
+ADDED   Support for video stabilization.
 
 Version 1.15 (2014/08/02)
 

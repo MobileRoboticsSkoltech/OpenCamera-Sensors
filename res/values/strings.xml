@@ -129,6 +129,8 @@
     <string name="video_quality_summary">Set the resolution of videos</string>
     <string name="preference_force_video_4k">Force 4K UHD video (experimental)</string>
     <string name="preference_force_video_4k_summary">Enable 3840x2160 resolution for video recording on back camera - this will only work if your device supports it, and may crash if not!</string>
+    <string name="preference_video_stabilization">Enable video stabilization</string>
+    <string name="preference_video_stabilization_summary">Video stabilization reduces the shaking due to the motion of the camera in both the preview and in recorded videos.</string>
     <string name="preference_video_bitrate">Video bitrate (approx)</string>
     <string name="preference_video_bitrate_summary">Set the approximate bitrate of videos (higher means better quality, but takes up more disk space; may cause video recording to fail if bitrate not supported)</string>
     <string name="preference_video_fps">Video frame rate (approx)</string>

@@ -150,6 +150,15 @@ public class MyPreferenceActivity extends PreferenceFragment {
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
         	pg.removePreference(pref);
 		}
+		
+		final boolean supports_video_stabilization = bundle.getBoolean("supports_video_stabilization");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_video_stabilization: " + supports_video_stabilization);
+		if( !supports_video_stabilization ) {
+			Preference pref = (Preference)findPreference("preference_video_stabilization");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
+        	pg.removePreference(pref);
+		}
 
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
         	// Camera.enableShutterSound requires JELLY_BEAN_MR1 or greater
@@ -329,6 +338,8 @@ public class MyPreferenceActivity extends PreferenceFragment {
                         about_string.append(getString(supports_auto_stabilise ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nFace detection?: ");
                         about_string.append(getString(supports_face_detection ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nVideo stabilization?: ");
+                        about_string.append(getString(supports_video_stabilization ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nFlash modes: ");
                 		String [] flash_values = bundle.getStringArray("flash_values");
                 		if( flash_values != null && flash_values.length > 0 ) {

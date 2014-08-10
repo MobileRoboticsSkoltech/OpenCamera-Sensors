@@ -201,6 +201,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean supports_face_detection = false;
 	private boolean using_face_detection = false;
 	private Face [] faces_detected = null;
+	private boolean supports_video_stabilization = false;
 	private boolean has_focus_area = false;
 	private int focus_screen_x = 0;
 	private int focus_screen_y = 0;
@@ -760,6 +761,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		faces_detected = null;
 		supports_face_detection = false;
 		using_face_detection = false;
+		supports_video_stabilization = false;
 		color_effects = null;
 		white_balances = null;
 		isos = null;
@@ -968,6 +970,17 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			camera.setFaceDetectionListener(new MyFaceDetectionListener());
 		}
+		
+		// get video stabilization supported
+		this.supports_video_stabilization = parameters.isVideoStabilizationSupported();
+		if( this.supports_video_stabilization ) {
+			boolean using_video_stabilization = sharedPreferences.getBoolean("preference_video_stabilization", false);
+			if( MyDebug.LOG )
+				Log.d(TAG, "using_video_stabilization?: " + using_video_stabilization);
+            parameters.setVideoStabilization(using_video_stabilization);
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_video_stabilization?: " + supports_video_stabilization);
 
 		// get available color effects
 		color_effects = parameters.getSupportedColorEffects();
@@ -3571,11 +3584,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	                Camera.Parameters parameters = camera.getParameters();
 	        		parameters.getPreviewFpsRange(fps_range);
 	    	    	if( MyDebug.LOG ) {
-	    				Log.d(TAG, "    recording with preview fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+	    				Log.d(TAG, "recording with preview fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+	    				if( this.supports_video_stabilization ) {
+	    					Log.d(TAG, "recording with video stabilization? " + (parameters.getVideoStabilization() ? "yes" : "no"));
+	    				}
 	    	    	}
 	    		}
 
-	        	video_recorder = new MediaRecorder();
+	    		video_recorder = new MediaRecorder();
 	    		this.camera.stopPreview(); // although not documented, we need to stop preview to prevent device freeze shortly after video recording starts on some devices (e.g., Samsung Galaxy S2 - I could reproduce this on Samsung RTL)
 	    		this.camera.unlock();
 	        	video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
@@ -4807,6 +4823,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsFaceDetection");
     	return supports_face_detection;
+    }
+    
+    boolean supportsVideoStabilization() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsVideoStabilization");
+    	return supports_video_stabilization;
     }
 
     List<String> getSupportedColorEffects() {
