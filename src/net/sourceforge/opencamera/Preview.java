@@ -3575,8 +3575,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    	    	}
 	    		}
 
-	    		this.camera.unlock();
 	        	video_recorder = new MediaRecorder();
+	    		this.camera.stopPreview(); // although not documented, we need to stop preview to prevent device freeze shortly after video recording starts on some devices (e.g., Samsung Galaxy S2 - I could reproduce this on Samsung RTL)
+	    		this.camera.unlock();
 	        	video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
 					@Override
 					public void onInfo(MediaRecorder mr, int what, int extra) {
@@ -3673,7 +3674,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    			Log.d(TAG, "video fileformat: " + profile.fileFormat);
 	    		}
 
-	        	video_recorder.setOrientationHint(getImageVideoRotation());
 	        	video_recorder.setOutputFile(video_name);
 	        	try {
 	        		showGUI(false);
@@ -3683,6 +3683,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        		/*if( true ) // test
 	        			throw new IOException();*/
 		        	video_recorder.setPreviewDisplay(mHolder.getSurface());
+		        	video_recorder.setOrientationHint(getImageVideoRotation());
 					video_recorder.prepare();
 	            	video_recorder.start();
 	            	video_start_time = System.currentTimeMillis();
