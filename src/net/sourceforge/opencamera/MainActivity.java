@@ -959,6 +959,7 @@ public class MainActivity extends Activity {
 			preview.onResume();
 		}
 		else {
+			layoutUI(); // needed in case we've changed left/right handed UI
 			preview.pausePreview();
 			preview.setupCamera();
 		}
