@@ -376,6 +376,7 @@ public class MainActivity extends Activity {
     public void layoutUI() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "layoutUI");
+		this.preview.updateUIPlacement();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
 		boolean ui_placement_right = ui_placement.equals("ui_right");
@@ -414,15 +415,15 @@ public class MainActivity extends Activity {
 		int align_parent_right = RelativeLayout.ALIGN_PARENT_RIGHT;
 		int align_parent_top = RelativeLayout.ALIGN_PARENT_TOP;
 		int align_parent_bottom = RelativeLayout.ALIGN_PARENT_BOTTOM;
-		if( ( relative_orientation == 0 && ui_placement_right ) || ( relative_orientation == 180 && ui_placement_right ) || relative_orientation == 90 || relative_orientation == 270) {
-			if( !ui_placement_right && ( relative_orientation == 90 || relative_orientation == 270 ) ) {
-				//align_top = RelativeLayout.ALIGN_BOTTOM;
-				//align_bottom = RelativeLayout.ALIGN_TOP;
-				above = RelativeLayout.BELOW;
-				below = RelativeLayout.ABOVE;
-				align_parent_top = RelativeLayout.ALIGN_PARENT_BOTTOM;
-				align_parent_bottom = RelativeLayout.ALIGN_PARENT_TOP;
-			}
+		if( !ui_placement_right ) {
+			//align_top = RelativeLayout.ALIGN_BOTTOM;
+			//align_bottom = RelativeLayout.ALIGN_TOP;
+			above = RelativeLayout.BELOW;
+			below = RelativeLayout.ABOVE;
+			align_parent_top = RelativeLayout.ALIGN_PARENT_BOTTOM;
+			align_parent_bottom = RelativeLayout.ALIGN_PARENT_TOP;
+		}
+		{
 			View view = findViewById(R.id.settings);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
@@ -433,7 +434,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.gallery);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
@@ -442,7 +443,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.exposure_lock);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
@@ -451,7 +452,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.exposure);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
@@ -460,7 +461,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.focus_mode);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
@@ -469,7 +470,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.flash);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
@@ -478,7 +479,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.switch_video);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
@@ -487,7 +488,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.switch_camera);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
@@ -498,7 +499,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.trash);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
@@ -507,7 +508,7 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.share);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
@@ -516,14 +517,14 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.take_photo);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
-
+	
 			view = findViewById(R.id.zoom);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
@@ -532,130 +533,11 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(180.0f); // should always match the zoom_seekbar, so that zoom in and out are in the same directions
-
+	
 			view = findViewById(R.id.zoom_seekbar);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_left, 0);
 			layoutParams.addRule(align_right, R.id.zoom);
-			layoutParams.addRule(above, R.id.zoom);
-			layoutParams.addRule(below, 0);
-			view.setLayoutParams(layoutParams);
-		}
-		else {
-			View view = findViewById(R.id.switch_camera);
-			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_right, 0);
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.switch_video);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.switch_camera);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.flash);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.switch_video);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.focus_mode);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.flash);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.exposure);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.focus_mode);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.exposure_lock);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.exposure);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.gallery);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.exposure_lock);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.settings);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.gallery);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.share);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.settings);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.trash);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, R.id.share);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.take_photo);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_right, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-
-			view = findViewById(R.id.zoom);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_right, 0);
-			layoutParams.addRule(align_parent_top, 0);
-			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(180.0f); // should always match the zoom_seekbar, so that zoom in and out are in the same directions
-
-			view = findViewById(R.id.zoom_seekbar);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_left, R.id.zoom);
-			layoutParams.addRule(align_right, 0);
 			layoutParams.addRule(above, R.id.zoom);
 			layoutParams.addRule(below, 0);
 			view.setLayoutParams(layoutParams);
@@ -954,12 +836,13 @@ public class MainActivity extends Activity {
 				need_reopen = true;
 			}
 		}
+
+		layoutUI(); // needed in case we've changed left/right handed UI
 		if( need_reopen || preview.getCamera() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
 			preview.onResume();
 		}
 		else {
-			layoutUI(); // needed in case we've changed left/right handed UI
 			preview.pausePreview();
 			preview.setupCamera();
 		}

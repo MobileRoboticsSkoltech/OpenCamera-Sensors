@@ -2174,10 +2174,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
 		// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
 		int text_base_y = 0;
-		if( ui_rotation == 0 ) {
+		if( ui_rotation == ( ui_placement_right ? 0 : 180 ) ) {
 			text_base_y = canvas.getHeight() - (int)(0.5*text_y);
 		}
-		else if( ui_rotation == 180 ) {
+		else if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
 			text_base_y = canvas.getHeight() - (int)(2.5*text_y);
 		}
 		else if( ui_rotation == 90 || ui_rotation == 270 ) {
@@ -2349,7 +2349,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( ui_rotation == 90 ) {
 				battery_y = canvas.getHeight() - battery_y - battery_height;
 			}
-			if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
+			if( ui_rotation == 180 ) {
 				battery_x = canvas.getWidth() - battery_x - battery_width;
 			}
 			p.setColor(Color.WHITE);
@@ -2373,7 +2373,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( ui_rotation == 90 ) {
 				location_y = canvas.getHeight() - location_y - location_size;
 			}
-			if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
+			if( ui_rotation == 180 ) {
 				location_x = canvas.getWidth() - location_x - location_size;
 			}
 			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
@@ -2403,7 +2403,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( ui_rotation == 90 ) {
 				location_y = canvas.getHeight() - location_y;
 			}
-			if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
+			if( ui_rotation == 180 ) {
 				location_x = canvas.getWidth() - location_x;
 				p.setTextAlign(Paint.Align.RIGHT);
 			}
@@ -4968,9 +4968,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
 		this.app_is_paused = false;
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
-		this.ui_placement_right = ui_placement.equals("ui_right");
 		this.openCamera();
     }
 
@@ -4979,6 +4976,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "onPause");
 		this.app_is_paused = true;
 		this.closeCamera();
+    }
+    
+    void updateUIPlacement() {
+    	// we cache the preference_ui_placement to save having to check it in the onDraw() method
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
+		this.ui_placement_right = ui_placement.equals("ui_right");
     }
 
 	void onSaveInstanceState(Bundle state) {
