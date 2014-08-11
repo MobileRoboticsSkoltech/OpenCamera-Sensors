@@ -2663,7 +2663,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					SharedPreferences.Editor editor = sharedPreferences.edit();
 					editor.putString(getExposurePreferenceKey(), "" + new_exposure);
 					editor.apply();
-		    		showToast(change_exposure_toast, getResources().getString(R.string.exposure_compensation) + " " + new_exposure);
+		    		showToast(change_exposure_toast, getResources().getString(R.string.exposure_compensation) + " " + (new_exposure > 0 ? "+" : "") + new_exposure);
 		    		if( update_seek_bar ) {
 		    			MainActivity main_activity = (MainActivity)this.getContext();
 		    			main_activity.setSeekBarExposure();
@@ -2713,7 +2713,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
 	private void showPhotoVideoToast() {
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-		if( main_activity.cameraInBackground() )
+		if( camera == null || main_activity.cameraInBackground() )
 			return;
 		String toast_string = "";
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
@@ -2744,6 +2744,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				toast_string += " " + current_size.width + "x" + current_size.height;
 			}
 		}
+		Camera.Parameters parameters = camera.getParameters();
+		int current_exposure = parameters.getExposureCompensation();
+		if( current_exposure != 0 ) {
+			toast_string += "\nExposure: " + (current_exposure > 0 ? "+" : "") + current_exposure;
+		}
 		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
 		if( lock_orientation.equals("landscape") ) {
 			toast_string += "\nLocked to landscape";
@@ -2751,6 +2756,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		else if( lock_orientation.equals("portrait") ) {
 			toast_string += "\nLocked to portrait";
 		}
+		
 		showToast(switch_video_toast, toast_string);
 	}
 
