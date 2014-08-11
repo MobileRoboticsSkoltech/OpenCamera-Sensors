@@ -3892,6 +3892,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			showGUI(true);
 			return;
 		}
+		cancelAutoFocus(); // make sure there isn't an autofocus in progress - can happen if in manual mode we take a photo while autofocusing - see testTakePhotoManualFocus()
 		successfully_focused = false; // so next photo taken will require an autofocus
 		if( MyDebug.LOG )
 			Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
@@ -4447,6 +4448,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					Log.e(TAG, "runtime exception from takePicture");
     			e.printStackTrace();
 	    	    showToast(null, R.string.failed_to_take_picture);
+				this.phase = PHASE_NORMAL;
+	            startCameraPreview();
+				showGUI(true);
     		}
     	}
 		if( MyDebug.LOG )
@@ -4646,7 +4650,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			camera.setParameters(parameters);
 		}
 		if( this.using_face_detection ) {
-			// On some devices such as mtk6589, face detection dooes not resume as written in documentation so we have
+			// On some devices such as mtk6589, face detection does not resume as written in documentation so we have
 			// to cancelfocus when focus is finished
 			if( camera != null ) {
 				try {
