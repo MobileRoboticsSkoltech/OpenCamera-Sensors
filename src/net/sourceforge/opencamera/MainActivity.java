@@ -24,7 +24,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
-//import android.preference.EditTextPreference;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images.ImageColumns;
@@ -1411,6 +1410,29 @@ public class MainActivity extends Activity {
     			}
     		);
         	if( is_new_picture ) {
+    	        /*ContentValues values = new ContentValues(); 
+    	        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
+    	        values.put(ImageColumns.DISPLAY_NAME, file.getName());
+    	        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
+    	        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
+    	        // TODO: orientation
+    	        values.put(ImageColumns.DATA, file.getAbsolutePath());
+    	        Location location = preview.getLocation();
+    	        if( location != null ) {
+        	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
+        	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
+    	        }
+    	        try {
+    	    		this.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
+    	        }
+    	        catch (Throwable th) { 
+        	        // This can happen when the external volume is already mounted, but 
+        	        // MediaScanner has not notify MediaProvider to add that volume. 
+        	        // The picture is still safe and MediaScanner will find it and 
+        	        // insert it into MediaProvider. The only problem is that the user 
+        	        // cannot click the thumbnail to review the picture. 
+        	        Log.e(TAG, "Failed to write MediaStore" + th); 
+        	    }*/
         		this.sendBroadcast(new Intent(Camera.ACTION_NEW_PICTURE, Uri.fromFile(file)));
         		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
         		this.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", Uri.fromFile(file)));
