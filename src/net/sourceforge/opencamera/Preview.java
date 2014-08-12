@@ -2207,6 +2207,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
 
+		final String ybounds_text = getResources().getString(R.string.zoom) + getResources().getString(R.string.free_memory) + getResources().getString(R.string.angle) + getResources().getString(R.string.direction);
 		final double close_angle = 1.0f;
 		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
@@ -2218,7 +2219,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				int pixels_offset_x = 0;
 				if( draw_geo_direction ) {
-					pixels_offset_x = - (int) (80 * scale + 0.5f); // convert dps to pixels
+					pixels_offset_x = - (int) (82 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				else {
@@ -2228,7 +2229,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					color = Color.GREEN;
 				}
 				String string = getResources().getString(R.string.angle) + ": " + decimalFormat.format(this.level_angle) + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y);
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
 			}
 			if( draw_geo_direction ) {
 				int color = Color.WHITE;
@@ -2244,7 +2245,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					geo_angle += 360.0f;
 				}
 				String string = " " + getResources().getString(R.string.direction) + ": " + Math.round(geo_angle) + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y);
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, false, ybounds_text);
 			}
 			//if( this.is_taking_photo_on_timer ) {
 			if( this.isOnTimer() ) {
@@ -2305,7 +2306,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				int pixels_offset_y = 2*text_y;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.CENTER);
-				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
 			}
 		}
 		if( camera != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
@@ -2321,7 +2322,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 			}
 			if( free_memory_gb >= 0.0f ) {
-				drawTextWithBackground(canvas, p, getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+				drawTextWithBackground(canvas, p, getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
 			}
 		}
 		
@@ -2362,10 +2363,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		
 		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
+		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 		if( store_location ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
 			int location_y = top_y;
-			int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
 				int diff = canvas.getWidth() - canvas.getHeight();
 				location_x += diff/2;
@@ -2403,7 +2404,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				location_y -= diff/2;
 			}
 			if( ui_rotation == 90 ) {
-				location_y = canvas.getHeight() - location_y;
+				location_y = canvas.getHeight() - location_y - location_size;
 			}
 			if( ui_rotation == 180 ) {
 				location_x = canvas.getWidth() - location_x;
@@ -2512,11 +2513,23 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top) {
+		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, align_top, null);
+	}
+
+	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top, String ybounds_text) {
 		final float scale = getResources().getDisplayMetrics().density;
 		p.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
 		paint.setAlpha(127);
+		int alt_height = 0;
+		if( ybounds_text != null ) {
+			paint.getTextBounds(ybounds_text, 0, ybounds_text.length(), text_bounds);
+			alt_height = text_bounds.bottom - text_bounds.top;
+		}
 		paint.getTextBounds(text, 0, text.length(), text_bounds);
+		if( ybounds_text != null ) {
+			text_bounds.bottom = text_bounds.top + alt_height;
+		}
 		final int padding = (int) (2 * scale + 0.5f); // convert dps to pixels
 		if( paint.getTextAlign() == Paint.Align.RIGHT || paint.getTextAlign() == Paint.Align.CENTER ) {
 			float width = paint.measureText(text); // n.b., need to use measureText rather than getTextBounds here
