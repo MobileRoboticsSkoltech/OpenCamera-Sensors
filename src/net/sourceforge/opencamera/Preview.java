@@ -2205,6 +2205,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
 		}
+		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
 
 		final double close_angle = 1.0f;
 		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED ) {
@@ -2338,7 +2339,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			//battery_frac = 0.2999f; // test
 			int battery_x = (int) (5 * scale + 0.5f); // convert dps to pixels
-			int battery_y = battery_x;
+			int battery_y = top_y;
 			int battery_width = (int) (5 * scale + 0.5f); // convert dps to pixels
 			int battery_height = 4*battery_width;
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
@@ -2363,7 +2364,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
 		if( store_location ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
-			int location_y = (int) (5 * scale + 0.5f); // convert dps to pixels
+			int location_y = top_y;
 			int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
 				int diff = canvas.getWidth() - canvas.getHeight();
@@ -2379,11 +2380,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
 			if( has_set_location ) {
 				canvas.drawBitmap(location_bitmap, null, location_dest, p);
+				int location_radius = location_size/10;
 				int indicator_x = location_x + location_size;
-				int indicator_y = location_y;
+				int indicator_y = location_y + location_radius/2 + 1;
 				p.setStyle(Paint.Style.FILL_AND_STROKE);
 				p.setColor(location_accuracy < 25.01f ? Color.GREEN : Color.YELLOW);
-				canvas.drawCircle(indicator_x, indicator_y, location_size/10, p);
+				canvas.drawCircle(indicator_x, indicator_y, location_radius, p);
 			}
 			else {
 				canvas.drawBitmap(location_off_bitmap, null, location_dest, p);
@@ -2394,7 +2396,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.LEFT);
 			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-			int location_y = (int) (15 * scale + 0.5f); // convert dps to pixels
+			int location_y = top_y;
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
 				int diff = canvas.getWidth() - canvas.getHeight();
 				location_x += diff/2;
@@ -2409,7 +2411,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 	        Calendar c = Calendar.getInstance();
 	        String current_time = DateFormat.getTimeInstance().format(c.getTime());
-	        drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y);
+	        drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, true);
 	    }
 
 		canvas.restore();
@@ -2506,6 +2508,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
+		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, false);
+	}
+
+	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top) {
 		final float scale = getResources().getDisplayMetrics().density;
 		p.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
@@ -2524,9 +2530,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "text_bounds left-right: " + text_bounds.left + " , " + text_bounds.right);*/
 		text_bounds.left += location_x - padding;
-		text_bounds.top += location_y - padding;
 		text_bounds.right += location_x + padding;
-		text_bounds.bottom += location_y + padding;
+		if( align_top ) {
+			int height = text_bounds.bottom - text_bounds.top + 2*padding;
+			// unclear why we need the offset of -1, but need this to align properly on Galaxy Nexus at least
+			int y_diff = - text_bounds.top + padding - 1;
+			text_bounds.top = location_y - 1;
+			text_bounds.bottom = text_bounds.top + height;
+			location_y += y_diff;
+		}
+		else {
+			text_bounds.top += location_y - padding;
+			text_bounds.bottom += location_y + padding;
+		}
 		canvas.drawRect(text_bounds, paint);
 		paint.setColor(foreground);
 		canvas.drawText(text, location_x, location_y, paint);
