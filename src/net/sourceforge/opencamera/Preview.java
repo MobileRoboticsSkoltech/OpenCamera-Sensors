@@ -2758,6 +2758,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 			String timer_value = sharedPreferences.getString("preference_video_max_duration", "0");
 			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
+			boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
+			if( !record_audio ) {
+				toast_string += "\nAudio Disabled";
+			}
 			if( timer_value.length() > 0 && !timer_value.equals("0") ) {
 				String [] entries_array = getResources().getStringArray(R.array.preference_video_max_duration_entries);
 				String [] values_array = getResources().getStringArray(R.array.preference_video_max_duration_values);
