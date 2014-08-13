@@ -71,7 +71,6 @@ import android.widget.Toast;
 import android.widget.ZoomControls;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final String TAG = "Preview";
 
@@ -3903,6 +3902,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	private void takePictureWhenFocused() {
 		// should be called when auto-focused
 		if( MyDebug.LOG )
