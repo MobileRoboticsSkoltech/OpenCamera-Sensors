@@ -2782,6 +2782,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( current_exposure != 0 ) {
 			toast_string += "\nExposure: " + (current_exposure > 0 ? "+" : "") + current_exposure;
 		}
+		String scene_mode = parameters.getSceneMode();
+    	if( !scene_mode.equals(Camera.Parameters.SCENE_MODE_AUTO) ) {
+    		toast_string += "\nScene mode: " + scene_mode;
+    	}
 		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
 		if( lock_orientation.equals("landscape") ) {
 			toast_string += "\nLocked to landscape";
