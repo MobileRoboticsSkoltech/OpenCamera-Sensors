@@ -1293,13 +1293,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			showPhotoVideoToast();
 		}
 
-		// must be done after setting parameters, as this function may set parameters
-		if( this.has_zoom && zoom_factor != 0 ) {
-			int new_zoom_factor = zoom_factor;
-			zoom_factor = 0; // force zoomTo to actually update the zoom!
-			zoomTo(new_zoom_factor, true);
-		}
-
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
 		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
@@ -1307,6 +1300,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		startCameraPreview();
 		if( MyDebug.LOG ) {
 			//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
+		}
+
+		// must be done after setting parameters, as this function may set parameters
+		// also needs to be done after starting preview for some devices (e.g., Nexus 7)
+		if( this.has_zoom && zoom_factor != 0 ) {
+			int new_zoom_factor = zoom_factor;
+			zoom_factor = 0; // force zoomTo to actually update the zoom!
+			zoomTo(new_zoom_factor, true);
 		}
 
     	final Handler handler = new Handler();
@@ -2637,7 +2638,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( parameters.isZoomSupported() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "zoom was: " + parameters.getZoom());
-				parameters.setZoom((int)new_zoom_factor);
+				parameters.setZoom(new_zoom_factor);
 				try {
 					camera.setParameters(parameters);
 					zoom_factor = new_zoom_factor;
