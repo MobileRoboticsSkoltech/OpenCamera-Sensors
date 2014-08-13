@@ -2790,7 +2790,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			toast_string += "\nLocked to portrait";
 		}
 		
-		showToast(switch_video_toast, toast_string);
+		showToast(switch_video_toast, toast_string, Toast.LENGTH_LONG);
 	}
 
 	private void matchPreviewFpsToVideo() {
@@ -5033,8 +5033,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     public void showToast(final ToastBoxer clear_toast, final int message_id) {
     	showToast(clear_toast, getResources().getString(message_id));
     }
-	
+
     public void showToast(final ToastBoxer clear_toast, final String message) {
+    	showToast(clear_toast, message, Toast.LENGTH_SHORT);
+    }
+    
+    public void showToast(final ToastBoxer clear_toast, final String message, final int duration) {
 		class RotatedTextView extends View {
 			private String [] lines = null;
 			private Paint paint = new Paint();
@@ -5124,7 +5128,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					clear_toast.toast = toast;
 				View text = new RotatedTextView(message, activity);
 				toast.setView(text);
-				toast.setDuration(Toast.LENGTH_SHORT);
+				toast.setDuration(duration);
 				toast.show();
 			}
 		});
