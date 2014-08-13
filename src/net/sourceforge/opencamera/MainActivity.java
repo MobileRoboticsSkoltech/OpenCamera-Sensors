@@ -192,7 +192,7 @@ public class MainActivity extends Activity {
         });
         
         gestureDetector = new GestureDetector(this, new MyGestureDetector());
-
+        
         final String done_first_time_key = "done_first_time";
 		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
         if( !has_done_first_time && !is_test ) {
@@ -348,6 +348,11 @@ public class MainActivity extends Activity {
 			if( mLocationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER) ) {
 				mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 			}
+		}
+		
+		if( !this.camera_in_background ) {
+			// immersive mode is cleared when app goes into background
+			setImmersiveMode(true);
 		}
 
 		layoutUI();
@@ -872,6 +877,21 @@ public class MainActivity extends Activity {
         super.onBackPressed();        
     }
     
+    //@TargetApi(Build.VERSION_CODES.KITKAT)
+	private void setImmersiveMode(boolean on) {
+		// Andorid 4.4 immersive mode disabled for now, as not clear of a good way to enter and leave immersive mode, and "sticky" might annoy some users
+        /*if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
+        	if( on )
+        		getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        	else
+        		getWindow().getDecorView().setSystemUiVisibility(0);
+        }*/
+    	if( on )
+    		getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+    	else
+    		getWindow().getDecorView().setSystemUiVisibility(0);
+    }
+    
     private void setWindowFlagsForCamera() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -899,6 +919,8 @@ public class MainActivity extends Activity {
 			}
 	        getWindow().setAttributes(layout); 
 		}
+		
+		setImmersiveMode(true);
 
 		camera_in_background = false;
     }
@@ -916,6 +938,8 @@ public class MainActivity extends Activity {
 	        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
 	        getWindow().setAttributes(layout); 
 		}
+
+		setImmersiveMode(false);
 
 		camera_in_background = true;
     }
