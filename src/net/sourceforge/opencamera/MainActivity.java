@@ -309,21 +309,14 @@ public class MainActivity extends Activity {
 		}
 	};
 	
-    @Override
-    protected void onResume() {
+	
+	private void setupLocationListener() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "onResume");
-        super.onResume();
-
+			Log.d(TAG, "setupLocationListener");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        mSensorManager.registerListener(accelerometerListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
-        orientationEventListener.enable();
-
 		// Define a listener that responds to location updates
 		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
-		if( store_location ) {
+		if( store_location && locationListener == null ) {
 			locationListener = new LocationListener() {
 			    public void onLocationChanged(Location location) {
 					if( MyDebug.LOG )
@@ -349,8 +342,27 @@ public class MainActivity extends Activity {
 				mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 			}
 		}
-		
-		if( !this.camera_in_background ) {
+		else if( !store_location && locationListener != null ) {
+	        if( this.locationListener != null ) {
+	            mLocationManager.removeUpdates(locationListener);
+	            locationListener = null;
+	        }
+		}
+	}
+
+	@Override
+    protected void onResume() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onResume");
+        super.onResume();
+
+        mSensorManager.registerListener(accelerometerListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
+        orientationEventListener.enable();
+
+        setupLocationListener();
+
+        if( !this.camera_in_background ) {
 			// immersive mode is cleared when app goes into background
 			setImmersiveMode(true);
 		}
@@ -373,6 +385,7 @@ public class MainActivity extends Activity {
         orientationEventListener.disable();
         if( this.locationListener != null ) {
             mLocationManager.removeUpdates(locationListener);
+            locationListener = null;
         }
 		preview.onPause();
     }
@@ -842,6 +855,7 @@ public class MainActivity extends Activity {
 		}
 
 		layoutUI(); // needed in case we've changed left/right handed UI
+        setupLocationListener(); // in case we've enabled GPS
 		if( need_reopen || preview.getCamera() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
 			preview.onResume();
@@ -1589,5 +1603,9 @@ public class MainActivity extends Activity {
 
 	public ArrayList<String> getSaveLocationHistory() {
 		return this.save_location_history;
+	}
+	
+	public LocationListener getLocationListener() {
+		return this.locationListener;
 	}
 }
