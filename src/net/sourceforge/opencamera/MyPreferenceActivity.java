@@ -29,6 +29,7 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.Display;
 
+// N.B., actually a Fragment, but called MyPreferenceActivity for historical reasons (this was originally an Activity)
 public class MyPreferenceActivity extends PreferenceFragment {
 	private static final String TAG = "MyPreferenceActivity";
 	
