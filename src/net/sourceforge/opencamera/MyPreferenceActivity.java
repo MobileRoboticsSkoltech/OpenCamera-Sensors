@@ -17,15 +17,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
-import android.preference.EditTextPreference;
+//import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
-import android.text.InputFilter;
-import android.text.Spanned;
+//import android.text.InputFilter;
+//import android.text.Spanned;
 import android.util.Log;
 import android.view.Display;
 
@@ -185,7 +185,7 @@ public class MyPreferenceActivity extends PreferenceFragment {
             });
         }
 
-        {
+        /*{
         	EditTextPreference edit = (EditTextPreference)findPreference("preference_save_location");
         	InputFilter filter = new InputFilter() { 
         		// whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
@@ -200,10 +200,23 @@ public class MyPreferenceActivity extends PreferenceFragment {
                 }
         	}; 
         	edit.getEditText().setFilters(new InputFilter[]{filter});         	
+        }*/
+        {
+        	Preference pref = findPreference("preference_save_location");
+        	pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        		@Override
+                public boolean onPreferenceClick(Preference arg0) {
+            		if( MyDebug.LOG )
+            			Log.d(TAG, "clicked save location");
+            		FolderChooserDialog fragment = new FolderChooserDialog();
+            		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
+                	return true;
+                }
+            });        	
         }
 
         {
-            final Preference pref = (Preference) findPreference("preference_donate");
+            final Preference pref = findPreference("preference_donate");
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference arg0) {
@@ -231,7 +244,7 @@ public class MyPreferenceActivity extends PreferenceFragment {
         }
 
         {
-            final Preference pref = (Preference) findPreference("preference_about");
+            final Preference pref = findPreference("preference_about");
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference arg0) {
@@ -485,6 +498,7 @@ public class MyPreferenceActivity extends PreferenceFragment {
 	
 	public void onResume() {
 		super.onResume();
+		// prevent fragment being transparent
 		getView().setBackgroundColor(Color.WHITE);
 	}
 }

@@ -93,7 +93,7 @@
     <string name="preference_ui_placement">UI placement</string>
     <string name="preference_ui_placement_summary">Whether to have a left-handed or right-handed user interface</string>
     <string name="preference_save_location">Save location</string>
-    <string name="preference_save_location_summary">Name of folder to save the photo/video files in (can also be a full path)</string>
+    <string name="preference_save_location_summary">Folder to save the photo/video files in</string>
     <string name="preference_show_when_locked">Show camera when locked</string>
     <string name="preference_show_when_locked_summary">If enabled, Open Camera will still show above any lockscreen (you\'ll still have to unlock to access Settings, Gallery etc)</string>
     <string name="preference_lock_video">Lock screen when recording video</string>

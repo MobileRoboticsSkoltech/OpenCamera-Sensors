@@ -1490,8 +1490,11 @@ public class MainActivity extends Activity {
 		return folder_name;
     }
     
-    public File getImageFolder() {
-		String folder_name = getSaveLocation();
+    static File getBaseFolder() {
+    	return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+    }
+
+    static File getImageFolder(String folder_name) {
 		File file = null;
 		if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
 			// ignore final '/' character
@@ -1502,13 +1505,18 @@ public class MainActivity extends Activity {
 			file = new File(folder_name);
 		}
 		else {
-	        file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), folder_name);
+	        file = new File(getBaseFolder(), folder_name);
 		}
 		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "folder_name: " + folder_name);
 			Log.d(TAG, "full path: " + file);
 		}*/
         return file;
+    }
+    
+    public File getImageFolder() {
+		String folder_name = getSaveLocation();
+		return getImageFolder(folder_name);
     }
 
     /** Create a File for saving an image or video */
