@@ -121,16 +121,19 @@ public final class R {
         public static final int app_name=0x7f070000;
         public static final int back_camera=0x7f070015;
         public static final int cancelled_timer=0x7f07001a;
+        public static final int cant_write_folder=0x7f0700a1;
         public static final int changed_save_location=0x7f070009;
         public static final int choose_save_location=0x7f070006;
         public static final int clear_folder_history=0x7f070007;
         public static final int clear_folder_history_question=0x7f070008;
         public static final int direction=0x7f070029;
+        public static final int enter_new_folder=0x7f0700a2;
         public static final int exposure=0x7f070096;
         public static final int exposure_compensation=0x7f070013;
         public static final int exposure_lock=0x7f070097;
         public static final int exposure_locked=0x7f070018;
         public static final int exposure_unlocked=0x7f070019;
+        public static final int failed_create_folder=0x7f0700a3;
         public static final int failed_to_open_camera_1=0x7f07002a;
         public static final int failed_to_open_camera_2=0x7f07002b;
         public static final int failed_to_open_camera_3=0x7f07002c;
@@ -144,13 +147,16 @@ public final class R {
         public static final int failed_to_take_picture=0x7f070023;
         public static final int flash_mode=0x7f070099;
         public static final int focus_mode=0x7f070098;
+        public static final int folder_exists=0x7f0700a4;
         public static final int free_memory=0x7f07002e;
         public static final int front_camera=0x7f070014;
         public static final int gallery=0x7f070095;
         public static final int intro_ok=0x7f070003;
         public static final int intro_text=0x7f070002;
+        public static final int new_folder=0x7f0700a0;
         public static final int no_gallery_app=0x7f070025;
         public static final int not_supported=0x7f07000e;
+        public static final int parent_folder=0x7f07009e;
         public static final int photo=0x7f070016;
         public static final int photo_deleted=0x7f070024;
         public static final int preference_about=0x7f07008e;
@@ -261,6 +267,7 @@ public final class R {
         public static final int taking_photo=0x7f070022;
         public static final int trash=0x7f07009c;
         public static final int unlocked=0x7f070027;
+        public static final int use_folder=0x7f07009f;
         public static final int video=0x7f070017;
         public static final int video_error_server_died=0x7f070010;
         /**   intentionally starts lower case 

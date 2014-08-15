@@ -168,4 +168,12 @@
     <string name="trash">Delete Last Picture</string>
     <string name="share">Share Photo</string>
     
+    <string name="parent_folder">Parent Folder</string>
+    <string name="use_folder">Use Folder</string>
+    <string name="new_folder">New Folder</string>
+    <string name="cant_write_folder">Can\'t write to this folder</string>
+    <string name="enter_new_folder">Enter new folder name</string>
+    <string name="failed_create_folder">Failed to create folder</string>
+    <string name="folder_exists">Folder already exists</string>
+    
 </resources>

@@ -17,6 +17,7 @@ import android.text.InputFilter;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -44,7 +45,7 @@ public class FolderChooserDialog extends DialogFragment {
 		@Override
 		public String toString() {
 			if( this.is_parent )
-				return "Parent Folder";
+				return getResources().getString(R.string.parent_folder);
 			return file.getName();
 		}
 		
@@ -98,8 +99,8 @@ public class FolderChooserDialog extends DialogFragment {
 		folder_dialog = new AlertDialog.Builder(getActivity())
 	        //.setIcon(R.drawable.alert_dialog_icon)
 	        .setView(list)
-	        .setPositiveButton("Use Folder", null) // we set the listener in onShowListener, so we can prevent the dialog from closing (if chosen folder isn't writable)
-	        .setNeutralButton("New Folder", null) // we set the listener in onShowListener, so we can prevent the dialog from closing
+	        .setPositiveButton(R.string.use_folder, null) // we set the listener in onShowListener, so we can prevent the dialog from closing (if chosen folder isn't writable)
+	        .setNeutralButton(R.string.new_folder, null) // we set the listener in onShowListener, so we can prevent the dialog from closing
 	        .setNegativeButton(android.R.string.cancel, null)
 	        .create();
 		folder_dialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -184,7 +185,7 @@ public class FolderChooserDialog extends DialogFragment {
 			return true;
 		}
 		else {
-			Toast.makeText(getActivity(), "Can't write to this folder", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity(), R.string.cant_write_folder, Toast.LENGTH_SHORT).show();
 		}
 		return false;
     }
@@ -211,30 +212,40 @@ public class FolderChooserDialog extends DialogFragment {
 
 			Dialog dialog = new AlertDialog.Builder(getActivity())
 		        //.setIcon(R.drawable.alert_dialog_icon)
-				.setTitle("Enter new folder name")
+				.setTitle(R.string.enter_new_folder)
 		        .setView(edit_text)
 		        .setPositiveButton(android.R.string.ok, new Dialog.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						boolean success = false;
-						try {
-							String new_folder = current_folder.getAbsolutePath() + File.separator + edit_text.getText().toString();
-							if( MyDebug.LOG )
-								Log.d(TAG, "create new folder: " + new_folder);
-							if( new File(new_folder).mkdirs() ) {
+						if( edit_text.getText().length() == 0 ) {
+							// do nothing
+						}
+						else {
+							try {
+								String new_folder_name = current_folder.getAbsolutePath() + File.separator + edit_text.getText().toString();
 								if( MyDebug.LOG )
-									Log.d(TAG, "failed to create new folder");
-								success = true;
-						    	refreshList();
+									Log.d(TAG, "create new folder: " + new_folder_name);
+								File new_folder = new File(new_folder_name);
+								if( new_folder.exists() ) {
+									if( MyDebug.LOG )
+										Log.d(TAG, "folder already exists");
+									Toast.makeText(getActivity(), R.string.folder_exists, Toast.LENGTH_SHORT).show();
+								}
+								else if( new_folder.mkdirs() ) {
+									if( MyDebug.LOG )
+										Log.d(TAG, "failed to create new folder");
+							    	refreshList();
+								}
+								else {
+									Toast.makeText(getActivity(), R.string.failed_create_folder, Toast.LENGTH_SHORT).show();
+								}
 							}
-						}
-						catch(Exception e) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "exception trying to create new folder");
-							e.printStackTrace();
-						}
-						if( !success ) {
-							Toast.makeText(getActivity(), "Failed to create folder", Toast.LENGTH_SHORT).show();
+							catch(Exception e) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "exception trying to create new folder");
+								e.printStackTrace();
+								Toast.makeText(getActivity(), R.string.failed_create_folder, Toast.LENGTH_SHORT).show();
+							}
 						}
 					}
 		        })
@@ -243,7 +254,7 @@ public class FolderChooserDialog extends DialogFragment {
 			dialog.show();
 		}
 		else {
-			Toast.makeText(getActivity(), "Can't write to this folder", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity(), R.string.cant_write_folder, Toast.LENGTH_SHORT).show();
 		}
 	}
 
