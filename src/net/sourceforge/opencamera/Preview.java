@@ -939,7 +939,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				public void onStopTrackingTouch(SeekBar seekBar) {
 				}
 			});
-			zoomSeekBar.setVisibility(View.VISIBLE);
+
+			if( sharedPreferences.getBoolean("preference_show_zoom_slider_controls", true) ) {
+				zoomSeekBar.setVisibility(View.VISIBLE);
+			}
+			else {
+				zoomSeekBar.setVisibility(View.INVISIBLE);
+			}
 		}
 		else {
 			zoomControls.setVisibility(View.GONE);
@@ -2783,7 +2789,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			toast_string += "\nExposure: " + (current_exposure > 0 ? "+" : "") + current_exposure;
 		}
 		String scene_mode = parameters.getSceneMode();
-    	if( !scene_mode.equals(Camera.Parameters.SCENE_MODE_AUTO) ) {
+    	if( scene_mode != null && !scene_mode.equals(Camera.Parameters.SCENE_MODE_AUTO) ) {
     		toast_string += "\nScene mode: " + scene_mode;
     	}
 		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");

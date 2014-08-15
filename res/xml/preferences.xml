@@ -201,6 +201,13 @@
                 />
         
             <CheckBoxPreference
+                android:key="preference_show_zoom_slider_controls"
+                android:title="@string/preference_show_zoom_slider_controls"
+                android:summary="@string/preference_show_zoom_slider_controls_summary"
+                android:defaultValue="true"
+                />
+        
+            <CheckBoxPreference
                 android:key="preference_free_memory"
                 android:title="@string/preference_free_memory"
                 android:summary="@string/preference_free_memory_summary"
