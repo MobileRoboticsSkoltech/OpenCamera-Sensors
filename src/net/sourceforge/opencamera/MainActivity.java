@@ -1211,8 +1211,6 @@ public class MainActivity extends Activity {
 		}
 		final int theme = android.R.style.Theme_Black_NoTitleBar_Fullscreen;
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, theme);
-        //AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, android.R.style.Theme_Light_NoTitleBar_Fullscreen);
-        //AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle(R.string.choose_save_location);
         CharSequence [] items = new CharSequence[save_location_history.size()+1];
         int index=0;
@@ -1221,11 +1219,15 @@ public class MainActivity extends Activity {
         	items[index++] = save_location_history.get(save_location_history.size() - 1 - i);
         }
         final int clear_index = index;
-        items[clear_index] = getResources().getString(R.string.clear_folder_history);
+        items[index++] = getResources().getString(R.string.clear_folder_history);
+        /*final int new_index = index;
+        items[index++] = getResources().getString(R.string.new_save_location);*/
 		alertDialog.setItems(items, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				if( which == clear_index ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "selected clear save history");
 				    new AlertDialog.Builder(MainActivity.this)
 			        	.setIcon(android.R.drawable.ic_dialog_alert)
 			        	.setTitle(R.string.clear_folder_history)
@@ -1234,7 +1236,7 @@ public class MainActivity extends Activity {
 			        		@Override
 					        public void onClick(DialogInterface dialog, int which) {
 								if( MyDebug.LOG )
-									Log.d(TAG, "clear save history");
+									Log.d(TAG, "confirmed clear save history");
 								clearFolderHistory();
 					        }
 			        	})
@@ -1242,7 +1244,29 @@ public class MainActivity extends Activity {
 			        	.show();
 					setWindowFlagsForCamera();
 				}
+				/*else if( which == new_index ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "selected choose new folder");
+		    		FolderChooserDialog fragment = new FolderChooserDialog();
+		    		fragment.setStyle(DialogFragment.STYLE_NORMAL, theme);
+		    		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
+					FragmentTransaction ft = getFragmentManager().beginTransaction();
+					//DialogFragment newFragment = MyDialogFragment.newInstance();
+					FolderChooserDialog fragment = new FolderChooserDialog();
+					ft.add(R.id.prefs_container, fragment);
+					ft.commit();
+		    		fragment.getDialog().setOnDismissListener(new DialogInterface.OnDismissListener() {
+						@Override
+						public void onDismiss(DialogInterface dialog) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "FolderChooserDialog dismissed");
+							setWindowFlagsForCamera();
+						}
+;		    		});
+				}*/
 				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "selected: " + which);
 					if( which >= 0 && which < save_location_history.size() ) {
 						String save_folder = save_location_history.get(save_location_history.size() - 1 - which);
 						if( MyDebug.LOG )
@@ -1256,58 +1280,6 @@ public class MainActivity extends Activity {
 					}
 					setWindowFlagsForCamera();
 				}
-				/*if( which == select_index ) {
-					class MyEditTextPreference extends EditTextPreference {
-						public MyEditTextPreference(Context context) {
-							super(context);
-						}
-						public void show() {
-							this.showDialog(null);
-						}
-					};
-					MyEditTextPreference editTextPref = new MyEditTextPreference(MainActivity.this);
-					editTextPref.setTitle(R.string.preference_save_location);
-					editTextPref.setSummary(R.string.preference_save_location_summary);
-					editTextPref.setEnabled(true);
-					editTextPref.show();*/
-					/*AlertDialog.Builder inputDialog = new AlertDialog.Builder(MainActivity.this);
-					inputDialog.setTitle(R.string.preference_save_location);
-					inputDialog.setMessage(R.string.preference_save_location_summary);
-					final EditText input = new EditText(MainActivity.this);
-					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-					String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
-					input.setText(folder_name);
-					inputDialog.setView(input);
-					inputDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int whichButton) {
-							String save_folder = input.getText().toString();
-							if( MyDebug.LOG )
-								Log.d(TAG, "changed save_folder to: " + save_folder);
-							SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-							SharedPreferences.Editor editor = sharedPreferences.edit();
-							editor.putString("preference_save_location", save_folder);
-							editor.apply();
-							setWindowFlagsForCamera();
-						}
-					});
-					inputDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int whichButton) {
-							setWindowFlagsForCamera();
-						}
-					});
-					inputDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface arg0) {
-					        setWindowFlagsForCamera();
-						}
-					});
-					inputDialog.show();
-					
-					openSettings();
-				}
-				else {
-					setWindowFlagsForCamera();
-				}*/
 			}
         });
 		alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
