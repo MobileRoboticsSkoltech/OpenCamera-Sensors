@@ -73,7 +73,11 @@ public class FolderChooserDialog extends DialogFragment {
 			Log.d(TAG, "onCreateDialog");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 		String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
+		if( MyDebug.LOG )
+			Log.d(TAG, "folder_name: " + folder_name);
 		current_folder = MainActivity.getImageFolder(folder_name);
+		if( MyDebug.LOG )
+			Log.d(TAG, "current_folder: " + current_folder);
 
 		list = new ListView(getActivity());
 		list.setOnItemClickListener(new OnItemClickListener() {
@@ -129,6 +133,8 @@ public class FolderChooserDialog extends DialogFragment {
     }
     
     private void refreshList() {
+    	if( current_folder == null )
+    		return;
 		File [] files = current_folder.listFiles();
 		List<FileWrapper> listed_files = new ArrayList<FileWrapper>();
 		if( current_folder.getParentFile() != null )
