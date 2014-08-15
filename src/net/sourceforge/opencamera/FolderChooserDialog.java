@@ -13,12 +13,15 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -26,7 +29,7 @@ public class FolderChooserDialog extends DialogFragment {
 	private static final String TAG = "FolderChooserFragment";
 
 	private File current_folder = null;
-	private AlertDialog dialog = null;
+	private AlertDialog folder_dialog = null;
 	private ListView list = null;
 	
 	private class FileWrapper implements Comparable<FileWrapper> {
@@ -88,40 +91,41 @@ public class FolderChooserDialog extends DialogFragment {
 				refreshList();
 			}
 		});
-		dialog = new AlertDialog.Builder(getActivity())
+		folder_dialog = new AlertDialog.Builder(getActivity())
 	        //.setIcon(R.drawable.alert_dialog_icon)
 	        .setView(list)
-	        .setPositiveButton("Use Folder",
-	            /*new DialogInterface.OnClickListener() {
-	                public void onClick(DialogInterface dialog, int whichButton) {
-	    				if( MyDebug.LOG )
-	    					Log.d(TAG, "choose folder: " + current_folder.toString());
-	    				useFolder();
-	                }
-	            }*/
-        		null
-	        )
+	        .setPositiveButton("Use Folder", null) // we set the listener in onShowListener, so we can prevent the dialog from closing (if chosen folder isn't writable)
+	        .setNeutralButton("New Folder", null) // we set the listener in onShowListener, so we can prevent the dialog from closing
 	        .setNegativeButton(android.R.string.cancel, null)
 	        .create();
-		dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+		folder_dialog.setOnShowListener(new DialogInterface.OnShowListener() {
 		    @Override
 		    public void onShow(DialogInterface dialog_interface) {
-		        Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-		        b.setOnClickListener(new View.OnClickListener() {
+		        Button b_positive = folder_dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+		        b_positive.setOnClickListener(new View.OnClickListener() {
 		            @Override
 		            public void onClick(View view) {
 	    				if( MyDebug.LOG )
 	    					Log.d(TAG, "choose folder: " + current_folder.toString());
 	    				if( useFolder() ) {
-	    					dialog.dismiss();
+	    					folder_dialog.dismiss();
 	    				}
+		            }
+		        });
+		        Button b_neutral = folder_dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+		        b_neutral.setOnClickListener(new View.OnClickListener() {
+		            @Override
+		            public void onClick(View view) {
+	    				if( MyDebug.LOG )
+	    					Log.d(TAG, "new folder in: " + current_folder.toString());
+	    				newFolder();
 		            }
 		        });
 		    }
 		});
 
 		refreshList();
-        return dialog;
+        return folder_dialog;
     }
     
     private void refreshList() {
@@ -141,7 +145,7 @@ public class FolderChooserDialog extends DialogFragment {
         list.setAdapter(adapter);
         
         //dialog.setTitle(current_folder.getName());
-        dialog.setTitle(current_folder.getAbsolutePath());
+        folder_dialog.setTitle(current_folder.getAbsolutePath());
     }
     
     private boolean canWrite() {
@@ -155,6 +159,8 @@ public class FolderChooserDialog extends DialogFragment {
     }
 
     private boolean useFolder() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "useFolder");
 		if( canWrite() ) {
         	File base_folder = MainActivity.getBaseFolder();
         	String new_save_location = current_folder.getAbsolutePath();
@@ -176,6 +182,65 @@ public class FolderChooserDialog extends DialogFragment {
 		}
 		return false;
     }
+    
+	private void newFolder() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "newFolder");
+		if( canWrite() ) {
+			final EditText edit_text = new EditText(getActivity());  
+			edit_text.setSingleLine();
+        	InputFilter filter = new InputFilter() { 
+        		// whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
+        		String disallowed = "|\\?*<\":>";
+                public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) { 
+                    for(int i=start;i<end;i++) { 
+                    	if( disallowed.indexOf( source.charAt(i) ) != -1 ) {
+                            return ""; 
+                    	}
+                    } 
+                    return null; 
+                }
+        	}; 
+        	edit_text.setFilters(new InputFilter[]{filter});         	
+
+			Dialog dialog = new AlertDialog.Builder(getActivity())
+		        //.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Enter new folder name")
+		        .setView(edit_text)
+		        .setPositiveButton(android.R.string.ok, new Dialog.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						boolean success = false;
+						try {
+							String new_folder = current_folder.getAbsolutePath() + File.separator + edit_text.getText().toString();
+							if( MyDebug.LOG )
+								Log.d(TAG, "create new folder: " + new_folder);
+							if( new File(new_folder).mkdirs() ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "failed to create new folder");
+								success = true;
+						    	refreshList();
+							}
+						}
+						catch(Exception e) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "exception trying to create new folder");
+							e.printStackTrace();
+						}
+						if( !success ) {
+							Toast.makeText(getActivity(), "Failed to create folder", Toast.LENGTH_SHORT).show();
+						}
+					}
+		        })
+		        .setNegativeButton(android.R.string.cancel, null)
+		        .create();
+			dialog.show();
+		}
+		else {
+			Toast.makeText(getActivity(), "Can't write to this folder", Toast.LENGTH_SHORT).show();
+		}
+	}
+
 
     @Override
     public void onResume() {
