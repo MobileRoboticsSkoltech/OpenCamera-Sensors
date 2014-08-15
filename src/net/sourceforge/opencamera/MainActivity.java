@@ -829,7 +829,7 @@ public class MainActivity extends Activity {
 		putBundleExtra(bundle, "focus_values", this.preview.getSupportedFocusValues());
 
 		setWindowFlagsForSettings();
-		MyPreferenceActivity fragment = new MyPreferenceActivity();
+		MyPreferenceFragment fragment = new MyPreferenceFragment();
 		fragment.setArguments(bundle);
         getFragmentManager().beginTransaction().add(R.id.prefs_container, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commit();
     }
@@ -870,14 +870,14 @@ public class MainActivity extends Activity {
     	return this.camera_in_background;
     }
     
-    MyPreferenceActivity getPreferenceFragment() {
-        MyPreferenceActivity fragment = (MyPreferenceActivity)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
+    MyPreferenceFragment getPreferenceFragment() {
+        MyPreferenceFragment fragment = (MyPreferenceFragment)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
         return fragment;
     }
     
     @Override
     public void onBackPressed() {
-        final MyPreferenceActivity fragment = getPreferenceFragment();
+        final MyPreferenceFragment fragment = getPreferenceFragment();
         if( screen_is_locked ) {
 			preview.showToast(screen_locked_toast, R.string.screen_is_locked);
         	return;

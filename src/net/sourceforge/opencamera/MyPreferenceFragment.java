@@ -30,7 +30,7 @@ import android.util.Log;
 import android.view.Display;
 
 // N.B., actually a Fragment, but called MyPreferenceActivity for historical reasons (this was originally an Activity)
-public class MyPreferenceActivity extends PreferenceFragment {
+public class MyPreferenceFragment extends PreferenceFragment {
 	private static final String TAG = "MyPreferenceActivity";
 	
 	@Override
@@ -251,12 +251,12 @@ public class MyPreferenceActivity extends PreferenceFragment {
                 	if( pref.getKey().equals("preference_about") ) {
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked about");
-            	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceActivity.this.getActivity());
+            	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
                         alertDialog.setTitle("About");
                         final StringBuilder about_string = new StringBuilder();
                         String version = "UNKNOWN_VERSION";
 						try {
-	                        PackageInfo pInfo = MyPreferenceActivity.this.getActivity().getPackageManager().getPackageInfo(MyPreferenceActivity.this.getActivity().getPackageName(), 0);
+	                        PackageInfo pInfo = MyPreferenceFragment.this.getActivity().getPackageManager().getPackageInfo(MyPreferenceFragment.this.getActivity().getPackageName(), 0);
 	                        version = pInfo.versionName;
 						}
 						catch(NameNotFoundException e) {
@@ -269,7 +269,7 @@ public class MyPreferenceActivity extends PreferenceFragment {
                         about_string.append("\n(c) 2013-2014 Mark Harman");
                         about_string.append("\nReleased under the GPL v3 or later");
                         about_string.append("\nPackage: ");
-                        about_string.append(MyPreferenceActivity.this.getActivity().getPackageName());
+                        about_string.append(MyPreferenceFragment.this.getActivity().getPackageName());
                         about_string.append("\nAndroid API version: ");
                         about_string.append(Build.VERSION.SDK_INT);
                         about_string.append("\nDevice manufacturer: ");
@@ -289,7 +289,7 @@ public class MyPreferenceActivity extends PreferenceFragment {
                         }
                         {
                             Point display_size = new Point();
-                            Display display = MyPreferenceActivity.this.getActivity().getWindowManager().getDefaultDisplay();
+                            Display display = MyPreferenceFragment.this.getActivity().getWindowManager().getDefaultDisplay();
                             display.getSize(display_size);
                             about_string.append("\nDisplay size: ");
                             about_string.append(display_size.x);
@@ -299,7 +299,7 @@ public class MyPreferenceActivity extends PreferenceFragment {
                         about_string.append("\nCurrent camera ID: ");
                         about_string.append(cameraId);
                         {
-                        	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MyPreferenceActivity.this.getActivity());
+                        	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MyPreferenceFragment.this.getActivity());
                         	String last_video_error = sharedPreferences.getString("last_video_error", "");
                         	if( last_video_error != null && last_video_error.length() > 0 ) {
                                 about_string.append("\nLast video error: ");
