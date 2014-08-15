@@ -273,16 +273,27 @@ photo. To keep the photo and continue, touch the screen (or take another photo).
 <p><b>Volume keys</b> - You can set what happens when the volume keys are pressed: either take photo/video, zoom in/out,
 change the exposure compensation, just change the device's volume as normal, or do nothing.</p>
 
-<p><b>Save location</b> - Enter the folder to store the photos in. This can be either a relative path (e.g.,
+<p><b>Save location</b> - Select the folder to store the photos in. Click on a folder (or "Parent Folder") to
+navigate through the filesystem. Select "New Folder" to create a new folder in the currently displayed folder.
+Select "Use Folder" to choose the currently displayed folder. Note that on Android, there are some folders that
+cannot be written to - Open Camera will display a message if you try to use one of these folders. You can also use
+this option to save to an external SD card, though unfortunately the path varies depending on the device, so you'll
+have to look this up or find it out yourself - it's usually one of the folders inside /mnt/. Also note that
+<a href="http://www.androidpolice.com/2014/02/17/external-blues-google-has-brought-big-changes-to-sd-cards-in-kitkat-and-even-samsung-may-be-implementing-them/">Google
+have blocked write access to external SD cards in Android 4.4</a>. Once you have specified a new save location, you
+can long press on the Gallery icon to quickly switch between recent save locations.
+
+<!--Enter the folder to store the photos in. This can be either a relative path (e.g.,
 OpenCamera or even something like MyPics/Camera) in which case the folder will be located inside the "DCIM"
 folder (usually something like /sdcard/DCIM/ ). For more advanced users, if the folder name starts with "/", then
 it indicates the full absolute path (e.g., /sdcard/Pictures/Photos ). Note that folder names are case sensitive.
 OpenCamera will attempt to create the folder (and any sub-folders as required) if it doesn't exist. If you specify
 a path that you don't have write permissions for, then OpenCamera will fail to save images/videos (and this will
-be reported when you try to take a photo or video).
+be reported when you try to take a photo or video).-
 You can also use this option to save to an external SD card, though unfortunately the path varies depending on the
 device, so you'll have to look this up yourself (it's usually something inside /mnt/ - a file explorer app such as
-<a href="https://play.google.com/store/apps/details?id=com.estrongs.android.pop">ES File Explorer</a> may help).</p>
+<a href="https://play.google.com/store/apps/details?id=com.estrongs.android.pop">ES File Explorer</a> may help).-->
+</p>
 
 <p><b>Show camera when locked</b> - If you have a lock screen on your device (e.g., PIN to unlock), Open Camera by
 default will show above the lock screen - i.e., if locked, you won't have to enter the PIN to use Open Camera. The
