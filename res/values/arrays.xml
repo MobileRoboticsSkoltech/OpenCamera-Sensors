@@ -165,7 +165,7 @@
         <item>preference_grid_none</item>
         <item>preference_grid_3x3</item>
         <item>preference_grid_4x2</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>Default</item>
         <item>100Kbit</item>
@@ -191,7 +191,7 @@
         <item>80Mbit</item>
         <item>90Mbit</item>
         <item>100Mbit</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_video_bitrate_values">
         <item>default</item>
         <item>100000</item>
@@ -225,7 +225,7 @@
         <item>25</item>
         <item>30</item>
         <item>60</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_video_fps_values">
         <item>default</item>
         <item>15</item>
@@ -292,7 +292,7 @@
         <item>Repeat 8 times</item>
         <item>Repeat 9 times</item>
         <item>Repeat 10 times</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_video_restart_values">
         <item>0</item>
         <item>1</item>
