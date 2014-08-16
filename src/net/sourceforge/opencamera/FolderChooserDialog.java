@@ -75,9 +75,9 @@ public class FolderChooserDialog extends DialogFragment {
 		String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
 		if( MyDebug.LOG )
 			Log.d(TAG, "folder_name: " + folder_name);
-		current_folder = MainActivity.getImageFolder(folder_name);
+		File new_folder = MainActivity.getImageFolder(folder_name);
 		if( MyDebug.LOG )
-			Log.d(TAG, "current_folder: " + current_folder);
+			Log.d(TAG, "start in folder: " + new_folder);
 
 		list = new ListView(getActivity());
 		list.setOnItemClickListener(new OnItemClickListener() {
@@ -91,8 +91,7 @@ public class FolderChooserDialog extends DialogFragment {
 				File file = file_wrapper.getFile();
 				if( MyDebug.LOG )
 					Log.d(TAG, "file: " + file.toString());
-				current_folder = file;
-				refreshList();
+				refreshList(file);
 			}
 		});
 		folder_dialog = new AlertDialog.Builder(getActivity())
@@ -128,17 +127,37 @@ public class FolderChooserDialog extends DialogFragment {
 		    }
 		});
 
-		refreshList();
+		refreshList(new_folder);
         return folder_dialog;
     }
     
-    private void refreshList() {
-    	if( current_folder == null )
+    private void refreshList(File new_folder) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "refreshList: " + new_folder);
+    	if( new_folder == null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "refreshList: null folder");
     		return;
-		File [] files = current_folder.listFiles();
+    	}
+		File [] files = null;
+		// try/catch just in case?
+		try {
+			files = new_folder.listFiles();
+		}
+		catch(Exception e) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "exception reading folder");
+			e.printStackTrace();
+		}
+		if( files == null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "couldn't read folder");
+			Toast.makeText(getActivity(), R.string.cant_access_folder, Toast.LENGTH_SHORT).show();
+			return;
+		}
 		List<FileWrapper> listed_files = new ArrayList<FileWrapper>();
-		if( current_folder.getParentFile() != null )
-			listed_files.add(new FileWrapper(current_folder.getParentFile(), true));
+		if( new_folder.getParentFile() != null )
+			listed_files.add(new FileWrapper(new_folder.getParentFile(), true));
 		for(int i=0;i<files.length;i++) {
 			File file = files[i];
 			if( file.isDirectory() ) {
@@ -149,14 +168,15 @@ public class FolderChooserDialog extends DialogFragment {
 
 		ArrayAdapter<FileWrapper> adapter = new ArrayAdapter<FileWrapper>(this.getActivity(), android.R.layout.simple_list_item_1, listed_files);
         list.setAdapter(adapter);
-        
+
+        this.current_folder = new_folder;
         //dialog.setTitle(current_folder.getName());
         folder_dialog.setTitle(current_folder.getAbsolutePath());
     }
     
     private boolean canWrite() {
     	try {
-    		if( this.current_folder.canWrite() )
+    		if( this.current_folder != null && this.current_folder.canWrite() )
     			return true;
     	}
     	catch(Exception e) {
@@ -167,6 +187,8 @@ public class FolderChooserDialog extends DialogFragment {
     private boolean useFolder() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "useFolder");
+		if( current_folder == null )
+			return false;
 		if( canWrite() ) {
         	File base_folder = MainActivity.getBaseFolder();
         	String new_save_location = current_folder.getAbsolutePath();
@@ -192,6 +214,8 @@ public class FolderChooserDialog extends DialogFragment {
 	private void newFolder() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "newFolder");
+		if( current_folder == null )
+			return;
 		if( canWrite() ) {
 			final EditText edit_text = new EditText(getActivity());  
 			edit_text.setSingleLine();
@@ -233,7 +257,7 @@ public class FolderChooserDialog extends DialogFragment {
 								else if( new_folder.mkdirs() ) {
 									if( MyDebug.LOG )
 										Log.d(TAG, "failed to create new folder");
-							    	refreshList();
+							    	refreshList(current_folder);
 								}
 								else {
 									Toast.makeText(getActivity(), R.string.failed_create_folder, Toast.LENGTH_SHORT).show();
@@ -261,6 +285,7 @@ public class FolderChooserDialog extends DialogFragment {
     @Override
     public void onResume() {
     	super.onResume();
-    	refreshList();
+    	// refresh in case files have changed
+    	refreshList(current_folder);
     }
 }
