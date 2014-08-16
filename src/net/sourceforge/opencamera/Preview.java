@@ -3641,7 +3641,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    		}
 
 	    		video_recorder = new MediaRecorder();
-	    		this.camera.stopPreview(); // although not documented, we need to stop preview to prevent device freeze shortly after video recording starts on some devices (e.g., Samsung Galaxy S2 - I could reproduce this on Samsung RTL); also see http://stackoverflow.com/questions/4244999/problem-with-video-recording-after-auto-focus-in-android
+	    		this.camera.stopPreview(); // although not documented, we need to stop preview to prevent device freeze or video errors shortly after video recording starts on some devices (e.g., device freeze on Samsung Galaxy S2 - I could reproduce this on Samsung RTL; also video recording fails and preview becomes corrupted on Galaxy S3 variant "SGH-I747-US2"); also see http://stackoverflow.com/questions/4244999/problem-with-video-recording-after-auto-focus-in-android
 	    		this.camera.unlock();
 	        	video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
 					@Override
