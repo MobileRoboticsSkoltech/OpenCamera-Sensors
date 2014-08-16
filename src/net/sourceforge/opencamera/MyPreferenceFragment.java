@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.hardware.Camera;
@@ -499,6 +500,12 @@ public class MyPreferenceFragment extends PreferenceFragment {
 	public void onResume() {
 		super.onResume();
 		// prevent fragment being transparent
-		getView().setBackgroundColor(Color.WHITE);
+		TypedArray array = getActivity().getTheme().obtainStyledAttributes(new int[] {  
+		    android.R.attr.colorBackground, 
+		    android.R.attr.textColorPrimary, 
+		});
+		int backgroundColor = array.getColor(0, Color.WHITE); 
+		getView().setBackgroundColor(backgroundColor);
+		array.recycle();
 	}
 }
