@@ -902,7 +902,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 
 		if( this.has_zoom ) {
-			if( sharedPreferences.getBoolean("preference_show_zoom_controls", true) ) {
+			if( sharedPreferences.getBoolean("preference_show_zoom_controls", false) ) {
 			    zoomControls.setIsZoomInEnabled(true);
 		        zoomControls.setIsZoomOutEnabled(true);
 		        zoomControls.setZoomSpeed(20);
