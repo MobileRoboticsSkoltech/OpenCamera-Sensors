@@ -3004,7 +3004,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cycleFlash()");
 		//if( is_taking_photo && !is_taking_photo_on_timer ) {
-		if( this.phase == PHASE_TAKING_PHOTO ) {
+		if( this.phase == PHASE_TAKING_PHOTO && !is_video ) {
 			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
@@ -4804,8 +4804,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    	switchCameraButton.setVisibility(visibility);
 			    if( !is_video )
 			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
-			    if( supported_flash_values != null )
-			    	flashButton.setVisibility(visibility);
+			    if( supported_flash_values != null && !is_video )
+			    	flashButton.setVisibility(visibility); // still allow flash mode when recording video
 			    if( supported_focus_values != null )
 			    	focusButton.setVisibility(visibility);
 			    if( exposures != null && !is_video ) // still allow exposure when recording video
