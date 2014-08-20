@@ -2232,7 +2232,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					p.setTextAlign(Paint.Align.CENTER);
 				}
 				if( Math.abs(this.level_angle) <= close_angle ) {
-					color = Color.GREEN;
+					color = Color.rgb(50, 255, 50);
 				}
 				String string = getResources().getString(R.string.angle) + ": " + decimalFormat.format(this.level_angle) + (char)0x00B0;
 				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
@@ -2261,7 +2261,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( remaining_time >= 0 ) {
 					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
-					drawTextWithBackground(canvas, p, "" + remaining_time, Color.RED, Color.rgb(75, 75, 75), canvas.getWidth() / 2, canvas.getHeight() / 2);
+					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(255, 50, 50), Color.rgb(75, 75, 75), canvas.getWidth() / 2, canvas.getHeight() / 2);
 				}
 			}
 			else if( this.video_recorder != null && video_start_time_set ) {
@@ -2282,10 +2282,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             	}
     			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
     			p.setTextAlign(Paint.Align.CENTER);
-    			//int pixels_offset_y = (int) (164 * scale + 0.5f); // convert dps to pixels
-				//drawTextWithBackground(canvas, p, "" + time_s, Color.RED, Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() - pixels_offset_y);
 				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom label
-				drawTextWithBackground(canvas, p, "" + time_s, Color.RED, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+				drawTextWithBackground(canvas, p, "" + time_s, Color.rgb(255, 50, 50), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
 		else if( camera == null ) {
@@ -2363,7 +2361,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			canvas.drawRect(battery_x, battery_y, battery_x+battery_width, battery_y+battery_height, p);
-			p.setColor(battery_frac >= 0.3f ? Color.GREEN : Color.RED);
+			p.setColor(battery_frac >= 0.3f ? Color.rgb(50, 150, 50) : Color.rgb(255, 50, 50));
 			p.setStyle(Paint.Style.FILL);
 			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
 		}
@@ -2391,7 +2389,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				int indicator_x = location_x + location_size;
 				int indicator_y = location_y + location_radius/2 + 1;
 				p.setStyle(Paint.Style.FILL_AND_STROKE);
-				p.setColor(location_accuracy < 25.01f ? Color.GREEN : Color.YELLOW);
+				p.setColor(location_accuracy < 25.01f ? Color.rgb(50, 150, 50) : Color.YELLOW);
 				canvas.drawCircle(indicator_x, indicator_y, location_radius, p);
 			}
 			else {
@@ -2445,7 +2443,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			int cx = canvas.getWidth()/2;
 			int cy = canvas.getHeight()/2;
 			if( Math.abs(this.level_angle) <= close_angle ) { // n.b., use level_angle, not angle or orig_level_angle
-				p.setColor(Color.GREEN);
+				p.setColor(Color.rgb(50, 150, 50));
 			}
 			else {
 				p.setColor(Color.WHITE);
