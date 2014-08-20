@@ -12,6 +12,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -127,7 +128,26 @@ public class FolderChooserDialog extends DialogFragment {
 		    }
 		});
 
+		if( !new_folder.exists() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "create new folder" + new_folder);
+			if( !new_folder.mkdirs() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "failed to create new folder");
+				// don't do anything yet, this is handled below
+			}
+		}
 		refreshList(new_folder);
+		if( current_folder == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "failed to read folder");
+			// note that we reset to DCIM rather than DCIM/OpenCamera, just to increase likelihood of getting back to a valid state
+			refreshList(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM));
+			if( current_folder == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "can't even read DCIM?!");
+			}
+		}
         return folder_dialog;
     }
     
@@ -152,7 +172,8 @@ public class FolderChooserDialog extends DialogFragment {
 		if( files == null ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "couldn't read folder");
-			Toast.makeText(getActivity(), R.string.cant_access_folder, Toast.LENGTH_SHORT).show();
+    		String toast_message = getResources().getString(R.string.cant_access_folder) + ":\n" + new_folder.getAbsolutePath();
+			Toast.makeText(getActivity(), toast_message, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		List<FileWrapper> listed_files = new ArrayList<FileWrapper>();
@@ -256,10 +277,12 @@ public class FolderChooserDialog extends DialogFragment {
 								}
 								else if( new_folder.mkdirs() ) {
 									if( MyDebug.LOG )
-										Log.d(TAG, "failed to create new folder");
+										Log.d(TAG, "created new folder");
 							    	refreshList(current_folder);
 								}
 								else {
+									if( MyDebug.LOG )
+										Log.d(TAG, "failed to create new folder");
 									Toast.makeText(getActivity(), R.string.failed_create_folder, Toast.LENGTH_SHORT).show();
 								}
 							}
@@ -287,5 +310,11 @@ public class FolderChooserDialog extends DialogFragment {
     	super.onResume();
     	// refresh in case files have changed
     	refreshList(current_folder);
+    }
+    
+    // for testing:
+
+    public File getCurrentFolder() {
+    	return current_folder;
     }
 }
