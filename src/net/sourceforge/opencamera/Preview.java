@@ -3602,13 +3602,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			showGUI(true);
 			return;
 		}
-		focus_success = FOCUS_DONE; // clear focus rectangle
 
 		updateParametersFromLocation();
 
 		if( is_video ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
+    		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
 			MainActivity main_activity = (MainActivity)Preview.this.getContext();
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
 			if( videoFile == null ) {
@@ -3882,6 +3882,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		//else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
 		else if( focus_value != null && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) ) {
+    		focus_success = FOCUS_DONE; // clear focus rectangle for new refocus
 	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
 				@Override
 				public void onAutoFocus(boolean success, Camera camera) {
@@ -3934,7 +3935,22 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			showGUI(true);
 			return;
 		}
-		cancelAutoFocus(); // make sure there isn't an autofocus in progress - can happen if in manual mode we take a photo while autofocusing - see testTakePhotoManualFocus()
+
+		String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "focus_value is " + focus_value);
+			Log.d(TAG, "focus_success is " + focus_success);
+		}
+
+		if( focus_value.equals("focus_mode_manual") && focus_success == FOCUS_WAITING ) {
+			// make sure there isn't an autofocus in progress - can happen if in manual mode we take a photo while autofocusing - see testTakePhotoManualFocus() (although that test doesn't always properly test the bug...)
+			// we only cancel when in manual mode and if still focusing, as I had 2 bug reports for v1.16 that the photo was being taken out of focus; both reports said it worked fine in 1.15
+			// they said this happened in every focus mode, including manual - so possible that on some devices, cancelAutoFocus() actually pulls the camera out of focus, or reverts to preview focus?
+			if( MyDebug.LOG )
+				Log.d(TAG, "cancelAutoFocus()");
+			cancelAutoFocus();
+		}
+		focus_success = FOCUS_DONE; // clear focus rectangle if not already done
 		successfully_focused = false; // so next photo taken will require an autofocus
 		if( MyDebug.LOG )
 			Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
@@ -4624,11 +4640,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		        };
 	
 				this.focus_success = FOCUS_WAITING;
+				if( MyDebug.LOG )
+					Log.d(TAG, "set focus_success to " + focus_success);
 	    		this.focus_complete_time = -1;
 	    		this.successfully_focused = false;
 	    		try {
 	    			camera.autoFocus(autoFocusCallback);
 	    			count_cameraAutoFocus++;
+					if( MyDebug.LOG )
+						Log.d(TAG, "autofocus started");
 	    		}
 	    		catch(RuntimeException e) {
 	    			// just in case? We got a RuntimeException report here from 1 user on Google Play
