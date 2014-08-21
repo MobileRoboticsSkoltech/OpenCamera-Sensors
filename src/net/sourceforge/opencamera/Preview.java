@@ -467,6 +467,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearFocusAreas()");
 		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
 			return;
 		}
         cancelAutoFocus();
@@ -790,6 +792,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		try {
 			camera = Camera.open(cameraId);
+			//throw new RuntimeException(); // uncomment to test camera not opening
 		}
 		catch(RuntimeException e) {
 			if( MyDebug.LOG )
@@ -1374,6 +1377,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             return;
         }
         if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
             return;
         }
 
@@ -1386,6 +1391,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "setPreviewSize()");
 		// also now sets picture size
 		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
 			return;
 		}
 		if( is_preview_started ) {
@@ -1960,8 +1967,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	void setCameraDisplayOrientation(Activity activity) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setCameraDisplayOrientation()");
-		if( camera == null )
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
 			return;
+		}
 	    Camera.CameraInfo info = new Camera.CameraInfo();
 	    Camera.getCameraInfo(cameraId, info);
 	    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
@@ -1999,8 +2009,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}*/
 		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
 			return;
-		if( camera == null )
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
 			return;
+		}
 	    Camera.getCameraInfo(cameraId, camera_info);
 	    orientation = (orientation + 45) / 90 * 90;
 	    this.current_orientation = orientation % 360;
@@ -2864,6 +2877,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
 		if( this.camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
 			return;
 		}
 		boolean old_is_video = is_video;
@@ -3082,6 +3097,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFlash() " + flash_value);
 		set_flash_after_autofocus = ""; // this overrides any previously saved setting, for during the startup autofocus
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
+			return;
+		}
         cancelAutoFocus();
 		Camera.Parameters parameters = camera.getParameters();
 		String flash_mode = convertFlashValueToMode(flash_value);
@@ -3253,7 +3273,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "getFocusValue()");
 		if( camera == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "null camera");
+				Log.d(TAG, "camera not opened!");
 			return null;
 		}
 		if( this.supported_focus_values != null && this.current_focus_index != -1 )
@@ -3266,7 +3286,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "setFocusValue() " + focus_value);
 		if( camera == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "null camera");
+				Log.d(TAG, "camera not opened!");
 			return;
 		}
         cancelAutoFocus();
@@ -3307,7 +3327,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		// n.b., need to allow when recording video, so no check on PHASE_TAKING_PHOTO
 		if( camera == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "null camera");
+				Log.d(TAG, "camera not opened!");
 			return;
 		}
 		if( is_exposure_locked_supported ) {
@@ -3320,7 +3340,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private void setExposureLocked() {
 		if( camera == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "null camera");
+				Log.d(TAG, "camera not opened!");
 			return;
 		}
 		if( is_exposure_locked_supported ) {
@@ -3387,7 +3407,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "takePicturePressed");
 		if( camera == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "camera not available");
+				Log.d(TAG, "camera not opened!");
 			/*is_taking_photo_on_timer = false;
 			is_taking_photo = false;*/
 			this.phase = PHASE_NORMAL;
@@ -3586,7 +3606,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         this.phase = PHASE_TAKING_PHOTO;
 		if( camera == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "camera not available");
+				Log.d(TAG, "camera not opened!");
 			/*is_taking_photo_on_timer = false;
 			is_taking_photo = false;*/
 			this.phase = PHASE_NORMAL;
@@ -3919,7 +3939,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "takePictureWhenFocused");
 		if( camera == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "camera not available");
+				Log.d(TAG, "camera not opened!");
 			/*is_taking_photo_on_timer = false;
 			is_taking_photo = false;*/
 			this.phase = PHASE_NORMAL;
@@ -4594,7 +4614,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		if( camera == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "no camera");
+				Log.d(TAG, "camera not opened!");
 		}
 		else if( !this.has_surface ) {
 			if( MyDebug.LOG )
@@ -4954,8 +4974,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     int getCurrentExposure() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentExposure");
-    	if( camera == null )
+    	if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
     		return 0;
+    	}
 		Camera.Parameters parameters = camera.getParameters();
 		int current_exposure = parameters.getExposureCompensation();
 		return current_exposure;
