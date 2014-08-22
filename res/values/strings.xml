@@ -38,6 +38,7 @@
     <string name="failed_to_save_image">Failed to save image file</string>
     <string name="failed_to_save_photo">Failed to save photo</string>
     <string name="failed_to_auto_stabilise">Failed to auto-stabilise</string>
+    <string name="failed_to_start_camera_preview">Failed to start camera preview</string>
     <string name="taking_photo">Taking photo</string>
     <string name="failed_to_take_picture">Failed to take picture</string>
     <string name="photo_deleted">Photo deleted</string>

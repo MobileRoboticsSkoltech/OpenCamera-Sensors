@@ -4784,8 +4784,17 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				matchPreviewFpsToVideo();
     		}
     		// else, we reset the preview fps to default in switchVideo
-	    	count_cameraStartPreview++;
-			camera.startPreview();
+    		try {
+				camera.startPreview();
+		    	count_cameraStartPreview++;
+    		}
+    		catch(RuntimeException e) {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "RuntimeException tryin to startPreview");
+    			e.printStackTrace();
+    			showToast(null, R.string.failed_to_start_camera_preview);
+    			return;
+    		}
 			this.is_preview_started = true;
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
