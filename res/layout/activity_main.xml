@@ -26,6 +26,7 @@
         android:src="@drawable/take_photo"
         android:onClick="clickedTakePhoto"
         android:layout_centerVertical="true"
+		android:background="@null"
         />
 
     <ZoomControls
