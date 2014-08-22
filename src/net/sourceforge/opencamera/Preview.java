@@ -4025,119 +4025,125 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     				//options.inMutable = true;
     				options.inPurgeable = true;
         			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
-        			int width = bitmap.getWidth();
-        			int height = bitmap.getHeight();
-        			if( MyDebug.LOG ) {
-        				Log.d(TAG, "level_angle: " + level_angle);
-        				Log.d(TAG, "decoded bitmap size " + width + ", " + height);
-        				Log.d(TAG, "bitmap size: " + width*height*4);
-        			}
-        			/*for(int y=0;y<height;y++) {
-        				for(int x=0;x<width;x++) {
-        					int col = bitmap.getPixel(x, y);
-        					col = col & 0xffff0000; // mask out red component
-        					bitmap.setPixel(x, y, col);
-        				}
-        			}*/
-        			if( test_low_memory ) {
-        		    	level_angle = 45.0;
-        			}
-        		    Matrix matrix = new Matrix();
-        		    double level_angle_rad_abs = Math.abs( Math.toRadians(level_angle) );
-        		    int w1 = width, h1 = height;
-        		    double w0 = (w1 * Math.cos(level_angle_rad_abs) + h1 * Math.sin(level_angle_rad_abs));
-        		    double h0 = (w1 * Math.sin(level_angle_rad_abs) + h1 * Math.cos(level_angle_rad_abs));
-        		    // apply a scale so that the overall image size isn't increased
-        		    float orig_size = w1*h1;
-        		    float rotated_size = (float)(w0*h0);
-        		    float scale = (float)Math.sqrt(orig_size/rotated_size);
-        			if( test_low_memory ) {
-            			if( MyDebug.LOG )
-            				Log.d(TAG, "TESTING LOW MEMORY");
-        		    	scale *= 2.0f; // test 20MP
-        		    	//scale *= 1.613f; // test 13MP
-        			}
-        			if( MyDebug.LOG ) {
-        				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
-        				Log.d(TAG, "w1 = " + w1 + " , h1 = " + h1);
-        				Log.d(TAG, "scale = sqrt " + orig_size + " / " + rotated_size + " = " + scale);
-        			}
-        		    matrix.postScale(scale, scale);
-        		    w0 *= scale;
-        		    h0 *= scale;
-        		    w1 *= scale;
-        		    h1 *= scale;
-        			if( MyDebug.LOG ) {
-        				Log.d(TAG, "after scaling: w0 = " + w0 + " , h0 = " + h0);
-        				Log.d(TAG, "after scaling: w1 = " + w1 + " , h1 = " + h1);
-        			}
-        		    Camera.CameraInfo info = new Camera.CameraInfo();
-        		    Camera.getCameraInfo(cameraId, info);
-        		    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            		    matrix.postRotate((float)-level_angle);
-        		    }
-        		    else {
-            		    matrix.postRotate((float)level_angle);
-        		    }
-        		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-        		    // careful, as new_bitmap is sometimes not a copy!
-        		    if( new_bitmap != bitmap ) {
-        		    	bitmap.recycle();
-        		    	bitmap = new_bitmap;
-        		    }
-    	            System.gc();
-        			if( MyDebug.LOG ) {
-        				Log.d(TAG, "rotated and scaled bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
-        				Log.d(TAG, "rotated and scaled bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
-        			}
-        			double tan_theta = Math.tan(level_angle_rad_abs);
-        			double sin_theta = Math.sin(level_angle_rad_abs);
-        			double denom = (double)( h0/w0 + tan_theta );
-        			double alt_denom = (double)( w0/h0 + tan_theta );
-        			if( denom == 0.0 || denom < 1.0e-14 ) {
-        	    		if( MyDebug.LOG )
-        	    			Log.d(TAG, "zero denominator?!");
-        			}
-        			else if( alt_denom == 0.0 || alt_denom < 1.0e-14 ) {
-        	    		if( MyDebug.LOG )
-        	    			Log.d(TAG, "zero alt denominator?!");
+        			if( bitmap == null ) {
+        	    	    showToast(null, R.string.failed_to_auto_stabilise);
+        	            System.gc();
         			}
         			else {
-            			int w2 = (int)(( h0 + 2.0*h1*sin_theta*tan_theta - w0*tan_theta ) / denom);
-            			int h2 = (int)(w2*h0/(double)w0);
-            			int alt_h2 = (int)(( w0 + 2.0*w1*sin_theta*tan_theta - h0*tan_theta ) / alt_denom);
-            			int alt_w2 = (int)(alt_h2*w0/(double)h0);
-            			if( MyDebug.LOG ) {
-            				//Log.d(TAG, "h0 " + h0 + " 2.0*h1*sin_theta*tan_theta " + 2.0*h1*sin_theta*tan_theta + " w0*tan_theta " + w0*tan_theta + " / h0/w0 " + h0/w0 + " tan_theta " + tan_theta);
-            				Log.d(TAG, "w2 = " + w2 + " , h2 = " + h2);
-            				Log.d(TAG, "alt_w2 = " + alt_w2 + " , alt_h2 = " + alt_h2);
-            			}
-            			if( alt_w2 < w2 ) {
-                			if( MyDebug.LOG ) {
-                				Log.d(TAG, "chose alt!");
-                			}
-            				w2 = alt_w2;
-            				h2 = alt_h2;
-            			}
-            			if( w2 <= 0 )
-            				w2 = 1;
-            			else if( w2 >= bitmap.getWidth() )
-            				w2 = bitmap.getWidth()-1;
-            			if( h2 <= 0 )
-            				h2 = 1;
-            			else if( h2 >= bitmap.getHeight() )
-            				h2 = bitmap.getHeight()-1;
-            			int x0 = (bitmap.getWidth()-w2)/2;
-            			int y0 = (bitmap.getHeight()-h2)/2;
-            			if( MyDebug.LOG ) {
-            				Log.d(TAG, "x0 = " + x0 + " , y0 = " + y0);
-            			}
-            			new_bitmap = Bitmap.createBitmap(bitmap, x0, y0, w2, h2);
-            		    if( new_bitmap != bitmap ) {
-            		    	bitmap.recycle();
-            		    	bitmap = new_bitmap;
-            		    }
-        	            System.gc();
+	        			int width = bitmap.getWidth();
+	        			int height = bitmap.getHeight();
+	        			if( MyDebug.LOG ) {
+	        				Log.d(TAG, "level_angle: " + level_angle);
+	        				Log.d(TAG, "decoded bitmap size " + width + ", " + height);
+	        				Log.d(TAG, "bitmap size: " + width*height*4);
+	        			}
+	        			/*for(int y=0;y<height;y++) {
+	        				for(int x=0;x<width;x++) {
+	        					int col = bitmap.getPixel(x, y);
+	        					col = col & 0xffff0000; // mask out red component
+	        					bitmap.setPixel(x, y, col);
+	        				}
+	        			}*/
+	        			if( test_low_memory ) {
+	        		    	level_angle = 45.0;
+	        			}
+	        		    Matrix matrix = new Matrix();
+	        		    double level_angle_rad_abs = Math.abs( Math.toRadians(level_angle) );
+	        		    int w1 = width, h1 = height;
+	        		    double w0 = (w1 * Math.cos(level_angle_rad_abs) + h1 * Math.sin(level_angle_rad_abs));
+	        		    double h0 = (w1 * Math.sin(level_angle_rad_abs) + h1 * Math.cos(level_angle_rad_abs));
+	        		    // apply a scale so that the overall image size isn't increased
+	        		    float orig_size = w1*h1;
+	        		    float rotated_size = (float)(w0*h0);
+	        		    float scale = (float)Math.sqrt(orig_size/rotated_size);
+	        			if( test_low_memory ) {
+	            			if( MyDebug.LOG )
+	            				Log.d(TAG, "TESTING LOW MEMORY");
+	        		    	scale *= 2.0f; // test 20MP
+	        		    	//scale *= 1.613f; // test 13MP
+	        			}
+	        			if( MyDebug.LOG ) {
+	        				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
+	        				Log.d(TAG, "w1 = " + w1 + " , h1 = " + h1);
+	        				Log.d(TAG, "scale = sqrt " + orig_size + " / " + rotated_size + " = " + scale);
+	        			}
+	        		    matrix.postScale(scale, scale);
+	        		    w0 *= scale;
+	        		    h0 *= scale;
+	        		    w1 *= scale;
+	        		    h1 *= scale;
+	        			if( MyDebug.LOG ) {
+	        				Log.d(TAG, "after scaling: w0 = " + w0 + " , h0 = " + h0);
+	        				Log.d(TAG, "after scaling: w1 = " + w1 + " , h1 = " + h1);
+	        			}
+	        		    Camera.CameraInfo info = new Camera.CameraInfo();
+	        		    Camera.getCameraInfo(cameraId, info);
+	        		    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+	            		    matrix.postRotate((float)-level_angle);
+	        		    }
+	        		    else {
+	            		    matrix.postRotate((float)level_angle);
+	        		    }
+	        		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+	        		    // careful, as new_bitmap is sometimes not a copy!
+	        		    if( new_bitmap != bitmap ) {
+	        		    	bitmap.recycle();
+	        		    	bitmap = new_bitmap;
+	        		    }
+	    	            System.gc();
+	        			if( MyDebug.LOG ) {
+	        				Log.d(TAG, "rotated and scaled bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
+	        				Log.d(TAG, "rotated and scaled bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
+	        			}
+	        			double tan_theta = Math.tan(level_angle_rad_abs);
+	        			double sin_theta = Math.sin(level_angle_rad_abs);
+	        			double denom = (double)( h0/w0 + tan_theta );
+	        			double alt_denom = (double)( w0/h0 + tan_theta );
+	        			if( denom == 0.0 || denom < 1.0e-14 ) {
+	        	    		if( MyDebug.LOG )
+	        	    			Log.d(TAG, "zero denominator?!");
+	        			}
+	        			else if( alt_denom == 0.0 || alt_denom < 1.0e-14 ) {
+	        	    		if( MyDebug.LOG )
+	        	    			Log.d(TAG, "zero alt denominator?!");
+	        			}
+	        			else {
+	            			int w2 = (int)(( h0 + 2.0*h1*sin_theta*tan_theta - w0*tan_theta ) / denom);
+	            			int h2 = (int)(w2*h0/(double)w0);
+	            			int alt_h2 = (int)(( w0 + 2.0*w1*sin_theta*tan_theta - h0*tan_theta ) / alt_denom);
+	            			int alt_w2 = (int)(alt_h2*w0/(double)h0);
+	            			if( MyDebug.LOG ) {
+	            				//Log.d(TAG, "h0 " + h0 + " 2.0*h1*sin_theta*tan_theta " + 2.0*h1*sin_theta*tan_theta + " w0*tan_theta " + w0*tan_theta + " / h0/w0 " + h0/w0 + " tan_theta " + tan_theta);
+	            				Log.d(TAG, "w2 = " + w2 + " , h2 = " + h2);
+	            				Log.d(TAG, "alt_w2 = " + alt_w2 + " , alt_h2 = " + alt_h2);
+	            			}
+	            			if( alt_w2 < w2 ) {
+	                			if( MyDebug.LOG ) {
+	                				Log.d(TAG, "chose alt!");
+	                			}
+	            				w2 = alt_w2;
+	            				h2 = alt_h2;
+	            			}
+	            			if( w2 <= 0 )
+	            				w2 = 1;
+	            			else if( w2 >= bitmap.getWidth() )
+	            				w2 = bitmap.getWidth()-1;
+	            			if( h2 <= 0 )
+	            				h2 = 1;
+	            			else if( h2 >= bitmap.getHeight() )
+	            				h2 = bitmap.getHeight()-1;
+	            			int x0 = (bitmap.getWidth()-w2)/2;
+	            			int y0 = (bitmap.getHeight()-h2)/2;
+	            			if( MyDebug.LOG ) {
+	            				Log.d(TAG, "x0 = " + x0 + " , y0 = " + y0);
+	            			}
+	            			new_bitmap = Bitmap.createBitmap(bitmap, x0, y0, w2, h2);
+	            		    if( new_bitmap != bitmap ) {
+	            		    	bitmap.recycle();
+	            		    	bitmap = new_bitmap;
+	            		    }
+	        	            System.gc();
+	        			}
         			}
     			}
 
