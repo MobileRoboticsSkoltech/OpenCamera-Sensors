@@ -136,15 +136,19 @@
     </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Сделать фото (или запустить/остановить запись видео)</item>
+        <item>Focus (if in auto/manual/macro mode)</item>
         <item>Увеличить/уменьшить масштаб</item>
         <item>Изменить уровень экспозиции</item>
+        <item>Switch auto-stabilise on/off</item>
         <item>Изменить громкость</item>
         <item>Ничего</item>
     </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
+        <item>volume_focus</item>
         <item>volume_zoom</item>
         <item>volume_exposure</item>
+        <item>volume_auto_stabilise</item>
         <item>volume_nothing</item><!-- actually means change device volume! -->
         <item>volume_really_nothing</item>
     </string-array>
