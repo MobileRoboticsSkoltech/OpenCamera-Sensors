@@ -8,6 +8,9 @@
     
     <string name="answer_yes">Yes</string>
     <string name="answer_no">No</string>
+
+    <string name="on">On</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
+    <string name="off">Off</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->
     
     <string name="choose_save_location">Choose save location:</string>
     <string name="clear_folder_history">Clear folder history</string>
@@ -45,6 +48,7 @@
     <string name="no_gallery_app">No gallery app available</string>
     <string name="screen_is_locked">Screen is locked - swipe the screen to unlock</string>
     <string name="unlocked">Unlocked</string>
+    <string name="auto_stabilise_not_supported">Sorry, auto-stabilise not supported\non this device</string>
     
     <string name="angle">Angle</string>
     <string name="direction">Direction</string>

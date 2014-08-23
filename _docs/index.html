@@ -55,7 +55,7 @@
 <li>Thumbnail of last photo/video is displayed, with link to the gallery app.</li>
 <li>Option to silence the shutter (requires Android 4.2).</li>
 <li>GUI works in any orientation without any pause when changing orientation. Option to optimise for left and right-handed users.</li>
-<li>Configurable volume keys (to take picture, focus, zoom, or change exposure compensation).</li>
+<li>Configurable volume keys (to take picture, focus, zoom, change exposure compensation, turn auto-stabilise on/off).</li>
 <li>Choice of save folder (though note <a href="http://www.androidpolice.com/2014/02/17/external-blues-google-has-brought-big-changes-to-sd-cards-in-kitkat-and-even-samsung-may-be-implementing-them/">Google have blocked write access to external SD cards in Android 4.4</a>).</li>
 <li>Configurable on-screen display shows battery, time, remaining device memory, orientation and direction of camera; also option to overlay a choice of grids (including "rule of thirds").</li>
 <li>Preview aspect ratio can be set either to maximise the preview display size, or match the aspect ratio of the photo/video resolution (so what you see is what is actually recorded).</li>
@@ -270,7 +270,8 @@ photo. To keep the photo and continue, touch the screen (or take another photo).
 <p><b>Shutter sound</b> - Whether to play a sound after taking a photo. (Requires Android 4.2 or higher to disable.)</p>
 
 <p><b>Volume keys</b> - You can set what happens when the volume keys are pressed: either take photo/video,
-focus, zoom in/out, change the exposure compensation, just change the device's volume as normal, or do nothing.</p>
+focus, zoom in/out, change the exposure compensation, switch auto-stabilise on/off, just change the device's volume
+as normal, or do nothing.</p>
 
 <p><b>Save location</b> - Select the folder to store the photos in. Click on a folder (or "Parent Folder") to
 navigate through the filesystem. Select "New Folder" to create a new folder in the currently displayed folder.
@@ -463,7 +464,7 @@ FIXED   "Save location" option didn't work if folder didn't exist (this also
         meant it didn't work when the app is first installed, unless a
         photo/video was taken first) (bug introduced in v1.16 with the new file
         chooser dialog).
-ADDED   New option for volume keys: focus.
+ADDED   New options for volume keys: focus, and switch auto-stabilise on/off.
 UPDATED Allow changing flash mode while recording video (so torch can be
         switched on and off).
 UPDATED Zoom -/+ controls are now disabled by default, to reduce clutter (for

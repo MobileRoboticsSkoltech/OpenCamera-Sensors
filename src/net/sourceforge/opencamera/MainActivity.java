@@ -84,6 +84,7 @@ public class MainActivity extends Activity {
     private boolean screen_is_locked = false;
 
     private ToastBoxer screen_locked_toast = new ToastBoxer();
+    private ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
     
 	// for testing:
 	public boolean is_test = false;
@@ -248,6 +249,21 @@ public class MainActivity extends Activity {
 	    			else
 	    				this.preview.changeExposure(-1, true);
 	                return true;
+	    		}
+	    		else if( volume_keys.equals("volume_auto_stabilise") ) {
+	    			if( this.supports_auto_stabilise ) {
+						boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
+						auto_stabilise = !auto_stabilise;
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putBoolean("preference_auto_stabilise", auto_stabilise);
+						editor.apply();
+						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(auto_stabilise ? R.string.on : R.string.off);
+						preview.showToast(changed_auto_stabilise_toast, message);
+	    			}
+	    			else {
+	    				preview.showToast(changed_auto_stabilise_toast, R.string.auto_stabilise_not_supported);
+	    			}
+	    			return true;
 	    		}
 	    		else if( volume_keys.equals("volume_really_nothing") ) {
 	    			// do nothing, but still return true so we don't change volume either

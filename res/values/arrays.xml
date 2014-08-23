@@ -139,6 +139,7 @@
         <item>Focus (if in auto/manual/macro mode)</item>
         <item>Zoom in/out</item>
         <item>Change exposure level</item>
+        <item>Switch auto-stabilise on/off</item>
         <item>Change device volume</item>
         <item>Do nothing</item>
         </string-array>
@@ -147,6 +148,7 @@
         <item>volume_focus</item>
         <item>volume_zoom</item>
         <item>volume_exposure</item>
+        <item>volume_auto_stabilise</item>
         <item>volume_nothing</item><!-- actually means change device volume! -->
         <item>volume_really_nothing</item>
     </string-array>
