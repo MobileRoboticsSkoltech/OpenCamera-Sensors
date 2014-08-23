@@ -4612,7 +4612,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
     private void tryAutoFocus(final boolean startup, final boolean manual) {
-    	// manual: whether user has requested autofocus (by touching screen)
+    	// manual: whether user has requested autofocus (e.g., by touching screen, or volume focus, or hardware focus button)
+    	// consider whether you want to call requestAutoFocus() instead (which properly cancels any in-progress auto-focus first)
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "tryAutoFocus");
 			Log.d(TAG, "startup? " + startup);

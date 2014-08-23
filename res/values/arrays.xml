@@ -136,6 +136,7 @@
     </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Take photo (or start/stop video recording)</item>
+        <item>Focus (if in auto/manual/macro mode)</item>
         <item>Zoom in/out</item>
         <item>Change exposure level</item>
         <item>Change device volume</item>
@@ -143,6 +144,7 @@
         </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
+        <item>volume_focus</item>
         <item>volume_zoom</item>
         <item>volume_exposure</item>
         <item>volume_nothing</item><!-- actually means change device volume! -->

@@ -231,6 +231,10 @@ public class MainActivity extends Activity {
 	            	takePicture();
 	                return true;
 	    		}
+	    		else if( volume_keys.equals("volume_focus") ) {
+					preview.requestAutoFocus();
+					return true;
+	    		}
 	    		else if( volume_keys.equals("volume_zoom") ) {
 	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
 	    				this.preview.zoomIn();
