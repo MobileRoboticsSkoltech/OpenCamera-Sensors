@@ -688,6 +688,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		set_flash_after_autofocus = "";
 		successfully_focused = false;
         has_set_location = false;
 		has_received_location = false;
@@ -754,6 +755,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		has_received_location = false;
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		set_flash_after_autofocus = "";
 		successfully_focused = false;
 		scene_modes = null;
 		has_zoom = false;
