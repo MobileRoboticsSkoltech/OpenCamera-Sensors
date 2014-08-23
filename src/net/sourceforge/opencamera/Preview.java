@@ -2010,8 +2010,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
 			return;
 		if( camera == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "camera not opened!");
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");*/
 			return;
 		}
 	    Camera.getCameraInfo(cameraId, camera_info);
