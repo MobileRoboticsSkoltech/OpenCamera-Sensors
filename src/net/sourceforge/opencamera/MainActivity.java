@@ -63,7 +63,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -607,7 +607,7 @@ public class MainActivity extends Activity {
 			// set icon for taking photos vs videos
 			ImageButton view = (ImageButton)findViewById(R.id.take_photo);
 			if( preview != null ) {
-				view.setImageResource(preview.isVideo() ? R.drawable.take_video : R.drawable.take_photo);
+				view.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
 			}
 		}
     }

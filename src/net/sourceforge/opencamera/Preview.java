@@ -2925,7 +2925,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 			Activity activity = (Activity)this.getContext();
 			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
-			view.setImageResource(is_video ? R.drawable.take_video : R.drawable.take_photo);
+			view.setImageResource(is_video ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
 
 			if( save ) {
 				// now save

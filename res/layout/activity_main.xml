@@ -23,7 +23,7 @@
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/take_photo"
-        android:src="@drawable/take_photo"
+        android:src="@drawable/take_photo_selector"
         android:onClick="clickedTakePhoto"
         android:layout_centerVertical="true"
 		android:background="@null"
