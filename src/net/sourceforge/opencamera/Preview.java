@@ -3962,7 +3962,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "focus_success is " + focus_success);
 		}
 
-		if( focus_value.equals("focus_mode_manual") && focus_success == FOCUS_WAITING ) {
+		if( focus_value != null && focus_value.equals("focus_mode_manual") && focus_success == FOCUS_WAITING ) {
 			// make sure there isn't an autofocus in progress - can happen if in manual mode we take a photo while autofocusing - see testTakePhotoManualFocus() (although that test doesn't always properly test the bug...)
 			// we only cancel when in manual mode and if still focusing, as I had 2 bug reports for v1.16 that the photo was being taken out of focus; both reports said it worked fine in 1.15, and one confirmed that it was due to the cancelAutoFocus() line, and that it's now fixed with this fix
 			// they said this happened in every focus mode, including manual - so possible that on some devices, cancelAutoFocus() actually pulls the camera out of focus, or reverts to preview focus?
