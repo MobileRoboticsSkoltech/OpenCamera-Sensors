@@ -780,6 +780,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		supported_focus_values = null;
 		current_focus_index = -1;
 		showGUI(true);
+		if( MyDebug.LOG )
+			Log.d(TAG, "done showGUI");
 		if( !this.has_surface ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "preview surface not yet available");
@@ -793,6 +795,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			return;
 		}
 		try {
+			if( MyDebug.LOG )
+				Log.d(TAG, "try to open camera: " + cameraId);
 			camera = Camera.open(cameraId);
 			//throw new RuntimeException(); // uncomment to test camera not opening
 		}
@@ -803,7 +807,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			camera = null;
 		}
 		if( MyDebug.LOG ) {
-			//Log.d(TAG, "time after opening camera: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "time after opening camera: " + (System.currentTimeMillis() - debug_time));
 		}
 		if( camera != null ) {
 			Activity activity = (Activity)this.getContext();
