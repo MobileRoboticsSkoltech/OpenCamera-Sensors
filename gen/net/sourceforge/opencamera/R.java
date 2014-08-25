@@ -130,6 +130,7 @@ public final class R {
         public static final int cant_write_folder=0x7f0700a8;
         public static final int changed_save_location=0x7f07000b;
         /**  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
+ whether a setting is turned off, e.g., "Auto-stabilise: Off" 
          */
         public static final int choose_save_location=0x7f070008;
         public static final int clear_folder_history=0x7f070009;
@@ -147,6 +148,7 @@ public final class R {
         public static final int failed_to_open_camera_2=0x7f070030;
         public static final int failed_to_open_camera_3=0x7f070031;
         /**   intentionally starts lower case 
+  intentionally starts lower case 
          */
         public static final int failed_to_reconnect_camera=0x7f07000e;
         public static final int failed_to_record_video=0x7f07001f;
@@ -167,6 +169,7 @@ public final class R {
         public static final int no_gallery_app=0x7f070029;
         public static final int not_supported=0x7f070010;
         /**  whether a setting is turned on, e.g., "Auto-stabilise: On" 
+ whether a setting is turned on, e.g., "Auto-stabilise: On" 
          */
         public static final int off=0x7f070007;
         public static final int on=0x7f070006;
@@ -287,6 +290,7 @@ public final class R {
         public static final int video=0x7f070019;
         public static final int video_error_server_died=0x7f070012;
         /**   intentionally starts lower case 
+  intentionally starts lower case 
          */
         public static final int video_error_unknown=0x7f070011;
         public static final int video_max_duration=0x7f070013;
