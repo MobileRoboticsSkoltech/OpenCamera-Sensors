@@ -749,7 +749,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		showGUI(true);
 	}
 	
-	private int debug_count_opencamera = 0; // see usage below
+	//private int debug_count_opencamera = 0; // see usage below
 
 	private void openCamera() {
 		long debug_time = 0;
