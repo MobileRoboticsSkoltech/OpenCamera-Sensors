@@ -3186,15 +3186,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}*/
 			// also resort as well as converting
 			// first one will be the default choice
+			// note: important for FLASH_MODE_OFF to be immediately after FLASH_MODE_TORCH, due to bug on Nexus 5 where torch doesn't switch off until we set FLASH_MODE_OFF
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_AUTO) ) {
 				output_modes.add("flash_auto");
 				if( MyDebug.LOG )
 					Log.d(TAG, " supports flash_auto");
-			}
-			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
-				output_modes.add("flash_off");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports flash_off");
 			}
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_ON) ) {
 				output_modes.add("flash_on");
@@ -3205,6 +3201,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				output_modes.add("flash_torch");
 				if( MyDebug.LOG )
 					Log.d(TAG, " supports flash_torch");
+			}
+			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
+				output_modes.add("flash_off");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports flash_off");
 			}
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_RED_EYE) ) {
 				output_modes.add("flash_red_eye");
