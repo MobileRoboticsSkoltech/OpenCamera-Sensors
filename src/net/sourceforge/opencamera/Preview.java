@@ -360,6 +360,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	@Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
+        if( camera == null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "try to reopen camera due to touch");
+    		this.openCamera();
+    		return true;
+        }
 		MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.clearSeekBar();
         //invalidate();
@@ -743,6 +749,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		showGUI(true);
 	}
 	
+	private int debug_count_opencamera = 0; // see usage below
+
 	private void openCamera() {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
@@ -794,6 +802,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			return;
 		}
+		/*{
+			// debug
+			if( debug_count_opencamera++ == 0 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "debug: don't open camera yet");
+				return;
+			}
+		}*/
 		try {
 			if( MyDebug.LOG )
 				Log.d(TAG, "try to open camera: " + cameraId);
