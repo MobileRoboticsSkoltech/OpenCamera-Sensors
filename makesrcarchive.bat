@@ -31,4 +31,7 @@ xcopy %src%\res %dst%\res /E /Y
 mkdir %dst%\src
 xcopy %src%\src %dst%\src /E /Y
 
+mkdir %dst%\_docs
+xcopy %src%\_docs %dst%\_docs /E /Y
+
 REM exit
