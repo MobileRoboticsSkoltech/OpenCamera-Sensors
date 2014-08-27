@@ -742,6 +742,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
+		if( this.is_video ) {
+			// make sure we're into continuous video mode
+			// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
+			// so to be safe, we always reset to continuous video mode
+			// although I've now fixed this at the level where we close the settings, I've put this guard here, just in case the problem occurs from elsewhere
+			this.updateFocusForVideo(false);
+		}
 		this.setPreviewPaused(false);
 		camera.stopPreview();
 		this.phase = PHASE_NORMAL;
@@ -876,6 +883,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
+		if( this.is_video ) {
+			// make sure we're into continuous video mode for closing
+			// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
+			// so to be safe, we always reset to continuous video mode
+			// although I've now fixed this at the level where we close the settings, I've put this guard here, just in case the problem occurs from elsewhere
+			this.updateFocusForVideo(false);
+		}
+
 		Activity activity = (Activity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
@@ -2977,10 +2992,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	private void updateFocusForVideo(boolean auto_focus) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "updateFocusForVideo()");
-		if( this.supported_focus_values != null && camera != null ) {
+	boolean focusIsVideo() {
+		if( camera != null ) {
 			Camera.Parameters parameters = camera.getParameters();
 			String current_focus_mode = parameters.getFocusMode();
 			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
@@ -2989,13 +3002,26 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "current_focus_mode: " + current_focus_mode);
 				Log.d(TAG, "focus_is_video: " + focus_is_video + " , is_video: " + is_video);
 			}
+			return focus_is_video;
+		}
+		return false;
+	}
+	
+	void updateFocusForVideo(boolean auto_focus) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateFocusForVideo()");
+		if( this.supported_focus_values != null && camera != null ) {
+			boolean focus_is_video = focusIsVideo();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "focus_is_video: " + focus_is_video + " , is_video: " + is_video);
+			}
 			if( focus_is_video != is_video ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "need to change focus mode");
 				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true, auto_focus);
 				if( MyDebug.LOG ) {
-					parameters = camera.getParameters();
-					current_focus_mode = parameters.getFocusMode();
+					Camera.Parameters parameters = camera.getParameters();
+					String current_focus_mode = parameters.getFocusMode();
 					Log.d(TAG, "new focus mode: " + current_focus_mode);
 				}
 			}
@@ -3231,7 +3257,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			updateFocus(new_focus_index, false, true, true);
 		}
 	}
-	
+
+	void updateFocus(String focus_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateFocus(): " + focus_value);
+		updateFocus(focus_value, true, true, false);
+	}
+
 	private boolean updateFocus(String focus_value, boolean quiet, boolean save, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + focus_value);
