@@ -855,6 +855,19 @@ public class MainActivity extends Activity {
     }
 
     public void updateForSettings() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateForSettings()");
+    	String saved_focus_value = null;
+    	if( preview.getCamera() != null && preview.isVideo() && !preview.focusIsVideo() ) {
+    		saved_focus_value = preview.getFocusValue(); // n.b., may still be null
+			// make sure we're into continuous video mode
+			// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
+			// so to be safe, we always reset to continuous video mode, and then reset it afterwards
+			preview.updateFocusForVideo(false);
+    	}
+		if( MyDebug.LOG )
+			Log.d(TAG, "saved_focus_value: " + saved_focus_value);
+    	
 		updateFolderHistory();
 
 		// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
@@ -884,6 +897,12 @@ public class MainActivity extends Activity {
 			preview.pausePreview();
 			preview.setupCamera();
 		}
+
+    	if( saved_focus_value != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "switch focus back to: " + saved_focus_value);
+    		preview.updateFocus(saved_focus_value);
+    	}
     }
     
     boolean cameraInBackground() {
