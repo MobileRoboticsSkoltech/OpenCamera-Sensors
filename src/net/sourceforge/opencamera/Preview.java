@@ -3590,9 +3590,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		take_photo_time = System.currentTimeMillis() + timer_delay;
 		if( MyDebug.LOG )
 			Log.d(TAG, "take photo at: " + take_photo_time);
-		if( !repeated ) {
+		/*if( !repeated ) {
 			showToast(take_photo_toast, R.string.started_timer);
-		}
+		}*/
     	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
@@ -3834,7 +3834,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            	video_recorder.start();
 	            	video_start_time = System.currentTimeMillis();
 	            	video_start_time_set = true;
-    				showToast(stopstart_video_toast, R.string.started_recording_video);
+    				//showToast(stopstart_video_toast, R.string.started_recording_video);
     				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
 
     				// handle restart timer
@@ -4574,7 +4574,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             }
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
-    		String toast_text = "";
+    		/*String toast_text = "";
     		if( n_burst > 1 ) {
     			int photo = (n_burst-remaining_burst_photos);
     			toast_text = getResources().getString(R.string.taking_photo) + "... (" +  photo + " / " + n_burst + ")";
@@ -4583,11 +4583,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			toast_text = getResources().getString(R.string.taking_photo) + "...";
     		}
     		if( MyDebug.LOG )
-    			Log.d(TAG, toast_text);
+    			Log.d(TAG, toast_text);*/
     		try {
     			camera.takePicture(shutterCallback, null, jpegPictureCallback);
         		count_cameraTakePicture++;
-    			showToast(take_photo_toast, toast_text);
+    			//showToast(take_photo_toast, toast_text);
     		}
     		catch(RuntimeException e) {
     			// just in case? We got a RuntimeException report here from 1 user on Google Play; I also encountered it myself once of Galaxy Nexus when starting up
