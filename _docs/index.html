@@ -109,6 +109,7 @@ Thanks! Donations can be used for: purchasing hardware for porting/testing; app 
 <li><a href="#user_interface">On-Screen User Interface</a></li>
 <li><a href="#auto_stabilise">Auto-stabilise feature</a></li>
 <li><a href="#settings">Settings</a></li>
+<li><a href="#faq">FAQ</a></li>
 <li><a href="#contact">Contacting me (bugs etc)</a></li>
 <li><a href="#credits">Credits</a></li>
 <li><a href="#licence">Licence</a></li>
@@ -273,7 +274,7 @@ photo. To keep the photo and continue, touch the screen (or take another photo).
 focus, zoom in/out, change the exposure compensation, switch auto-stabilise on/off, just change the device's volume
 as normal, or do nothing.</p>
 
-<p><b>Save location</b> - Select the folder to store the photos in. Click on a folder (or "Parent Folder") to
+<p><a name="save_location"><b>Save location</b> - Select the folder to store the photos in. Click on a folder (or "Parent Folder") to
 navigate through the filesystem. Select "New Folder" to create a new folder in the currently displayed folder.
 Select "Use Folder" to choose the currently displayed folder. Note that on Android, there are some folders that
 cannot be written to - Open Camera will display a message if you try to use one of these folders. You can also use
@@ -406,6 +407,69 @@ video is still recording.</p>
 
 <p><b>About</b> - Provides various debug information about the app and your device's camera. You can also copy
 this information to the clipboard.</p>
+
+<p><a name="faq"><b>Frequently Asked Questions</b></p>
+
+<p><b>I don't like the UI!</b> - I'm hoping to make improvements to the user-interface - I have some ideas to make
+more options quickly accessible. But please be specific - comments like this could mean all sorts of things, such as
+the style of the icons, the arrangement of the icons, wanting more things on the main screen, wanting less things on
+the main screen, preferring swipes to icons, wanting it easier to change certain options, or even that some devices
+may have a bug that I'm not aware of.</p>
+
+<p><b>Why is the UI cluttered?</b> - Under Settings/On screen GUI, there are options to disable various controls and
+so on from the main view.</p>
+
+<p><b>How can I save to my external SD card</b> - See <a href="#save_location">Save location</a> under Settings/More
+camera controls.</p>
+
+<p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - The Android API only allows up to FullHD.
+Devices which offer higher resolutions provide this only in the "stock" camera app (or "mods"). For some devices, it
+turns out that 3rd party camera apps can request recording in 3840x2160 (tested on Galaxy S5 and Note 3), but this
+isn't guaranteed to work, hence it's marked experimental. If this doesn't work, it's not a bug in Open Camera, it's
+something that's just not possible through 3rd party apps on some devices.</p>
+
+<p><b>Why doesn't the FPS/bitrate setting for video work?</b> - These settings only give "recommendations" to the
+camera, and there is no guarantee that they will be met. Some devices might not even allow recording at some
+settings, and there's no way to determine this in advance.</p>
+
+<p><b>But my camera can do 60/120FPS, so why can't Open Camera?</b> - High frame rates often are achieved only by the
+"stock" camera app (or "mods" of it) because these are written for a specific device and don't have to go through
+the standard Android camera API.</p>
+
+<p><b>Why isn't Open Camera available in my language?</b> - I can only speak English I'm afraid. Please contact me
+if you're willing to do a translation (this doesn't require any knowledge of Android programming, it's just a case
+of translating a set of strings in a text file).</p>
+
+<p><b>Why is the non-English translation of my language incomplete?</b> - Scene modes and color effects aren't
+currently translated, as these are just strings returned by the camera. Also note that even if I get someone to
+translate Open Camera, when I later add new features/options, this may require additional strings which aren't
+translated. I don't have a team of paid translators, so it's not always possible to keep translations up to date :)</p>
+
+<p><b>The non-English translation is wrong!</b> - I can only speak English, and am dependent on other people to
+offer translations. If you think a particular translation is inaccurate, please let me know.</p>
+
+<p><b>Why is the screen forced to maximum brightness?</b> - If you don't like this feature, you can switch it off
+by going to Settings/On screen GUI/Force maximum brightness.</p>
+
+<p><b>Why is auto-stabilise slow?</b> - This feature requires doing a decompress of the JPEG data, followed by a
+rotation of a multi-megapixel image, then recompressing, which typically results in a short pause on most devices.
+And as devices get faster CPUs, they typically come with cameras with even bigger megapixels! This is why I've made
+it optional (and you can set the volume control to quickly switch it on and off if you like).</p>
+
+<p><b>Why is auto-stabilise for photos only?</b> - Doing auto-stabilise for video is a <i>massively</i> harder
+problem. This wouldn't be possible in real-time - rotating images causes a noticeable pause as it is, imagine
+having to do that for every frame. Also the rotation angle wouldn't be constant, so it's a much harder problem
+figuring out what the correct result should actually be.</p>
+
+<p><b>Why does Open Camera have ads?</b> - Open Camera does <i>not</i> have ads, but there are some clones that
+appear on Google Play with ads inserted. Please ensure that you've downloaded from one of the places listed above
+on this page.</p>
+
+<p><b>Can I use the Open Camera source code in my app?</b> - Open Camera is available under the GPL (see
+<a href="#licence">Licence</a>), and can be used for free, including commercially, if you follow the terms of that
+licence (this means making the source of your app available under a GPL-compatible licence). If you would like to
+use the Open Camera in a closed source app, please contact me for a commercial licence, with details on your company
+and app.</p>
 
 <p><a name="contact"><b>Contacting me (bugs etc)</b></p>
 
