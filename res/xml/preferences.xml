@@ -161,6 +161,15 @@
                 android:defaultValue="false"
                 />
 
+            <ListPreference 
+                android:key="preference_rotate_preview"
+                android:title="@string/preference_rotate_preview"
+                android:summary="@string/preference_rotate_preview_summary"
+                android:entries="@array/preference_rotate_preview_entries"
+                android:entryValues="@array/preference_rotate_preview_values"
+                android:defaultValue="0"
+                />
+        
             </PreferenceScreen>
 
 	    <PreferenceScreen

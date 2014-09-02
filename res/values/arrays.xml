@@ -152,6 +152,14 @@
         <item>volume_nothing</item><!-- actually means change device volume! -->
         <item>volume_really_nothing</item>
     </string-array>
+    <string-array name="preference_rotate_preview_entries">
+        <item>Don\'t rotate</item>
+        <item>Rotate 180 degrees</item>
+        </string-array>
+    <string-array name="preference_rotate_preview_values">
+        <item>0</item>
+        <item>180</item>
+    </string-array>
     <string-array name="preference_ui_placement_entries">
         <item>Left-handed user interface</item>
         <item>Right-handed user interface</item>

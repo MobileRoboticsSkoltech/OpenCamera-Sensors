@@ -894,6 +894,7 @@ public class MainActivity extends Activity {
 			preview.onResume();
 		}
 		else {
+			preview.setCameraDisplayOrientation(this); // need to call in case the preview rotation option was changed
 			preview.pausePreview();
 			preview.setupCamera();
 		}

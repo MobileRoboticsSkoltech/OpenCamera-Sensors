@@ -2022,6 +2022,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "    degrees = " + degrees);
 
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String rotate_preview = sharedPreferences.getString("preference_rotate_preview", "0");
+		if( MyDebug.LOG )
+			Log.d(TAG, "    rotate_preview = " + rotate_preview);
+		if( rotate_preview.equals("180") ) {
+			degrees = (degrees + 180) % 360;
+		}
+		
 	    int result = 0;
 	    if( info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
 	        result = (info.orientation + degrees) % 360;
