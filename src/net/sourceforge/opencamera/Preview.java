@@ -240,6 +240,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public boolean test_have_angle = false;
 	public float test_angle = 0.0f;
 	public String test_last_saved_image = null;
+	public int count_camera_parameters_exception = 0;
 
 	Preview(Context context) {
 		this(context, null);
@@ -1369,6 +1370,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		if( MyDebug.LOG )
     			Log.d(TAG, "failed to set parameters");
     		e.printStackTrace();
+    		count_camera_parameters_exception++;
 	    }
 	}
 
