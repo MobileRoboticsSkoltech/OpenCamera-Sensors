@@ -10,6 +10,8 @@
     <string name="intro_ok">Ок</string>
     <string name="answer_yes">Да</string>
     <string name="answer_no">Нет</string>
+    <string name="on">Вкл</string>
+    <string name="off">Выкл</string>
     <string name="choose_save_location">Выберите папку сохранения:</string>
     <string name="clear_folder_history">Очистить историю папки</string>
     <string name="clear_folder_history_question">Очистить историю папки?</string>
@@ -38,12 +40,15 @@
     <string name="sorry">К сожалению</string>
     <string name="failed_to_save_image">Не удалось сохранить файл изображения</string>
     <string name="failed_to_save_photo">Не удалось сохранить фото</string>
+    <string name="failed_to_auto_stabilise">Не удалось стабилизировать</string>
+    <string name="failed_to_start_camera_preview">Не удалось запустить предпросмотр</string>
     <string name="taking_photo">Снимок</string>
     <string name="failed_to_take_picture">Не удалось сфотографировать</string>
     <string name="photo_deleted">Фотография удалена</string>
     <string name="no_gallery_app">Галерея недоступна</string>
     <string name="screen_is_locked">Экран заблокирован - проведите пальцем по экрану, чтобы разблокировать</string>
     <string name="unlocked">Разблокировано</string>
+    <string name="auto_stabilise_not_supported">К сожалению, авто-стабилизация не поддерживается на данном устройстве</string>
     <string name="angle">Угол</string>
     <string name="direction">Направление</string>
     <string name="failed_to_open_camera_1">Не удалось открыть камеру.</string>
@@ -100,6 +105,8 @@
     <string name="preference_show_zoom_summary">Отображает текущий уровень масштабирования камеры на экране (при увеличении масштаба)</string>
     <string name="preference_show_zoom_controls">Показать (+/-) на экране</string>
     <string name="preference_show_zoom_controls_summary">Отображение (+/-) кнопок управления масштабом</string>
+    <string name="preference_show_zoom_slider_controls">Ползунок масштабирования</string>
+    <string name="preference_show_zoom_slider_controls_summary">Отображение ползунка для управления зумом</string>
     <string name="preference_free_memory">Показать свободную память</string>
     <string name="preference_free_memory_summary">Отображение количества свободной памяти</string>
     <string name="preference_show_angle">Показать угол</string>
@@ -126,6 +133,8 @@
     <string name="video_quality_summary">Выбор разрешения видео</string>
     <string name="preference_force_video_4k">Качество видео 4K UHD (экспериментально)</string>
     <string name="preference_force_video_4k_summary">При выборе разрешения (3840х2160) для записи через заднюю камеру, это будет работать только, если ваше устройство поддерживает данный формат!</string>
+    <string name="preference_video_stabilization">Включить стабилизацию видео</string>
+    <string name="preference_video_stabilization_summary">Стабилизация видео уменьшает тряску в связи с движением камеры</string>
     <string name="preference_video_bitrate">Видео битрейт (примерно)</string>
     <string name="preference_video_bitrate_summary">Выбор битрейта видео (чем выше, тем лучше качество, но файл будет занимать больше места на флешке. Неподдерживаемый битрейт может стать причиной ошибки при записи видео)</string>
     <string name="preference_video_fps">Частота кадров видео (примерно)</string>
@@ -160,4 +169,12 @@
     <string name="switch_video">Переключение видео</string>
     <string name="trash">Удалить последний снимок</string>
     <string name="share">Поделиться</string>
+    <string name="parent_folder">Родительская папка</string>
+    <string name="use_folder">Использовать папку</string>
+    <string name="new_folder">Новая папка</string>
+    <string name="cant_write_folder">Невозможно записать в эту папку</string>
+    <string name="cant_access_folder">Не удается получить доступ к этой папке</string>
+    <string name="enter_new_folder">Введите имя новой папки</string>
+    <string name="failed_create_folder">Не удалось создать папку</string>
+    <string name="folder_exists">Папка уже существует</string>
 </resources>
