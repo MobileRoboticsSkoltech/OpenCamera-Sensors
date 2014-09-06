@@ -2276,7 +2276,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			String preference_crop_guide = sharedPreferences.getString("preference_crop_guide", "crop_guide_none");
 			if( camera != null && preview_targetRatio > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
 				p.setStyle(Paint.Style.STROKE);
-				p.setColor(Color.YELLOW);
+				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 				double crop_ratio = -1.0;
 				if( preference_crop_guide.equals("crop_guide_1.33") ) {
 					crop_ratio = 1.33333333;
@@ -2556,7 +2556,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			canvas.drawRect(battery_x, battery_y, battery_x+battery_width, battery_y+battery_height, p);
-			p.setColor(battery_frac >= 0.3f ? Color.rgb(50, 150, 50) : Color.rgb(255, 50, 50));
+			p.setColor(battery_frac >= 0.3f ? Color.rgb(37, 155, 36) : Color.rgb(229, 28, 35)); // Green 500 or Red 500
 			p.setStyle(Paint.Style.FILL);
 			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
 		}
@@ -2584,7 +2584,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				int indicator_x = location_x + location_size;
 				int indicator_y = location_y + location_radius/2 + 1;
 				p.setStyle(Paint.Style.FILL_AND_STROKE);
-				p.setColor(location_accuracy < 25.01f ? Color.rgb(50, 150, 50) : Color.YELLOW);
+				p.setColor(location_accuracy < 25.01f ? Color.rgb(37, 155, 36) : Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
 				canvas.drawCircle(indicator_x, indicator_y, location_radius, p);
 			}
 			else {
@@ -2638,7 +2638,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			int cx = canvas.getWidth()/2;
 			int cy = canvas.getHeight()/2;
 			if( Math.abs(this.level_angle) <= close_angle ) { // n.b., use level_angle, not angle or orig_level_angle
-				p.setColor(Color.rgb(50, 150, 50));
+				p.setColor(Color.rgb(37, 155, 36)); // Green 500
 			}
 			else {
 				p.setColor(Color.WHITE);
@@ -2649,9 +2649,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( this.focus_success != FOCUS_DONE ) {
 			int size = (int) (50 * scale + 0.5f); // convert dps to pixels
 			if( this.focus_success == FOCUS_SUCCESS )
-				p.setColor(Color.GREEN);
+				p.setColor(Color.rgb(20, 231, 21)); // Green A400
 			else if( this.focus_success == FOCUS_FAILED )
-				p.setColor(Color.RED);
+				p.setColor(Color.rgb(229, 28, 35)); // Red 500
 			else
 				p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
@@ -2672,7 +2672,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			p.setStyle(Paint.Style.FILL); // reset
 		}
 		if( this.using_face_detection && this.faces_detected != null ) {
-			p.setColor(Color.YELLOW);
+			p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 			p.setStyle(Paint.Style.STROKE);
 			for(Face face : faces_detected) {
 				// Android doc recommends filtering out faces with score less than 50
@@ -2719,7 +2719,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		final float scale = getResources().getDisplayMetrics().density;
 		p.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
-		paint.setAlpha(127);
+		paint.setAlpha(64);
 		int alt_height = 0;
 		if( ybounds_text != null ) {
 			paint.getTextBounds(ybounds_text, 0, ybounds_text.length(), text_bounds);
@@ -5295,7 +5295,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			private Paint paint = new Paint();
 			private Rect bounds = new Rect();
 			private Rect sub_bounds = new Rect();
-			private Rect rect = new Rect();
+			private RectF rect = new RectF();
 
 			public RotatedTextView(String text, Context context) {
 				super(context);
@@ -5343,15 +5343,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				rect.bottom = canvas.getHeight()/2 + bounds.bottom + padding + offset_y;
 
 				paint.setStyle(Paint.Style.FILL);
-				paint.setColor(Color.rgb(75, 75, 75));
-				canvas.drawRect(rect.left, rect.top, rect.right, rect.bottom, paint);
+				paint.setColor(Color.rgb(50, 50, 50));
+				//canvas.drawRect(rect, paint);
+				final float radius = (24 * scale + 0.5f); // convert dps to pixels
+				canvas.drawRoundRect(rect, radius, radius, paint);
 
-				paint.setStyle(Paint.Style.STROKE);
-				paint.setColor(Color.rgb(150, 150, 150));
-				canvas.drawLine(rect.left, rect.top, rect.right, rect.top, paint);
-				canvas.drawLine(rect.left, rect.top, rect.left, rect.bottom, paint);
-
-				paint.setStyle(Paint.Style.FILL); // needed for Android 4.4!
 				paint.setColor(Color.WHITE);
 				int ypos = canvas.getHeight()/2 + offset_y - ((lines.length-1) * height)/2;
 				for(String line : lines) {
