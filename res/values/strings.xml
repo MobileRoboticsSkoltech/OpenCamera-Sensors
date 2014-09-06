@@ -122,6 +122,8 @@
     <string name="preference_show_geo_direction_summary">Display the compass direction of the device on screen</string>
     <string name="preference_grid">Show a grid</string>
     <string name="preference_grid_summary">Display one of various grids</string>
+    <string name="preference_crop_guide">Show a crop guide</string>
+    <string name="preference_crop_guide_summary">A crop guide displays a rectangle showing what the specified aspect ratio looks like - useful if you plan to crop the photo/video afterwards to a different aspect ratio. Requires WYSIWYG photo mode, or being in video mode.</string>
     <string name="preference_thumbnail_animation">Show thumbnail animation</string>
     <string name="preference_thumbnail_animation_summary">Display moving thumbnail animation when taking a photo</string>
     <string name="preference_max_brightness">Force maximum brightness</string>

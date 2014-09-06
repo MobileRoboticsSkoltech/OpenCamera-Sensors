@@ -85,6 +85,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private RectF face_rect = new RectF();
 	private Rect text_bounds = new Rect();
     private int display_orientation = 0;
+    private double preview_targetRatio = 0.0;
 
 	private boolean ui_placement_right = true;
 
@@ -674,6 +675,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		focus_success = FOCUS_DONE;
 		set_flash_after_autofocus = "";
 		successfully_focused = false;
+		preview_targetRatio = 0.0;
         has_set_location = false;
 		has_received_location = false;
 		MainActivity main_activity = (MainActivity)this.getContext();
@@ -750,6 +752,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		focus_success = FOCUS_DONE;
 		set_flash_after_autofocus = "";
 		successfully_focused = false;
+		preview_targetRatio = 0.0;
 		scene_modes = null;
 		has_zoom = false;
 		max_zoom_factor = 0;
@@ -1930,6 +1933,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         	// but if the preview's aspect ratio differs from the actual photo/video size, the preview will show a cropped version of what is actually taken
             targetRatio = ((double)display_size.x) / (double)display_size.y;
 		}
+		this.preview_targetRatio = targetRatio;
 		if( MyDebug.LOG )
 			Log.d(TAG, "targetRatio: " + targetRatio);
 		return targetRatio;
@@ -2249,14 +2253,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		MainActivity main_activity = (MainActivity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		final float scale = getResources().getDisplayMetrics().density;
-		if( camera != null && sharedPreferences.getString("preference_grid", "preference_grid_none").equals("preference_grid_3x3") ) {
+		String preference_grid = sharedPreferences.getString("preference_grid", "preference_grid_none");
+		if( camera != null && preference_grid.equals("preference_grid_3x3") ) {
 			p.setColor(Color.WHITE);
 			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(2.0f*canvas.getWidth()/3.0f, 0.0f, 2.0f*canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(0.0f, canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, canvas.getHeight()/3.0f, p);
 			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
 		}
-		if( camera != null && sharedPreferences.getString("preference_grid", "preference_grid_none").equals("preference_grid_4x2") ) {
+		if( camera != null && preference_grid.equals("preference_grid_4x2") ) {
 			p.setColor(Color.GRAY);
 			canvas.drawLine(canvas.getWidth()/4.0f, 0.0f, canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(canvas.getWidth()/2.0f, 0.0f, canvas.getWidth()/2.0f, canvas.getHeight()-1.0f, p);
@@ -2266,6 +2271,54 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			int crosshairs_radius = (int) (20 * scale + 0.5f); // convert dps to pixels
 			canvas.drawLine(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f - crosshairs_radius, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f + crosshairs_radius, p);
 			canvas.drawLine(canvas.getWidth()/2.0f - crosshairs_radius, canvas.getHeight()/2.0f, canvas.getWidth()/2.0f + crosshairs_radius, canvas.getHeight()/2.0f, p);
+		}
+		if( this.is_video || sharedPreferences.getString("preference_preview_size", "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
+			String preference_crop_guide = sharedPreferences.getString("preference_crop_guide", "crop_guide_none");
+			if( camera != null && preview_targetRatio > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
+				p.setStyle(Paint.Style.STROKE);
+				p.setColor(Color.YELLOW);
+				double crop_ratio = -1.0;
+				if( preference_crop_guide.equals("crop_guide_1.33") ) {
+					crop_ratio = 1.33333333;
+				}
+				else if( preference_crop_guide.equals("crop_guide_1.78") ) {
+					crop_ratio = 1.77777778;
+				}
+				else if( preference_crop_guide.equals("crop_guide_1.85") ) {
+					crop_ratio = 1.85;
+				}
+				else if( preference_crop_guide.equals("crop_guide_2.33") ) {
+					crop_ratio = 2.33333333;
+				}
+				else if( preference_crop_guide.equals("crop_guide_2.35") ) {
+					crop_ratio = 2.35006120; // actually 1920:817
+				}
+				else if( preference_crop_guide.equals("crop_guide_2.4") ) {
+					crop_ratio = 2.4;
+				}
+				if( crop_ratio > 0.0 && Math.abs(preview_targetRatio - crop_ratio) > 1.0e-5 ) {
+		    		/*if( MyDebug.LOG ) {
+		    			Log.d(TAG, "crop_ratio: " + crop_ratio);
+		    			Log.d(TAG, "preview_targetRatio: " + preview_targetRatio);
+		    			Log.d(TAG, "canvas width: " + canvas.getWidth());
+		    			Log.d(TAG, "canvas height: " + canvas.getHeight());
+		    		}*/
+					int left = 1, top = 1, right = canvas.getWidth()-1, bottom = canvas.getHeight()-1;
+					if( crop_ratio > preview_targetRatio ) {
+						// crop ratio is wider, so we have to crop top/bottom
+						double new_hheight = ((double)canvas.getWidth()) / (2.0f*crop_ratio);
+						top = (int)(canvas.getHeight()/2 - new_hheight);
+						bottom = (int)(canvas.getHeight()/2 + new_hheight);
+					}
+					else {
+						// crop ratio is taller, so we have to crop left/right
+						double new_hwidth = (((double)canvas.getHeight()) * crop_ratio) / 2.0f;
+						left = (int)(canvas.getWidth()/2 - new_hwidth);
+						right = (int)(canvas.getWidth()/2 + new_hwidth);
+					}
+					canvas.drawRect(left, top, right, bottom, p);
+				}
+			}
 		}
 
 		// note, no need to check preferences here, as we do that when setting thumbnail_anim
@@ -5502,5 +5555,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     
     public boolean hasSetLocation() {
     	return this.has_set_location;
+    }
+    
+    public int getDisplayOrientation() {
+    	return this.display_orientation;
     }
 }

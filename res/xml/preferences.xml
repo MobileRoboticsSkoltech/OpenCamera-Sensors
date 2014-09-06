@@ -252,6 +252,15 @@
                 android:entryValues="@array/preference_grid_values"
                 android:defaultValue="preference_grid_none"
                 />
+
+            <ListPreference 
+                android:key="preference_crop_guide"
+                android:title="@string/preference_crop_guide"
+                android:summary="@string/preference_crop_guide_summary"
+                android:entries="@array/preference_crop_guide_entries"
+                android:entryValues="@array/preference_crop_guide_values"
+                android:defaultValue="crop_guide_none"
+                />
             
             <CheckBoxPreference
                 android:key="preference_thumbnail_animation"

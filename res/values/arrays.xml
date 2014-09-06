@@ -178,6 +178,24 @@
         <item>preference_grid_3x3</item>
         <item>preference_grid_4x2</item>
     </string-array>
+    <string-array name="preference_crop_guide_entries">
+        <item>None</item>
+        <item>1.33 (4:3)</item>
+        <item>1.78 (16:9)</item>
+        <item>1.85 (37:20)</item>
+        <item>2.33 (21:9)</item>
+        <item>2.35 (47:20)</item>
+        <item>2.4 (12:5)</item>
+    </string-array>
+    <string-array name="preference_crop_guide_values">
+        <item>crop_guide_none</item>
+        <item>crop_guide_1.33</item>
+        <item>crop_guide_1.78</item>
+        <item>crop_guide_1.85</item>
+        <item>crop_guide_2.33</item>
+        <item>crop_guide_2.35</item>
+        <item>crop_guide_2.4</item>
+        </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>Default</item>
         <item>100Kbit</item>
