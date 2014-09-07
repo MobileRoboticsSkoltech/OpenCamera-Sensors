@@ -56,7 +56,8 @@
     <string name="failed_to_open_camera_3">другим приложением?</string>
     <string name="zoom">Масштаб</string>
     <string name="free_memory">Память</string>
-    <string name="screen_lock_message">[Заблокировано: Проведите по экрану, чтобы разблокировать]</string>
+    <string name="screen_lock_message_1">[Заблокировано:</string>
+    <string name="screen_lock_message_2">Проведите по экрану, чтобы разблокировать]</string>
     <string name="preference_category_camera_effects">Эффекты</string>
     <string name="preference_auto_stabilise">Авто стабилизация</string>
     <string name="preference_auto_stabilise_summary">Изображение будет стабилизироваться. Не рекомендуется на слабых устройствах</string>

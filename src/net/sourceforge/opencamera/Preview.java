@@ -2472,13 +2472,17 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
             	/*if( MyDebug.LOG )
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
-            	if( main_activity.isScreenLocked() ) {
-            		time_s += " " + getResources().getString(R.string.screen_lock_message);
-            	}
     			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
     			p.setTextAlign(Paint.Align.CENTER);
 				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom label
-				drawTextWithBackground(canvas, p, "" + time_s, Color.rgb(255, 50, 50), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+            	if( main_activity.isScreenLocked() ) {
+            		// writing in reverse order, bottom to top
+    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_2), Color.rgb(255, 50, 50), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+            		pixels_offset_y += text_y;
+    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_1), Color.rgb(255, 50, 50), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+            		pixels_offset_y += text_y;
+            	}
+				drawTextWithBackground(canvas, p, time_s, Color.rgb(255, 50, 50), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
 		else if( camera == null ) {

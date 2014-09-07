@@ -57,7 +57,8 @@
     <string name="failed_to_open_camera_3">POR OTRA APLICACIÓN?</string>
     <string name="zoom">Zoom</string>
     <string name="free_memory">Memoria libre</string>
-    <string name="screen_lock_message">[BLOQUEADO: Desliza para desbloquear]</string>
+    <string name="screen_lock_message_1">[BLOQUEADO:</string>
+    <string name="screen_lock_message_2">Desliza para desbloquear]</string>
     
     <string name="preference_category_camera_effects">Efectos de cámara</string>
     <string name="preference_auto_stabilise">Auto-Estabilizar</string>
