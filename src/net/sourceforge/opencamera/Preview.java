@@ -2947,14 +2947,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
 			boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
 			if( !record_audio ) {
-				toast_string += "\nAudio Disabled";
+				toast_string += "\n" + getResources().getString(R.string.audio_disabled);
 			}
 			if( timer_value.length() > 0 && !timer_value.equals("0") ) {
 				String [] entries_array = getResources().getStringArray(R.array.preference_video_max_duration_entries);
 				String [] values_array = getResources().getStringArray(R.array.preference_video_max_duration_values);
 				int index = Arrays.asList(values_array).indexOf(timer_value);
-				String entry = entries_array[index];
-				toast_string += "\nMax duration: " + entry;
+				if( index != -1 ) { // just in case!
+					String entry = entries_array[index];
+					toast_string += "\n" + getResources().getString(R.string.max_duration) +": " + entry;
+				}
 			}
 			if( sharedPreferences.getBoolean("preference_video_flash", false) && supportsFlash() ) {
 				toast_string += "\n" + getResources().getString(R.string.preference_video_flash);
@@ -2970,18 +2972,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		Camera.Parameters parameters = camera.getParameters();
 		int current_exposure = parameters.getExposureCompensation();
 		if( current_exposure != 0 ) {
-			toast_string += "\nExposure: " + (current_exposure > 0 ? "+" : "") + current_exposure;
+			toast_string += "\n" + getResources().getString(R.string.exposure) + ": " + (current_exposure > 0 ? "+" : "") + current_exposure;
 		}
 		String scene_mode = parameters.getSceneMode();
     	if( scene_mode != null && !scene_mode.equals(Camera.Parameters.SCENE_MODE_AUTO) ) {
-    		toast_string += "\nScene mode: " + scene_mode;
+    		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + scene_mode;
     	}
 		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
-		if( lock_orientation.equals("landscape") ) {
-			toast_string += "\nLocked to landscape";
-		}
-		else if( lock_orientation.equals("portrait") ) {
-			toast_string += "\nLocked to portrait";
+		if( !lock_orientation.equals("none") ) {
+			String [] entries_array = getResources().getStringArray(R.array.preference_lock_orientation_entries);
+			String [] values_array = getResources().getStringArray(R.array.preference_lock_orientation_values);
+			int index = Arrays.asList(values_array).indexOf(lock_orientation);
+			if( index != -1 ) { // just in case!
+				String entry = entries_array[index];
+				toast_string += "\n" + entry;
+			}
 		}
 		
 		showToast(switch_video_toast, toast_string, Toast.LENGTH_LONG);
