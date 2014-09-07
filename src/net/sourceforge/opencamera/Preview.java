@@ -1516,6 +1516,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "setPreviewSize() shouldn't be called when preview is running");
 			throw new RuntimeException();
 		}
+		this.cancelAutoFocus();
 		// first set picture size (for photo mode, must be done now so we can set the picture size from this; for video, doesn't really matter when we set it)
     	Camera.Parameters parameters = camera.getParameters();
     	if( this.is_video ) {
@@ -3098,7 +3099,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		
 		if( is_video != old_is_video ) {
-			updateFocusForVideo(true);
+			updateFocusForVideo(false); // don't do autofocus, as it'll be cancelled when restarting preview
 
 			Activity activity = (Activity)this.getContext();
 			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
@@ -4933,7 +4934,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			set_flash_after_autofocus = "";
         	setCameraParameters(parameters);
 		}
-		if( this.using_face_detection ) {
+		if( this.using_face_detection && !cancelled ) {
 			// On some devices such as mtk6589, face detection does not resume as written in documentation so we have
 			// to cancelfocus when focus is finished
 			if( camera != null ) {
@@ -5571,5 +5572,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     
     public int getDisplayOrientation() {
     	return this.display_orientation;
+    }
+    
+    public boolean isFocusWaiting() {
+    	return focus_success == FOCUS_WAITING;
     }
 }
