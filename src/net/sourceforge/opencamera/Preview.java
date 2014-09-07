@@ -2427,7 +2427,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					p.setTextAlign(Paint.Align.CENTER);
 				}
 				if( Math.abs(this.level_angle) <= close_angle ) {
-					color = Color.rgb(50, 255, 50);
+					color = Color.rgb(20, 231, 21); // Green A400
 				}
 				String string = getResources().getString(R.string.angle) + ": " + decimalFormat.format(this.level_angle) + (char)0x00B0;
 				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
@@ -2456,7 +2456,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( remaining_time >= 0 ) {
 					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
-					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(255, 50, 50), Color.rgb(75, 75, 75), canvas.getWidth() / 2, canvas.getHeight() / 2);
+					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(229, 28, 35), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500
 				}
 			}
 			else if( this.video_recorder != null && video_start_time_set ) {
@@ -2475,14 +2475,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
     			p.setTextAlign(Paint.Align.CENTER);
 				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom label
+				int color = Color.rgb(229, 28, 35); // Red 500
             	if( main_activity.isScreenLocked() ) {
             		// writing in reverse order, bottom to top
-    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_2), Color.rgb(255, 50, 50), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_2), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
             		pixels_offset_y += text_y;
-    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_1), Color.rgb(255, 50, 50), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_1), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
             		pixels_offset_y += text_y;
             	}
-				drawTextWithBackground(canvas, p, time_s, Color.rgb(255, 50, 50), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+				drawTextWithBackground(canvas, p, time_s, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
 		else if( camera == null ) {
@@ -2642,7 +2643,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			int cx = canvas.getWidth()/2;
 			int cy = canvas.getHeight()/2;
 			if( Math.abs(this.level_angle) <= close_angle ) { // n.b., use level_angle, not angle or orig_level_angle
-				p.setColor(Color.rgb(37, 155, 36)); // Green 500
+				p.setColor(Color.rgb(20, 231, 21)); // Green A400
 			}
 			else {
 				p.setColor(Color.WHITE);
