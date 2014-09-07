@@ -2952,6 +2952,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				String entry = entries_array[index];
 				toast_string += "\nMax duration: " + entry;
 			}
+			if( sharedPreferences.getBoolean("preference_video_flash", false) && supportsFlash() ) {
+				toast_string += "\n" + getResources().getString(R.string.preference_video_flash);
+			}
 		}
 		else {
 			toast_string = getResources().getString(R.string.photo);
