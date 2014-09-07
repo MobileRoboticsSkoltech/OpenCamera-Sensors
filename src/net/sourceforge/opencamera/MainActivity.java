@@ -63,7 +63,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -407,6 +407,8 @@ public class MainActivity extends Activity {
             mLocationManager.removeUpdates(locationListener);
             locationListener = null;
         }
+		// reset location, as may be out of date when resumed - the location listener is reinitialised when resuming
+        preview.resetLocation();
 		preview.onPause();
     }
 

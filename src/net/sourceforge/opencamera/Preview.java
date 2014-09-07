@@ -236,7 +236,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public int count_cameraStartPreview = 0;
 	public int count_cameraAutoFocus = 0;
 	public int count_cameraTakePicture = 0;
-	public boolean has_received_location = false;
+	public boolean test_has_received_location = false;
 	public boolean test_low_memory = false;
 	public boolean test_have_angle = false;
 	public float test_angle = 0.0f;
@@ -676,8 +676,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		set_flash_after_autofocus = "";
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
-        has_set_location = false;
-		has_received_location = false;
+		// n.b., don't reset has_set_location, as we can remember the location when switching camera
 		MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.clearSeekBar();
 		//if( is_taking_photo_on_timer ) {
@@ -746,8 +745,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			debug_time = System.currentTimeMillis();
 		}
 		// need to init everything now, in case we don't open the camera (but these may already be initialised from an earlier call - e.g., if we are now switching to another camera)
-        has_set_location = false;
-		has_received_location = false;
+		// n.b., don't reset has_set_location, as we can remember the location when switching camera
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		set_flash_after_autofocus = "";
@@ -5403,7 +5401,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     void locationChanged(Location location) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "locationChanged");
-		this.has_received_location = true;
+		this.test_has_received_location = true;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
 		if( store_location ) {
@@ -5418,6 +5416,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            this.location_accuracy = location.getAccuracy();
     		}
 		}
+    }
+    
+    void resetLocation() {
+        this.has_set_location = false;
+        this.test_has_received_location = false;
     }
     
     private void updateParametersFromLocation() {
@@ -5456,7 +5459,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            parameters.removeGpsData();
 	        	setCameraParameters(parameters);
 	            this.has_set_location = false;
-	    		has_received_location = false;
+	            test_has_received_location = false;
     		}
     	}
     }
