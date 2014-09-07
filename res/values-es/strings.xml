@@ -46,9 +46,9 @@
     <string name="failed_to_take_picture">Fallo al realizar la foto</string>
     <string name="photo_deleted">Foto eliminada</string>
     <string name="no_gallery_app">No existe una aplicación de galeria disponible</string>
-    <string name="screen_is_locked">La pantalla esta bloqueada - deslize el dedo por la pantalla para desbloquear</string>
+    <string name="screen_is_locked">La pantalla esta bloqueada\ndeslize el dedo por la\npantalla para desbloquear</string>
     <string name="unlocked">Desbloqueado</string>
-    <string name="auto_stabilise_not_supported">Lo sentimos, auto-estabilizar no esta soportado en este dispositivo</string>
+    <string name="auto_stabilise_not_supported">Lo sentimos, auto-estabilizar no esta\nsoportado en este dispositivo</string>
     
     <string name="angle">Ángulo</string>
     <string name="direction">Dirección</string>

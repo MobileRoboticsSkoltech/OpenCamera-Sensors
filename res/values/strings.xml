@@ -46,7 +46,7 @@
     <string name="failed_to_take_picture">Failed to take picture</string>
     <string name="photo_deleted">Photo deleted</string>
     <string name="no_gallery_app">No gallery app available</string>
-    <string name="screen_is_locked">Screen is locked - swipe the screen to unlock</string>
+    <string name="screen_is_locked">Screen is locked\nswipe the screen to unlock</string>
     <string name="unlocked">Unlocked</string>
     <string name="auto_stabilise_not_supported">Sorry, auto-stabilise not supported\non this device</string>
     
