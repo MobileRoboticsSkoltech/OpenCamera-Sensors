@@ -320,7 +320,9 @@ what you see in the preview will match what will be in the resultant photo ("Wha
 may mean you will have "black bars" on the display in order to do this. If instead you select "Maximise preview size", then the
 camera preview will be as large as possible, trying to fill the available space. However if the resolution of the
 photo is a different aspect ratio to that of your device, this will result in the preview being cropped.
-(Note that when in video mode, the preview is always in WYSIWYG mode.)</p>
+Note that when in video mode, the preview is always in WYSIWYG mode. Also note that even in WYSIWYG mode, on some
+devices and resolutions, it may not be possible to match the preview to the resultant photo/video exactly; in such
+cases, Open Camera will try to match as closely as possible.</p>
 
 <p><b>UI placement</b> - Whether to optimise the user interface for left-handed or right-handed use.</p>
 
@@ -444,6 +446,12 @@ settings, and there's no way to determine this in advance.</p>
 <p><b>But my camera can do 60/120FPS, so why can't Open Camera?</b> - High frame rates often are achieved only by the
 "stock" camera app (or "mods" of it) because these are written for a specific device and don't have to go through
 the standard Android camera API.</p>
+
+<p><b>Why doesn't the preview display match the resultant photo/video? One of them is cropped.</b> - Firstly, make
+sure that Settings/On screen GUI/Preview size is set to "Match photo size (WYSIWYG)". However if that doesn't fix
+the problem, this is a limitation on some devices and photo/video resolutions (it happens if the device doesn't offer
+a "preview" with the same aspect ratio as the chosen photo/video resolution). A workaround may be to try a different
+resolution for photos and/or videos.</p>
 
 <p><b>Why isn't Open Camera available in my language?</b> - I can only speak English I'm afraid. Please contact me
 if you're willing to do a translation (this doesn't require any knowledge of Android programming, it's just a case
