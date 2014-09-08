@@ -55,9 +55,11 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 import android.widget.ImageButton;
+//import android.widget.ImageView.ScaleType;
+//import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+//import android.widget.RelativeLayout.LayoutParams;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
@@ -625,6 +627,10 @@ public class MainActivity extends Activity {
 			}
 		}
 		
+		/*{
+			findViewById(R.id.popup_container).setRotation(ui_rotation);
+		}*/
+		
 		{
 			// set icon for taking photos vs videos
 			ImageButton view = (ImageButton)findViewById(R.id.take_photo);
@@ -768,6 +774,45 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSettings");
 		openSettings();
+        /*LinearLayout ll = new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        int resource = 0;
+        ImageButton image_button = null;
+        {
+            LinearLayout ll2 = new LinearLayout(this);
+            ll2.setOrientation(LinearLayout.HORIZONTAL);
+        	// add flash
+        	String [] flash_icons = getResources().getStringArray(R.array.flash_icons);
+        	String [] flash_values = getResources().getStringArray(R.array.flash_values);
+        	List<String> supported_flash_values = preview.getSupportedFlashValues();
+        	for(String supported_flash_value : supported_flash_values) {
+        		int index = -1;
+        		for(int i=0;i<flash_values.length && index==-1;i++) {
+        			if( flash_values[i].equals(supported_flash_value) )
+        				index = i;
+        		}
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "supported_flash_value: " + supported_flash_value + " index: " + index);
+        		if( index != -1 ) {
+        			image_button = new ImageButton(this);
+        			resource = getResources().getIdentifier(flash_icons[index], null, this.getApplicationContext().getPackageName());
+        			image_button.setImageResource(resource);
+        			ll2.addView(image_button);
+        			ViewGroup.LayoutParams params = image_button.getLayoutParams();
+        			final float scale = getResources().getDisplayMetrics().density;
+        			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
+        			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+        			final int padding = (int) (10 * scale + 0.5f); // convert dps to pixels
+        			image_button.setPadding(padding, padding, padding, padding);
+        			image_button.setLayoutParams(params);
+        			image_button.setScaleType(ScaleType.FIT_CENTER);
+        			image_button.setContentDescription(getResources().getString(R.string.flash_mode));
+        		}
+        	}
+    		ll.addView(ll2);
+        }
+
+		((ViewGroup) findViewById(R.id.popup_container)).addView(ll);*/
     }
     
     private void openSettings() {
@@ -954,13 +999,13 @@ public class MainActivity extends Activity {
 		// force to landscape mode
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
-        getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		if( sharedPreferences.getBoolean("preference_show_when_locked", true) ) {
 	        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
-			getWindow().addFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		}
 		else {
-	        getWindow().clearFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+	        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		}
 
         // set screen to max brightness - see http://stackoverflow.com/questions/11978042/android-screen-brightness-max-value
@@ -985,9 +1030,9 @@ public class MainActivity extends Activity {
 		// allow screen rotation
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 		// revert to standard screen blank behaviour
-        getWindow().clearFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // settings should still be protected by screen lock
-        getWindow().clearFlags(LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 
 		{
 	        WindowManager.LayoutParams layout = getWindow().getAttributes();
