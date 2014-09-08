@@ -183,4 +183,12 @@
         android:layout_height="match_parent"
         />
 
+    <FrameLayout
+        android:id="@+id/popup_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/settings"
+        android:layout_below="@+id/settings"
+        />
+    
 </RelativeLayout>
