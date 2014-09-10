@@ -1350,16 +1350,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( flash_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing flash_value: " + flash_value);
-					if( !updateFlash(flash_value) ) {
+					if( !updateFlash(flash_value, false) ) { // don't need to save, as this is the value that's already saved
 						if( MyDebug.LOG )
 							Log.d(TAG, "flash value no longer supported!");
-						updateFlash(0);
+						updateFlash(0, true);
 					}
 				}
 				else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found no existing flash_value");
-					updateFlash(0);
+					updateFlash(0, true);
 				}
 			}
 			else {
@@ -3216,21 +3216,23 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		if( this.supported_flash_values != null && this.supported_flash_values.size() > 1 ) {
 			int new_flash_index = (current_flash_index+1) % this.supported_flash_values.size();
-			updateFlash(new_flash_index);
-
-			// now save
-			String flash_value = supported_flash_values.get(current_flash_index);
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "save new flash_value: " + flash_value);
-			}
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString(getFlashPreferenceKey(cameraId), flash_value);
-			editor.apply();
+			updateFlash(new_flash_index, true);
 		}
 	}
 
-	private boolean updateFlash(String flash_value) {
+	void updateFlash(String focus_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateFlash(): " + focus_value);
+		if( this.phase == PHASE_TAKING_PHOTO ) {
+			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
+			if( MyDebug.LOG )
+				Log.d(TAG, "currently taking a photo");
+			return;
+		}
+		updateFlash(focus_value, true);
+	}
+
+	private boolean updateFlash(String flash_value, boolean save) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFlash(): " + flash_value);
 		if( supported_flash_values != null ) {
@@ -3238,14 +3240,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "new_flash_index: " + new_flash_index);
 	    	if( new_flash_index != -1 ) {
-	    		updateFlash(new_flash_index);
+	    		updateFlash(new_flash_index, save);
 	    		return true;
 	    	}
 		}
     	return false;
 	}
 	
-	private void updateFlash(int new_flash_index) {
+	private void updateFlash(int new_flash_index, boolean save) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFlash(): " + new_flash_index);
 		// updates the Flash button, and Flash camera mode
@@ -3279,6 +3281,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    		}
 	    	}
 	    	this.setFlash(flash_value);
+	    	if( save ) {
+				// now save
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getFlashPreferenceKey(cameraId), flash_value);
+				editor.apply();
+	    	}
 		}
 	}
 
@@ -3399,10 +3408,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	void updateFocus(String focus_value) {
+	void updateFocus(String focus_value, boolean quiet, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + focus_value);
-		updateFocus(focus_value, true, true, false);
+		if( this.phase == PHASE_TAKING_PHOTO ) {
+			// just to be safe - otherwise problem that changing the focus mode will cancel the autofocus before taking a photo, so we never take a photo, but is_taking_photo remains true!
+			if( MyDebug.LOG )
+				Log.d(TAG, "currently taking a photo");
+			return;
+		}
+		updateFocus(focus_value, quiet, true, auto_focus);
 	}
 
 	private boolean updateFocus(String focus_value, boolean quiet, boolean save, boolean auto_focus) {

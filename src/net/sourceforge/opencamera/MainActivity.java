@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.Sensor;
@@ -44,8 +45,10 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -56,16 +59,18 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-//import android.widget.ImageView.ScaleType;
-//import android.widget.LinearLayout;
+import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
-//import android.widget.RelativeLayout.LayoutParams;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -402,6 +407,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPause");
         super.onPause();
+		closePopup();
         mSensorManager.unregisterListener(accelerometerListener);
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
@@ -627,9 +633,9 @@ public class MainActivity extends Activity {
 			}
 		}
 		
-		/*{
+		{
 			findViewById(R.id.popup_container).setRotation(ui_rotation);
-		}*/
+		}
 		
 		{
 			// set icon for taking photos vs videos
@@ -684,12 +690,14 @@ public class MainActivity extends Activity {
     public void clickedSwitchCamera(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchCamera");
+		this.closePopup();
 		this.preview.switchCamera();
     }
 
     public void clickedSwitchVideo(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchVideo");
+		this.closePopup();
 		this.preview.switchVideo(true, true);
     }
 
@@ -722,6 +730,7 @@ public class MainActivity extends Activity {
     public void clickedExposure(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposure");
+		this.closePopup();
 		SeekBar seek_bar = ((SeekBar)findViewById(R.id.seekbar));
 		int visibility = seek_bar.getVisibility();
 		if( visibility == View.GONE && preview.getCamera() != null && preview.supportsExposures() ) {
@@ -769,23 +778,53 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "clickedExposureLock");
     	this.preview.toggleExposureLock();
     }
+    
+    private void closePopup() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "close popup");
+		ViewGroup popup_container = (ViewGroup)findViewById(R.id.popup_container);
+		popup_container.removeAllViews();
+    }
 
     public void clickedSettings(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSettings");
 		openSettings();
-        /*LinearLayout ll = new LinearLayout(this);
+		//clickedPopupSettings();
+    }
+    
+    public void clickedPopupSettings() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedPopupSettings");
+		ViewGroup popup_container = (ViewGroup)findViewById(R.id.popup_container);
+		if( popup_container.getChildCount() > 0 ) {
+			closePopup();
+			return;
+		}
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "open popup");
+
+		clearSeekBar();
+
+		{
+			// prevent popup being transparent
+			popup_container.setBackgroundColor(Color.BLACK);
+			popup_container.setAlpha(0.95f);
+		}
+
+		LinearLayout ll = new LinearLayout(this);
         ll.setOrientation(LinearLayout.VERTICAL);
-        int resource = 0;
-        ImageButton image_button = null;
-        {
+    	List<String> supported_flash_values = preview.getSupportedFlashValues();
+    	if( supported_flash_values != null ) {
+        	// flash
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "add flash settings");
             LinearLayout ll2 = new LinearLayout(this);
             ll2.setOrientation(LinearLayout.HORIZONTAL);
-        	// add flash
         	String [] flash_icons = getResources().getStringArray(R.array.flash_icons);
         	String [] flash_values = getResources().getStringArray(R.array.flash_values);
-        	List<String> supported_flash_values = preview.getSupportedFlashValues();
-        	for(String supported_flash_value : supported_flash_values) {
+        	for(final String supported_flash_value : supported_flash_values) {
         		int index = -1;
         		for(int i=0;i<flash_values.length && index==-1;i++) {
         			if( flash_values[i].equals(supported_flash_value) )
@@ -794,8 +833,8 @@ public class MainActivity extends Activity {
         		if( MyDebug.LOG )
         			Log.d(TAG, "supported_flash_value: " + supported_flash_value + " index: " + index);
         		if( index != -1 ) {
-        			image_button = new ImageButton(this);
-        			resource = getResources().getIdentifier(flash_icons[index], null, this.getApplicationContext().getPackageName());
+        			ImageButton image_button = new ImageButton(this);
+        			int resource = getResources().getIdentifier(flash_icons[index], null, this.getApplicationContext().getPackageName());
         			image_button.setImageResource(resource);
         			ll2.addView(image_button);
         			ViewGroup.LayoutParams params = image_button.getLayoutParams();
@@ -807,17 +846,131 @@ public class MainActivity extends Activity {
         			image_button.setLayoutParams(params);
         			image_button.setScaleType(ScaleType.FIT_CENTER);
         			image_button.setContentDescription(getResources().getString(R.string.flash_mode));
+        			image_button.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "clicked flash: " + supported_flash_value);
+							preview.updateFlash(supported_flash_value);
+							closePopup();
+						}
+        			});
         		}
         	}
     		ll.addView(ll2);
         }
 
-		((ViewGroup) findViewById(R.id.popup_container)).addView(ll);*/
+    	List<String> supported_focus_values = preview.getSupportedFocusValues();
+    	if( supported_focus_values != null ) {
+        	// focus
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "add focus settings");
+            LinearLayout ll2 = new LinearLayout(this);
+            ll2.setOrientation(LinearLayout.HORIZONTAL);
+        	String [] focus_mode_icons = getResources().getStringArray(R.array.focus_mode_icons);
+        	String [] focus_mode_values = getResources().getStringArray(R.array.focus_mode_values);
+        	for(final String supported_focus_value : supported_focus_values) {
+        		int index = -1;
+        		for(int i=0;i<focus_mode_values.length && index==-1;i++) {
+        			if( focus_mode_values[i].equals(supported_focus_value) )
+        				index = i;
+        		}
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "supported_focus_value: " + supported_focus_value + " index: " + index);
+        		if( index != -1 ) {
+        			ImageButton image_button = new ImageButton(this);
+        			int resource = getResources().getIdentifier(focus_mode_icons[index], null, this.getApplicationContext().getPackageName());
+        			image_button.setImageResource(resource);
+        			ll2.addView(image_button);
+        			ViewGroup.LayoutParams params = image_button.getLayoutParams();
+        			final float scale = getResources().getDisplayMetrics().density;
+        			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
+        			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+        			final int padding = (int) (10 * scale + 0.5f); // convert dps to pixels
+        			image_button.setPadding(padding, padding, padding, padding);
+        			image_button.setLayoutParams(params);
+        			image_button.setScaleType(ScaleType.FIT_CENTER);
+        			image_button.setContentDescription(getResources().getString(R.string.focus_mode));
+        			image_button.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "clicked focus: " + supported_focus_value);
+							preview.updateFocus(supported_focus_value, false, true);
+							closePopup();
+						}
+        			});
+        		}
+        	}
+    		ll.addView(ll2);
+        }
+        
+    	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
+    	if( supported_white_balances != null ) {
+        	// white balance
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "add white balance settings");
+    		TextView text_view = new TextView(this);
+    		text_view.setText("White Balance");
+    		text_view.setTextColor(Color.WHITE);
+    		text_view.setGravity(Gravity.CENTER);
+    		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
+        	ll.addView(text_view);
+
+    		RadioGroup rg = new RadioGroup(this); 
+        	rg.setOrientation(RadioGroup.VERTICAL);
+
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+			String current_white_balance = sharedPreferences.getString(Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
+        	for(final String supported_white_balance : supported_white_balances) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "supported_white_balance: " + supported_white_balance);
+        		//Button button = new Button(this);
+        		RadioButton button = new RadioButton(this);
+        		button.setText(supported_white_balance);
+        		button.setTextColor(Color.WHITE);
+        		if( supported_white_balance.equals(current_white_balance) ) {
+        			button.setChecked(true);
+        		}
+        		else {
+        			button.setChecked(false);
+        		}
+    			//ll.addView(button);
+    			rg.addView(button);
+    			button.setContentDescription(supported_white_balance);
+    			button.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "clicked white balance: " + supported_white_balance);
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(Preview.getWhiteBalancePreferenceKey(), supported_white_balance);
+						editor.apply();
+
+						updateForSettings();
+						closePopup();
+					}
+    			});
+        	}
+        	// test
+        	for(int i=0;i<5;i++) {
+        		RadioButton button = new RadioButton(this);
+        		button.setText("blah");
+        		button.setTextColor(Color.WHITE);
+    			button.setChecked(false);
+    			rg.addView(button);
+        	}
+        	ll.addView(rg);
+        }
+
+		popup_container.addView(ll);
     }
     
     private void openSettings() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "openSettings");
+		closePopup();
 		preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
 		
 		Bundle bundle = new Bundle();
@@ -949,7 +1102,7 @@ public class MainActivity extends Activity {
     	if( saved_focus_value != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "switch focus back to: " + saved_focus_value);
-    		preview.updateFocus(saved_focus_value);
+    		preview.updateFocus(saved_focus_value, true, false);
     	}
     }
     
@@ -1416,6 +1569,7 @@ public class MainActivity extends Activity {
     private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
+		closePopup();
     	this.preview.takePicturePressed();
     }
     
