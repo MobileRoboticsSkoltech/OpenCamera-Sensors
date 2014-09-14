@@ -370,6 +370,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 		MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.clearSeekBar();
+		main_activity.closePopup();
         //invalidate();
 		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "touch event: " + event.getAction());
@@ -1339,13 +1340,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up flash");
-		    View flashButton = (View) activity.findViewById(R.id.flash);
 			current_flash_index = -1;
 			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "flash modes: " + supported_flash_modes);
 				supported_flash_values = convertFlashModesToValues(supported_flash_modes); // convert to our format (also resorts)
-	
+
 				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
 				if( flash_value.length() > 0 ) {
 					if( MyDebug.LOG )
@@ -1359,7 +1359,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found no existing flash_value");
-					updateFlash(0, true);
+					updateFlash("flash_auto", true);
 				}
 			}
 			else {
@@ -1367,13 +1367,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					Log.d(TAG, "flash not supported");
 				supported_flash_values = null;
 			}
-			flashButton.setVisibility(supported_flash_values != null ? View.VISIBLE : View.GONE);
 		}
 
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up focus");
-		    View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
 			current_focus_index = -1;
 			if( supported_focus_modes != null && supported_focus_modes.size() > 1 ) {
 				if( MyDebug.LOG )
@@ -1393,7 +1391,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found no existing focus_value");
-					updateFocus(0, false, true, true);
+					updateFocus("focus_mode_auto", false, true, true);
 				}
 			}
 			else {
@@ -1401,7 +1399,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					Log.d(TAG, "focus not supported");
 				supported_focus_values = null;
 			}
-			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);
+		    /*View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
+			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);*/
 		}
 
 		{
@@ -3223,7 +3222,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	void updateFlash(String focus_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFlash(): " + focus_value);
-		if( this.phase == PHASE_TAKING_PHOTO ) {
+		if( this.phase == PHASE_TAKING_PHOTO && !is_video ) {
 			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
@@ -3257,10 +3256,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "    current_flash_index is now " + current_flash_index + " (initial " + initial + ")");
 
-			Activity activity = (Activity)this.getContext();
-		    ImageButton flashButton = (ImageButton) activity.findViewById(R.id.flash);
+			//Activity activity = (Activity)this.getContext();
 	    	String [] flash_entries = getResources().getStringArray(R.array.flash_entries);
-	    	String [] flash_icons = getResources().getStringArray(R.array.flash_icons);
+	    	//String [] flash_icons = getResources().getStringArray(R.array.flash_icons);
 			String flash_value = supported_flash_values.get(current_flash_index);
 			if( MyDebug.LOG )
 				Log.d(TAG, "    flash_value: " + flash_value);
@@ -3271,9 +3269,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    		if( flash_value.equals(flash_values[i]) ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "    found entry: " + i);
-	    			//flashButton.setText(flash_entries[i]);
-	    			int resource = getResources().getIdentifier(flash_icons[i], null, activity.getApplicationContext().getPackageName());
-	    			flashButton.setImageResource(resource);
 	    			if( !initial ) {
 	    				showToast(flash_toast, flash_entries[i]);
 	    			}
@@ -3304,11 +3299,26 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		Camera.Parameters parameters = camera.getParameters();
 		String flash_mode = convertFlashValueToMode(flash_value);
     	if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
+    		if( parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH) && !flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
+    			// workaround for bug on Nexus 5 where torch doesn't switch off until we set FLASH_MODE_OFF
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "first turn torch off");
+        		parameters.setFlashMode(flash_mode);
+            	setCameraParameters(parameters);
+        		parameters = camera.getParameters();
+    		}
     		parameters.setFlashMode(flash_mode);
         	setCameraParameters(parameters);
     	}
 	}
 
+	// this returns the flash mode indicated by the UI, rather than from the camera parameters (may be different, e.g., in startup autofocus!)
+    public String getCurrentFlashValue() {
+    	if( this.current_flash_index == -1 )
+    		return null;
+    	return this.supported_flash_values.get(current_flash_index);
+    }
+    
 	// this returns the flash mode indicated by the UI, rather than from the camera parameters (may be different, e.g., in startup autofocus!)
 	public String getCurrentFlashMode() {
 		if( current_flash_index == -1 )
@@ -3361,8 +3371,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 			}*/
 			// also resort as well as converting
-			// first one will be the default choice
-			// note: important for FLASH_MODE_OFF to be immediately after FLASH_MODE_TORCH, due to bug on Nexus 5 where torch doesn't switch off until we set FLASH_MODE_OFF
+			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
+				output_modes.add("flash_off");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports flash_off");
+			}
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_AUTO) ) {
 				output_modes.add("flash_auto");
 				if( MyDebug.LOG )
@@ -3377,11 +3390,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				output_modes.add("flash_torch");
 				if( MyDebug.LOG )
 					Log.d(TAG, " supports flash_torch");
-			}
-			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
-				output_modes.add("flash_off");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports flash_off");
 			}
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_RED_EYE) ) {
 				output_modes.add("flash_red_eye");
@@ -3445,10 +3453,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "    current_focus_index is now " + current_focus_index + " (initial " + initial + ")");
 
-			Activity activity = (Activity)this.getContext();
-		    ImageButton focusModeButton = (ImageButton) activity.findViewById(R.id.focus_mode);
+			//Activity activity = (Activity)this.getContext();
 	    	String [] focus_entries = getResources().getStringArray(R.array.focus_mode_entries);
-	    	String [] focus_icons = getResources().getStringArray(R.array.focus_mode_icons);
+	    	//String [] focus_icons = getResources().getStringArray(R.array.focus_mode_icons);
 			String focus_value = supported_focus_values.get(current_focus_index);
 			if( MyDebug.LOG )
 				Log.d(TAG, "    focus_value: " + focus_value);
@@ -3459,8 +3466,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    		if( focus_value.equals(focus_values[i]) ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "    found entry: " + i);
-	    			int resource = getResources().getIdentifier(focus_icons[i], null, activity.getApplicationContext().getPackageName());
-	    			focusModeButton.setImageResource(resource);
 	    			if( !initial && !quiet ) {
 	    				showToast(focus_toast, focus_entries[i]);
 	    			}
@@ -3479,9 +3484,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
-	public String getFocusValue() {
+	// this returns the flash mode indicated by the UI, rather than from the camera parameters
+	public String getCurrentFocusValue() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "getFocusValue()");
+			Log.d(TAG, "getCurrentFocusValue()");
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
@@ -3571,7 +3577,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		List<String> output_modes = new Vector<String>();
 		if( supported_focus_modes != null ) {
 			// also resort as well as converting
-			// first one will be the default choice
 			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
 				output_modes.add("focus_mode_auto");
 				if( MyDebug.LOG ) {
@@ -3840,7 +3845,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
     		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
-			MainActivity main_activity = (MainActivity)Preview.this.getContext();
+    		MainActivity main_activity = (MainActivity)Preview.this.getContext();
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
 			if( videoFile == null ) {
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
@@ -5057,28 +5062,28 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     private void showGUI(final boolean show) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "showGUI: " + show);
-		final Activity activity = (Activity)this.getContext();
-		activity.runOnUiThread(new Runnable() {
+		final MainActivity main_activity = (MainActivity)this.getContext();
+		main_activity.runOnUiThread(new Runnable() {
 			public void run() {
 		    	final int visibility = show ? View.VISIBLE : View.GONE;
-			    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
-			    View switchVideoButton = (View) activity.findViewById(R.id.switch_video);
-			    View flashButton = (View) activity.findViewById(R.id.flash);
-			    View focusButton = (View) activity.findViewById(R.id.focus_mode);
-			    View exposureButton = (View) activity.findViewById(R.id.exposure);
-			    View exposureLockButton = (View) activity.findViewById(R.id.exposure_lock);
+			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
+			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
+			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
+			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
+			    View popupButton = (View) main_activity.findViewById(R.id.popup);
 			    if( Camera.getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 			    if( !is_video )
 			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
-			    if( supported_flash_values != null && !is_video )
-			    	flashButton.setVisibility(visibility); // still allow flash mode when recording video
-			    if( supported_focus_values != null )
-			    	focusButton.setVisibility(visibility);
 			    if( exposures != null && !is_video ) // still allow exposure when recording video
 			    	exposureButton.setVisibility(visibility);
 			    if( is_exposure_locked_supported && !is_video ) // still allow exposure lock when recording video
 			    	exposureLockButton.setVisibility(visibility);
+			    if( !show ) {
+			    	main_activity.closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
+			    }
+			    if( !is_video )
+			    	popupButton.setVisibility(visibility); // still allow popup in order to change flash mode when recording video
 			}
 		});
     }
@@ -5251,7 +5256,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return supported_flash_values;
 	}
 
-	List<String> getSupportedFocusValues() {
+	public List<String> getSupportedFocusValues() {
 		return supported_focus_values;
 	}
 
@@ -5484,6 +5489,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return is_video;
 	}
 	
+    public boolean isTakingPhoto() {
+    	return this.phase == PHASE_TAKING_PHOTO;
+    }
+
     // must be static, to safely call from other Activities
     public static String getFlashPreferenceKey(int cameraId) {
     	return "flash_value_" + cameraId;
@@ -5553,12 +5562,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.is_exposure_locked_supported;
     }
     
-    public String getCurrentFlashValue() {
-    	if( this.current_flash_index == -1 )
-    		return null;
-    	return this.supported_flash_values.get(current_flash_index);
-    }
-    
     public boolean hasFocusArea() {
     	return this.has_focus_area;
     }
@@ -5568,10 +5571,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.phase == PHASE_TAKING_PHOTO || this.phase == PHASE_TIMER;
     }
     
-    public boolean isTakingPhoto() {
-    	return this.phase == PHASE_TAKING_PHOTO;
-    }
-
     public boolean isOnTimer() {
     	//return this.is_taking_photo_on_timer;
     	return this.phase == PHASE_TIMER;

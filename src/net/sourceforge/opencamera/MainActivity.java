@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -20,6 +22,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -57,7 +60,9 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -491,11 +496,20 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 	
-			view = findViewById(R.id.exposure_lock);
+			view = findViewById(R.id.popup);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
 			layoutParams.addRule(left_of, R.id.gallery);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = findViewById(R.id.exposure_lock);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.popup);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -509,29 +523,11 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 	
-			view = findViewById(R.id.focus_mode);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.exposure);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.flash);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.focus_mode);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
 			view = findViewById(R.id.switch_video);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.flash);
+			layoutParams.addRule(left_of, R.id.exposure);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -632,11 +628,48 @@ public class MainActivity extends Activity {
 				view.setTranslationY(0);
 			}
 		}
-		
+
 		{
-			findViewById(R.id.popup_container).setRotation(ui_rotation);
+			View view = findViewById(R.id.popup_container);
+			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			//layoutParams.addRule(left_of, R.id.popup);
+			layoutParams.addRule(align_right, R.id.popup);
+			layoutParams.addRule(below, R.id.popup);
+			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+			layoutParams.addRule(above, 0);
+			layoutParams.addRule(align_parent_top, 0);
+			view.setLayoutParams(layoutParams);
+
+			view.setRotation(ui_rotation);
+			// reset:
+			view.setTranslationX(0.0f);
+			view.setTranslationY(0.0f);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "popup view width: " + view.getWidth());
+				Log.d(TAG, "popup view height: " + view.getHeight());
+			}
+			if( ui_rotation == 0 || ui_rotation == 180 ) {
+				view.setPivotX(view.getWidth()/2.0f);
+				view.setPivotY(view.getHeight()/2.0f);
+			}
+			else {
+				view.setPivotX(view.getWidth());
+				view.setPivotY(ui_placement_right ? 0.0f : view.getHeight());
+				if( ui_placement_right ) {
+					if( ui_rotation == 90 )
+						view.setTranslationY( view.getWidth() );
+					else if( ui_rotation == 270 )
+						view.setTranslationX( - view.getHeight() );
+				}
+				else {
+					if( ui_rotation == 90 )
+						view.setTranslationX( - view.getHeight() );
+					else if( ui_rotation == 270 )
+						view.setTranslationY( - view.getWidth() );
+				}
+			}
 		}
-		
+
 		{
 			// set icon for taking photos vs videos
 			ImageButton view = (ImageButton)findViewById(R.id.take_photo);
@@ -779,25 +812,40 @@ public class MainActivity extends Activity {
     	this.preview.toggleExposureLock();
     }
     
-    private void closePopup() {
+    void closePopup() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "close popup");
 		ViewGroup popup_container = (ViewGroup)findViewById(R.id.popup_container);
 		popup_container.removeAllViews();
+		popup_buttons.clear();
     }
 
     public void clickedSettings(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSettings");
 		openSettings();
-		//clickedPopupSettings();
     }
+
+    public boolean popupIsOpen() {
+		final ViewGroup popup_container = (ViewGroup)findViewById(R.id.popup_container);
+		if( popup_container.getChildCount() > 0 ) {
+			return true;
+		}
+		return false;
+    }
+
+    Map<String, View> popup_buttons = new Hashtable<String, View>();
     
-    public void clickedPopupSettings() {
+    // for testing
+    public View getPopupButton(String key) {
+    	return popup_buttons.get(key);
+    }
+
+    public void clickedPopupSettings(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedPopupSettings");
-		ViewGroup popup_container = (ViewGroup)findViewById(R.id.popup_container);
-		if( popup_container.getChildCount() > 0 ) {
+		final ViewGroup popup_container = (ViewGroup)findViewById(R.id.popup_container);
+		if( popupIsOpen() ) {
 			closePopup();
 			return;
 		}
@@ -815,103 +863,172 @@ public class MainActivity extends Activity {
 
 		LinearLayout ll = new LinearLayout(this);
         ll.setOrientation(LinearLayout.VERTICAL);
-    	List<String> supported_flash_values = preview.getSupportedFlashValues();
-    	if( supported_flash_values != null ) {
-        	// flash
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "add flash settings");
-            LinearLayout ll2 = new LinearLayout(this);
-            ll2.setOrientation(LinearLayout.HORIZONTAL);
-        	String [] flash_icons = getResources().getStringArray(R.array.flash_icons);
-        	String [] flash_values = getResources().getStringArray(R.array.flash_values);
-        	for(final String supported_flash_value : supported_flash_values) {
-        		int index = -1;
-        		for(int i=0;i<flash_values.length && index==-1;i++) {
-        			if( flash_values[i].equals(supported_flash_value) )
-        				index = i;
-        		}
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "supported_flash_value: " + supported_flash_value + " index: " + index);
-        		if( index != -1 ) {
-        			ImageButton image_button = new ImageButton(this);
-        			int resource = getResources().getIdentifier(flash_icons[index], null, this.getApplicationContext().getPackageName());
-        			image_button.setImageResource(resource);
-        			ll2.addView(image_button);
-        			ViewGroup.LayoutParams params = image_button.getLayoutParams();
-        			final float scale = getResources().getDisplayMetrics().density;
-        			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
-        			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
-        			final int padding = (int) (10 * scale + 0.5f); // convert dps to pixels
-        			image_button.setPadding(padding, padding, padding, padding);
-        			image_button.setLayoutParams(params);
-        			image_button.setScaleType(ScaleType.FIT_CENTER);
-        			image_button.setContentDescription(getResources().getString(R.string.flash_mode));
-        			image_button.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "clicked flash: " + supported_flash_value);
-							preview.updateFlash(supported_flash_value);
-							closePopup();
-						}
-        			});
-        		}
-        	}
-    		ll.addView(ll2);
-        }
 
-    	List<String> supported_focus_values = preview.getSupportedFocusValues();
-    	if( supported_focus_values != null ) {
-        	// focus
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "add focus settings");
-            LinearLayout ll2 = new LinearLayout(this);
+        List<String> supported_flash_values = preview.getSupportedFlashValues();
+    	addButtonOptionsToPopup(ll, supported_flash_values, R.array.flash_icons, R.array.flash_values, R.string.flash_mode, preview.getCurrentFlashValue(), new ButtonOptionsPopupListener() {
+			@Override
+			public void onClick(String option) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "clicked flash: " + option);
+				preview.updateFlash(option);
+				closePopup();
+			}
+		});
+    	
+    	if( preview.isVideo() && preview.isTakingPhoto() ) {
+    		// don't add any more options
+    	}
+    	else {
+        	List<String> supported_focus_values = preview.getSupportedFocusValues();
+        	addButtonOptionsToPopup(ll, supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, R.string.focus_mode, preview.getCurrentFocusValue(), new ButtonOptionsPopupListener() {
+    			@Override
+    			public void onClick(String option) {
+    				if( MyDebug.LOG )
+    					Log.d(TAG, "clicked focus: " + option);
+    				preview.updateFocus(option, false, true);
+    				closePopup();
+    			}
+    		});
+            
+        	List<String> supported_isos = this.preview.getSupportedISOs();
+    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+    		String current_iso = sharedPreferences.getString(Preview.getISOPreferenceKey(), "auto");
+        	addButtonOptionsToPopup(ll, supported_isos, -1, -1, R.string.iso, current_iso, new ButtonOptionsPopupListener() {
+    			@Override
+    			public void onClick(String option) {
+    				if( MyDebug.LOG )
+    					Log.d(TAG, "clicked iso: " + option);
+    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+    				SharedPreferences.Editor editor = sharedPreferences.edit();
+    				editor.putString(Preview.getISOPreferenceKey(), option);
+    				editor.apply();
+
+    				updateForSettings();
+    				closePopup();
+    			}
+    		});
+
+        	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
+        	addRadioOptionsToPopup(ll, supported_white_balances, "White Balance", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
+
+        	List<String> supported_scene_modes = this.preview.getSupportedSceneModes();
+        	addRadioOptionsToPopup(ll, supported_scene_modes, "Scene Mode", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
+
+        	List<String> supported_color_effects = this.preview.getSupportedColorEffects();
+        	addRadioOptionsToPopup(ll, supported_color_effects, "Color Effect", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
+    	}
+
+		popup_container.addView(ll);
+
+		// need to call layoutUI to make sure the new popup is oriented correctly
+		// but need to do after the layout has been done, so we have a valid width/height to use
+		popup_container.getViewTreeObserver().addOnGlobalLayoutListener( 
+			new OnGlobalLayoutListener() {
+				@SuppressWarnings("deprecation")
+			    @SuppressLint("NewApi")
+				@Override
+			    public void onGlobalLayout() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "onGlobalLayout()");
+		    		layoutUI();
+		    		// stop listening - only want to call this once!
+		            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+		            	popup_container.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+		            } else {
+		            	popup_container.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+		            }
+		        }
+			}
+		);
+    }
+    
+    private abstract class ButtonOptionsPopupListener {
+		public abstract void onClick(String option);
+    }
+    
+    private void addButtonOptionsToPopup(LinearLayout ll, List<String> supported_options, int icons_id, int values_id, int string_id, String current_value, final ButtonOptionsPopupListener listener) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "addButtonOptionsToPopup");
+    	if( supported_options != null ) {
+			String string = getResources().getString(string_id);
+
+        	LinearLayout ll2 = new LinearLayout(this);
             ll2.setOrientation(LinearLayout.HORIZONTAL);
-        	String [] focus_mode_icons = getResources().getStringArray(R.array.focus_mode_icons);
-        	String [] focus_mode_values = getResources().getStringArray(R.array.focus_mode_values);
-        	for(final String supported_focus_value : supported_focus_values) {
-        		int index = -1;
-        		for(int i=0;i<focus_mode_values.length && index==-1;i++) {
-        			if( focus_mode_values[i].equals(supported_focus_value) )
-        				index = i;
-        		}
+        	String [] icons = icons_id != -1 ? getResources().getStringArray(icons_id) : null;
+        	String [] values = values_id != -1 ? getResources().getStringArray(values_id) : null;
+        	for(final String supported_option : supported_options) {
         		if( MyDebug.LOG )
-        			Log.d(TAG, "supported_focus_value: " + supported_focus_value + " index: " + index);
-        		if( index != -1 ) {
-        			ImageButton image_button = new ImageButton(this);
-        			int resource = getResources().getIdentifier(focus_mode_icons[index], null, this.getApplicationContext().getPackageName());
-        			image_button.setImageResource(resource);
-        			ll2.addView(image_button);
-        			ViewGroup.LayoutParams params = image_button.getLayoutParams();
-        			final float scale = getResources().getDisplayMetrics().density;
-        			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
-        			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
-        			final int padding = (int) (10 * scale + 0.5f); // convert dps to pixels
-        			image_button.setPadding(padding, padding, padding, padding);
-        			image_button.setLayoutParams(params);
-        			image_button.setScaleType(ScaleType.FIT_CENTER);
-        			image_button.setContentDescription(getResources().getString(R.string.focus_mode));
-        			image_button.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "clicked focus: " + supported_focus_value);
-							preview.updateFocus(supported_focus_value, false, true);
-							closePopup();
-						}
-        			});
+        			Log.d(TAG, "supported_option: " + supported_option);
+        		int resource = -1;
+        		if( icons != null && values != null ) {
+            		int index = -1;
+            		for(int i=0;i<values.length && index==-1;i++) {
+            			if( values[i].equals(supported_option) )
+            				index = i;
+            		}
+            		if( MyDebug.LOG )
+            			Log.d(TAG, "index: " + index);
+            		if( index != -1 ) {
+            			resource = getResources().getIdentifier(icons[index], null, this.getApplicationContext().getPackageName());
+            		}
         		}
-        	}
+
+        		View view = null;
+    			final float scale = getResources().getDisplayMetrics().density;
+        		if( resource != -1 ) {
+        			ImageButton image_button = new ImageButton(this);
+        			view = image_button;
+        			ll2.addView(view);
+
+        			image_button.setImageResource(resource);
+        			image_button.setScaleType(ScaleType.FIT_CENTER);
+        			final int padding = (int) (10 * scale + 0.5f); // convert dps to pixels
+        			view.setPadding(padding, padding, padding, padding);
+        		}
+        		else {
+        			Button button = new Button(this);
+        			view = button;
+        			ll2.addView(view);
+
+        			button.setText(string + "\n" + supported_option);
+        			button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
+        			// need 0 padding so we have enough room to display text for ISO buttons, when there are 6 ISO settings
+        			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
+        			view.setPadding(padding, padding, padding, padding);
+        		}
+    			ViewGroup.LayoutParams params = view.getLayoutParams();
+    			//params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
+    			params.width = (int) ((250/supported_options.size()) * scale + 0.5f); // convert dps to pixels
+    			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+    			view.setLayoutParams(params);
+
+    			view.setContentDescription(string);
+    			if( supported_option.equals(current_value) ) {
+    				view.setAlpha(1.0f);
+    			}
+    			else {
+    				view.setAlpha(0.6f);
+    			}
+    			view.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "clicked: " + supported_option);
+						listener.onClick(supported_option);
+					}
+    			});
+    			this.popup_buttons.put(supported_option, view);
+    		}
     		ll.addView(ll2);
         }
-        
-    	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
-    	if( supported_white_balances != null ) {
-        	// white balance
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "add white balance settings");
+    }
+    
+    private void addRadioOptionsToPopup(LinearLayout ll, List<String> supported_options, final String title, final String preference_key, final String default_option) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "addOptionsToPopup: " + title);
+    	if( supported_options != null ) {
     		TextView text_view = new TextView(this);
-    		text_view.setText("White Balance");
+    		text_view.setText(title);
     		text_view.setTextColor(Color.WHITE);
     		text_view.setGravity(Gravity.CENTER);
     		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
@@ -921,15 +1038,15 @@ public class MainActivity extends Activity {
         	rg.setOrientation(RadioGroup.VERTICAL);
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-			String current_white_balance = sharedPreferences.getString(Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
-        	for(final String supported_white_balance : supported_white_balances) {
+			String current_option = sharedPreferences.getString(preference_key, default_option);
+        	for(final String supported_option : supported_options) {
         		if( MyDebug.LOG )
-        			Log.d(TAG, "supported_white_balance: " + supported_white_balance);
+        			Log.d(TAG, "supported_option: " + supported_option);
         		//Button button = new Button(this);
         		RadioButton button = new RadioButton(this);
-        		button.setText(supported_white_balance);
+        		button.setText(supported_option);
         		button.setTextColor(Color.WHITE);
-        		if( supported_white_balance.equals(current_white_balance) ) {
+        		if( supported_option.equals(current_option) ) {
         			button.setChecked(true);
         		}
         		else {
@@ -937,34 +1054,25 @@ public class MainActivity extends Activity {
         		}
     			//ll.addView(button);
     			rg.addView(button);
-    			button.setContentDescription(supported_white_balance);
+    			button.setContentDescription(supported_option);
     			button.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						if( MyDebug.LOG )
-							Log.d(TAG, "clicked white balance: " + supported_white_balance);
+							Log.d(TAG, "clicked current_option: " + supported_option);
 						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putString(Preview.getWhiteBalancePreferenceKey(), supported_white_balance);
+						editor.putString(preference_key, supported_option);
 						editor.apply();
 
 						updateForSettings();
 						closePopup();
 					}
     			});
-        	}
-        	// test
-        	for(int i=0;i<5;i++) {
-        		RadioButton button = new RadioButton(this);
-        		button.setText("blah");
-        		button.setTextColor(Color.WHITE);
-    			button.setChecked(false);
-    			rg.addView(button);
+    			this.popup_buttons.put(supported_option, button);
         	}
         	ll.addView(rg);
         }
-
-		popup_container.addView(ll);
     }
     
     private void openSettings() {
@@ -1059,7 +1167,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "updateForSettings()");
     	String saved_focus_value = null;
     	if( preview.getCamera() != null && preview.isVideo() && !preview.focusIsVideo() ) {
-    		saved_focus_value = preview.getFocusValue(); // n.b., may still be null
+    		saved_focus_value = preview.getCurrentFocusValue(); // n.b., may still be null
 			// make sure we're into continuous video mode
 			// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
 			// so to be safe, we always reset to continuous video mode, and then reset it afterwards
@@ -1127,6 +1235,12 @@ public class MainActivity extends Activity {
 				Log.d(TAG, "close settings");
 			setWindowFlagsForCamera();
 			updateForSettings();
+        }
+        else {
+			if( popupIsOpen() ) {
+    			closePopup();
+    			return;
+    		}
         }
         super.onBackPressed();        
     }

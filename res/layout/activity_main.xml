@@ -56,6 +56,17 @@
         />
 
     <ImageButton
+        android:id="@+id/popup"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/action_popup"
+        android:src="@drawable/popup"
+        android:onClick="clickedPopupSettings"
+        />
+    
+    <ImageButton
         android:id="@+id/gallery"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -85,26 +96,6 @@
         android:contentDescription="@string/exposure"
         android:src="@drawable/exposure"
         android:onClick="clickedExposure"
-        />
-
-    <ImageButton
-        android:id="@+id/focus_mode"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/focus_mode"
-        android:onClick="clickedFocusMode"
-        />
-
-    <ImageButton
-        android:id="@+id/flash"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/flash_mode"
-        android:onClick="clickedFlash"
         />
 
     <ImageButton
