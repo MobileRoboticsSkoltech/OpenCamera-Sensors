@@ -739,6 +739,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	//private int debug_count_opencamera = 0; // see usage below
 
 	private void openCamera() {
+		openCamera(null);
+	}
+	
+	private void openCamera(String toast_message) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera()");
@@ -842,7 +846,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
 		    switchCameraButton.setVisibility(Camera.getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
 
-		    setupCamera();
+		    setupCamera(toast_message);
 		}
 
 		if( MyDebug.LOG ) {
@@ -855,7 +859,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
 	/* Should only be called after camera first opened, or after preview is paused.
 	 */
-	void setupCamera() {
+	void setupCamera(String toast_message) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setupCamera()");
 		/*long debug_time = 0;
@@ -885,6 +889,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		if( saved_is_video != this.is_video ) {
 			this.switchVideo(false, false);
+		}
+		else if( toast_message != null ) {
+			showToast(null, toast_message);
 		}
 		else {
 			showPhotoVideoToast();
@@ -5282,10 +5289,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     }
     
     void onResume() {
+    	onResume(null);
+    }
+    
+    void onResume(String toast_message) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
 		this.app_is_paused = false;
-		this.openCamera();
+		this.openCamera(toast_message);
     }
 
     void onPause() {

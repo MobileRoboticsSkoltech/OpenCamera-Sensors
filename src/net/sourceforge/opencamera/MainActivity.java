@@ -62,6 +62,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView.ScaleType;
@@ -903,7 +905,7 @@ public class MainActivity extends Activity {
     				editor.putString(Preview.getISOPreferenceKey(), option);
     				editor.apply();
 
-    				updateForSettings();
+    				updateForSettings("ISO: " + option);
     				closePopup();
     			}
     		});
@@ -919,8 +921,8 @@ public class MainActivity extends Activity {
     	}
 
 		popup_container.addView(ll);
-
-		// need to call layoutUI to make sure the new popup is oriented correctly
+		
+        // need to call layoutUI to make sure the new popup is oriented correctly
 		// but need to do after the layout has been done, so we have a valid width/height to use
 		popup_container.getViewTreeObserver().addOnGlobalLayoutListener( 
 			new OnGlobalLayoutListener() {
@@ -937,6 +939,10 @@ public class MainActivity extends Activity {
 		            } else {
 		            	popup_container.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 		            }
+
+		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f);
+		    		animation.setDuration(100);
+		    		popup_container.setAnimation(animation);
 		        }
 			}
 		);
@@ -1065,7 +1071,7 @@ public class MainActivity extends Activity {
 						editor.putString(preference_key, supported_option);
 						editor.apply();
 
-						updateForSettings();
+						updateForSettings(title + ": " + supported_option);
 						closePopup();
 					}
     			});
@@ -1163,8 +1169,16 @@ public class MainActivity extends Activity {
     }
 
     public void updateForSettings() {
-		if( MyDebug.LOG )
+    	updateForSettings(null);
+    }
+
+    public void updateForSettings(String toast_message) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings()");
+			if( toast_message != null ) {
+				Log.d(TAG, "toast_message: " + toast_message);
+			}
+		}
     	String saved_focus_value = null;
     	if( preview.getCamera() != null && preview.isVideo() && !preview.focusIsVideo() ) {
     		saved_focus_value = preview.getCurrentFocusValue(); // n.b., may still be null
@@ -1199,12 +1213,12 @@ public class MainActivity extends Activity {
         setupLocationListener(); // in case we've enabled GPS
 		if( need_reopen || preview.getCamera() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
-			preview.onResume();
+			preview.onResume(toast_message);
 		}
 		else {
 			preview.setCameraDisplayOrientation(this); // need to call in case the preview rotation option was changed
 			preview.pausePreview();
-			preview.setupCamera();
+			preview.setupCamera(toast_message);
 		}
 
     	if( saved_focus_value != null ) {
