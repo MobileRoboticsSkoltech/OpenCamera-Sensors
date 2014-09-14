@@ -5089,7 +5089,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    if( !show ) {
 			    	main_activity.closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
 			    }
-			    if( !is_video )
+			    if( !is_video || supported_flash_values == null )
 			    	popupButton.setVisibility(visibility); // still allow popup in order to change flash mode when recording video
 			}
 		});
@@ -5259,7 +5259,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return this.video_sizes;
     }
     
-	List<String> getSupportedFlashValues() {
+	public List<String> getSupportedFlashValues() {
 		return supported_flash_values;
 	}
 
