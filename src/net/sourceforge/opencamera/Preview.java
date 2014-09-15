@@ -891,7 +891,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			this.switchVideo(false, false);
 		}
 		else if( toast_message != null ) {
-			showToast(null, toast_message);
+			if( toast_message.length() > 0 )
+				showToast(null, toast_message);
 		}
 		else {
 			showPhotoVideoToast();
