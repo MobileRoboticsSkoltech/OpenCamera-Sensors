@@ -65,6 +65,8 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -909,6 +911,30 @@ public class MainActivity extends Activity {
     				closePopup();
     			}
     		});
+
+        	if( this.supports_auto_stabilise ) {
+        		CheckBox checkBox = new CheckBox(this);
+        		checkBox.setText("Auto-stabilise?");
+        		checkBox.setTextColor(Color.WHITE);
+
+        		boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
+        		checkBox.setChecked(auto_stabilise);
+        		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putBoolean("preference_auto_stabilise", isChecked);
+						editor.apply();
+
+						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
+						preview.showToast(changed_auto_stabilise_toast, message);
+	    				closePopup();
+					}
+        		});
+
+				ll.addView(checkBox);
+        	}
 
         	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
         	addRadioOptionsToPopup(ll, supported_white_balances, "White Balance", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
