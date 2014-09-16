@@ -1219,6 +1219,8 @@ public class MainActivity extends Activity {
 			resolution_text_view.setText(supported_options.get(current_index));
 			resolution_text_view.setTextColor(Color.WHITE);
 			resolution_text_view.setGravity(Gravity.CENTER);
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+			resolution_text_view.setLayoutParams(params);
 
 			final float scale = getResources().getDisplayMetrics().density;
 			final Button prev_button = new Button(this);
@@ -1227,10 +1229,10 @@ public class MainActivity extends Activity {
 			prev_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
 			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
 			prev_button.setPadding(padding, padding, padding, padding);
-			ViewGroup.LayoutParams params = prev_button.getLayoutParams();
-			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
-			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
-			prev_button.setLayoutParams(params);
+			ViewGroup.LayoutParams vg_params = prev_button.getLayoutParams();
+			vg_params.width = (int) (60 * scale + 0.5f); // convert dps to pixels
+			vg_params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+			prev_button.setLayoutParams(vg_params);
 			prev_button.setVisibility( (current_index > 0) ? View.VISIBLE : View.INVISIBLE);
 
         	ll2.addView(resolution_text_view);
@@ -1240,10 +1242,10 @@ public class MainActivity extends Activity {
 			next_button.setText(">");
 			next_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
 			next_button.setPadding(padding, padding, padding, padding);
-			params = next_button.getLayoutParams();
-			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
-			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
-			next_button.setLayoutParams(params);
+			vg_params = next_button.getLayoutParams();
+			vg_params.width = (int) (60 * scale + 0.5f); // convert dps to pixels
+			vg_params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+			next_button.setLayoutParams(vg_params);
 			next_button.setVisibility( (current_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
 
 			prev_button.setOnClickListener(new View.OnClickListener() {
