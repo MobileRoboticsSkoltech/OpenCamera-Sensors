@@ -912,6 +912,15 @@ public class MainActivity extends Activity {
     			}
     		});
 
+        	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
+        	addRadioOptionsToPopup(ll, supported_white_balances, "White Balance", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
+
+        	List<String> supported_scene_modes = this.preview.getSupportedSceneModes();
+        	addRadioOptionsToPopup(ll, supported_scene_modes, "Scene Mode", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
+
+        	List<String> supported_color_effects = this.preview.getSupportedColorEffects();
+        	addRadioOptionsToPopup(ll, supported_color_effects, "Color Effect", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
+        	
         	if( this.supports_auto_stabilise ) {
         		CheckBox checkBox = new CheckBox(this);
         		checkBox.setText("Auto-stabilise?");
@@ -936,15 +945,6 @@ public class MainActivity extends Activity {
 				ll.addView(checkBox);
         	}
 
-        	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
-        	addRadioOptionsToPopup(ll, supported_white_balances, "White Balance", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
-
-        	List<String> supported_scene_modes = this.preview.getSupportedSceneModes();
-        	addRadioOptionsToPopup(ll, supported_scene_modes, "Scene Mode", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
-
-        	List<String> supported_color_effects = this.preview.getSupportedColorEffects();
-        	addRadioOptionsToPopup(ll, supported_color_effects, "Color Effect", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
-        	
     		final List<Camera.Size> picture_sizes = this.preview.getSupportedPictureSizes();
     		int picture_size_index = this.preview.getCurrentPictureSizeIndex();
     		if( picture_sizes != null && picture_size_index != -1 ) {
@@ -1115,6 +1115,7 @@ public class MainActivity extends Activity {
 
         			button.setText(string + "\n" + supported_option);
         			button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
+        			button.setTextColor(Color.WHITE);
         			// need 0 padding so we have enough room to display text for ISO buttons, when there are 6 ISO settings
         			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
         			view.setPadding(padding, padding, padding, padding);
