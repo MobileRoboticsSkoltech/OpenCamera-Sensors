@@ -101,6 +101,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
 	private String video_name = null;
+	private boolean has_current_fps_range = false;
 	private int [] current_fps_range = new int[2];
 
 	private final int PHASE_NORMAL = 0;
@@ -988,10 +989,20 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	        if( MyDebug.LOG )
 				Log.d(TAG, "get preview fps range");
-			parameters.getPreviewFpsRange(current_fps_range);
-	    	if( MyDebug.LOG ) {
-				Log.d(TAG, "    current fps range: " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-	    	}
+	        has_current_fps_range = false;
+	        try {
+				parameters.getPreviewFpsRange(current_fps_range);
+		        has_current_fps_range = true;
+		    	if( MyDebug.LOG ) {
+					Log.d(TAG, "    current fps range: " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+		    	}
+	        }
+	        catch(NumberFormatException e) {
+	        	// needed to trap NumberFormatException reported on "mb526" running SlimKat 4.6, based on Android 4.4.2
+		    	if( MyDebug.LOG )
+					Log.d(TAG, "parameters.getPreviewFpsRange failed!");
+		    	e.printStackTrace();
+	        }
 
 	    	supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
 
@@ -3007,6 +3018,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private void matchPreviewFpsToVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "matchPreviewFpsToVideo()");
+		if( !has_current_fps_range ) {
+			// exit, as we don't have a current fps to reset back to later
+			if( MyDebug.LOG )
+				Log.d(TAG, "current fps not available");
+			return;
+		}
 		CamcorderProfile profile = getCamcorderProfile();
 		Camera.Parameters parameters = camera.getParameters();
 
@@ -3120,7 +3137,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					this.is_preview_started = false;
 				}
 				setPreviewSize();
-				if( !is_video ) {
+				if( !is_video && has_current_fps_range ) {
 					// if is_video is true, we set the preview fps range in startCameraPreview()
 					if( MyDebug.LOG )
 						Log.d(TAG, "    reset preview to current fps range: " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
