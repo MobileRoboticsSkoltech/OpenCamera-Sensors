@@ -854,6 +854,11 @@ public class MainActivity extends Activity {
 			closePopup();
 			return;
 		}
+		if( preview.getCamera() == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
+			return;
+		}
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "open popup");
