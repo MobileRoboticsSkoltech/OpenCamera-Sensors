@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.hardware.Camera;
@@ -99,6 +100,7 @@ public class MainActivity extends Activity {
 	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
     private GestureDetector gestureDetector;
     private boolean screen_is_locked = false;
+    private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<Integer, Bitmap>();
 
     private ToastBoxer screen_locked_toast = new ToastBoxer();
     private ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
@@ -225,8 +227,23 @@ public class MainActivity extends Activity {
 			editor.apply();
         }
 
+        preloadIcons(R.array.flash_icons);
+        preloadIcons(R.array.focus_mode_icons);
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for Activity startup: " + (System.currentTimeMillis() - time_s));
+	}
+	
+	private void preloadIcons(int icons_id) {
+    	long time_s = System.currentTimeMillis();
+    	String [] icons = getResources().getStringArray(icons_id);
+    	for(int i=0;i<icons.length;i++) {
+    		int resource = getResources().getIdentifier(icons[i], null, this.getApplicationContext().getPackageName());
+    		Bitmap bm = BitmapFactory.decodeResource(getResources(), resource);
+    		this.preloaded_bitmap_resources.put(resource, bm);
+    	}
+		if( MyDebug.LOG )
+			Log.d(TAG, "time for preloadIcons: " + (System.currentTimeMillis() - time_s));
 	}
 	
 	@Override
@@ -866,7 +883,9 @@ public class MainActivity extends Activity {
 		clearSeekBar();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
 
-		{
+    	final long time_s = System.currentTimeMillis();
+
+    	{
 			// prevent popup being transparent
 			popup_container.setBackgroundColor(Color.BLACK);
 			popup_container.setAlpha(0.95f);
@@ -886,7 +905,10 @@ public class MainActivity extends Activity {
 			}
 		});
     	
-    	if( preview.isVideo() && preview.isTakingPhoto() ) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "time 1: " + (System.currentTimeMillis() - time_s));
+
+		if( preview.isVideo() && preview.isTakingPhoto() ) {
     		// don't add any more options
     	}
     	else {
@@ -901,7 +923,10 @@ public class MainActivity extends Activity {
     			}
     		});
             
-        	List<String> supported_isos = this.preview.getSupportedISOs();
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "time 2: " + (System.currentTimeMillis() - time_s));
+
+    		List<String> supported_isos = this.preview.getSupportedISOs();
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
     		String current_iso = sharedPreferences.getString(Preview.getISOPreferenceKey(), "auto");
         	addButtonOptionsToPopup(ll, supported_isos, -1, -1, R.string.iso, current_iso, new ButtonOptionsPopupListener() {
@@ -919,15 +944,27 @@ public class MainActivity extends Activity {
     			}
     		});
 
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "time 3: " + (System.currentTimeMillis() - time_s));
+
         	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
         	addRadioOptionsToPopup(ll, supported_white_balances, getResources().getString(R.string.preference_white_balance), Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "TEST_WHITE_BALANCE");
+
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "time 4: " + (System.currentTimeMillis() - time_s));
 
         	List<String> supported_scene_modes = this.preview.getSupportedSceneModes();
         	addRadioOptionsToPopup(ll, supported_scene_modes, getResources().getString(R.string.preference_scene_mode), Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "TEST_SCENE_MODE");
 
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "time 5: " + (System.currentTimeMillis() - time_s));
+
         	List<String> supported_color_effects = this.preview.getSupportedColorEffects();
         	addRadioOptionsToPopup(ll, supported_color_effects, getResources().getString(R.string.preference_color_effect), Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "TEST_COLOR_EFFECT");
         	
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "time 6: " + (System.currentTimeMillis() - time_s));
+
         	if( this.supports_auto_stabilise ) {
         		CheckBox checkBox = new CheckBox(this);
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
@@ -951,6 +988,9 @@ public class MainActivity extends Activity {
 
 				ll.addView(checkBox);
         	}
+
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "time 7: " + (System.currentTimeMillis() - time_s));
 
     		final List<Camera.Size> picture_sizes = this.preview.getSupportedPictureSizes();
     		int picture_size_index = this.preview.getCurrentPictureSizeIndex();
@@ -990,6 +1030,9 @@ public class MainActivity extends Activity {
 					return -1;
 				}
     		});
+
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "time 8: " + (System.currentTimeMillis() - time_s));
 
         	final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
         	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
@@ -1035,6 +1078,9 @@ public class MainActivity extends Activity {
     		});
     	}
 
+		if( MyDebug.LOG )
+			Log.d(TAG, "time 9: " + (System.currentTimeMillis() - time_s));
+
 		popup_container.addView(ll);
 		
         // need to call layoutUI to make sure the new popup is oriented correctly
@@ -1047,7 +1093,11 @@ public class MainActivity extends Activity {
 			    public void onGlobalLayout() {
 					if( MyDebug.LOG )
 						Log.d(TAG, "onGlobalLayout()");
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after global layout: " + (System.currentTimeMillis() - time_s));
 		    		layoutUI();
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after layoutUI: " + (System.currentTimeMillis() - time_s));
 		    		// stop listening - only want to call this once!
 		            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
 		            	popup_container.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -1061,6 +1111,9 @@ public class MainActivity extends Activity {
 		        }
 			}
 		);
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "time to create popup: " + (System.currentTimeMillis() - time_s));
     }
     
     private abstract class ButtonOptionsPopupListener {
@@ -1073,10 +1126,15 @@ public class MainActivity extends Activity {
     	if( supported_options != null ) {
 			String string = getResources().getString(string_id);
 
+	    	final long time_s = System.currentTimeMillis();
         	LinearLayout ll2 = new LinearLayout(this);
             ll2.setOrientation(LinearLayout.HORIZONTAL);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addButtonOptionsToPopup time 1: " + (System.currentTimeMillis() - time_s));
         	String [] icons = icons_id != -1 ? getResources().getStringArray(icons_id) : null;
         	String [] values = values_id != -1 ? getResources().getStringArray(values_id) : null;
+			if( MyDebug.LOG )
+				Log.d(TAG, "addButtonOptionsToPopup time 2: " + (System.currentTimeMillis() - time_s));
         	for(final String supported_option : supported_options) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "supported_option: " + supported_option);
@@ -1093,15 +1151,30 @@ public class MainActivity extends Activity {
             			resource = getResources().getIdentifier(icons[index], null, this.getApplicationContext().getPackageName());
             		}
         		}
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.1: " + (System.currentTimeMillis() - time_s));
 
         		View view = null;
     			final float scale = getResources().getDisplayMetrics().density;
         		if( resource != -1 ) {
         			ImageButton image_button = new ImageButton(this);
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "addButtonOptionsToPopup time 2.11: " + (System.currentTimeMillis() - time_s));
         			view = image_button;
         			ll2.addView(view);
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "addButtonOptionsToPopup time 2.12: " + (System.currentTimeMillis() - time_s));
 
-        			image_button.setImageResource(resource);
+        			//image_button.setImageResource(resource);
+        			Bitmap bm = this.preloaded_bitmap_resources.get(resource);
+        			if( bm != null )
+        				image_button.setImageBitmap(bm);
+        			else {
+            			if( MyDebug.LOG )
+            				Log.d(TAG, "failed to find bitmap for resource " + resource + "!");
+        			}
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "addButtonOptionsToPopup time 2.13: " + (System.currentTimeMillis() - time_s));
         			image_button.setScaleType(ScaleType.FIT_CENTER);
         			final int padding = (int) (10 * scale + 0.5f); // convert dps to pixels
         			view.setPadding(padding, padding, padding, padding);
@@ -1118,6 +1191,8 @@ public class MainActivity extends Activity {
         			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
         			view.setPadding(padding, padding, padding, padding);
         		}
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.2: " + (System.currentTimeMillis() - time_s));
     			ViewGroup.LayoutParams params = view.getLayoutParams();
     			//params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
     			params.width = (int) ((250/supported_options.size()) * scale + 0.5f); // convert dps to pixels
@@ -1131,6 +1206,8 @@ public class MainActivity extends Activity {
     			else {
     				view.setAlpha(0.6f);
     			}
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.3: " + (System.currentTimeMillis() - time_s));
     			view.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -1140,8 +1217,14 @@ public class MainActivity extends Activity {
 					}
     			});
     			this.popup_buttons.put(supported_option, view);
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.currentTimeMillis() - time_s));
     		}
+			if( MyDebug.LOG )
+				Log.d(TAG, "addButtonOptionsToPopup time 3: " + (System.currentTimeMillis() - time_s));
     		ll.addView(ll2);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addButtonOptionsToPopup time 4: " + (System.currentTimeMillis() - time_s));
         }
     }
     
