@@ -859,6 +859,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "open popup");
 
 		clearSeekBar();
+		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
 
 		{
 			// prevent popup being transparent
@@ -1301,6 +1302,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "openSettings");
 		closePopup();
+		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
 		preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
 		
 		Bundle bundle = new Bundle();

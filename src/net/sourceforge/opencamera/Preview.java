@@ -680,20 +680,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		// n.b., don't reset has_set_location, as we can remember the location when switching camera
 		MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.clearSeekBar();
-		//if( is_taking_photo_on_timer ) {
-		if( this.isOnTimer() ) {
-			takePictureTimerTask.cancel();
-			takePictureTimerTask = null;
-			if( beepTimerTask != null ) {
-				beepTimerTask.cancel();
-				beepTimerTask = null;
-			}
-			/*is_taking_photo_on_timer = false;
-			is_taking_photo = false;*/
-    		this.phase = PHASE_NORMAL;
-			if( MyDebug.LOG )
-				Log.d(TAG, "cancelled camera timer");
-		}
+		cancelTimer();
 		if( camera != null ) {
 			if( video_recorder != null ) {
 				stopVideo(false);
@@ -711,6 +698,24 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				camera.release();
 				camera = null;
 			}
+		}
+	}
+	
+	void cancelTimer() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cancelTimer()");
+		if( this.isOnTimer() ) {
+			takePictureTimerTask.cancel();
+			takePictureTimerTask = null;
+			if( beepTimerTask != null ) {
+				beepTimerTask.cancel();
+				beepTimerTask = null;
+			}
+			/*is_taking_photo_on_timer = false;
+			is_taking_photo = false;*/
+    		this.phase = PHASE_NORMAL;
+			if( MyDebug.LOG )
+				Log.d(TAG, "cancelled camera timer");
 		}
 	}
 	
@@ -3075,19 +3080,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			showPhotoVideoToast();
 		}
 		else {
-			//if( is_taking_photo_on_timer ) {
 			if( this.isOnTimer() ) {
-				takePictureTimerTask.cancel();
-				takePictureTimerTask = null;
-				if( beepTimerTask != null ) {
-					beepTimerTask.cancel();
-					beepTimerTask = null;
-				}
-				/*is_taking_photo_on_timer = false;
-				is_taking_photo = false;*/
-				this.phase = PHASE_NORMAL;
-				if( MyDebug.LOG )
-					Log.d(TAG, "cancelled camera timer");
+				cancelTimer();
 				this.is_video = true;
 			}
 			//else if( this.is_taking_photo ) {
@@ -3647,17 +3641,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		//if( is_taking_photo_on_timer ) {
 		if( this.isOnTimer() ) {
-			takePictureTimerTask.cancel();
-			takePictureTimerTask = null;
-			if( beepTimerTask != null ) {
-				beepTimerTask.cancel();
-				beepTimerTask = null;
-			}
-			/*is_taking_photo_on_timer = false;
-			is_taking_photo = false;*/
-			this.phase = PHASE_NORMAL;
-			if( MyDebug.LOG )
-				Log.d(TAG, "cancelled camera timer");
+			cancelTimer();
 		    showToast(take_photo_toast, R.string.cancelled_timer);
 			return;
 		}
