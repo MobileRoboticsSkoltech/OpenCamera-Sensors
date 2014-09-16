@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
@@ -947,94 +948,85 @@ public class MainActivity extends Activity {
 
     		final List<Camera.Size> picture_sizes = this.preview.getSupportedPictureSizes();
     		int picture_size_index = this.preview.getCurrentPictureSizeIndex();
-    		if( picture_sizes != null && picture_size_index != -1 ) {
-        		// add resolution
-        		TextView text_view = new TextView(this);
-        		text_view.setText("Photo resolution");
-        		text_view.setTextColor(Color.WHITE);
-        		text_view.setGravity(Gravity.CENTER);
-        		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
-            	ll.addView(text_view);
+    		final List<String> picture_size_strings = new ArrayList<String>();
+    		for(Camera.Size picture_size : picture_sizes) {
+    			String size_string = picture_size.width + " x " + picture_size.height;
+    			picture_size_strings.add(size_string);
+    		}
+    		addArrayOptionsToPopup(ll, picture_size_strings, "Photo resolution", picture_size_index, new ArrayOptionsPopupListener() {
+    			private void update(int index) {
+	                Camera.Size new_size = picture_sizes.get(index);
+	                String resolution_string = new_size.width + " " + new_size.height;
+    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString(Preview.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
+					editor.apply();
+    				updateForSettings("");
+    			}
+				@Override
+				public int onClickPrev() {
+		    		int index = preview.getCurrentPictureSizeIndex();
+	        		if( index > 0 ) {
+	        			index--;
+	        			update(index);
+	    				return index;
+	        		}
+					return -1;
+				}
+				@Override
+				public int onClickNext() {
+		    		int index = preview.getCurrentPictureSizeIndex();
+	                if( index < picture_sizes.size()-1 ) {
+	        			index++;
+	        			update(index);
+	    				return index;
+	        		}
+					return -1;
+				}
+    		});
 
-            	LinearLayout ll2 = new LinearLayout(this);
-                ll2.setOrientation(LinearLayout.HORIZONTAL);
-                
-                Camera.Size current_size = picture_sizes.get(picture_size_index);
-				String size_string = current_size.width + " x " + current_size.height;
-				final TextView resolution_text_view = new TextView(this);
-				resolution_text_view.setText(size_string);
-				resolution_text_view.setTextColor(Color.WHITE);
-				resolution_text_view.setGravity(Gravity.CENTER);
-
-    			final float scale = getResources().getDisplayMetrics().density;
-    			final Button prev_button = new Button(this);
-    			ll2.addView(prev_button);
-    			prev_button.setText("<");
-    			prev_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
-    			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
-    			prev_button.setPadding(padding, padding, padding, padding);
-    			ViewGroup.LayoutParams params = prev_button.getLayoutParams();
-    			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
-    			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
-    			prev_button.setLayoutParams(params);
-    			prev_button.setContentDescription("Previous picture resolution");
-    			prev_button.setVisibility( (picture_size_index > 0) ? View.VISIBLE : View.INVISIBLE);
-
-            	ll2.addView(resolution_text_view);
-
-    			final Button next_button = new Button(this);
-    			ll2.addView(next_button);
-    			next_button.setText(">");
-    			next_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
-    			next_button.setPadding(padding, padding, padding, padding);
-    			params = next_button.getLayoutParams();
-    			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
-    			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
-    			next_button.setLayoutParams(params);
-    			next_button.setContentDescription("Previous picture resolution");
-    			next_button.setVisibility( (picture_size_index < picture_sizes.size()-1) ? View.VISIBLE : View.INVISIBLE);
-
-    			prev_button.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-			    		int picture_size_index = preview.getCurrentPictureSizeIndex();
-		        		if( picture_size_index > 0 ) {
-    		                Camera.Size new_size = picture_sizes.get(picture_size_index-1);
-    		                String resolution_string = new_size.width + " " + new_size.height;
-    	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-    						SharedPreferences.Editor editor = sharedPreferences.edit();
-    						editor.putString(Preview.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
-    						editor.apply();
-    	    				updateForSettings("");
-    	    				String size_string = new_size.width + " x " + new_size.height;
-    	    				resolution_text_view.setText(size_string);
-    	        			prev_button.setVisibility( (picture_size_index-1 > 0) ? View.VISIBLE : View.INVISIBLE);
-    	        			next_button.setVisibility( (picture_size_index-1 < picture_sizes.size()-1) ? View.VISIBLE : View.INVISIBLE);
-		        		}
-					}
-    			});
-    			next_button.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-			    		int picture_size_index = preview.getCurrentPictureSizeIndex();
-		                if( picture_size_index < picture_sizes.size()-1 ) {
-    		                Camera.Size new_size = picture_sizes.get(picture_size_index+1);
-    		                String resolution_string = new_size.width + " " + new_size.height;
-    	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-    						SharedPreferences.Editor editor = sharedPreferences.edit();
-    						editor.putString(Preview.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
-    						editor.apply();
-    	    				updateForSettings("");
-    	    				String size_string = new_size.width + " x " + new_size.height;
-    	    				resolution_text_view.setText(size_string);
-    	        			prev_button.setVisibility( (picture_size_index+1 > 0) ? View.VISIBLE : View.INVISIBLE);
-    	        			next_button.setVisibility( (picture_size_index+1 < picture_sizes.size()-1) ? View.VISIBLE : View.INVISIBLE);
-	        			}
-					}
-    			});
-
-    			ll.addView(ll2);
-        	}
+        	final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
+        	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
+    		String timer_value = sharedPreferences.getString("preference_timer", "0");
+    		int current_index = Arrays.asList(timer_values).indexOf(timer_value);
+    		if( current_index == -1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
+    			current_index = 0;
+    		}
+    		addArrayOptionsToPopup(ll, Arrays.asList(timer_entries), "Timer", current_index, new ArrayOptionsPopupListener() {
+    			private void update(int index) {
+    				String new_timer_value = timer_values[index];
+    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString("preference_timer", new_timer_value);
+					editor.apply();
+    			}
+				@Override
+				public int onClickPrev() {
+    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		    		String timer_value = sharedPreferences.getString("preference_timer", "0");
+		    		int index = Arrays.asList(timer_values).indexOf(timer_value);
+	        		if( index != -1 && index > 0 ) {
+	        			index--;
+	        			update(index);
+	    				return index;
+	        		}
+					return -1;
+				}
+				@Override
+				public int onClickNext() {
+    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		    		String timer_value = sharedPreferences.getString("preference_timer", "0");
+		    		int index = Arrays.asList(timer_values).indexOf(timer_value);
+	                if( index != -1 && index < timer_values.length-1 ) {
+	        			index++;
+	        			update(index);
+	    				return index;
+	        		}
+					return -1;
+				}
+    		});
     	}
 
 		popup_container.addView(ll);
@@ -1197,6 +1189,112 @@ public class MainActivity extends Activity {
         	}
         	ll.addView(rg);
         }
+    }
+    
+    private abstract class ArrayOptionsPopupListener {
+		public abstract int onClickPrev();
+		public abstract int onClickNext();
+    }
+    
+    private void addArrayOptionsToPopup(LinearLayout ll, final List<String> supported_options, final String title, final int current_index, final ArrayOptionsPopupListener listener) {
+		if( supported_options != null && current_index != -1 ) {
+    		// add resolution
+    		TextView text_view = new TextView(this);
+    		text_view.setText(title);
+    		text_view.setTextColor(Color.WHITE);
+    		text_view.setGravity(Gravity.CENTER);
+    		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
+        	ll.addView(text_view);
+
+        	LinearLayout ll2 = new LinearLayout(this);
+            ll2.setOrientation(LinearLayout.HORIZONTAL);
+            
+			final TextView resolution_text_view = new TextView(this);
+			resolution_text_view.setText(supported_options.get(current_index));
+			resolution_text_view.setTextColor(Color.WHITE);
+			resolution_text_view.setGravity(Gravity.CENTER);
+
+			final float scale = getResources().getDisplayMetrics().density;
+			final Button prev_button = new Button(this);
+			ll2.addView(prev_button);
+			prev_button.setText("<");
+			prev_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
+			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
+			prev_button.setPadding(padding, padding, padding, padding);
+			ViewGroup.LayoutParams params = prev_button.getLayoutParams();
+			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
+			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+			prev_button.setLayoutParams(params);
+			prev_button.setContentDescription("Previous picture resolution");
+			prev_button.setVisibility( (current_index > 0) ? View.VISIBLE : View.INVISIBLE);
+
+        	ll2.addView(resolution_text_view);
+
+			final Button next_button = new Button(this);
+			ll2.addView(next_button);
+			next_button.setText(">");
+			next_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
+			next_button.setPadding(padding, padding, padding, padding);
+			params = next_button.getLayoutParams();
+			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
+			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+			next_button.setLayoutParams(params);
+			next_button.setContentDescription("Previous picture resolution");
+			next_button.setVisibility( (current_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
+
+			prev_button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+        			int new_index = listener.onClickPrev();
+        			if( new_index != -1 ) {
+        				resolution_text_view.setText(supported_options.get(new_index));
+	        			prev_button.setVisibility( (new_index > 0) ? View.VISIBLE : View.INVISIBLE);
+	        			next_button.setVisibility( (new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
+        			}
+		    		/*int index = preview.getCurrentPictureSizeIndex();
+	        		if( index > 0 ) {
+		                Camera.Size new_size = supported_options.get(index-1);
+		                String resolution_string = new_size.width + " " + new_size.height;
+	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(Preview.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
+						editor.apply();
+	    				updateForSettings("");
+	    				String size_string = new_size.width + " x " + new_size.height;
+	    				resolution_text_view.setText(size_string);
+	        			prev_button.setVisibility( (index-1 > 0) ? View.VISIBLE : View.INVISIBLE);
+	        			next_button.setVisibility( (index-1 < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
+	        		}*/
+				}
+			});
+			next_button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+        			int new_index = listener.onClickNext();
+        			if( new_index != -1 ) {
+        				resolution_text_view.setText(supported_options.get(new_index));
+	        			prev_button.setVisibility( (new_index > 0) ? View.VISIBLE : View.INVISIBLE);
+	        			next_button.setVisibility( (new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
+        			}
+		    		/*int index = preview.getCurrentPictureSizeIndex();
+	                if( index < supported_options.size()-1 ) {
+		                Camera.Size new_size = supported_options.get(index+1);
+		                String resolution_string = new_size.width + " " + new_size.height;
+	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(Preview.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
+						editor.apply();
+	    				updateForSettings("");
+	    				String size_string = new_size.width + " x " + new_size.height;
+	    				resolution_text_view.setText(size_string);
+	        			prev_button.setVisibility( (index+1 > 0) ? View.VISIBLE : View.INVISIBLE);
+	        			next_button.setVisibility( (index+1 < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
+        			}*/
+				}
+			});
+
+			ll.addView(ll2);
+    	}
     }
     
     private void openSettings() {
