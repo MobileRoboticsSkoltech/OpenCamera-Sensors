@@ -920,13 +920,13 @@ public class MainActivity extends Activity {
     		});
 
         	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
-        	addRadioOptionsToPopup(ll, supported_white_balances, getResources().getString(R.string.preference_white_balance), Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
+        	addRadioOptionsToPopup(ll, supported_white_balances, getResources().getString(R.string.preference_white_balance), Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "TEST_WHITE_BALANCE");
 
         	List<String> supported_scene_modes = this.preview.getSupportedSceneModes();
-        	addRadioOptionsToPopup(ll, supported_scene_modes, getResources().getString(R.string.preference_scene_mode), Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
+        	addRadioOptionsToPopup(ll, supported_scene_modes, getResources().getString(R.string.preference_scene_mode), Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "TEST_SCENE_MODE");
 
         	List<String> supported_color_effects = this.preview.getSupportedColorEffects();
-        	addRadioOptionsToPopup(ll, supported_color_effects, getResources().getString(R.string.preference_color_effect), Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
+        	addRadioOptionsToPopup(ll, supported_color_effects, getResources().getString(R.string.preference_color_effect), Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "TEST_COLOR_EFFECT");
         	
         	if( this.supports_auto_stabilise ) {
         		CheckBox checkBox = new CheckBox(this);
@@ -1145,7 +1145,7 @@ public class MainActivity extends Activity {
         }
     }
     
-    private void addRadioOptionsToPopup(LinearLayout ll, List<String> supported_options, final String title, final String preference_key, final String default_option) {
+    private void addRadioOptionsToPopup(LinearLayout ll, List<String> supported_options, final String title, final String preference_key, final String default_option, final String test_key) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addOptionsToPopup: " + title);
     	if( supported_options != null ) {
@@ -1158,6 +1158,7 @@ public class MainActivity extends Activity {
 
     		RadioGroup rg = new RadioGroup(this); 
         	rg.setOrientation(RadioGroup.VERTICAL);
+        	this.popup_buttons.put(test_key, rg);
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 			String current_option = sharedPreferences.getString(preference_key, default_option);

@@ -5147,19 +5147,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return supports_video_stabilization;
     }
 
-    List<String> getSupportedColorEffects() {
+    public List<String> getSupportedColorEffects() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedColorEffects");
 		return this.color_effects;
     }
 
-    List<String> getSupportedSceneModes() {
+    public List<String> getSupportedSceneModes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedSceneModes");
 		return this.scene_modes;
     }
 
-    List<String> getSupportedWhiteBalances() {
+    public List<String> getSupportedWhiteBalances() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedWhiteBalances");
 		return this.white_balances;
@@ -5171,7 +5171,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.iso_key;
     }
     
-    List<String> getSupportedISOs() {
+    public List<String> getSupportedISOs() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedISOs");
 		return this.isos;
