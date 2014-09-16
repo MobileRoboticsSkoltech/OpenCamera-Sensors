@@ -914,23 +914,23 @@ public class MainActivity extends Activity {
     				editor.putString(Preview.getISOPreferenceKey(), option);
     				editor.apply();
 
-    				updateForSettings("ISO: " + option);
+    				updateForSettings(getResources().getString(R.string.iso) + ": " + option);
     				closePopup();
     			}
     		});
 
         	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
-        	addRadioOptionsToPopup(ll, supported_white_balances, "White Balance", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
+        	addRadioOptionsToPopup(ll, supported_white_balances, getResources().getString(R.string.preference_white_balance), Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
 
         	List<String> supported_scene_modes = this.preview.getSupportedSceneModes();
-        	addRadioOptionsToPopup(ll, supported_scene_modes, "Scene Mode", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
+        	addRadioOptionsToPopup(ll, supported_scene_modes, getResources().getString(R.string.preference_scene_mode), Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
 
         	List<String> supported_color_effects = this.preview.getSupportedColorEffects();
-        	addRadioOptionsToPopup(ll, supported_color_effects, "Color Effect", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
+        	addRadioOptionsToPopup(ll, supported_color_effects, getResources().getString(R.string.preference_color_effect), Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
         	
         	if( this.supports_auto_stabilise ) {
         		CheckBox checkBox = new CheckBox(this);
-        		checkBox.setText("Auto-stabilise?");
+        		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
         		checkBox.setTextColor(Color.WHITE);
 
         		boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
@@ -959,7 +959,7 @@ public class MainActivity extends Activity {
     			String size_string = picture_size.width + " x " + picture_size.height;
     			picture_size_strings.add(size_string);
     		}
-    		addArrayOptionsToPopup(ll, picture_size_strings, "Photo resolution", picture_size_index, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(ll, picture_size_strings, getResources().getString(R.string.preference_resolution), picture_size_index, new ArrayOptionsPopupListener() {
     			private void update(int index) {
 	                Camera.Size new_size = picture_sizes.get(index);
 	                String resolution_string = new_size.width + " " + new_size.height;
@@ -1000,7 +1000,7 @@ public class MainActivity extends Activity {
 					Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
     			current_index = 0;
     		}
-    		addArrayOptionsToPopup(ll, Arrays.asList(timer_entries), "Timer", current_index, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(ll, Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), current_index, new ArrayOptionsPopupListener() {
     			private void update(int index) {
     				String new_timer_value = timer_values[index];
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
@@ -1231,7 +1231,6 @@ public class MainActivity extends Activity {
 			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
 			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
 			prev_button.setLayoutParams(params);
-			prev_button.setContentDescription("Previous picture resolution");
 			prev_button.setVisibility( (current_index > 0) ? View.VISIBLE : View.INVISIBLE);
 
         	ll2.addView(resolution_text_view);
@@ -1245,7 +1244,6 @@ public class MainActivity extends Activity {
 			params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
 			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
 			next_button.setLayoutParams(params);
-			next_button.setContentDescription("Previous picture resolution");
 			next_button.setVisibility( (current_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
 
 			prev_button.setOnClickListener(new View.OnClickListener() {
@@ -1257,20 +1255,6 @@ public class MainActivity extends Activity {
 	        			prev_button.setVisibility( (new_index > 0) ? View.VISIBLE : View.INVISIBLE);
 	        			next_button.setVisibility( (new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}
-		    		/*int index = preview.getCurrentPictureSizeIndex();
-	        		if( index > 0 ) {
-		                Camera.Size new_size = supported_options.get(index-1);
-		                String resolution_string = new_size.width + " " + new_size.height;
-	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putString(Preview.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
-						editor.apply();
-	    				updateForSettings("");
-	    				String size_string = new_size.width + " x " + new_size.height;
-	    				resolution_text_view.setText(size_string);
-	        			prev_button.setVisibility( (index-1 > 0) ? View.VISIBLE : View.INVISIBLE);
-	        			next_button.setVisibility( (index-1 < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
-	        		}*/
 				}
 			});
 			next_button.setOnClickListener(new View.OnClickListener() {
@@ -1282,20 +1266,6 @@ public class MainActivity extends Activity {
 	        			prev_button.setVisibility( (new_index > 0) ? View.VISIBLE : View.INVISIBLE);
 	        			next_button.setVisibility( (new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}
-		    		/*int index = preview.getCurrentPictureSizeIndex();
-	                if( index < supported_options.size()-1 ) {
-		                Camera.Size new_size = supported_options.get(index+1);
-		                String resolution_string = new_size.width + " " + new_size.height;
-	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putString(Preview.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
-						editor.apply();
-	    				updateForSettings("");
-	    				String size_string = new_size.width + " x " + new_size.height;
-	    				resolution_text_view.setText(size_string);
-	        			prev_button.setVisibility( (index+1 > 0) ? View.VISIBLE : View.INVISIBLE);
-	        			next_button.setVisibility( (index+1 < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
-        			}*/
 				}
 			});
 
