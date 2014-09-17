@@ -49,8 +49,10 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
@@ -1193,9 +1195,26 @@ public class MainActivity extends Activity {
         		}
     			if( MyDebug.LOG )
     				Log.d(TAG, "addButtonOptionsToPopup time 2.2: " + (System.currentTimeMillis() - time_s));
+
+    			int total_width = 280;
+    			{
+    			    Display display = getWindowManager().getDefaultDisplay();
+    			    DisplayMetrics outMetrics = new DisplayMetrics();
+    			    display.getMetrics(outMetrics);
+
+    			    // the height should limit the width, due to when held in portrait
+    			    float density  = getResources().getDisplayMetrics().density;
+    			    int dpHeight = (int)(outMetrics.heightPixels / density);
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "dpHeight: " + dpHeight);
+        			dpHeight -= 50; // allow space for the icons at top/right of screen
+        			if( total_width > dpHeight )
+        				total_width = dpHeight;
+    			}
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "total_width: " + total_width);
     			ViewGroup.LayoutParams params = view.getLayoutParams();
-    			//params.width = (int) (50 * scale + 0.5f); // convert dps to pixels
-    			params.width = (int) ((250/supported_options.size()) * scale + 0.5f); // convert dps to pixels
+    			params.width = (int) ((total_width/supported_options.size()) * scale + 0.5f); // convert dps to pixels
     			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
     			view.setLayoutParams(params);
 
