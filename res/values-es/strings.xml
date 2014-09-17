@@ -50,7 +50,9 @@
     <string name="unlocked">Desbloqueado</string>
     <string name="auto_stabilise_not_supported">Lo sentimos, auto-estabilizar no esta\nsoportado en este dispositivo</string>
     <string name="max_duration">Duración máxima</string>
+    <string name="color_effect">Efecto de color</string>
     <string name="scene_mode">Modo de escena</string>
+    <string name="white_balance">Balance de blancos</string>
     
     <string name="angle">Ángulo</string>
     <string name="direction">Dirección</string>

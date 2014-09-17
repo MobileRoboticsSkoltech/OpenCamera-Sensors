@@ -49,7 +49,9 @@
     <string name="screen_is_locked">Экран заблокирован\nпроведите пальцем по экрану,\nчтобы разблокировать</string>
     <string name="unlocked">Разблокировано</string>
     <string name="auto_stabilise_not_supported">К сожалению, авто-стабилизация не\nподдерживается на данном устройстве</string>
+    <string name="color_effect">Цветовой эффект</string>
     <string name="scene_mode">Сцена</string>
+    <string name="white_balance">Баланс белого</string>
     <string name="angle">Угол</string>
     <string name="direction">Направление</string>
     <string name="failed_to_open_camera_1">Не удалось открыть камеру.</string>

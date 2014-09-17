@@ -52,7 +52,9 @@
     <string name="auto_stabilise_not_supported">Sorry, auto-stabilise not supported\non this device</string>
     <string name="audio_disabled">Audio disabled</string>
     <string name="max_duration">Max duration</string>
+    <string name="color_effect">Color effect</string>
     <string name="scene_mode">Scene mode</string>
+    <string name="white_balance">White balance</string>
     
     <string name="angle">Angle</string>
     <string name="direction">Direction</string>

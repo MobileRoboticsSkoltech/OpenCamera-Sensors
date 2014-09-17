@@ -948,19 +948,19 @@ public class MainActivity extends Activity {
     			Log.d(TAG, "time 3: " + (System.currentTimeMillis() - time_s));
 
         	List<String> supported_white_balances = this.preview.getSupportedWhiteBalances();
-        	addRadioOptionsToPopup(ll, supported_white_balances, getResources().getString(R.string.preference_white_balance), Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "TEST_WHITE_BALANCE");
+        	addRadioOptionsToPopup(ll, supported_white_balances, getResources().getString(R.string.white_balance), Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "TEST_WHITE_BALANCE");
 
     		if( MyDebug.LOG )
     			Log.d(TAG, "time 4: " + (System.currentTimeMillis() - time_s));
 
         	List<String> supported_scene_modes = this.preview.getSupportedSceneModes();
-        	addRadioOptionsToPopup(ll, supported_scene_modes, getResources().getString(R.string.preference_scene_mode), Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "TEST_SCENE_MODE");
+        	addRadioOptionsToPopup(ll, supported_scene_modes, getResources().getString(R.string.scene_mode), Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "TEST_SCENE_MODE");
 
     		if( MyDebug.LOG )
     			Log.d(TAG, "time 5: " + (System.currentTimeMillis() - time_s));
 
         	List<String> supported_color_effects = this.preview.getSupportedColorEffects();
-        	addRadioOptionsToPopup(ll, supported_color_effects, getResources().getString(R.string.preference_color_effect), Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "TEST_COLOR_EFFECT");
+        	addRadioOptionsToPopup(ll, supported_color_effects, getResources().getString(R.string.color_effect), Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "TEST_COLOR_EFFECT");
         	
     		if( MyDebug.LOG )
     			Log.d(TAG, "time 6: " + (System.currentTimeMillis() - time_s));
