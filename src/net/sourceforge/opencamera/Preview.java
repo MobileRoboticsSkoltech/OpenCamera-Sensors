@@ -1176,7 +1176,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 						iso_key = null; // not supported
 				}
 			}
-			if( iso_key != null ) {
+			/*isos = new ArrayList<String>();
+			isos.add("auto");
+			isos.add("100");
+			isos.add("200");
+			isos.add("400");
+			isos.add("800");
+			isos.add("1600");*/
+			if( iso_key != null ){
 				if( isos == null ) {
 					// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
 					isos = new ArrayList<String>();
@@ -1423,6 +1430,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					Log.d(TAG, "focus not supported");
 				supported_focus_values = null;
 			}
+			/*supported_focus_values = new Vector<String>();
+			supported_focus_values.add("focus_mode_auto");
+			supported_focus_values.add("focus_mode_infinity");
+			supported_focus_values.add("focus_mode_macro");
+			supported_focus_values.add("focus_mode_manual");
+			supported_focus_values.add("focus_mode_fixed");
+			supported_focus_values.add("focus_mode_edof");
+			supported_focus_values.add("focus_mode_continuous_video");*/
 		    /*View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
 			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);*/
 		}
