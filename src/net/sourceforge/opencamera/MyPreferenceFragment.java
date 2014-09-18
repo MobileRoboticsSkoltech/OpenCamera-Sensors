@@ -46,6 +46,8 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
 		
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+
 		final boolean supports_auto_stabilise = bundle.getBoolean("supports_auto_stabilise");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);
@@ -90,7 +92,6 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
 			String resolution_preference_key = Preview.getResolutionPreferenceKey(cameraId);
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 			String resolution_value = sharedPreferences.getString(resolution_preference_key, "");
 			if( MyDebug.LOG )
 				Log.d(TAG, "resolution_value: " + resolution_value);
@@ -130,7 +131,6 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
 			String video_quality_preference_key = Preview.getVideoQualityPreferenceKey(cameraId);
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 			String video_quality_value = sharedPreferences.getString(video_quality_preference_key, "");
 			if( MyDebug.LOG )
 				Log.d(TAG, "video_quality_value: " + video_quality_value);
@@ -437,6 +437,10 @@ public class MyPreferenceFragment extends PreferenceFragment {
                 		if( iso_key != null ) {
                 			about_string.append("\nISO key: " + iso_key);
                 		}
+
+                		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MyPreferenceFragment.this.getActivity());
+                		String save_location = sharedPreferences.getString("preference_save_location", "OpenCamera");
+                		about_string.append("\nSave Location: " + save_location);
 
                 		about_string.append("\nParameters: ");
                 		String parameters_string = bundle.getString("parameters_string");
