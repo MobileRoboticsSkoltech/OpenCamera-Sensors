@@ -135,7 +135,7 @@ your device supports focus areas, you can touch the part of the screen you want 
 (if your device supports it) control the exposure level (e.g., so clicking on a bright area will adjust the exposure
 so that it becomes less bright). To zoom, use the slider next to the take photo button, or do a multi-touch "pinch"
 gesture. You can also control via the volume keys on your phone or tablet - by default, pressing them will take a
-photo, but can change this to zoom in/out from the <a href="#settings">Settings</a>.</p>
+photo, but you can change this to zoom in/out from the <a href="#settings">Settings</a>.</p>
 
 <p>You can press the gallery icon to view your photos
 (by default saved in the OpenCamera folder) - it will show the most recent image or video. The gallery button's
@@ -160,12 +160,18 @@ device has two cameras).</p>
 recording video mode. When in video mode, the take photo icon will change to the record video icon
 <img src="take_video.png" width="32" height="32">.</p>
 
-<p><img src="flash_auto.png" width="32" height="32"><b>Flash mode</b> - Click this to cycle through the available flash modes. Popup
+<!--<p><img src="flash_auto.png" width="32" height="32"><b>Flash mode</b> - Click this to cycle through the available flash modes. Popup
 text will explain what each mode is. (Only available if the camera supports flash.)</p>
 
 <p><img src="focus_mode_auto.png" width="32" height="32"><b>Focus mode</b> - Click this to cycle through the available focus modes.
 Popup text will explain what each mode is. (Only available if the camera supports different focus modes.) A special mode is "Focus Manual",
-which means the camera will never refocus when taking a photo, instead you should touch the screen to manually focus.</p>
+which means the camera will never refocus when taking a photo, instead you should touch the screen to manually focus.</p>-->
+
+<p><img src="popup.png" width="32" height="32"><b>Popop menu</b> - Opens the popup menu for quick access to changing
+flash, focus, ISO, white balance, scene mode, color effect, camera resolution, timer: For flash and focus modes,
+selecting an option will display popup text explaining what the mode is. A special mode is "Focus Manual", which
+means the camera will never refocus when taking a photo, instead you should touch the screen to manually focus.
+See <a href="#settings">Settings</a> for more info on the other settings.</p>
 
 <p><img src="exposure.png" width="32" height="32"><b>Exposure compensation</b> - Clicking this will bring up a
 slider and plus/minus buttons which can be used to control the exposure compensation. A higher value increases
@@ -553,6 +559,8 @@ FIXED   Crash (NumberFormatException in Parameters.getPreviewFpsRange()) on
         startup for mb526.
 FIXED   Problems if settings window was opened while timer was active (timer is
         now cancelled when going to settings).
+ADDED   New popup menu, allows quick access to changing: flash, focus, ISO,
+        white balance, scene mode, color effect, camera resolution, timer.
 
 Version 1.19 (2014/09/08)
 
