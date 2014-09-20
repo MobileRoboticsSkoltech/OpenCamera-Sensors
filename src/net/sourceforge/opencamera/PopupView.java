@@ -46,7 +46,7 @@ public class PopupView extends LinearLayout {
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
         List<String> supported_flash_values = preview.getSupportedFlashValues();
-    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, R.string.flash_mode, preview.getCurrentFlashValue(), new ButtonOptionsPopupListener() {
+    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), new ButtonOptionsPopupListener() {
 			@Override
 			public void onClick(String option) {
 				if( MyDebug.LOG )
@@ -61,7 +61,7 @@ public class PopupView extends LinearLayout {
     	}
     	else {
         	List<String> supported_focus_values = preview.getSupportedFocusValues();
-        	addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, R.string.focus_mode, preview.getCurrentFocusValue(), new ButtonOptionsPopupListener() {
+        	addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), new ButtonOptionsPopupListener() {
     			@Override
     			public void onClick(String option) {
     				if( MyDebug.LOG )
@@ -74,7 +74,8 @@ public class PopupView extends LinearLayout {
     		List<String> supported_isos = preview.getSupportedISOs();
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     		String current_iso = sharedPreferences.getString(Preview.getISOPreferenceKey(), "auto");
-        	addButtonOptionsToPopup(supported_isos, -1, -1, R.string.iso, current_iso, new ButtonOptionsPopupListener() {
+    		// n.b., we hardcode the string "ISO" as we don't want it translated - firstly more consistent with the ISO values returned by the driver, secondly need to worry about the size of the buttons, so don't want risk of a translated string being too long
+        	addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, new ButtonOptionsPopupListener() {
     			@Override
     			public void onClick(String option) {
     				if( MyDebug.LOG )
@@ -84,7 +85,7 @@ public class PopupView extends LinearLayout {
     				editor.putString(Preview.getISOPreferenceKey(), option);
     				editor.apply();
 
-    				main_activity.updateForSettings(getResources().getString(R.string.iso) + ": " + option);
+    				main_activity.updateForSettings("ISO: " + option);
     				main_activity.closePopup();
     			}
     		});
@@ -206,12 +207,10 @@ public class PopupView extends LinearLayout {
 		public abstract void onClick(String option);
     }
     
-    private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, int string_id, String current_value, final ButtonOptionsPopupListener listener) {
+    private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String string, String current_value, final ButtonOptionsPopupListener listener) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addButtonOptionsToPopup");
     	if( supported_options != null ) {
-			String string = getResources().getString(string_id);
-
 	    	final long time_s = System.currentTimeMillis();
         	LinearLayout ll2 = new LinearLayout(this.getContext());
             ll2.setOrientation(LinearLayout.HORIZONTAL);
@@ -271,7 +270,13 @@ public class PopupView extends LinearLayout {
         			view = button;
         			ll2.addView(view);
 
-        			button.setText(string + "\n" + supported_option);
+        			// hack for ISO mode ISO_HJR (e.g., on Samsung S5)
+        			if( string.equalsIgnoreCase("ISO") && supported_option.length() >= 4 && supported_option.substring(0, 4).equalsIgnoreCase("ISO_") ) {
+            			button.setText(string + "\n" + supported_option.substring(4));
+        			}
+        			else {
+            			button.setText(string + "\n" + supported_option);
+        			}
         			button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
         			button.setTextColor(Color.WHITE);
         			// need 0 padding so we have enough room to display text for ISO buttons, when there are 6 ISO settings

@@ -133,8 +133,8 @@ public final class R {
         public static final int auto_stabilise_not_supported=0x7f07002d;
         public static final int back_camera=0x7f070018;
         public static final int cancelled_timer=0x7f07001d;
-        public static final int cant_access_folder=0x7f0700b5;
-        public static final int cant_write_folder=0x7f0700b4;
+        public static final int cant_access_folder=0x7f0700b4;
+        public static final int cant_write_folder=0x7f0700b3;
         public static final int changed_save_location=0x7f07000c;
         /**  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
@@ -144,13 +144,13 @@ public final class R {
         public static final int clear_folder_history_question=0x7f07000b;
         public static final int color_effect=0x7f070030;
         public static final int direction=0x7f070034;
-        public static final int enter_new_folder=0x7f0700b6;
+        public static final int enter_new_folder=0x7f0700b5;
         public static final int exposure=0x7f0700a8;
         public static final int exposure_compensation=0x7f070016;
         public static final int exposure_lock=0x7f0700a9;
         public static final int exposure_locked=0x7f07001b;
         public static final int exposure_unlocked=0x7f07001c;
-        public static final int failed_create_folder=0x7f0700b7;
+        public static final int failed_create_folder=0x7f0700b6;
         public static final int failed_to_auto_stabilise=0x7f070025;
         public static final int failed_to_open_camera_1=0x7f070035;
         public static final int failed_to_open_camera_2=0x7f070036;
@@ -167,15 +167,14 @@ public final class R {
         public static final int failed_to_take_picture=0x7f070028;
         public static final int flash_mode=0x7f0700ab;
         public static final int focus_mode=0x7f0700aa;
-        public static final int folder_exists=0x7f0700b8;
+        public static final int folder_exists=0x7f0700b7;
         public static final int free_memory=0x7f070039;
         public static final int front_camera=0x7f070017;
         public static final int gallery=0x7f0700a7;
         public static final int intro_ok=0x7f070004;
         public static final int intro_text=0x7f070003;
-        public static final int iso=0x7f0700b0;
         public static final int max_duration=0x7f07002f;
-        public static final int new_folder=0x7f0700b3;
+        public static final int new_folder=0x7f0700b2;
         public static final int no_gallery_app=0x7f07002a;
         public static final int not_supported=0x7f070011;
         /**  whether a setting is turned on, e.g., "Auto-stabilise: On" 
@@ -183,7 +182,7 @@ public final class R {
          */
         public static final int off=0x7f070008;
         public static final int on=0x7f070007;
-        public static final int parent_folder=0x7f0700b1;
+        public static final int parent_folder=0x7f0700b0;
         public static final int photo=0x7f070019;
         public static final int photo_deleted=0x7f070029;
         public static final int preference_about=0x7f0700a0;
@@ -302,7 +301,7 @@ public final class R {
         public static final int taking_photo=0x7f070027;
         public static final int trash=0x7f0700ae;
         public static final int unlocked=0x7f07002c;
-        public static final int use_folder=0x7f0700b2;
+        public static final int use_folder=0x7f0700b1;
         public static final int video=0x7f07001a;
         public static final int video_error_server_died=0x7f070013;
         /**   intentionally starts lower case 

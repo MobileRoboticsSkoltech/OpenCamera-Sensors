@@ -1178,6 +1178,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 			/*isos = new ArrayList<String>();
 			isos.add("auto");
+			isos.add("ISO_HJR");
 			isos.add("100");
 			isos.add("200");
 			isos.add("400");
