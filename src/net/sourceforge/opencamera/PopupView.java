@@ -46,7 +46,7 @@ public class PopupView extends LinearLayout {
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
         List<String> supported_flash_values = preview.getSupportedFlashValues();
-    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), new ButtonOptionsPopupListener() {
+    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
 			@Override
 			public void onClick(String option) {
 				if( MyDebug.LOG )
@@ -61,7 +61,7 @@ public class PopupView extends LinearLayout {
     	}
     	else {
         	List<String> supported_focus_values = preview.getSupportedFocusValues();
-        	addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), new ButtonOptionsPopupListener() {
+        	addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), "TEST_FOCUS", new ButtonOptionsPopupListener() {
     			@Override
     			public void onClick(String option) {
     				if( MyDebug.LOG )
@@ -75,7 +75,7 @@ public class PopupView extends LinearLayout {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     		String current_iso = sharedPreferences.getString(Preview.getISOPreferenceKey(), "auto");
     		// n.b., we hardcode the string "ISO" as we don't want it translated - firstly more consistent with the ISO values returned by the driver, secondly need to worry about the size of the buttons, so don't want risk of a translated string being too long
-        	addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, new ButtonOptionsPopupListener() {
+        	addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, "TEST_ISO", new ButtonOptionsPopupListener() {
     			@Override
     			public void onClick(String option) {
     				if( MyDebug.LOG )
@@ -207,7 +207,7 @@ public class PopupView extends LinearLayout {
 		public abstract void onClick(String option);
     }
     
-    private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String string, String current_value, final ButtonOptionsPopupListener listener) {
+    private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String string, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addButtonOptionsToPopup");
     	if( supported_options != null ) {
@@ -326,7 +326,7 @@ public class PopupView extends LinearLayout {
 						listener.onClick(supported_option);
 					}
     			});
-    			this.popup_buttons.put(supported_option, view);
+    			this.popup_buttons.put(test_key + "_" + supported_option, view);
     			if( MyDebug.LOG )
     				Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.currentTimeMillis() - time_s));
     		}
@@ -387,7 +387,7 @@ public class PopupView extends LinearLayout {
 						main_activity.closePopup();
 					}
     			});
-    			this.popup_buttons.put(supported_option, button);
+    			this.popup_buttons.put(test_key + "_" + supported_option, button);
         	}
         	this.addView(rg);
         }
