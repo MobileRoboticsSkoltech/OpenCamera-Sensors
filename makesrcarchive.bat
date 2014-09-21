@@ -12,7 +12,8 @@ copy %src%\gpl-3.0.txt %dst%
 copy %src%\.classpath %dst%
 copy %src%\.project %dst%
 copy %src%\AndroidManifest.xml %dst%
-copy %src%\ic_launcher-web.png %dst%
+REM copy %src%\ic_launcher-web.png %dst%
+copy %src%\logo.svg %dst%
 copy %src%\proguard-project.txt %dst%
 copy %src%\project.properties %dst%
 
