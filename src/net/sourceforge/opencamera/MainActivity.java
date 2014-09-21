@@ -70,7 +70,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = true;
+	static final boolean LOG = false;
 }
 
 public class MainActivity extends Activity {
