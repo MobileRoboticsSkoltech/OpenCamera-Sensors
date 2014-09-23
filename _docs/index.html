@@ -321,15 +321,20 @@ correct the preview so that you can still see what you are shooting properly.</p
 
 <p><b>On screen GUI...</b> - Select to access the following controls:</p>
 
-<p><b>Preview size</b> - By default, Open Camera matches the aspect ratio of the preview (the image that is displayed on
-the phone/tablet's display) with that of the photo resolution ("Match photo size (WYSIWYG)" mode). The advantage is that
-what you see in the preview will match what will be in the resultant photo ("What-You-See-Is-What-You-Get") - though this
-may mean you will have "black bars" on the display in order to do this. If instead you select "Maximise preview size", then the
-camera preview will be as large as possible, trying to fill the available space. However if the resolution of the
-photo is a different aspect ratio to that of your device, this will result in the preview being cropped.
-Note that when in video mode, the preview is always in WYSIWYG mode. Also note that even in WYSIWYG mode, on some
-devices and resolutions, it may not be possible to match the preview to the resultant photo/video exactly; in such
-cases, Open Camera will try to match as closely as possible.</p>
+<p><b>Preview size</b> - By default, Open Camera matches the aspect ratio of the preview (the image that is
+displayed on the phone/tablet's display) with that of the photo resolution ("Match photo size (WYSIWYG)" mode). The
+advantage is that what you see in the preview will match what will be in the resultant photo
+("What-You-See-Is-What-You-Get") - though this may mean you will have "black bars" on the display in order to do
+this. If instead you select "Maximise preview size", then the camera preview will be as large as possible, trying to
+fill the available space. However if the resolution of the photo is a different aspect ratio to that of your device,
+this will result in the preview being cropped. In video mode, the preview is always in WYSIWYG mode.<ul>
+<li>Note that Android 4.4.3 <a href="https://code.google.com/p/android/issues/detail?id=70830">introduced a bug</a>
+which means that the aspect ratio will be wrong if you select "Maximise preview size" (i.e., the preview will look
+squished). To avoid this problem, stick with "Match photo size".</li>
+<li>Also note that even in "Match photo size" mode, on some devices and resolutions, it may not be possible to match
+the preview to the resultant photo/video exactly; in such cases, Open Camera will try to match as closely as
+possible.</li>
+</ul></p>
 
 <p><b>UI placement</b> - Whether to optimise the user interface for left-handed or right-handed use.</p>
 
