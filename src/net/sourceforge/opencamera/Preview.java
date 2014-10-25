@@ -18,6 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -353,7 +354,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    return areas;
 	}
 
-	@Override
+	@SuppressLint("ClickableViewAccessibility") @Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
         if( camera_controller == null ) {
