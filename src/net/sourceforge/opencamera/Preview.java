@@ -149,7 +149,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private List<String> supported_focus_values = null; // our "values" format
 	private int current_focus_index = -1; // this is an index into the supported_focus_values array, or -1 if no focus modes available
 	
-	private boolean is_exposure_locked_supported = false;
+	private boolean is_exposure_lock_supported = false;
 	private boolean is_exposure_locked = false;
 
 	private List<String> color_effects = null;
@@ -938,7 +938,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 	        supported_flash_values = camera_features.supported_flash_values;
 	        supported_focus_values = camera_features.supported_focus_values; // Android format
-	        this.is_exposure_locked_supported = camera_features.is_exposure_lock_supported;
+	        this.is_exposure_lock_supported = camera_features.is_exposure_lock_supported;
 	        this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
 			min_exposure = camera_features.min_exposure;
 			max_exposure = camera_features.max_exposure;
@@ -1344,9 +1344,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up exposure lock");
 		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
-		    exposureLockButton.setVisibility(is_exposure_locked_supported ? View.VISIBLE : View.GONE);
+		    exposureLockButton.setVisibility(is_exposure_lock_supported ? View.VISIBLE : View.GONE);
 	    	is_exposure_locked = false;
-		    if( is_exposure_locked_supported ) {
+		    if( is_exposure_lock_supported ) {
 		    	// exposure lock should always default to false, as doesn't make sense to save it - we can't really preserve a "lock" after the camera is reopened
 		    	// also note that it isn't safe to lock the exposure before starting the preview
 				exposureLockButton.setImageResource(is_exposure_locked ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
@@ -3241,7 +3241,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-		if( is_exposure_locked_supported ) {
+		if( is_exposure_lock_supported ) {
 			is_exposure_locked = !is_exposure_locked;
 			setExposureLocked();
 			showToast(exposure_lock_toast, is_exposure_locked ? R.string.exposure_locked : R.string.exposure_unlocked);
@@ -3254,7 +3254,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-		if( is_exposure_locked_supported ) {
+		if( is_exposure_lock_supported ) {
 	        cancelAutoFocus();
 	        camera_controller.setAutoExposureLock(is_exposure_locked);
 			Activity activity = (Activity)this.getContext();
@@ -4663,7 +4663,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
 			    if( exposures != null && !is_video ) // still allow exposure when recording video
 			    	exposureButton.setVisibility(visibility);
-			    if( is_exposure_locked_supported && !is_video ) // still allow exposure lock when recording video
+			    if( is_exposure_lock_supported && !is_video ) // still allow exposure lock when recording video
 			    	exposureLockButton.setVisibility(visibility);
 			    if( !show ) {
 			    	main_activity.closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
@@ -5133,7 +5133,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     }
     
     public boolean supportsExposureLock() {
-    	return this.is_exposure_locked_supported;
+    	return this.is_exposure_lock_supported;
     }
     
     public boolean hasFocusArea() {
