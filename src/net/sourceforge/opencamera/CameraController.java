@@ -83,7 +83,6 @@ public class CameraController {
 	private static final String TAG = "CameraController";
 
 	private Camera camera = null;
-	private int cameraId = 0;
     private int display_orientation = 0;
     private Camera.CameraInfo camera_info = new Camera.CameraInfo();
 	private String iso_key = null;
@@ -92,8 +91,8 @@ public class CameraController {
 	public int count_camera_parameters_exception = 0;
 
 	CameraController(int cameraId) {
-		this.cameraId = cameraId;
 		camera = Camera.open(cameraId);
+	    Camera.getCameraInfo(cameraId, camera_info);
 	}
 	
 	void release() {
@@ -860,7 +859,6 @@ public class CameraController {
 	
 	void setDisplayOrientation(int degrees) {
 	    int result = 0;
-	    Camera.getCameraInfo(cameraId, camera_info);
 	    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
 	        result = (camera_info.orientation + degrees) % 360;
 	        result = (360 - result) % 360;  // compensate the mirror
@@ -882,12 +880,10 @@ public class CameraController {
 	}
 	
 	int getCameraOrientation() {
-		Camera.getCameraInfo(cameraId, camera_info);
 		return camera_info.orientation;
 	}
 	
 	boolean isFrontFacing() {
-		Camera.getCameraInfo(cameraId, camera_info);
 		return (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
 	}
 	
