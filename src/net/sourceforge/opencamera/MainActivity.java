@@ -932,7 +932,10 @@ public class MainActivity extends Activity {
 		            	popup_container.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 		            }
 
-		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 0.0f);
+		    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		    		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
+		    		boolean ui_placement_right = ui_placement.equals("ui_right");
+		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, ui_placement_right ? 0.0f : 1.0f);
 		    		animation.setDuration(100);
 		    		popup_container.setAnimation(animation);
 		        }
