@@ -1569,7 +1569,7 @@ public class MainActivity extends Activity {
     
     void lockScreen() {
 		((ViewGroup) findViewById(R.id.locker)).setOnTouchListener(new View.OnTouchListener() {
-            @Override
+            @SuppressLint("ClickableViewAccessibility") @Override
             public boolean onTouch(View arg0, MotionEvent event) {
                 return gestureDetector.onTouchEvent(event);
                 //return true;
