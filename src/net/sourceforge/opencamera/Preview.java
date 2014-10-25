@@ -815,6 +815,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		    setupCamera(toast_message);
 		}
+    	setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
@@ -3078,6 +3079,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    			break;
 	    		}
 	    	}
+	    	this.setPopupIcon();
 	    	this.setFlash(flash_value);
 	    	if( save ) {
 				// now save
@@ -4673,6 +4675,25 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    	popupButton.setVisibility(visibility); // still allow popup in order to change flash mode when recording video
 			}
 		});
+    }
+    
+    private void setPopupIcon() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPopupIcon");
+		MainActivity main_activity = (MainActivity)this.getContext();
+		ImageButton popup = (ImageButton)main_activity.findViewById(R.id.popup);
+		String flash_value = getCurrentFlashValue();
+		if( MyDebug.LOG )
+			Log.d(TAG, "flash_value: " + flash_value);
+		if( flash_value != null && flash_value.equals("flash_auto") ) {
+    		popup.setImageResource(R.drawable.popup_flash_auto);
+    	}
+    	else if( flash_value != null && flash_value.equals("flash_on") ) {
+    		popup.setImageResource(R.drawable.popup_flash_on);
+    	}
+    	else {
+    		popup.setImageResource(R.drawable.popup);
+    	}
     }
 
     void onAccelerometerSensorChanged(SensorEvent event) {
