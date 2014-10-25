@@ -18,7 +18,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -35,8 +34,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
-import android.hardware.Camera.Face;
-import android.hardware.Camera.Parameters;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -48,7 +45,6 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.BatteryManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -79,12 +75,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
-    private Camera.CameraInfo camera_info = new Camera.CameraInfo();
     private Matrix camera_to_preview_matrix = new Matrix();
     private Matrix preview_to_camera_matrix = new Matrix();
 	private RectF face_rect = new RectF();
 	private Rect text_bounds = new Rect();
-    private int display_orientation = 0;
     private double preview_targetRatio = 0.0;
 
 	private boolean ui_placement_right = true;
@@ -94,7 +88,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean has_surface = false;
 	private boolean has_aspect_ratio = false;
 	private double aspect_ratio = 0.0f;
-	private Camera camera = null;
+	private CameraController camera_controller = null;
 	private int cameraId = 0;
 	private boolean is_video = false;
 	private MediaRecorder video_recorder = null;
@@ -109,8 +103,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private final int PHASE_TAKING_PHOTO = 2;
 	private final int PHASE_PREVIEW_PAUSED = 3; // the paused state after taking a photo
 	private int phase = PHASE_NORMAL;
-	/*private boolean is_taking_photo = false;
-	private boolean is_taking_photo_on_timer = false;*/
 	private Timer takePictureTimer = new Timer();
 	private TimerTask takePictureTimerTask = null;
 	private Timer beepTimer = new Timer();
@@ -163,15 +155,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private List<String> color_effects = null;
 	private List<String> scene_modes = null;
 	private List<String> white_balances = null;
-	private String iso_key = null;
 	private List<String> isos = null;
 	private List<String> exposures = null;
 	private int min_exposure = 0;
 	private int max_exposure = 0;
 
-	private List<Camera.Size> supported_preview_sizes = null;
+	private List<CameraController.Size> supported_preview_sizes = null;
 	
-	private List<Camera.Size> sizes = null;
+	private List<CameraController.Size> sizes = null;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
 	// video_quality can either be:
@@ -179,7 +170,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	// - of the form [CamcorderProfile]_r[width]x[height] - we use the CamcorderProfile as a base, and override the video resolution - this is needed to support resolutions which don't have corresponding camcorder profiles
 	private List<String> video_quality = null;
 	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
-	private List<Camera.Size> video_sizes = null;
+	private List<CameraController.Size> video_sizes = null;
 	
 	private Location location = null;
 	private boolean has_set_location = false;
@@ -201,7 +192,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	private boolean supports_face_detection = false;
 	private boolean using_face_detection = false;
-	private Face [] faces_detected = null;
+	private CameraController.Face [] faces_detected = null;
 	private boolean supports_video_stabilization = false;
 	private boolean has_focus_area = false;
 	private int focus_screen_x = 0;
@@ -212,7 +203,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final int FOCUS_SUCCESS = 1;
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
-	private String set_flash_after_autofocus = "";
+	private String set_flash_value_after_autofocus = "";
 	private boolean successfully_focused = false;
 	private long successfully_focused_time = -1;
 
@@ -242,7 +233,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public boolean test_have_angle = false;
 	public float test_angle = 0.0f;
 	public String test_last_saved_image = null;
-	public int count_camera_parameters_exception = 0;
 
 	Preview(Context context) {
 		this(context, null);
@@ -299,14 +289,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}*/
 
 	private void calculateCameraToPreviewMatrix() {
+		if( camera_controller == null )
+			return;
 		camera_to_preview_matrix.reset();
 		// from http://developer.android.com/reference/android/hardware/Camera.Face.html#rect
-		Camera.getCameraInfo(cameraId, camera_info);
-		// Need mirror for front camera.
-		boolean mirror = (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
+		// Need mirror for front camera
+		boolean mirror = camera_controller.isFrontFacing();
 		camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
 		// This is the value for android.hardware.Camera.setDisplayOrientation.
-		camera_to_preview_matrix.postRotate(display_orientation);
+		camera_to_preview_matrix.postRotate(camera_controller.getDisplayOrientation());
 		// Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
 		// UI coordinates range from (0, 0) to (width, height).
 		camera_to_preview_matrix.postScale(this.getWidth() / 2000f, this.getHeight() / 2000f);
@@ -314,6 +305,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	private void calculatePreviewToCameraMatrix() {
+		if( camera_controller == null )
+			return;
 		calculateCameraToPreviewMatrix();
 		if( !camera_to_preview_matrix.invert(preview_to_camera_matrix) ) {
     		if( MyDebug.LOG )
@@ -321,7 +314,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	private ArrayList<Camera.Area> getAreas(float x, float y) {
+	private ArrayList<CameraController.Area> getAreas(float x, float y) {
 		float [] coords = {x, y};
 		calculatePreviewToCameraMatrix();
 		preview_to_camera_matrix.mapPoints(coords);
@@ -355,15 +348,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			rect.top = rect.bottom - 2*focus_size;
 		}
 
-	    ArrayList<Camera.Area> areas = new ArrayList<Camera.Area>();
-	    areas.add(new Camera.Area(rect, 1000));
+	    ArrayList<CameraController.Area> areas = new ArrayList<CameraController.Area>();
+	    areas.add(new CameraController.Area(rect, 1000));
 	    return areas;
 	}
 
 	@Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
-        if( camera == null ) {
+        if( camera_controller == null ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "try to reopen camera due to touch");
     		this.openCamera();
@@ -402,41 +395,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
         cancelAutoFocus();
 
-        if( camera != null && !this.using_face_detection ) {
-            Camera.Parameters parameters = camera.getParameters();
-			String focus_mode = parameters.getFocusMode();
+        if( camera_controller != null && !this.using_face_detection ) {
     		this.has_focus_area = false;
-			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
-            if( parameters.getMaxNumFocusAreas() != 0 && focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) ) {
+			ArrayList<CameraController.Area> areas = getAreas(event.getX(), event.getY());
+        	if( camera_controller.setFocusAndMeteringArea(areas) ) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "set focus (and metering?) area");
 				this.has_focus_area = true;
 				this.focus_screen_x = (int)event.getX();
 				this.focus_screen_y = (int)event.getY();
-
-				ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
-			    parameters.setFocusAreas(areas);
-
-			    // also set metering areas
-			    if( parameters.getMaxNumMeteringAreas() == 0 ) {
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "metering areas not supported");
-			    }
-			    else {
-			    	parameters.setMeteringAreas(areas);
-			    }
-
-			    setCameraParameters(parameters);
-            }
-            else if( parameters.getMaxNumMeteringAreas() != 0 ) {
+        	}
+        	else {
         		if( MyDebug.LOG )
-        			Log.d(TAG, "set metering area");
+        			Log.d(TAG, "didn't set focus area in this mode, may have set metering");
         		// don't set has_focus_area in this mode
-				ArrayList<Camera.Area> areas = getAreas(event.getX(), event.getY());
-		    	parameters.setMeteringAreas(areas);
-
-			    setCameraParameters(parameters);
-            }
+        	}
         }
         
 		tryAutoFocus(false, true);
@@ -446,7 +419,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
     	@Override
     	public boolean onScale(ScaleGestureDetector detector) {
-    		if( Preview.this.camera != null && Preview.this.has_zoom ) {
+    		if( Preview.this.camera_controller != null && Preview.this.has_zoom ) {
     			Preview.this.scaleZoom(detector.getScaleFactor());
     		}
     		return true;
@@ -456,29 +429,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     public void clearFocusAreas() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearFocusAreas()");
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
         cancelAutoFocus();
-        Camera.Parameters parameters = camera.getParameters();
-        boolean update_parameters = false;
-        if( parameters.getMaxNumFocusAreas() > 0 ) {
-        	parameters.setFocusAreas(null);
-        	update_parameters = true;
-        }
-        if( parameters.getMaxNumMeteringAreas() > 0 ) {
-        	parameters.setMeteringAreas(null);
-        	update_parameters = true;
-        }
-        if( update_parameters ) {
-		    setCameraParameters(parameters);
-        }
+        camera_controller.clearFocusAndMetering();
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		successfully_focused = false;
-        //Log.d(TAG, "camera parameters null? " + (camera.getParameters().getFocusAreas()==null));
     }
 
 	public void surfaceCreated(SurfaceHolder holder) {
@@ -631,9 +591,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 	
 	private void reconnectCamera(boolean quiet) {
-        if( camera != null ) { // just to be safe
+        if( camera_controller != null ) { // just to be safe
     		try {
-				camera.reconnect();
+    			camera_controller.reconnect();
 		        this.startCameraPreview();
 			}
     		catch (IOException e) {
@@ -653,8 +613,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     			// this happens on Nexus 7 if trying to record video at bitrate 50Mbits or higher - it's fair enough that it fails, but we need to recover without a crash!
     			// not safe to call closeCamera, as any call to getParameters may cause a RuntimeException
     			this.is_preview_started = false;
-    			camera.release();
-    			camera = null;
+    			camera_controller.release();
+    			camera_controller = null;
     			if( !quiet ) {
     	        	CamcorderProfile profile = getCamcorderProfile();
 					String features = getErrorFeatures(profile);
@@ -675,14 +635,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
-		set_flash_after_autofocus = "";
+		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
 		// n.b., don't reset has_set_location, as we can remember the location when switching camera
 		MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.clearSeekBar();
 		cancelTimer();
-		if( camera != null ) {
+		if( camera_controller != null ) {
 			if( video_recorder != null ) {
 				stopVideo(false);
 			}
@@ -693,11 +653,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				this.updateFocusForVideo(false);
 			}
 			// need to check for camera being non-null again - if an error occurred stopping the video, we will have closed the camera, and may not be able to reopen
-			if( camera != null ) {
+			if( camera_controller != null ) {
 				//camera.setPreviewCallback(null);
 				pausePreview();
-				camera.release();
-				camera = null;
+				camera_controller.release();
+				camera_controller = null;
 			}
 		}
 	}
@@ -723,7 +683,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	void pausePreview() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "pausePreview()");
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
@@ -736,7 +696,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			this.updateFocusForVideo(false);
 		}
 		this.setPreviewPaused(false);
-		camera.stopPreview();
+		camera_controller.stopPreview();
 		this.phase = PHASE_NORMAL;
 		this.is_preview_started = false;
 		showGUI(true);
@@ -759,7 +719,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		// n.b., don't reset has_set_location, as we can remember the location when switching camera
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
-		set_flash_after_autofocus = "";
+		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
 		scene_modes = null;
@@ -810,21 +770,21 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		try {
 			if( MyDebug.LOG )
 				Log.d(TAG, "try to open camera: " + cameraId);
-			camera = Camera.open(cameraId);
+			camera_controller = new CameraController(cameraId);
 			//throw new RuntimeException(); // uncomment to test camera not opening
 		}
 		catch(RuntimeException e) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "Failed to open camera: " + e.getMessage());
 			e.printStackTrace();
-			camera = null;
+			camera_controller = null;
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "time after opening camera: " + (System.currentTimeMillis() - debug_time));
 		}
-		if( camera != null ) {
+		if( camera_controller != null ) {
 			Activity activity = (Activity)this.getContext();
-	        this.setCameraDisplayOrientation(activity);
+	        this.setCameraDisplayOrientation();
 	        new OrientationEventListener(activity) {
 				@Override
 				public void onOrientationChanged(int orientation) {
@@ -838,7 +798,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "call setPreviewDisplay");
 			try {
-				camera.setPreviewDisplay(mHolder);
+				camera_controller.setPreviewDisplay(mHolder);
 			}
 			catch(IOException e) {
 				if( MyDebug.LOG )
@@ -857,9 +817,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
-			if( camera != null ) {
-				Log.d(TAG, "camera parameters: " + camera.getParameters().flatten());
-			}
 		}
 	}
 	
@@ -872,7 +829,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG ) {
 			debug_time = System.currentTimeMillis();
 		}*/
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
@@ -941,76 +898,52 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
 		{
-			if( MyDebug.LOG )
-				Log.d(TAG, "set up scene mode");
-		    Camera.Parameters parameters = camera.getParameters();
 			// get available scene modes
 			// important, from docs:
 			// "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance).
 			// For example, suppose originally flash mode is on and supported flash modes are on/off. In night
 			// scene mode, both flash mode and supported flash mode may be changed to off. After setting scene
 			// mode, applications should call getParameters to know if some parameters are changed."
-			scene_modes = parameters.getSupportedSceneModes();
-			String scene_mode = setupValuesPref(scene_modes, getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO);
-			if( scene_mode != null && !parameters.getSceneMode().equals(scene_mode) ) {
-	        	parameters.setSceneMode(scene_mode);
-	        	setCameraParameters(parameters);
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up scene mode");
+			String value = sharedPreferences.getString(getSceneModePreferenceKey(), camera_controller.getDefaultSceneMode());
+			if( MyDebug.LOG )
+				Log.d(TAG, "saved scene mode: " + value);
+
+			CameraController.SupportedValues supported_values = camera_controller.setSceneMode(value);
+			if( supported_values != null ) {
+				scene_modes = supported_values.values;
+	    		// now save, so it's available for PreferenceActivity
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getSceneModePreferenceKey(), supported_values.selected_value);
+				editor.apply();
 			}
 		}
 		
-		List<String> supported_flash_modes = null;
-		List<String> supported_focus_modes = null;
 		{
 			// grab all read-only info from parameters
 			if( MyDebug.LOG )
 				Log.d(TAG, "grab info from parameters");
-		    Camera.Parameters parameters = camera.getParameters();
-			this.has_zoom = parameters.isZoomSupported();
+			CameraController.CameraFeatures camera_features = camera_controller.getCameraFeatures();
+			this.has_zoom = camera_features.is_zoom_supported;
 			if( this.has_zoom ) {
-				this.max_zoom_factor = parameters.getMaxZoom();
-				try {
-					this.zoom_ratios = parameters.getZoomRatios();
-				}
-				catch(NumberFormatException e) {
-	        		// crash java.lang.NumberFormatException: Invalid int: " 500" reported in v1.4 on device "es209ra", Android 4.1, 3 Jan 2014
-					// this is from java.lang.Integer.invalidInt(Integer.java:138) - unclear if this is a bug in Open Camera, all we can do for now is catch it
-		    		if( MyDebug.LOG )
-		    			Log.e(TAG, "NumberFormatException in getZoomRatios()");
-					e.printStackTrace();
-					this.has_zoom = false;
-					this.zoom_ratios = null;
-				}
+				this.max_zoom_factor = camera_features.max_zoom;
+				this.zoom_ratios = camera_features.zoom_ratios;
 			}
-
-			this.supports_face_detection = parameters.getMaxNumDetectedFaces() > 0;
-
-			// get available sizes
-	        sizes = parameters.getSupportedPictureSizes();
-
-	        if( MyDebug.LOG )
-				Log.d(TAG, "get preview fps range");
-	        has_current_fps_range = false;
-	        try {
-				parameters.getPreviewFpsRange(current_fps_range);
-		        has_current_fps_range = true;
-		    	if( MyDebug.LOG ) {
-					Log.d(TAG, "    current fps range: " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-		    	}
-	        }
-	        catch(NumberFormatException e) {
-	        	// needed to trap NumberFormatException reported on "mb526" running SlimKat 4.6, based on Android 4.4.2
-		    	if( MyDebug.LOG )
-					Log.d(TAG, "parameters.getPreviewFpsRange failed!");
-		    	e.printStackTrace();
-	        }
-
-	    	supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
-
-	    	supported_focus_modes = parameters.getSupportedFocusModes(); // Android format
-
-	    	this.is_exposure_locked_supported = parameters.isAutoExposureLockSupported();
-
-	    	this.supports_video_stabilization = parameters.isVideoStabilizationSupported();
+			this.supports_face_detection = camera_features.supports_face_detection;
+			this.sizes = camera_features.picture_sizes;
+			this.has_current_fps_range = camera_features.has_current_fps_range;
+			if( this.has_current_fps_range ) {
+				this.current_fps_range = camera_features.current_fps_range;
+			}
+	        supported_flash_values = camera_features.supported_flash_values;
+	        supported_focus_values = camera_features.supported_focus_values; // Android format
+	        this.is_exposure_locked_supported = camera_features.is_exposure_lock_supported;
+	        this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
+			min_exposure = camera_features.min_exposure;
+			max_exposure = camera_features.max_exposure;
+			this.video_sizes = camera_features.video_sizes;
+	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
 		
 		{
@@ -1089,14 +1022,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "using_face_detection?: " + using_face_detection);
 			}
 			if( this.using_face_detection ) {
-				class MyFaceDetectionListener implements Camera.FaceDetectionListener {
+				class MyFaceDetectionListener implements CameraController.FaceDetectionListener {
 				    @Override
-				    public void onFaceDetection(Face[] faces, Camera camera) {
-				    	faces_detected = new Face[faces.length];
+				    public void onFaceDetection(CameraController.Face[] faces) {
+				    	faces_detected = new CameraController.Face[faces.length];
 				    	System.arraycopy(faces, 0, faces_detected, 0, faces.length);				    	
 				    }
 				}
-				camera.setFaceDetectionListener(new MyFaceDetectionListener());
+				camera_controller.setFaceDetectionListener(new MyFaceDetectionListener());
 			}
 		}
 		
@@ -1107,9 +1040,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				boolean using_video_stabilization = sharedPreferences.getBoolean("preference_video_stabilization", false);
 				if( MyDebug.LOG )
 					Log.d(TAG, "using_video_stabilization?: " + using_video_stabilization);
-			    Camera.Parameters parameters = camera.getParameters();
-	            parameters.setVideoStabilization(using_video_stabilization);
-	        	setCameraParameters(parameters);
+				camera_controller.setVideoStabilization(using_video_stabilization);
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "supports_video_stabilization?: " + supports_video_stabilization);
@@ -1118,120 +1049,92 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up color effect");
-		    Camera.Parameters parameters = camera.getParameters();
-			// get available color effects
-			color_effects = parameters.getSupportedColorEffects();
-			String color_effect = setupValuesPref(color_effects, getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE);
-			if( color_effect != null ) {
-	        	parameters.setColorEffect(color_effect);
-	        	setCameraParameters(parameters);
+			String value = sharedPreferences.getString(getColorEffectPreferenceKey(), camera_controller.getDefaultColorEffect());
+			if( MyDebug.LOG )
+				Log.d(TAG, "saved color effect: " + value);
+
+			CameraController.SupportedValues supported_values = camera_controller.setColorEffect(value);
+			if( supported_values != null ) {
+				color_effects = supported_values.values;
+	    		// now save, so it's available for PreferenceActivity
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getColorEffectPreferenceKey(), supported_values.selected_value);
+				editor.apply();
 			}
 		}
 
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up white balance");
-		    Camera.Parameters parameters = camera.getParameters();
-			// get available white balances
-			white_balances = parameters.getSupportedWhiteBalance();
-			String white_balance = setupValuesPref(white_balances, getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO);
-			if( white_balance != null ) {
-	        	parameters.setWhiteBalance(white_balance);
-	        	setCameraParameters(parameters);
+			String value = sharedPreferences.getString(getWhiteBalancePreferenceKey(), camera_controller.getDefaultWhiteBalance());
+			if( MyDebug.LOG )
+				Log.d(TAG, "saved white balance: " + value);
+
+			CameraController.SupportedValues supported_values = camera_controller.setWhiteBalance(value);
+			if( supported_values != null ) {
+				white_balances = supported_values.values;
+	    		// now save, so it's available for PreferenceActivity
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getWhiteBalancePreferenceKey(), supported_values.selected_value);
+				editor.apply();
 			}
 		}
 		
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up iso");
-		    Camera.Parameters parameters = camera.getParameters();
-			// get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting
-			String iso_values = parameters.get("iso-values");
-			if( iso_values == null ) {
-				iso_values = parameters.get("iso-mode-values"); // Galaxy Nexus
-				if( iso_values == null ) {
-					iso_values = parameters.get("iso-speed-values"); // Micromax A101
-					if( iso_values == null )
-						iso_values = parameters.get("nv-picture-iso-values"); // LG dual P990
-				}
-			}
-			if( iso_values != null && iso_values.length() > 0 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "iso_values: " + iso_values);
-				String [] isos_array = iso_values.split(",");					
-				if( isos_array != null && isos_array.length > 0 ) {
-					isos = new ArrayList<String>();				
-					for(int i=0;i< isos_array.length;i++) {
-						isos.add(isos_array[i]);
-					}
-				}
-			}
+			String value = sharedPreferences.getString(getISOPreferenceKey(), camera_controller.getDefaultISO());
+			if( MyDebug.LOG )
+				Log.d(TAG, "saved iso: " + value);
 
-			iso_key = "iso";
-			if( parameters.get(iso_key) == null ) {
-				iso_key = "iso-speed"; // Micromax A101
-				if( parameters.get(iso_key) == null ) {
-					iso_key = "nv-picture-iso"; // LG dual P990
-					if( parameters.get(iso_key) == null )
-						iso_key = null; // not supported
-				}
-			}
-			/*isos = new ArrayList<String>();
-			isos.add("auto");
-			isos.add("ISO_HJR");
-			isos.add("100");
-			isos.add("200");
-			isos.add("400");
-			isos.add("800");
-			isos.add("1600");*/
-			if( iso_key != null ){
-				if( isos == null ) {
-					// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
-					isos = new ArrayList<String>();
-					isos.add("auto");
-					isos.add("100");
-					isos.add("200");
-					isos.add("400");
-					isos.add("800");
-					isos.add("1600");
-				}
-				String iso = setupValuesPref(isos, getISOPreferenceKey(), "auto");
-				if( iso != null ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "set: " + iso_key + " to: " + iso);
-		        	parameters.set(iso_key, iso);
-		        	setCameraParameters(parameters);
-				}
+			CameraController.SupportedValues supported_values = camera_controller.setISO(value);
+			if( supported_values != null ) {
+				isos = supported_values.values;
+	    		// now save, so it's available for PreferenceActivity
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getISOPreferenceKey(), supported_values.selected_value);
+				editor.apply();
 			}
 		}
 
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up exposure compensation");
-		    Camera.Parameters parameters = camera.getParameters();
 			// get min/max exposure
 			exposures = null;
-			min_exposure = parameters.getMinExposureCompensation();
-			max_exposure = parameters.getMaxExposureCompensation();
 			if( min_exposure != 0 || max_exposure != 0 ) {
 				exposures = new Vector<String>();
 				for(int i=min_exposure;i<=max_exposure;i++) {
 					exposures.add("" + i);
 				}
-				String exposure_s = setupValuesPref(exposures, getExposurePreferenceKey(), "0");
-				if( exposure_s != null ) {
-					try {
-						int exposure = Integer.parseInt(exposure_s);
+				String value = sharedPreferences.getString(getExposurePreferenceKey(), "0");
+				if( MyDebug.LOG )
+					Log.d(TAG, "saved exposure value: " + value);
+				int exposure = 0;
+				try {
+					exposure = Integer.parseInt(value);
+					if( MyDebug.LOG )
+						Log.d(TAG, "exposure: " + exposure);
+				}
+				catch(NumberFormatException exception) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "exposure invalid format, can't parse to int");
+				}
+				if( exposure < min_exposure || exposure > max_exposure ) {
+					exposure = 0;
+					if( MyDebug.LOG )
+						Log.d(TAG, "saved exposure not supported, reset to 0");
+					if( exposure < min_exposure || exposure > max_exposure ) {
 						if( MyDebug.LOG )
-							Log.d(TAG, "exposure: " + exposure);
-						parameters.setExposureCompensation(exposure);
-			        	setCameraParameters(parameters);
-					}
-					catch(NumberFormatException exception) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "exposure invalid format, can't parse to int");
+							Log.d(TAG, "zero isn't an allowed exposure?! reset to min " + min_exposure);
+						exposure = min_exposure;
 					}
 				}
+				camera_controller.setExposureCompensation(exposure);
+	    		// now save, so it's available for PreferenceActivity
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(getExposurePreferenceKey(), "" + exposure);
+				editor.apply();
 			}
 			View exposureButton = (View) activity.findViewById(R.id.exposure);
 		    exposureButton.setVisibility(exposures != null ? View.VISIBLE : View.GONE);
@@ -1242,7 +1145,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "set up picture sizes");
 			if( MyDebug.LOG ) {
 				for(int i=0;i<sizes.size();i++) {
-		        	Camera.Size size = sizes.get(i);
+					CameraController.Size size = sizes.get(i);
 		        	Log.d(TAG, "supported picture size: " + size.width + " , " + size.height);
 				}
 			}
@@ -1273,7 +1176,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 							Log.d(TAG, "resolution_h: " + resolution_h);
 						// now find size in valid list
 						for(int i=0;i<sizes.size() && current_size_index==-1;i++) {
-				        	Camera.Size size = sizes.get(i);
+							CameraController.Size size = sizes.get(i);
 				        	if( size.width == resolution_w && size.height == resolution_h ) {
 				        		current_size_index = i;
 								if( MyDebug.LOG )
@@ -1294,9 +1197,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 			if( current_size_index == -1 ) {
 				// set to largest
-				Camera.Size current_size = null;
+				CameraController.Size current_size = null;
 				for(int i=0;i<sizes.size();i++) {
-		        	Camera.Size size = sizes.get(i);
+					CameraController.Size size = sizes.get(i);
 		        	if( current_size == null || size.width*size.height > current_size.width*current_size.height ) {
 		        		current_size_index = i;
 		        		current_size = size;
@@ -1304,7 +1207,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		        }
 			}
 			if( current_size_index != -1 ) {
-				Camera.Size current_size = sizes.get(current_size_index);
+				CameraController.Size current_size = sizes.get(current_size_index);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "Current size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
 
@@ -1323,12 +1226,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up jpeg quality");
-		    Camera.Parameters parameters = camera.getParameters();
-			/*if( MyDebug.LOG )
-				Log.d(TAG, "Current image quality: " + parameters.getJpegQuality());*/
 			int image_quality = getImageQuality();
-			parameters.setJpegQuality(image_quality);
-        	setCameraParameters(parameters);
+			camera_controller.setJpegQuality(image_quality);
 			if( MyDebug.LOG )
 				Log.d(TAG, "image quality: " + image_quality);
 		}
@@ -1373,10 +1272,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up flash");
 			current_flash_index = -1;
-			if( supported_flash_modes != null && supported_flash_modes.size() > 1 ) {
+			if( supported_flash_values != null && supported_flash_values.size() > 1 ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "flash modes: " + supported_flash_modes);
-				supported_flash_values = convertFlashModesToValues(supported_flash_modes); // convert to our format (also resorts)
+					Log.d(TAG, "flash values: " + supported_flash_values);
 
 				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
 				if( flash_value.length() > 0 ) {
@@ -1405,10 +1303,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up focus");
 			current_focus_index = -1;
-			if( supported_focus_modes != null && supported_focus_modes.size() > 1 ) {
+			if( supported_focus_values != null && supported_focus_values.size() > 1 ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "focus modes: " + supported_focus_modes);
-				supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
+					Log.d(TAG, "focus values: " + supported_focus_values);
 	
 				String focus_value = sharedPreferences.getString(getFocusPreferenceKey(cameraId), "");
 				if( focus_value.length() > 0 ) {
@@ -1461,67 +1358,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	private void setCameraParameters(Camera.Parameters parameters) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setCameraParameters");
-		if( camera == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "camera not opened!");
-            return;
-		}
-	    try {
-	    	camera.setParameters(parameters);
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "done");
-	    }
-	    catch(RuntimeException e) {
-	    	// just in case something has gone wrong
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "failed to set parameters");
-    		e.printStackTrace();
-    		count_camera_parameters_exception++;
-	    }
-	}
-
-	private String setupValuesPref(List<String> values, String key, String default_value) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setupValuesPref, key: " + key);
-		if( values != null && values.size() > 0 ) {
-			if( MyDebug.LOG ) {
-				for(int i=0;i<values.size();i++) {
-		        	Log.d(TAG, "supported value: " + values.get(i));
-				}
-			}
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-			String value = sharedPreferences.getString(key, default_value);
-			if( MyDebug.LOG )
-				Log.d(TAG, "value: " + value);
-			// make sure result is valid
-			if( !values.contains(value) ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "value not valid!");
-				if( values.contains(default_value) )
-					value = default_value;
-				else
-					value = values.get(0);
-				if( MyDebug.LOG )
-					Log.d(TAG, "value is now: " + value);
-			}
-
-    		// now save, so it's available for PreferenceActivity
-			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString(key, value);
-			editor.apply();
-
-        	return value;
-		}
-		else {
-			if( MyDebug.LOG )
-				Log.d(TAG, "values not supported");
-			return null;
-		}
-	}
-
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "surfaceChanged " + w + ", " + h);
@@ -1531,7 +1367,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             // preview surface does not exist
             return;
         }
-        if( camera == null ) {
+        if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
             return;
@@ -1545,7 +1381,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewSize()");
 		// also now sets picture size
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
@@ -1557,7 +1393,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		this.cancelAutoFocus();
 		// first set picture size (for photo mode, must be done now so we can set the picture size from this; for video, doesn't really matter when we set it)
-    	Camera.Parameters parameters = camera.getParameters();
+		CameraController.Size new_size = null;
     	if( this.is_video ) {
     		// In theory, the picture size shouldn't matter in video mode, but the stock Android camera sets a picture size
     		// which is the largest that matches the video's aspect ratio.
@@ -1567,78 +1403,57 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         	if( MyDebug.LOG )
         		Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
         	double targetRatio = ((double)profile.videoFrameWidth) / (double)profile.videoFrameHeight;
-        	Camera.Size best_size = getOptimalVideoPictureSize(sizes, targetRatio);
-            parameters.setPictureSize(best_size.width, best_size.height);
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "set picture size for video: " + parameters.getPictureSize().width + ", " + parameters.getPictureSize().height);
+        	new_size = getOptimalVideoPictureSize(sizes, targetRatio);
     	}
     	else {
     		if( current_size_index != -1 ) {
-    			Camera.Size current_size = sizes.get(current_size_index);
-    			parameters.setPictureSize(current_size.width, current_size.height);
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "set picture size for photo: " + parameters.getPictureSize().width + ", " + parameters.getPictureSize().height);
+    			new_size = sizes.get(current_size_index);
     		}
     	}
-    	// need to set parameteres, so that picture size is set
-    	setCameraParameters(parameters);
-    	parameters = camera.getParameters();
+    	if( new_size != null ) {
+    		camera_controller.setPictureSize(new_size.width, new_size.height);
+    	}
 		// set optimal preview size
-		if( MyDebug.LOG )
-			Log.d(TAG, "current preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
-        supported_preview_sizes = parameters.getSupportedPreviewSizes();
-        if( supported_preview_sizes.size() > 0 ) {
-	        /*Camera.Size best_size = supported_preview_sizes.get(0);
-	        for(Camera.Size size : supported_preview_sizes) {
+        if( supported_preview_sizes != null && supported_preview_sizes.size() > 0 ) {
+	        /*CameraController.Size best_size = supported_preview_sizes.get(0);
+	        for(CameraController.Size size : supported_preview_sizes) {
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "    supported preview size: " + size.width + ", " + size.height);
 	        	if( size.width*size.height > best_size.width*best_size.height ) {
 	        		best_size = size;
 	        	}
 	        }*/
-        	Camera.Size best_size = getOptimalPreviewSize(supported_preview_sizes);
-            parameters.setPreviewSize(best_size.width, best_size.height);
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "new preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
-    		this.setAspectRatio( ((double)parameters.getPreviewSize().width) / (double)parameters.getPreviewSize().height );
-
-        	setCameraParameters(parameters);
+        	CameraController.Size best_size = getOptimalPreviewSize(supported_preview_sizes);
+        	camera_controller.setPreviewSize(best_size.width, best_size.height);
+    		this.setAspectRatio( ((double)best_size.width) / (double)best_size.height );
         }
 	}
 
 	private void sortVideoSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "sortVideoSizes()");
-		Collections.sort(this.video_sizes, new Comparator<Camera.Size>() {
-			public int compare(final Camera.Size a, final Camera.Size b) {
+		Collections.sort(this.video_sizes, new Comparator<CameraController.Size>() {
+			public int compare(final CameraController.Size a, final CameraController.Size b) {
 				return b.width * b.height - a.width * a.height;
 			}
 		});
 	}
 	
 	// for testing
-	public void setVideoSizes(List<Camera.Size> video_sizes) {
+	public void setVideoSizes(List<CameraController.Size> video_sizes) {
 		this.video_sizes = video_sizes;
 		this.sortVideoSizes();
 	}
 	
 	private void initialiseVideoSizes() {
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-	    Camera.Parameters parameters = camera.getParameters();
-    	video_sizes = parameters.getSupportedVideoSizes(); 
-    	if( video_sizes == null ) {
-    		// if null, we should use the preview sizes - see http://stackoverflow.com/questions/14263521/android-getsupportedvideosizes-allways-returns-null
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "take video_sizes from preview sizes");
-    		video_sizes = parameters.getSupportedPreviewSizes();
-    	}
 		this.sortVideoSizes();
 		if( MyDebug.LOG ) {
-			for(Camera.Size size : video_sizes) {
+			for(CameraController.Size size : video_sizes) {
     			Log.d(TAG, "    supported video size: " + size.width + ", " + size.height);
 			}
         }
@@ -1690,7 +1505,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	for(int i=0;i<video_sizes.size();i++) {
     		if( done_video_size[i] )
     			continue;
-    		Camera.Size size = video_sizes.get(i);
+    		CameraController.Size size = video_sizes.get(i);
     		if( size.width == min_resolution_w && size.height == min_resolution_h ) {
     			String str = "" + base_profile;
             	video_quality.add(str);
@@ -1957,8 +1772,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        else {
 	        	if( MyDebug.LOG )
 	        		Log.d(TAG, "set preview aspect ratio from photo size (wysiwyg)");
-	        	Camera.Parameters parameters = camera.getParameters();
-	        	Camera.Size picture_size = parameters.getPictureSize();
+	        	CameraController.Size picture_size = camera_controller.getPictureSize();
 	        	if( MyDebug.LOG )
 	        		Log.d(TAG, "picture_size: " + picture_size.width + " x " + picture_size.height);
 	        	targetRatio = ((double)picture_size.width) / (double)picture_size.height;
@@ -1977,12 +1791,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return targetRatio;
 	}
 
-	public Camera.Size getClosestSize(List<Camera.Size> sizes, double targetRatio) {
+	public CameraController.Size getClosestSize(List<CameraController.Size> sizes, double targetRatio) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getClosestSize()");
-        Camera.Size optimalSize = null;
+		CameraController.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
-        for(Camera.Size size : sizes) {
+        for(CameraController.Size size : sizes) {
             double ratio = (double)size.width / size.height;
             if( Math.abs(ratio - targetRatio) < minDiff ) {
                 optimalSize = size;
@@ -1992,13 +1806,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         return optimalSize;
 	}
 
-	public Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes) {
+	public CameraController.Size getOptimalPreviewSize(List<CameraController.Size> sizes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getOptimalPreviewSize()");
 		final double ASPECT_TOLERANCE = 0.05;
         if( sizes == null )
         	return null;
-        Camera.Size optimalSize = null;
+        CameraController.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
         Point display_size = new Point();
 		Activity activity = (Activity)this.getContext();
@@ -2014,7 +1828,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             targetHeight = display_size.y;
         }
         // Try to find an size match aspect ratio and size
-        for(Camera.Size size : sizes) {
+        for(CameraController.Size size : sizes) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "    supported preview size: " + size.width + ", " + size.height);
             double ratio = (double)size.width / size.height;
@@ -2038,15 +1852,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         return optimalSize;
     }
 
-	public Camera.Size getOptimalVideoPictureSize(List<Camera.Size> sizes, double targetRatio) {
+	public CameraController.Size getOptimalVideoPictureSize(List<CameraController.Size> sizes, double targetRatio) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getOptimalVideoPictureSize()");
 		final double ASPECT_TOLERANCE = 0.05;
         if( sizes == null )
         	return null;
-        Camera.Size optimalSize = null;
+        CameraController.Size optimalSize = null;
         // Try to find largest size that matches aspect ratio
-        for(Camera.Size size : sizes) {
+        for(CameraController.Size size : sizes) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "    supported preview size: " + size.width + ", " + size.height);
             double ratio = (double)size.width / size.height;
@@ -2127,16 +1941,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
     // for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
 	// note, if orientation is locked to landscape this is only called when setting up the activity, and will always have the same orientation
-	void setCameraDisplayOrientation(Activity activity) {
+	void setCameraDisplayOrientation() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setCameraDisplayOrientation()");
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-	    Camera.CameraInfo info = new Camera.CameraInfo();
-	    Camera.getCameraInfo(cameraId, info);
+		Activity activity = (Activity)this.getContext();
 	    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
 	    int degrees = 0;
 	    switch (rotation) {
@@ -2156,20 +1969,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			degrees = (degrees + 180) % 360;
 		}
 		
-	    int result = 0;
-	    if( info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-	        result = (info.orientation + degrees) % 360;
-	        result = (360 - result) % 360;  // compensate the mirror
-	    }
-	    else {
-	        result = (info.orientation - degrees + 360) % 360;
-	    }
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "    info orientation is " + info.orientation);
-			Log.d(TAG, "    setDisplayOrientation to " + result);
-		}
-	    camera.setDisplayOrientation(result);
-	    this.display_orientation = result;
+	    camera_controller.setDisplayOrientation(degrees);
 	}
 	
 	// for taking photos - from http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
@@ -2180,25 +1980,25 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}*/
 		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
 			return;
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");*/
 			return;
 		}
-	    Camera.getCameraInfo(cameraId, camera_info);
 	    orientation = (orientation + 45) / 90 * 90;
 	    this.current_orientation = orientation % 360;
 	    int new_rotation = 0;
-	    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-	    	new_rotation = (camera_info.orientation - orientation + 360) % 360;
+	    int camera_orientation = camera_controller.getCameraOrientation();
+	    if( camera_controller.isFrontFacing() ) {
+	    	new_rotation = (camera_orientation - orientation + 360) % 360;
 	    }
 	    else {
-	    	new_rotation = (camera_info.orientation + orientation) % 360;
+	    	new_rotation = (camera_orientation + orientation) % 360;
 	    }
 	    if( new_rotation != current_rotation ) {
 			/*if( MyDebug.LOG ) {
 				Log.d(TAG, "    current_orientation is " + current_orientation);
-				Log.d(TAG, "    info orientation is " + camera_info.orientation);
+				Log.d(TAG, "    info orientation is " + camera_orientation);
 				Log.d(TAG, "    set Camera rotation from " + current_rotation + " to " + new_rotation);
 			}*/
 	    	this.current_rotation = new_rotation;
@@ -2228,41 +2028,41 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
 		if( lock_orientation.equals("landscape") ) {
+			int camera_orientation = camera_controller.getCameraOrientation();
 		    int device_orientation = getDeviceDefaultOrientation();
-		    Camera.getCameraInfo(cameraId, camera_info);
 		    int result = 0;
 		    if( device_orientation == Configuration.ORIENTATION_PORTRAIT ) {
 		    	// should be equivalent to onOrientationChanged(270)
-			    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-			    	result = (camera_info.orientation + 90) % 360;
+			    if( camera_controller.isFrontFacing() ) {
+			    	result = (camera_orientation + 90) % 360;
 			    }
 			    else {
-			    	result = (camera_info.orientation + 270) % 360;
+			    	result = (camera_orientation + 270) % 360;
 			    }
 		    }
 		    else {
 		    	// should be equivalent to onOrientationChanged(0)
-		    	result = camera_info.orientation;
+		    	result = camera_orientation;
 		    }
 			if( MyDebug.LOG )
 				Log.d(TAG, "getImageVideoRotation() lock to landscape, returns " + result);
 		    return result;
 		}
 		else if( lock_orientation.equals("portrait") ) {
-		    Camera.getCameraInfo(cameraId, camera_info);
+			int camera_orientation = camera_controller.getCameraOrientation();
 		    int result = 0;
 		    int device_orientation = getDeviceDefaultOrientation();
 		    if( device_orientation == Configuration.ORIENTATION_PORTRAIT ) {
 		    	// should be equivalent to onOrientationChanged(0)
-		    	result = camera_info.orientation;
+		    	result = camera_orientation;
 		    }
 		    else {
 		    	// should be equivalent to onOrientationChanged(90)
-			    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
-			    	result = (camera_info.orientation + 270) % 360;
+			    if( camera_controller.isFrontFacing() ) {
+			    	result = (camera_orientation + 270) % 360;
 			    }
 			    else {
-			    	result = (camera_info.orientation + 90) % 360;
+			    	result = (camera_orientation + 90) % 360;
 			    }
 		    }
 			if( MyDebug.LOG )
@@ -2292,14 +2092,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		final float scale = getResources().getDisplayMetrics().density;
 		String preference_grid = sharedPreferences.getString("preference_grid", "preference_grid_none");
-		if( camera != null && preference_grid.equals("preference_grid_3x3") ) {
+		if( camera_controller != null && preference_grid.equals("preference_grid_3x3") ) {
 			p.setColor(Color.WHITE);
 			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(2.0f*canvas.getWidth()/3.0f, 0.0f, 2.0f*canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(0.0f, canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, canvas.getHeight()/3.0f, p);
 			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
 		}
-		if( camera != null && preference_grid.equals("preference_grid_4x2") ) {
+		if( camera_controller != null && preference_grid.equals("preference_grid_4x2") ) {
 			p.setColor(Color.GRAY);
 			canvas.drawLine(canvas.getWidth()/4.0f, 0.0f, canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
 			canvas.drawLine(canvas.getWidth()/2.0f, 0.0f, canvas.getWidth()/2.0f, canvas.getHeight()-1.0f, p);
@@ -2312,7 +2112,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		if( this.is_video || sharedPreferences.getString("preference_preview_size", "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
 			String preference_crop_guide = sharedPreferences.getString("preference_crop_guide", "crop_guide_none");
-			if( camera != null && preview_targetRatio > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
+			if( camera_controller != null && preview_targetRatio > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
 				p.setStyle(Paint.Style.STROKE);
 				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 				double crop_ratio = -1.0;
@@ -2360,7 +2160,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 
 		// note, no need to check preferences here, as we do that when setting thumbnail_anim
-		if( camera != null && this.thumbnail_anim && this.thumbnail != null ) {
+		if( camera_controller != null && this.thumbnail_anim && this.thumbnail != null ) {
 			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
 			final long duration = 500;
 			if( time > duration ) {
@@ -2448,7 +2248,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		final String ybounds_text = getResources().getString(R.string.zoom) + getResources().getString(R.string.free_memory) + getResources().getString(R.string.angle) + getResources().getString(R.string.direction);
 		final double close_angle = 1.0f;
-		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED ) {
+		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
 			boolean draw_angle = this.has_level_angle && sharedPreferences.getBoolean("preference_show_angle", true);
@@ -2524,7 +2324,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				drawTextWithBackground(canvas, p, time_s, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
-		else if( camera == null ) {
+		else if( camera_controller == null ) {
 			/*if( MyDebug.LOG ) {
 				Log.d(TAG, "no camera!");
 				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
@@ -2540,7 +2340,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
-		if( this.has_zoom && camera != null && sharedPreferences.getBoolean("preference_show_zoom", true) ) {
+		if( this.has_zoom && camera_controller != null && sharedPreferences.getBoolean("preference_show_zoom", true) ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			// only show when actually zoomed in
 			if( zoom_ratio > 1.0f + 1.0e-5f ) {
@@ -2551,7 +2351,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
 			}
 		}
-		if( camera != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
+		if( camera_controller != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
 			int pixels_offset_y = 1*text_y;
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
@@ -2659,7 +2459,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		canvas.restore();
 		
-		if( camera != null && this.phase != PHASE_PREVIEW_PAUSED && has_level_angle && sharedPreferences.getBoolean("preference_show_angle_line", false) ) {
+		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED && has_level_angle && sharedPreferences.getBoolean("preference_show_angle_line", false) ) {
 			// n.b., must draw this without canvas rotation
 			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
 			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
@@ -2717,7 +2517,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( this.using_face_detection && this.faces_detected != null ) {
 			p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 			p.setStyle(Paint.Style.STROKE);
-			for(Face face : faces_detected) {
+			for(CameraController.Face face : faces_detected) {
 				// Android doc recommends filtering out faces with score less than 50
 				if( face.score >= 50 ) {
 					calculateCameraToPreviewMatrix();
@@ -2806,7 +2606,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public void scaleZoom(float scale_factor) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "scaleZoom() " + scale_factor);
-		if( this.camera != null && this.has_zoom ) {
+		if( this.camera_controller != null && this.has_zoom ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			zoom_ratio *= scale_factor;
 
@@ -2875,13 +2675,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( new_zoom_factor > max_zoom_factor )
 			new_zoom_factor = max_zoom_factor;
 		// problem where we crashed due to calling this function with null camera should be fixed now, but check again just to be safe
-    	if(new_zoom_factor != zoom_factor && camera != null) {
-			Camera.Parameters parameters = camera.getParameters();
-			if( parameters.isZoomSupported() ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "zoom was: " + parameters.getZoom());
-				parameters.setZoom(new_zoom_factor);
-	        	setCameraParameters(parameters);
+    	if(new_zoom_factor != zoom_factor && camera_controller != null) {
+			if( this.has_zoom ) {
+				camera_controller.setZoom(new_zoom_factor);
 				zoom_factor = new_zoom_factor;
 				if( update_seek_bar ) {
 					Activity activity = (Activity)this.getContext();
@@ -2896,9 +2692,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public void changeExposure(int change, boolean update_seek_bar) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "changeExposure(): " + change);
-		if( change != 0 && camera != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
-			Camera.Parameters parameters = camera.getParameters();
-			int current_exposure = parameters.getExposureCompensation();
+		if( change != 0 && camera_controller != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
+			int current_exposure = camera_controller.getExposureCompensation();
 			int new_exposure = current_exposure + change;
 			setExposure(new_exposure, update_seek_bar);
 		}
@@ -2907,19 +2702,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public void setExposure(int new_exposure, boolean update_seek_bar) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExposure(): " + new_exposure);
-		if( camera != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
+		if( camera_controller != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
 	        cancelAutoFocus();
-			Camera.Parameters parameters = camera.getParameters();
-			int current_exposure = parameters.getExposureCompensation();
 			if( new_exposure < min_exposure )
 				new_exposure = min_exposure;
 			if( new_exposure > max_exposure )
 				new_exposure = max_exposure;
-			if( new_exposure != current_exposure ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "change exposure from " + current_exposure + " to " + new_exposure);
-				parameters.setExposureCompensation(new_exposure);
-	        	setCameraParameters(parameters);
+			if( camera_controller.setExposureCompensation(new_exposure) ) {
 				// now save
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -2950,9 +2739,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( n_cameras > 1 ) {
 			closeCamera();
 			cameraId = (cameraId+1) % n_cameras;
-		    Camera.CameraInfo info = new Camera.CameraInfo();
-		    Camera.getCameraInfo(cameraId, info);
-		    if( info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
+		    if( CameraController.isFrontFacing(cameraId) ) {
 				showToast(switch_camera_toast, R.string.front_camera);
 		    }
 		    else {
@@ -2968,7 +2755,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
 	private void showPhotoVideoToast() {
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-		if( camera == null || main_activity.cameraInBackground() )
+		if( camera_controller == null || main_activity.cameraInBackground() )
 			return;
 		String toast_string = "";
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
@@ -3004,17 +2791,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		else {
 			toast_string = getResources().getString(R.string.photo);
 			if( current_size_index != -1 && sizes != null ) {
-				Camera.Size current_size = sizes.get(current_size_index);
+				CameraController.Size current_size = sizes.get(current_size_index);
 				toast_string += " " + current_size.width + "x" + current_size.height;
 			}
 		}
-		Camera.Parameters parameters = camera.getParameters();
-		int current_exposure = parameters.getExposureCompensation();
+		int current_exposure = camera_controller.getExposureCompensation();
 		if( current_exposure != 0 ) {
 			toast_string += "\n" + getResources().getString(R.string.exposure) + ": " + (current_exposure > 0 ? "+" : "") + current_exposure;
 		}
-		String scene_mode = parameters.getSceneMode();
-    	if( scene_mode != null && !scene_mode.equals(Camera.Parameters.SCENE_MODE_AUTO) ) {
+		String scene_mode = camera_controller.getSceneMode();
+    	if( scene_mode != null && !scene_mode.equals(camera_controller.getDefaultSceneMode()) ) {
     		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + scene_mode;
     	}
 		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
@@ -3041,16 +2827,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			return;
 		}
 		CamcorderProfile profile = getCamcorderProfile();
-		Camera.Parameters parameters = camera.getParameters();
-
-		List<int []> fps_ranges = parameters.getSupportedPreviewFpsRange();
+		List<int []> fps_ranges = camera_controller.getSupportedPreviewFpsRange();
 		int selected_min_fps = -1, selected_max_fps = -1, selected_diff = -1;
         for(int [] fps_range : fps_ranges) {
 	    	if( MyDebug.LOG ) {
-    			Log.d(TAG, "    supported fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+    			Log.d(TAG, "    supported fps range: " + fps_range[0] + " to " + fps_range[1]);
 	    	}
-			int min_fps = fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX];
-			int max_fps = fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX];
+			int min_fps = fps_range[0];
+			int max_fps = fps_range[1];
 			if( min_fps <= profile.videoFrameRate*1000 && max_fps >= profile.videoFrameRate*1000 ) {
     			int diff = max_fps - min_fps;
     			if( selected_diff == -1 || diff < selected_diff ) {
@@ -3064,8 +2848,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         	selected_diff = -1;
         	int selected_dist = -1;
             for(int [] fps_range : fps_ranges) {
-    			int min_fps = fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX];
-    			int max_fps = fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX];
+    			int min_fps = fps_range[0];
+    			int max_fps = fps_range[1];
     			int diff = max_fps - min_fps;
     			int dist = -1;
     			if( max_fps < profile.videoFrameRate*1000 )
@@ -3084,22 +2868,20 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             }
 	    	if( MyDebug.LOG )
 	    		Log.d(TAG, "    can't find match for fps range, so choose closest: " + selected_min_fps + " to " + selected_max_fps);
-	        parameters.setPreviewFpsRange(selected_min_fps, selected_max_fps);
-        	setCameraParameters(parameters);
+	        camera_controller.setPreviewFpsRange(selected_min_fps, selected_max_fps);
         }
         else {
 	    	if( MyDebug.LOG ) {
     			Log.d(TAG, "    chosen fps range: " + selected_min_fps + " to " + selected_max_fps);
 	    	}
-	        parameters.setPreviewFpsRange(selected_min_fps, selected_max_fps);
-        	setCameraParameters(parameters);
+	    	camera_controller.setPreviewFpsRange(selected_min_fps, selected_max_fps);
         }
 	}
 	
 	void switchVideo(boolean save, boolean update_preview_size) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
-		if( this.camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
@@ -3149,17 +2931,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			
 			if( update_preview_size ) {
 				if( this.is_preview_started ) {
-					camera.stopPreview();
+					camera_controller.stopPreview();
 					this.is_preview_started = false;
 				}
 				setPreviewSize();
 				if( !is_video && has_current_fps_range ) {
 					// if is_video is true, we set the preview fps range in startCameraPreview()
 					if( MyDebug.LOG )
-						Log.d(TAG, "    reset preview to current fps range: " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-					Camera.Parameters parameters = camera.getParameters();
-			        parameters.setPreviewFpsRange(current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX], current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-		        	setCameraParameters(parameters);
+						Log.d(TAG, "    reset preview to current fps range: " + current_fps_range[0] + " to " + current_fps_range[1]);
+					camera_controller.setPreviewFpsRange(current_fps_range[0], current_fps_range[1]);
 				}
 				// always start the camera preview, even if it was previously paused
 		        this.startCameraPreview();
@@ -3168,16 +2948,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 	
 	boolean focusIsVideo() {
-		if( camera != null ) {
-			Camera.Parameters parameters = camera.getParameters();
-			String current_focus_mode = parameters.getFocusMode();
-			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
-			boolean focus_is_video = current_focus_mode != null && current_focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "current_focus_mode: " + current_focus_mode);
-				Log.d(TAG, "focus_is_video: " + focus_is_video + " , is_video: " + is_video);
-			}
-			return focus_is_video;
+		if( camera_controller != null ) {
+			return camera_controller.focusIsVideo();
 		}
 		return false;
 	}
@@ -3185,7 +2957,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	void updateFocusForVideo(boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocusForVideo()");
-		if( this.supported_focus_values != null && camera != null ) {
+		if( this.supported_focus_values != null && camera_controller != null ) {
 			boolean focus_is_video = focusIsVideo();
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "focus_is_video: " + focus_is_video + " , is_video: " + is_video);
@@ -3194,11 +2966,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( MyDebug.LOG )
 					Log.d(TAG, "need to change focus mode");
 				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true, auto_focus);
-				if( MyDebug.LOG ) {
-					Camera.Parameters parameters = camera.getParameters();
-					String current_focus_mode = parameters.getFocusMode();
-					Log.d(TAG, "new focus mode: " + current_focus_mode);
-				}
 			}
 		}
 	}
@@ -3324,30 +3091,17 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private void setFlash(String flash_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFlash() " + flash_value);
-		set_flash_after_autofocus = ""; // this overrides any previously saved setting, for during the startup autofocus
-		if( camera == null ) {
+		set_flash_value_after_autofocus = ""; // this overrides any previously saved setting, for during the startup autofocus
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
         cancelAutoFocus();
-		Camera.Parameters parameters = camera.getParameters();
-		String flash_mode = convertFlashValueToMode(flash_value);
-    	if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
-    		if( parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH) && !flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
-    			// workaround for bug on Nexus 5 where torch doesn't switch off until we set FLASH_MODE_OFF
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "first turn torch off");
-        		parameters.setFlashMode(flash_mode);
-            	setCameraParameters(parameters);
-        		parameters = camera.getParameters();
-    		}
-    		parameters.setFlashMode(flash_mode);
-        	setCameraParameters(parameters);
-    	}
+        camera_controller.setFlashValue(flash_value);
 	}
 
-	// this returns the flash mode indicated by the UI, rather than from the camera parameters (may be different, e.g., in startup autofocus!)
+	// this returns the flash value indicated by the UI, rather than from the camera parameters (may be different, e.g., in startup autofocus!)
     public String getCurrentFlashValue() {
     	if( this.current_flash_index == -1 )
     		return null;
@@ -3355,85 +3109,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     }
     
 	// this returns the flash mode indicated by the UI, rather than from the camera parameters (may be different, e.g., in startup autofocus!)
-	public String getCurrentFlashMode() {
+	/*public String getCurrentFlashMode() {
 		if( current_flash_index == -1 )
 			return null;
 		String flash_value = supported_flash_values.get(current_flash_index);
 		String flash_mode = convertFlashValueToMode(flash_value);
 		return flash_mode;
-	}
-
-	private String convertFlashValueToMode(String flash_value) {
-		String flash_mode = "";
-    	if( flash_value.equals("flash_off") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_OFF;
-    	}
-    	else if( flash_value.equals("flash_auto") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_AUTO;
-    	}
-    	else if( flash_value.equals("flash_on") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_ON;
-    	}
-    	else if( flash_value.equals("flash_torch") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_TORCH;
-    	}
-    	else if( flash_value.equals("flash_red_eye") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_RED_EYE;
-    	}
-    	return flash_mode;
-	}
-	
-	private List<String> convertFlashModesToValues(List<String> supported_flash_modes) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "convertFlashModesToValues()");
-		List<String> output_modes = new Vector<String>();
-		if( supported_flash_modes != null ) {
-			/*for(String flash_mode : supported_flash_modes) {
-				if( flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
-					output_modes.add("flash_off");
-				}
-				else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_AUTO) ) {
-					output_modes.add("flash_auto");
-				}
-				else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_ON) ) {
-					output_modes.add("flash_on");
-				}
-				else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_TORCH) ) {
-					output_modes.add("flash_torch");
-				}
-				else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_RED_EYE) ) {
-					output_modes.add("flash_red_eye");
-				}
-			}*/
-			// also resort as well as converting
-			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
-				output_modes.add("flash_off");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports flash_off");
-			}
-			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_AUTO) ) {
-				output_modes.add("flash_auto");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports flash_auto");
-			}
-			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_ON) ) {
-				output_modes.add("flash_on");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports flash_on");
-			}
-			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_TORCH) ) {
-				output_modes.add("flash_torch");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports flash_torch");
-			}
-			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_RED_EYE) ) {
-				output_modes.add("flash_red_eye");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports flash_red_eye");
-			}
-		}
-		return output_modes;
-	}
+	}*/
 
 	void cycleFocusMode() {
 		if( MyDebug.LOG )
@@ -3523,7 +3205,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public String getCurrentFocusValue() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentFocusValue()");
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return null;
@@ -3536,36 +3218,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private void setFocusValue(String focus_value, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusValue() " + focus_value);
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
         cancelAutoFocus();
-		Camera.Parameters parameters = camera.getParameters();
-    	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_manual") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-    	}
-    	else if( focus_value.equals("focus_mode_infinity") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
-    	}
-    	else if( focus_value.equals("focus_mode_macro") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
-    	}
-    	else if( focus_value.equals("focus_mode_fixed") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_FIXED);
-    	}
-    	else if( focus_value.equals("focus_mode_edof") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_EDOF);
-    	}
-    	else if( focus_value.equals("focus_mode_continuous_video") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-    	}
-    	else {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
-    	}
-    	setCameraParameters(parameters);
+        camera_controller.setFocusValue(focus_value);
 		clearFocusAreas();
 		// n.b., we reset even for manual focus mode
 		if( auto_focus ) {
@@ -3577,7 +3236,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "toggleExposureLock()");
 		// n.b., need to allow when recording video, so no check on PHASE_TAKING_PHOTO
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
@@ -3590,73 +3249,24 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	private void setExposureLocked() {
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
 		if( is_exposure_locked_supported ) {
 	        cancelAutoFocus();
-			Camera.Parameters parameters = camera.getParameters();
-			parameters.setAutoExposureLock(is_exposure_locked);
-        	setCameraParameters(parameters);
+	        camera_controller.setAutoExposureLock(is_exposure_locked);
 			Activity activity = (Activity)this.getContext();
 		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
 			exposureLockButton.setImageResource(is_exposure_locked ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
 		}
 	}
 	
-	private List<String> convertFocusModesToValues(List<String> supported_focus_modes) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "convertFocusModesToValues()");
-		List<String> output_modes = new Vector<String>();
-		if( supported_focus_modes != null ) {
-			// also resort as well as converting
-			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
-				output_modes.add("focus_mode_auto");
-				if( MyDebug.LOG ) {
-					Log.d(TAG, " supports focus_mode_auto");
-				}
-			}
-			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_INFINITY) ) {
-				output_modes.add("focus_mode_infinity");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports focus_mode_infinity");
-			}
-			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_MACRO) ) {
-				output_modes.add("focus_mode_macro");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports focus_mode_macro");
-			}
-			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
-				output_modes.add("focus_mode_manual");
-				if( MyDebug.LOG ) {
-					Log.d(TAG, " supports focus_mode_manual");
-				}
-			}
-			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_FIXED) ) {
-				output_modes.add("focus_mode_fixed");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports focus_mode_fixed");
-			}
-			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_EDOF) ) {
-				output_modes.add("focus_mode_edof");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports focus_mode_edof");
-			}
-			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
-				output_modes.add("focus_mode_continuous_video");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports focus_mode_continuous_video");
-			}
-		}
-		return output_modes;
-	}
-	
 	void takePicturePressed() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicturePressed");
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			/*is_taking_photo_on_timer = false;
@@ -3755,7 +3365,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					public void run() {
 						// we run on main thread to avoid problem of camera closing at the same time
 						// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
-						if( camera != null && takePictureTimerTask != null )
+						if( camera_controller != null && takePictureTimerTask != null )
 							takePicture();
 						else {
 							if( MyDebug.LOG )
@@ -3794,30 +3404,24 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private void flashVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "flashVideo");
-		Camera.Parameters parameters = camera.getParameters();
-		String flash_mode = parameters.getFlashMode();
-		// getFlashMode() may return null if flash not supported!
-		if( flash_mode == null )
+		// getFlashValue() may return "" if flash not supported!
+		String flash_value = camera_controller.getFlashValue();
+		if( flash_value.length() == 0 )
 			return;
-		String flash_mode_ui = getCurrentFlashMode();
-		if( flash_mode_ui == null )
+		String flash_value_ui = getCurrentFlashValue();
+		if( flash_value_ui == null )
 			return;
-		if( flash_mode_ui.equals("flash_torch") )
+		if( flash_value_ui.equals("flash_torch") )
 			return;
-		if( flash_mode.equals(Parameters.FLASH_MODE_TORCH) ) {
+		if( flash_value.equals("flash_torch") ) {
 			// shouldn't happen? but set to what the UI is
 	        cancelAutoFocus();
-			String flash_mode_from_ui = convertFlashValueToMode(flash_mode_ui);
-	    	if( flash_mode_from_ui.length() > 0 ) {
-	    		parameters.setFlashMode(flash_mode_from_ui);
-	        	setCameraParameters(parameters);
-	    	}
+	        camera_controller.setFlashValue(flash_value_ui);
 			return;
 		}
 		// turn on torch
         cancelAutoFocus();
-		parameters.setFlashMode(Parameters.FLASH_MODE_TORCH);
-    	setCameraParameters(parameters);
+        camera_controller.setFlashValue("flash_torch");
 		try {
 			Thread.sleep(100);
 		}
@@ -3826,8 +3430,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		// turn off torch
         cancelAutoFocus();
-		parameters.setFlashMode(flash_mode);
-    	setCameraParameters(parameters);
+        camera_controller.setFlashValue(flash_value_ui);
 	}
 	
 	private void onVideoError(int message_id, int what, int extra, String debug_value) {
@@ -3845,7 +3448,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "takePicture");
 		this.thumbnail_anim = false;
         this.phase = PHASE_TAKING_PHOTO;
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			/*is_taking_photo_on_timer = false;
@@ -3888,20 +3491,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality));
 	    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
 	    			Log.d(TAG, "bit rate " + profile.videoBitRate);
-	    			int [] fps_range = new int[2];
-	                Camera.Parameters parameters = camera.getParameters();
-	        		parameters.getPreviewFpsRange(fps_range);
 	    	    	if( MyDebug.LOG ) {
+		    			int [] fps_range = new int[2];
+		                camera_controller.getPreviewFpsRange(fps_range);
 	    				Log.d(TAG, "recording with preview fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
 	    				if( this.supports_video_stabilization ) {
-	    					Log.d(TAG, "recording with video stabilization? " + (parameters.getVideoStabilization() ? "yes" : "no"));
+	    					Log.d(TAG, "recording with video stabilization? " + (camera_controller.getVideoStabilization() ? "yes" : "no"));
 	    				}
 	    	    	}
 	    		}
 
 	    		video_recorder = new MediaRecorder();
-	    		this.camera.stopPreview(); // although not documented, we need to stop preview to prevent device freeze or video errors shortly after video recording starts on some devices (e.g., device freeze on Samsung Galaxy S2 - I could reproduce this on Samsung RTL; also video recording fails and preview becomes corrupted on Galaxy S3 variant "SGH-I747-US2"); also see http://stackoverflow.com/questions/4244999/problem-with-video-recording-after-auto-focus-in-android
-	    		this.camera.unlock();
+	    		this.camera_controller.stopPreview(); // although not documented, we need to stop preview to prevent device freeze or video errors shortly after video recording starts on some devices (e.g., device freeze on Samsung Galaxy S2 - I could reproduce this on Samsung RTL; also video recording fails and preview becomes corrupted on Galaxy S3 variant "SGH-I747-US2"); also see http://stackoverflow.com/questions/4244999/problem-with-video-recording-after-auto-focus-in-android
+	    		this.camera_controller.unlock();
 	        	video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
 					@Override
 					public void onInfo(MediaRecorder mr, int what, int extra) {
@@ -3957,7 +3559,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 						});
 					}
 				});
-	        	video_recorder.setCamera(camera);
+	        	camera_controller.initVideoRecorder(video_recorder);
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
 				if( record_audio ) {
@@ -4050,7 +3652,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         							public void run() {
         								// we run on main thread to avoid problem of camera closing at the same time
         								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
-        								if( camera != null && restartVideoTimerTask != null )
+        								if( camera_controller != null && restartVideoTimerTask != null )
         									restartVideo();
         								else {
         									if( MyDebug.LOG )
@@ -4073,7 +3675,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         							public void run() {
         								// we run on main thread to avoid problem of camera closing at the same time
         								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
-        								if( camera != null && flashVideoTimerTask != null )
+        								if( camera_controller != null && flashVideoTimerTask != null )
         									flashVideo();
         								else {
         									if( MyDebug.LOG )
@@ -4128,10 +3730,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 
 		showGUI(false);
-        /*Camera.Parameters parameters = camera.getParameters();
-		String focus_mode = parameters.getFocusMode();
-		if( MyDebug.LOG )
-			Log.d(TAG, "focus_mode is " + focus_mode);*/
 		String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
 		if( MyDebug.LOG )
 			Log.d(TAG, "focus_value is " + focus_value);
@@ -4144,9 +3742,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		//else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
 		else if( focus_value != null && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) ) {
     		focus_success = FOCUS_DONE; // clear focus rectangle for new refocus
-	        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+	        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
 				@Override
-				public void onAutoFocus(boolean success, Camera camera) {
+				public void onAutoFocus(boolean success) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "autofocus complete: " + success);
 					takePictureWhenFocused();
@@ -4155,13 +3753,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "start autofocus to take picture");
     		try {
-    	    	camera.autoFocus(autoFocusCallback);
+    			camera_controller.autoFocus(autoFocusCallback);
     			count_cameraAutoFocus++;
     		}
     		catch(RuntimeException e) {
     			// just in case? We got a RuntimeException report here from 1 user on Google Play:
     			// 21 Dec 2013, Xperia Go, Android 4.1
-    			autoFocusCallback.onAutoFocus(false, camera);
+    			autoFocusCallback.onAutoFocus(false);
 
     			if( MyDebug.LOG )
 					Log.e(TAG, "runtime exception from autoFocus when trying to take photo");
@@ -4173,12 +3771,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	private void takePictureWhenFocused() {
 		// should be called when auto-focused
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureWhenFocused");
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			/*is_taking_photo_on_timer = false;
@@ -4216,16 +3813,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
 
-    	Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
-    		// don't do anything here, but we need to implement the callback to get the shutter sound (at least on Galaxy Nexus and Nexus 7)
-            public void onShutter() {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "shutterCallback.onShutter()");
-            }
-        };
-
-        Camera.PictureCallback jpegPictureCallback = new Camera.PictureCallback() {
-    	    public void onPictureTaken(byte[] data, Camera cam) {
+		CameraController.PictureCallback jpegPictureCallback = new CameraController.PictureCallback() {
+    	    public void onPictureTaken(byte[] data) {
     	    	// n.b., this is automatically run in a different thread
 	            System.gc();
     			if( MyDebug.LOG )
@@ -4317,9 +3906,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        				Log.d(TAG, "after scaling: w0 = " + w0 + " , h0 = " + h0);
 	        				Log.d(TAG, "after scaling: w1 = " + w1 + " , h1 = " + h1);
 	        			}
-	        		    Camera.CameraInfo info = new Camera.CameraInfo();
-	        		    Camera.getCameraInfo(cameraId, info);
-	        		    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+	        		    if( camera_controller.isFrontFacing() ) {
 	            		    matrix.postRotate((float)-level_angle);
 	        		    }
 	        		    else {
@@ -4623,8 +4210,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            if( success && picFile != null ) {
 	            	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
 	            	long time_s = System.currentTimeMillis();
-	                Camera.Parameters parameters = cam.getParameters();
-	        		Camera.Size size = parameters.getPictureSize();
+		        	CameraController.Size size = camera_controller.getPictureSize();
 	        		int ratio = (int) Math.ceil((double) size.width / Preview.this.getWidth());
     				BitmapFactory.Options options = new BitmapFactory.Options();
     				options.inMutable = false;
@@ -4739,17 +4325,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	    }
     	};
     	{
-			Camera.Parameters parameters = camera.getParameters();
-			parameters.setRotation(getImageVideoRotation());
-        	setCameraParameters(parameters);
+    		camera_controller.setRotation(getImageVideoRotation());
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 			boolean enable_sound = sharedPreferences.getBoolean("preference_shutter_sound", true);
     		if( MyDebug.LOG )
     			Log.d(TAG, "enable_sound? " + enable_sound);
-            if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
-            	camera.enableShutterSound(enable_sound);
-            }
+        	camera_controller.enableShutterSound(enable_sound);
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
     		/*String toast_text = "";
@@ -4763,7 +4345,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		if( MyDebug.LOG )
     			Log.d(TAG, toast_text);*/
     		try {
-    			camera.takePicture(shutterCallback, null, jpegPictureCallback);
+    			camera_controller.takePicture(null, jpegPictureCallback);
         		count_cameraTakePicture++;
     			//showToast(take_photo_toast, toast_text);
     		}
@@ -4860,7 +4442,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "startup? " + startup);
 			Log.d(TAG, "manual? " + manual);
 		}
-		if( camera == null ) {
+		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 		}
@@ -4881,26 +4463,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		else {
 			// it's only worth doing autofocus when autofocus has an effect (i.e., auto or macro mode)
-            Camera.Parameters parameters = camera.getParameters();
-			String focus_mode = parameters.getFocusMode();
-			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play from the below line (v1.7),
-			// on Galaxy Tab 10.1 (GT-P7500), Android 4.0.3 - 4.0.4; HTC EVO 3D X515m (shooteru), Android 4.0.3 - 4.0.4
-	        if( focus_mode != null && ( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) ) {
+	        if( camera_controller.supportsAutoFocus() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "try to start autofocus");
-    			String old_flash = parameters.getFlashMode();
-				if( MyDebug.LOG )
-					Log.d(TAG, "old_flash: " + old_flash);
-    			set_flash_after_autofocus = "";
-    			// getFlashMode() may return null if flash not supported!
-    			if( startup && old_flash != null && old_flash != Camera.Parameters.FLASH_MODE_OFF ) {
-        			set_flash_after_autofocus = old_flash;
-    				parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-    	        	setCameraParameters(parameters);
+				set_flash_value_after_autofocus = "";
+				String old_flash_value = camera_controller.getFlashValue();
+    			// getFlashValue() may return "" if flash not supported!
+    			if( startup && !old_flash_value.equals("flash_off") ) {
+    				set_flash_value_after_autofocus = old_flash_value;
+        			camera_controller.setFlashValue("flash_off");
     			}
-		        Camera.AutoFocusCallback autoFocusCallback = new Camera.AutoFocusCallback() {
+    			CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
 					@Override
-					public void onAutoFocus(boolean success, Camera camera) {
+					public void onAutoFocus(boolean success) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "autofocus complete: " + success);
 						autoFocusCompleted(manual, success, false);
@@ -4913,14 +4488,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    		this.focus_complete_time = -1;
 	    		this.successfully_focused = false;
 	    		try {
-	    			camera.autoFocus(autoFocusCallback);
+	    			camera_controller.autoFocus(autoFocusCallback);
 	    			count_cameraAutoFocus++;
 					if( MyDebug.LOG )
 						Log.d(TAG, "autofocus started");
 	    		}
 	    		catch(RuntimeException e) {
 	    			// just in case? We got a RuntimeException report here from 1 user on Google Play
-	    			autoFocusCallback.onAutoFocus(false, camera);
+	    			autoFocusCallback.onAutoFocus(false);
 
 	    			if( MyDebug.LOG )
 						Log.e(TAG, "runtime exception from autoFocus");
@@ -4938,14 +4513,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     private void cancelAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
-        if( camera != null ) {
+        if( camera_controller != null ) {
 			try {
-	    		camera.cancelAutoFocus();
+				camera_controller.cancelAutoFocus();
 			}
 			catch(RuntimeException e) {
 				// had a report of crash on some devices, see comment at https://sourceforge.net/p/opencamera/tickets/4/ made on 20140520
 				if( MyDebug.LOG )
-					Log.d(TAG, "camera.cancelAutoFocus() failed");
+					Log.d(TAG, "cancelAutoFocus() failed");
 	    		e.printStackTrace();
 			}
     		autoFocusCompleted(false, false, true);
@@ -4971,24 +4546,22 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			successfully_focused = true;
 			successfully_focused_time = focus_complete_time;
 		}
-		if( set_flash_after_autofocus.length() > 0 && camera != null ) {
+		if( set_flash_value_after_autofocus.length() > 0 && camera_controller != null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "set flash back to: " + set_flash_after_autofocus);
-			Camera.Parameters parameters = camera.getParameters();
-			parameters.setFlashMode(set_flash_after_autofocus);
-			set_flash_after_autofocus = "";
-        	setCameraParameters(parameters);
+				Log.d(TAG, "set flash back to: " + set_flash_value_after_autofocus);
+			camera_controller.setFlashValue(set_flash_value_after_autofocus);
+			set_flash_value_after_autofocus = "";
 		}
 		if( this.using_face_detection && !cancelled ) {
 			// On some devices such as mtk6589, face detection does not resume as written in documentation so we have
 			// to cancelfocus when focus is finished
-			if( camera != null ) {
+			if( camera_controller != null ) {
 				try {
-					camera.cancelAutoFocus();
+					camera_controller.cancelAutoFocus();
 				}
 				catch(RuntimeException e) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "camera.cancelAutoFocus() failed");
+						Log.d(TAG, "cancelAutoFocus() failed");
 					e.printStackTrace();
 				}
 			}
@@ -5002,32 +4575,20 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			debug_time = System.currentTimeMillis();
 		}
 		//if( camera != null && !is_taking_photo && !is_preview_started ) {
-		if( camera != null && !this.isTakingPhotoOrOnTimer() && !is_preview_started ) {
+		if( camera_controller != null && !this.isTakingPhotoOrOnTimer() && !is_preview_started ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "starting the camera preview");
 			{
 				if( MyDebug.LOG )
 					Log.d(TAG, "setRecordingHint: " + is_video);
-				Camera.Parameters parameters = camera.getParameters();
-				// Calling setParameters here with continuous video focus mode causes preview to not restart after taking a photo on Galaxy Nexus?! (fine on my Nexus 7).
-				// The issue seems to specifically be with setParameters (i.e., the problem occurs even if we don't setRecordingHint).
-				// In addition, I had a report of a bug on HTC Desire X, Android 4.0.4 where the saved video was corrupted.
-				// This worked fine in 1.7, then not in 1.8 and 1.9, then was fixed again in 1.10
-				// The only thing in common to 1.7->1.8 and 1.9-1.10, that seems relevant, was adding this code to setRecordingHint() and setParameters() (unclear which would have been the problem),
-				// so we should be very careful about enabling this code again!
-				String focus_mode = parameters.getFocusMode();
-				// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
-	            if( focus_mode != null && !focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
-					parameters.setRecordingHint(this.is_video);
-		        	setCameraParameters(parameters);
-	            }
+				camera_controller.setRecordingHint(this.is_video);
 			}
     		if( this.is_video ) {
 				matchPreviewFpsToVideo();
     		}
     		// else, we reset the preview fps to default in switchVideo
     		try {
-				camera.startPreview();
+    			camera_controller.startPreview();
 		    	count_cameraStartPreview++;
     		}
     		catch(RuntimeException e) {
@@ -5045,7 +4606,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( MyDebug.LOG )
 					Log.d(TAG, "start face detection");
 				try {
-					camera.startFaceDetection();
+					camera_controller.startFaceDetection();
 				}
 				catch(RuntimeException e) {
 					// I didn't think this could happen, as we only call startFaceDetection() after we've called takePicture() or stopPreview(), which the Android docs say stops the face detection
@@ -5201,7 +4762,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     String getISOKey() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getISOKey");
-    	return this.iso_key;
+    	return camera_controller == null ? "" : camera_controller.getISOKey();
     }
     
     public List<String> getSupportedISOs() {
@@ -5231,13 +4792,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     int getCurrentExposure() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentExposure");
-    	if( camera == null ) {
+    	if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
     		return 0;
     	}
-		Camera.Parameters parameters = camera.getParameters();
-		int current_exposure = parameters.getExposureCompensation();
+		int current_exposure = camera_controller.getExposureCompensation();
 		return current_exposure;
     }
     
@@ -5247,13 +4807,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.exposures;
     }
 
-    List<Camera.Size> getSupportedPreviewSizes() {
+    List<CameraController.Size> getSupportedPreviewSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPreviewSizes");
     	return this.supported_preview_sizes;
     }
     
-    public List<Camera.Size> getSupportedPictureSizes() {
+    public List<CameraController.Size> getSupportedPictureSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPictureSizes");
 		return this.sizes;
@@ -5271,7 +4831,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return this.video_quality;
     }
     
-    List<Camera.Size> getSupportedVideoSizes() {
+    List<CameraController.Size> getSupportedVideoSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedVideoSizes");
 		return this.video_sizes;
@@ -5474,7 +5034,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     }
     
     private void updateParametersFromLocation() {
-    	if( camera != null ) {
+    	if( camera_controller != null ) {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
     		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
     		// Android camera source claims we need to check lat/long != 0.0d
@@ -5483,31 +5043,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    			Log.d(TAG, "updating parameters from location...");
 	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
 	    		}
-	            Camera.Parameters parameters = camera.getParameters();
-	            parameters.removeGpsData();
-	            parameters.setGpsTimestamp(System.currentTimeMillis() / 1000); // initialise to a value (from Android camera source)
-	            parameters.setGpsLatitude(location.getLatitude());
-	            parameters.setGpsLongitude(location.getLongitude());
-	            parameters.setGpsProcessingMethod(location.getProvider()); // from http://boundarydevices.com/how-to-write-an-android-camera-app/
-	            if( location.hasAltitude() ) {
-		            parameters.setGpsAltitude(location.getAltitude());
-	            }
-	            else {
-	            	// Android camera source claims we need to fake one if not present
-	            	// and indeed, this is needed to fix crash on Nexus 7
-		            parameters.setGpsAltitude(0);
-	            }
-	            if( location.getTime() != 0 ) { // from Android camera source
-	            	parameters.setGpsTimestamp(location.getTime() / 1000);
-	            }
-	        	setCameraParameters(parameters);
+	    		camera_controller.setLocationInfo(location);
     		}
     		else {
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "removing location data from parameters...");
-	            Camera.Parameters parameters = camera.getParameters();
-	            parameters.removeGpsData();
-	        	setCameraParameters(parameters);
+	    		camera_controller.removeLocationInfo();
 	            this.has_set_location = false;
 	            test_has_received_location = false;
     		}
@@ -5576,7 +5117,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     public Camera getCamera() {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "getCamera: " + camera);*/
-    	return this.camera;
+    	return this.camera_controller.getCamera();
+    }
+    
+    public CameraController getCameraController() {
+    	return this.camera_controller;
     }
     
     public boolean supportsFocus() {
@@ -5614,7 +5159,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     }
     
     public int getDisplayOrientation() {
-    	return this.display_orientation;
+    	return camera_controller==null ? 0 : camera_controller.getDisplayOrientation();
     }
     
     public boolean isFocusWaiting() {

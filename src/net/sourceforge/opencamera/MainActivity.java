@@ -70,7 +70,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -743,7 +743,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "onConfigurationChanged()");
 		// configuration change can include screen orientation (landscape/portrait) when not locked (when settings is open)
 		// needed if app is paused/resumed when settings is open and device is in portrait mode
-        preview.setCameraDisplayOrientation(this);
+        preview.setCameraDisplayOrientation();
         super.onConfigurationChanged(newConfig);
     }
 
@@ -966,12 +966,12 @@ public class MainActivity extends Activity {
 			bundle.putString("parameters_string", this.preview.getCamera().getParameters().flatten());
 		}
 
-		List<Camera.Size> preview_sizes = this.preview.getSupportedPreviewSizes();
+		List<CameraController.Size> preview_sizes = this.preview.getSupportedPreviewSizes();
 		if( preview_sizes != null ) {
 			int [] widths = new int[preview_sizes.size()];
 			int [] heights = new int[preview_sizes.size()];
 			int i=0;
-			for(Camera.Size size: preview_sizes) {
+			for(CameraController.Size size: preview_sizes) {
 				widths[i] = size.width;
 				heights[i] = size.height;
 				i++;
@@ -980,12 +980,12 @@ public class MainActivity extends Activity {
 			bundle.putIntArray("preview_heights", heights);
 		}
 		
-		List<Camera.Size> sizes = this.preview.getSupportedPictureSizes();
+		List<CameraController.Size> sizes = this.preview.getSupportedPictureSizes();
 		if( sizes != null ) {
 			int [] widths = new int[sizes.size()];
 			int [] heights = new int[sizes.size()];
 			int i=0;
-			for(Camera.Size size: sizes) {
+			for(CameraController.Size size: sizes) {
 				widths[i] = size.width;
 				heights[i] = size.height;
 				i++;
@@ -1008,12 +1008,12 @@ public class MainActivity extends Activity {
 			bundle.putStringArray("video_quality_string", video_quality_string_arr);
 		}
 
-		List<Camera.Size> video_sizes = this.preview.getSupportedVideoSizes();
+		List<CameraController.Size> video_sizes = this.preview.getSupportedVideoSizes();
 		if( video_sizes != null ) {
 			int [] widths = new int[video_sizes.size()];
 			int [] heights = new int[video_sizes.size()];
 			int i=0;
-			for(Camera.Size size: video_sizes) {
+			for(CameraController.Size size: video_sizes) {
 				widths[i] = size.width;
 				heights[i] = size.height;
 				i++;
@@ -1079,7 +1079,7 @@ public class MainActivity extends Activity {
 			preview.onResume(toast_message);
 		}
 		else {
-			preview.setCameraDisplayOrientation(this); // need to call in case the preview rotation option was changed
+			preview.setCameraDisplayOrientation(); // need to call in case the preview rotation option was changed
 			preview.pausePreview();
 			preview.setupCamera(toast_message);
 		}

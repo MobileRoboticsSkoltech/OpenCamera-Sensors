@@ -123,10 +123,10 @@ public class PopupView extends LinearLayout {
         		this.addView(checkBox);
         	}
 
-    		final List<Camera.Size> picture_sizes = preview.getSupportedPictureSizes();
+    		final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes();
     		picture_size_index = preview.getCurrentPictureSizeIndex();
     		final List<String> picture_size_strings = new ArrayList<String>();
-    		for(Camera.Size picture_size : picture_sizes) {
+    		for(CameraController.Size picture_size : picture_sizes) {
     			String size_string = picture_size.width + " x " + picture_size.height;
     			picture_size_strings.add(size_string);
     		}
@@ -134,7 +134,7 @@ public class PopupView extends LinearLayout {
     			private void update() {
     				if( picture_size_index == -1 )
     					return;
-	                Camera.Size new_size = picture_sizes.get(picture_size_index);
+    				CameraController.Size new_size = picture_sizes.get(picture_size_index);
 	                String resolution_string = new_size.width + " " + new_size.height;
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
