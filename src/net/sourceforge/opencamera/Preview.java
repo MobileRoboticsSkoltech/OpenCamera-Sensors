@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -34,6 +35,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Paint.Align;
 import android.hardware.Camera;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
@@ -3976,6 +3978,57 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        	            System.gc();
 	        			}
         			}
+    			}
+    			String preference_stamp = sharedPreferences.getString("preference_stamp", "preference_stamp_no");
+    			if( preference_stamp.equals("preference_stamp_yes") ) {
+    				if( bitmap == null ) {
+            			if( MyDebug.LOG )
+            				Log.d(TAG, "decode bitmap in order to stamp info");
+        				BitmapFactory.Options options = new BitmapFactory.Options();
+        				options.inMutable = true;
+        				options.inPurgeable = true;
+            			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+            			if( bitmap == null ) {
+            	    	    showToast(null, R.string.failed_to_stamp);
+            	            System.gc();
+            			}
+    				}
+    				if( bitmap != null ) {
+            			if( MyDebug.LOG )
+            				Log.d(TAG, "stamp info to bitmap");
+	        			int width = bitmap.getWidth();
+	        			int height = bitmap.getHeight();
+	        			if( MyDebug.LOG ) {
+	        				Log.d(TAG, "decoded bitmap size " + width + ", " + height);
+	        				Log.d(TAG, "bitmap size: " + width*height*4);
+	        			}
+	        			Canvas canvas = new Canvas(bitmap);
+	        			final float scale = getResources().getDisplayMetrics().density;
+	        			p.setColor(Color.WHITE);
+	        			p.setTextSize(20 * scale + 0.5f); // convert dps to pixels
+	        	        String time_stamp = DateFormat.getDateTimeInstance().format(new Date());
+	        	        int offset_x = (int)(8 * scale + 0.5f); // convert dps to pixels
+	        	        int offset_y = (int)(8 * scale + 0.5f); // convert dps to pixels
+	        	        int diff_y = (int)(24 * scale + 0.5f); // convert dps to pixels
+	        	        p.setTextAlign(Align.RIGHT);
+	    				drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, height - offset_y);
+	    				boolean store_location = sharedPreferences.getBoolean("preference_location", false);
+	    				// Android camera source claims we need to check lat/long != 0.0d
+	    				if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+	    					String location_string = Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
+	    					if( location.hasAltitude() ) {
+		    					location_string += ", " + decimalFormat.format(location.getAltitude()) + getResources().getString(R.string.metres_abbreviation);
+	    					}
+	    			    	if( Preview.this.has_geo_direction ) {
+	    						float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
+	    						if( geo_angle < 0.0f ) {
+	    							geo_angle += 360.0f;
+	    						}
+	    						location_string += ", " + Math.round(geo_angle) + (char)0x00B0;
+	    			    	}
+		    				drawTextWithBackground(canvas, p, location_string, Color.WHITE, Color.BLACK, width - offset_x, height - offset_y - diff_y);
+	    				}
+    				}
     			}
 
     			String exif_orientation_s = null;
