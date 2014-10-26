@@ -4037,9 +4037,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	        try {
 	    			OutputStream outputStream = null;
 	    			if( image_capture_intent ) {
+	        			if( MyDebug.LOG )
+	        				Log.d(TAG, "image_capture_intent");
 	        			if( image_capture_intent_uri != null )
 	        			{
 	        			    // Save the bitmap to the specified URI (use a try/catch block)
+		        			if( MyDebug.LOG )
+		        				Log.d(TAG, "save to: " + image_capture_intent_uri);
 	        			    outputStream = main_activity.getContentResolver().openOutputStream(image_capture_intent_uri);
 	        			}
 	        			else
@@ -4055,6 +4059,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    				//options.inMutable = true;
 			    				options.inPurgeable = true;
 			        			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+	        				}
+	        				if( bitmap != null ) {
 			        			int width = bitmap.getWidth();
 			        			int height = bitmap.getHeight();
 			        			if( MyDebug.LOG ) {
@@ -4074,12 +4080,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				        		    	bitmap.recycle();
 				        		    	bitmap = new_bitmap;
 				        		    }
-				        			if( MyDebug.LOG ) {
-				        				Log.d(TAG, "scaled bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
-				        				Log.d(TAG, "scaled bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
-				        			}
 				        		}
 	        				}
+		        			if( MyDebug.LOG ) {
+		        				Log.d(TAG, "returned bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
+		        				Log.d(TAG, "returned bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
+		        			}
 	        				main_activity.setResult(Activity.RESULT_OK, new Intent("inline-data").putExtra("data", bitmap));
 	        				main_activity.finish();
 	        			}

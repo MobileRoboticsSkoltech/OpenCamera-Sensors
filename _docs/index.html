@@ -584,6 +584,9 @@ available from
 Version 1.21 (Work in progress)
 
 FIXED   Corrected look of popup animation when in left-handed UI mode.
+FIXED   If called via an intent, and returning the bitmap via a parcel, the
+        bitmap wasn't being resized to a small size if auto-stabilise option
+        was enabled.
 ADDED   Option to stamp photos with date and time; and also GPS if location
         data is enabled.
 UPDATED Popup menu button now shows flash indicator (for flash auto or on).
