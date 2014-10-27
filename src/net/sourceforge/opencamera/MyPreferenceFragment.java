@@ -13,20 +13,16 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
-//import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
-//import android.text.InputFilter;
-//import android.text.Spanned;
 import android.util.Log;
 import android.view.Display;
 
@@ -52,16 +48,16 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);
 
-		if( !supports_auto_stabilise ) {
+		/*if( !supports_auto_stabilise ) {
 			Preference pref = (Preference)findPreference("preference_auto_stabilise");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_effects");
         	pg.removePreference(pref);
-		}
+		}*/
 
-		readFromBundle(bundle, "color_effects", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
-		readFromBundle(bundle, "scene_modes", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
-		readFromBundle(bundle, "white_balances", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
-		readFromBundle(bundle, "isos", Preview.getISOPreferenceKey(), "auto", "preference_category_camera_effects");
+		//readFromBundle(bundle, "color_effects", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
+		//readFromBundle(bundle, "scene_modes", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
+		//readFromBundle(bundle, "white_balances", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
+		//readFromBundle(bundle, "isos", Preview.getISOPreferenceKey(), "auto", "preference_category_camera_effects");
 		//readFromBundle(bundle, "exposures", "preference_exposure", "0", "preference_category_camera_effects");
 
 		final boolean supports_face_detection = bundle.getBoolean("supports_face_detection");
@@ -471,7 +467,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
         }
 	}
 	
-	private void readFromBundle(Bundle bundle, String intent_key, String preference_key, String default_value, String preference_category_key) {
+	/*private void readFromBundle(Bundle bundle, String intent_key, String preference_key, String default_value, String preference_category_key) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "readFromBundle: " + intent_key);
 		}
@@ -499,7 +495,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference(preference_category_key);
         	pg.removePreference(lp);
 		}
-	}
+	}*/
 	
 	public void onResume() {
 		super.onResume();
