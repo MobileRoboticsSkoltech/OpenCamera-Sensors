@@ -850,7 +850,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		
 		// now switch to video if saved
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		boolean saved_is_video = sharedPreferences.getBoolean(getIsVideoPreferenceKey(), false);
+		boolean saved_is_video = sharedPreferences.getBoolean(MainActivity.getIsVideoPreferenceKey(), false);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saved_is_video: " + saved_is_video);
 		}
@@ -910,7 +910,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			// mode, applications should call getParameters to know if some parameters are changed."
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up scene mode");
-			String value = sharedPreferences.getString(getSceneModePreferenceKey(), camera_controller.getDefaultSceneMode());
+			String value = sharedPreferences.getString(MainActivity.getSceneModePreferenceKey(), camera_controller.getDefaultSceneMode());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved scene mode: " + value);
 
@@ -919,7 +919,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				scene_modes = supported_values.values;
 	    		// now save, so it's available for PreferenceActivity
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getSceneModePreferenceKey(), supported_values.selected_value);
+				editor.putString(MainActivity.getSceneModePreferenceKey(), supported_values.selected_value);
 				editor.apply();
 			}
 		}
@@ -959,7 +959,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    SeekBar zoomSeekBar = (SeekBar) activity.findViewById(R.id.zoom_seekbar);
 
 			if( this.has_zoom ) {
-				if( sharedPreferences.getBoolean("preference_show_zoom_controls", false) ) {
+				if( sharedPreferences.getBoolean(MainActivity.getShowZoomControlsPreferenceKey(), false) ) {
 				    zoomControls.setIsZoomInEnabled(true);
 			        zoomControls.setIsZoomOutEnabled(true);
 			        zoomControls.setZoomSpeed(20);
@@ -997,7 +997,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					}
 				});
 
-				if( sharedPreferences.getBoolean("preference_show_zoom_slider_controls", true) ) {
+				if( sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), true) ) {
 					zoomSeekBar.setVisibility(View.VISIBLE);
 				}
 				else {
@@ -1016,7 +1016,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			// get face detection supported
 			this.faces_detected = null;
 			if( this.supports_face_detection ) {
-				this.using_face_detection = sharedPreferences.getBoolean("preference_face_detection", false);
+				this.using_face_detection = sharedPreferences.getBoolean(MainActivity.getFaceDetectionPreferenceKey(), false);
 			}
 			else {
 				this.using_face_detection = false;
@@ -1041,7 +1041,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up video stabilization");
 			if( this.supports_video_stabilization ) {
-				boolean using_video_stabilization = sharedPreferences.getBoolean("preference_video_stabilization", false);
+				boolean using_video_stabilization = sharedPreferences.getBoolean(MainActivity.getVideoStabilizationPreferenceKey(), false);
 				if( MyDebug.LOG )
 					Log.d(TAG, "using_video_stabilization?: " + using_video_stabilization);
 				camera_controller.setVideoStabilization(using_video_stabilization);
@@ -1053,7 +1053,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up color effect");
-			String value = sharedPreferences.getString(getColorEffectPreferenceKey(), camera_controller.getDefaultColorEffect());
+			String value = sharedPreferences.getString(MainActivity.getColorEffectPreferenceKey(), camera_controller.getDefaultColorEffect());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved color effect: " + value);
 
@@ -1062,7 +1062,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				color_effects = supported_values.values;
 	    		// now save, so it's available for PreferenceActivity
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getColorEffectPreferenceKey(), supported_values.selected_value);
+				editor.putString(MainActivity.getColorEffectPreferenceKey(), supported_values.selected_value);
 				editor.apply();
 			}
 		}
@@ -1070,7 +1070,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up white balance");
-			String value = sharedPreferences.getString(getWhiteBalancePreferenceKey(), camera_controller.getDefaultWhiteBalance());
+			String value = sharedPreferences.getString(MainActivity.getWhiteBalancePreferenceKey(), camera_controller.getDefaultWhiteBalance());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved white balance: " + value);
 
@@ -1079,7 +1079,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				white_balances = supported_values.values;
 	    		// now save, so it's available for PreferenceActivity
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getWhiteBalancePreferenceKey(), supported_values.selected_value);
+				editor.putString(MainActivity.getWhiteBalancePreferenceKey(), supported_values.selected_value);
 				editor.apply();
 			}
 		}
@@ -1087,7 +1087,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up iso");
-			String value = sharedPreferences.getString(getISOPreferenceKey(), camera_controller.getDefaultISO());
+			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved iso: " + value);
 
@@ -1096,7 +1096,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				isos = supported_values.values;
 	    		// now save, so it's available for PreferenceActivity
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getISOPreferenceKey(), supported_values.selected_value);
+				editor.putString(MainActivity.getISOPreferenceKey(), supported_values.selected_value);
 				editor.apply();
 			}
 		}
@@ -1111,7 +1111,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				for(int i=min_exposure;i<=max_exposure;i++) {
 					exposures.add("" + i);
 				}
-				String value = sharedPreferences.getString(getExposurePreferenceKey(), "0");
+				String value = sharedPreferences.getString(MainActivity.getExposurePreferenceKey(), "0");
 				if( MyDebug.LOG )
 					Log.d(TAG, "saved exposure value: " + value);
 				int exposure = 0;
@@ -1137,7 +1137,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				camera_controller.setExposureCompensation(exposure);
 	    		// now save, so it's available for PreferenceActivity
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getExposurePreferenceKey(), "" + exposure);
+				editor.putString(MainActivity.getExposurePreferenceKey(), "" + exposure);
 				editor.apply();
 			}
 			View exposureButton = (View) activity.findViewById(R.id.exposure);
@@ -1154,7 +1154,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 			}
 			current_size_index = -1;
-			String resolution_value = sharedPreferences.getString(getResolutionPreferenceKey(cameraId), "");
+			String resolution_value = sharedPreferences.getString(MainActivity.getResolutionPreferenceKey(cameraId), "");
 			if( MyDebug.LOG )
 				Log.d(TAG, "resolution_value: " + resolution_value);
 			if( resolution_value.length() > 0 ) {
@@ -1221,7 +1221,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					Log.d(TAG, "save new resolution_value: " + resolution_value);
 				}
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getResolutionPreferenceKey(cameraId), resolution_value);
+				editor.putString(MainActivity.getResolutionPreferenceKey(cameraId), resolution_value);
 				editor.apply();
 			}
 			// size set later in setPreviewSize()
@@ -1241,7 +1241,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		initialiseVideoQuality();
 
 		current_video_quality = -1;
-		String video_quality_value_s = sharedPreferences.getString(getVideoQualityPreferenceKey(cameraId), "");
+		String video_quality_value_s = sharedPreferences.getString(MainActivity.getVideoQualityPreferenceKey(cameraId), "");
 		if( MyDebug.LOG )
 			Log.d(TAG, "video_quality_value: " + video_quality_value_s);
 		if( video_quality_value_s.length() > 0 ) {
@@ -1268,7 +1268,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( current_video_quality != -1 ) {
     		// now save, so it's available for PreferenceActivity
 			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString(getVideoQualityPreferenceKey(cameraId), video_quality.get(current_video_quality));
+			editor.putString(MainActivity.getVideoQualityPreferenceKey(cameraId), video_quality.get(current_video_quality));
 			editor.apply();
 		}
 
@@ -1280,7 +1280,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( MyDebug.LOG )
 					Log.d(TAG, "flash values: " + supported_flash_values);
 
-				String flash_value = sharedPreferences.getString(getFlashPreferenceKey(cameraId), "");
+				String flash_value = sharedPreferences.getString(MainActivity.getFlashPreferenceKey(cameraId), "");
 				if( flash_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing flash_value: " + flash_value);
@@ -1311,7 +1311,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				if( MyDebug.LOG )
 					Log.d(TAG, "focus values: " + supported_focus_values);
 	
-				String focus_value = sharedPreferences.getString(getFocusPreferenceKey(cameraId), "");
+				String focus_value = sharedPreferences.getString(MainActivity.getFocusPreferenceKey(cameraId), "");
 				if( focus_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing focus_value: " + focus_value);
@@ -1650,7 +1650,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		CamcorderProfile profile = null;
-		if( cameraId == 0 && sharedPreferences.getBoolean("preference_force_video_4k", false) && main_activity.supportsForceVideo4K() ) {
+		if( cameraId == 0 && sharedPreferences.getBoolean(MainActivity.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "force 4K UHD video");
 			profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
@@ -1665,7 +1665,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
 		}
 
-		String bitrate_value = sharedPreferences.getString("preference_video_bitrate", "default");
+		String bitrate_value = sharedPreferences.getString(MainActivity.getVideoBitratePreferenceKey(), "default");
 		if( !bitrate_value.equals("default") ) {
 			try {
 				int bitrate = Integer.parseInt(bitrate_value);
@@ -1678,7 +1678,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					Log.d(TAG, "bitrate invalid format, can't parse to int: " + bitrate_value);
 			}
 		}
-		String fps_value = sharedPreferences.getString("preference_video_fps", "default");
+		String fps_value = sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
 		if( !fps_value.equals("default") ) {
 			try {
 				int fps = Integer.parseInt(fps_value);
@@ -1761,7 +1761,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         double targetRatio = 0.0f;
 		Activity activity = (Activity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
-		String preview_size = sharedPreferences.getString("preference_preview_size", "preference_preview_size_wysiwyg");
+		String preview_size = sharedPreferences.getString(MainActivity.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg");
 		// should always use wysiwig for video mode, otherwise we get incorrect aspect ratio shown when recording video (at least on Galaxy Nexus, e.g., at 640x480)
 		// also not using wysiwyg mode with video caused corruption on Samsung cameras (tested with Samsung S3, Android 4.3, front camera, infinity focus)
 		if( preview_size.equals("preference_preview_size_wysiwyg") || this.is_video ) {
@@ -1966,7 +1966,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "    degrees = " + degrees);
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String rotate_preview = sharedPreferences.getString("preference_rotate_preview", "0");
+		String rotate_preview = sharedPreferences.getString(MainActivity.getRotatePreviewPreferenceKey(), "0");
 		if( MyDebug.LOG )
 			Log.d(TAG, "    rotate_preview = " + rotate_preview);
 		if( rotate_preview.equals("180") ) {
@@ -2030,7 +2030,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getImageVideoRotation() from current_rotation " + current_rotation);
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
+		String lock_orientation = sharedPreferences.getString(MainActivity.getLockOrientationPreferenceKey(), "none");
 		if( lock_orientation.equals("landscape") ) {
 			int camera_orientation = camera_controller.getCameraOrientation();
 		    int device_orientation = getDeviceDefaultOrientation();
@@ -2095,7 +2095,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		MainActivity main_activity = (MainActivity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		final float scale = getResources().getDisplayMetrics().density;
-		String preference_grid = sharedPreferences.getString("preference_grid", "preference_grid_none");
+		String preference_grid = sharedPreferences.getString(MainActivity.getShowGridPreferenceKey(), "preference_grid_none");
 		if( camera_controller != null && preference_grid.equals("preference_grid_3x3") ) {
 			p.setColor(Color.WHITE);
 			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
@@ -2114,8 +2114,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			canvas.drawLine(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f - crosshairs_radius, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f + crosshairs_radius, p);
 			canvas.drawLine(canvas.getWidth()/2.0f - crosshairs_radius, canvas.getHeight()/2.0f, canvas.getWidth()/2.0f + crosshairs_radius, canvas.getHeight()/2.0f, p);
 		}
-		if( this.is_video || sharedPreferences.getString("preference_preview_size", "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
-			String preference_crop_guide = sharedPreferences.getString("preference_crop_guide", "crop_guide_none");
+		if( this.is_video || sharedPreferences.getString(MainActivity.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
+			String preference_crop_guide = sharedPreferences.getString(MainActivity.getShowCropGuidePreferenceKey(), "crop_guide_none");
 			if( camera_controller != null && preview_targetRatio > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
 				p.setStyle(Paint.Style.STROKE);
 				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
@@ -2255,8 +2255,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
-			boolean draw_angle = this.has_level_angle && sharedPreferences.getBoolean("preference_show_angle", true);
-			boolean draw_geo_direction = this.has_geo_direction && sharedPreferences.getBoolean("preference_show_geo_direction", true);
+			boolean draw_angle = this.has_level_angle && sharedPreferences.getBoolean(MainActivity.getShowAnglePreferenceKey(), true);
+			boolean draw_geo_direction = this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getShowGeoDirectionPreferenceKey(), true);
 			if( draw_angle ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
@@ -2344,7 +2344,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
-		if( this.has_zoom && camera_controller != null && sharedPreferences.getBoolean("preference_show_zoom", true) ) {
+		if( this.has_zoom && camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowZoomPreferenceKey(), true) ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			// only show when actually zoomed in
 			if( zoom_ratio > 1.0f + 1.0e-5f ) {
@@ -2355,7 +2355,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
 			}
 		}
-		if( camera_controller != null && sharedPreferences.getBoolean("preference_free_memory", true) ) {
+		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowFreeMemoryPreferenceKey(), true) ) {
 			int pixels_offset_y = 1*text_y;
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
@@ -2408,7 +2408,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
 		}
 		
-		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
+		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
 		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 		if( store_location ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
@@ -2463,7 +2463,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		canvas.restore();
 		
-		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED && has_level_angle && sharedPreferences.getBoolean("preference_show_angle_line", false) ) {
+		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED && has_level_angle && sharedPreferences.getBoolean(MainActivity.getShowAngleLinePreferenceKey(), false) ) {
 			// n.b., must draw this without canvas rotation
 			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
 			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
@@ -2716,7 +2716,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				// now save
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getExposurePreferenceKey(), "" + new_exposure);
+				editor.putString(MainActivity.getExposurePreferenceKey(), "" + new_exposure);
 				editor.apply();
 	    		showToast(change_exposure_toast, getResources().getString(R.string.exposure_compensation) + " " + (new_exposure > 0 ? "+" : "") + new_exposure);
 	    		if( update_seek_bar ) {
@@ -2773,9 +2773,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			else
 				bitrate_string = profile.videoBitRate + "bps";
 
-			String timer_value = sharedPreferences.getString("preference_video_max_duration", "0");
+			String timer_value = sharedPreferences.getString(MainActivity.getVideoMaxDurationPreferenceKey(), "0");
 			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
-			boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
+			boolean record_audio = sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
 			if( !record_audio ) {
 				toast_string += "\n" + getResources().getString(R.string.audio_disabled);
 			}
@@ -2788,7 +2788,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					toast_string += "\n" + getResources().getString(R.string.max_duration) +": " + entry;
 				}
 			}
-			if( sharedPreferences.getBoolean("preference_video_flash", false) && supportsFlash() ) {
+			if( sharedPreferences.getBoolean(MainActivity.getVideoFlashPreferenceKey(), false) && supportsFlash() ) {
 				toast_string += "\n" + getResources().getString(R.string.preference_video_flash);
 			}
 		}
@@ -2807,7 +2807,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	if( scene_mode != null && !scene_mode.equals(camera_controller.getDefaultSceneMode()) ) {
     		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + scene_mode;
     	}
-		String lock_orientation = sharedPreferences.getString("preference_lock_orientation", "none");
+		String lock_orientation = sharedPreferences.getString(MainActivity.getLockOrientationPreferenceKey(), "none");
 		if( !lock_orientation.equals("none") ) {
 			String [] entries_array = getResources().getStringArray(R.array.preference_lock_orientation_entries);
 			String [] values_array = getResources().getStringArray(R.array.preference_lock_orientation_values);
@@ -2929,7 +2929,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				// now save
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putBoolean(getIsVideoPreferenceKey(), is_video);
+				editor.putBoolean(MainActivity.getIsVideoPreferenceKey(), is_video);
 				editor.apply();
 	    	}
 			
@@ -2980,11 +2980,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			was_4k = true;
 		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String bitrate_value = sharedPreferences.getString("preference_video_bitrate", "default");
+		String bitrate_value = sharedPreferences.getString(MainActivity.getVideoBitratePreferenceKey(), "default");
 		if( !bitrate_value.equals("default") ) {
 			was_bitrate = true;
 		}
-		String fps_value = sharedPreferences.getString("preference_video_fps", "default");
+		String fps_value = sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
 		if( !fps_value.equals("default") ) {
 			was_fps = true;
 		}
@@ -3087,7 +3087,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				// now save
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getFlashPreferenceKey(cameraId), flash_value);
+				editor.putString(MainActivity.getFlashPreferenceKey(cameraId), flash_value);
 				editor.apply();
 	    	}
 		}
@@ -3200,7 +3200,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				// now save
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(getFocusPreferenceKey(cameraId), focus_value);
+				editor.putString(MainActivity.getFocusPreferenceKey(cameraId), focus_value);
 				editor.apply();
 	    	}
 		}
@@ -3319,7 +3319,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
         //is_taking_photo = true;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String timer_value = sharedPreferences.getString("preference_timer", "0");
+		String timer_value = sharedPreferences.getString(MainActivity.getTimerPreferenceKey(), "0");
 		long timer_delay = 0;
 		try {
 			timer_delay = Integer.parseInt(timer_value) * 1000;
@@ -3331,7 +3331,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		timer_delay = 0;
         }
 
-		String burst_mode_value = sharedPreferences.getString("preference_burst_mode", "1");
+		String burst_mode_value = sharedPreferences.getString(MainActivity.getBurstModePreferenceKey(), "1");
 		try {
 			n_burst = Integer.parseInt(burst_mode_value);
     		if( MyDebug.LOG )
@@ -3389,7 +3389,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		if( sharedPreferences.getBoolean("preference_timer_beep", true) ) {
+		if( sharedPreferences.getBoolean(MainActivity.getTimerBeepPreferenceKey(), true) ) {
     		class BeepTimerTask extends TimerTask {
     			public void run() {
     			    try {
@@ -3566,9 +3566,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				});
 	        	camera_controller.initVideoRecorder(video_recorder);
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-				boolean record_audio = sharedPreferences.getBoolean("preference_record_audio", true);
+				boolean record_audio = sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
 				if( record_audio ) {
-	        		String pref_audio_src = sharedPreferences.getString("preference_record_audio_src", "audio_src_camcorder");
+	        		String pref_audio_src = sharedPreferences.getString(MainActivity.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
 		    		if( MyDebug.LOG )
 		    			Log.d(TAG, "pref_audio_src: " + pref_audio_src);
 	        		int audio_source = MediaRecorder.AudioSource.CAMCORDER;
@@ -3581,7 +3581,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
-				boolean store_location = sharedPreferences.getBoolean("preference_location", false);
+				boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
 				// Android camera source claims we need to check lat/long != 0.0d
 				if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
 		    		if( MyDebug.LOG ) {
@@ -3608,7 +3608,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        	video_recorder.setOutputFile(video_name);
 	        	try {
 	        		showGUI(false);
-	    			if( sharedPreferences.getBoolean("preference_lock_video", false) ) {
+	    			if( sharedPreferences.getBoolean(MainActivity.getLockVideoPreferenceKey(), false) ) {
 	    				main_activity.lockScreen();
 	    			}
 	        		/*if( true ) // test
@@ -3623,7 +3623,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
 
     				// handle restart timer
-    				String timer_value = sharedPreferences.getString("preference_video_max_duration", "0");
+    				String timer_value = sharedPreferences.getString(MainActivity.getVideoMaxDurationPreferenceKey(), "0");
     				long timer_delay = 0;
     				try {
     					timer_delay = Integer.parseInt(timer_value) * 1000;
@@ -3637,7 +3637,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
     				if( timer_delay > 0 ) {
     					if( remaining_restart_video == 0 ) {
-        					String restart_value = sharedPreferences.getString("preference_video_restart", "0");
+        					String restart_value = sharedPreferences.getString(MainActivity.getVideoRestartPreferenceKey(), "0");
         					try {
         						remaining_restart_video = Integer.parseInt(restart_value);
         					}
@@ -3670,7 +3670,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         		    	restartVideoTimer.schedule(restartVideoTimerTask = new RestartVideoTimerTask(), timer_delay);
     				}
 
-    				if( sharedPreferences.getBoolean("preference_video_flash", false) && supportsFlash() ) {
+    				if( sharedPreferences.getBoolean(MainActivity.getVideoFlashPreferenceKey(), false) && supportsFlash() ) {
     					class FlashVideoTimerTask extends TimerTask {
         					public void run() {
         			    		if( MyDebug.LOG )
@@ -3844,7 +3844,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	        boolean success = false;
     	        Bitmap bitmap = null;
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Preview.this.getContext());
-				boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
+				boolean auto_stabilise = sharedPreferences.getBoolean(MainActivity.getAutoStabilisePreferenceKey(), false);
     			if( auto_stabilise && has_level_angle && main_activity.supportsAutoStabilise() )
     			{
     				//level_angle = -129;
@@ -3979,7 +3979,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        			}
         			}
     			}
-    			String preference_stamp = sharedPreferences.getString("preference_stamp", "preference_stamp_no");
+    			String preference_stamp = sharedPreferences.getString(MainActivity.getStampPreferenceKey(), "preference_stamp_no");
     			if( preference_stamp.equals("preference_stamp_yes") ) {
     				if( bitmap == null ) {
             			if( MyDebug.LOG )
@@ -4012,7 +4012,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        	        int diff_y = (int)(24 * scale + 0.5f); // convert dps to pixels
 	        	        p.setTextAlign(Align.RIGHT);
 	    				drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, height - offset_y);
-	    				boolean store_location = sharedPreferences.getBoolean("preference_location", false);
+	    				boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
 	    				// Android camera source claims we need to check lat/long != 0.0d
 	    				if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
 	    					String location_string = Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
@@ -4202,7 +4202,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
                 	    		if( MyDebug.LOG )
                 	    			Log.d(TAG, "now saved EXIF data");
         	            	}
-        	            	else if( Preview.this.has_geo_direction && sharedPreferences.getBoolean("preference_location", false) ) {
+        	            	else if( Preview.this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false) ) {
             	            	if( MyDebug.LOG )
                 	    			Log.d(TAG, "add GPS direction exif info");
             	            	long time_s = System.currentTimeMillis();
@@ -4247,7 +4247,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            }
 	            else {
 	    	        phase = PHASE_NORMAL;
-					boolean pause_preview = sharedPreferences.getBoolean("preference_pause_preview", false);
+					boolean pause_preview = sharedPreferences.getBoolean(MainActivity.getPausePreviewPreferenceKey(), false);
 	        		if( MyDebug.LOG )
 	        			Log.d(TAG, "pause_preview? " + pause_preview);
 					if( pause_preview && success ) {
@@ -4278,7 +4278,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     				options.inMutable = false;
     				options.inPurgeable = true;
     				options.inSampleSize = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality 
-        			if( !sharedPreferences.getBoolean("preference_thumbnail_animation", true) ) {
+        			if( !sharedPreferences.getBoolean(MainActivity.getThumbnailAnimationPreferenceKey(), true) ) {
         				// can use lower resolution if we don't have the thumbnail animation
         				options.inSampleSize *= 4;
         			}
@@ -4343,7 +4343,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         				}
         			}
 
-        			if( sharedPreferences.getBoolean("preference_thumbnail_animation", true) ) {
+        			if( sharedPreferences.getBoolean(MainActivity.getThumbnailAnimationPreferenceKey(), true) ) {
             			thumbnail_anim = true;
             			thumbnail_anim_start_ms = System.currentTimeMillis();
         			}
@@ -4361,7 +4361,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            if( remaining_burst_photos > 0 ) {
 	            	remaining_burst_photos--;
 
-	        		String timer_value = sharedPreferences.getString("preference_burst_interval", "0");
+	        		String timer_value = sharedPreferences.getString(MainActivity.getBurstIntervalPreferenceKey(), "0");
 	        		long timer_delay = 0;
 	        		try {
 	        			timer_delay = Integer.parseInt(timer_value) * 1000;
@@ -4390,7 +4390,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		camera_controller.setRotation(getImageVideoRotation());
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-			boolean enable_sound = sharedPreferences.getBoolean("preference_shutter_sound", true);
+			boolean enable_sound = sharedPreferences.getBoolean(MainActivity.getShutterSoundPreferenceKey(), true);
     		if( MyDebug.LOG )
     			Log.d(TAG, "enable_sound? " + enable_sound);
         	camera_controller.enableShutterSound(enable_sound);
@@ -4428,7 +4428,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	private void setGPSDirectionExif(ExifInterface exif) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-    	if( this.has_geo_direction && sharedPreferences.getBoolean("preference_location", false) ) {
+    	if( this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false) ) {
 			float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
 			if( geo_angle < 0.0f ) {
 				geo_angle += 360.0f;
@@ -4934,7 +4934,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getImageQuality");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String image_quality_s = sharedPreferences.getString("preference_quality", "90");
+		String image_quality_s = sharedPreferences.getString(MainActivity.getQualityPreferenceKey(), "90");
 		int image_quality = 0;
 		try {
 			image_quality = Integer.parseInt(image_quality_s);
@@ -4968,7 +4968,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     void updateUIPlacement() {
     	// we cache the preference_ui_placement to save having to check it in the onDraw() method
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
+		String ui_placement = sharedPreferences.getString(MainActivity.getUIPlacementPreferenceKey(), "ui_right");
 		this.ui_placement_right = ui_placement.equals("ui_right");
     }
 
@@ -5094,7 +5094,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "locationChanged");
 		this.test_has_received_location = true;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
+		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
 		if( store_location ) {
 			this.location = location;
     		// Android camera source claims we need to check lat/long != 0.0d
@@ -5117,7 +5117,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     private void updateParametersFromLocation() {
     	if( camera_controller != null ) {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-    		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
+    		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
     		// Android camera source claims we need to check lat/long != 0.0d
     		if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
 	    		if( MyDebug.LOG ) {
@@ -5142,56 +5142,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	
     public boolean isTakingPhoto() {
     	return this.phase == PHASE_TAKING_PHOTO;
-    }
-
-    // must be static, to safely call from other Activities
-    public static String getFlashPreferenceKey(int cameraId) {
-    	return "flash_value_" + cameraId;
-    }
-
-    // must be static, to safely call from other Activities
-    public static String getFocusPreferenceKey(int cameraId) {
-    	return "focus_value_" + cameraId;
-    }
-
-    // must be static, to safely call from other Activities
-    public static String getResolutionPreferenceKey(int cameraId) {
-    	return "camera_resolution_" + cameraId;
-    }
-    
-    // must be static, to safely call from other Activities
-    public static String getVideoQualityPreferenceKey(int cameraId) {
-    	return "video_quality_" + cameraId;
-    }
-    
-    // must be static, to safely call from other Activities
-    public static String getIsVideoPreferenceKey() {
-    	return "is_video";
-    }
-    
-    // must be static, to safely call from other Activities
-    public static String getExposurePreferenceKey() {
-    	return "preference_exposure";
-    }
-
-    // must be static, to safely call from other Activities
-    public static String getColorEffectPreferenceKey() {
-    	return "preference_color_effect";
-    }
-
-    // must be static, to safely call from other Activities
-    public static String getSceneModePreferenceKey() {
-    	return "preference_scene_mode";
-    }
-
-    // must be static, to safely call from other Activities
-    public static String getWhiteBalancePreferenceKey() {
-    	return "preference_white_balance";
-    }
-
-    // must be static, to safely call from other Activities
-    public static String getISOPreferenceKey() {
-    	return "preference_iso";
     }
 
     // for testing:

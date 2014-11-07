@@ -73,7 +73,7 @@ public class PopupView extends LinearLayout {
             
     		List<String> supported_isos = preview.getSupportedISOs();
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-    		String current_iso = sharedPreferences.getString(Preview.getISOPreferenceKey(), "auto");
+    		String current_iso = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), "auto");
     		// n.b., we hardcode the string "ISO" as we don't want it translated - firstly more consistent with the ISO values returned by the driver, secondly need to worry about the size of the buttons, so don't want risk of a translated string being too long
         	addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, "TEST_ISO", new ButtonOptionsPopupListener() {
     			@Override
@@ -82,7 +82,7 @@ public class PopupView extends LinearLayout {
     					Log.d(TAG, "clicked iso: " + option);
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     				SharedPreferences.Editor editor = sharedPreferences.edit();
-    				editor.putString(Preview.getISOPreferenceKey(), option);
+    				editor.putString(MainActivity.getISOPreferenceKey(), option);
     				editor.apply();
 
     				main_activity.updateForSettings("ISO: " + option);
@@ -91,27 +91,27 @@ public class PopupView extends LinearLayout {
     		});
 
         	List<String> supported_white_balances = preview.getSupportedWhiteBalances();
-        	addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "TEST_WHITE_BALANCE");
+        	addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), MainActivity.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "TEST_WHITE_BALANCE");
 
         	List<String> supported_scene_modes = preview.getSupportedSceneModes();
-        	addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "TEST_SCENE_MODE");
+        	addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), MainActivity.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "TEST_SCENE_MODE");
 
         	List<String> supported_color_effects = preview.getSupportedColorEffects();
-        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "TEST_COLOR_EFFECT");
+        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), MainActivity.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "TEST_COLOR_EFFECT");
         	
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
         		checkBox.setTextColor(Color.WHITE);
 
-        		boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
+        		boolean auto_stabilise = sharedPreferences.getBoolean(MainActivity.getAutoStabilisePreferenceKey(), false);
         		checkBox.setChecked(auto_stabilise);
         		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
 	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putBoolean("preference_auto_stabilise", isChecked);
+						editor.putBoolean(MainActivity.getAutoStabilisePreferenceKey(), isChecked);
 						editor.apply();
 
 						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
@@ -138,7 +138,7 @@ public class PopupView extends LinearLayout {
 	                String resolution_string = new_size.width + " " + new_size.height;
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(Preview.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
+					editor.putString(MainActivity.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
 					editor.apply();
 					main_activity.updateForSettings("");
     			}
@@ -164,7 +164,7 @@ public class PopupView extends LinearLayout {
 
         	final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
         	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
-    		String timer_value = sharedPreferences.getString("preference_timer", "0");
+    		String timer_value = sharedPreferences.getString(MainActivity.getTimerPreferenceKey(), "0");
     		timer_index = Arrays.asList(timer_values).indexOf(timer_value);
     		if( timer_index == -1 ) {
 				if( MyDebug.LOG )
@@ -178,7 +178,7 @@ public class PopupView extends LinearLayout {
     				String new_timer_value = timer_values[timer_index];
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString("preference_timer", new_timer_value);
+					editor.putString(MainActivity.getTimerPreferenceKey(), new_timer_value);
 					editor.apply();
     			}
 				@Override

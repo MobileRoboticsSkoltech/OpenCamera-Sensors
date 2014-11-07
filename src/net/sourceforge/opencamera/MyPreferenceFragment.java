@@ -87,7 +87,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			ListPreference lp = (ListPreference)findPreference("preference_resolution");
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
-			String resolution_preference_key = Preview.getResolutionPreferenceKey(cameraId);
+			String resolution_preference_key = MainActivity.getResolutionPreferenceKey(cameraId);
 			String resolution_value = sharedPreferences.getString(resolution_preference_key, "");
 			if( MyDebug.LOG )
 				Log.d(TAG, "resolution_value: " + resolution_value);
@@ -126,7 +126,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			ListPreference lp = (ListPreference)findPreference("preference_video_quality");
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
-			String video_quality_preference_key = Preview.getVideoQualityPreferenceKey(cameraId);
+			String video_quality_preference_key = MainActivity.getVideoQualityPreferenceKey(cameraId);
 			String video_quality_value = sharedPreferences.getString(video_quality_preference_key, "");
 			if( MyDebug.LOG )
 				Log.d(TAG, "video_quality_value: " + video_quality_value);
@@ -435,7 +435,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
                 		}
 
                 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MyPreferenceFragment.this.getActivity());
-                		String save_location = sharedPreferences.getString("preference_save_location", "OpenCamera");
+                		String save_location = sharedPreferences.getString(MainActivity.getSaveLocationPreferenceKey(), "OpenCamera");
                 		about_string.append("\nSave Location: " + save_location);
 
                 		about_string.append("\nParameters: ");

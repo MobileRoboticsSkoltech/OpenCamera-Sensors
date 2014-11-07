@@ -273,7 +273,7 @@ public class MainActivity extends Activity {
         case KeyEvent.KEYCODE_VOLUME_DOWN:
 	        {
 	    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-	    		String volume_keys = sharedPreferences.getString("preference_volume_keys", "volume_take_photo");
+	    		String volume_keys = sharedPreferences.getString(getVolumeKeysPreferenceKey(), "volume_take_photo");
 	    		if( volume_keys.equals("volume_take_photo") ) {
 	            	takePicture();
 	                return true;
@@ -298,10 +298,10 @@ public class MainActivity extends Activity {
 	    		}
 	    		else if( volume_keys.equals("volume_auto_stabilise") ) {
 	    			if( this.supports_auto_stabilise ) {
-						boolean auto_stabilise = sharedPreferences.getBoolean("preference_auto_stabilise", false);
+						boolean auto_stabilise = sharedPreferences.getBoolean(getAutoStabilisePreferenceKey(), false);
 						auto_stabilise = !auto_stabilise;
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putBoolean("preference_auto_stabilise", auto_stabilise);
+						editor.putBoolean(getAutoStabilisePreferenceKey(), auto_stabilise);
 						editor.apply();
 						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(auto_stabilise ? R.string.on : R.string.off);
 						preview.showToast(changed_auto_stabilise_toast, message);
@@ -381,7 +381,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "setupLocationListener");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		// Define a listener that responds to location updates
-		boolean store_location = sharedPreferences.getBoolean("preference_location", false);
+		boolean store_location = sharedPreferences.getBoolean(getLocationPreferenceKey(), false);
 		if( store_location && locationListener == null ) {
 			locationListener = new LocationListener() {
 			    public void onLocationChanged(Location location) {
@@ -464,7 +464,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "layoutUI");
 		this.preview.updateUIPlacement();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
+		String ui_placement = sharedPreferences.getString(getUIPlacementPreferenceKey(), "ui_right");
 		boolean ui_placement_right = ui_placement.equals("ui_right");
 		if( MyDebug.LOG )
 			Log.d(TAG, "ui_placement: " + ui_placement);
@@ -934,7 +934,7 @@ public class MainActivity extends Activity {
 		            }
 
 		    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-		    		String ui_placement = sharedPreferences.getString("preference_ui_placement", "ui_right");
+		    		String ui_placement = sharedPreferences.getString(getUIPlacementPreferenceKey(), "ui_right");
 		    		boolean ui_placement_right = ui_placement.equals("ui_right");
 		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, ui_placement_right ? 0.0f : 1.0f);
 		    		animation.setDuration(100);
@@ -1066,7 +1066,7 @@ public class MainActivity extends Activity {
 			Camera.Parameters parameters = preview.getCamera().getParameters();
 			if( MyDebug.LOG )
 				Log.d(TAG, "scene mode was: " + parameters.getSceneMode());
-			String key = Preview.getSceneModePreferenceKey();
+			String key = getSceneModePreferenceKey();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			String value = sharedPreferences.getString(key, Camera.Parameters.SCENE_MODE_AUTO);
 			if( !value.equals(parameters.getSceneMode()) ) {
@@ -1148,7 +1148,7 @@ public class MainActivity extends Activity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		if( sharedPreferences.getBoolean("preference_show_when_locked", true) ) {
+		if( sharedPreferences.getBoolean(getShowWhenLockedPreferenceKey(), true) ) {
 	        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		}
@@ -1160,7 +1160,7 @@ public class MainActivity extends Activity {
 		// done here rather than onCreate, so that changing it in preferences takes effect without restarting app
 		{
 	        WindowManager.LayoutParams layout = getWindow().getAttributes();
-			if( sharedPreferences.getBoolean("preference_max_brightness", true) ) {
+			if( sharedPreferences.getBoolean(getMaxBrightnessPreferenceKey(), true) ) {
 		        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
 	        }
 			else {
@@ -1509,7 +1509,7 @@ public class MainActivity extends Activity {
 						preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder);
 						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putString("preference_save_location", save_folder);
+						editor.putString(getSaveLocationPreferenceKey(), save_folder);
 						editor.apply();
 						updateFolderHistory(); // to move new selection to most recent
 					}
@@ -1694,7 +1694,7 @@ public class MainActivity extends Activity {
 
     private String getSaveLocation() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
+		String folder_name = sharedPreferences.getString(getSaveLocationPreferenceKey(), "OpenCamera");
 		return folder_name;
     }
     
@@ -1816,6 +1816,204 @@ public class MainActivity extends Activity {
     	return this.preview;
     }
 
+    // must be static, to safely call from other Activities:
+
+    public static String getFlashPreferenceKey(int cameraId) {
+    	return "flash_value_" + cameraId;
+    }
+
+    public static String getFocusPreferenceKey(int cameraId) {
+    	return "focus_value_" + cameraId;
+    }
+
+    public static String getResolutionPreferenceKey(int cameraId) {
+    	return "camera_resolution_" + cameraId;
+    }
+    
+    public static String getVideoQualityPreferenceKey(int cameraId) {
+    	return "video_quality_" + cameraId;
+    }
+    
+    public static String getIsVideoPreferenceKey() {
+    	return "is_video";
+    }
+    
+    public static String getExposurePreferenceKey() {
+    	return "preference_exposure";
+    }
+
+    public static String getColorEffectPreferenceKey() {
+    	return "preference_color_effect";
+    }
+
+    public static String getSceneModePreferenceKey() {
+    	return "preference_scene_mode";
+    }
+
+    public static String getWhiteBalancePreferenceKey() {
+    	return "preference_white_balance";
+    }
+
+    public static String getISOPreferenceKey() {
+    	return "preference_iso";
+    }
+    
+    public static String getVolumeKeysPreferenceKey() {
+    	return "preference_volume_keys";
+    }
+    
+    public static String getQualityPreferenceKey() {
+    	return "preference_quality";
+    }
+    
+    public static String getAutoStabilisePreferenceKey() {
+    	return "preference_auto_stabilise";
+    }
+    
+    public static String getLocationPreferenceKey() {
+    	return "preference_location";
+    }
+    
+    public static String getStampPreferenceKey() {
+    	return "preference_stamp";
+    }
+
+    public static String getUIPlacementPreferenceKey() {
+    	return "preference_ui_placement";
+    }
+    
+    public static String getPausePreviewPreferenceKey() {
+    	return "preference_pause_preview";
+    }
+    
+    public static String getThumbnailAnimationPreferenceKey() {
+    	return "preference_thumbnail_animation";
+    }
+
+    public static String getShowWhenLockedPreferenceKey() {
+    	return "preference_show_when_locked";
+    }
+
+    public static String getMaxBrightnessPreferenceKey() {
+    	return "preference_max_brightness";
+    }
+
+    public static String getSaveLocationPreferenceKey() {
+    	return "preference_save_location";
+    }
+
+    public static String getShowZoomControlsPreferenceKey() {
+    	return "preference_show_zoom_controls";
+    }
+
+    public static String getShowZoomSliderControlsPreferenceKey() {
+    	return "preference_show_zoom_slider_controls";
+    }
+    
+    public static String getShowZoomPreferenceKey() {
+    	return "preference_show_zoom";
+    }
+
+    public static String getShowAnglePreferenceKey() {
+    	return "preference_show_angle";
+    }
+    
+    public static String getShowAngleLinePreferenceKey() {
+    	return "preference_show_angle_line";
+    }
+
+    public static String getShowGeoDirectionPreferenceKey() {
+    	return "preference_show_geo_direction";
+    }
+    
+    public static String getShowFreeMemoryPreferenceKey() {
+    	return "preference_free_memory";
+    }
+    
+    public static String getShowGridPreferenceKey() {
+    	return "preference_grid";
+    }
+    
+    public static String getShowCropGuidePreferenceKey() {
+    	return "preference_crop_guide";
+    }
+    
+    public static String getFaceDetectionPreferenceKey() {
+    	return "preference_face_detection";
+    }
+
+    public static String getVideoStabilizationPreferenceKey() {
+    	return "preference_video_stabilization";
+    }
+    
+    public static String getForceVideo4KPreferenceKey() {
+    	return "preference_force_video_4k";
+    }
+    
+    public static String getVideoBitratePreferenceKey() {
+    	return "preference_video_bitrate";
+    }
+
+    public static String getVideoFPSPreferenceKey() {
+    	return "preference_video_fps";
+    }
+    
+    public static String getVideoMaxDurationPreferenceKey() {
+    	return "preference_video_max_duration";
+    }
+    
+    public static String getVideoRestartPreferenceKey() {
+    	return "preference_video_restart";
+    }
+    
+    public static String getVideoFlashPreferenceKey() {
+    	return "preference_video_flash";
+    }
+
+    public static String getLockVideoPreferenceKey() {
+    	return "preference_lock_video";
+    }
+    
+    public static String getRecordAudioPreferenceKey() {
+    	return "preference_record_audio";
+    }
+
+    public static String getRecordAudioSourcePreferenceKey() {
+    	return "preference_record_audio_src";
+    }
+
+    public static String getPreviewSizePreferenceKey() {
+    	return "preference_preview_size";
+    }
+
+    public static String getRotatePreviewPreferenceKey() {
+    	return "preference_rotate_preview";
+    }
+
+    public static String getLockOrientationPreferenceKey() {
+    	return "preference_lock_orientation";
+    }
+
+    public static String getTimerPreferenceKey() {
+    	return "preference_timer";
+    }
+    
+    public static String getTimerBeepPreferenceKey() {
+    	return "preference_timer_beep";
+    }
+    
+    public static String getBurstModePreferenceKey() {
+    	return "preference_burst_mode";
+    }
+    
+    public static String getBurstIntervalPreferenceKey() {
+    	return "preference_burst_interval";
+    }
+    
+    public static String getShutterSoundPreferenceKey() {
+    	return "preference_shutter_sound";
+    }
+    
     // for testing:
 	public ArrayList<String> getSaveLocationHistory() {
 		return this.save_location_history;
