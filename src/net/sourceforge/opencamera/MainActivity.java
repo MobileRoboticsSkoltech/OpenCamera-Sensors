@@ -1142,6 +1142,17 @@ public class MainActivity extends Activity {
     }
     
     private void setWindowFlagsForCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setWindowFlagsForCamera");
+    	/*{
+    		Intent intent = new Intent(this, MyWidgetProvider.class);
+    		intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+    		AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+    		ComponentName widgetComponent = new ComponentName(this, MyWidgetProvider.class);
+    		int[] widgetIds = widgetManager.getAppWidgetIds(widgetComponent);
+    		intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, widgetIds);
+    		sendBroadcast(intent);    		
+    	}*/
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		// force to landscape mode
@@ -1149,10 +1160,14 @@ public class MainActivity extends Activity {
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		if( sharedPreferences.getBoolean(getShowWhenLockedPreferenceKey(), true) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "do show when locked");
 	        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		}
 		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "don't show when locked");
 	        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
 		}
 

@@ -50,7 +50,21 @@
                 <action android:name="android.media.action.STILL_IMAGE_CAMERA_SECURE" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            </activity>
+        </activity>
+		<receiver
+		    android:icon="@drawable/ic_launcher"
+		    android:label="Open Camera"
+		    android:name="MyWidgetProvider" >
+		    <intent-filter >
+		         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+		    </intent-filter>
+            <!-- <intent-filter> 
+            	<action android:name="net.sourceforge.opencamera.LAUNCH_OPEN_CAMERA"/> 
+            </intent-filter>  -->
+		    		
+		    <meta-data
+		       android:name="android.appwidget.provider"
+		       android:resource="@xml/widget_info" />
+		</receiver> 
     </application>
-
 </manifest>
