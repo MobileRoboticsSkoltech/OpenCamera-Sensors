@@ -1602,14 +1602,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( index != -1 ) {
 				profile_string = quality.substring(0, index);
 				if( MyDebug.LOG )
-					Log.e(TAG, "    profile_string: " + profile_string);
+					Log.d(TAG, "    profile_string: " + profile_string);
 			}
 			int profile = Integer.parseInt(profile_string);
 			camcorder_profile = CamcorderProfile.get(cameraId, profile);
 			if( index != -1 && index+1 < quality.length() ) {
 				String override_string = quality.substring(index+1);
 				if( MyDebug.LOG )
-					Log.e(TAG, "    override_string: " + override_string);
+					Log.d(TAG, "    override_string: " + override_string);
 				if( override_string.charAt(0) == 'r' && override_string.length() >= 4 ) {
 					index = override_string.indexOf('x');
 					if( index == -1 ) {
