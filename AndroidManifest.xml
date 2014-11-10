@@ -54,7 +54,7 @@
         </activity>
         <activity
             android:name="net.sourceforge.opencamera.TakePhoto"
-            android:label="Take Photo"
+            android:label="@string/take_photo"
 	        android:icon="@drawable/ic_launcher_take_photo"
             android:screenOrientation="landscape"
 			android:configChanges="orientation|screenSize|keyboardHidden"
@@ -80,5 +80,16 @@
 		       android:name="android.appwidget.provider"
 		       android:resource="@xml/widget_info" />
 		</receiver> 
-	</application>
+        <receiver
+		    android:icon="@drawable/ic_launcher_take_photo"
+            android:label="@string/take_photo"
+		    android:name="MyWidgetProviderTakePhoto" >
+		    <intent-filter >
+		         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+		    </intent-filter>
+		    <meta-data
+		       android:name="android.appwidget.provider"
+		       android:resource="@xml/widget_info_take_photo" />
+		</receiver> 
+    </application>
 </manifest>
