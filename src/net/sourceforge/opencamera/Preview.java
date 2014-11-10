@@ -3531,6 +3531,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    		video_recorder = new MediaRecorder();
 	    		this.camera_controller.stopPreview(); // although not documented, we need to stop preview to prevent device freeze or video errors shortly after video recording starts on some devices (e.g., device freeze on Samsung Galaxy S2 - I could reproduce this on Samsung RTL; also video recording fails and preview becomes corrupted on Galaxy S3 variant "SGH-I747-US2"); also see http://stackoverflow.com/questions/4244999/problem-with-video-recording-after-auto-focus-in-android
 	    		this.camera_controller.unlock();
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "set video listeners");
 	        	video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
 					@Override
 					public void onInfo(MediaRecorder mr, int what, int extra) {
@@ -3601,6 +3603,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    			Log.d(TAG, "audio_source: " + audio_source);
 					video_recorder.setAudioSource(audio_source);
 				}
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "set video source");
 				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
 				boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
@@ -3612,6 +3616,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					video_recorder.setLocation((float)location.getLatitude(), (float)location.getLongitude());
 				}
 
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "set video profile");
 				if( record_audio ) {
 					video_recorder.setProfile(profile);
 				}
@@ -3625,6 +3631,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				}
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "video fileformat: " + profile.fileFormat);
+	    			Log.d(TAG, "video framerate: " + profile.videoFrameRate);
+	    			Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+	    			Log.d(TAG, "video bitrate: " + profile.videoBitRate);
+	    			Log.d(TAG, "video codec: " + profile.videoCodec);
 	    		}
 
 	        	video_recorder.setOutputFile(video_name);
@@ -3638,7 +3648,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		        	video_recorder.setPreviewDisplay(mHolder.getSurface());
 		        	video_recorder.setOrientationHint(getImageVideoRotation());
 					video_recorder.prepare();
+					if( MyDebug.LOG )
+						Log.d(TAG, "about to start video recorder");
 	            	video_recorder.start();
+					if( MyDebug.LOG )
+						Log.d(TAG, "video recorder started");
 	            	video_start_time = System.currentTimeMillis();
 	            	video_start_time_set = true;
     				//showToast(stopstart_video_toast, R.string.started_recording_video);
