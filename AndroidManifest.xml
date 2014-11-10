@@ -55,6 +55,7 @@
         <activity
             android:name="net.sourceforge.opencamera.TakePhoto"
             android:label="Take Photo"
+	        android:icon="@drawable/ic_launcher_take_photo"
             android:screenOrientation="landscape"
 			android:configChanges="orientation|screenSize|keyboardHidden"
 			android:taskAffinity=""
