@@ -13,7 +13,7 @@ copy %src%\.classpath %dst%
 copy %src%\.project %dst%
 copy %src%\AndroidManifest.xml %dst%
 REM copy %src%\ic_launcher-web.png %dst%
-copy %src%\logo.svg %dst%
+REM copy %src%\logo.svg %dst%
 copy %src%\proguard-project.txt %dst%
 copy %src%\project.properties %dst%
 
