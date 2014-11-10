@@ -822,6 +822,28 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
 		}
+
+		if( camera_controller != null ) {
+			Activity activity = (Activity)this.getContext();
+			if( MyDebug.LOG )
+				Log.d(TAG, "intent: " + activity.getIntent());
+			if( activity.getIntent() != null && activity.getIntent().getExtras() != null ) {
+				boolean take_photo = activity.getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO);
+				if( MyDebug.LOG )
+					Log.d(TAG, "take_photo?: " + take_photo);
+				if( take_photo ) {
+					activity.getIntent().removeExtra(TakePhoto.TAKE_PHOTO);
+					if( this.is_video ) {
+						this.switchVideo(true, true);
+					}
+					takePicture();
+				}
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no intent data");
+			}
+		}
 	}
 	
 	/* Should only be called after camera first opened, or after preview is paused.

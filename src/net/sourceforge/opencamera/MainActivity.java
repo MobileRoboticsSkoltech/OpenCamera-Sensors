@@ -115,6 +115,11 @@ public class MainActivity extends Activity {
 			if( MyDebug.LOG )
 				Log.d(TAG, "is_test: " + is_test);
 		}
+		if( getIntent() != null && getIntent().getExtras() != null ) {
+			boolean take_photo = getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO);
+			if( MyDebug.LOG )
+				Log.d(TAG, "take_photo?: " + take_photo);
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);

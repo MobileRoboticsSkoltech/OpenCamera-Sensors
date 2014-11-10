@@ -37,6 +37,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.media.action.IMAGE_CAPTURE" />
@@ -51,9 +52,22 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-		<receiver
+        <activity
+            android:name="net.sourceforge.opencamera.TakePhoto"
+            android:label="Take Photo"
+            android:screenOrientation="landscape"
+			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:taskAffinity=""
+			android:excludeFromRecents="true"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver
 		    android:icon="@drawable/ic_launcher"
-		    android:label="Open Camera"
+		    android:label="@string/app_name"
 		    android:name="MyWidgetProvider" >
 		    <intent-filter >
 		         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -61,10 +75,9 @@
             <!-- <intent-filter> 
             	<action android:name="net.sourceforge.opencamera.LAUNCH_OPEN_CAMERA"/> 
             </intent-filter>  -->
-		    		
 		    <meta-data
 		       android:name="android.appwidget.provider"
 		       android:resource="@xml/widget_info" />
 		</receiver> 
-    </application>
+	</application>
 </manifest>
