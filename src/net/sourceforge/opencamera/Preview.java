@@ -785,8 +785,22 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "time after opening camera: " + (System.currentTimeMillis() - debug_time));
 		}
+		boolean take_photo = false;
 		if( camera_controller != null ) {
 			Activity activity = (Activity)this.getContext();
+			if( MyDebug.LOG )
+				Log.d(TAG, "intent: " + activity.getIntent());
+			if( activity.getIntent() != null && activity.getIntent().getExtras() != null ) {
+				take_photo = activity.getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO);
+				activity.getIntent().removeExtra(TakePhoto.TAKE_PHOTO);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no intent data");
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "take_photo?: " + take_photo);
+
 	        this.setCameraDisplayOrientation();
 	        new OrientationEventListener(activity) {
 				@Override
@@ -815,7 +829,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
 		    switchCameraButton.setVisibility(Camera.getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
 
-		    setupCamera(toast_message);
+		    setupCamera(toast_message, take_photo);
 		}
     	setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
 
@@ -823,32 +837,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
 		}
 
-		if( camera_controller != null ) {
-			Activity activity = (Activity)this.getContext();
-			if( MyDebug.LOG )
-				Log.d(TAG, "intent: " + activity.getIntent());
-			if( activity.getIntent() != null && activity.getIntent().getExtras() != null ) {
-				boolean take_photo = activity.getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO);
-				if( MyDebug.LOG )
-					Log.d(TAG, "take_photo?: " + take_photo);
-				if( take_photo ) {
-					activity.getIntent().removeExtra(TakePhoto.TAKE_PHOTO);
-					if( this.is_video ) {
-						this.switchVideo(true, true);
-					}
-					takePicture();
-				}
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "no intent data");
-			}
-		}
 	}
 	
 	/* Should only be called after camera first opened, or after preview is paused.
 	 */
-	void setupCamera(String toast_message) {
+	void setupCamera(String toast_message, boolean take_photo) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setupCamera()");
 		/*long debug_time = 0;
@@ -904,13 +897,32 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			zoomTo(new_zoom_factor, true);
 		}
 
-    	final Handler handler = new Handler();
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				tryAutoFocus(true, false); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
+	    if( take_photo ) {
+			if( this.is_video ) {
+				this.switchVideo(true, true);
 			}
-		}, 500);
+			// take photo after a delay - otherwise we sometimes get a black image?!
+	    	final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "do automatic take picture");
+					takePicture();
+				}
+			}, 500);
+		}
+	    else {
+	    	final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "do startup autofocus");
+					tryAutoFocus(true, false); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
+				}
+			}, 500);
+	    }
 	}
 
 	private void setupCameraParameters() {

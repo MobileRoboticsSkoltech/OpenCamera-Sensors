@@ -1092,7 +1092,7 @@ public class MainActivity extends Activity {
 		else {
 			preview.setCameraDisplayOrientation(); // need to call in case the preview rotation option was changed
 			preview.pausePreview();
-			preview.setupCamera(toast_message);
+			preview.setupCamera(toast_message, false);
 		}
 
     	if( saved_focus_value != null ) {
