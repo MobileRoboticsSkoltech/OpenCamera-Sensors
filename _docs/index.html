@@ -614,6 +614,9 @@ available from
 
 Version 1.21 (Work in progress)
 
+FIXED   Broadcasts of Camera.ACTION_NEW_PICTURE, com.android.camera.NEW_PICTURE
+        and Camera.ACTION_NEW_VIDEO intents weren't supplying the Uri correctly
+        - auto-uploading for photos and videos with Owncloud should now work.
 FIXED   Corrected look of popup animation when in left-handed UI mode.
 FIXED   If called via an intent, and returning the bitmap via a parcel, the
         bitmap wasn't being resized to a small size if auto-stabilise option

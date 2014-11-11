@@ -32,6 +32,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.provider.MediaStore.Video;
 import android.provider.MediaStore.Video.VideoColumns;
@@ -99,6 +100,7 @@ public class MainActivity extends Activity {
 	// for testing:
 	public boolean is_test = false;
 	public Bitmap gallery_bitmap = null;
+	public boolean failed_to_scan = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -1654,7 +1656,9 @@ public class MainActivity extends Activity {
 	    }
 	}
 
-    public void broadcastFile(File file, boolean is_new_picture, boolean is_new_video) {
+    public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "broadcastFile");
     	// note that the new method means that the new folder shows up as a file when connected to a PC via MTP (at least tested on Windows 8)
     	if( file.isDirectory() ) {
     		//this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(file)));
@@ -1665,6 +1669,7 @@ public class MainActivity extends Activity {
     	else {
         	// both of these work fine, but using MediaScannerConnection.scanFile() seems to be preferred over sending an intent
     		//this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+ 			failed_to_scan = true; // set to true until scanned okay
         	MediaScannerConnection.scanFile(this, new String[] { file.getAbsolutePath() }, null,
         			new MediaScannerConnection.OnScanCompletedListener() {
     		 		public void onScanCompleted(String path, Uri uri) {
@@ -1672,40 +1677,70 @@ public class MainActivity extends Activity {
     		 				Log.d("ExternalStorage", "Scanned " + path + ":");
     		 				Log.d("ExternalStorage", "-> uri=" + uri);
     		 			}
+    		        	if( is_new_picture ) {
+    		        		sendBroadcast(new Intent(Camera.ACTION_NEW_PICTURE, uri));
+    		        		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
+    		        		sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
+
+	    		 			if( MyDebug.LOG ) // this code only used for debugging/logging
+	    		 			{
+    		        	        String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE }; 
+    		        	        Cursor c = getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
+    		        	        if( c == null ) { 
+    		    		 			if( MyDebug.LOG )
+    		    		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
+    		        	        }
+    		        	        else if( !c.moveToFirst() ) { 
+    		    		 			if( MyDebug.LOG )
+    		    		 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
+    		        	        }
+    		        	        else {
+    			        	        String file_path = c.getString(c.getColumnIndex(Images.Media.DATA)); 
+    			        	        String file_name = c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME)); 
+    			        	        String mime_type = c.getString(c.getColumnIndex(Images.Media.MIME_TYPE)); 
+    		    		 			if( MyDebug.LOG ) {
+    		    		 				Log.d(TAG, "file_path: " + file_path); 
+    		    		 				Log.d(TAG, "file_name: " + file_name); 
+    		    		 				Log.d(TAG, "mime_type: " + mime_type); 
+    		    		 			}
+    			        	        c.close(); 
+    		    		 			failed_to_scan = false;
+    		        	        }
+    		        		}
+    		        	}
+    		        	else if( is_new_video ) {
+    		        		sendBroadcast(new Intent(Camera.ACTION_NEW_VIDEO, uri));
+	    		 			failed_to_scan = true;
+    		        	}
+    		        	else {
+	    		 			failed_to_scan = true;
+    		        	}
     		 		}
     			}
     		);
-        	if( is_new_picture ) {
-    	        /*ContentValues values = new ContentValues(); 
-    	        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
-    	        values.put(ImageColumns.DISPLAY_NAME, file.getName());
-    	        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
-    	        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
-    	        // TODO: orientation
-    	        values.put(ImageColumns.DATA, file.getAbsolutePath());
-    	        Location location = preview.getLocation();
-    	        if( location != null ) {
-        	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
-        	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
-    	        }
-    	        try {
-    	    		this.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
-    	        }
-    	        catch (Throwable th) { 
-        	        // This can happen when the external volume is already mounted, but 
-        	        // MediaScanner has not notify MediaProvider to add that volume. 
-        	        // The picture is still safe and MediaScanner will find it and 
-        	        // insert it into MediaProvider. The only problem is that the user 
-        	        // cannot click the thumbnail to review the picture. 
-        	        Log.e(TAG, "Failed to write MediaStore" + th); 
-        	    }*/
-        		this.sendBroadcast(new Intent(Camera.ACTION_NEW_PICTURE, Uri.fromFile(file)));
-        		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
-        		this.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", Uri.fromFile(file)));
-        	}
-        	else if( is_new_video ) {
-        		this.sendBroadcast(new Intent(Camera.ACTION_NEW_VIDEO, Uri.fromFile(file)));
-        	}
+	        /*ContentValues values = new ContentValues(); 
+	        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
+	        values.put(ImageColumns.DISPLAY_NAME, file.getName());
+	        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
+	        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
+	        // TODO: orientation
+	        values.put(ImageColumns.DATA, file.getAbsolutePath());
+	        Location location = preview.getLocation();
+	        if( location != null ) {
+    	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
+    	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
+	        }
+	        try {
+	    		this.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
+	        }
+	        catch (Throwable th) { 
+    	        // This can happen when the external volume is already mounted, but 
+    	        // MediaScanner has not notify MediaProvider to add that volume. 
+    	        // The picture is still safe and MediaScanner will find it and 
+    	        // insert it into MediaProvider. The only problem is that the user 
+    	        // cannot click the thumbnail to review the picture. 
+    	        Log.e(TAG, "Failed to write MediaStore" + th); 
+    	    }*/
     	}
 	}
     
