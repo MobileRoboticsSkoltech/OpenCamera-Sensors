@@ -229,6 +229,9 @@
         <item>25</item>
         <item>30</item>
         <item>60</item>
+        <item>96</item>
+        <item>100</item>
+        <item>120</item>
     </string-array>
     <string-array name="preference_video_fps_values">
         <item>default</item>
@@ -237,6 +240,9 @@
         <item>25</item>
         <item>30</item>
         <item>60</item>
+        <item>96</item>
+        <item>100</item>
+        <item>120</item>
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Неограниченно</item>
