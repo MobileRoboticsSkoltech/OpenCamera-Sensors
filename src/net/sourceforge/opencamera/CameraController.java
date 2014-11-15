@@ -626,8 +626,13 @@ public class CameraController {
 	
 	private String convertFlashModeToValue(String flash_mode) {
 		// flash_mode may be null, meaning flash isn't supported; we return ""
+		if( MyDebug.LOG )
+			Log.d(TAG, "convertFlashModeToValue: " + flash_mode);
 		String flash_value = "";
-    	if( flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
+		if( flash_mode == null ) {
+			// ignore, leave flash_value at null
+		}
+		else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
     		flash_value = "flash_off";
     	}
     	else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_AUTO) ) {
@@ -648,7 +653,7 @@ public class CameraController {
 	public String getFlashValue() {
 		// returns "" if flash isn't supported
 		Camera.Parameters parameters = this.getParameters();
-		String flash_mode = parameters.getFlashMode();
+		String flash_mode = parameters.getFlashMode(); // will be null if flash mode not supported
 		return convertFlashModeToValue(flash_mode);
 	}
 	
