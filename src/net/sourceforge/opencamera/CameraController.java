@@ -609,6 +609,8 @@ public class CameraController {
 	
 	void setFlashValue(String flash_value) {
 		Camera.Parameters parameters = this.getParameters();
+		if( parameters.getFlashMode() == null )
+			return; // flash mode not supported
 		String flash_mode = convertFlashValueToMode(flash_value);
     	if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
     		if( parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH) && !flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
