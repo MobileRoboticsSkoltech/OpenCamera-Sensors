@@ -5192,13 +5192,15 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.phase == PHASE_TAKING_PHOTO;
     }
 
-    // for testing:
     public Camera getCamera() {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "getCamera: " + camera);*/
+    	if( this.camera_controller == null )
+    		return null;
     	return this.camera_controller.getCamera();
     }
-    
+
+    // for testing:
     public CameraController getCameraController() {
     	return this.camera_controller;
     }
