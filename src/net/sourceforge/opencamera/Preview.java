@@ -3959,7 +3959,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        				Log.d(TAG, "after scaling: w0 = " + w0 + " , h0 = " + h0);
 	        				Log.d(TAG, "after scaling: w1 = " + w1 + " , h1 = " + h1);
 	        			}
-	        		    if( camera_controller.isFrontFacing() ) {
+        				// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
+	        		    if( camera_controller != null && camera_controller.isFrontFacing() ) {
 	            		    matrix.postRotate((float)-level_angle);
 	        		    }
 	        		    else {
@@ -4317,7 +4318,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         		    bitmap = null;
 	            }
 
-	            if( success && picFile != null ) {
+				// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
+	            if( success && picFile != null && camera_controller != null ) {
 	            	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
 	            	long time_s = System.currentTimeMillis();
 		        	CameraController.Size size = camera_controller.getPictureSize();
