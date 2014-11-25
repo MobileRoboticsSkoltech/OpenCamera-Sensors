@@ -14,7 +14,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -807,7 +806,7 @@ public class MainActivity extends Activity {
 		this.closePopup();
 		SeekBar seek_bar = ((SeekBar)findViewById(R.id.seekbar));
 		int visibility = seek_bar.getVisibility();
-		if( visibility == View.GONE && preview.getCamera() != null && preview.supportsExposures() ) {
+		if( visibility == View.GONE && preview.getCameraController() != null && preview.supportsExposures() ) {
 			final int min_exposure = preview.getMinimumExposure();
 			seek_bar.setVisibility(View.VISIBLE);
 			setSeekBarExposure();
@@ -895,7 +894,7 @@ public class MainActivity extends Activity {
 			closePopup();
 			return;
 		}
-		if( preview.getCamera() == null ) {
+		if( preview.getCameraController() == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
@@ -973,8 +972,8 @@ public class MainActivity extends Activity {
 		putBundleExtra(bundle, "white_balances", this.preview.getSupportedWhiteBalances());
 		putBundleExtra(bundle, "isos", this.preview.getSupportedISOs());
 		bundle.putString("iso_key", this.preview.getISOKey());
-		if( this.preview.getCamera() != null ) {
-			bundle.putString("parameters_string", this.preview.getCamera().getParameters().flatten());
+		if( this.preview.getCameraController() != null ) {
+			bundle.putString("parameters_string", preview.getCameraController().getParametersString());
 		}
 
 		List<CameraController.Size> preview_sizes = this.preview.getSupportedPreviewSizes();
@@ -1054,7 +1053,7 @@ public class MainActivity extends Activity {
 			}
 		}
     	String saved_focus_value = null;
-    	if( preview.getCamera() != null && preview.isVideo() && !preview.focusIsVideo() ) {
+    	if( preview.getCameraController() != null && preview.isVideo() && !preview.focusIsVideo() ) {
     		saved_focus_value = preview.getCurrentFocusValue(); // n.b., may still be null
 			// make sure we're into continuous video mode
 			// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
@@ -1069,14 +1068,14 @@ public class MainActivity extends Activity {
 		// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
 		// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
 		boolean need_reopen = false;
-		if( preview.getCamera() != null ) {
-			Camera.Parameters parameters = preview.getCamera().getParameters();
+		if( preview.getCameraController() != null ) {
+			String scene_mode = preview.getCameraController().getSceneMode();
 			if( MyDebug.LOG )
-				Log.d(TAG, "scene mode was: " + parameters.getSceneMode());
+				Log.d(TAG, "scene mode was: " + scene_mode);
 			String key = getSceneModePreferenceKey();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			String value = sharedPreferences.getString(key, Camera.Parameters.SCENE_MODE_AUTO);
-			if( !value.equals(parameters.getSceneMode()) ) {
+			String value = sharedPreferences.getString(key, CameraController.getDefaultSceneMode());
+			if( !value.equals(scene_mode) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "scene mode changed to: " + value);
 				need_reopen = true;
@@ -1085,7 +1084,7 @@ public class MainActivity extends Activity {
 
 		layoutUI(); // needed in case we've changed left/right handed UI
         setupLocationListener(); // in case we've enabled GPS
-		if( need_reopen || preview.getCamera() == null ) { // if camera couldn't be opened before, might as well try again
+		if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
 			preview.onResume(toast_message);
 		}
@@ -1678,7 +1677,7 @@ public class MainActivity extends Activity {
     		 				Log.d("ExternalStorage", "-> uri=" + uri);
     		 			}
     		        	if( is_new_picture ) {
-    		        		sendBroadcast(new Intent(Camera.ACTION_NEW_PICTURE, uri));
+    		        		sendBroadcast(new Intent(CameraController.getActionNewPicture(), uri));
     		        		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
     		        		sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
 
@@ -1709,7 +1708,7 @@ public class MainActivity extends Activity {
     		        		}
     		        	}
     		        	else if( is_new_video ) {
-    		        		sendBroadcast(new Intent(Camera.ACTION_NEW_VIDEO, uri));
+    		        		sendBroadcast(new Intent(CameraController.getActionNewVideo(), uri));
 	    		 			failed_to_scan = true;
     		        	}
     		        	else {

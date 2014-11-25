@@ -325,19 +325,19 @@ public class CameraController {
 		return null;
 	}
 	
-	String getDefaultSceneMode() {
+	static String getDefaultSceneMode() {
 		return Camera.Parameters.SCENE_MODE_AUTO;
 	}
 	
-	String getDefaultColorEffect() {
+	static String getDefaultColorEffect() {
 		return Camera.Parameters.EFFECT_NONE;
 	}
 	
-	String getDefaultWhiteBalance() {
+	static String getDefaultWhiteBalance() {
 		return Camera.Parameters.WHITE_BALANCE_AUTO;
 	}
 	
-	String getDefaultISO() {
+	static String getDefaultISO() {
 		return "auto";
 	}
 	
@@ -557,6 +557,14 @@ public class CameraController {
 			fps_range[0] = 0;
 			fps_range[1] = 0;
         }
+	}
+	
+	static int getPreviewFPSMinIndex() {
+		return Camera.Parameters.PREVIEW_FPS_MIN_INDEX;
+	}
+	
+	static int getPreviewFPSMaxIndex() {
+		return Camera.Parameters.PREVIEW_FPS_MAX_INDEX;
 	}
 	
 	List<int []> getSupportedPreviewFpsRange() {
@@ -922,4 +930,21 @@ public class CameraController {
 	void initVideoRecorder(MediaRecorder video_recorder) {
     	video_recorder.setCamera(camera);
 	}
+	
+	String getParametersString() {
+		return this.getParameters().flatten();
+	}
+	
+	static int getNumberOfCameras() {
+		return Camera.getNumberOfCameras();
+	}
+
+	static String getActionNewPicture() {
+    	return Camera.ACTION_NEW_PICTURE;
+    }
+
+    static String getActionNewVideo() {
+    	return Camera.ACTION_NEW_VIDEO;
+    }
+
 }

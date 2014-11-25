@@ -263,9 +263,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
 			if( MyDebug.LOG )
 				Log.d(TAG, "found cameraId: " + cameraId);
-    		if( cameraId < 0 || cameraId >= Camera.getNumberOfCameras() ) {
+    		if( cameraId < 0 || cameraId >= CameraController.getNumberOfCameras() ) {
     			if( MyDebug.LOG )
-    				Log.d(TAG, "cameraID not valid for " + Camera.getNumberOfCameras() + " cameras!");
+    				Log.d(TAG, "cameraID not valid for " + CameraController.getNumberOfCameras() + " cameras!");
     			cameraId = 0;
     		}
     		zoom_factor = savedInstanceState.getInt("zoom_factor", 0);
@@ -827,7 +827,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 
 		    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
-		    switchCameraButton.setVisibility(Camera.getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
+		    switchCameraButton.setVisibility(CameraController.getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
 
 		    setupCamera(toast_message, take_photo);
 		}
@@ -944,7 +944,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			// mode, applications should call getParameters to know if some parameters are changed."
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up scene mode");
-			String value = sharedPreferences.getString(MainActivity.getSceneModePreferenceKey(), camera_controller.getDefaultSceneMode());
+			String value = sharedPreferences.getString(MainActivity.getSceneModePreferenceKey(), CameraController.getDefaultSceneMode());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved scene mode: " + value);
 
@@ -1087,7 +1087,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up color effect");
-			String value = sharedPreferences.getString(MainActivity.getColorEffectPreferenceKey(), camera_controller.getDefaultColorEffect());
+			String value = sharedPreferences.getString(MainActivity.getColorEffectPreferenceKey(), CameraController.getDefaultColorEffect());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved color effect: " + value);
 
@@ -1104,7 +1104,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up white balance");
-			String value = sharedPreferences.getString(MainActivity.getWhiteBalancePreferenceKey(), camera_controller.getDefaultWhiteBalance());
+			String value = sharedPreferences.getString(MainActivity.getWhiteBalancePreferenceKey(), CameraController.getDefaultWhiteBalance());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved white balance: " + value);
 
@@ -1121,7 +1121,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up iso");
-			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
+			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), CameraController.getDefaultISO());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved iso: " + value);
 
@@ -2771,7 +2771,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				Log.d(TAG, "currently taking a photo");
 			return;
 		}
-		int n_cameras = Camera.getNumberOfCameras();
+		int n_cameras = CameraController.getNumberOfCameras();
 		if( MyDebug.LOG )
 			Log.d(TAG, "found " + n_cameras + " cameras");
 		if( n_cameras > 1 ) {
@@ -2838,7 +2838,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			toast_string += "\n" + getResources().getString(R.string.exposure) + ": " + (current_exposure > 0 ? "+" : "") + current_exposure;
 		}
 		String scene_mode = camera_controller.getSceneMode();
-    	if( scene_mode != null && !scene_mode.equals(camera_controller.getDefaultSceneMode()) ) {
+    	if( scene_mode != null && !scene_mode.equals(CameraController.getDefaultSceneMode()) ) {
     		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + scene_mode;
     	}
 		String lock_orientation = sharedPreferences.getString(MainActivity.getLockOrientationPreferenceKey(), "none");
@@ -3533,7 +3533,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    	    	if( MyDebug.LOG ) {
 		    			int [] fps_range = new int[2];
 		                camera_controller.getPreviewFpsRange(fps_range);
-	    				Log.d(TAG, "recording with preview fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+	    				Log.d(TAG, "recording with preview fps range: " + fps_range[CameraController.getPreviewFPSMinIndex()] + " to " + fps_range[CameraController.getPreviewFPSMaxIndex()]);
 	    				if( this.supports_video_stabilization ) {
 	    					Log.d(TAG, "recording with video stabilization? " + (camera_controller.getVideoStabilization() ? "yes" : "no"));
 	    				}
@@ -4769,7 +4769,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
 			    View popupButton = (View) main_activity.findViewById(R.id.popup);
-			    if( Camera.getNumberOfCameras() > 1 )
+			    if( CameraController.getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 			    if( !is_video )
 			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
@@ -5195,13 +5195,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public Camera getCamera() {
-		/*if( MyDebug.LOG )
-			Log.d(TAG, "getCamera: " + camera);*/
     	if( this.camera_controller == null )
     		return null;
     	return this.camera_controller.getCamera();
     }
-
+    
     // for testing:
     public CameraController getCameraController() {
     	return this.camera_controller;
