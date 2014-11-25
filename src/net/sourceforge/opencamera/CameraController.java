@@ -303,7 +303,7 @@ public class CameraController {
 
 	// gets the available values of a generic mode, e.g., scene, color etc, and makes sure the requested mode is available
 	SupportedValues checkModeIsSupported(List<String> values, String value, String default_value) {
-		if( values != null && values.size() > 0 ) {
+		if( values != null && values.size() > 1 ) { // n.b., if there is only 1 supported value, we also return null, as no point offering the choice to the user (there are some devices, e.g., Samsung, that only have a scene mode of "auto")
 			if( MyDebug.LOG ) {
 				for(int i=0;i<values.size();i++) {
 		        	Log.d(TAG, "supported value: " + values.get(i));
@@ -350,6 +350,11 @@ public class CameraController {
 		String default_value = getDefaultSceneMode();
     	Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedSceneModes();
+		/*{
+			// test
+			values = new ArrayList<String>();
+			values.add("auto");
+		}*/
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
 			if( !parameters.getSceneMode().equals(supported_values.selected_value) ) {
