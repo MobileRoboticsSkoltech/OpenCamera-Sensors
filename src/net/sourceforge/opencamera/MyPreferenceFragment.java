@@ -252,10 +252,12 @@ public class MyPreferenceFragment extends PreferenceFragment {
                         alertDialog.setTitle("About");
                         final StringBuilder about_string = new StringBuilder();
                         String version = "UNKNOWN_VERSION";
+                        int version_code = -1;
 						try {
 	                        PackageInfo pInfo = MyPreferenceFragment.this.getActivity().getPackageManager().getPackageInfo(MyPreferenceFragment.this.getActivity().getPackageName(), 0);
 	                        version = pInfo.versionName;
-						}
+	                        version_code = pInfo.versionCode;
+	                    }
 						catch(NameNotFoundException e) {
 	                		if( MyDebug.LOG )
 	                			Log.d(TAG, "NameNotFoundException exception trying to get version number");
@@ -263,6 +265,8 @@ public class MyPreferenceFragment extends PreferenceFragment {
 						}
                         about_string.append("Open Camera v");
                         about_string.append(version);
+                        about_string.append("\nVersion Code: ");
+                        about_string.append(version_code);
                         about_string.append("\n(c) 2013-2014 Mark Harman");
                         about_string.append("\nReleased under the GPL v3 or later");
                         about_string.append("\nPackage: ");
