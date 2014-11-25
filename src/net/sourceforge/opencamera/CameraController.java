@@ -900,9 +900,19 @@ public class CameraController {
 	}
 	
 	static boolean isFrontFacing(int cameraId) {
-	    Camera.CameraInfo camera_info = new Camera.CameraInfo();
-		Camera.getCameraInfo(cameraId, camera_info);
-		return (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
+	    try {
+		    Camera.CameraInfo camera_info = new Camera.CameraInfo();
+			Camera.getCameraInfo(cameraId, camera_info);
+			return (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
+	    }
+	    catch(RuntimeException e) {
+	    	// Had a report of this crashing on Galaxy Nexus - may be device specific issue, see http://stackoverflow.com/questions/22383708/java-lang-runtimeexception-fail-to-get-camera-info
+	    	// but good to catch it anyway
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "failed to set parameters");
+	    	e.printStackTrace();
+	    	return false;
+	    }
 	}
 	
 	void unlock() {
