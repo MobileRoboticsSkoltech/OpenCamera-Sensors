@@ -4794,7 +4794,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		String flash_value = getCurrentFlashValue();
 		if( MyDebug.LOG )
 			Log.d(TAG, "flash_value: " + flash_value);
-		if( flash_value != null && flash_value.equals("flash_auto") ) {
+		if( flash_value != null && flash_value.equals("flash_torch") ) {
+    		popup.setImageResource(R.drawable.popup_flash_torch);
+    	}
+		else if( flash_value != null && flash_value.equals("flash_auto") ) {
     		popup.setImageResource(R.drawable.popup_flash_auto);
     	}
     	else if( flash_value != null && flash_value.equals("flash_on") ) {
