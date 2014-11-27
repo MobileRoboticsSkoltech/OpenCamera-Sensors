@@ -1467,11 +1467,12 @@ public class MainActivity extends Activity {
 		editor.apply();
     }
     
-    /*private void openFolderChooserDialog() {
+    private void openFolderChooserDialog() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "openFolderChooserDialog");
 		showPreview(false);
 		setWindowFlagsForSettings();
+		final String orig_save_location = getSaveLocation();
 		FolderChooserDialog fragment = new FolderChooserDialog() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
@@ -1479,24 +1480,32 @@ public class MainActivity extends Activity {
 					Log.d(TAG, "FolderChooserDialog dismissed");
 				setWindowFlagsForCamera();
 				showPreview(true);
+				final String new_save_location = getSaveLocation();
+				if( !orig_save_location.equals(new_save_location) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "changed save_folder to: " + getSaveLocation());
+					updateFolderHistory();
+					preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + getSaveLocation());
+				}
+				super.onDismiss(dialog);
 			}
 		};
 		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
-    }*/
+    }
     
     private void longClickedGallery() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "longClickedGallery");
 		if( save_location_history.size() <= 1 ) {
 			// go straight to choose folder dialog
-			//openFolderChooserDialog();
+			openFolderChooserDialog();
 			return;
 		}
 
 		showPreview(false);
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle(R.string.choose_save_location);
-        CharSequence [] items = new CharSequence[save_location_history.size()+1];
+        CharSequence [] items = new CharSequence[save_location_history.size()+2];
         int index=0;
         // save_location_history is stored in order most-recent-last
         for(int i=0;i<save_location_history.size();i++) {
@@ -1504,8 +1513,8 @@ public class MainActivity extends Activity {
         }
         final int clear_index = index;
         items[index++] = getResources().getString(R.string.clear_folder_history);
-        /*final int new_index = index;
-        items[index++] = getResources().getString(R.string.choose_another_folder);*/
+        final int new_index = index;
+        items[index++] = getResources().getString(R.string.choose_another_folder);
 		alertDialog.setItems(items, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -1529,11 +1538,11 @@ public class MainActivity extends Activity {
 					setWindowFlagsForCamera();
 					showPreview(true);
 				}
-				/*else if( which == new_index ) {
+				else if( which == new_index ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "selected choose new folder");
 					openFolderChooserDialog();
-				}*/
+				}
 				else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "selected: " + which);

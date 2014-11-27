@@ -16,6 +16,7 @@
     <string name="choose_save_location">Choose save location:</string>
     <string name="clear_folder_history">Clear folder history</string>
     <string name="clear_folder_history_question">Clear folder history?</string>
+    <string name="choose_another_folder">Choose another folder</string>
     <string name="changed_save_location">Changed save location to:</string>
     <string name="stopped_recording_video">Stopped recording video</string>
     <string name="repeats_to_go">repeats to go</string> <!--  intentionally starts lower case -->
