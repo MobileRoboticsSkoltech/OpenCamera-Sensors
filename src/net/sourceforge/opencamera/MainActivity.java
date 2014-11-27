@@ -1531,12 +1531,21 @@ public class MainActivity extends Activity {
 								if( MyDebug.LOG )
 									Log.d(TAG, "confirmed clear save history");
 								clearFolderHistory();
+								setWindowFlagsForCamera();
+								showPreview(true);
 					        }
 			        	})
 			        	.setNegativeButton(R.string.answer_no, null)
+						.setOnCancelListener(new DialogInterface.OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface arg0) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "cancelled clear save history");
+								setWindowFlagsForCamera();
+								showPreview(true);
+							}
+						})
 			        	.show();
-					setWindowFlagsForCamera();
-					showPreview(true);
 				}
 				else if( which == new_index ) {
 					if( MyDebug.LOG )
