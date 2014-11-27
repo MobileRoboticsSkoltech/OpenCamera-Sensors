@@ -1214,6 +1214,14 @@ public class MainActivity extends Activity {
 		camera_in_background = true;
     }
     
+    private void showPreview(boolean show) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "showPreview: " + show);
+		final ViewGroup container = (ViewGroup)findViewById(R.id.hide_container);
+		container.setBackgroundColor(Color.BLACK);
+		container.setAlpha(show ? 0.0f : 1.0f);
+    }
+    
     class Media {
     	public long id;
     	public boolean video;
@@ -1459,14 +1467,34 @@ public class MainActivity extends Activity {
 		editor.apply();
     }
     
+    /*private void openFolderChooserDialog() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "openFolderChooserDialog");
+		showPreview(false);
+		setWindowFlagsForSettings();
+		FolderChooserDialog fragment = new FolderChooserDialog() {
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "FolderChooserDialog dismissed");
+				setWindowFlagsForCamera();
+				showPreview(true);
+			}
+		};
+		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
+    }*/
+    
     private void longClickedGallery() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "longClickedGallery");
 		if( save_location_history.size() <= 1 ) {
+			// go straight to choose folder dialog
+			//openFolderChooserDialog();
 			return;
 		}
-		final int theme = android.R.style.Theme_Black_NoTitleBar_Fullscreen;
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this, theme);
+
+		showPreview(false);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle(R.string.choose_save_location);
         CharSequence [] items = new CharSequence[save_location_history.size()+1];
         int index=0;
@@ -1477,7 +1505,7 @@ public class MainActivity extends Activity {
         final int clear_index = index;
         items[index++] = getResources().getString(R.string.clear_folder_history);
         /*final int new_index = index;
-        items[index++] = getResources().getString(R.string.new_save_location);*/
+        items[index++] = getResources().getString(R.string.choose_another_folder);*/
 		alertDialog.setItems(items, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -1499,26 +1527,12 @@ public class MainActivity extends Activity {
 			        	.setNegativeButton(R.string.answer_no, null)
 			        	.show();
 					setWindowFlagsForCamera();
+					showPreview(true);
 				}
 				/*else if( which == new_index ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "selected choose new folder");
-		    		FolderChooserDialog fragment = new FolderChooserDialog();
-		    		fragment.setStyle(DialogFragment.STYLE_NORMAL, theme);
-		    		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
-					FragmentTransaction ft = getFragmentManager().beginTransaction();
-					//DialogFragment newFragment = MyDialogFragment.newInstance();
-					FolderChooserDialog fragment = new FolderChooserDialog();
-					ft.add(R.id.prefs_container, fragment);
-					ft.commit();
-		    		fragment.getDialog().setOnDismissListener(new DialogInterface.OnDismissListener() {
-						@Override
-						public void onDismiss(DialogInterface dialog) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "FolderChooserDialog dismissed");
-							setWindowFlagsForCamera();
-						}
-;		    		});
+					openFolderChooserDialog();
 				}*/
 				else {
 					if( MyDebug.LOG )
@@ -1535,6 +1549,7 @@ public class MainActivity extends Activity {
 						updateFolderHistory(); // to move new selection to most recent
 					}
 					setWindowFlagsForCamera();
+					showPreview(true);
 				}
 			}
         });
@@ -1542,6 +1557,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onCancel(DialogInterface arg0) {
 		        setWindowFlagsForCamera();
+				showPreview(true);
 			}
 		});
         alertDialog.show();
