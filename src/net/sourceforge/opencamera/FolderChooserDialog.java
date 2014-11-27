@@ -222,7 +222,7 @@ public class FolderChooserDialog extends DialogFragment {
 				Log.d(TAG, "new_save_location: " + new_save_location);
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString("preference_save_location", new_save_location);
+			editor.putString(MainActivity.getSaveLocationPreferenceKey(), new_save_location);
 			editor.apply();
 			return true;
 		}
