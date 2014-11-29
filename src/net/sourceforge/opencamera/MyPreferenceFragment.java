@@ -36,6 +36,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences);
+		this.getActivity().setTheme(R.style.PreferenceTheme); // needed to avoid sub-screens opening with the black background that we've set in AppTheme
 
 		final Bundle bundle = getArguments();
 		final int cameraId = bundle.getInt("cameraId");
