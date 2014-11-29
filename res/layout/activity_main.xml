@@ -2,12 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
     tools:context=".MainActivity" >
-    <!-- N.B., Android Lint whinges that android:background above causes overdraw, however we need this so that any
-         blank area around the preview is black rather than white. Although this could be fixed by changing to a dark
-         theme, this then looks undesirable for the MyPreferenceFragment, and unclear how to change a theme for a
-         PreferenceFragment. -->
 
     <FrameLayout
         android:id="@+id/preview"
