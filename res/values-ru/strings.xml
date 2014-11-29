@@ -163,7 +163,7 @@
     <string name="about_available">Доступно</string>
     <string name="about_not_available">Не доступно</string>
     <string name="about_copy_to_clipboard">Копировать в буфер</string>
-    <string name="take_photo">Выбрать фото</string>
+    <string name="take_photo">Делай фото</string>
     <string name="gallery">Галерея</string>
     <string name="exposure">Экспозиция</string>
     <string name="exposure_lock">Блокировка экспозиции</string>
