@@ -39,6 +39,14 @@
         android:layout_marginRight="10dp"
         />
     
+    <Button
+        android:id="@+id/gui_anchor"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="1dp"
+        android:scaleType="fitCenter"
+        />
+
     <ImageButton
         android:id="@+id/settings"
         android:layout_width="50dp"
@@ -48,6 +56,17 @@
         android:contentDescription="@string/action_settings"
         android:src="@drawable/settings"
         android:onClick="clickedSettings"
+        />
+
+    <ImageButton
+        android:id="@+id/gallery"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/gallery"
+        android:src="@drawable/gallery"
+        android:onClick="clickedGallery"
         />
 
     <ImageButton
@@ -61,17 +80,6 @@
         android:onClick="clickedPopupSettings"
         />
     
-    <ImageButton
-        android:id="@+id/gallery"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/gallery"
-        android:src="@drawable/gallery"
-        android:onClick="clickedGallery"
-        />
-
     <ImageButton
         android:id="@+id/exposure_lock"
         android:layout_width="50dp"

@@ -117,6 +117,8 @@
     <string name="preference_preview_size_summary">How to choose the preview size</string>
     <string name="preference_ui_placement">UI placement</string>
     <string name="preference_ui_placement_summary">Whether to have a left-handed or right-handed user interface</string>
+    <string name="preference_immersive_mode">Immersive mode</string>
+    <string name="preference_immersive_mode_summary">Options for \"immersive mode\" behaviour</string>
     <string name="preference_show_zoom">Show zoom</string>
     <string name="preference_show_zoom_summary">Display the current camera zoom level on screen (when zoomed in)</string>
     <string name="preference_show_zoom_controls">Show zoom -/+ controls</string>

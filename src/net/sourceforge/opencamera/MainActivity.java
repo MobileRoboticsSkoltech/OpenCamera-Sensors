@@ -36,6 +36,7 @@ import android.provider.MediaStore.Images.ImageColumns;
 import android.provider.MediaStore.Video;
 import android.provider.MediaStore.Video.VideoColumns;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -71,7 +72,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -210,6 +211,37 @@ public class MainActivity extends Activity {
         
         gestureDetector = new GestureDetector(this, new MyGestureDetector());
         
+        View decorView = getWindow().getDecorView();
+        decorView.setOnSystemUiVisibilityChangeListener
+                (new View.OnSystemUiVisibilityChangeListener() {
+            @Override
+            public void onSystemUiVisibilityChange(int visibility) {
+                // Note that system bars will only be "visible" if none of the
+                // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
+            	if( !usingKitKatImmersiveMode() )
+            		return;
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "onSystemUiVisibilityChange: " + visibility);
+                if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+            		if( MyDebug.LOG )
+            			Log.d(TAG, "system bars now visible");
+                    // The system bars are visible. Make any desired
+                    // adjustments to your UI, such as showing the action bar or
+                    // other navigational controls.
+                	preview.setImmersiveMode(false);
+                	setImmersiveTimer();
+                }
+                else {
+            		if( MyDebug.LOG )
+            			Log.d(TAG, "system bars now NOT visible");
+                    // The system bars are NOT visible. Make any desired
+                    // adjustments to your UI, such as hiding the action bar or
+                    // other navigational controls.
+                	preview.setImmersiveMode(true);
+                }
+            }
+        });
+
         final String done_first_time_key = "done_first_time";
 		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
         if( !has_done_first_time && !is_test ) {
@@ -434,11 +466,6 @@ public class MainActivity extends Activity {
 
         setupLocationListener();
 
-        if( !this.camera_in_background ) {
-			// immersive mode is cleared when app goes into background
-			setImmersiveMode(true);
-		}
-
 		layoutUI();
 
 		updateGalleryIcon(); // update in case images deleted whilst idle
@@ -446,6 +473,19 @@ public class MainActivity extends Activity {
 		preview.onResume();
 
     }
+	
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onWindowFocusChanged: " + hasFocus);
+		super.onWindowFocusChanged(hasFocus);
+        if( !this.camera_in_background && hasFocus ) {
+			// low profile mode is cleared when app goes into background
+        	// and for Kit Kat immersive mode, we want to set up the timer
+        	// we do in onWindowFocusChanged rather than onResume(), to also catch when window lost focus due to notification bar being dragged down (which prevents resetting of immersive mode)
+            initImmersiveMode();
+        }
+	}
 
     @Override
     protected void onPause() {
@@ -516,13 +556,23 @@ public class MainActivity extends Activity {
 			align_parent_bottom = RelativeLayout.ALIGN_PARENT_TOP;
 		}
 		{
-			View view = findViewById(R.id.settings);
+			// we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
+			View view = findViewById(R.id.gui_anchor);
 			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
 			layoutParams.addRule(left_of, 0);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = findViewById(R.id.settings);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.gui_anchor);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -878,6 +928,7 @@ public class MainActivity extends Activity {
 			popup_container.removeAllViews();
 			popup_view.close();
 			popup_view = null;
+			initImmersiveMode(); // to reset the timer when closing the popup
 		}
     }
     
@@ -1132,17 +1183,64 @@ public class MainActivity extends Activity {
         super.onBackPressed();        
     }
     
-    //@TargetApi(Build.VERSION_CODES.KITKAT)
-	private void setImmersiveMode(boolean on) {
-		// Andorid 4.4 immersive mode disabled for now, as not clear of a good way to enter and leave immersive mode, and "sticky" might annoy some users
-        /*if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
-        	if( on )
-        		getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
-        	else
-        		getWindow().getDecorView().setSystemUiVisibility(0);
-        }*/
-    	if( on )
-    		getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+    boolean usingKitKatImmersiveMode() {
+    	// whether we are using a Kit Kat style immersive mode (either hiding GUI, or everything)
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
+    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    		String immersive_mode = sharedPreferences.getString(getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+    		if( immersive_mode.equals("immersive_mode_gui") || immersive_mode.equals("immersive_mode_everything") )
+    			return true;
+		}
+		return false;
+    }
+    
+    private Handler immersive_timer_handler = null;
+    private Runnable immersive_timer_runnable = null;
+    
+    private void setImmersiveTimer() {
+    	if( immersive_timer_handler != null && immersive_timer_runnable != null ) {
+    		immersive_timer_handler.removeCallbacks(immersive_timer_runnable);
+    	}
+    	immersive_timer_handler = new Handler();
+    	immersive_timer_handler.postDelayed(immersive_timer_runnable = new Runnable(){
+    		@Override
+    	    public void run(){
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "setImmersiveTimer: run");
+    			if( !camera_in_background && !popupIsOpen() && usingKitKatImmersiveMode() )
+    				setImmersiveMode(true);
+    	   }
+    	}, 5000);
+    }
+
+    void initImmersiveMode() {
+        if( !usingKitKatImmersiveMode() ) {
+			setImmersiveMode(true);
+		}
+        else {
+        	// don't start in immersive mode, only after a timer
+        	setImmersiveTimer();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+	void setImmersiveMode(boolean on) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setImmersiveMode: " + on);
+    	// n.b., preview.setImmersiveMode() is called from onSystemUiVisibilityChange()
+    	if( on ) {
+    		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && usingKitKatImmersiveMode() ) {
+        		getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+    		}
+    		else {
+        		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        		String immersive_mode = sharedPreferences.getString(getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+        		if( immersive_mode.equals("immersive_mode_low_profile") )
+        			getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        		else
+            		getWindow().getDecorView().setSystemUiVisibility(0);
+    		}
+    	}
     	else
     		getWindow().getDecorView().setSystemUiVisibility(0);
     }
@@ -1190,8 +1288,7 @@ public class MainActivity extends Activity {
 	        getWindow().setAttributes(layout); 
 		}
 		
-		setImmersiveMode(true);
-
+		initImmersiveMode();
 		camera_in_background = false;
     }
     
@@ -1210,7 +1307,6 @@ public class MainActivity extends Activity {
 		}
 
 		setImmersiveMode(false);
-
 		camera_in_background = true;
     }
     
@@ -2100,6 +2196,10 @@ public class MainActivity extends Activity {
     
     public static String getShutterSoundPreferenceKey() {
     	return "preference_shutter_sound";
+    }
+    
+    public static String getImmersiveModePreferenceKey() {
+    	return "preference_immersive_mode";
     }
     
     // for testing:

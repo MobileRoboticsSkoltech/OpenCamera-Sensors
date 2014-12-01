@@ -368,6 +368,19 @@ possible.</li>
 
 <p><b>UI placement</b> - Whether to optimise the user interface for left-handed or right-handed use.</p>
 
+<p><b>Immersive mode</b> - Allows you to choose between various modes which affect the behaviour of the user-interface, in order to
+make it more immersive (requires Android 4.4 or higher):<ul>
+<li><b>Off</b> - Don't use Android's immersive mode, and on-screen virtual navigation buttons are always visible.</li>
+<li><b>Only hide on-screen virtual navigation buttons (default)</b> - Don't use Android's immersive mode, but on-screen virtual
+navigation buttons are dimmed.</li>
+<li><b>Hide GUI</b> - After a short delay, any on-screen virtual navigation buttons will disappear, along with most of the GUI buttons.
+To exit this immersive mode, either touch on-screen, or swipe in from the top/bottom sides when the device is held in landscape (or
+left/right sides if held in portrait).</li>
+<li><b>Hide everything</b> - Same as "Hide GUI", but when in immersive mode everything will disappear except the camera preview. This
+mode probably isn't useful for most people (since you need to exit immersive mode even to take a photo), but is available if you wish
+to only have the preview showing.</li>
+</ul></p>
+
 <p><b>Show zoom</b> - Whether to display the current zoom level of the camera (when zoomed in).</p>
 
 <p><b>Show zoom -/+ controls</b> - Whether to display -/+ buttons to control zoom.</p>
@@ -646,6 +659,12 @@ Version 1.22 (Work in progress)
 FIXED   Crash if camera couldn't be opened, and GUI buttons were pressed.
 FIXED   Crash that could occur if camera closes whilst taking a photo.
 FIXED   Crash on Galaxy Nexus in rare circumstances when switching camera.
+ADDED   New immersive mode (requires Android 4.4 KitKat or higher), under
+        Settings/On screen GUI/Immersive mode. You can set the option to use
+        KitKat's immersive mode, either hiding the GUI, or even hiding
+        everything except the camera preview. Touch the preview or swipe in
+        from side to exit immersive mode. Also added an option to not even dim
+        the on-screen virtual navigation buttons.
 UPDATED Can now choose new save location from recent save folders picker.
 UPDATED Improved look of recent save folders picker.
 UPDATED Popup menu button now also shows indicator for torch.

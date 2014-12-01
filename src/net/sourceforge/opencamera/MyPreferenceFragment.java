@@ -50,7 +50,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);
 
 		/*if( !supports_auto_stabilise ) {
-			Preference pref = (Preference)findPreference("preference_auto_stabilise");
+			Preference pref = findPreference("preference_auto_stabilise");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_effects");
         	pg.removePreference(pref);
 		}*/
@@ -66,7 +66,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			Log.d(TAG, "supports_face_detection: " + supports_face_detection);
 
 		if( !supports_face_detection ) {
-			Preference pref = (Preference)findPreference("preference_face_detection");
+			Preference pref = findPreference("preference_face_detection");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_effects");
         	pg.removePreference(pref);
 		}
@@ -97,7 +97,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			lp.setKey(resolution_preference_key);
 		}
 		else {
-			Preference pref = (Preference)findPreference("preference_resolution");
+			Preference pref = findPreference("preference_resolution");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
         	pg.removePreference(pref);
 		}
@@ -136,7 +136,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			lp.setKey(video_quality_preference_key);
 		}
 		else {
-			Preference pref = (Preference)findPreference("preference_video_quality");
+			Preference pref = findPreference("preference_video_quality");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
         	pg.removePreference(pref);
 		}
@@ -145,7 +145,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_force_video_4k: " + supports_force_video_4k);
 		if( !supports_force_video_4k || video_quality == null || video_quality_string == null ) {
-			Preference pref = (Preference)findPreference("preference_force_video_4k");
+			Preference pref = findPreference("preference_force_video_4k");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
         	pg.removePreference(pref);
 		}
@@ -154,20 +154,27 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_video_stabilization: " + supports_video_stabilization);
 		if( !supports_video_stabilization ) {
-			Preference pref = (Preference)findPreference("preference_video_stabilization");
+			Preference pref = findPreference("preference_video_stabilization");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
         	pg.removePreference(pref);
 		}
 
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
         	// Camera.enableShutterSound requires JELLY_BEAN_MR1 or greater
-        	CheckBoxPreference cbp = (CheckBoxPreference)findPreference("preference_shutter_sound");
+        	Preference pref = findPreference("preference_shutter_sound");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_controls_more");
-        	pg.removePreference(cbp);
+        	pg.removePreference(pref);
+        }
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT ) {
+        	// Some immersive modes require KITKAT - simpler to require Kitkat for any of the menu options
+        	Preference pref = findPreference("preference_immersive_mode");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+        	pg.removePreference(pref);
         }
 
         {
-            final Preference pref = (Preference) findPreference("preference_online_help");
+            final Preference pref = findPreference("preference_online_help");
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference arg0) {
@@ -496,9 +503,9 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "remove preference " + preference_key + " from category " + preference_category_key);
-			ListPreference lp = (ListPreference)findPreference(preference_key);
+			Preference pref = findPreference(preference_key);
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference(preference_category_key);
-        	pg.removePreference(lp);
+        	pg.removePreference(pref);
 		}
 	}*/
 	

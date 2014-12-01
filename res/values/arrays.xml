@@ -168,6 +168,18 @@
         <item>ui_left</item>
         <item>ui_right</item>
     </string-array>
+    <string-array name="preference_immersive_mode_entries">
+        <item>Off</item>
+        <item>Only hide on-screen virtual navigation buttons</item>
+        <item>Hide GUI</item>
+        <item>Hide everything</item>
+    </string-array>
+    <string-array name="preference_immersive_mode_values">
+        <item>immersive_mode_off</item>
+        <item>immersive_mode_low_profile</item>
+        <item>immersive_mode_gui</item>
+        <item>immersive_mode_everything</item>
+        </string-array>
     <string-array name="preference_grid_entries">
         <item>None</item>
         <item>Display a 3x3 grid ("rule of thirds")</item>

@@ -368,6 +368,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.clearSeekBar();
 		main_activity.closePopup();
+		if( main_activity.usingKitKatImmersiveMode() ) {
+			main_activity.setImmersiveMode(false);
+		}
         //invalidate();
 		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "touch event: " + event.getAction());
@@ -827,7 +830,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 
 		    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
-		    switchCameraButton.setVisibility(CameraController.getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
+		    switchCameraButton.setVisibility(CameraController.getNumberOfCameras() > 1 && !immersive_mode ? View.VISIBLE : View.GONE);
 
 		    setupCamera(toast_message, take_photo);
 		}
@@ -1008,7 +1011,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				    		zoomOut();
 				        }
 				    });
-					zoomControls.setVisibility(View.VISIBLE);
+					if( !immersive_mode ) {
+						zoomControls.setVisibility(View.VISIBLE);
+					}
 				}
 				else {
 					zoomControls.setVisibility(View.INVISIBLE); // must be INVISIBLE not GONE, so we can still position the zoomSeekBar relative to it
@@ -1032,7 +1037,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				});
 
 				if( sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), true) ) {
-					zoomSeekBar.setVisibility(View.VISIBLE);
+					if( !immersive_mode ) {
+						zoomSeekBar.setVisibility(View.VISIBLE);
+					}
 				}
 				else {
 					zoomSeekBar.setVisibility(View.INVISIBLE);
@@ -1175,7 +1182,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				editor.apply();
 			}
 			View exposureButton = (View) activity.findViewById(R.id.exposure);
-		    exposureButton.setVisibility(exposures != null ? View.VISIBLE : View.GONE);
+		    exposureButton.setVisibility(exposures != null && !immersive_mode ? View.VISIBLE : View.GONE);
 		}
 
 		{
@@ -1375,14 +1382,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			supported_focus_values.add("focus_mode_edof");
 			supported_focus_values.add("focus_mode_continuous_video");*/
 		    /*View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
-			focusModeButton.setVisibility(supported_focus_values != null ? View.VISIBLE : View.GONE);*/
+			focusModeButton.setVisibility(supported_focus_values != null && !immersive_mode ? View.VISIBLE : View.GONE);*/
 		}
 
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up exposure lock");
 		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
-		    exposureLockButton.setVisibility(is_exposure_lock_supported ? View.VISIBLE : View.GONE);
+		    exposureLockButton.setVisibility(is_exposure_lock_supported && !immersive_mode ? View.VISIBLE : View.GONE);
 	    	is_exposure_locked = false;
 		    if( is_exposure_lock_supported ) {
 		    	// exposure lock should always default to false, as doesn't make sense to save it - we can't really preserve a "lock" after the camera is reopened
@@ -2128,6 +2135,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		MainActivity main_activity = (MainActivity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		if( immersive_mode ) {
+			String immersive_mode = sharedPreferences.getString(MainActivity.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			if( immersive_mode.equals("immersive_mode_everything") ) {
+				// exit, to ensure we don't display anything!
+				return;
+			}
+		}
 		final float scale = getResources().getDisplayMetrics().density;
 		String preference_grid = sharedPreferences.getString(MainActivity.getShowGridPreferenceKey(), "preference_grid_none");
 		if( camera_controller != null && preference_grid.equals("preference_grid_3x3") ) {
@@ -4737,16 +4751,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     private void setPreviewPaused(boolean paused) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewPaused: " + paused);
-		Activity activity = (Activity)this.getContext();
-	    View shareButton = (View) activity.findViewById(R.id.share);
-	    View trashButton = (View) activity.findViewById(R.id.trash);
+		MainActivity main_activity = (MainActivity)this.getContext();
+	    View shareButton = (View) main_activity.findViewById(R.id.share);
+	    View trashButton = (View) main_activity.findViewById(R.id.trash);
 		/*is_preview_paused = paused;
 		if( is_preview_paused ) {*/
 	    if( paused ) {
 	    	this.phase = PHASE_PREVIEW_PAUSED;
 		    shareButton.setVisibility(View.VISIBLE);
 		    trashButton.setVisibility(View.VISIBLE);
-		    // shouldn't call showGUI(false), as should already have been disabled when we started to take a photo
+		    // shouldn't call showGUI(false), as should already have been disabled when we started to take a photo (or above when exiting immersive mode)
 		}
 		else {
 	    	this.phase = PHASE_NORMAL;
@@ -4756,11 +4770,71 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			showGUI(true);
 		}
     }
+
+    private boolean immersive_mode = false;
+    
+    void setImmersiveMode(final boolean immersive_mode) {
+    	this.immersive_mode = immersive_mode;
+		final MainActivity main_activity = (MainActivity)this.getContext();
+		main_activity.runOnUiThread(new Runnable() {
+			public void run() {
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+				// if going into immersive mode, the we should set GONE the ones that are set GONE in showGUI(false)
+		    	//final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
+		    	final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
+		    	// n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
+			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
+			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
+			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
+			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
+			    View popupButton = (View) main_activity.findViewById(R.id.popup);
+			    View galleryButton = (View) main_activity.findViewById(R.id.gallery);
+			    View settingsButton = (View) main_activity.findViewById(R.id.settings);
+			    View zoomControls = (View) main_activity.findViewById(R.id.zoom);
+			    View zoomSeekBar = (View) main_activity.findViewById(R.id.zoom_seekbar);
+			    if( CameraController.getNumberOfCameras() > 1 )
+			    	switchCameraButton.setVisibility(visibility);
+		    	switchVideoButton.setVisibility(visibility);
+			    if( exposures != null )
+			    	exposureButton.setVisibility(visibility);
+			    if( is_exposure_lock_supported )
+			    	exposureLockButton.setVisibility(visibility);
+			    if( supported_flash_values == null )
+			    	popupButton.setVisibility(visibility);
+			    galleryButton.setVisibility(visibility);
+			    settingsButton.setVisibility(visibility);
+				if( has_zoom && sharedPreferences.getBoolean(MainActivity.getShowZoomControlsPreferenceKey(), false) ) {
+					zoomControls.setVisibility(visibility);
+				}
+				if( has_zoom && sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), false) ) {
+					zoomSeekBar.setVisibility(visibility);
+				}
+        		String pref_immersive_mode = sharedPreferences.getString(MainActivity.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+        		if( pref_immersive_mode.equals("immersive_mode_everything") ) {
+    			    View takePhotoButton = (View) main_activity.findViewById(R.id.take_photo);
+    			    takePhotoButton.setVisibility(visibility);
+        		}
+				if( !immersive_mode ) {
+					// make sure the GUI is set up as expected
+					showGUI(show_gui);
+				}
+			}
+		});
+    }
+    
+    private boolean show_gui = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
     
     private void showGUI(final boolean show) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "showGUI: " + show);
+		this.show_gui = show;
+		if( immersive_mode )
+			return;
 		final MainActivity main_activity = (MainActivity)this.getContext();
+		if( show && main_activity.usingKitKatImmersiveMode() ) {
+			// call to reset the timer
+			main_activity.initImmersiveMode();
+		}
 		main_activity.runOnUiThread(new Runnable() {
 			public void run() {
 		    	final int visibility = show ? View.VISIBLE : View.GONE;
