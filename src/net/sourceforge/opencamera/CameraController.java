@@ -31,6 +31,7 @@ public class CameraController {
 		boolean is_video_stabilization_supported = false;
 		int min_exposure = 0;
 		int max_exposure = 0;
+		boolean can_disable_shutter_sound = false;
 	}
 	
 	public static class Size {
@@ -207,7 +208,10 @@ public class CameraController {
 		return output_modes;
 	}
 	
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	CameraFeatures getCameraFeatures() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getCameraFeatures()");
 	    Camera.Parameters parameters = this.getParameters();
 	    CameraFeatures camera_features = new CameraFeatures();
 		camera_features.is_zoom_supported = parameters.isZoomSupported();
@@ -288,6 +292,14 @@ public class CameraController {
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "camera parameters: " + parameters.flatten());
+
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
+        	// Camera.canDisableShutterSound requires JELLY_BEAN_MR1 or greater
+        	camera_features.can_disable_shutter_sound = camera_info.canDisableShutterSound;
+        }
+        else {
+        	camera_features.can_disable_shutter_sound = false;
+        }
 
 		return camera_features;
 	}

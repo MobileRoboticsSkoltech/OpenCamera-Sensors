@@ -1017,6 +1017,7 @@ public class MainActivity extends Activity {
 		bundle.putBoolean("supports_force_video_4k", this.supports_force_video_4k);
 		bundle.putBoolean("supports_face_detection", this.preview.supportsFaceDetection());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
+		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
 
 		putBundleExtra(bundle, "color_effects", this.preview.getSupportedColorEffects());
 		putBundleExtra(bundle, "scene_modes", this.preview.getSupportedSceneModes());

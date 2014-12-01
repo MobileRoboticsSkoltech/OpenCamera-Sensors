@@ -197,6 +197,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean using_face_detection = false;
 	private CameraController.Face [] faces_detected = null;
 	private boolean supports_video_stabilization = false;
+	private boolean can_disable_shutter_sound = false;
 	private boolean has_focus_area = false;
 	private int focus_screen_x = 0;
 	private int focus_screen_y = 0;
@@ -736,6 +737,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		supports_face_detection = false;
 		using_face_detection = false;
 		supports_video_stabilization = false;
+		can_disable_shutter_sound = false;
 		color_effects = null;
 		white_balances = null;
 		isos = null;
@@ -981,6 +983,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        supported_focus_values = camera_features.supported_focus_values; // Android format
 	        this.is_exposure_lock_supported = camera_features.is_exposure_lock_supported;
 	        this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
+	        this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
 			min_exposure = camera_features.min_exposure;
 			max_exposure = camera_features.max_exposure;
 			this.video_sizes = camera_features.video_sizes;
@@ -4947,6 +4950,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsVideoStabilization");
     	return supports_video_stabilization;
+    }
+    
+    boolean canDisableShutterSound() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "canDisableShutterSound");
+    	return can_disable_shutter_sound;
     }
 
     public List<String> getSupportedColorEffects() {

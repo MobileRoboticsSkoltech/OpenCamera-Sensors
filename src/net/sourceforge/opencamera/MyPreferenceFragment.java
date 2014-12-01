@@ -16,7 +16,6 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -159,7 +158,10 @@ public class MyPreferenceFragment extends PreferenceFragment {
         	pg.removePreference(pref);
 		}
 
-        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
+		final boolean can_disable_shutter_sound = bundle.getBoolean("can_disable_shutter_sound");
+		if( MyDebug.LOG )
+			Log.d(TAG, "can_disable_shutter_sound: " + can_disable_shutter_sound);
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 || !can_disable_shutter_sound ) {
         	// Camera.enableShutterSound requires JELLY_BEAN_MR1 or greater
         	Preference pref = findPreference("preference_shutter_sound");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_controls_more");
