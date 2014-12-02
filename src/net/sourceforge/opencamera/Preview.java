@@ -2508,7 +2508,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				p.setTextAlign(Paint.Align.RIGHT);
 			}
 	        Calendar c = Calendar.getInstance();
+	        // n.b., DateFormat.getTimeInstance() ignores user preferences such as 12/24 hour or date format, but this is an Android bug.
+	        // Whilst DateUtils.formatDateTime doesn't have that problem, it doesn't print out seconds! See:
+	        // http://stackoverflow.com/questions/15981516/simpledateformat-gettimeinstance-ignores-24-hour-format
+	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
+	        // http://code.google.com/p/android/issues/detail?id=42104
 	        String current_time = DateFormat.getTimeInstance().format(c.getTime());
+	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
 	        drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, true);
 	    }
 
@@ -4072,6 +4078,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        			final float scale = getResources().getDisplayMetrics().density;
 	        			p.setColor(Color.WHITE);
 	        			p.setTextSize(20 * scale + 0.5f); // convert dps to pixels
+	        			// doesn't respect user preferences such as 12/24 hour - see note about in onDraw() about DateFormat.getTimeInstance()
 	        	        String time_stamp = DateFormat.getDateTimeInstance().format(new Date());
 	        	        int offset_x = (int)(8 * scale + 0.5f); // convert dps to pixels
 	        	        int offset_y = (int)(8 * scale + 0.5f); // convert dps to pixels
