@@ -434,7 +434,8 @@ isn't available for video.</p>
 "Video resolution"). Note that 4K video isn't fully supported by the standard Android API yet, so there is no way for Open Camera to
 determine if your device supports 4K video. If you enable this on a device that doesn't support it, you may either get an error
 message when you try to record, or it may succeed but create a video where the resolution isn't 4K, or may even result in a crash! So
-please test this out first. I've tested this successfully on a Samsung Galaxy S5 and Note 3. (If this option doesn't show up at all, it's
+please test this out first. I've tested this successfully on a Samsung Galaxy S5 and Note 3, but even there it only works on some
+variants of those devices. (If this option doesn't show up at all, it's
 because Open Camera thinks this is a device that probably doesn't support 4K video - if your device does support 4K video,
 please let me know so I can fix this.) Also note that on some devices, 4K resolutions may show up in the list of available
 video resolutions anyway.</p>
@@ -504,7 +505,7 @@ choose what goes on the homescreen, but All Apps will list all shortcuts.</p>
 
 <p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - The Android API only allows up to FullHD.
 Devices which offer higher resolutions provide this only in the "stock" camera app (or "mods"). For some devices, it
-turns out that 3rd party camera apps can request recording in 3840x2160 (tested on Galaxy S5 and Note 3), but this
+turns out that 3rd party camera apps can request recording in 3840x2160, but this
 isn't guaranteed to work, hence it's marked experimental. If this doesn't work, it's not a bug in Open Camera, it's
 something that's just not possible through 3rd party apps on some devices.</p>
 
