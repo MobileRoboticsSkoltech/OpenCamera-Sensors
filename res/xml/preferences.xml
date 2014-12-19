@@ -446,6 +446,12 @@
             android:summary="@string/preference_about_summary"  
             />  
         
-    </PreferenceCategory>
+        <Preference
+            android:key="preference_reset"  
+            android:title="@string/preference_reset"
+            android:summary="@string/preference_reset_summary"  
+            />
+        
+        </PreferenceCategory>
         
 </PreferenceScreen>

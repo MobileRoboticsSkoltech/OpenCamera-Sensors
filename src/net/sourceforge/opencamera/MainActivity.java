@@ -242,8 +242,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        final String done_first_time_key = "done_first_time";
-		boolean has_done_first_time = sharedPreferences.contains(done_first_time_key);
+		boolean has_done_first_time = sharedPreferences.contains(getFirstTimePreferenceKey());
         if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle(R.string.app_name);
@@ -251,9 +250,7 @@ public class MainActivity extends Activity {
             alertDialog.setPositiveButton(R.string.intro_ok, null);
             alertDialog.show();
 
-			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putBoolean(done_first_time_key, true);
-			editor.apply();
+            setFirstTimeFlag();
         }
 
         preloadIcons(R.array.flash_icons);
@@ -295,12 +292,18 @@ public class MainActivity extends Activity {
 		super.onDestroy();
 	}
 	
-	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	private void setFirstTimeFlag() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putBoolean(getFirstTimePreferenceKey(), true);
+		editor.apply();
 	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) { 
@@ -2002,6 +2005,10 @@ public class MainActivity extends Activity {
     }
 
     // must be static, to safely call from other Activities:
+
+    public static String getFirstTimePreferenceKey() {
+        return "done_first_time";
+    }
 
     public static String getFlashPreferenceKey(int cameraId) {
     	return "flash_value_" + cameraId;

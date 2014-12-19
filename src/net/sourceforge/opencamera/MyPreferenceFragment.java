@@ -42,7 +42,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
 		
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 
 		final boolean supports_auto_stabilise = bundle.getBoolean("supports_auto_stabilise");
 		if( MyDebug.LOG )
@@ -474,6 +474,37 @@ public class MyPreferenceFragment extends PreferenceFragment {
                         });
                         alertDialog.show();
                 		return false;
+                	}
+                	return false;
+                }
+            });
+        }
+
+        {
+            final Preference pref = findPreference("preference_reset");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                	if( pref.getKey().equals("preference_reset") ) {
+                		if( MyDebug.LOG )
+                			Log.d(TAG, "user clicked reset");
+    				    new AlertDialog.Builder(MyPreferenceFragment.this.getActivity())
+			        	.setIcon(android.R.drawable.ic_dialog_alert)
+			        	.setTitle(R.string.preference_reset)
+			        	.setMessage(R.string.preference_reset_question)
+			        	.setPositiveButton(R.string.answer_yes, new DialogInterface.OnClickListener() {
+			        		@Override
+					        public void onClick(DialogInterface dialog, int which) {
+		                		if( MyDebug.LOG )
+		                			Log.d(TAG, "user confirmed reset");
+		                		SharedPreferences.Editor editor = sharedPreferences.edit();
+		                		editor.clear();
+		                		editor.putBoolean(MainActivity.getFirstTimePreferenceKey(), true);
+		                		editor.apply();
+					        }
+			        	})
+			        	.setNegativeButton(R.string.answer_no, null)
+			        	.show();
                 	}
                 	return false;
                 }

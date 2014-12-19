@@ -179,6 +179,9 @@
     <string name="preference_donate_summary">If you like this app, please consider making a donation. You can do this by purchasing my "donation app" - click this option will open up the page for my donation app. Thanks!</string>
     <string name="preference_about">About</string>
     <string name="preference_about_summary">App and debug information</string>
+    <string name="preference_reset">Reset settings</string>
+    <string name="preference_reset_summary">Reset all Open Camera settings to default</string>
+    <string name="preference_reset_question">Are you sure you want to reset all Open Camera settings to default?</string>
     <string name="about_ok">OK</string>
     <string name="about_available">Available</string>
     <string name="about_not_available">Not available</string>
