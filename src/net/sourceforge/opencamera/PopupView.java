@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.hardware.Camera;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -91,13 +90,13 @@ public class PopupView extends LinearLayout {
     		});
 
         	List<String> supported_white_balances = preview.getSupportedWhiteBalances();
-        	addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), MainActivity.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "TEST_WHITE_BALANCE");
+        	addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), MainActivity.getWhiteBalancePreferenceKey(), CameraController.getDefaultWhiteBalance(), "TEST_WHITE_BALANCE");
 
         	List<String> supported_scene_modes = preview.getSupportedSceneModes();
-        	addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), MainActivity.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "TEST_SCENE_MODE");
+        	addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), MainActivity.getSceneModePreferenceKey(), CameraController.getDefaultSceneMode(), "TEST_SCENE_MODE");
 
         	List<String> supported_color_effects = preview.getSupportedColorEffects();
-        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), MainActivity.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "TEST_COLOR_EFFECT");
+        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), MainActivity.getColorEffectPreferenceKey(), CameraController.getDefaultColorEffect(), "TEST_COLOR_EFFECT");
         	
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);
