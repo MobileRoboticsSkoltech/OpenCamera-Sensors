@@ -264,6 +264,20 @@
                 android:defaultValue="true"
                 />
 
+            <CheckBoxPreference
+                android:key="preference_show_time"
+                android:title="@string/preference_show_time"
+                android:summary="@string/preference_show_time_summary"
+                android:defaultValue="true"
+                />
+
+            <CheckBoxPreference
+                android:key="preference_show_battery"
+                android:title="@string/preference_show_battery"
+                android:summary="@string/preference_show_battery_summary"
+                android:defaultValue="true"
+                />
+
             <ListPreference 
                 android:key="preference_grid"
                 android:title="@string/preference_grid"

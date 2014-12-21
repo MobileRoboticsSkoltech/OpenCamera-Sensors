@@ -2422,7 +2422,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 		}
 		
-		{
+		if( sharedPreferences.getBoolean(MainActivity.getShowBatteryPreferenceKey(), true) ) {
 			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
 				Intent batteryStatus = main_activity.registerReceiver(null, battery_ifilter);
@@ -2489,7 +2489,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 		}
 		
-		{
+		if( sharedPreferences.getBoolean(MainActivity.getShowTimePreferenceKey(), true) ) {
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.LEFT);
 			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels

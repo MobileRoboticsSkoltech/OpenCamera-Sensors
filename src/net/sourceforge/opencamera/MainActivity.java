@@ -2122,6 +2122,14 @@ public class MainActivity extends Activity {
     	return "preference_free_memory";
     }
     
+    public static String getShowTimePreferenceKey() {
+    	return "preference_show_time";
+    }
+    
+    public static String getShowBatteryPreferenceKey() {
+    	return "preference_show_battery";
+    }
+    
     public static String getShowGridPreferenceKey() {
     	return "preference_grid";
     }

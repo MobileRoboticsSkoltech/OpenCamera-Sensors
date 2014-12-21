@@ -133,6 +133,10 @@
     <string name="preference_show_angle_line_summary">Display horizontal level line</string>
     <string name="preference_show_geo_direction">Show compass direction</string>
     <string name="preference_show_geo_direction_summary">Display the compass direction of the device on screen</string>
+    <string name="preference_show_time">Show time</string>
+    <string name="preference_show_time_summary">Display the current time on screen</string>
+    <string name="preference_show_battery">Show battery</string>
+    <string name="preference_show_battery_summary">Display the current battery level on screen</string>
     <string name="preference_grid">Show a grid</string>
     <string name="preference_grid_summary">Display one of various grids</string>
     <string name="preference_crop_guide">Show a crop guide</string>
