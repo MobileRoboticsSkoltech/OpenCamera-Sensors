@@ -36,7 +36,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Paint.Align;
-import android.hardware.Camera;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -5287,12 +5286,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.phase == PHASE_TAKING_PHOTO;
     }
 
-    public Camera getCamera() {
-    	if( this.camera_controller == null )
-    		return null;
-    	return this.camera_controller.getCamera();
-    }
-    
     // for testing:
     public CameraController getCameraController() {
     	return this.camera_controller;

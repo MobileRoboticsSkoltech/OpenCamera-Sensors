@@ -14,6 +14,7 @@ import android.os.Build;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+@SuppressWarnings("deprecation")
 public class CameraController {
 	static class CameraFeatures {
 		boolean is_zoom_supported = false;
@@ -101,7 +102,7 @@ public class CameraController {
 		camera = null;
 	}
 
-	Camera getCamera() {
+	public Camera getCamera() {
 		return camera;
 	}
 	
