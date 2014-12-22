@@ -404,7 +404,7 @@ class CameraController1 extends CameraController {
     	return this.iso_key;
     }
     
-    CameraController.Size getPictureSize() {
+    public CameraController.Size getPictureSize() {
     	Camera.Parameters parameters = this.getParameters();
     	Camera.Size camera_size = parameters.getPictureSize();
     	return new CameraController.Size(camera_size.width, camera_size.height);
@@ -418,6 +418,12 @@ class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
 	}
     
+    public CameraController.Size getPreviewSize() {
+    	Camera.Parameters parameters = this.getParameters();
+    	Camera.Size camera_size = parameters.getPreviewSize();
+    	return new CameraController.Size(camera_size.width, camera_size.height);
+    }
+
     void setPreviewSize(int width, int height) {
     	Camera.Parameters parameters = this.getParameters();
 		if( MyDebug.LOG )
@@ -732,6 +738,46 @@ class CameraController1 extends CameraController {
         return false;
 	}
 	
+	void clearFocusAndMetering() {
+        Camera.Parameters parameters = this.getParameters();
+        boolean update_parameters = false;
+        if( parameters.getMaxNumFocusAreas() > 0 ) {
+        	parameters.setFocusAreas(null);
+        	update_parameters = true;
+        }
+        if( parameters.getMaxNumMeteringAreas() > 0 ) {
+        	parameters.setMeteringAreas(null);
+        	update_parameters = true;
+        }
+        if( update_parameters ) {
+		    setCameraParameters(parameters);
+        }
+	}
+	
+	public List<CameraController.Area> getFocusAreas() {
+        Camera.Parameters parameters = this.getParameters();
+		List<Camera.Area> camera_areas = parameters.getFocusAreas();
+		if( camera_areas == null )
+			return null;
+		List<CameraController.Area> areas = new ArrayList<CameraController.Area>();
+		for(Camera.Area camera_area : camera_areas) {
+			areas.add(new CameraController.Area(camera_area.rect, camera_area.weight));
+		}
+		return areas;
+	}
+
+	public List<CameraController.Area> getMeteringAreas() {
+        Camera.Parameters parameters = this.getParameters();
+		List<Camera.Area> camera_areas = parameters.getMeteringAreas();
+		if( camera_areas == null )
+			return null;
+		List<CameraController.Area> areas = new ArrayList<CameraController.Area>();
+		for(Camera.Area camera_area : camera_areas) {
+			areas.add(new CameraController.Area(camera_area.rect, camera_area.weight));
+		}
+		return areas;
+	}
+
 	boolean supportsAutoFocus() {
         Camera.Parameters parameters = this.getParameters();
 		String focus_mode = parameters.getFocusMode();
@@ -801,22 +847,6 @@ class CameraController1 extends CameraController {
 	
 	void cancelAutoFocus() {
 		camera.cancelAutoFocus();
-	}
-	
-	void clearFocusAndMetering() {
-        Camera.Parameters parameters = this.getParameters();
-        boolean update_parameters = false;
-        if( parameters.getMaxNumFocusAreas() > 0 ) {
-        	parameters.setFocusAreas(null);
-        	update_parameters = true;
-        }
-        if( parameters.getMaxNumMeteringAreas() > 0 ) {
-        	parameters.setMeteringAreas(null);
-        	update_parameters = true;
-        }
-        if( update_parameters ) {
-		    setCameraParameters(parameters);
-        }
 	}
 	
 	void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg) {

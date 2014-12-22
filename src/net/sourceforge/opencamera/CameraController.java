@@ -40,6 +40,10 @@ public abstract class CameraController {
 			this.width = width;
 			this.height = height;
 		}
+		
+		public boolean equals(Size that) {
+			return this.width == that.width && this.height == that.height;
+		}
 	}
 	
 	static class Area {
@@ -93,8 +97,9 @@ public abstract class CameraController {
 	abstract SupportedValues setWhiteBalance(String value);
 	abstract SupportedValues setISO(String value);
     abstract String getISOKey();
-    abstract CameraController.Size getPictureSize();
+    public abstract CameraController.Size getPictureSize();
     abstract void setPictureSize(int width, int height);
+    public abstract CameraController.Size getPreviewSize();
     abstract void setPreviewSize(int width, int height);
 	abstract void setVideoStabilization(boolean enabled);
 	abstract boolean getVideoStabilization();
@@ -122,6 +127,9 @@ public abstract class CameraController {
 	abstract void removeLocationInfo();
 	abstract void enableShutterSound(boolean enabled);
 	abstract boolean setFocusAndMeteringArea(List<CameraController.Area> areas);
+	abstract void clearFocusAndMetering();
+	public abstract List<CameraController.Area> getFocusAreas();
+	public abstract List<CameraController.Area> getMeteringAreas();
 	abstract boolean supportsAutoFocus();
 	abstract boolean focusIsVideo();
 	abstract void reconnect() throws IOException;
@@ -132,7 +140,6 @@ public abstract class CameraController {
 	abstract void setFaceDetectionListener(final CameraController.FaceDetectionListener listener);
 	abstract void autoFocus(final CameraController.AutoFocusCallback cb);
 	abstract void cancelAutoFocus();
-	abstract void clearFocusAndMetering();
 	abstract void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg);
 	abstract void setDisplayOrientation(int degrees);
 	abstract int getDisplayOrientation();
