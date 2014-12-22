@@ -89,14 +89,17 @@ public class PopupView extends LinearLayout {
     			}
     		});
 
-        	List<String> supported_white_balances = preview.getSupportedWhiteBalances();
-        	addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), MainActivity.getWhiteBalancePreferenceKey(), CameraController.getDefaultWhiteBalance(), "TEST_WHITE_BALANCE");
-
-        	List<String> supported_scene_modes = preview.getSupportedSceneModes();
-        	addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), MainActivity.getSceneModePreferenceKey(), CameraController.getDefaultSceneMode(), "TEST_SCENE_MODE");
-
-        	List<String> supported_color_effects = preview.getSupportedColorEffects();
-        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), MainActivity.getColorEffectPreferenceKey(), CameraController.getDefaultColorEffect(), "TEST_COLOR_EFFECT");
+        	// popup should only be opened if we have a camera controller, but check just to be safe
+    		if( preview.getCameraController() != null ) {
+	        	List<String> supported_white_balances = preview.getSupportedWhiteBalances();
+	        	addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), MainActivity.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE");
+	
+	        	List<String> supported_scene_modes = preview.getSupportedSceneModes();
+	        	addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), MainActivity.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE");
+	
+	        	List<String> supported_color_effects = preview.getSupportedColorEffects();
+	        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), MainActivity.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT");
+    		}
         	
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);

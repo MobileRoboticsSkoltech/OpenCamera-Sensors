@@ -1129,7 +1129,7 @@ public class MainActivity extends Activity {
 				Log.d(TAG, "scene mode was: " + scene_mode);
 			String key = getSceneModePreferenceKey();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			String value = sharedPreferences.getString(key, CameraController.getDefaultSceneMode());
+			String value = sharedPreferences.getString(key, preview.getCameraController().getDefaultSceneMode());
 			if( !value.equals(scene_mode) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "scene mode changed to: " + value);
@@ -1805,13 +1805,14 @@ public class MainActivity extends Activity {
  			failed_to_scan = true; // set to true until scanned okay
         	MediaScannerConnection.scanFile(this, new String[] { file.getAbsolutePath() }, null,
         			new MediaScannerConnection.OnScanCompletedListener() {
-    		 		public void onScanCompleted(String path, Uri uri) {
+					public void onScanCompleted(String path, Uri uri) {
     		 			if( MyDebug.LOG ) {
     		 				Log.d("ExternalStorage", "Scanned " + path + ":");
     		 				Log.d("ExternalStorage", "-> uri=" + uri);
     		 			}
     		        	if( is_new_picture ) {
-    		        		sendBroadcast(new Intent(CameraController.getActionNewPicture(), uri));
+    		        		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcase the string for other apps
+    		        		sendBroadcast(new Intent( "android.hardware.action.NEW_PICTURE" , uri));
     		        		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
     		        		sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
 
@@ -1842,7 +1843,7 @@ public class MainActivity extends Activity {
     		        		}
     		        	}
     		        	else if( is_new_video ) {
-    		        		sendBroadcast(new Intent(CameraController.getActionNewVideo(), uri));
+    		        		sendBroadcast(new Intent("android.hardware.action.NEW_VIDEO", uri));
 	    		 			failed_to_scan = true;
     		        	}
     		        	else {
