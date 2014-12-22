@@ -982,8 +982,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        this.is_exposure_lock_supported = camera_features.is_exposure_lock_supported;
 	        this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
 	        this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
-			min_exposure = camera_features.min_exposure;
-			max_exposure = camera_features.max_exposure;
+			this.min_exposure = camera_features.min_exposure;
+			this.max_exposure = camera_features.max_exposure;
 			this.video_sizes = camera_features.video_sizes;
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
@@ -4998,19 +4998,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.exposures != null;
     }
     
-    int getMinimumExposure() {
+    public int getMinimumExposure() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getMinimumExposure");
     	return this.min_exposure;
     }
     
-    int getMaximumExposure() {
+    public int getMaximumExposure() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getMaximumExposure");
     	return this.max_exposure;
     }
     
-    int getCurrentExposure() {
+    public int getCurrentExposure() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentExposure");
     	if( camera_controller == null ) {

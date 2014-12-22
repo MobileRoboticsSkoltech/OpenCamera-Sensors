@@ -136,7 +136,7 @@ public abstract class CameraController {
 	abstract void setPreviewDisplay(SurfaceHolder holder) throws IOException;
 	abstract void startPreview();
 	abstract void stopPreview();
-	abstract void startFaceDetection();
+	public abstract boolean startFaceDetection();
 	abstract void setFaceDetectionListener(final CameraController.FaceDetectionListener listener);
 	abstract void autoFocus(final CameraController.AutoFocusCallback cb);
 	abstract void cancelAutoFocus();

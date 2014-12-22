@@ -817,8 +817,15 @@ class CameraController1 extends CameraController {
 		camera.stopPreview();
 	}
 	
-	void startFaceDetection() {
-		camera.startFaceDetection();
+	// returns false if RuntimeException thrown (may include if face-detection already started)
+	public boolean startFaceDetection() {
+	    try {
+			camera.startFaceDetection();
+	    }
+	    catch(RuntimeException e) {
+	    	return false;
+	    }
+	    return true;
 	}
 	
 	void setFaceDetectionListener(final CameraController.FaceDetectionListener listener) {
