@@ -195,6 +195,7 @@ class CameraController1 extends CameraController {
 
         List<String> supported_focus_modes = parameters.getSupportedFocusModes(); // Android format
 		camera_features.supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
+		camera_features.max_num_focus_areas = parameters.getMaxNumFocusAreas();
 
         camera_features.is_exposure_lock_supported = parameters.isAutoExposureLockSupported();
 
@@ -666,6 +667,12 @@ class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
 	}
 	
+	public boolean getAutoExposureLock() {
+		Camera.Parameters parameters = this.getParameters();
+		if( !parameters.isAutoExposureLockSupported() )
+			return false;
+		return parameters.getAutoExposureLock();
+	}
 	void setRotation(int rotation) {
 		Camera.Parameters parameters = this.getParameters();
 		parameters.setRotation(rotation);

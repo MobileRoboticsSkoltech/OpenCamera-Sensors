@@ -25,6 +25,7 @@ public abstract class CameraController {
 		int [] current_fps_range = new int[2];
 		List<String> supported_flash_values = null;
 		List<String> supported_focus_values = null;
+		int max_num_focus_areas = 0;
 		boolean is_exposure_lock_supported = false;
 		boolean is_video_stabilization_supported = false;
 		int min_exposure = 0;
@@ -122,6 +123,7 @@ public abstract class CameraController {
 	abstract public String getFlashValue();
 	abstract void setRecordingHint(boolean hint);
 	abstract void setAutoExposureLock(boolean enabled);
+	abstract public boolean getAutoExposureLock();
 	abstract void setRotation(int rotation);
 	abstract void setLocationInfo(Location location);
 	abstract void removeLocationInfo();
