@@ -103,7 +103,7 @@ public abstract class CameraController {
     public abstract CameraController.Size getPreviewSize();
     abstract void setPreviewSize(int width, int height);
 	abstract void setVideoStabilization(boolean enabled);
-	abstract boolean getVideoStabilization();
+	public abstract boolean getVideoStabilization();
 	abstract void setJpegQuality(int quality);
 	abstract void setZoom(int value);
 	abstract int getExposureCompensation();

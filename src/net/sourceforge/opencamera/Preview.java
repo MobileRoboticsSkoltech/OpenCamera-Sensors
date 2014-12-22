@@ -151,6 +151,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	private List<String> supported_focus_values = null; // our "values" format
 	private int current_focus_index = -1; // this is an index into the supported_focus_values array, or -1 if no focus modes available
+	private int max_num_focus_areas = 0;
 	
 	private boolean is_exposure_lock_supported = false;
 	private boolean is_exposure_locked = false;
@@ -750,6 +751,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		current_flash_index = -1;
 		supported_focus_values = null;
 		current_focus_index = -1;
+		max_num_focus_areas = 0;
 		showGUI(true);
 		if( MyDebug.LOG )
 			Log.d(TAG, "done showGUI");
@@ -978,7 +980,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				this.current_fps_range = camera_features.current_fps_range;
 			}
 	        supported_flash_values = camera_features.supported_flash_values;
-	        supported_focus_values = camera_features.supported_focus_values; // Android format
+	        supported_focus_values = camera_features.supported_focus_values;
+	        this.max_num_focus_areas = camera_features.max_num_focus_areas;
 	        this.is_exposure_lock_supported = camera_features.is_exposure_lock_supported;
 	        this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
 	        this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
@@ -4950,7 +4953,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return supports_face_detection;
     }
     
-    boolean supportsVideoStabilization() {
+    public boolean supportsVideoStabilization() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsVideoStabilization");
     	return supports_video_stabilization;
@@ -5028,7 +5031,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.exposures;
     }
 
-    List<CameraController.Size> getSupportedPreviewSizes() {
+    public List<CameraController.Size> getSupportedPreviewSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPreviewSizes");
     	return this.supported_preview_sizes;
@@ -5307,6 +5310,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     
     public boolean hasFocusArea() {
     	return this.has_focus_area;
+    }
+    
+    public int getMaxNumFocusAreas() {
+    	return this.max_num_focus_areas;
     }
     
     public boolean isTakingPhotoOrOnTimer() {

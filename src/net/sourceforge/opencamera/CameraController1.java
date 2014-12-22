@@ -441,7 +441,7 @@ class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
 	}
 	
-	boolean getVideoStabilization() {
+	public boolean getVideoStabilization() {
 	    Camera.Parameters parameters = this.getParameters();
         return parameters.getVideoStabilization();
 	}
