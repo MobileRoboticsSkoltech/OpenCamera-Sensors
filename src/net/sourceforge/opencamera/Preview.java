@@ -5308,6 +5308,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.is_exposure_lock_supported;
     }
     
+    public boolean supportsZoom() {
+    	return this.has_zoom;
+    }
+    
+    public int getMaxZoom() {
+    	return this.max_zoom_factor;
+    }
+    
     public boolean hasFocusArea() {
     	return this.has_focus_area;
     }

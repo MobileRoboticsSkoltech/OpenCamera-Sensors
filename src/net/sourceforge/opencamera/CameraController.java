@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import android.graphics.Rect;
-import android.hardware.Camera;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
@@ -89,13 +88,14 @@ public abstract class CameraController {
 	}
 
 	abstract void release();
-	abstract public Camera getCamera();
 
 	abstract CameraFeatures getCameraFeatures();
 	abstract SupportedValues setSceneMode(String value);
-	abstract String getSceneMode();
+	public abstract String getSceneMode();
 	abstract SupportedValues setColorEffect(String value);
+	public abstract String getColorEffect();
 	abstract SupportedValues setWhiteBalance(String value);
+	public abstract String getWhiteBalance();
 	abstract SupportedValues setISO(String value);
     abstract String getISOKey();
     public abstract CameraController.Size getPictureSize();
@@ -104,7 +104,9 @@ public abstract class CameraController {
     abstract void setPreviewSize(int width, int height);
 	abstract void setVideoStabilization(boolean enabled);
 	public abstract boolean getVideoStabilization();
+	abstract public int getJpegQuality();
 	abstract void setJpegQuality(int quality);
+	abstract public int getZoom();
 	abstract void setZoom(int value);
 	abstract int getExposureCompensation();
 	abstract boolean setExposureCompensation(int new_exposure);
@@ -112,10 +114,10 @@ public abstract class CameraController {
 	abstract void getPreviewFpsRange(int [] fps_range);
 	abstract List<int []> getSupportedPreviewFpsRange();
 
-	abstract String getDefaultSceneMode();
-	abstract String getDefaultColorEffect();
-	abstract String getDefaultWhiteBalance();
-	abstract String getDefaultISO();
+	public abstract String getDefaultSceneMode();
+	public abstract String getDefaultColorEffect();
+	public abstract String getDefaultWhiteBalance();
+	public abstract String getDefaultISO();
 
 	abstract void setFocusValue(String focus_value);
 	abstract public String getFocusValue();

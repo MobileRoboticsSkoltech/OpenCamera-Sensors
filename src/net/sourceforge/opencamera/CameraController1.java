@@ -260,19 +260,19 @@ class CameraController1 extends CameraController {
 		return null;
 	}
 	
-	String getDefaultSceneMode() {
+	public String getDefaultSceneMode() {
 		return Camera.Parameters.SCENE_MODE_AUTO;
 	}
 	
-	String getDefaultColorEffect() {
+	public String getDefaultColorEffect() {
 		return Camera.Parameters.EFFECT_NONE;
 	}
 	
-	String getDefaultWhiteBalance() {
+	public String getDefaultWhiteBalance() {
 		return Camera.Parameters.WHITE_BALANCE_AUTO;
 	}
 	
-	String getDefaultISO() {
+	public String getDefaultISO() {
 		return "auto";
 	}
 	
@@ -300,7 +300,7 @@ class CameraController1 extends CameraController {
 		return supported_values;
 	}
 	
-	String getSceneMode() {
+	public String getSceneMode() {
     	Camera.Parameters parameters = this.getParameters();
     	return parameters.getSceneMode();
 	}
@@ -319,6 +319,11 @@ class CameraController1 extends CameraController {
 		return supported_values;
 	}
 
+	public String getColorEffect() {
+    	Camera.Parameters parameters = this.getParameters();
+    	return parameters.getColorEffect();
+	}
+
 	SupportedValues setWhiteBalance(String value) {
 		String default_value = getDefaultWhiteBalance();
     	Camera.Parameters parameters = this.getParameters();
@@ -331,6 +336,11 @@ class CameraController1 extends CameraController {
 			}
 		}
 		return supported_values;
+	}
+
+	public String getWhiteBalance() {
+    	Camera.Parameters parameters = this.getParameters();
+    	return parameters.getWhiteBalance();
 	}
 
 	SupportedValues setISO(String value) {
@@ -445,11 +455,21 @@ class CameraController1 extends CameraController {
 	    Camera.Parameters parameters = this.getParameters();
         return parameters.getVideoStabilization();
 	}
+
+	public int getJpegQuality() {
+	    Camera.Parameters parameters = this.getParameters();
+	    return parameters.getJpegQuality();
+	}
 	
 	void setJpegQuality(int quality) {
 	    Camera.Parameters parameters = this.getParameters();
 		parameters.setJpegQuality(quality);
     	setCameraParameters(parameters);
+	}
+	
+	public int getZoom() {
+		Camera.Parameters parameters = this.getParameters();
+		return parameters.getZoom();
 	}
 	
 	void setZoom(int value) {
