@@ -9,11 +9,6 @@ import android.location.Location;
 import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
 
-abstract class CameraControllerManager {
-	abstract int getNumberOfCameras();
-	abstract boolean isFrontFacing(int cameraId);
-}
-
 public abstract class CameraController {
 	// for testing:
 	public int count_camera_parameters_exception = 0;
@@ -117,6 +112,7 @@ public abstract class CameraController {
 	abstract String getDefaultISO();
 
 	abstract void setFocusValue(String focus_value);
+	abstract public String getFocusValue();
 	abstract void setFlashValue(String flash_value);
 	abstract public String getFlashValue();
 	abstract void setRecordingHint(boolean hint);

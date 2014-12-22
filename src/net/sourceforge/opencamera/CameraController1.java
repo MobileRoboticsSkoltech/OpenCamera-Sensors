@@ -14,31 +14,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 @SuppressWarnings("deprecation")
-class CameraControllerManager1 extends CameraControllerManager {
-	private static final String TAG = "CameraControllerManager1";
-	int getNumberOfCameras() {
-		return Camera.getNumberOfCameras();
-	}
-
-	boolean isFrontFacing(int cameraId) {
-	    try {
-		    Camera.CameraInfo camera_info = new Camera.CameraInfo();
-			Camera.getCameraInfo(cameraId, camera_info);
-			return (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
-	    }
-	    catch(RuntimeException e) {
-	    	// Had a report of this crashing on Galaxy Nexus - may be device specific issue, see http://stackoverflow.com/questions/22383708/java-lang-runtimeexception-fail-to-get-camera-info
-	    	// but good to catch it anyway
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "failed to set parameters");
-	    	e.printStackTrace();
-	    	return false;
-	    }
-	}
-}
-
-@SuppressWarnings("deprecation")
-public class CameraController1 extends CameraController {
+class CameraController1 extends CameraController {
 	private static final String TAG = "CameraController1";
 
 	private Camera camera = null;
@@ -553,6 +529,43 @@ public class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
 	}
 	
+	private String convertFocusModeToValue(String focus_mode) {
+		// focus_mode may be null on some devices; we return ""
+		if( MyDebug.LOG )
+			Log.d(TAG, "convertFocusModeToValue: " + focus_mode);
+		String focus_value = "";
+		if( focus_mode == null ) {
+			// ignore, leave focus_value at null
+		}
+		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) ) {
+    		focus_value = "focus_mode_auto";
+    	}
+		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_INFINITY) ) {
+    		focus_value = "focus_mode_infinity";
+    	}
+		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
+    		focus_value = "focus_mode_macro";
+    	}
+		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_FIXED) ) {
+    		focus_value = "focus_mode_fixed";
+    	}
+		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_EDOF) ) {
+    		focus_value = "focus_mode_edof";
+    	}
+		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
+    		focus_value = "focus_mode_continuous_video";
+    	}
+    	return focus_value;
+	}
+	
+	public String getFocusValue() {
+		// returns "" if Parameters.getFocusMode() returns null
+		Camera.Parameters parameters = this.getParameters();
+		String focus_mode = parameters.getFocusMode();
+		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
+		return convertFocusModeToValue(focus_mode);
+	}
+
 	private String convertFlashValueToMode(String flash_value) {
 		String flash_mode = "";
     	if( flash_value.equals("flash_off") ) {
