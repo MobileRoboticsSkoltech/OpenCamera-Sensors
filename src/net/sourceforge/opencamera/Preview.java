@@ -5289,6 +5289,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.camera_controller;
     }
     
+    public CameraControllerManager getCameraControllerManager() {
+    	return this.camera_controller_manager;
+    }
+    
     public boolean supportsFocus() {
     	return this.supported_focus_values != null;
     }
