@@ -39,11 +39,6 @@ public class CameraController {
 		public int width = 0;
 		public int height = 0;
 		
-		public Size(Camera.Size camera_size) {
-			this.width = camera_size.width;
-			this.height = camera_size.height;
-		}
-
 		public Size(int width, int height) {
 			this.width = width;
 			this.height = height;
@@ -76,9 +71,9 @@ public class CameraController {
 		public int score = 0;
 		public Rect rect = null;
 
-		Face(Camera.Face camera_face) {
-			this.score = camera_face.score;
-			this.rect = camera_face.rect;
+		Face(int score, Rect rect) {
+			this.score = score;
+			this.rect = rect;
 		}
 	}
 	
@@ -106,7 +101,7 @@ public class CameraController {
 		return camera;
 	}
 	
-	Camera.Parameters getParameters() {
+	private Camera.Parameters getParameters() {
 		return camera.getParameters();
 	}
 	
@@ -239,7 +234,7 @@ public class CameraController {
 		List<Camera.Size> camera_picture_sizes = parameters.getSupportedPictureSizes();
 		camera_features.picture_sizes = new ArrayList<CameraController.Size>();
 		for(Camera.Size camera_size : camera_picture_sizes) {
-			camera_features.picture_sizes.add(new CameraController.Size(camera_size));
+			camera_features.picture_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
 
         if( MyDebug.LOG )
@@ -282,13 +277,13 @@ public class CameraController {
     	}
 		camera_features.video_sizes = new ArrayList<CameraController.Size>();
 		for(Camera.Size camera_size : camera_video_sizes) {
-			camera_features.video_sizes.add(new CameraController.Size(camera_size));
+			camera_features.video_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
 
 		List<Camera.Size> camera_preview_sizes = parameters.getSupportedPreviewSizes();
 		camera_features.preview_sizes = new ArrayList<CameraController.Size>();
 		for(Camera.Size camera_size : camera_preview_sizes) {
-			camera_features.preview_sizes.add(new CameraController.Size(camera_size));
+			camera_features.preview_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
 
 		if( MyDebug.LOG )
@@ -486,7 +481,7 @@ public class CameraController {
     CameraController.Size getPictureSize() {
     	Camera.Parameters parameters = this.getParameters();
     	Camera.Size camera_size = parameters.getPictureSize();
-    	return new CameraController.Size(camera_size);
+    	return new CameraController.Size(camera_size.width, camera_size.height);
     }
 
     void setPictureSize(int width, int height) {
@@ -828,7 +823,7 @@ public class CameraController {
 		    public void onFaceDetection(Camera.Face[] camera_faces, Camera camera) {
 		    	Face [] faces = new Face[camera_faces.length];
 		    	for(int i=0;i<camera_faces.length;i++) {
-		    		faces[i] = new Face(camera_faces[i]);
+		    		faces[i] = new Face(camera_faces[i].score, camera_faces[i].rect);
 		    	}
 		    	listener.onFaceDetection(faces);
 		    }
