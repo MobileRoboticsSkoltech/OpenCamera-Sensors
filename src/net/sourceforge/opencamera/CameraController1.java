@@ -23,6 +23,8 @@ class CameraController1 extends CameraController {
 	private String iso_key = null;
 
 	CameraController1(int cameraId) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "create new CameraController1: " + cameraId);
 		camera = Camera.open(cameraId);
 	    Camera.getCameraInfo(cameraId, camera_info);
 	}
@@ -833,6 +835,8 @@ class CameraController1 extends CameraController {
 	}
 	
 	void setPreviewDisplay(SurfaceHolder holder) throws IOException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPreviewDisplay");
 		camera.setPreviewDisplay(holder);
 	}
 	
