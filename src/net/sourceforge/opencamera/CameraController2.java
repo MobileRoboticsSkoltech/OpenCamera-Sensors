@@ -1,72 +1,161 @@
 package net.sourceforge.opencamera;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class CameraController2 extends CameraController {
 	private static final String TAG = "CameraController2";
+
+	private Context context = null;
 	private CameraDevice camera = null;
+	private String cameraIdS = null;
+	private boolean callback_done = false;
+	private CameraCaptureSession captureSession = null;
+	private CaptureRequest previewRequest = null;
+	private SurfaceHolder holder = null;
 	
 	public CameraController2(Context context, int cameraId) {
-		class MyStateCallback extends CameraDevice.StateCallback {
+		if( MyDebug.LOG )
+			Log.d(TAG, "create new CameraController2: " + cameraId);
 
+		this.context = context;
+		final Object waitObject = new Object();
+		callback_done = false;
+
+		class MyStateCallback extends CameraDevice.StateCallback {
 			@Override
 			public void onOpened(CameraDevice camera) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera opened");
 				CameraController2.this.camera = camera;
+				synchronized( waitObject ) {
+					callback_done = true;
+					waitObject.notify();
+				}
 			}
 
 			@Override
 			public void onDisconnected(CameraDevice camera) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera disconnected");
+				camera.close();
 				CameraController2.this.camera = null;
+				synchronized( waitObject ) {
+					callback_done = true;
+					waitObject.notify();
+				}
 			}
 
 			@Override
 			public void onError(CameraDevice camera, int error) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera error: " + error);
+				camera.close();
 				CameraController2.this.camera = null;
+				synchronized( waitObject ) {
+					callback_done = true;
+					waitObject.notify();
+				}
 			}
 		};
 		MyStateCallback myStateCallback = new MyStateCallback();
+		HandlerThread thread = new HandlerThread("CameraBackground"); 
+		thread.start(); 
+		Handler handler = new Handler(thread.getLooper()); 
 
 		CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 		try {
-			String cameraIdS = manager.getCameraIdList()[cameraId];
-			manager.openCamera(cameraIdS, myStateCallback, null);
+			this.cameraIdS = manager.getCameraIdList()[cameraId];
+			manager.openCamera(cameraIdS, myStateCallback, handler);
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
 			// throw as a RuntimeException instead, as this is what callers will catch
 			throw new RuntimeException();
 		}
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "wait until camera opened...");
+		// need to wait until camera is opened
+		while( !callback_done ) {
+			synchronized( waitObject ) {
+				try {
+					waitObject.wait();
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera failed to open");
+			throw new RuntimeException();
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "camera now opened");
 	}
 
 	@Override
 	void release() {
-		// TODO Auto-generated method stub
-
+		camera.close();
+		camera = null;
 	}
 
 	@Override
 	CameraFeatures getCameraFeatures() {
-		// TODO Auto-generated method stub
-		return null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "getCameraFeatures()");
+	    CameraFeatures camera_features = new CameraFeatures();
+		CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
+		try {
+		    CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
+		    StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+		    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
+			camera_features.picture_sizes = new ArrayList<CameraController.Size>();
+			for(android.util.Size camera_size : camera_picture_sizes) {
+				camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+			}
+
+		    android.util.Size [] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
+			camera_features.video_sizes = new ArrayList<CameraController.Size>();
+			for(android.util.Size camera_size : camera_video_sizes) {
+				camera_features.video_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+			}
+
+			android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceHolder.class);
+			camera_features.preview_sizes = new ArrayList<CameraController.Size>();
+			for(android.util.Size camera_size : camera_preview_sizes) {
+				camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+			}
+
+		}
+		catch(CameraAccessException e) {
+			e.printStackTrace();
+		}
+	    return camera_features;
 	}
 
 	@Override
@@ -137,8 +226,11 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setPreviewSize(int width, int height) {
-		// TODO Auto-generated method stub
-
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPreviewSize: " + width + " , " + height);
+		if( holder != null ) {
+			holder.setFixedSize(width, height);
+		}
 	}
 
 	@Override
@@ -341,20 +433,109 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setPreviewDisplay(SurfaceHolder holder) throws IOException {
-		// TODO Auto-generated method stub
-
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPreviewDisplay");
+		this.holder = holder;
 	}
 
 	@Override
 	void startPreview() {
-		// TODO Auto-generated method stub
+		if( MyDebug.LOG )
+			Log.d(TAG, "startPreview");
 
+		try {
+			captureSession = null;
+			previewRequest = null;
+
+			final CaptureRequest.Builder builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+			builder.addTarget(holder.getSurface());
+
+			final Object waitObject = new Object();
+			callback_done = false;
+
+			camera.createCaptureSession(Arrays.asList(holder.getSurface()),
+				new CameraCaptureSession.StateCallback() {
+					@Override
+					public void onConfigured(CameraCaptureSession session) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "onConfigured");
+						if( camera == null ) {
+							synchronized( waitObject ) {
+								callback_done = true;
+								waitObject.notify();
+							}
+							return;
+						}
+						captureSession = session;
+						previewRequest = builder.build();
+						synchronized( waitObject ) {
+							callback_done = true;
+							waitObject.notify();
+						}
+					}
+
+					@Override
+					public void onConfigureFailed(CameraCaptureSession session) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "onConfigureFailed");
+						synchronized( waitObject ) {
+							callback_done = true;
+							waitObject.notify();
+						}
+					}
+		 		},
+		 		null);
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "wait until preview capture session is configured");
+			while( !callback_done ) {
+				synchronized( waitObject ) {
+					try {
+						waitObject.wait();
+					}
+					catch(InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			if( captureSession == null || previewRequest == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "preview capture session failed to be configured");
+				//throw new IOException();
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "preview capture session is configured");
+		}
+		catch(CameraAccessException e) {
+			e.printStackTrace();
+			//throw new IOException();
+		} 
+
+		if( captureSession == null || previewRequest == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "capture session or preview request not yet available");
+			return;
+		}
+		try {
+			captureSession.setRepeatingRequest(previewRequest, null, null);
+		}
+		catch(CameraAccessException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	void stopPreview() {
-		// TODO Auto-generated method stub
-
+		if( MyDebug.LOG )
+			Log.d(TAG, "stopPreview");
+		if( captureSession == null )
+			return;
+		try {
+			captureSession.stopRepeating();
+		}
+		catch(CameraAccessException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
