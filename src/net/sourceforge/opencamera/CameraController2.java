@@ -16,6 +16,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
+import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
@@ -33,13 +34,21 @@ public class CameraController2 extends CameraController {
 	private boolean callback_done = false;
 	private CameraCaptureSession captureSession = null;
 	private CaptureRequest previewRequest = null;
+	private ImageReader imageReader = null;
 	private SurfaceHolder holder = null;
+	private HandlerThread thread = null; 
+	Handler handler = null;
 	
 	public CameraController2(Context context, int cameraId) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController2: " + cameraId);
 
 		this.context = context;
+
+		thread = new HandlerThread("CameraBackground"); 
+		thread.start(); 
+		handler = new Handler(thread.getLooper());
+
 		final Object waitObject = new Object();
 		callback_done = false;
 
@@ -80,9 +89,6 @@ public class CameraController2 extends CameraController {
 			}
 		};
 		MyStateCallback myStateCallback = new MyStateCallback();
-		HandlerThread thread = new HandlerThread("CameraBackground"); 
-		thread.start(); 
-		Handler handler = new Handler(thread.getLooper()); 
 
 		CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 		try {
@@ -115,12 +121,40 @@ public class CameraController2 extends CameraController {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "camera now opened");
+
+		/*CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
+	    StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+	    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
+		imageReader = ImageReader.newInstance(camera_picture_sizes[0].getWidth(), , ImageFormat.JPEG, 2);*/
 	}
 
 	@Override
 	void release() {
-		camera.close();
-		camera = null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "release");
+		if( thread != null ) {
+			thread.quitSafely();
+			try {
+				thread.join();
+				thread = null;
+				handler = null;
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		if( captureSession != null ) {
+			captureSession.close();
+			captureSession = null;
+		}
+		if( camera != null ) {
+			camera.close();
+			camera = null;
+		}
+		if( imageReader != null ) {
+			imageReader.close();
+			imageReader = null;
+		}
 	}
 
 	@Override
@@ -208,14 +242,16 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public Size getPictureSize() {
-		// TODO Auto-generated method stub
-		return null;
+		Size size = new Size(imageReader.getWidth(), imageReader.getHeight());
+		return size;
 	}
 
 	@Override
 	void setPictureSize(int width, int height) {
-		// TODO Auto-generated method stub
-
+		if( imageReader != null ) {
+			imageReader.close();
+		}
+		imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2); 
 	}
 
 	@Override
@@ -229,6 +265,8 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewSize: " + width + " , " + height);
 		if( holder != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set size of surface holder");
 			holder.setFixedSize(width, height);
 		}
 	}
@@ -447,13 +485,10 @@ public class CameraController2 extends CameraController {
 			captureSession = null;
 			previewRequest = null;
 
-			final CaptureRequest.Builder builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-			builder.addTarget(holder.getSurface());
-
 			final Object waitObject = new Object();
 			callback_done = false;
 
-			camera.createCaptureSession(Arrays.asList(holder.getSurface()),
+			camera.createCaptureSession(Arrays.asList(holder.getSurface(), imageReader.getSurface()),
 				new CameraCaptureSession.StateCallback() {
 					@Override
 					public void onConfigured(CameraCaptureSession session) {
@@ -467,7 +502,24 @@ public class CameraController2 extends CameraController {
 							return;
 						}
 						captureSession = session;
-						previewRequest = builder.build();
+						try {
+							CaptureRequest.Builder builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "holder surface: " + holder.getSurface());
+								if( holder.getSurface() == null )
+									Log.d(TAG, "holder surface is null!");
+								else if( !holder.getSurface().isValid() )
+									Log.d(TAG, "holder surface is not valid!");
+							}
+							builder.addTarget(holder.getSurface());
+							previewRequest = builder.build();
+							captureSession.setRepeatingRequest(previewRequest, null, null);
+						}
+						catch(CameraAccessException e) {
+							e.printStackTrace();
+							captureSession = null;
+							previewRequest = null;
+						}
 						synchronized( waitObject ) {
 							callback_done = true;
 							waitObject.notify();
@@ -485,43 +537,11 @@ public class CameraController2 extends CameraController {
 					}
 		 		},
 		 		null);
-
-			if( MyDebug.LOG )
-				Log.d(TAG, "wait until preview capture session is configured");
-			while( !callback_done ) {
-				synchronized( waitObject ) {
-					try {
-						waitObject.wait();
-					}
-					catch(InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-			if( captureSession == null || previewRequest == null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "preview capture session failed to be configured");
-				//throw new IOException();
-			}
-			if( MyDebug.LOG )
-				Log.d(TAG, "preview capture session is configured");
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
 			//throw new IOException();
 		} 
-
-		if( captureSession == null || previewRequest == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "capture session or preview request not yet available");
-			return;
-		}
-		try {
-			captureSession.setRepeatingRequest(previewRequest, null, null);
-		}
-		catch(CameraAccessException e) {
-			e.printStackTrace();
-		}
 	}
 
 	@Override
