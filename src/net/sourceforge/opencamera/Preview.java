@@ -47,6 +47,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -75,6 +76,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final String TAG_GPS_IMG_DIRECTION = "GPSImgDirection";
 	private static final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
 
+	private boolean using_android_l = false;
+	
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
     private Matrix camera_to_preview_matrix = new Matrix();
@@ -119,6 +122,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private int n_burst = 1;
 	private int remaining_restart_video = 0;
 
+	private boolean requested_preview_size = false; // Android L only
+	private int requested_preview_size_w = 0; // Android L only
+	private int requested_preview_size_h = 0; // Android L only
 	private boolean is_preview_started = false;
 	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
 	private String preview_image_name = null;
@@ -245,8 +251,18 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "new Preview");
 		}
+		
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+        	//this.using_android_l = true;
+        }
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "using_android_l?: " + using_android_l);
+		}
 
-		camera_controller_manager = new CameraControllerManager1();
+        if( using_android_l )
+    		camera_controller_manager = new CameraControllerManager2(context);
+        else
+    		camera_controller_manager = new CameraControllerManager1();
 
 		// Install a SurfaceHolder.Callback so we get notified when the
 		// underlying surface is created and destroyed.
@@ -778,7 +794,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		try {
 			if( MyDebug.LOG )
 				Log.d(TAG, "try to open camera: " + cameraId);
-			camera_controller = new CameraController1(cameraId);
+	        if( using_android_l )
+				camera_controller = new CameraController2(this.getContext(), cameraId);
+	        else
+				camera_controller = new CameraController1(cameraId);
 			//throw new RuntimeException(); // uncomment to test camera not opening
 		}
 		catch(RuntimeException e) {
@@ -887,9 +906,19 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
-		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
-		// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
-		startCameraPreview();
+		if( !this.using_android_l ) {
+			// if using Android L API, need to wait until surface holder has changed size for first time
+			setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
+			// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
+			startCameraPreview();
+		}
+		else {
+			// just set flag to indicate we need to set preview size
+			this.requested_preview_size = false;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "set requested_preview_size to false");
+			}
+		}
 		if( MyDebug.LOG ) {
 			//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 		}
@@ -1411,6 +1440,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG )
 			Log.d(TAG, "surfaceChanged " + w + ", " + h);
 		// surface size is now changed to match the aspect ratio of camera preview - so we shouldn't change the preview to match the surface size, so no need to restart preview here
+		// update: except for Android L, where we must start the preview after the surface has changed size
 
         if( mHolder.getSurface() == null ) {
             // preview surface does not exist
@@ -1422,6 +1452,24 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             return;
         }
 
+        if( using_android_l ) {
+        	if( !this.requested_preview_size )  {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "request preview size");
+    			setPreviewSize();
+    			if( this.requested_preview_size_w == w && this.requested_preview_size_h == h ) {
+    				// if the surface is already the correct size, we can start the preview straight away - and indeed, we must do, as we won't receive another surfaceChanged call
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "surface is already correct size");
+        			startCameraPreview();
+    			}
+        	}
+        	else {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "have now set preview size");
+    			startCameraPreview();
+        	}
+        }
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
 		main_activity.layoutUI(); // need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed
 	}
@@ -1474,6 +1522,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        }*/
         	CameraController.Size best_size = getOptimalPreviewSize(supported_preview_sizes);
         	camera_controller.setPreviewSize(best_size.width, best_size.height);
+    		if( this.using_android_l ) {
+    			// in Android L, calling setPreviewSize changes the size of the SurfaceHolder
+    			this.requested_preview_size = true;
+    			this.requested_preview_size_w = best_size.width;
+    			this.requested_preview_size_h = best_size.height;
+    		}
     		this.setAspectRatio( ((double)best_size.width) / (double)best_size.height );
         }
 	}
@@ -4729,7 +4783,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		}
     		catch(RuntimeException e) {
     			if( MyDebug.LOG )
-    				Log.d(TAG, "RuntimeException tryin to startPreview");
+    				Log.d(TAG, "RuntimeException trying to startPreview");
     			e.printStackTrace();
     			showToast(null, R.string.failed_to_start_camera_preview);
     			return;
