@@ -49,7 +49,6 @@ public class CameraController2 extends CameraController {
 		thread.start(); 
 		handler = new Handler(thread.getLooper());
 
-		final Object waitObject = new Object();
 		callback_done = false;
 
 		class MyStateCallback extends CameraDevice.StateCallback {
@@ -58,10 +57,7 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera opened");
 				CameraController2.this.camera = camera;
-				synchronized( waitObject ) {
-					callback_done = true;
-					waitObject.notify();
-				}
+				callback_done = true;
 			}
 
 			@Override
@@ -70,10 +66,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "camera disconnected");
 				camera.close();
 				CameraController2.this.camera = null;
-				synchronized( waitObject ) {
-					callback_done = true;
-					waitObject.notify();
-				}
+				callback_done = true;
 			}
 
 			@Override
@@ -82,10 +75,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "camera error: " + error);
 				camera.close();
 				CameraController2.this.camera = null;
-				synchronized( waitObject ) {
-					callback_done = true;
-					waitObject.notify();
-				}
+				callback_done = true;
 			}
 		};
 		MyStateCallback myStateCallback = new MyStateCallback();
@@ -105,14 +95,6 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "wait until camera opened...");
 		// need to wait until camera is opened
 		while( !callback_done ) {
-			synchronized( waitObject ) {
-				try {
-					waitObject.wait();
-				}
-				catch(InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 		if( camera == null ) {
 			if( MyDebug.LOG )
@@ -485,7 +467,6 @@ public class CameraController2 extends CameraController {
 			captureSession = null;
 			previewRequest = null;
 
-			final Object waitObject = new Object();
 			callback_done = false;
 
 			camera.createCaptureSession(Arrays.asList(holder.getSurface(), imageReader.getSurface()),
@@ -495,10 +476,7 @@ public class CameraController2 extends CameraController {
 						if( MyDebug.LOG )
 							Log.d(TAG, "onConfigured");
 						if( camera == null ) {
-							synchronized( waitObject ) {
-								callback_done = true;
-								waitObject.notify();
-							}
+							callback_done = true;
 							return;
 						}
 						captureSession = session;
@@ -520,20 +498,14 @@ public class CameraController2 extends CameraController {
 							captureSession = null;
 							previewRequest = null;
 						}
-						synchronized( waitObject ) {
-							callback_done = true;
-							waitObject.notify();
-						}
+						callback_done = true;
 					}
 
 					@Override
 					public void onConfigureFailed(CameraCaptureSession session) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "onConfigureFailed");
-						synchronized( waitObject ) {
-							callback_done = true;
-							waitObject.notify();
-						}
+						callback_done = true;
 					}
 		 		},
 		 		null);
