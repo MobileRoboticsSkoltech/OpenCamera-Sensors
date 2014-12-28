@@ -469,6 +469,8 @@ public class CameraController2 extends CameraController {
 
 			callback_done = false;
 
+			if( MyDebug.LOG )
+				Log.d(TAG, "picture size: " + imageReader.getWidth() + " x " + imageReader.getHeight());
 			camera.createCaptureSession(Arrays.asList(holder.getSurface(), imageReader.getSurface()),
 				new CameraCaptureSession.StateCallback() {
 					@Override
@@ -489,6 +491,10 @@ public class CameraController2 extends CameraController {
 								else if( !holder.getSurface().isValid() )
 									Log.d(TAG, "holder surface is not valid!");
 							}
+							builder.set(CaptureRequest.CONTROL_AF_MODE,
+                                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                            builder.set(CaptureRequest.CONTROL_AE_MODE,
+                                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
 							builder.addTarget(holder.getSurface());
 							previewRequest = builder.build();
 							captureSession.setRepeatingRequest(previewRequest, null, null);
