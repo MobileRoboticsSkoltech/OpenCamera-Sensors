@@ -125,6 +125,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean requested_preview_size = false; // Android L only
 	private int requested_preview_size_w = 0; // Android L only
 	private int requested_preview_size_h = 0; // Android L only
+	private int surface_holder_w = 0;
+	private int surface_holder_h = 0;
 	private boolean is_preview_started = false;
 	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
 	private String preview_image_name = null;
@@ -480,6 +482,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		// Because the CameraDevice object is not a shared resource, it's very
 		// important to release it when the activity is paused.
 		this.has_surface = false;
+		this.surface_holder_w = 0;
+		this.surface_holder_h = 0;
 		this.closeCamera();
 	}
 	
@@ -907,16 +911,20 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
 		if( !this.using_android_l ) {
-			// if using Android L API, need to wait until surface holder has changed size for first time
 			setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
 			// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
 			startCameraPreview();
 		}
 		else {
-			// just set flag to indicate we need to set preview size
 			this.requested_preview_size = false;
-			if( MyDebug.LOG ) {
+			if( MyDebug.LOG )
 				Log.d(TAG, "set requested_preview_size to false");
+			setPreviewSize();
+			// if surface isn't yet the correct size, we have to wait until surfaceChanged() is called with correct size
+			if( surface_holder_w == this.requested_preview_size_w && surface_holder_h == this.requested_preview_size_h ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "surface already correct size, so start preview");
+				startCameraPreview();
 			}
 		}
 		if( MyDebug.LOG ) {
@@ -1439,6 +1447,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "surfaceChanged " + w + ", " + h);
+		this.surface_holder_w = w;
+		this.surface_holder_h = h;
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "surface frame " + mHolder.getSurfaceFrame().width() + ", " + mHolder.getSurfaceFrame().height());*/
 		// surface size is now changed to match the aspect ratio of camera preview - so we shouldn't change the preview to match the surface size, so no need to restart preview here
 		// update: except for Android L, where we must start the preview after the surface has changed size
 
@@ -1453,7 +1465,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         if( using_android_l ) {
-        	if( !this.requested_preview_size )  {
+        	/*if( !this.requested_preview_size )  {
     			if( MyDebug.LOG )
     				Log.d(TAG, "request preview size");
     			setPreviewSize();
@@ -1464,10 +1476,20 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         			startCameraPreview();
     			}
         	}
-        	else {
+        	else*/
+			if( this.requested_preview_size && this.requested_preview_size_w == w && this.requested_preview_size_h == h ) {
     			if( MyDebug.LOG )
-    				Log.d(TAG, "have now set preview size");
+    				Log.d(TAG, "have now set preview size, so can start camera preview");
     			startCameraPreview();
+    	    	/*final Handler handler = new Handler();
+    			handler.postDelayed(new Runnable() {
+    				@Override
+    				public void run() {
+    					if( MyDebug.LOG )
+    						Log.d(TAG, "delayed start camera preview");
+    					startCameraPreview();
+    				}
+    			}, 5000);*/
         	}
         }
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
@@ -1930,7 +1952,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         if( targetHeight <= 0 ) {
             targetHeight = display_size.y;
         }
-        // Try to find an size match aspect ratio and size
+        // Try to find the size which matches the aspect ratio, and is closest match to display height
         for(CameraController.Size size : sizes) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "    supported preview size: " + size.width + ", " + size.height);
@@ -2190,6 +2212,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			return;*/
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "ui_rotation: " + ui_rotation);*/
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "canvas size " + canvas.getWidth() + " x " + canvas.getHeight());*/
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "surface frame " + mHolder.getSurfaceFrame().width() + ", " + mHolder.getSurfaceFrame().height());*/
 
 		MainActivity main_activity = (MainActivity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
