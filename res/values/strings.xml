@@ -35,6 +35,7 @@
     <string name="exposure_locked">Exposure Locked</string>
     <string name="exposure_unlocked">Exposure unlocked</string>
     <string name="cancelled_timer">Cancelled timer</string>
+    <string name="cancelled_burst_mode">Cancelled burst mode</string>
     <string name="started_timer">Started timer</string>
     <string name="failed_to_save_video">Failed to save video file</string>
     <string name="failed_to_record_video">Failed to record video</string>

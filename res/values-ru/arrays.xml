@@ -91,6 +91,7 @@
         <item>4x</item>
         <item>5x</item>
         <item>10x</item>
+        <item>Unlimited</item>
     </string-array>
     <string-array name="preference_burst_mode_values">
         <item>1</item>
@@ -99,6 +100,7 @@
         <item>4</item>
         <item>5</item>
         <item>10</item>
+        <item>unlimited</item>
     </string-array>
     <string-array name="preference_burst_interval_entries">
         <item>Без задержки</item>

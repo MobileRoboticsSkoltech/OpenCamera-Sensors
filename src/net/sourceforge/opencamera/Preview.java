@@ -119,7 +119,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private TimerTask flashVideoTimerTask = null;
 	private long take_photo_time = 0;
 	private int remaining_burst_photos = 0;
-	private int n_burst = 1;
 	private int remaining_restart_video = 0;
 
 	private boolean requested_preview_size = false; // Android L only
@@ -3448,6 +3447,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		else {
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "already taking a photo");
+    			if( remaining_burst_photos != 0 ) {
+    				remaining_burst_photos = 0;
+    			    showToast(take_photo_toast, R.string.cancelled_burst_mode);
+    			}
     		}
     		return;
     	}
@@ -3470,18 +3473,27 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         }
 
 		String burst_mode_value = sharedPreferences.getString(MainActivity.getBurstModePreferenceKey(), "1");
-		try {
-			n_burst = Integer.parseInt(burst_mode_value);
+		int n_burst = 1;
+		if( burst_mode_value.equals("unlimited") ) {
     		if( MyDebug.LOG )
-    			Log.d(TAG, "n_burst: " + n_burst);
+    			Log.d(TAG, "unlimited burst");
+			n_burst = -1;
+			remaining_burst_photos = -1;
 		}
-        catch(NumberFormatException e) {
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "failed to parse preference_burst_mode value: " + burst_mode_value);
-    		e.printStackTrace();
-    		n_burst = 1;
-        }
-		remaining_burst_photos = n_burst-1;
+		else {
+			try {
+				n_burst = Integer.parseInt(burst_mode_value);
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "n_burst: " + n_burst);
+			}
+	        catch(NumberFormatException e) {
+	    		if( MyDebug.LOG )
+	    			Log.e(TAG, "failed to parse preference_burst_mode value: " + burst_mode_value);
+	    		e.printStackTrace();
+	    		n_burst = 1;
+	        }
+			remaining_burst_photos = n_burst-1;
+		}
 		
 		if( timer_delay == 0 ) {
 			takePicture();
@@ -4391,7 +4403,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
     			is_preview_started = false; // preview automatically stopped due to taking photo
     	        phase = PHASE_NORMAL; // need to set this even if remaining burst photos, so we can restart the preview
-	            if( remaining_burst_photos > 0 ) {
+	            if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
 	    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
 	    	    	// (otherwise this can fail, at least on Nexus 7)
 		            startCameraPreview();
@@ -4512,8 +4524,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	            System.gc();
 
-	            if( remaining_burst_photos > 0 ) {
-	            	remaining_burst_photos--;
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
+	            if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
+	            	if( remaining_burst_photos > 0 )
+	            		remaining_burst_photos--;
 
 	        		String timer_value = sharedPreferences.getString(MainActivity.getBurstIntervalPreferenceKey(), "0");
 	        		long timer_delay = 0;
@@ -4550,16 +4565,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         	camera_controller.enableShutterSound(enable_sound);
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
-    		/*String toast_text = "";
-    		if( n_burst > 1 ) {
-    			int photo = (n_burst-remaining_burst_photos);
-    			toast_text = getResources().getString(R.string.taking_photo) + "... (" +  photo + " / " + n_burst + ")";
-    		}
-    		else {
-    			toast_text = getResources().getString(R.string.taking_photo) + "...";
-    		}
-    		if( MyDebug.LOG )
-    			Log.d(TAG, toast_text);*/
     		try {
     			camera_controller.takePicture(null, jpegPictureCallback);
         		count_cameraTakePicture++;
