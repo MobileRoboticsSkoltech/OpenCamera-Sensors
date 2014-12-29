@@ -31,10 +31,10 @@ public class CameraController2 extends CameraController {
 	private Context context = null;
 	private CameraDevice camera = null;
 	private String cameraIdS = null;
-	private boolean callback_done = false;
 	private CameraCaptureSession captureSession = null;
 	private CaptureRequest previewRequest = null;
 	private ImageReader imageReader = null;
+	//private ImageReader previewImageReader = null;
 	private SurfaceHolder holder = null;
 	private HandlerThread thread = null; 
 	Handler handler = null;
@@ -49,15 +49,20 @@ public class CameraController2 extends CameraController {
 		thread.start(); 
 		handler = new Handler(thread.getLooper());
 
-		callback_done = false;
-
 		class MyStateCallback extends CameraDevice.StateCallback {
+			boolean callback_done = false;
 			@Override
 			public void onOpened(CameraDevice camera) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera opened");
 				CameraController2.this.camera = camera;
 				callback_done = true;
+			}
+
+			@Override
+			public void onClosed(CameraDevice camera) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "camera closed");
 			}
 
 			@Override
@@ -73,8 +78,6 @@ public class CameraController2 extends CameraController {
 			public void onError(CameraDevice camera, int error) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera error: " + error);
-				camera.close();
-				CameraController2.this.camera = null;
 				callback_done = true;
 			}
 		};
@@ -94,7 +97,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "wait until camera opened...");
 		// need to wait until camera is opened
-		while( !callback_done ) {
+		while( !myStateCallback.callback_done ) {
 		}
 		if( camera == null ) {
 			if( MyDebug.LOG )
@@ -137,6 +140,10 @@ public class CameraController2 extends CameraController {
 			imageReader.close();
 			imageReader = null;
 		}
+		/*if( previewImageReader != null ) {
+			previewImageReader.close();
+			previewImageReader = null;
+		}*/
 	}
 
 	@Override
@@ -251,6 +258,11 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "set size of surface holder");
 			holder.setFixedSize(width, height);
 		}
+		/*if( previewImageReader != null ) {
+			previewImageReader.close();
+		}
+		previewImageReader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2); 
+		*/
 	}
 
 	@Override
@@ -467,53 +479,54 @@ public class CameraController2 extends CameraController {
 			captureSession = null;
 			previewRequest = null;
 
-			callback_done = false;
-
 			if( MyDebug.LOG )
 				Log.d(TAG, "picture size: " + imageReader.getWidth() + " x " + imageReader.getHeight());
-			camera.createCaptureSession(Arrays.asList(holder.getSurface(), imageReader.getSurface()),
-				new CameraCaptureSession.StateCallback() {
-					@Override
-					public void onConfigured(CameraCaptureSession session) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "onConfigured");
-						if( camera == null ) {
-							callback_done = true;
-							return;
-						}
-						captureSession = session;
-						try {
-							CaptureRequest.Builder builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-							if( MyDebug.LOG ) {
-								Log.d(TAG, "holder surface: " + holder.getSurface());
-								if( holder.getSurface() == null )
-									Log.d(TAG, "holder surface is null!");
-								else if( !holder.getSurface().isValid() )
-									Log.d(TAG, "holder surface is not valid!");
-							}
-							builder.set(CaptureRequest.CONTROL_AF_MODE,
-                                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                            builder.set(CaptureRequest.CONTROL_AE_MODE,
-                                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-							builder.addTarget(holder.getSurface());
-							previewRequest = builder.build();
-							captureSession.setRepeatingRequest(previewRequest, null, null);
-						}
-						catch(CameraAccessException e) {
-							e.printStackTrace();
-							captureSession = null;
-							previewRequest = null;
-						}
-						callback_done = true;
-					}
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "preview size: " + previewImageReader.getWidth() + " x " + previewImageReader.getHeight());*/
 
-					@Override
-					public void onConfigureFailed(CameraCaptureSession session) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "onConfigureFailed");
-						callback_done = true;
+			class MyStateCallback extends CameraCaptureSession.StateCallback {
+				@Override
+				public void onConfigured(CameraCaptureSession session) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "onConfigured");
+					if( camera == null ) {
+						return;
 					}
-		 		},
+					captureSession = session;
+					try {
+						CaptureRequest.Builder builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "holder surface: " + holder.getSurface());
+							if( holder.getSurface() == null )
+								Log.d(TAG, "holder surface is null!");
+							else if( !holder.getSurface().isValid() )
+								Log.d(TAG, "holder surface is not valid!");
+						}
+						builder.set(CaptureRequest.CONTROL_AF_MODE,
+                                CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                        builder.set(CaptureRequest.CONTROL_AE_MODE,
+                                CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+						builder.addTarget(holder.getSurface());
+						previewRequest = builder.build();
+						captureSession.setRepeatingRequest(previewRequest, null, null);
+					}
+					catch(CameraAccessException e) {
+						e.printStackTrace();
+						captureSession = null;
+						previewRequest = null;
+					}
+				}
+
+				@Override
+				public void onConfigureFailed(CameraCaptureSession session) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "onConfigureFailed");
+				}
+			}
+			MyStateCallback myStateCallback = new MyStateCallback();
+
+			camera.createCaptureSession(Arrays.asList(holder.getSurface()/*, previewImageReader.getSurface()*/, imageReader.getSurface()),
+				myStateCallback,
 		 		null);
 		}
 		catch(CameraAccessException e) {
