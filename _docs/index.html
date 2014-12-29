@@ -66,8 +66,7 @@
 <li>Optional GPS location tagging (geotagging) of photos and videos; for photos this includes compass direction (GPSImgDirection, GPSImgDirectionRef).</li>
 <li>Option to apply a date and timestamp to photos, and also to stamp photos with the location coordinates.</li>
 <li>Support for external microphones (may not be supported by all devices).</li>
-<li>App shortcut to automatically take a photo after launching.</li>
-<li>Widgets to launch Open Camera, and automatically take a photo, from lock screen (requires Android 4.2).</li>
+<li>Widget to automatically take a photo after launching.</li>
 <li>Small file size.</li>
 <li>Completely free and ad-free, unlike most Android apps.</li>
 </small>
@@ -118,7 +117,7 @@ Thanks! Donations can be used for: purchasing hardware for porting/testing; app 
 <li><a href="#user_interface">On-Screen User Interface</a></li>
 <li><a href="#auto_stabilise">Auto-stabilise feature</a></li>
 <li><a href="#settings">Settings</a></li>
-<li><a href="#widgets">Shortcuts and widgets</a></li>
+<li><a href="#widgets">Widgets</a></li>
 <li><a href="#faq">FAQ</a></li>
 <li><a href="#contact">Contacting me (bugs etc)</a></li>
 <li><a href="#credits">Credits</a></li>
@@ -487,27 +486,22 @@ this information to the clipboard.</p>
 
 <p><b>Reset settings</b> - Resets all Open Camera settings to their default.</p>
 
-<p><a name="widgets"><b>Shortcuts and widgets</b></p>
+<p><a name="widgets"><b>Widgets</b></p>
 
-<p>Open Camera installs two shortcuts - one to launch the main application ("Open Camera"), and
-another one, "Take Photo". When launched, this takes a photo automatically after opening Open
-Camera.</p>
+<p>Open Camera comes with a "Take Photo" widget. You can place this on your homescreen. When clicked
+on, it lauches Open Camera and takes a photo immediately.</p>
 
 <p>Open Camera also comes with two widgets that can be
 <a href="https://support.google.com/nexus/answer/2781801">displayed on the lock screen</a>
-(requires Android 4.2 or later). The "Open Camera" widget launches the app; the "Take Photo" widget
-will also automatically take a photo. Note that if you have a PIN lock etc, you'll have to unlock
-even if "Show camera when locked" is enabled.</p>
+(requires Android 4.2 or later - but lock screen widgets are no longer available in Android 5 or later).
+The "Open Camera" widget launches the app; the "Take Photo" widget will also automatically take
+a photo. Note that if you have a PIN lock etc, you'll have to unlock even if "Show camera when locked"
+is enabled.</p>
 
 <p><a name="faq"><b>Frequently Asked Questions</b></p>
 
 <p><b>How can I save to my external SD card</b> - See <a href="#save_location">Save location</a> under Settings/More
 camera controls.</p>
-
-<p><b>Why are there two app icons?</b> - See <a href="#widgets">here</a> for details. I've done the "Take Photo" like this, as
-Google recommends shortcuts should be done as shortcuts, not widgets. Google do this themselves ("Google" and "Voice Search" are both
-shortcuts to "Google Search") (and CameraMX does a similar thing to Open Camera). Android doesn't support optional shortcuts - you
-choose what goes on the homescreen, but All Apps will list all shortcuts.</p>
 
 <p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - The Android API only allows up to FullHD.
 Devices which offer higher resolutions provide this only in the "stock" camera app (or "mods"). For some devices, it
@@ -683,6 +677,9 @@ UPDATED Improved look of recent save folders picker.
 UPDATED Popup menu button now also shows indicator for torch.
 UPDATED If camera only supports one scene mode etc, no point offering the
         option to the user.
+UPDATED "Take Photo" shortcut is now done as a widget rather than a shortcut
+        (if you previously had this shortcut on your homescreen, you may need
+        to re-add it as a widget).
 
 Version 1.21 (2014/11/15)
 
