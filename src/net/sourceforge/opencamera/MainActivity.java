@@ -2067,6 +2067,10 @@ public class MainActivity extends Activity {
     	return "preference_location";
     }
     
+    public static String getRequireLocationPreferenceKey() {
+    	return "preference_require_location";
+    }
+    
     public static String getStampPreferenceKey() {
     	return "preference_stamp";
     }

@@ -428,6 +428,10 @@ location, and compass direction (note that if Open Camera is called via another 
 won't be saved - this is only supported when Open Camera is run as a standalone app). Location data will also
 be stored in videos (though only for devices that record in MPEG4 or 3GPP formats).</p>
 
+<p><b>Require location data</b> - If "Store location data" is enabled, then also enabling this option means that
+photos and videos can only be taken if location data is present (this can be useful if you need pictures/videos to
+have location data in them).</p>
+
 <p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
 location data" is enabled, then the current location latitude and longitude coordinates and compass
 direction will also be stamped on the resultant photos (if the location is known). Note that if
@@ -678,6 +682,8 @@ ADDED   Option to reset all settings to default.
 ADDED   Options to control whether time and/or battery status are displayed
         on-screen.
 ADDED   Can now set burst mode to unlimited.
+ADDED   New option to only allow taking photo/video if GPS location data is
+        available.
 UPDATED Can now choose new save location from recent save folders picker.
 UPDATED Improved look of recent save folders picker.
 UPDATED Popup menu button now also shows indicator for torch.

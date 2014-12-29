@@ -3624,6 +3624,24 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		updateParametersFromLocation();
 
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
+		if( store_location ) {
+			boolean require_location = sharedPreferences.getBoolean(MainActivity.getRequireLocationPreferenceKey(), false);
+			if( require_location ) {
+				// Android camera source claims we need to check lat/long != 0.0d
+				if( location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+					// fine, we have location
+				}
+				else {
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "location data required, but not available");
+		    	    showToast(null, R.string.location_not_available);
+		    	    return;
+				}
+			}
+		}
+
 		if( is_video ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
@@ -3716,7 +3734,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					}
 				});
 	        	camera_controller.initVideoRecorder(video_recorder);
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 				boolean record_audio = sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
 				if( record_audio ) {
 	        		String pref_audio_src = sharedPreferences.getString(MainActivity.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
@@ -3734,7 +3751,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    			Log.d(TAG, "set video source");
 				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
-				boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
 				// Android camera source claims we need to check lat/long != 0.0d
 				if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
 		    		if( MyDebug.LOG ) {

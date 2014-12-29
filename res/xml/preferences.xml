@@ -343,6 +343,13 @@
 	            android:defaultValue="false"
 	            />
 		    
+	        <CheckBoxPreference
+	            android:key="preference_require_location"
+	            android:title="@string/preference_require_location"
+	            android:summary="@string/preference_require_location_summary"
+	            android:defaultValue="false"
+	            />
+		    
 	        <ListPreference 
 	            android:key="preference_stamp"
 	            android:title="@string/preference_stamp"

@@ -47,6 +47,7 @@
     <string name="failed_to_start_camera_preview">Failed to start camera preview</string>
     <string name="taking_photo">Taking photo</string>
     <string name="failed_to_take_picture">Failed to take picture</string>
+    <string name="location_not_available">GPS location not available</string>
     <string name="photo_deleted">Photo deleted</string>
     <string name="no_gallery_app">No gallery app available</string>
     <string name="screen_is_locked">Screen is locked\nswipe the screen to unlock</string>
@@ -155,6 +156,8 @@
     <string name="preference_quality_summary">Set the image quality of saved photo images (recommended value is 90%%)</string>
     <string name="preference_location">Store location data (Geotagging)</string>
     <string name="preference_location_summary">Store GPS location data in the photos/videos</string>
+    <string name="preference_require_location">Require location data</string>
+    <string name="preference_require_location_summary">If location data is enabled, only take photo/video if location data is available</string>
     <string name="preference_stamp">Stamp photos</string>
     <string name="preference_stamp_summary">Stamp photos with date and time; and also GPS info if location data is enabled</string>
     <string name="video_quality">Video resolution</string>
@@ -187,6 +190,7 @@
     <string name="preference_reset">Reset settings</string>
     <string name="preference_reset_summary">Reset all Open Camera settings to default</string>
     <string name="preference_reset_question">Are you sure you want to reset all Open Camera settings to default?</string>
+
     <string name="about_ok">OK</string>
     <string name="about_available">Available</string>
     <string name="about_not_available">Not available</string>
@@ -211,5 +215,4 @@
     <string name="enter_new_folder">Enter new folder name</string>
     <string name="failed_create_folder">Failed to create folder</string>
     <string name="folder_exists">Folder already exists</string>
-    
 </resources>
