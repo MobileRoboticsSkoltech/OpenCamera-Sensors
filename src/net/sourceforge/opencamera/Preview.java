@@ -3650,9 +3650,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
     		MainActivity main_activity = (MainActivity)Preview.this.getContext();
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
-			if( videoFile == null ) {
+    		if( videoFile == null ) {
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
 	    	    showToast(null, R.string.failed_to_save_video);
+				this.phase = PHASE_NORMAL;
+				showGUI(true);
 			}
 			else {
 				video_name = videoFile.getAbsolutePath();
