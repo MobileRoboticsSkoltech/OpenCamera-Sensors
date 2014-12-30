@@ -4197,22 +4197,29 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        	        int diff_y = (int)(24 * scale + 0.5f); // convert dps to pixels
 	        	        p.setTextAlign(Align.RIGHT);
 	    				drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, height - offset_y);
+	    				String location_string = "";
 	    				boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
 	    				// Android camera source claims we need to check lat/long != 0.0d
 	    				if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
-	    					String location_string = Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
+	    					location_string += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
 	    					if( location.hasAltitude() ) {
 		    					location_string += ", " + decimalFormat.format(location.getAltitude()) + getResources().getString(R.string.metres_abbreviation);
 	    					}
-	    			    	if( Preview.this.has_geo_direction ) {
-	    						float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
-	    						if( geo_angle < 0.0f ) {
-	    							geo_angle += 360.0f;
-	    						}
-	    						location_string += ", " + Math.round(geo_angle) + (char)0x00B0;
-	    			    	}
-		    				drawTextWithBackground(canvas, p, location_string, Color.WHITE, Color.BLACK, width - offset_x, height - offset_y - diff_y);
 	    				}
+    			    	if( Preview.this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false) ) {
+    						float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
+    						if( geo_angle < 0.0f ) {
+    							geo_angle += 360.0f;
+    						}
+        			    	if( location_string.length() > 0 )
+        			    		location_string += ", ";
+    						location_string += Math.round(geo_angle) + (char)0x00B0;
+    			    	}
+    			    	if( location_string.length() > 0 ) {
+    	        			if( MyDebug.LOG )
+    	        				Log.d(TAG, "stamp with location_string: " + location_string);
+    			    		drawTextWithBackground(canvas, p, location_string, Color.WHITE, Color.BLACK, width - offset_x, height - offset_y - diff_y);
+    			    	}
     				}
     			}
 
@@ -4387,7 +4394,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
                 	    		if( MyDebug.LOG )
                 	    			Log.d(TAG, "now saved EXIF data");
         	            	}
-        	            	else if( Preview.this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false) ) {
+        	            	else if( Preview.this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false) ) {
             	            	if( MyDebug.LOG )
                 	    			Log.d(TAG, "add GPS direction exif info");
             	            	long time_s = System.currentTimeMillis();
@@ -4607,7 +4614,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	private void setGPSDirectionExif(ExifInterface exif) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-    	if( this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false) ) {
+    	if( this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false) ) {
 			float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
 			if( geo_angle < 0.0f ) {
 				geo_angle += 360.0f;

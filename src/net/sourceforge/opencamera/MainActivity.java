@@ -2067,6 +2067,10 @@ public class MainActivity extends Activity {
     	return "preference_location";
     }
     
+    public static String getGPSDirectionPreferenceKey() {
+    	return "preference_gps_direction";
+    }
+    
     public static String getRequireLocationPreferenceKey() {
     	return "preference_require_location";
     }

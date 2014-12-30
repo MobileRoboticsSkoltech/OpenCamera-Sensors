@@ -344,6 +344,13 @@
 	            />
 		    
 	        <CheckBoxPreference
+	            android:key="preference_gps_direction"
+	            android:title="@string/preference_gps_direction"
+	            android:summary="@string/preference_gps_direction_summary"
+	            android:defaultValue="false"
+	            />
+		    
+	      	<CheckBoxPreference
 	            android:key="preference_require_location"
 	            android:title="@string/preference_require_location"
 	            android:summary="@string/preference_require_location_summary"

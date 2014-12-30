@@ -432,19 +432,22 @@ images will in general come out as a slightly lower resolution (due to the rotat
 more storage space.</p>
 
 <p><b>Store location data (Geotagging)</b> - If selected, then photos will be tagged with the current
-location, and compass direction (note that if Open Camera is called via another app, the compass direction
-won't be saved - this is only supported when Open Camera is run as a standalone app). Location data will also
-be stored in videos (though only for devices that record in MPEG4 or 3GPP formats).</p>
+location. Location data will also be stored in videos (though only for devices that record in MPEG4 or
+3GPP formats).</p>
+
+<p><b>Store compass direction</b> - If selected, then photos will be tagged with the compass direction. Note
+that if Open Camera is called via another app, the compass direction won't be saved - this is only supported
+when Open Camera is run as a standalone app. Also not supported for videos.</p>
 
 <p><b>Require location data</b> - If "Store location data" is enabled, then also enabling this option means that
 photos and videos can only be taken if location data is present (this can be useful if you need pictures/videos to
 have location data in them).</p>
 
 <p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
-location data" is enabled, then the current location latitude and longitude coordinates and compass
-direction will also be stamped on the resultant photos (if the location is known). Note that if
-this option is enabled, then it will take longer to save the photo. Also note that this option
-isn't available for video.</p>
+location data" is enabled, then the current location latitude and longitude coordinates will
+also be stamped on the resultant photos (if the location is known). Similarly for "Store compass
+direction". Note that if this option is enabled, then it will take longer to save the photo.
+Also note that this option is only supported for photos, not video.</p>
 
 <p><b>Video resolution</b> - Select the resolution of videos taken by the camera.</p>
 
@@ -694,6 +697,10 @@ ADDED   Options to control whether time and/or battery status are displayed
 ADDED   Can now set burst mode to unlimited.
 ADDED   New option to only allow taking photo/video if GPS location data is
         available.
+ADDED   Tagging photos with GPS direction is now a separate option ("Store
+        compass direction" rather than "Store location data"). If you are
+        upgrading and want photos to remain tagged with GPS direction, please
+        enable the new option.
 UPDATED Can now choose new save location from recent save folders picker.
 UPDATED Improved look of recent save folders picker.
 UPDATED Popup menu button now also shows indicator for torch.
