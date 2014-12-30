@@ -3637,6 +3637,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		    		if( MyDebug.LOG )
 		    			Log.d(TAG, "location data required, but not available");
 		    	    showToast(null, R.string.location_not_available);
+					this.phase = PHASE_NORMAL;
+					showGUI(true);
 		    	    return;
 				}
 			}
