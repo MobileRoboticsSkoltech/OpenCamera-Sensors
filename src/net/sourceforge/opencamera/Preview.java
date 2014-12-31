@@ -4904,6 +4904,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     private boolean immersive_mode = false;
     
     void setImmersiveMode(final boolean immersive_mode) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setImmersiveMode: " + immersive_mode);
     	this.immersive_mode = immersive_mode;
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		main_activity.runOnUiThread(new Runnable() {
@@ -4912,6 +4914,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				// if going into immersive mode, the we should set GONE the ones that are set GONE in showGUI(false)
 		    	//final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
 		    	final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
+				if( MyDebug.LOG )
+					Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
 		    	// n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
 			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
 			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
@@ -4933,10 +4937,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			    	popupButton.setVisibility(visibility);
 			    galleryButton.setVisibility(visibility);
 			    settingsButton.setVisibility(visibility);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "has_zoom: " + has_zoom);
+				}
 				if( has_zoom && sharedPreferences.getBoolean(MainActivity.getShowZoomControlsPreferenceKey(), false) ) {
 					zoomControls.setVisibility(visibility);
 				}
-				if( has_zoom && sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), false) ) {
+				if( has_zoom && sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), true) ) {
 					zoomSeekBar.setVisibility(visibility);
 				}
         		String pref_immersive_mode = sharedPreferences.getString(MainActivity.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
