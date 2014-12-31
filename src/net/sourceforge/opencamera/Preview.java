@@ -241,6 +241,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	public int count_cameraAutoFocus = 0;
 	public int count_cameraTakePicture = 0;
 	public boolean test_has_received_location = false;
+	public boolean test_fail_open_camera = false;
 	public boolean test_low_memory = false;
 	public boolean test_have_angle = false;
 	public float test_angle = 0.0f;
@@ -797,6 +798,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		try {
 			if( MyDebug.LOG )
 				Log.d(TAG, "try to open camera: " + cameraId);
+			if( test_fail_open_camera ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "test failing to open camera");
+				throw new RuntimeException();
+			}
 	        if( using_android_l )
 				camera_controller = new CameraController2(this.getContext(), cameraId);
 	        else
