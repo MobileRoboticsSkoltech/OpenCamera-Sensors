@@ -4217,9 +4217,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     						if( geo_angle < 0.0f ) {
     							geo_angle += 360.0f;
     						}
+    	        			if( MyDebug.LOG )
+    	        				Log.d(TAG, "geo_angle: " + geo_angle);
         			    	if( location_string.length() > 0 )
         			    		location_string += ", ";
-    						location_string += Math.round(geo_angle) + (char)0x00B0;
+    						location_string += "" + Math.round(geo_angle) + (char)0x00B0;
     			    	}
     			    	if( location_string.length() > 0 ) {
     	        			if( MyDebug.LOG )
