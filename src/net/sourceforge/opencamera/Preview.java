@@ -19,13 +19,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -70,14 +70,16 @@ import android.widget.Toast;
 import android.widget.ZoomControls;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-public class Preview extends SurfaceView implements SurfaceHolder.Callback {
+public class Preview implements SurfaceHolder.Callback {
 	private static final String TAG = "Preview";
 
 	private static final String TAG_GPS_IMG_DIRECTION = "GPSImgDirection";
 	private static final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
 
 	private boolean using_android_l = false;
-	
+
+	private SurfaceView surfaceView = null;
+
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
     private Matrix camera_to_preview_matrix = new Matrix();
@@ -249,10 +251,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	@SuppressWarnings("deprecation")
 	Preview(Context context, Bundle savedInstanceState) {
-		super(context);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "new Preview");
 		}
+		
+		this.surfaceView = new MySurfaceView(context, savedInstanceState, this);
 		
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
         	//this.using_android_l = true;
@@ -268,7 +271,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		// Install a SurfaceHolder.Callback so we get notified when the
 		// underlying surface is created and destroyed.
-		mHolder = getHolder();
+		mHolder = surfaceView.getHolder();
 		mHolder.addCallback(this);
         // deprecated setting, but required on Android versions prior to 3.0
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // deprecated
@@ -309,6 +312,14 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		coords[1] = beta * (float)this.getHeight();
 	}*/
 
+	private Resources getResources() {
+		return surfaceView.getResources();
+	}
+	
+	public View getView() {
+		return surfaceView;
+	}
+
 	private void calculateCameraToPreviewMatrix() {
 		if( camera_controller == null )
 			return;
@@ -321,8 +332,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		camera_to_preview_matrix.postRotate(camera_controller.getDisplayOrientation());
 		// Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
 		// UI coordinates range from (0, 0) to (width, height).
-		camera_to_preview_matrix.postScale(this.getWidth() / 2000f, this.getHeight() / 2000f);
-		camera_to_preview_matrix.postTranslate(this.getWidth() / 2f, this.getHeight() / 2f);
+		camera_to_preview_matrix.postScale(surfaceView.getWidth() / 2000f, surfaceView.getHeight() / 2000f);
+		camera_to_preview_matrix.postTranslate(surfaceView.getWidth() / 2f, surfaceView.getHeight() / 2f);
 	}
 
 	private void calculatePreviewToCameraMatrix() {
@@ -374,8 +385,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    return areas;
 	}
 
-	@SuppressLint("ClickableViewAccessibility") @Override
-    public boolean onTouchEvent(MotionEvent event) {
+	boolean touchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
         if( camera_controller == null ) {
     		if( MyDebug.LOG )
@@ -438,9 +448,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         
 		tryAutoFocus(false, true);
 		return true;
-    }
+	}
+	
+	//@SuppressLint("ClickableViewAccessibility") @Override
 
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+	private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
     	@Override
     	public boolean onScale(ScaleGestureDetector detector) {
     		if( Preview.this.camera_controller != null && Preview.this.has_zoom ) {
@@ -472,7 +484,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		// to draw.
 		this.has_surface = true;
 		this.openCamera();
-		this.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
+		surfaceView.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
@@ -594,6 +606,10 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 	
+	private Context getContext() {
+		return surfaceView.getContext();
+	}
+
 	private void restartVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "restartVideo()");
@@ -1047,12 +1063,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			        zoomControls.setIsZoomOutEnabled(true);
 			        zoomControls.setZoomSpeed(20);
 
-			        zoomControls.setOnZoomInClickListener(new OnClickListener(){
+			        zoomControls.setOnZoomInClickListener(new View.OnClickListener(){
 			            public void onClick(View v){
 			            	zoomIn();
 			            }
 			        });
-				    zoomControls.setOnZoomOutClickListener(new OnClickListener(){
+				    zoomControls.setOnZoomOutClickListener(new View.OnClickListener(){
 				    	public void onClick(View v){
 				    		zoomOut();
 				        }
@@ -2013,49 +2029,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         return optimalSize;
     }
 
-    @Override
-    protected void onMeasure(int widthSpec, int heightSpec) {
-    	if( !this.has_aspect_ratio ) {
-    		super.onMeasure(widthSpec, heightSpec);
-    		return;
-    	}
-        int previewWidth = MeasureSpec.getSize(widthSpec);
-        int previewHeight = MeasureSpec.getSize(heightSpec);
-
-        // Get the padding of the border background.
-        int hPadding = getPaddingLeft() + getPaddingRight();
-        int vPadding = getPaddingTop() + getPaddingBottom();
-
-        // Resize the preview frame with correct aspect ratio.
-        previewWidth -= hPadding;
-        previewHeight -= vPadding;
-
-        boolean widthLonger = previewWidth > previewHeight;
-        int longSide = (widthLonger ? previewWidth : previewHeight);
-        int shortSide = (widthLonger ? previewHeight : previewWidth);
-        if (longSide > shortSide * aspect_ratio) {
-            longSide = (int) ((double) shortSide * aspect_ratio);
-        } else {
-            shortSide = (int) ((double) longSide / aspect_ratio);
-        }
-        if (widthLonger) {
-            previewWidth = longSide;
-            previewHeight = shortSide;
-        } else {
-            previewWidth = shortSide;
-            previewHeight = longSide;
-        }
-
-
-        // Add the padding of the border.
-        previewWidth += hPadding;
-        previewHeight += vPadding;
-
-        // Ask children to follow the new preview dimension.
-        super.onMeasure(MeasureSpec.makeMeasureSpec(previewWidth, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(previewHeight, MeasureSpec.EXACTLY));
-    }
-
     private void setAspectRatio(double ratio) {
         if( ratio <= 0.0 )
         	throw new IllegalArgumentException();
@@ -2065,8 +2038,16 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         	aspect_ratio = ratio;
     		if( MyDebug.LOG )
     			Log.d(TAG, "new aspect ratio: " + aspect_ratio);
-            requestLayout();
+    		surfaceView.requestLayout();
         }
+    }
+    
+    boolean hasAspectRatio() {
+    	return has_aspect_ratio;
+    }
+
+    double getAspectRatio() {
+    	return aspect_ratio;
     }
 
     // for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
@@ -2204,13 +2185,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		return this.current_rotation;
 	}
 
-	@Override
-	public void onDraw(Canvas canvas) {
+	void draw(Canvas canvas) {
 		/*if( MyDebug.LOG )
-			Log.d(TAG, "onDraw()");*/
+			Log.d(TAG, "draw()");*/
 		if( this.app_is_paused ) {
     		/*if( MyDebug.LOG )
-    			Log.d(TAG, "onDraw(): app is paused");*/
+    			Log.d(TAG, "draw(): app is paused");*/
 			return;
 		}
 		/*if( true ) // test
@@ -2366,7 +2346,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			// align with "top" of the take_photo button, but remember to take the rotation into account!
 			view.getLocationOnScreen(gui_location);
 			int view_left = gui_location[0];
-			this.getLocationOnScreen(gui_location);
+			surfaceView.getLocationOnScreen(gui_location);
 			int this_left = gui_location[0];
 			int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
     		/*if( MyDebug.LOG ) {
@@ -4196,7 +4176,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        			final float scale = getResources().getDisplayMetrics().density;
 	        			p.setColor(Color.WHITE);
 	        			p.setTextSize(20 * scale + 0.5f); // convert dps to pixels
-	        			// doesn't respect user preferences such as 12/24 hour - see note about in onDraw() about DateFormat.getTimeInstance()
+	        			// doesn't respect user preferences such as 12/24 hour - see note about in draw() about DateFormat.getTimeInstance()
 	        	        String time_stamp = DateFormat.getDateTimeInstance().format(new Date());
 	        	        int offset_x = (int)(8 * scale + 0.5f); // convert dps to pixels
 	        	        int offset_y = (int)(8 * scale + 0.5f); // convert dps to pixels
@@ -4474,7 +4454,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
 	            	long time_s = System.currentTimeMillis();
 		        	CameraController.Size size = camera_controller.getPictureSize();
-	        		int ratio = (int) Math.ceil((double) size.width / Preview.this.getWidth());
+	        		int ratio = (int) Math.ceil((double) size.width / surfaceView.getWidth());
     				BitmapFactory.Options options = new BitmapFactory.Options();
     				options.inMutable = false;
     				options.inPurgeable = true;
@@ -4485,7 +4465,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         			}
     	    		if( MyDebug.LOG ) {
     	    			Log.d(TAG, "    picture width   : " + size.width);
-    	    			Log.d(TAG, "    preview width   : " + Preview.this.getWidth());
+    	    			Log.d(TAG, "    preview width   : " + surfaceView.getWidth());
     	    			Log.d(TAG, "    ratio           : " + ratio);
     	    			Log.d(TAG, "    inSampleSize    : " + options.inSampleSize);
     	    		}
@@ -5046,7 +5026,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			this.level_angle -= 360.0;
 		}
 
-		this.invalidate();
+		surfaceView.invalidate();
 	}
 
     void onMagneticSensorChanged(SensorEvent event) {
@@ -5236,7 +5216,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     }
     
     void updateUIPlacement() {
-    	// we cache the preference_ui_placement to save having to check it in the onDraw() method
+    	// we cache the preference_ui_placement to save having to check it in the draw() method
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String ui_placement = sharedPreferences.getString(MainActivity.getUIPlacementPreferenceKey(), "ui_right");
 		this.ui_placement_right = ui_placement.equals("ui_right");
