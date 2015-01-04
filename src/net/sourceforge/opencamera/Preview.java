@@ -4378,6 +4378,7 @@ public class Preview implements SurfaceHolder.Callback {
 	            	            if( exif_white_balance != null )
 	            	            	exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
 	            	            setGPSDirectionExif(exif_new);
+	            	            setDateTimeExif(exif_new);
             	            	exif_new.saveAttributes();
                 	    		if( MyDebug.LOG )
                 	    			Log.d(TAG, "now saved EXIF data");
@@ -4388,6 +4389,7 @@ public class Preview implements SurfaceHolder.Callback {
             	            	long time_s = System.currentTimeMillis();
             	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
 	            	            setGPSDirectionExif(exif);
+	            	            setDateTimeExif(exif);
             	            	exif.saveAttributes();
                 	    		if( MyDebug.LOG ) {
                 	    			Log.d(TAG, "done adding GPS direction exif info, time taken: " + (System.currentTimeMillis() - time_s));
@@ -4618,6 +4620,16 @@ public class Preview implements SurfaceHolder.Callback {
     	}
 	}
 
+	private void setDateTimeExif(ExifInterface exif) {
+    	String exif_datetime = exif.getAttribute(ExifInterface.TAG_DATETIME);
+    	if( exif_datetime != null ) {
+        	if( MyDebug.LOG )
+    			Log.d(TAG, "write datetime tags: " + exif_datetime);
+        	exif.setAttribute("DateTimeOriginal", exif_datetime);
+        	exif.setAttribute("DateTimeDigitized", exif_datetime);
+    	}
+	}
+	
 	void clickedShare() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedShare");
