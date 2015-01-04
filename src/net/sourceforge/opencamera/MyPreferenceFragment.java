@@ -277,7 +277,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
                         about_string.append(version);
                         about_string.append("\nVersion Code: ");
                         about_string.append(version_code);
-                        about_string.append("\n(c) 2013-2014 Mark Harman");
+                        about_string.append("\n(c) 2013-2015 Mark Harman");
                         about_string.append("\nReleased under the GPL v3 or later");
                         about_string.append("\nPackage: ");
                         about_string.append(MyPreferenceFragment.this.getActivity().getPackageName());
