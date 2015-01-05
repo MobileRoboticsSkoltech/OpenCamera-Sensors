@@ -146,6 +146,7 @@ public class FolderChooserDialog extends DialogFragment {
 			if( current_folder == null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "can't even read DCIM?!");
+				refreshList(new File("/"));
 			}
 		}
         return folder_dialog;
