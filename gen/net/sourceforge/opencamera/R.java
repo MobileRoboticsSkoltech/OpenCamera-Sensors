@@ -157,6 +157,7 @@ public final class R {
         public static final int choose_another_folder=0x7f08000c;
         /**  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
+ whether a setting is turned off, e.g., "Auto-stabilise: Off" 
          */
         public static final int choose_save_location=0x7f080009;
         public static final int clear_folder_history=0x7f08000a;
@@ -176,6 +177,8 @@ public final class R {
         public static final int failed_to_open_camera_3=0x7f08003a;
         /**   intentionally starts lower case 
   intentionally starts lower case 
+  intentionally starts lower case 
+ @TODO PER FAVORE VERIFICARE QUESTA TRADUZIONE! 
          */
         public static final int failed_to_reconnect_camera=0x7f080010;
         public static final int failed_to_record_video=0x7f080022;
@@ -201,6 +204,7 @@ public final class R {
         public static final int not_supported=0x7f080012;
         /**  whether a setting is turned on, e.g., "Auto-stabilise: On" 
  whether a setting is turned on, e.g., "Auto-stabilise: On" 
+ whether a setting is turned on, e.g., "Auto-stabilise: On" 
          */
         public static final int off=0x7f080008;
         public static final int on=0x7f080007;
@@ -221,6 +225,8 @@ public final class R {
         public static final int preference_category_camera_effects=0x7f080041;
         public static final int preference_category_camera_quality=0x7f08008b;
         public static final int preference_category_online=0x7f0800ad;
+        /**  @TODO PER FAVORE RIGUARDARE "livellate" PERCHÈ SECONDO ME NON HA SENSO! 
+         */
         public static final int preference_color_effect=0x7f080044;
         public static final int preference_color_effect_summary=0x7f080045;
         public static final int preference_crop_guide=0x7f080085;
@@ -258,6 +264,8 @@ public final class R {
         public static final int preference_preview_size_summary=0x7f08006c;
         public static final int preference_quality=0x7f08008f;
         public static final int preference_quality_summary=0x7f080090;
+        /**  @TODO MA IN CHE SENSO? COSA FA? 
+         */
         public static final int preference_record_audio=0x7f0800a7;
         public static final int preference_record_audio_src=0x7f0800a9;
         public static final int preference_record_audio_src_summary=0x7f0800aa;
@@ -344,6 +352,7 @@ public final class R {
         public static final int video=0x7f08001b;
         public static final int video_error_server_died=0x7f080014;
         /**   intentionally starts lower case 
+  intentionally starts lower case 
   intentionally starts lower case 
          */
         public static final int video_error_unknown=0x7f080013;
