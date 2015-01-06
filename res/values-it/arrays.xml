@@ -91,6 +91,7 @@
         <item>4x</item>
         <item>5x</item>
         <item>10x</item>
+        <item>Unlimited</item>
     </string-array>
     <string-array name="preference_burst_mode_values">
         <item>1</item>
@@ -99,6 +100,7 @@
         <item>4</item>
         <item>5</item>
         <item>10</item>
+        <item>unlimited</item>
     </string-array>
     <string-array name="preference_burst_interval_entries">
         <item>Nessun intervallo</item>
@@ -255,6 +257,9 @@
         <item>25</item>
         <item>30</item>
         <item>60</item>
+        <item>96</item>
+        <item>100</item>
+        <item>120</item>
     </string-array>
     <string-array name="preference_video_fps_values">
         <item>default</item>
@@ -263,6 +268,9 @@
         <item>25</item>
         <item>30</item>
         <item>60</item>
+        <item>96</item>
+        <item>100</item>
+        <item>120</item>
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Illimitata</item>
