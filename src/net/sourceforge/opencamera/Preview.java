@@ -485,6 +485,58 @@ public class Preview implements SurfaceHolder.Callback {
 		this.closeCamera();
 	}
 	
+	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "surfaceChanged " + w + ", " + h);
+		this.surface_holder_w = w;
+		this.surface_holder_h = h;
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "surface frame " + mHolder.getSurfaceFrame().width() + ", " + mHolder.getSurfaceFrame().height());*/
+		// surface size is now changed to match the aspect ratio of camera preview - so we shouldn't change the preview to match the surface size, so no need to restart preview here
+		// update: except for Android L, where we must start the preview after the surface has changed size
+
+        if( holder.getSurface() == null ) {
+            // preview surface does not exist
+            return;
+        }
+        if( camera_controller == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
+            return;
+        }
+
+        if( using_android_l ) {
+        	/*if( !this.requested_preview_size )  {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "request preview size");
+    			setPreviewSize();
+    			if( this.requested_preview_size_w == w && this.requested_preview_size_h == h ) {
+    				// if the surface is already the correct size, we can start the preview straight away - and indeed, we must do, as we won't receive another surfaceChanged call
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "surface is already correct size");
+        			startCameraPreview();
+    			}
+        	}
+        	else*/
+			if( this.requested_preview_size && this.requested_preview_size_w == w && this.requested_preview_size_h == h ) {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "have now set preview size, so can start camera preview");
+    			startCameraPreview();
+    	    	/*final Handler handler = new Handler();
+    			handler.postDelayed(new Runnable() {
+    				@Override
+    				public void run() {
+    					if( MyDebug.LOG )
+    						Log.d(TAG, "delayed start camera preview");
+    					startCameraPreview();
+    				}
+    			}, 5000);*/
+        	}
+        }
+		MainActivity main_activity = (MainActivity)Preview.this.getContext();
+		main_activity.layoutUI(); // need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed
+	}
+	
 	void stopVideo(boolean from_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopVideo()");
@@ -1444,58 +1496,6 @@ public class Preview implements SurfaceHolder.Callback {
 		}
 	}
 
-	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "surfaceChanged " + w + ", " + h);
-		this.surface_holder_w = w;
-		this.surface_holder_h = h;
-		/*if( MyDebug.LOG )
-			Log.d(TAG, "surface frame " + mHolder.getSurfaceFrame().width() + ", " + mHolder.getSurfaceFrame().height());*/
-		// surface size is now changed to match the aspect ratio of camera preview - so we shouldn't change the preview to match the surface size, so no need to restart preview here
-		// update: except for Android L, where we must start the preview after the surface has changed size
-
-        if( holder.getSurface() == null ) {
-            // preview surface does not exist
-            return;
-        }
-        if( camera_controller == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "camera not opened!");
-            return;
-        }
-
-        if( using_android_l ) {
-        	/*if( !this.requested_preview_size )  {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "request preview size");
-    			setPreviewSize();
-    			if( this.requested_preview_size_w == w && this.requested_preview_size_h == h ) {
-    				// if the surface is already the correct size, we can start the preview straight away - and indeed, we must do, as we won't receive another surfaceChanged call
-        			if( MyDebug.LOG )
-        				Log.d(TAG, "surface is already correct size");
-        			startCameraPreview();
-    			}
-        	}
-        	else*/
-			if( this.requested_preview_size && this.requested_preview_size_w == w && this.requested_preview_size_h == h ) {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "have now set preview size, so can start camera preview");
-    			startCameraPreview();
-    	    	/*final Handler handler = new Handler();
-    			handler.postDelayed(new Runnable() {
-    				@Override
-    				public void run() {
-    					if( MyDebug.LOG )
-    						Log.d(TAG, "delayed start camera preview");
-    					startCameraPreview();
-    				}
-    			}, 5000);*/
-        	}
-        }
-		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-		main_activity.layoutUI(); // need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed
-	}
-	
 	private void setPreviewSize() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewSize()");
