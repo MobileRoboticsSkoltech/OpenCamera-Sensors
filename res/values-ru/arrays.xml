@@ -91,7 +91,7 @@
         <item>4x</item>
         <item>5x</item>
         <item>10x</item>
-        <item>Unlimited</item>
+        <item>Безгранично</item>
     </string-array>
     <string-array name="preference_burst_mode_values">
         <item>1</item>
@@ -138,10 +138,10 @@
     </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Сделать фото (или запустить/остановить запись видео)</item>
-        <item>Focus (if in auto/manual/macro mode)</item>
+        <item>Фокус (авто/ручн/макро)</item>
         <item>Увеличить/уменьшить масштаб</item>
         <item>Изменить уровень экспозиции</item>
-        <item>Switch auto-stabilise on/off</item>
+        <item>Авто стабилизация вкл/выкл</item>
         <item>Изменить громкость</item>
         <item>Ничего</item>
     </string-array>
@@ -151,8 +151,16 @@
         <item>volume_zoom</item>
         <item>volume_exposure</item>
         <item>volume_auto_stabilise</item>
-        <item>volume_nothing</item><!-- actually means change device volume! -->
+        <item>volume_nothing</item>
         <item>volume_really_nothing</item>
+    </string-array>
+    <string-array name="preference_rotate_preview_entries">
+        <item>"Не поворачивать"</item>
+        <item>Повернуть на 180 градусов</item>
+    </string-array>
+    <string-array name="preference_rotate_preview_values">
+        <item>0</item>
+        <item>180</item>
     </string-array>
     <string-array name="preference_ui_placement_entries">
         <item>Интерфейс для левши</item>
@@ -161,6 +169,18 @@
     <string-array name="preference_ui_placement_values">
         <item>ui_left</item>
         <item>ui_right</item>
+    </string-array>
+    <string-array name="preference_immersive_mode_entries">
+        <item>Выключить</item>
+        <item>Скрыть кнопки навигации</item>
+        <item>Скрыть GUI</item>
+        <item>Скрыть все</item>
+    </string-array>
+    <string-array name="preference_immersive_mode_values">
+        <item>immersive_mode_off</item>
+        <item>immersive_mode_low_profile</item>
+        <item>immersive_mode_gui</item>
+        <item>immersive_mode_everything</item>
     </string-array>
     <string-array name="preference_grid_entries">
         <item>Нет</item>
@@ -171,6 +191,32 @@
         <item>preference_grid_none</item>
         <item>preference_grid_3x3</item>
         <item>preference_grid_4x2</item>
+    </string-array>
+    <string-array name="preference_crop_guide_entries">
+        <item>Нет</item>
+        <item>1.33 (4:3)</item>
+        <item>1.78 (16:9)</item>
+        <item>1.85 (37:20)</item>
+        <item>2.33 (21:9)</item>
+        <item>2.35 (47:20)</item>
+        <item>2.4 (12:5)</item>
+    </string-array>
+    <string-array name="preference_crop_guide_values">
+        <item>crop_guide_none</item>
+        <item>crop_guide_1.33</item>
+        <item>crop_guide_1.78</item>
+        <item>crop_guide_1.85</item>
+        <item>crop_guide_2.33</item>
+        <item>crop_guide_2.35</item>
+        <item>crop_guide_2.4</item>
+    </string-array>
+    <string-array name="preference_stamp_entries">
+        <item>Без отметки</item>
+        <item>С отметками</item>
+    </string-array>
+    <string-array name="preference_stamp_values">
+        <item>preference_stamp_no</item>
+        <item>preference_stamp_yes</item>
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>По умолчанию</item>

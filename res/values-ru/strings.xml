@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Настройки</string>
+    <string name="action_popup">Настройки всплывающих окон</string>
     <string name="intro_text">"Нажмите фокус и выберите синюю кнопку, чтобы сделать фото.
 
 В настройках вас ждет очень много плюшек. :)
@@ -15,6 +16,7 @@
     <string name="choose_save_location">Выберите папку сохранения:</string>
     <string name="clear_folder_history">Очистить историю папки</string>
     <string name="clear_folder_history_question">Очистить историю папки?</string>
+    <string name="choose_another_folder">Выбрать другую папку</string>
     <string name="changed_save_location">Папка сохранения изменена на:</string>
     <string name="stopped_recording_video">Запись остановлена</string>
     <string name="repeats_to_go">repeats to go</string>
@@ -33,6 +35,7 @@
     <string name="exposure_locked">Экспозиция заблокирована</string>
     <string name="exposure_unlocked">Экспозиция разблокирована</string>
     <string name="cancelled_timer">Таймер отменен</string>
+    <string name="cancelled_burst_mode">Режим серийной съемки отменен</string>
     <string name="started_timer">Таймер</string>
     <string name="failed_to_save_video">Не удалось сохранить видеофайл</string>
     <string name="failed_to_record_video">Не удалось записать видео</string>
@@ -44,11 +47,17 @@
     <string name="failed_to_start_camera_preview">Не удалось запустить предпросмотр</string>
     <string name="taking_photo">Снимок</string>
     <string name="failed_to_take_picture">Не удалось сфотографировать</string>
+    <string name="location_not_available">Местоположение недоступно</string>
     <string name="photo_deleted">Фотография удалена</string>
     <string name="no_gallery_app">Галерея недоступна</string>
-    <string name="screen_is_locked">Экран заблокирован\nпроведите пальцем по экрану,\nчтобы разблокировать</string>
+    <string name="screen_is_locked">"Экран заблокирован
+проведите пальцем по экрану,
+чтобы разблокировать"</string>
     <string name="unlocked">Разблокировано</string>
-    <string name="auto_stabilise_not_supported">К сожалению, авто-стабилизация не\nподдерживается на данном устройстве</string>
+    <string name="auto_stabilise_not_supported">"К сожалению, авто-стабилизация не
+поддерживается на данном устройстве"</string>
+    <string name="audio_disabled">Аудио отключено</string>
+    <string name="max_duration">Макс. продолжительность</string>
     <string name="color_effect">Цветовой эффект</string>
     <string name="scene_mode">Сцена</string>
     <string name="white_balance">Баланс белого</string>
@@ -61,6 +70,8 @@
     <string name="free_memory">Память</string>
     <string name="screen_lock_message_1">[Заблокировано:</string>
     <string name="screen_lock_message_2">Проведите по экрану, чтобы разблокировать]</string>
+    <string name="failed_to_stamp">Не удалось добавить отметку</string>
+    <string name="metres_abbreviation">m</string>
     <string name="preference_category_camera_effects">Эффекты</string>
     <string name="preference_auto_stabilise">Авто стабилизация</string>
     <string name="preference_auto_stabilise_summary">Изображение будет стабилизироваться. Не рекомендуется на слабых устройствах</string>
@@ -94,19 +105,23 @@
     <string name="preference_shutter_sound_summary">Воспроизведение звука при съемке фотографии (требуется Android 4.2+ для отключения)</string>
     <string name="preference_volume_keys">Клавиши громкости</string>
     <string name="preference_volume_keys_summary">Задать поведение при нажатии клавиш громкости</string>
-    <string name="preference_screen_gui">Настройки отображения</string>
-    <string name="preference_preview_size">Размер предпросмотра</string>
-    <string name="preference_preview_size_summary">Выбор размера предпросмотра</string>
-    <string name="preference_ui_placement">Интерфейс</string>
-    <string name="preference_ui_placement_summary">Пользовательский интерфейс для правши/левши</string>
     <string name="preference_save_location">Папка сохранения</string>
     <string name="preference_save_location_summary">Имя папки для сохранения фото и видео (также может быть полный путь)</string>
     <string name="preference_show_when_locked">Камера на экране блокировки</string>
     <string name="preference_show_when_locked_summary">Если включено, то Open Camera все равно будет отображаться поверх любого экрана блокировки (вы можете получить доступ к настройкам, галереи и т.д.)</string>
     <string name="preference_lock_video">Блокировать экран при записи видео</string>
     <string name="preference_lock_video_summary">При записи видео, графический интерфейс будет заблокирован для предотвращения случайной остановки записи. Проведите по экрану, чтобы разблокировать. Обратите внимание, что запись видео остановится, если приложение перейдет в фоновый режим или погаснет экран.</string>
+    <string name="preference_rotate_preview">Поворот превью</string>
+    <string name="preference_rotate_preview_summary">"Возможность поворота превью (не повлияет на фото/видео)"</string>
+    <string name="preference_screen_gui">Настройки отображения</string>
+    <string name="preference_preview_size">Размер предпросмотра</string>
+    <string name="preference_preview_size_summary">Выбор размера предпросмотра</string>
+    <string name="preference_ui_placement">Интерфейс</string>
+    <string name="preference_ui_placement_summary">Пользовательский интерфейс для правши/левши</string>
+    <string name="preference_immersive_mode">Режим погружения</string>
+    <string name="preference_immersive_mode_summary">Опции для \"режима погружения\"</string>
     <string name="preference_show_zoom">Показать масштаб</string>
-    <string name="preference_show_zoom_summary">Отображает текущий уровень масштабирования камеры на экране (при увеличении масштаба)</string>
+    <string name="preference_show_zoom_summary">Отображение текущего уровня масштабирования камеры на экране (при увеличении масштаба)</string>
     <string name="preference_show_zoom_controls">Показать (+/-) на экране</string>
     <string name="preference_show_zoom_controls_summary">Отображение (+/-) кнопок управления масштабом</string>
     <string name="preference_show_zoom_slider_controls">Ползунок масштабирования</string>
@@ -119,8 +134,14 @@
     <string name="preference_show_angle_line_summary">Отображение горизонтальной линии уровня</string>
     <string name="preference_show_geo_direction">Показать направление компаса</string>
     <string name="preference_show_geo_direction_summary">Отображение направления компаса на экране</string>
+    <string name="preference_show_time">Показать время</string>
+    <string name="preference_show_time_summary">Отображение текущего времени на экране</string>
+    <string name="preference_show_battery">Показать батарею</string>
+    <string name="preference_show_battery_summary">Отображение текущего уровня заряда батареи</string>
     <string name="preference_grid">Показать сетку</string>
     <string name="preference_grid_summary">Отображение одной из различных сеток</string>
+    <string name="preference_crop_guide">Руководство по обрезке</string>
+    <string name="preference_crop_guide_summary">Отображение прямоугольника, показывающего соотношение сторон - полезно, если вы планируете, обрезать фото/видео. Требуется WYSIWYG режим фотосъемки или режим видео.</string>
     <string name="preference_thumbnail_animation">Показать эскиз анимации</string>
     <string name="preference_thumbnail_animation_summary">Отображение перемещение эскиза анимации при съемке фотографии</string>
     <string name="preference_max_brightness">Максимальная яркость</string>
@@ -133,6 +154,12 @@
     <string name="preference_quality_summary">Выбор качества фотографий (рекомендуется 90%%)</string>
     <string name="preference_location">Хранить данные о местоположении (Geotagging)</string>
     <string name="preference_location_summary">Хранить данные о местоположении в фотографиях</string>
+    <string name="preference_gps_direction">Хранить направление компаса</string>
+    <string name="preference_gps_direction_summary">Хранить данные о направлении компаса в фотографиях</string>
+    <string name="preference_require_location">Требовать данные о местоположении</string>
+    <string name="preference_require_location_summary">Если данные о местоположении включены, вы сможете снять фото/видео только, если они доступны</string>
+    <string name="preference_stamp">Отметки</string>
+    <string name="preference_stamp_summary">Сохранение вместе с фотографий таких данных как: дата/время/местоположение</string>
     <string name="video_quality">Разрешение видео</string>
     <string name="video_quality_summary">Выбор разрешения видео</string>
     <string name="preference_force_video_4k">Качество видео 4K UHD (экспериментально)</string>
@@ -159,6 +186,9 @@
     <string name="preference_donate_summary">Если вам нравится это приложение, киньте мне копейку. Вы можете сделать это, купив мое приложение. Спасибо!</string>
     <string name="preference_about">О программе</string>
     <string name="preference_about_summary">Информация</string>
+    <string name="preference_reset">Сброс настроек</string>
+    <string name="preference_reset_summary">Сброс всех настроек Open Camera на стандартные значения</string>
+    <string name="preference_reset_question">Сбросить все настройки Open Camera на стандартные значения?</string>
     <string name="about_ok">ОК</string>
     <string name="about_available">Доступно</string>
     <string name="about_not_available">Не доступно</string>
