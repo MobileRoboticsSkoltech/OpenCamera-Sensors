@@ -34,6 +34,7 @@ public class PopupView extends LinearLayout {
 
 	private int picture_size_index = -1;
 	private int timer_index = -1;
+	private int burst_mode_index = -1;
 
 	private Map<String, View> popup_buttons = new Hashtable<String, View>();
 
@@ -198,6 +199,45 @@ public class PopupView extends LinearLayout {
 	                	timer_index++;
 	        			update();
 	    				return timer_index;
+	        		}
+					return -1;
+				}
+    		});
+
+        	final String [] burst_mode_values = getResources().getStringArray(R.array.preference_burst_mode_values);
+        	String [] burst_mode_entries = getResources().getStringArray(R.array.preference_burst_mode_entries);
+    		String burst_mode_value = sharedPreferences.getString(MainActivity.getBurstModePreferenceKey(), "1");
+    		burst_mode_index = Arrays.asList(burst_mode_values).indexOf(burst_mode_value);
+    		if( burst_mode_index == -1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "can't find burst_mode_value " + burst_mode_value + " in burst_mode_values!");
+				burst_mode_index = 0;
+    		}
+    		addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(R.string.preference_burst_mode), burst_mode_index, new ArrayOptionsPopupListener() {
+    			private void update() {
+    				if( burst_mode_index == -1 )
+    					return;
+    				String new_burst_mode_value = burst_mode_values[burst_mode_index];
+    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString(MainActivity.getBurstModePreferenceKey(), new_burst_mode_value);
+					editor.apply();
+    			}
+				@Override
+				public int onClickPrev() {
+	        		if( burst_mode_index != -1 && burst_mode_index > 0 ) {
+	        			burst_mode_index--;
+	        			update();
+	    				return burst_mode_index;
+	        		}
+					return -1;
+				}
+				@Override
+				public int onClickNext() {
+	                if( burst_mode_index != -1 && burst_mode_index < burst_mode_values.length-1 ) {
+	                	burst_mode_index++;
+	        			update();
+	    				return burst_mode_index;
 	        		}
 					return -1;
 				}
