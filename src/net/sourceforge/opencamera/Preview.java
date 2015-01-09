@@ -61,7 +61,6 @@ import android.view.OrientationEventListener;
 import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -78,7 +77,7 @@ public class Preview implements SurfaceHolder.Callback {
 
 	private boolean using_android_l = false;
 
-	private SurfaceView surfaceView = null;
+	private CameraSurface cameraSurface = null;
 
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
@@ -91,7 +90,6 @@ public class Preview implements SurfaceHolder.Callback {
 	private boolean ui_placement_right = true;
 
 	private boolean app_is_paused = true;
-	private SurfaceHolder mHolder = null;
 	private boolean has_surface = false;
 	private boolean has_aspect_ratio = false;
 	private double aspect_ratio = 0.0f;
@@ -245,13 +243,12 @@ public class Preview implements SurfaceHolder.Callback {
 	public float test_angle = 0.0f;
 	public String test_last_saved_image = null;
 
-	@SuppressWarnings("deprecation")
 	Preview(Context context, Bundle savedInstanceState) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "new Preview");
 		}
 		
-		this.surfaceView = new MySurfaceView(context, savedInstanceState, this);
+		this.cameraSurface = new MySurfaceView(context, savedInstanceState, this);
 		
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
         	//this.using_android_l = true;
@@ -264,13 +261,6 @@ public class Preview implements SurfaceHolder.Callback {
     		camera_controller_manager = new CameraControllerManager2(context);
         else
     		camera_controller_manager = new CameraControllerManager1();
-
-		// Install a SurfaceHolder.Callback so we get notified when the
-		// underlying surface is created and destroyed.
-		mHolder = surfaceView.getHolder();
-		mHolder.addCallback(this);
-        // deprecated setting, but required on Android versions prior to 3.0
-		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // deprecated
 
 	    scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
 
@@ -309,11 +299,11 @@ public class Preview implements SurfaceHolder.Callback {
 	}*/
 
 	private Resources getResources() {
-		return surfaceView.getResources();
+		return cameraSurface.getView().getResources();
 	}
 	
 	public View getView() {
-		return surfaceView;
+		return cameraSurface.getView();
 	}
 
 	private void calculateCameraToPreviewMatrix() {
@@ -328,8 +318,8 @@ public class Preview implements SurfaceHolder.Callback {
 		camera_to_preview_matrix.postRotate(camera_controller.getDisplayOrientation());
 		// Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
 		// UI coordinates range from (0, 0) to (width, height).
-		camera_to_preview_matrix.postScale(surfaceView.getWidth() / 2000f, surfaceView.getHeight() / 2000f);
-		camera_to_preview_matrix.postTranslate(surfaceView.getWidth() / 2f, surfaceView.getHeight() / 2f);
+		camera_to_preview_matrix.postScale(cameraSurface.getView().getWidth() / 2000f, cameraSurface.getView().getHeight() / 2000f);
+		camera_to_preview_matrix.postTranslate(cameraSurface.getView().getWidth() / 2f, cameraSurface.getView().getHeight() / 2f);
 	}
 
 	private void calculatePreviewToCameraMatrix() {
@@ -480,7 +470,7 @@ public class Preview implements SurfaceHolder.Callback {
 		// to draw.
 		this.has_surface = true;
 		this.openCamera();
-		surfaceView.setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
+		cameraSurface.getView().setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
 	}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
@@ -603,7 +593,7 @@ public class Preview implements SurfaceHolder.Callback {
 	}
 	
 	private Context getContext() {
-		return surfaceView.getContext();
+		return cameraSurface.getView().getContext();
 	}
 
 	private void restartVideo() {
@@ -859,14 +849,7 @@ public class Preview implements SurfaceHolder.Callback {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call setPreviewDisplay");
-			try {
-				camera_controller.setPreviewDisplay(mHolder);
-			}
-			catch(IOException e) {
-				if( MyDebug.LOG )
-					Log.e(TAG, "Failed to set preview display: " + e.getMessage());
-				e.printStackTrace();
-			}
+			cameraSurface.setPreviewDisplay(camera_controller);
 			if( MyDebug.LOG ) {
 				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
@@ -1471,7 +1454,7 @@ public class Preview implements SurfaceHolder.Callback {
 		// surface size is now changed to match the aspect ratio of camera preview - so we shouldn't change the preview to match the surface size, so no need to restart preview here
 		// update: except for Android L, where we must start the preview after the surface has changed size
 
-        if( mHolder.getSurface() == null ) {
+        if( holder.getSurface() == null ) {
             // preview surface does not exist
             return;
         }
@@ -2034,7 +2017,7 @@ public class Preview implements SurfaceHolder.Callback {
         	aspect_ratio = ratio;
     		if( MyDebug.LOG )
     			Log.d(TAG, "new aspect ratio: " + aspect_ratio);
-    		surfaceView.requestLayout();
+    		cameraSurface.getView().requestLayout();
         }
     }
     
@@ -2342,7 +2325,7 @@ public class Preview implements SurfaceHolder.Callback {
 			// align with "top" of the take_photo button, but remember to take the rotation into account!
 			view.getLocationOnScreen(gui_location);
 			int view_left = gui_location[0];
-			surfaceView.getLocationOnScreen(gui_location);
+			cameraSurface.getView().getLocationOnScreen(gui_location);
 			int this_left = gui_location[0];
 			int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
     		/*if( MyDebug.LOG ) {
@@ -3773,7 +3756,7 @@ public class Preview implements SurfaceHolder.Callback {
 	    			}
 	        		/*if( true ) // test
 	        			throw new IOException();*/
-		        	video_recorder.setPreviewDisplay(mHolder.getSurface());
+	    			cameraSurface.setVideoRecorder(video_recorder);
 		        	video_recorder.setOrientationHint(getImageVideoRotation());
 					video_recorder.prepare();
 					if( MyDebug.LOG )
@@ -4451,7 +4434,7 @@ public class Preview implements SurfaceHolder.Callback {
 	            	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
 	            	long time_s = System.currentTimeMillis();
 		        	CameraController.Size size = camera_controller.getPictureSize();
-	        		int ratio = (int) Math.ceil((double) size.width / surfaceView.getWidth());
+	        		int ratio = (int) Math.ceil((double) size.width / cameraSurface.getView().getWidth());
     				BitmapFactory.Options options = new BitmapFactory.Options();
     				options.inMutable = false;
     				options.inPurgeable = true;
@@ -4462,7 +4445,7 @@ public class Preview implements SurfaceHolder.Callback {
         			}
     	    		if( MyDebug.LOG ) {
     	    			Log.d(TAG, "    picture width   : " + size.width);
-    	    			Log.d(TAG, "    preview width   : " + surfaceView.getWidth());
+    	    			Log.d(TAG, "    preview width   : " + cameraSurface.getView().getWidth());
     	    			Log.d(TAG, "    ratio           : " + ratio);
     	    			Log.d(TAG, "    inSampleSize    : " + options.inSampleSize);
     	    		}
@@ -5033,7 +5016,7 @@ public class Preview implements SurfaceHolder.Callback {
 			this.level_angle -= 360.0;
 		}
 
-		surfaceView.invalidate();
+		cameraSurface.getView().invalidate();
 	}
 
     void onMagneticSensorChanged(SensorEvent event) {
