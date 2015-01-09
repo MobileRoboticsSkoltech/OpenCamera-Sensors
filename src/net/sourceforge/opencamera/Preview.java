@@ -185,9 +185,6 @@ public class Preview implements SurfaceHolder.Callback {
 	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
 	private List<CameraController.Size> video_sizes = null;
 	
-	private Location location = null;
-	private boolean has_set_location = false;
-	private float location_accuracy = 0.0f;
 	private Bitmap location_bitmap = null;
 	private Bitmap location_off_bitmap = null;
 	private Rect location_dest = new Rect();
@@ -242,7 +239,6 @@ public class Preview implements SurfaceHolder.Callback {
 	public int count_cameraStartPreview = 0;
 	public int count_cameraAutoFocus = 0;
 	public int count_cameraTakePicture = 0;
-	public boolean test_has_received_location = false;
 	public boolean test_fail_open_camera = false;
 	public boolean test_low_memory = false;
 	public boolean test_have_angle = false;
@@ -2542,13 +2538,13 @@ public class Preview implements SurfaceHolder.Callback {
 				location_x = canvas.getWidth() - location_x - location_size;
 			}
 			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
-			if( has_set_location ) {
+			if( main_activity.getLocation() != null ) {
 				canvas.drawBitmap(location_bitmap, null, location_dest, p);
 				int location_radius = location_size/10;
 				int indicator_x = location_x + location_size;
 				int indicator_y = location_y + location_radius/2 + 1;
 				p.setStyle(Paint.Style.FILL_AND_STROKE);
-				p.setColor(location_accuracy < 25.01f ? Color.rgb(37, 155, 36) : Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
+				p.setColor(main_activity.getLocation().getAccuracy() < 25.01f ? Color.rgb(37, 155, 36) : Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
 				canvas.drawCircle(indicator_x, indicator_y, location_radius, p);
 			}
 			else {
@@ -3610,13 +3606,13 @@ public class Preview implements SurfaceHolder.Callback {
 
 		updateParametersFromLocation();
 
+		MainActivity main_activity = (MainActivity)Preview.this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
 		if( store_location ) {
 			boolean require_location = sharedPreferences.getBoolean(MainActivity.getRequireLocationPreferenceKey(), false);
 			if( require_location ) {
-				// Android camera source claims we need to check lat/long != 0.0d
-				if( location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+				if( main_activity.getLocation() != null ) {
 					// fine, we have location
 				}
 				else {
@@ -3634,7 +3630,6 @@ public class Preview implements SurfaceHolder.Callback {
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
     		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
-    		MainActivity main_activity = (MainActivity)Preview.this.getContext();
 			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
     		if( videoFile == null ) {
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
@@ -3741,8 +3736,8 @@ public class Preview implements SurfaceHolder.Callback {
 	    			Log.d(TAG, "set video source");
 				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
-				// Android camera source claims we need to check lat/long != 0.0d
-				if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+				if( store_location && main_activity.getLocation() != null ) {
+					Location location = main_activity.getLocation();
 		    		if( MyDebug.LOG ) {
 		    			Log.d(TAG, "set video location: lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
 		    		}
@@ -4185,8 +4180,8 @@ public class Preview implements SurfaceHolder.Callback {
 	    				drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, height - offset_y);
 	    				String location_string = "";
 	    				boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
-	    				// Android camera source claims we need to check lat/long != 0.0d
-	    				if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+	    				if( store_location && main_activity.getLocation() != null ) {
+	    					Location location = main_activity.getLocation();
 	    					location_string += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
 	    					if( location.hasAltitude() ) {
 		    					location_string += ", " + decimalFormat.format(location.getAltitude()) + getResources().getString(R.string.metres_abbreviation);
@@ -5351,37 +5346,13 @@ public class Preview implements SurfaceHolder.Callback {
 		this.ui_rotation = ui_rotation;
 	}
 
-    void locationChanged(Location location) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "locationChanged");
-		this.test_has_received_location = true;
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
-		if( store_location ) {
-			this.location = location;
-    		// Android camera source claims we need to check lat/long != 0.0d
-    		if( location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
-	    		if( MyDebug.LOG ) {
-	    			Log.d(TAG, "received location:");
-	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
-	    		}
-	            this.has_set_location = true;
-	            this.location_accuracy = location.getAccuracy();
-    		}
-		}
-    }
-    
-    void resetLocation() {
-        this.has_set_location = false;
-        this.test_has_received_location = false;
-    }
-    
     private void updateParametersFromLocation() {
     	if( camera_controller != null ) {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
     		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
-    		// Android camera source claims we need to check lat/long != 0.0d
-    		if( store_location && location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
+    		MainActivity main_activity = (MainActivity)this.getContext();
+    		if( store_location && main_activity.getLocation() != null ) {
+    			Location location = main_activity.getLocation();
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "updating parameters from location...");
 	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
@@ -5392,8 +5363,6 @@ public class Preview implements SurfaceHolder.Callback {
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "removing location data from parameters...");
 	    		camera_controller.removeLocationInfo();
-	            this.has_set_location = false;
-	            test_has_received_location = false;
     		}
     	}
     }
@@ -5455,10 +5424,6 @@ public class Preview implements SurfaceHolder.Callback {
 
     public boolean isPreviewStarted() {
     	return this.is_preview_started;
-    }
-    
-    public boolean hasSetLocation() {
-    	return this.has_set_location;
     }
     
     public int getDisplayOrientation() {
