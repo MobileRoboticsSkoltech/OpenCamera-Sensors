@@ -63,6 +63,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.View.MeasureSpec;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -461,6 +462,49 @@ public class Preview implements SurfaceHolder.Callback {
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		successfully_focused = false;
+    }
+
+    protected void getMeasureSpec(int [] spec, int widthSpec, int heightSpec) {
+    	if( !this.hasAspectRatio() ) {
+    		spec[0] = widthSpec;
+    		spec[1] = heightSpec;
+    		return;
+    	}
+    	double aspect_ratio = this.getAspectRatio();
+
+    	int previewWidth = MeasureSpec.getSize(widthSpec);
+        int previewHeight = MeasureSpec.getSize(heightSpec);
+
+        // Get the padding of the border background.
+        int hPadding = cameraSurface.getView().getPaddingLeft() + cameraSurface.getView().getPaddingRight();
+        int vPadding = cameraSurface.getView().getPaddingTop() + cameraSurface.getView().getPaddingBottom();
+
+        // Resize the preview frame with correct aspect ratio.
+        previewWidth -= hPadding;
+        previewHeight -= vPadding;
+
+        boolean widthLonger = previewWidth > previewHeight;
+        int longSide = (widthLonger ? previewWidth : previewHeight);
+        int shortSide = (widthLonger ? previewHeight : previewWidth);
+        if (longSide > shortSide * aspect_ratio) {
+            longSide = (int) ((double) shortSide * aspect_ratio);
+        } else {
+            shortSide = (int) ((double) longSide / aspect_ratio);
+        }
+        if (widthLonger) {
+            previewWidth = longSide;
+            previewHeight = shortSide;
+        } else {
+            previewWidth = shortSide;
+            previewHeight = longSide;
+        }
+
+        // Add the padding of the border.
+        previewWidth += hPadding;
+        previewHeight += vPadding;
+
+        spec[0] = MeasureSpec.makeMeasureSpec(previewWidth, MeasureSpec.EXACTLY);
+        spec[1] = MeasureSpec.makeMeasureSpec(previewHeight, MeasureSpec.EXACTLY);
     }
 
 	public void surfaceCreated(SurfaceHolder holder) {
@@ -2021,11 +2065,11 @@ public class Preview implements SurfaceHolder.Callback {
         }
     }
     
-    boolean hasAspectRatio() {
+    private boolean hasAspectRatio() {
     	return has_aspect_ratio;
     }
 
-    double getAspectRatio() {
+    private double getAspectRatio() {
     	return aspect_ratio;
     }
 
