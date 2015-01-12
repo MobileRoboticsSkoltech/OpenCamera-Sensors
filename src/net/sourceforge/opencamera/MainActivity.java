@@ -191,7 +191,6 @@ public class MainActivity extends Activity {
 		clearSeekBar();
 
 		preview = new Preview(this, savedInstanceState);
-		((ViewGroup) findViewById(R.id.preview)).addView(preview.getView());
 		
 		orientationEventListener = new OrientationEventListener(this) {
 			@Override

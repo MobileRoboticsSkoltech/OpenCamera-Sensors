@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
@@ -138,6 +139,7 @@ public abstract class CameraController {
 	abstract boolean focusIsVideo();
 	abstract void reconnect() throws IOException;
 	abstract void setPreviewDisplay(SurfaceHolder holder) throws IOException;
+	abstract void setPreviewTexture(SurfaceTexture texture) throws IOException;
 	abstract void startPreview();
 	abstract void stopPreview();
 	public abstract boolean startFaceDetection();

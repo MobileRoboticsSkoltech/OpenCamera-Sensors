@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Vector;
 
 import android.annotation.TargetApi;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.location.Location;
 import android.media.MediaRecorder;
@@ -840,6 +841,12 @@ class CameraController1 extends CameraController {
 		camera.setPreviewDisplay(holder);
 	}
 	
+	void setPreviewTexture(SurfaceTexture texture) throws IOException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPreviewTexture");
+		camera.setPreviewTexture(texture);
+	}
+
 	void startPreview() {
 		camera.startPreview();
 	}

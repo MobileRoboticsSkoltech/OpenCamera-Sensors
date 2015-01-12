@@ -36,6 +36,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Paint.Align;
+import android.graphics.SurfaceTexture;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -61,7 +62,10 @@ import android.view.OrientationEventListener;
 import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.MeasureSpec;
 import android.widget.ImageButton;
@@ -70,7 +74,7 @@ import android.widget.Toast;
 import android.widget.ZoomControls;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-public class Preview implements SurfaceHolder.Callback {
+public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
 	private static final String TAG = "Preview";
 
 	private static final String TAG_GPS_IMG_DIRECTION = "GPSImgDirection";
@@ -79,6 +83,7 @@ public class Preview implements SurfaceHolder.Callback {
 	private boolean using_android_l = false;
 
 	private CameraSurface cameraSurface = null;
+	private CanvasView canvasView = null;
 
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
@@ -249,8 +254,6 @@ public class Preview implements SurfaceHolder.Callback {
 			Log.d(TAG, "new Preview");
 		}
 		
-		this.cameraSurface = new MySurfaceView(context, savedInstanceState, this);
-		
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
         	//this.using_android_l = true;
         }
@@ -258,10 +261,17 @@ public class Preview implements SurfaceHolder.Callback {
 			Log.d(TAG, "using_android_l?: " + using_android_l);
 		}
 
-        if( using_android_l )
+        if( using_android_l ) {
+    		this.cameraSurface = new MySurfaceView(context, savedInstanceState, this);
     		camera_controller_manager = new CameraControllerManager2(context);
-        else
+    		
+        }
+        else {
+    		this.cameraSurface = new MyTextureView(context, savedInstanceState, this);
+    		// a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CanvasView
+    		this.canvasView = new CanvasView(context, savedInstanceState, this);
     		camera_controller_manager = new CameraControllerManager1();
+        }
 
 	    scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
 
@@ -283,6 +293,12 @@ public class Preview implements SurfaceHolder.Callback {
 
     	location_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth);
     	location_off_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth_off);
+
+		Activity activity = (Activity)context;
+		((ViewGroup) activity.findViewById(R.id.preview)).addView(cameraSurface.getView());
+		if( canvasView != null ) {
+			((ViewGroup) activity.findViewById(R.id.preview)).addView(canvasView);
+		}
 	}
 	
 	/*private void previewToCamera(float [] coords) {
@@ -506,32 +522,20 @@ public class Preview implements SurfaceHolder.Callback {
         spec[0] = MeasureSpec.makeMeasureSpec(previewWidth, MeasureSpec.EXACTLY);
         spec[1] = MeasureSpec.makeMeasureSpec(previewHeight, MeasureSpec.EXACTLY);
     }
-
-	public void surfaceCreated(SurfaceHolder holder) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "surfaceCreated()");
-		// The Surface has been created, acquire the camera and tell it where
-		// to draw.
+    
+    private void mySurfaceCreated() {
 		this.has_surface = true;
 		this.openCamera();
-		cameraSurface.getView().setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
-	}
-
-	public void surfaceDestroyed(SurfaceHolder holder) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "surfaceDestroyed()");
-		// Surface will be destroyed when we return, so stop the preview.
-		// Because the CameraDevice object is not a shared resource, it's very
-		// important to release it when the activity is paused.
+    }
+    
+    private void mySurfaceDestroyed() {
 		this.has_surface = false;
 		this.surface_holder_w = 0;
 		this.surface_holder_h = 0;
 		this.closeCamera();
-	}
-	
-	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "surfaceChanged " + w + ", " + h);
+    }
+    
+    private void mySurfaceChanged(int w, int h) {
 		this.surface_holder_w = w;
 		this.surface_holder_h = h;
 		/*if( MyDebug.LOG )
@@ -539,10 +543,6 @@ public class Preview implements SurfaceHolder.Callback {
 		// surface size is now changed to match the aspect ratio of camera preview - so we shouldn't change the preview to match the surface size, so no need to restart preview here
 		// update: except for Android L, where we must start the preview after the surface has changed size
 
-        if( holder.getSurface() == null ) {
-            // preview surface does not exist
-            return;
-        }
         if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
@@ -579,8 +579,67 @@ public class Preview implements SurfaceHolder.Callback {
         }
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
 		main_activity.layoutUI(); // need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed
+    }
+    
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "surfaceCreated()");
+		// The Surface has been created, acquire the camera and tell it where
+		// to draw.
+		mySurfaceCreated();
+		cameraSurface.getView().setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "surfaceDestroyed()");
+		// Surface will be destroyed when we return, so stop the preview.
+		// Because the CameraDevice object is not a shared resource, it's very
+		// important to release it when the activity is paused.
+		mySurfaceDestroyed();
 	}
 	
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "surfaceChanged " + w + ", " + h);
+        if( holder.getSurface() == null ) {
+            // preview surface does not exist
+    		this.surface_holder_w = w;
+    		this.surface_holder_h = h;
+            return;
+        }
+		mySurfaceChanged(w, h);
+	}
+	
+	@Override
+	public void onSurfaceTextureAvailable(SurfaceTexture arg0, int arg1, int arg2) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onSurfaceTextureAvailable()");
+		mySurfaceCreated();
+	}
+
+	@Override
+	public boolean onSurfaceTextureDestroyed(SurfaceTexture arg0) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onSurfaceTextureDestroyed()");
+		mySurfaceDestroyed();
+		return true;
+	}
+
+	@Override
+	public void onSurfaceTextureSizeChanged(SurfaceTexture arg0, int width, int height) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onSurfaceTextureSizeChanged " + width + ", " + height);
+		mySurfaceChanged(width, height);
+	}
+
+	@Override
+	public void onSurfaceTextureUpdated(SurfaceTexture arg0) {
+	}
+
 	void stopVideo(boolean from_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopVideo()");

@@ -8,6 +8,7 @@ import java.util.List;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -22,6 +23,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -32,10 +34,12 @@ public class CameraController2 extends CameraController {
 	private CameraDevice camera = null;
 	private String cameraIdS = null;
 	private CameraCaptureSession captureSession = null;
+	private CaptureRequest.Builder previewBuilder = null;
 	private CaptureRequest previewRequest = null;
 	private ImageReader imageReader = null;
 	//private ImageReader previewImageReader = null;
 	private SurfaceHolder holder = null;
+	private SurfaceTexture texture = null;
 	private HandlerThread thread = null; 
 	Handler handler = null;
 	
@@ -258,6 +262,11 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "set size of surface holder");
 			holder.setFixedSize(width, height);
 		}
+		if( texture != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set size of preview texture");
+			texture.setDefaultBufferSize(width, height);
+		}
 		/*if( previewImageReader != null ) {
 			previewImageReader.close();
 		}
@@ -468,6 +477,15 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewDisplay");
 		this.holder = holder;
+		this.texture = null;
+	}
+
+	@Override
+	void setPreviewTexture(SurfaceTexture texture) throws IOException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPreviewTexture");
+		this.texture = texture;
+		this.holder = null;
 	}
 
 	@Override
@@ -477,12 +495,30 @@ public class CameraController2 extends CameraController {
 
 		try {
 			captureSession = null;
+			previewBuilder = null;
 			previewRequest = null;
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "picture size: " + imageReader.getWidth() + " x " + imageReader.getHeight());
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "preview size: " + previewImageReader.getWidth() + " x " + previewImageReader.getHeight());*/
+        	Surface surface = null;
+            if( holder != null ) {
+            	surface = holder.getSurface();
+            }
+            else if( texture != null ) {
+            	surface = new Surface(texture);
+            }
+
+			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+			if( MyDebug.LOG && holder != null ) {
+				Log.d(TAG, "holder surface: " + holder.getSurface());
+				if( holder.getSurface() == null )
+					Log.d(TAG, "holder surface is null!");
+				else if( !holder.getSurface().isValid() )
+					Log.d(TAG, "holder surface is not valid!");
+			}
+			previewBuilder.addTarget(surface);
 
 			class MyStateCallback extends CameraCaptureSession.StateCallback {
 				@Override
@@ -494,20 +530,11 @@ public class CameraController2 extends CameraController {
 					}
 					captureSession = session;
 					try {
-						CaptureRequest.Builder builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "holder surface: " + holder.getSurface());
-							if( holder.getSurface() == null )
-								Log.d(TAG, "holder surface is null!");
-							else if( !holder.getSurface().isValid() )
-								Log.d(TAG, "holder surface is not valid!");
-						}
-						builder.set(CaptureRequest.CONTROL_AF_MODE,
+						previewBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                                 CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                        builder.set(CaptureRequest.CONTROL_AE_MODE,
+						previewBuilder.set(CaptureRequest.CONTROL_AE_MODE,
                                 CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-						builder.addTarget(holder.getSurface());
-						previewRequest = builder.build();
+						previewRequest = previewBuilder.build();
 						captureSession.setRepeatingRequest(previewRequest, null, null);
 					}
 					catch(CameraAccessException e) {
@@ -525,7 +552,7 @@ public class CameraController2 extends CameraController {
 			}
 			MyStateCallback myStateCallback = new MyStateCallback();
 
-			camera.createCaptureSession(Arrays.asList(holder.getSurface()/*, previewImageReader.getSurface()*/, imageReader.getSurface()),
+			camera.createCaptureSession(Arrays.asList(surface/*, previewImageReader.getSurface()*/, imageReader.getSurface()),
 				myStateCallback,
 		 		null);
 		}
