@@ -62,7 +62,6 @@ import android.view.OrientationEventListener;
 import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,9 +80,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
 
 	private boolean using_android_l = false;
+	private boolean using_surface_holder = false;
 
 	private CameraSurface cameraSurface = null;
 	private CanvasView canvasView = null;
+	private boolean set_preview_size = false;
+	private int preview_w = 0, preview_h = 0;
 
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
@@ -127,11 +129,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int remaining_burst_photos = 0;
 	private int remaining_restart_video = 0;
 
-	private boolean requested_preview_size = false; // Android L only
-	private int requested_preview_size_w = 0; // Android L only
-	private int requested_preview_size_h = 0; // Android L only
-	private int surface_holder_w = 0;
-	private int surface_holder_h = 0;
+	private boolean requested_preview_size = false; // Android L and SurfaceHolder only
+	private int requested_preview_size_w = 0; // Android L and SurfaceHolder only
+	private int requested_preview_size_h = 0; // Android L and SurfaceHolder only
+	private int surface_holder_w = 0; // Android L and SurfaceHolder only
+	private int surface_holder_h = 0; // Android L and SurfaceHolder only
 	private boolean is_preview_started = false;
 	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
 	private String preview_image_name = null;
@@ -262,14 +264,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
         if( using_android_l ) {
-    		this.cameraSurface = new MySurfaceView(context, savedInstanceState, this);
-    		camera_controller_manager = new CameraControllerManager2(context);
-    		
-        }
-        else {
+        	this.using_surface_holder = false;
     		this.cameraSurface = new MyTextureView(context, savedInstanceState, this);
     		// a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CanvasView
     		this.canvasView = new CanvasView(context, savedInstanceState, this);
+    		camera_controller_manager = new CameraControllerManager2(context);
+        }
+        else {
+        	this.using_surface_holder = true;
+    		this.cameraSurface = new MySurfaceView(context, savedInstanceState, this);
     		camera_controller_manager = new CameraControllerManager1();
         }
 
@@ -530,26 +533,56 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     
     private void mySurfaceDestroyed() {
 		this.has_surface = false;
-		this.surface_holder_w = 0;
-		this.surface_holder_h = 0;
 		this.closeCamera();
     }
     
-    private void mySurfaceChanged(int w, int h) {
-		this.surface_holder_w = w;
-		this.surface_holder_h = h;
-		/*if( MyDebug.LOG )
-			Log.d(TAG, "surface frame " + mHolder.getSurfaceFrame().width() + ", " + mHolder.getSurfaceFrame().height());*/
+    private void mySurfaceChanged() {
 		// surface size is now changed to match the aspect ratio of camera preview - so we shouldn't change the preview to match the surface size, so no need to restart preview here
-		// update: except for Android L, where we must start the preview after the surface has changed size
-
         if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
             return;
         }
 
-        if( using_android_l ) {
+		MainActivity main_activity = (MainActivity)Preview.this.getContext();
+		main_activity.layoutUI(); // need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed)
+    }
+    
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "surfaceCreated()");
+		// The Surface has been created, acquire the camera and tell it where
+		// to draw.
+		mySurfaceCreated();
+		cameraSurface.getView().setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "surfaceDestroyed()");
+		// Surface will be destroyed when we return, so stop the preview.
+		// Because the CameraDevice object is not a shared resource, it's very
+		// important to release it when the activity is paused.
+		this.surface_holder_w = 0;
+		this.surface_holder_h = 0;
+		mySurfaceDestroyed();
+	}
+	
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "surfaceChanged " + w + ", " + h);
+		this.surface_holder_w = w;
+		this.surface_holder_h = h;
+        if( holder.getSurface() == null ) {
+            // preview surface does not exist
+            return;
+        }
+		mySurfaceChanged();
+
+		if( using_android_l ) {
         	/*if( !this.requested_preview_size )  {
     			if( MyDebug.LOG )
     				Log.d(TAG, "request preview size");
@@ -577,48 +610,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			}, 5000);*/
         	}
         }
-		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-		main_activity.layoutUI(); // need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed
-    }
-    
-	@Override
-	public void surfaceCreated(SurfaceHolder holder) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "surfaceCreated()");
-		// The Surface has been created, acquire the camera and tell it where
-		// to draw.
-		mySurfaceCreated();
-		cameraSurface.getView().setWillNotDraw(false); // see http://stackoverflow.com/questions/2687015/extended-surfaceviews-ondraw-method-never-called
-	}
-
-	@Override
-	public void surfaceDestroyed(SurfaceHolder holder) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "surfaceDestroyed()");
-		// Surface will be destroyed when we return, so stop the preview.
-		// Because the CameraDevice object is not a shared resource, it's very
-		// important to release it when the activity is paused.
-		mySurfaceDestroyed();
 	}
 	
 	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "surfaceChanged " + w + ", " + h);
-        if( holder.getSurface() == null ) {
-            // preview surface does not exist
-    		this.surface_holder_w = w;
-    		this.surface_holder_h = h;
-            return;
-        }
-		mySurfaceChanged(w, h);
-	}
-	
-	@Override
-	public void onSurfaceTextureAvailable(SurfaceTexture arg0, int arg1, int arg2) {
+	public void onSurfaceTextureAvailable(SurfaceTexture arg0, int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSurfaceTextureAvailable()");
 		mySurfaceCreated();
+		configureTransform(width, height);
 	}
 
 	@Override
@@ -633,14 +632,38 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void onSurfaceTextureSizeChanged(SurfaceTexture arg0, int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSurfaceTextureSizeChanged " + width + ", " + height);
-		mySurfaceChanged(width, height);
+		// n.b., width/height won't be same as received by surfaceChanged
+		mySurfaceChanged();
+		configureTransform(width, height);
 	}
 
 	@Override
 	public void onSurfaceTextureUpdated(SurfaceTexture arg0) {
 	}
 
-	void stopVideo(boolean from_restart) {
+    private void configureTransform(int viewWidth, int viewHeight) { 
+    	Activity activity = (Activity)this.getContext();
+    	if( camera_controller == null || !this.set_preview_size )
+    		return;
+    	int rotation = activity.getWindowManager().getDefaultDisplay().getRotation(); 
+		Matrix matrix = new Matrix(); 
+		RectF viewRect = new RectF(0, 0, viewWidth, viewHeight); 
+		RectF bufferRect = new RectF(0, 0, this.preview_h, this.preview_w); 
+		float centerX = viewRect.centerX(); 
+		float centerY = viewRect.centerY(); 
+        if( Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation ) { 
+            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY()); 
+	        matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL); 
+	        float scale = Math.max(
+	        		(float) viewHeight / preview_h, 
+                    (float) viewWidth / preview_w); 
+            matrix.postScale(scale, scale, centerX, centerY); 
+            matrix.postRotate(90 * (rotation - 2), centerX, centerY); 
+        } 
+        cameraSurface.setTransform(matrix); 
+    }
+
+    void stopVideo(boolean from_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopVideo()");
 		final MainActivity main_activity = (MainActivity)this.getContext();
@@ -900,6 +923,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		// need to init everything now, in case we don't open the camera (but these may already be initialised from an earlier call - e.g., if we are now switching to another camera)
 		// n.b., don't reset has_set_location, as we can remember the location when switching camera
+    	set_preview_size = false;
+    	preview_w = 0;
+    	preview_h = 0;
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		set_flash_value_after_autofocus = "";
@@ -1065,7 +1091,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
-		if( !this.using_android_l ) {
+		if( !this.using_android_l || !this.using_surface_holder ) {
 			setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
 			// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
 			startCameraPreview();
@@ -1647,7 +1673,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        }*/
         	CameraController.Size best_size = getOptimalPreviewSize(supported_preview_sizes);
         	camera_controller.setPreviewSize(best_size.width, best_size.height);
-    		if( this.using_android_l ) {
+        	this.set_preview_size = true;
+        	this.preview_w = best_size.width;
+        	this.preview_h = best_size.height;
+    		if( this.using_android_l && this.using_surface_holder ) {
     			// in Android L, calling setPreviewSize changes the size of the SurfaceHolder
     			this.requested_preview_size = true;
     			this.requested_preview_size_w = best_size.width;

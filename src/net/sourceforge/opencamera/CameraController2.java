@@ -608,13 +608,11 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setDisplayOrientation(int degrees) {
-		// TODO Auto-generated method stub
-
+		// do nothing - for CameraController2, the preview display orientation is handled via the TextureView's transform
 	}
 
 	@Override
 	int getDisplayOrientation() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 

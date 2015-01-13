@@ -5,6 +5,7 @@ import java.io.IOException;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +20,7 @@ interface CameraSurface {
 	abstract View getView();
 	abstract void setPreviewDisplay(CameraController camera_controller); // n.b., uses double-dispatch similar to Visitor pattern - behaviour depends on type of CameraSurface and CameraController
 	abstract void setVideoRecorder(MediaRecorder video_recorder);
+	abstract void setTransform(Matrix matrix);
 }
 
 class MySurfaceView extends SurfaceView implements CameraSurface {
@@ -82,6 +84,13 @@ class MySurfaceView extends SurfaceView implements CameraSurface {
     	preview.getMeasureSpec(measure_spec, widthSpec, heightSpec);
     	super.onMeasure(measure_spec[0], measure_spec[1]);
     }
+
+	@Override
+	public void setTransform(Matrix matrix) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setting transforms not supported for MySurfaceView");
+		throw new RuntimeException();
+	}
 }
 
 class MyTextureView extends TextureView implements CameraSurface {
@@ -142,6 +151,11 @@ class MyTextureView extends TextureView implements CameraSurface {
     	preview.getMeasureSpec(measure_spec, widthSpec, heightSpec);
     	super.onMeasure(measure_spec[0], measure_spec[1]);
     }
+
+	@Override
+	public void setTransform(Matrix matrix) {
+		super.setTransform(matrix);
+	}
 }
 
 class CanvasView extends View {
