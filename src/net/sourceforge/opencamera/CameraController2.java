@@ -172,7 +172,8 @@ public class CameraController2 extends CameraController {
 				camera_features.video_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 			}
 
-			android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceHolder.class);
+			//android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceHolder.class);
+			android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceTexture.class);
 			camera_features.preview_sizes = new ArrayList<CameraController.Size>();
 			for(android.util.Size camera_size : camera_preview_sizes) {
 				camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
