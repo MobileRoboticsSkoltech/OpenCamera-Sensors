@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -14,7 +15,10 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
 import android.media.ImageReader;
@@ -35,7 +39,6 @@ public class CameraController2 extends CameraController {
 	private String cameraIdS = null;
 	private CameraCaptureSession captureSession = null;
 	private CaptureRequest.Builder previewBuilder = null;
-	private CaptureRequest previewRequest = null;
 	private ImageReader imageReader = null;
 	//private ImageReader previewImageReader = null;
 	private SurfaceHolder holder = null;
@@ -150,6 +153,46 @@ public class CameraController2 extends CameraController {
 		}*/
 	}
 
+	private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "convertFocusModesToValues()");
+	    List<Integer> supported_focus_modes = new ArrayList<Integer>();
+	    for(int i=0;i<supported_focus_modes_arr.length;i++)
+	    	supported_focus_modes.add(supported_focus_modes_arr[i]);
+	    List<String> output_modes = new Vector<String>();
+		if( supported_focus_modes != null ) {
+			// also resort as well as converting
+			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_AUTO) ) {
+				output_modes.add("focus_mode_auto");
+				if( MyDebug.LOG ) {
+					Log.d(TAG, " supports focus_mode_auto");
+				}
+			}
+			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_MACRO) ) {
+				output_modes.add("focus_mode_macro");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports focus_mode_macro");
+			}
+			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_AUTO) ) {
+				output_modes.add("focus_mode_manual");
+				if( MyDebug.LOG ) {
+					Log.d(TAG, " supports focus_mode_manual");
+				}
+			}
+			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_EDOF) ) {
+				output_modes.add("focus_mode_edof");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports focus_mode_edof");
+			}
+			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO) ) {
+				output_modes.add("focus_mode_continuous_video");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports focus_mode_continuous_video");
+			}
+		}
+		return output_modes;
+	}
+
 	@Override
 	CameraFeatures getCameraFeatures() {
 		if( MyDebug.LOG )
@@ -158,7 +201,36 @@ public class CameraController2 extends CameraController {
 		CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 		try {
 		    CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
-		    StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+			if( MyDebug.LOG ) {
+				int hardware_level = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+				if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY )
+					Log.d(TAG, "Hardware Level: LEGACY");
+				else if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED )
+					Log.d(TAG, "Hardware Level: LIMITED");
+				else if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL )
+					Log.d(TAG, "Hardware Level: FULL");
+				else
+					Log.e(TAG, "Unknown Hardware Level!");
+			}
+
+		    // TODO: zoom
+		    
+			int [] face_modes = characteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
+			camera_features.supports_face_detection = false;
+			for(int i=0;i<face_modes.length && !camera_features.supports_face_detection;i++) {
+				if( face_modes[i] == CameraCharacteristics.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
+					camera_features.supports_face_detection = true;
+				}
+			}
+			if( camera_features.supports_face_detection ) {
+				int face_count = characteristics.get(CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT);
+				if( face_count <= 0 ) {
+					camera_features.supports_face_detection = false;
+				}
+			}
+
+			StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
 		    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
 			camera_features.picture_sizes = new ArrayList<CameraController.Size>();
@@ -178,7 +250,16 @@ public class CameraController2 extends CameraController {
 			for(android.util.Size camera_size : camera_preview_sizes) {
 				camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 			}
+			
+			// TODO: current_fps_range
+			
+			if( characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ) {
+				// TODO: flash
+			}
 
+			int [] supported_focus_modes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES); // Android format
+			camera_features.supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
+			camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
@@ -367,14 +448,55 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setFocusValue(String focus_value) {
-		// TODO Auto-generated method stub
-
+		if( previewBuilder == null || captureSession == null )
+			return;
+		int focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
+    	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_manual") ) {
+    		focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
+    	}
+    	else if( focus_value.equals("focus_mode_macro") ) {
+    		focus_mode = CaptureRequest.CONTROL_AF_MODE_MACRO;
+    	}
+    	else if( focus_value.equals("focus_mode_edof") ) {
+    		focus_mode = CaptureRequest.CONTROL_AF_MODE_EDOF;
+    	}
+    	else if( focus_value.equals("focus_mode_continuous_video") ) {
+    		focus_mode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
+    	}
+    	else {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
+    		return;
+    	}
+    	previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, focus_mode);
+    	setRepeatingRequest();
 	}
 
+	private String convertFocusModeToValue(int focus_mode) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "convertFocusModeToValue: " + focus_mode);
+		String focus_value = "";
+		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_AUTO ) {
+    		focus_value = "focus_mode_auto";
+    	}
+		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_MACRO ) {
+    		focus_value = "focus_mode_macro";
+    	}
+		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_EDOF ) {
+    		focus_value = "focus_mode_edof";
+    	}
+		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO ) {
+    		focus_value = "focus_mode_continuous_video";
+    	}
+    	return focus_value;
+	}
+	
 	@Override
 	public String getFocusValue() {
-		// TODO Auto-generated method stub
-		return null;
+		if( previewBuilder == null || captureSession == null )
+			return "";
+		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		return convertFocusModeToValue(focus_mode);
 	}
 
 	@Override
@@ -386,7 +508,8 @@ public class CameraController2 extends CameraController {
 	@Override
 	public String getFlashValue() {
 		// TODO Auto-generated method stub
-		return null;
+		// returns "" if flash isn't supported
+		return "";
 	}
 
 	@Override
@@ -457,7 +580,11 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	boolean supportsAutoFocus() {
-		// TODO Auto-generated method stub
+		if( previewBuilder == null || captureSession == null )
+			return false;
+		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_AUTO || focus_mode == CaptureRequest.CONTROL_AF_MODE_MACRO )
+			return true;
 		return false;
 	}
 
@@ -488,6 +615,32 @@ public class CameraController2 extends CameraController {
 		this.texture = texture;
 		this.holder = null;
 	}
+	
+	private void setRepeatingRequest() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setRepeatingRequest");
+		if( previewBuilder == null || captureSession == null )
+			return;
+		try {
+			captureSession.setRepeatingRequest(previewBuilder.build(), mCaptureCallback, null);
+		}
+		catch(CameraAccessException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void capture() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "capture");
+		if( previewBuilder == null || captureSession == null )
+			return;
+		try {
+			captureSession.capture(previewBuilder.build(), mCaptureCallback, null);
+		}
+		catch(CameraAccessException e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	void startPreview() {
@@ -497,7 +650,6 @@ public class CameraController2 extends CameraController {
 		try {
 			captureSession = null;
 			previewBuilder = null;
-			previewRequest = null;
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "picture size: " + imageReader.getWidth() + " x " + imageReader.getHeight());
@@ -530,19 +682,10 @@ public class CameraController2 extends CameraController {
 						return;
 					}
 					captureSession = session;
-					try {
-						previewBuilder.set(CaptureRequest.CONTROL_AF_MODE,
-                                CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-						previewBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                                CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-						previewRequest = previewBuilder.build();
-						captureSession.setRepeatingRequest(previewRequest, null, null);
-					}
-					catch(CameraAccessException e) {
-						e.printStackTrace();
-						captureSession = null;
-						previewRequest = null;
-					}
+					previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
+					//previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+					previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+					setRepeatingRequest();
 				}
 
 				@Override
@@ -591,14 +734,32 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void autoFocus(AutoFocusCallback cb) {
-		// TODO Auto-generated method stub
-
+		if( MyDebug.LOG )
+			Log.d(TAG, "autoFocus");
+		if( previewBuilder == null || captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "capture session not available");
+			return;
+		}
+    	//previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+    	//previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+    	/*previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, 0.0f);
+		if( MyDebug.LOG ) {
+			Float focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
+			Log.d(TAG, "focus_distance: " + focus_distance);
+		}*/
+    	//setRepeatingRequest();
+    	capture();
 	}
 
 	@Override
 	void cancelAutoFocus() {
-		// TODO Auto-generated method stub
-
+		if( previewBuilder == null || captureSession == null )
+			return;
+    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+    	//setRepeatingRequest();
+    	capture();
 	}
 
 	@Override
@@ -647,4 +808,15 @@ public class CameraController2 extends CameraController {
 		return null;
 	}
 
+	private CameraCaptureSession.CaptureCallback mCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
+		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "onCaptureCompleted");*/
+			int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+			if( af_state != CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "CONTROL_AF_STATE = " + af_state);
+			}
+		}
+	};
 }
