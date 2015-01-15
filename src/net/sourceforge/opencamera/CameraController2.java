@@ -39,6 +39,7 @@ public class CameraController2 extends CameraController {
 	private String cameraIdS = null;
 	private CameraCaptureSession captureSession = null;
 	private CaptureRequest.Builder previewBuilder = null;
+	private AutoFocusCallback autofocus_cb = null;
 	private ImageReader imageReader = null;
 	//private ImageReader previewImageReader = null;
 	private SurfaceHolder holder = null;
@@ -751,6 +752,7 @@ public class CameraController2 extends CameraController {
 		}*/
     	//setRepeatingRequest();
     	capture();
+		this.autofocus_cb = cb;
 	}
 
 	@Override
@@ -760,6 +762,7 @@ public class CameraController2 extends CameraController {
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
     	//setRepeatingRequest();
     	capture();
+		this.autofocus_cb = null;
 	}
 
 	@Override
@@ -812,10 +815,28 @@ public class CameraController2 extends CameraController {
 		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureCompleted");*/
-			int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+			/*int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			if( af_state != CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "CONTROL_AF_STATE = " + af_state);
+			}*/
+			if( autofocus_cb != null ) {
+				// check for autofocus completing
+				int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ) {
+					if( MyDebug.LOG ) {
+						if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
+							Log.d(TAG, "onCaptureCompleted: autofocus success");
+						else
+							Log.d(TAG, "onCaptureCompleted: autofocus failed");
+					}
+					// we need to cancel af trigger, otherwise sometimes things seem to get confused, with the autofocus thinking it's completed too early
+			    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+			    	capture();
+
+					autofocus_cb.onAutoFocus(af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED);
+					autofocus_cb = null;
+				}
 			}
 		}
 	};
