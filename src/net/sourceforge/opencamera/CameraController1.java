@@ -528,8 +528,21 @@ class CameraController1 extends CameraController {
 	
 	List<int []> getSupportedPreviewFpsRange() {
 		Camera.Parameters parameters = this.getParameters();
-		List<int []> fps_ranges = parameters.getSupportedPreviewFpsRange();
-		return fps_ranges;
+		try {
+			List<int []> fps_ranges = parameters.getSupportedPreviewFpsRange();
+			return fps_ranges;
+		}
+		catch(StringIndexOutOfBoundsException e) {
+			/* Have had reports of StringIndexOutOfBoundsException on Google Play on Sony Xperia M devices
+				at android.hardware.Camera$Parameters.splitRange(Camera.java:4098)
+				at android.hardware.Camera$Parameters.getSupportedPreviewFpsRange(Camera.java:2799)
+				*/
+			e.printStackTrace();
+	    	if( MyDebug.LOG ) {
+	    		Log.e(TAG, "getSupportedPreviewFpsRange() gave StringIndexOutOfBoundsException");
+	    	}
+		}
+		return null;
 	}
 	
 	void setFocusValue(String focus_value) {
