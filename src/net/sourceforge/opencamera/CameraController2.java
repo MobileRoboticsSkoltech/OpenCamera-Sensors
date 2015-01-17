@@ -449,6 +449,8 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setFocusValue(String focus_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFocusValue: " + focus_value);
 		if( previewBuilder == null || captureSession == null )
 			return;
 		int focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
@@ -502,6 +504,8 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setFlashValue(String flash_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFlashValue: " + flash_value);
 		// TODO Auto-generated method stub
 
 	}
@@ -757,6 +761,8 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void cancelAutoFocus() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cancelAutoFocus");
 		if( previewBuilder == null || captureSession == null )
 			return;
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
@@ -820,6 +826,13 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "CONTROL_AF_STATE = " + af_state);
 			}*/
+			if( MyDebug.LOG && autofocus_cb == null ) {
+				int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
+					Log.d(TAG, "onCaptureCompleted: autofocus success but no callback set");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED )
+					Log.d(TAG, "onCaptureCompleted: autofocus failed but no callback set");
+			}
 			if( autofocus_cb != null ) {
 				// check for autofocus completing
 				int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
