@@ -370,8 +370,7 @@ public class MainActivity extends Activity {
 		case KeyEvent.KEYCODE_CAMERA:
 			{
 				if( event.getRepeatCount() == 0 ) {
-					View view = findViewById(R.id.take_photo);
-					clickedTakePhoto(view);
+	            	takePicture();
 		            return true;
 				}
 			}
