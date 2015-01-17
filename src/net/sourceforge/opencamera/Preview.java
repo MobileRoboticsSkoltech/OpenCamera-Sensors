@@ -632,7 +632,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void onSurfaceTextureSizeChanged(SurfaceTexture arg0, int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSurfaceTextureSizeChanged " + width + ", " + height);
-		// n.b., width/height won't be same as received by surfaceChanged
 		mySurfaceChanged();
 		configureTransform(width, height);
 	}
@@ -3032,6 +3031,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				CameraController.Size current_size = sizes.get(current_size_index);
 				toast_string += " " + current_size.width + "x" + current_size.height;
 			}
+			if( supported_focus_values != null && supported_focus_values.size() > 1 && current_focus_index != -1 ) {
+				String focus_value = supported_focus_values.get(current_focus_index);
+				if( !focus_value.equals("focus_mode_auto") ) {
+					String focus_entry = findFocusEntryForValue(focus_value);
+					if( focus_entry != null ) {
+						toast_string += "\n" + focus_entry;
+					}
+				}
+			}
+			String iso_value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
+			if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
+				toast_string += "\nISO: " + iso_value;
+			}
 		}
 		int current_exposure = camera_controller.getExposureCompensation();
 		if( current_exposure != 0 ) {
@@ -3399,6 +3411,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return false;
 	}
 
+	private String findEntryForValue(String value, int entries_id, int values_id) {
+    	String [] entries = getResources().getStringArray(entries_id);
+    	String [] values = getResources().getStringArray(values_id);
+    	for(int i=0;i<values.length;i++) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "    compare to value: " + values[i]);
+    		if( value.equals(values[i]) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "    found entry: " + i);
+				return entries[i];
+    		}
+    	}
+    	return null;
+	}
+	
+	private String findFocusEntryForValue(String focus_value) {
+		return findEntryForValue(focus_value, R.array.focus_mode_entries, R.array.focus_mode_values);
+	}
+	
 	private void updateFocus(int new_focus_index, boolean quiet, boolean save, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + new_focus_index + " current_focus_index: " + current_focus_index);
@@ -3409,25 +3440,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "    current_focus_index is now " + current_focus_index + " (initial " + initial + ")");
 
-			//Activity activity = (Activity)this.getContext();
-	    	String [] focus_entries = getResources().getStringArray(R.array.focus_mode_entries);
-	    	//String [] focus_icons = getResources().getStringArray(R.array.focus_mode_icons);
 			String focus_value = supported_focus_values.get(current_focus_index);
 			if( MyDebug.LOG )
 				Log.d(TAG, "    focus_value: " + focus_value);
-	    	String [] focus_values = getResources().getStringArray(R.array.focus_mode_values);
-	    	for(int i=0;i<focus_values.length;i++) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "    compare to: " + focus_values[i]);
-	    		if( focus_value.equals(focus_values[i]) ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "    found entry: " + i);
-	    			if( !initial && !quiet ) {
-	    				showToast(focus_toast, focus_entries[i]);
-	    			}
-	    			break;
-	    		}
-	    	}
+			if( !initial && !quiet ) {
+				String focus_entry = findFocusEntryForValue(focus_value);
+				if( focus_entry != null ) {
+    				showToast(focus_toast, focus_entry);
+				}
+			}
 	    	this.setFocusValue(focus_value, auto_focus);
 
 	    	if( save ) {
