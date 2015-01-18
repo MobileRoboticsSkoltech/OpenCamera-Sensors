@@ -3148,7 +3148,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				stopVideo(false);
 			}
 			this.is_video = false;
-			showPhotoVideoToast();
 		}
 		else {
 			if( this.isOnTimer() ) {
@@ -3164,14 +3163,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			else {
 				this.is_video = true;
 			}
-			
-			if( this.is_video ) {
-				showPhotoVideoToast();
-			}
 		}
 		
 		if( is_video != old_is_video ) {
 			updateFocusForVideo(false); // don't do autofocus, as it'll be cancelled when restarting preview
+			showPhotoVideoToast(); // must be after we update focus for video
 
 			Activity activity = (Activity)this.getContext();
 			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
