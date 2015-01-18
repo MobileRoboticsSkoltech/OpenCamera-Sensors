@@ -384,8 +384,8 @@ class CameraController1 extends CameraController {
 		/*values = new ArrayList<String>();
 		values.add("auto");
 		values.add("ISO_HJR");
-		values.add("100");
-		values.add("200");
+		values.add("ISO100");
+		values.add("ISO200");
 		values.add("400");
 		values.add("800");
 		values.add("1600");*/

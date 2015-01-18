@@ -313,8 +313,12 @@ public class PopupView extends LinearLayout {
         			ll2.addView(view);
 
         			// hack for ISO mode ISO_HJR (e.g., on Samsung S5)
+        			// also some devices report e.g. "ISO100" etc
         			if( string.equalsIgnoreCase("ISO") && supported_option.length() >= 4 && supported_option.substring(0, 4).equalsIgnoreCase("ISO_") ) {
             			button.setText(string + "\n" + supported_option.substring(4));
+        			}
+        			else if( string.equalsIgnoreCase("ISO") && supported_option.length() >= 3 && supported_option.substring(0, 3).equalsIgnoreCase("ISO") ) {
+            			button.setText(string + "\n" + supported_option.substring(3));
         			}
         			else {
             			button.setText(string + "\n" + supported_option);
