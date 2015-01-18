@@ -4121,7 +4121,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
 
 		CameraController.PictureCallback jpegPictureCallback = new CameraController.PictureCallback() {
-    	    public void onPictureTaken(byte[] data) {
+    	    @SuppressWarnings("deprecation")
+			public void onPictureTaken(byte[] data) {
     	    	// n.b., this is automatically run in a different thread
 	            System.gc();
     			if( MyDebug.LOG )
@@ -4160,7 +4161,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         				Log.d(TAG, "auto stabilising... angle: " + level_angle);
     				BitmapFactory.Options options = new BitmapFactory.Options();
     				//options.inMutable = true;
-    				options.inPurgeable = true;
+    				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+    					// setting is ignored in Android 5 onwards
+    					options.inPurgeable = true;
+    				}
         			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
         			if( bitmap == null ) {
         	    	    showToast(null, R.string.failed_to_auto_stabilise);
@@ -4289,7 +4293,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             				Log.d(TAG, "decode bitmap in order to stamp info");
         				BitmapFactory.Options options = new BitmapFactory.Options();
         				options.inMutable = true;
-        				options.inPurgeable = true;
+        				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+        					// setting is ignored in Android 5 onwards
+        					options.inPurgeable = true;
+        				}
             			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
             			if( bitmap == null ) {
             	    	    showToast(null, R.string.failed_to_stamp);
@@ -4370,7 +4377,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			        				Log.d(TAG, "create bitmap");
 			    				BitmapFactory.Options options = new BitmapFactory.Options();
 			    				//options.inMutable = true;
-			    				options.inPurgeable = true;
+			    				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+			    					// setting is ignored in Android 5 onwards
+			    					options.inPurgeable = true;
+			    				}
 			        			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 	        				}
 	        				if( bitmap != null ) {
@@ -4592,7 +4602,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        		int ratio = (int) Math.ceil((double) size.width / cameraSurface.getView().getWidth());
     				BitmapFactory.Options options = new BitmapFactory.Options();
     				options.inMutable = false;
-    				options.inPurgeable = true;
+    				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+    					// setting is ignored in Android 5 onwards
+    					options.inPurgeable = true;
+    				}
     				options.inSampleSize = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality 
         			if( !sharedPreferences.getBoolean(MainActivity.getThumbnailAnimationPreferenceKey(), true) ) {
         				// can use lower resolution if we don't have the thumbnail animation
