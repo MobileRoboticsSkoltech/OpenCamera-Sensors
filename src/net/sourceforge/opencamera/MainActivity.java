@@ -94,6 +94,7 @@ public class MainActivity extends Activity {
     private boolean screen_is_locked = false;
     private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<Integer, Bitmap>();
     private PopupView popup_view = null;
+    private Uri last_media_scanned = null;
 
     private ToastBoxer screen_locked_toast = new ToastBoxer();
     ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
@@ -161,7 +162,7 @@ public class MainActivity extends Activity {
         		save_location_history.add(string);
         	}
         }
-        // also update, just in case a new folder has been set
+        // also update, just in case a new folder has been set; this is also necessary to update the gallery icon
 		updateFolderHistory();
 		//updateFolderHistory("/sdcard/Pictures/OpenCameraTest");
 
@@ -187,7 +188,6 @@ public class MainActivity extends Activity {
 
 		mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
-		updateGalleryIcon();
 		clearSeekBar();
 
 		preview = new Preview(this, savedInstanceState);
@@ -1404,19 +1404,61 @@ public class MainActivity extends Activity {
     }
     
     private Media getLatestMedia(boolean video) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getLatestMedia: " + (video ? "video" : "images"));
     	Media media = null;
 		Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-		Uri query = baseUri.buildUpon().appendQueryParameter("limit", "1").build();
-		String [] projection = video ? new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN} : new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.ORIENTATION};
+		//Uri query = baseUri.buildUpon().appendQueryParameter("limit", "1").build();
+		Uri query = baseUri;
+		final int column_id_c = 0;
+		final int column_date_taken_c = 1;
+		final int column_data_c = 2;
+		final int column_orientation_c = 3;
+		String [] projection = video ? new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN, VideoColumns.DATA} : new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.DATA, ImageColumns.ORIENTATION};
 		String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg'";
 		String order = video ? VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC" : ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
 		Cursor cursor = null;
 		try {
 			cursor = getContentResolver().query(query, projection, selection, null, order);
 			if( cursor != null && cursor.moveToFirst() ) {
-				long id = cursor.getLong(0);
-				long date = cursor.getLong(1);
-				int orientation = video ? 0 : cursor.getInt(2);
+				if( MyDebug.LOG )
+					Log.d(TAG, "found: " + cursor.getCount());
+				// now sorted in order of date - scan to most recent one in the Open Camera save folder
+				boolean found = false;
+				File save_folder = getImageFolder();
+				String save_folder_string = save_folder.getAbsolutePath() + File.separator;
+				if( MyDebug.LOG )
+					Log.d(TAG, "save_folder_string: " + save_folder_string);
+				do {
+					String path = cursor.getString(column_data_c);
+					if( MyDebug.LOG )
+						Log.d(TAG, "path: " + path);
+					// path may be null on Android 4.4!: http://stackoverflow.com/questions/3401579/get-filename-and-path-from-uri-from-mediastore
+					if( path != null && path.contains(save_folder_string) ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "found most recent in Open Camera folder");
+						// we filter files with dates in future, in case there exists an image in the folder with incorrect datestamp set to the future
+						// we allow up to 2 days in future, to avoid risk of issues to do with timezone etc
+						long date = cursor.getLong(column_date_taken_c);
+				    	long current_time = System.currentTimeMillis();
+						if( date > current_time + 172800000 ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "skip date in the future!");
+						}
+						else {
+							found = true;
+							break;
+						}
+					}
+				} while( cursor.moveToNext() );
+				if( !found ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "can't find suitable in Open Camera folder, so just go with most recent");
+					cursor.moveToFirst();
+				}
+				long id = cursor.getLong(column_id_c);
+				long date = cursor.getLong(column_date_taken_c);
+				int orientation = video ? 0 : cursor.getInt(column_orientation_c);
 				Uri uri = ContentUris.withAppendedId(baseUri, id);
 				if( MyDebug.LOG )
 					Log.d(TAG, "found most recent uri for " + (video ? "video" : "images") + ": " + uri);
@@ -1524,6 +1566,8 @@ public class MainActivity extends Activity {
 	    		}
     		}
     	}
+    	// since we're now setting the thumbnail to the latest media on disk, we need to make sure clicking the Gallery goes to this
+    	last_media_scanned = null;
     	if( thumbnail != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set gallery button to thumbnail");
@@ -1537,15 +1581,19 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "time to update gallery icon: " + (System.currentTimeMillis() - time_s));
     }
-    
+
     public void clickedGallery(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedGallery");
 		//Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		Uri uri = null;
-		Media media = getLatestMedia();
-		if( media != null ) {
-			uri = media.uri;
+		Uri uri = this.last_media_scanned;
+		if( uri == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "go to latest media");
+			Media media = getLatestMedia();
+			if( media != null ) {
+				uri = media.uri;
+			}
 		}
 
 		if( uri != null ) {
@@ -1596,10 +1644,11 @@ public class MainActivity extends Activity {
 			}
 		}
     }
-    
-    public void updateFolderHistory() {
+
+    private void updateFolderHistory() {
 		String folder_name = getSaveLocation();
 		updateFolderHistory(folder_name);
+		updateGalleryIcon(); // if the folder has changed, need to update the gallery icon
     }
     
     private void updateFolderHistory(String folder_name) {
@@ -1875,6 +1924,7 @@ public class MainActivity extends Activity {
     		 				Log.d("ExternalStorage", "Scanned " + path + ":");
     		 				Log.d("ExternalStorage", "-> uri=" + uri);
     		 			}
+    		 			last_media_scanned = uri;
     		        	if( is_new_picture ) {
     		        		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcase the string for other apps
     		        		sendBroadcast(new Intent( "android.hardware.action.NEW_PICTURE" , uri));
@@ -2297,7 +2347,11 @@ public class MainActivity extends Activity {
 		return this.save_location_history;
 	}
 	
-	public boolean hasLocationListeners() {
+    public void usedFolderPicker() {
+    	updateFolderHistory();
+    }
+
+    public boolean hasLocationListeners() {
 		if( this.locationListeners == null )
 			return false;
 		if( this.locationListeners.length != 2 )
