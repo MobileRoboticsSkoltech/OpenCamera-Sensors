@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -134,7 +135,17 @@ public class PopupView extends LinearLayout {
     			picture_size_strings.add(size_string);
     		}
     		addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), picture_size_index, new ArrayOptionsPopupListener() {
-    			private void update() {
+		    	final Handler handler = new Handler();
+				Runnable update_runnable = new Runnable() {
+					@Override
+					public void run() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "update settings due to resolution change");
+						main_activity.updateForSettings("");
+					}
+				};
+
+				private void update() {
     				if( picture_size_index == -1 )
     					return;
     				CameraController.Size new_size = picture_sizes.get(picture_size_index);
@@ -143,7 +154,10 @@ public class PopupView extends LinearLayout {
 					SharedPreferences.Editor editor = sharedPreferences.edit();
 					editor.putString(MainActivity.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
 					editor.apply();
-					main_activity.updateForSettings("");
+
+					// make it easier to scroll through the list of resolutions without a pause each time
+					handler.removeCallbacks(update_runnable);
+					handler.postDelayed(update_runnable, 400);
     			}
 				@Override
 				public int onClickPrev() {
