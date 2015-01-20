@@ -12,7 +12,7 @@
         <item>Flash Auto</item>
         <item>Flash On</item>
         <item>Linterna</item>
-        <item>Ojos rojos</item>
+        <item>Ojos Rojos</item>
     </string-array>
     <string-array name="flash_values">
         <item>flash_off</item>
@@ -49,9 +49,9 @@
         <item>focus_mode_continuous_video</item>
     </string-array>
     <string-array name="preference_lock_orientation_entries">
-        <item>Sin bloqueo</item>
-        <item>Bloquear horizontalmente</item>
-        <item>Bloquear verticalmente</item>
+        <item>Quitar Bloqueo</item>
+        <item>Bloquear Horizontalmente</item>
+        <item>Bloquear Verticalmente</item>
     </string-array>
     <string-array name="preference_lock_orientation_values">
         <item>none</item>
@@ -59,7 +59,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>No timer</item>
+        <item>Off</item>
         <item>1s</item>
         <item>2s</item>
         <item>5s</item>
@@ -129,21 +129,21 @@
         <item>300</item>
     </string-array>
     <string-array name="preference_preview_size_entries">
-        <item>Maximizar tamaño preview</item>
-        <item>Igualar tamaño foto (WYSIWYG)</item>
+        <item>Maximizar tamaño Preview</item>
+        <item>Igualar tamaño Foto (WYSIWYG)</item>
     </string-array>
     <string-array name="preference_preview_size_values">
         <item>preference_preview_size_display</item>
         <item>preference_preview_size_wysiwyg</item>
     </string-array>
     <string-array name="preference_volume_keys_entries">
-        <item>Tomar foto (o comenzar/detener grabacion video)</item>
-        <item>Enfoque (si esta en modo auto/manual/macro)</item>
-        <item>Zoom mas/menos</item>
-        <item>Cambiar nivel de exposición</item>
-        <item>Cambiar auto-estabilizar on/off</item>
-        <item>Cambiar volumen dispositivo</item>
-        <item>No hacer nada</item>
+        <item>Tomar Foto (o Comenzar/Detener Grabacion Video)</item>
+        <item>Enfoque (si está en modo Auto/Manual/Macro)</item>
+        <item>Zoom</item>
+        <item>Cambiar Nivel de Exposición</item>
+        <item>Cambiar Auto-Estabilizar ON/OFF</item>
+        <item>Cambiar Volumen Dispositivo</item>
+        <item>No hacer Nada</item>
         </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
@@ -155,8 +155,8 @@
         <item>volume_really_nothing</item>
     </string-array>
     <string-array name="preference_ui_placement_entries">
-        <item>Interfaz usuario zurdo</item>
-        <item>Interfaz usuario diestro</item>
+        <item>Interfaz usuario Zurdo</item>
+        <item>Interfaz usuario Diestro</item>
     </string-array>
     <string-array name="preference_ui_placement_values">
         <item>ui_left</item>
@@ -164,8 +164,8 @@
     </string-array>
     <string-array name="preference_grid_entries">
         <item>Ninguno</item>
-        <item>Muestra una cuadrícula 3x3 ("regla de tres")</item>
-        <item>Muestra una cuadrícula 4x2</item>
+        <item>Cuadrícula 3x3</item>
+        <item>Cuadrícula 4x2</item>
 	</string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
@@ -248,26 +248,26 @@
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Unlimited</item>
-        <item>15 seconds</item>
-        <item>30 seconds</item>
-        <item>1 minute</item>
-        <item>2 minutes</item>
-        <item>3 minutes</item>
-        <item>4 minutes</item>
-        <item>5 minutes</item>
-        <item>6 minutes</item>
-        <item>7 minutes</item>
-        <item>8 minutes</item>
-        <item>9 minutes</item>
-        <item>10 minutes</item>
-        <item>11 minutes</item>
-        <item>12 minutes</item>
-        <item>15 minutes</item>
-        <item>20 minutes</item>
-        <item>25 minutes</item>
-        <item>30 minutes</item>
-        <item>45 minutes</item>
-        <item>1 hour</item>
+        <item>15 segundos</item>
+        <item>30 segundos</item>
+        <item>1 minutos</item>
+        <item>2 minutos</item>
+        <item>3 minutos</item>
+        <item>4 minutos</item>
+        <item>5 minutos</item>
+        <item>6 minutos</item>
+        <item>7 minutos</item>
+        <item>8 minutos</item>
+        <item>9 minutos</item>
+        <item>10 minutos</item>
+        <item>11 minutos</item>
+        <item>12 minutos</item>
+        <item>15 minutos</item>
+        <item>20 minutos</item>
+        <item>25 minutos</item>
+        <item>30 minutos</item>
+        <item>45 minutos</item>
+        <item>1 hora</item>
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
@@ -320,7 +320,7 @@
     </string-array>
     <string-array name="preference_record_audio_src_entries">
         <item>Camcorder</item>
-        <item>Micrófono externo(si existe)</item>
+        <item>Micrófono Externo(si existe)</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>
