@@ -22,7 +22,7 @@
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-		<item name="android:windowBackground">@color/black</item>
+		<item name="android:windowBackground">@color/black</item> <!-- Set black window background rather than view black background (avoids overdraw, also needed if we hide the virtual buttons in immersive mode). -->
     </style>
     <style name="PreferenceTheme" parent="PreferenceBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
