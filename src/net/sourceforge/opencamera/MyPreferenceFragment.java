@@ -35,7 +35,6 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences);
-		this.getActivity().setTheme(R.style.PreferenceTheme); // needed to avoid sub-screens opening with the black background that we've set in AppTheme
 
 		final Bundle bundle = getArguments();
 		final int cameraId = bundle.getInt("cameraId");
@@ -545,11 +544,19 @@ public class MyPreferenceFragment extends PreferenceFragment {
 	public void onResume() {
 		super.onResume();
 		// prevent fragment being transparent
+		// note, setting color here only seems to affect the "main" preference fragment screen, and not sub-screens
+		// note, on Galaxy Nexus Android 4.3 this sets to black rather than the dark grey that the background theme should be (and what the sub-screens use); works okay on Nexus 7 Android 5
+		// we used to use a light theme for the PreferenceFragment, but mixing themes in same activity seems to cause problems (e.g., for EditTextPreference colors)
 		TypedArray array = getActivity().getTheme().obtainStyledAttributes(new int[] {  
-		    android.R.attr.colorBackground, 
-		    android.R.attr.textColorPrimary, 
+			    android.R.attr.colorBackground
 		});
-		int backgroundColor = array.getColor(0, Color.WHITE); 
+		int backgroundColor = array.getColor(0, Color.BLACK);
+		/*if( MyDebug.LOG ) {
+			int r = (backgroundColor >> 16) & 0xFF;
+			int g = (backgroundColor >> 8) & 0xFF;
+			int b = (backgroundColor >> 0) & 0xFF;
+			Log.d(TAG, "backgroundColor: " + r + " , " + g + " , " + b);
+		}*/
 		getView().setBackgroundColor(backgroundColor);
 		array.recycle();
 	}

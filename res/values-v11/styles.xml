@@ -7,8 +7,5 @@
     <style name="AppBaseTheme" parent="android:Theme.Holo.NoActionBar.Fullscreen">
         <!-- API 11 theme customizations can go here. -->
     </style>
-    <style name="PreferenceBaseTheme" parent="android:Theme.Holo.Light.NoActionBar.Fullscreen">
-        <!-- API 11 theme customizations can go here. -->
-    </style>
 
 </resources>

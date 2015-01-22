@@ -533,6 +533,10 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "onResume");
         super.onResume();
 
+        // Set black window background; also needed if we hide the virtual buttons in immersive mode
+        // Note that we do it here rather than customising the theme's android:windowBackground, so this doesn't affect other views - in particular, the MyPreferenceFragment settings
+		getWindow().getDecorView().getRootView().setBackgroundColor(Color.BLACK);
+
         mSensorManager.registerListener(accelerometerListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
