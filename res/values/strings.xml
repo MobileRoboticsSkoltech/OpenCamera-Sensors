@@ -108,6 +108,10 @@
     <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
     <string name="preference_save_location">Save location</string>
     <string name="preference_save_location_summary">Folder to save the photo/video files in</string>
+    <string name="preference_save_photo_prefix">Save photo prefix</string>
+    <string name="preference_save_photo_prefix_summary">The prefix to use for the save filenames for photos</string>
+    <string name="preference_save_video_prefix">Save video prefix</string>
+    <string name="preference_save_video_prefix_summary">The prefix to use for the save filenames for videos</string>
     <string name="preference_show_when_locked">Show camera when locked</string>
     <string name="preference_show_when_locked_summary">If enabled, Open Camera will still show above any lockscreen (you\'ll still have to unlock to access Settings, Gallery etc)</string>
     <string name="preference_lock_video">Lock screen when recording video</string>

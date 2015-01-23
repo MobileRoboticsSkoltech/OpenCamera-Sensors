@@ -157,7 +157,27 @@
 	            android:defaultValue="OpenCamera"
 		        />
 	
-            <CheckBoxPreference
+	        <EditTextPreference
+	            android:key="preference_save_photo_prefix"
+	            android:title="@string/preference_save_photo_prefix"
+	            android:summary="@string/preference_save_photo_prefix_summary"
+		        android:dialogTitle="@string/preference_save_photo_prefix"
+		        android:dialogMessage="@string/preference_save_photo_prefix_summary"
+		        android:inputType="text"
+	            android:defaultValue="IMG_"
+		        />
+	
+	        <EditTextPreference
+	            android:key="preference_save_video_prefix"
+	            android:title="@string/preference_save_video_prefix"
+	            android:summary="@string/preference_save_video_prefix_summary"
+		        android:dialogTitle="@string/preference_save_video_prefix"
+		        android:dialogMessage="@string/preference_save_video_prefix_summary"
+		        android:inputType="text"
+	            android:defaultValue="VID_"
+		        />
+
+			<CheckBoxPreference
                 android:key="preference_show_when_locked"
                 android:title="@string/preference_show_when_locked"
                 android:summary="@string/preference_show_when_locked_summary"

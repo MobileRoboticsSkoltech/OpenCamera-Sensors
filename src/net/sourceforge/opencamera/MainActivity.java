@@ -2060,13 +2060,16 @@ public class MainActivity extends Activity {
         String index = "";
         File mediaFile = null;
         for(int count=1;count<=100;count++) {
+    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             if( type == MEDIA_TYPE_IMAGE ) {
+        		String prefix = sharedPreferences.getString(getSavePhotoPrefixPreferenceKey(), "IMG_");
                 mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                "IMG_"+ timeStamp + index + ".jpg");
+                	prefix + timeStamp + index + ".jpg");
             }
             else if( type == MEDIA_TYPE_VIDEO ) {
+        		String prefix = sharedPreferences.getString(getSaveVideoPrefixPreferenceKey(), "VID_");
                 mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                "VID_"+ timeStamp + index + ".mp4");
+                		prefix + timeStamp + index + ".mp4");
             }
             else {
                 return null;
@@ -2076,7 +2079,6 @@ public class MainActivity extends Activity {
             }
             index = "_" + count; // try to find a unique filename
         }
-        
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "getOutputMediaFile returns: " + mediaFile);
@@ -2220,6 +2222,14 @@ public class MainActivity extends Activity {
 
     public static String getSaveLocationPreferenceKey() {
     	return "preference_save_location";
+    }
+
+    public static String getSavePhotoPrefixPreferenceKey() {
+    	return "preference_save_photo_prefix";
+    }
+
+    public static String getSaveVideoPrefixPreferenceKey() {
+    	return "preference_save_video_prefix";
     }
 
     public static String getShowZoomControlsPreferenceKey() {
