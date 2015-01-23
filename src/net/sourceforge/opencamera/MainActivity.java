@@ -1335,7 +1335,16 @@ public class MainActivity extends Activity {
 		// force to landscape mode
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		if( sharedPreferences.getBoolean(getKeepDisplayOnPreferenceKey(), true) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "do keep screen on");
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "don't keep screen on");
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		}
 		if( sharedPreferences.getBoolean(getShowWhenLockedPreferenceKey(), true) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "do show when locked");
@@ -2222,6 +2231,10 @@ public class MainActivity extends Activity {
 
     public static String getShowWhenLockedPreferenceKey() {
     	return "preference_show_when_locked";
+    }
+
+    public static String getKeepDisplayOnPreferenceKey() {
+    	return "preference_keep_display_on";
     }
 
     public static String getMaxBrightnessPreferenceKey() {

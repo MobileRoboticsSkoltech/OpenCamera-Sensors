@@ -177,7 +177,7 @@
 	            android:defaultValue="VID_"
 		        />
 
-			<CheckBoxPreference
+	       <CheckBoxPreference
                 android:key="preference_show_when_locked"
                 android:title="@string/preference_show_when_locked"
                 android:summary="@string/preference_show_when_locked_summary"
@@ -320,6 +320,13 @@
                 android:key="preference_thumbnail_animation"
                 android:title="@string/preference_thumbnail_animation"
                 android:summary="@string/preference_thumbnail_animation_summary"
+                android:defaultValue="true"
+                />
+
+			<CheckBoxPreference
+                android:key="preference_keep_display_on"
+                android:title="@string/preference_keep_display_on"
+                android:summary="@string/preference_keep_display_on_summary"
                 android:defaultValue="true"
                 />
 
