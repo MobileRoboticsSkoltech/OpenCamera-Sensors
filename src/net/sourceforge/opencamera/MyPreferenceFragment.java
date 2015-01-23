@@ -96,7 +96,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		}
 		else {
 			Preference pref = findPreference("preference_resolution");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
         	pg.removePreference(pref);
 		}
 
@@ -135,7 +135,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		}
 		else {
 			Preference pref = findPreference("preference_video_quality");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
         	pg.removePreference(pref);
 		}
 
@@ -144,7 +144,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			Log.d(TAG, "supports_force_video_4k: " + supports_force_video_4k);
 		if( !supports_force_video_4k || video_quality == null || video_quality_string == null ) {
 			Preference pref = findPreference("preference_force_video_4k");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
         	pg.removePreference(pref);
 		}
 		
@@ -153,7 +153,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			Log.d(TAG, "supports_video_stabilization: " + supports_video_stabilization);
 		if( !supports_video_stabilization ) {
 			Preference pref = findPreference("preference_video_stabilization");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_quality");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
         	pg.removePreference(pref);
 		}
 

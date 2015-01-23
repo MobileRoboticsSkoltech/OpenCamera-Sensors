@@ -419,7 +419,7 @@ to a particular aspect ratio. For photos, the crop-guide requires "Preview size"
 
 <p><b>Photo and Video Settings:</b></p>
 
-<p><b>Photo and video settings</b> - Select to access the following controls:</p>
+<p><b>Photo settings</b> - Select to access the following controls:</p>
 
 <p><b>Camera resolution</b> - Select the resolution of photo images taken by the camera. Note that if auto-stabilise is enabled,
 images will in general come out as a slightly lower resolution (due to the rotation and cropping that's required).</p>
@@ -427,23 +427,7 @@ images will in general come out as a slightly lower resolution (due to the rotat
 <p><b>Image quality</b> - The image quality of saved JPEG images. Higher means better quality, but the image files will take up
 more storage space.</p>
 
-<p><b>Store location data (Geotagging)</b> - If selected, then photos will be tagged with the current
-location. Location data will also be stored in videos (though only for devices that record in MPEG4 or
-3GPP formats).</p>
-
-<p><b>Store compass direction</b> - If selected, then photos will be tagged with the compass direction. Note
-that if Open Camera is called via another app, the compass direction won't be saved - this is only supported
-when Open Camera is run as a standalone app. Also not supported for videos.</p>
-
-<p><b>Require location data</b> - If "Store location data" is enabled, then also enabling this option means that
-photos and videos can only be taken if location data is present (this can be useful if you need pictures/videos to
-have location data in them).</p>
-
-<p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
-location data" is enabled, then the current location latitude and longitude coordinates will
-also be stamped on the resultant photos (if the location is known). Similarly for "Store compass
-direction". Note that if this option is enabled, then it will take longer to save the photo.
-Also note that this option is only supported for photos, not video.</p>
+<p><b>Video settings</b> - Select to access the following controls:</p>
 
 <p><b>Video resolution</b> - Select the resolution of videos taken by the camera.</p>
 
@@ -487,6 +471,26 @@ if it supports an external microphone, you may be able to use this by selecting 
 <p><b>Flash while recording video</b> - If enabled, the camera flash will flash every second while recording video. This
 isn't something most people will need, but it can be useful if the phone is being operated remotely, as a signal that the
 video is still recording.</p>
+
+<p><b>Location settings</b> - Select to access the following controls:</p>
+
+<p><b>Store location data (Geotagging)</b> - If selected, then photos will be tagged with the current
+location. Location data will also be stored in videos (though only for devices that record in MPEG4 or
+3GPP formats).</p>
+
+<p><b>Store compass direction</b> - If selected, then photos will be tagged with the compass direction. Note
+that if Open Camera is called via another app, the compass direction won't be saved - this is only supported
+when Open Camera is run as a standalone app. Also not supported for videos.</p>
+
+<p><b>Require location data</b> - If "Store location data" is enabled, then also enabling this option means that
+photos and videos can only be taken if location data is present (this can be useful if you need pictures/videos to
+have location data in them).</p>
+
+<p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
+location data" is enabled, then the current location latitude and longitude coordinates will
+also be stamped on the resultant photos (if the location is known). Similarly for "Store compass
+direction". Note that if this option is enabled, then it will take longer to save the photo.
+Also note that this option is only supported for photos, not video.</p>
 
 <p><b>Misc:</b></p>
 
@@ -696,6 +700,8 @@ UPDATED Now uses dark theme for Settings (more consistent with rest of app;
         better for not ruining night vision; sorry if you preferred the old
         look, but Android doesn't seem to cope well with mixing themes in the
         same Activity).
+UPDATED "Photo and video settings" preference screen now split up into "Photo
+        settings", "Video settings" and "Location settings".
 UPDATED Photo toast now displays if focus or ISO modes are non-default.
 
 Version 1.22 (2015/01/04)

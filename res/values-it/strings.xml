@@ -134,7 +134,8 @@
     <string name="preference_max_brightness_summary">Forza lo schermo ad essere al massimo della luminosità, invece che seguire le impostazioni predefinite</string>
     
     <string name="preference_category_camera_quality">Impostazioni Foto e Video</string>
-    <string name="preference_screen_camera_quality">Impostazioni Foto e Video…</string>
+    <string name="preference_screen_photo_settings">Impostazioni Foto…</string>
+    <string name="preference_screen_video_settings">Impostazioni Video…</string>
     <string name="preference_resolution">Risoluzione fotocamera</string>
     <string name="preference_resolution_summary">Imposta la risoluzione per le foto scattate dalla fotocamera</string>
     <string name="preference_quality">Qualità immagine</string>

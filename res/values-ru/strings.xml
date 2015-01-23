@@ -146,8 +146,8 @@
     <string name="preference_thumbnail_animation_summary">Отображение перемещение эскиза анимации при съемке фотографии</string>
     <string name="preference_max_brightness">Максимальная яркость</string>
     <string name="preference_max_brightness_summary">Включение максимальной яркости во время съемки</string>
+
     <string name="preference_category_camera_quality">Качество фото и видео</string>
-    <string name="preference_screen_camera_quality">Настройки качества фото- и видео-съёмки…</string>
     <string name="preference_resolution">Разрешение камеры</string>
     <string name="preference_resolution_summary">"Выбор  разрешения фотографий, снятых на камеру"</string>
     <string name="preference_quality">Качество изображения</string>

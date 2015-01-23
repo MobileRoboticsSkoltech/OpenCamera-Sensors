@@ -131,7 +131,8 @@
     <string name="preference_max_brightness_summary">Forzar el brillo de la pantalla al máximo en vez de el predeterminado por el dispositivo</string>
     
     <string name="preference_category_camera_quality">Ajustes de Foto y Video</string>
-    <string name="preference_screen_camera_quality">Ajustes de Foto y Video…</string>
+    <string name="preference_screen_photo_settings">Ajustes de Foto…</string>
+    <string name="preference_screen_video_settings">Ajustes de Video…</string>
     <string name="preference_resolution">Resolución de la cámara</string>
     <string name="preference_resolution_summary">Establece la resolución de las fotos tomadas por la cámara</string>
     <string name="preference_quality">Calidad de imagen</string>
