@@ -1753,7 +1753,15 @@ public class MainActivity extends Activity {
 								showPreview(true);
 					        }
 			        	})
-			        	.setNegativeButton(R.string.answer_no, null)
+			        	.setNegativeButton(R.string.answer_no, new DialogInterface.OnClickListener() {
+			        		@Override
+					        public void onClick(DialogInterface dialog, int which) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "don't clear save history");
+								setWindowFlagsForCamera();
+								showPreview(true);
+					        }
+			        	})
 						.setOnCancelListener(new DialogInterface.OnCancelListener() {
 							@Override
 							public void onCancel(DialogInterface arg0) {
