@@ -260,6 +260,9 @@ public class CameraController2 extends CameraController {
 
 		int [] supported_focus_modes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES); // Android format
 		camera_features.supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
+		camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
+
+		camera_features.is_exposure_lock_supported = true;
 
 	    return camera_features;
 	}
@@ -326,10 +329,12 @@ public class CameraController2 extends CameraController {
 		imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2); 
 	}
 
+	private int preview_width = 0;
+	private int preview_height = 0;
+	
 	@Override
 	public Size getPreviewSize() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Size(preview_width, preview_height);
 	}
 
 	@Override
@@ -346,6 +351,8 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "set size of preview texture");
 			texture.setDefaultBufferSize(width, height);
 		}
+		preview_width = width;
+		preview_height = height;
 		/*if( previewImageReader != null ) {
 			previewImageReader.close();
 		}
@@ -521,14 +528,13 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setAutoExposureLock(boolean enabled) {
-		// TODO Auto-generated method stub
-
+    	previewBuilder.set(CaptureRequest.CONTROL_AE_LOCK, enabled);
+    	setRepeatingRequest();
 	}
 
 	@Override
 	public boolean getAutoExposureLock() {
-		// TODO Auto-generated method stub
-		return false;
+    	return previewBuilder.get(CaptureRequest.CONTROL_AE_LOCK);
 	}
 
 	@Override
