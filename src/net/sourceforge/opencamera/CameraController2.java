@@ -599,6 +599,32 @@ public class CameraController2 extends CameraController {
 		return metering_rectangle;
 	}
 
+	private Area convertMeteringRectangleToArea(Rect sensor_rect, MeteringRectangle metering_rectangle) {
+		// inverse of convertAreaToMeteringRectangle()
+
+		double left_f = (metering_rectangle.getRect().left)/(double)(sensor_rect.width()-1);
+		double top_f = (metering_rectangle.getRect().top)/(double)(sensor_rect.height()-1);
+		double right_f = (metering_rectangle.getRect().right)/(double)(sensor_rect.width()-1);
+		double bottom_f = (metering_rectangle.getRect().bottom)/(double)(sensor_rect.height()-1);
+		int sensor_left = (int)(left_f * 2000) - 1000;
+		int sensor_right = (int)(right_f * 2000) - 1000;
+		int sensor_top = (int)(top_f * 2000) - 1000;
+		int sensor_bottom = (int)(bottom_f * 2000) - 1000;
+
+		sensor_left = Math.max(sensor_left, -1000);
+		sensor_right = Math.max(sensor_right, -1000);
+		sensor_top = Math.max(sensor_top, -1000);
+		sensor_bottom = Math.max(sensor_bottom, -1000);
+		sensor_left = Math.min(sensor_left, 1000);
+		sensor_right = Math.min(sensor_right, 1000);
+		sensor_top = Math.min(sensor_top, 1000);
+		sensor_bottom = Math.min(sensor_bottom, 1000);
+
+		Rect area_rect = new Rect(sensor_left, sensor_top, sensor_right, sensor_bottom);
+		Area area = new Area(area_rect, metering_rectangle.getMeteringWeight());
+		return area;
+	}
+
 	@Override
 	boolean setFocusAndMeteringArea(List<Area> areas) {
 		/*if( previewBuilder == null || captureSession == null ) {
@@ -658,14 +684,32 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public List<Area> getFocusAreas() {
-		// TODO Auto-generated method stub
-		return null;
+		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) == 0 )
+			return null;
+    	MeteringRectangle [] metering_rectangles = previewBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
+    	if( metering_rectangles == null )
+    		return null;
+		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		List<Area> areas = new ArrayList<CameraController.Area>();
+		for(int i=0;i<metering_rectangles.length;i++) {
+			areas.add(convertMeteringRectangleToArea(sensor_rect, metering_rectangles[i]));
+		}
+		return areas;
 	}
 
 	@Override
 	public List<Area> getMeteringAreas() {
-		// TODO Auto-generated method stub
-		return null;
+		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) == 0 )
+			return null;
+    	MeteringRectangle [] metering_rectangles = previewBuilder.get(CaptureRequest.CONTROL_AE_REGIONS);
+    	if( metering_rectangles == null )
+    		return null;
+		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		List<Area> areas = new ArrayList<CameraController.Area>();
+		for(int i=0;i<metering_rectangles.length;i++) {
+			areas.add(convertMeteringRectangleToArea(sensor_rect, metering_rectangles[i]));
+		}
+		return areas;
 	}
 
 	@Override
@@ -680,7 +724,10 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	boolean focusIsVideo() {
-		// TODO Auto-generated method stub
+		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO ) {
+			return true;
+		}
 		return false;
 	}
 
