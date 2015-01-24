@@ -43,6 +43,7 @@ public class CameraController2 extends CameraController {
 	private CameraCaptureSession captureSession = null;
 	private CaptureRequest.Builder previewBuilder = null;
 	private AutoFocusCallback autofocus_cb = null;
+	private FaceDetectionListener face_detection_listener = null;
 	private ImageReader imageReader = null;
 	//private ImageReader previewImageReader = null;
 	private SurfaceHolder holder = null;
@@ -575,54 +576,71 @@ public class CameraController2 extends CameraController {
 		// TODO Auto-generated method stub
 
 	}
-	
-	private MeteringRectangle convertAreaToMeteringRectangle(Rect sensor_rect, Area area) {
+
+	private Rect convertRectToCamera2(Rect sensor_rect, Rect rect) {
 		// CameraController.Area is always [-1000, -1000] to [1000, 1000]
 		// but for CameraController2, we must convert to [0, 0] to [sensor width-1, sensor height-1] for use as a MeteringRectangle
-		double left_f = (area.rect.left+1000)/2000.0;
-		double top_f = (area.rect.top+1000)/2000.0;
-		double right_f = (area.rect.right+1000)/2000.0;
-		double bottom_f = (area.rect.bottom+1000)/2000.0;
-		int sensor_left = (int)(left_f * (sensor_rect.width()-1));
-		int sensor_right = (int)(right_f * (sensor_rect.width()-1));
-		int sensor_top = (int)(top_f * (sensor_rect.height()-1));
-		int sensor_bottom = (int)(bottom_f * (sensor_rect.height()-1));
-		sensor_left = Math.max(sensor_left, 0);
-		sensor_right = Math.max(sensor_right, 0);
-		sensor_top = Math.max(sensor_top, 0);
-		sensor_bottom = Math.max(sensor_bottom, 0);
-		sensor_left = Math.min(sensor_left, sensor_rect.width()-1);
-		sensor_right = Math.min(sensor_right, sensor_rect.width()-1);
-		sensor_top = Math.min(sensor_top, sensor_rect.height()-1);
-		sensor_bottom = Math.min(sensor_bottom, sensor_rect.height()-1);
-		MeteringRectangle metering_rectangle = new MeteringRectangle(sensor_left, sensor_top, sensor_right, sensor_bottom, area.weight);
+		double left_f = (rect.left+1000)/2000.0;
+		double top_f = (rect.top+1000)/2000.0;
+		double right_f = (rect.right+1000)/2000.0;
+		double bottom_f = (rect.bottom+1000)/2000.0;
+		int left = (int)(left_f * (sensor_rect.width()-1));
+		int right = (int)(right_f * (sensor_rect.width()-1));
+		int top = (int)(top_f * (sensor_rect.height()-1));
+		int bottom = (int)(bottom_f * (sensor_rect.height()-1));
+		left = Math.max(left, 0);
+		right = Math.max(right, 0);
+		top = Math.max(top, 0);
+		bottom = Math.max(bottom, 0);
+		left = Math.min(left, sensor_rect.width()-1);
+		right = Math.min(right, sensor_rect.width()-1);
+		top = Math.min(top, sensor_rect.height()-1);
+		bottom = Math.min(bottom, sensor_rect.height()-1);
+
+		Rect camera2_rect = new Rect(left, top, right, bottom);
+		return camera2_rect;
+	}
+
+	private MeteringRectangle convertAreaToMeteringRectangle(Rect sensor_rect, Area area) {
+		Rect camera2_rect = convertRectToCamera2(sensor_rect, area.rect);
+		MeteringRectangle metering_rectangle = new MeteringRectangle(camera2_rect, area.weight);
 		return metering_rectangle;
 	}
 
+	private Rect convertRectFromCamera2(Rect sensor_rect, Rect camera2_rect) {
+		// inverse of convertRectToCamera2()
+		double left_f = camera2_rect.left/(double)(sensor_rect.width()-1);
+		double top_f = camera2_rect.top/(double)(sensor_rect.height()-1);
+		double right_f = camera2_rect.right/(double)(sensor_rect.width()-1);
+		double bottom_f = camera2_rect.bottom/(double)(sensor_rect.height()-1);
+		int left = (int)(left_f * 2000) - 1000;
+		int right = (int)(right_f * 2000) - 1000;
+		int top = (int)(top_f * 2000) - 1000;
+		int bottom = (int)(bottom_f * 2000) - 1000;
+
+		left = Math.max(left, -1000);
+		right = Math.max(right, -1000);
+		top = Math.max(top, -1000);
+		bottom = Math.max(bottom, -1000);
+		left = Math.min(left, 1000);
+		right = Math.min(right, 1000);
+		top = Math.min(top, 1000);
+		bottom = Math.min(bottom, 1000);
+
+		Rect rect = new Rect(left, top, right, bottom);
+		return rect;
+	}
+
 	private Area convertMeteringRectangleToArea(Rect sensor_rect, MeteringRectangle metering_rectangle) {
-		// inverse of convertAreaToMeteringRectangle()
-
-		double left_f = (metering_rectangle.getRect().left)/(double)(sensor_rect.width()-1);
-		double top_f = (metering_rectangle.getRect().top)/(double)(sensor_rect.height()-1);
-		double right_f = (metering_rectangle.getRect().right)/(double)(sensor_rect.width()-1);
-		double bottom_f = (metering_rectangle.getRect().bottom)/(double)(sensor_rect.height()-1);
-		int sensor_left = (int)(left_f * 2000) - 1000;
-		int sensor_right = (int)(right_f * 2000) - 1000;
-		int sensor_top = (int)(top_f * 2000) - 1000;
-		int sensor_bottom = (int)(bottom_f * 2000) - 1000;
-
-		sensor_left = Math.max(sensor_left, -1000);
-		sensor_right = Math.max(sensor_right, -1000);
-		sensor_top = Math.max(sensor_top, -1000);
-		sensor_bottom = Math.max(sensor_bottom, -1000);
-		sensor_left = Math.min(sensor_left, 1000);
-		sensor_right = Math.min(sensor_right, 1000);
-		sensor_top = Math.min(sensor_top, 1000);
-		sensor_bottom = Math.min(sensor_bottom, 1000);
-
-		Rect area_rect = new Rect(sensor_left, sensor_top, sensor_right, sensor_bottom);
+		Rect area_rect = convertRectFromCamera2(sensor_rect, metering_rectangle.getRect());
 		Area area = new Area(area_rect, metering_rectangle.getMeteringWeight());
 		return area;
+	}
+	
+	private CameraController.Face convertFromCameraFace(Rect sensor_rect, android.hardware.camera2.params.Face camera2_face) {
+		Rect area_rect = convertRectFromCamera2(sensor_rect, camera2_face.getBounds());
+		CameraController.Face face = new CameraController.Face(camera2_face.getScore(), area_rect);
+		return face;
 	}
 
 	@Override
@@ -901,14 +919,17 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean startFaceDetection() {
-		// TODO Auto-generated method stub
-		return false;
+    	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
+    		return false;
+    	}
+    	previewBuilder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE);
+    	setRepeatingRequest();
+		return true;
 	}
 
 	@Override
 	void setFaceDetectionListener(FaceDetectionListener listener) {
-		// TODO Auto-generated method stub
-
+		this.face_detection_listener = listener;
 	}
 
 	@Override
@@ -1047,6 +1068,15 @@ public class CameraController2 extends CameraController {
 					autofocus_cb.onAutoFocus(af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED);
 					autofocus_cb = null;
 				}
+			}
+			if( face_detection_listener != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
+				Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+				android.hardware.camera2.params.Face [] camera_faces = result.get(CaptureResult.STATISTICS_FACES);
+				CameraController.Face [] faces = new CameraController.Face[camera_faces.length];
+				for(int i=0;i<camera_faces.length;i++) {
+					faces[i] = convertFromCameraFace(sensor_rect, camera_faces[i]);
+				}
+				face_detection_listener.onFaceDetection(faces);
 			}
 		}
 	};

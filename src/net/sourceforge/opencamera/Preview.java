@@ -2756,7 +2756,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 			p.setStyle(Paint.Style.STROKE);
 			for(CameraController.Face face : faces_detected) {
-				// Android doc recommends filtering out faces with score less than 50
+				// Android doc recommends filtering out faces with score less than 50 (same for both Camera and Camera2 APIs)
 				if( face.score >= 50 ) {
 					calculateCameraToPreviewMatrix();
 					face_rect.set(face.rect);
