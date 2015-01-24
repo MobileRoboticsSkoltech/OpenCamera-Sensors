@@ -29,6 +29,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
+import android.util.Range;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -68,6 +69,9 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "camera opened");
 				CameraController2.this.camera = camera;
 				callback_done = true;
+
+				// note, this won't start the preview yet, but we create the previewBuilder in order to start setting camera parameters
+				createPreviewRequest();
 			}
 
 			@Override
@@ -264,7 +268,11 @@ public class CameraController2 extends CameraController {
 
 		camera_features.is_exposure_lock_supported = true;
 
-	    return camera_features;
+		Range<Integer> exposure_range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
+		camera_features.min_exposure = exposure_range.getLower();
+		camera_features.max_exposure = exposure_range.getUpper();
+
+		return camera_features;
 	}
 
 	@Override
@@ -398,13 +406,20 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	int getExposureCompensation() {
-		// TODO Auto-generated method stub
-		return 0;
+		return previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION);
 	}
 
 	@Override
+	// Returns whether exposure was modified
 	boolean setExposureCompensation(int new_exposure) {
-		// TODO Auto-generated method stub
+		int current_exposure = previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION);
+		if( new_exposure != current_exposure ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "change exposure from " + current_exposure + " to " + new_exposure);
+	    	previewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, new_exposure);
+	    	setRepeatingRequest();
+        	return true;
+		}
 		return false;
 	}
 
@@ -454,8 +469,8 @@ public class CameraController2 extends CameraController {
 	void setFocusValue(String focus_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusValue: " + focus_value);
-		if( previewBuilder == null || captureSession == null )
-			return;
+		/*if( previewBuilder == null || captureSession == null )
+			return;*/
 		int focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
     	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_manual") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
@@ -499,8 +514,8 @@ public class CameraController2 extends CameraController {
 	
 	@Override
 	public String getFocusValue() {
-		if( previewBuilder == null || captureSession == null )
-			return "";
+		/*if( previewBuilder == null || captureSession == null )
+			return "";*/
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 		return convertFocusModeToValue(focus_mode);
 	}
@@ -586,11 +601,11 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	boolean setFocusAndMeteringArea(List<Area> areas) {
-		if( previewBuilder == null || captureSession == null ) {
+		/*if( previewBuilder == null || captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "capture session not available");
 			return false;
-		}
+		}*/
 
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
 		boolean has_focus = false;
@@ -639,8 +654,8 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	boolean supportsAutoFocus() {
-		if( previewBuilder == null || captureSession == null )
-			return false;
+		/*if( previewBuilder == null || captureSession == null )
+			return false;*/
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_AUTO || focus_mode == CaptureRequest.CONTROL_AF_MODE_MACRO )
 			return true;
@@ -678,7 +693,7 @@ public class CameraController2 extends CameraController {
 	private void setRepeatingRequest() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setRepeatingRequest");
-		if( previewBuilder == null || captureSession == null )
+		if( /*previewBuilder == null ||*/ captureSession == null )
 			return;
 		try {
 			captureSession.setRepeatingRequest(previewBuilder.build(), mCaptureCallback, null);
@@ -691,7 +706,7 @@ public class CameraController2 extends CameraController {
 	private void capture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "capture");
-		if( previewBuilder == null || captureSession == null )
+		if( /*previewBuilder == null ||*/ captureSession == null )
 			return;
 		try {
 			captureSession.capture(previewBuilder.build(), mCaptureCallback, null);
@@ -702,12 +717,16 @@ public class CameraController2 extends CameraController {
 	}
 	
 	private void createPreviewRequest() {
-		if( camera == null || captureSession == null ) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "createPreviewRequest");
+		if( camera == null /*|| captureSession == null*/ ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not available!");
 			return;
 		}
 		try {
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-			if( MyDebug.LOG && holder != null ) {
+			/*if( MyDebug.LOG && holder != null ) {
 				Log.d(TAG, "holder surface: " + holder.getSurface());
 				if( holder.getSurface() == null )
 					Log.d(TAG, "holder surface is null!");
@@ -721,7 +740,7 @@ public class CameraController2 extends CameraController {
             else if( texture != null ) {
             	surface = new Surface(texture);
             }
-			previewBuilder.addTarget(surface);
+			previewBuilder.addTarget(surface);*/
 
 			previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
 			//previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
@@ -731,7 +750,7 @@ public class CameraController2 extends CameraController {
 			setRepeatingRequest();
 		}
 		catch(CameraAccessException e) {
-			captureSession = null;
+			//captureSession = null;
 			e.printStackTrace();
 		} 
 	}
@@ -743,7 +762,7 @@ public class CameraController2 extends CameraController {
 
 		try {
 			captureSession = null;
-			previewBuilder = null;
+			//previewBuilder = null;
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "picture size: " + imageReader.getWidth() + " x " + imageReader.getHeight());
@@ -759,7 +778,23 @@ public class CameraController2 extends CameraController {
 						return;
 					}
 					captureSession = session;
-					createPreviewRequest();
+					//createPreviewRequest();
+					if( MyDebug.LOG && holder != null ) {
+						Log.d(TAG, "holder surface: " + holder.getSurface());
+						if( holder.getSurface() == null )
+							Log.d(TAG, "holder surface is null!");
+						else if( !holder.getSurface().isValid() )
+							Log.d(TAG, "holder surface is not valid!");
+					}
+		        	Surface surface = null;
+		            if( holder != null ) {
+		            	surface = holder.getSurface();
+		            }
+		            else if( texture != null ) {
+		            	surface = new Surface(texture);
+		            }
+					previewBuilder.addTarget(surface);
+					setRepeatingRequest();
 				}
 
 				@Override
@@ -817,7 +852,7 @@ public class CameraController2 extends CameraController {
 	void autoFocus(AutoFocusCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoFocus");
-		if( previewBuilder == null || captureSession == null ) {
+		if( /*previewBuilder == null ||*/ captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "capture session not available");
 			return;
@@ -859,7 +894,7 @@ public class CameraController2 extends CameraController {
 	void cancelAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
-		if( previewBuilder == null || captureSession == null )
+		if( /*previewBuilder == null ||*/ captureSession == null )
 			return;
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
     	//setRepeatingRequest();
