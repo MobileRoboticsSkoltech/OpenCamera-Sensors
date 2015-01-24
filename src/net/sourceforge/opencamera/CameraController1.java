@@ -709,6 +709,7 @@ class CameraController1 extends CameraController {
 			return false;
 		return parameters.getAutoExposureLock();
 	}
+
 	void setRotation(int rotation) {
 		Camera.Parameters parameters = this.getParameters();
 		parameters.setRotation(rotation);
