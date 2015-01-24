@@ -9,6 +9,7 @@ import java.util.Vector;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -19,6 +20,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
+import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
 import android.media.ImageReader;
@@ -34,9 +36,9 @@ import android.view.SurfaceHolder;
 public class CameraController2 extends CameraController {
 	private static final String TAG = "CameraController2";
 
-	private Context context = null;
 	private CameraDevice camera = null;
 	private String cameraIdS = null;
+	private CameraCharacteristics characteristics = null;
 	private CameraCaptureSession captureSession = null;
 	private CaptureRequest.Builder previewBuilder = null;
 	private AutoFocusCallback autofocus_cb = null;
@@ -46,12 +48,13 @@ public class CameraController2 extends CameraController {
 	private SurfaceTexture texture = null;
 	private HandlerThread thread = null; 
 	Handler handler = null;
-	
+
+	//private MeteringRectangle [] focus_areas = null;
+	//private MeteringRectangle [] metering_areas = null;
+
 	public CameraController2(Context context, int cameraId) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController2: " + cameraId);
-
-		this.context = context;
 
 		thread = new HandlerThread("CameraBackground"); 
 		thread.start(); 
@@ -95,6 +98,7 @@ public class CameraController2 extends CameraController {
 		try {
 			this.cameraIdS = manager.getCameraIdList()[cameraId];
 			manager.openCamera(cameraIdS, myStateCallback, handler);
+		    characteristics = manager.getCameraCharacteristics(cameraIdS);
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
@@ -198,73 +202,65 @@ public class CameraController2 extends CameraController {
 	CameraFeatures getCameraFeatures() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCameraFeatures()");
-	    CameraFeatures camera_features = new CameraFeatures();
-		CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
-		try {
-		    CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
-
-			if( MyDebug.LOG ) {
-				int hardware_level = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-				if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY )
-					Log.d(TAG, "Hardware Level: LEGACY");
-				else if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED )
-					Log.d(TAG, "Hardware Level: LIMITED");
-				else if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL )
-					Log.d(TAG, "Hardware Level: FULL");
-				else
-					Log.e(TAG, "Unknown Hardware Level!");
-			}
-
-		    // TODO: zoom
-		    
-			int [] face_modes = characteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
-			camera_features.supports_face_detection = false;
-			for(int i=0;i<face_modes.length && !camera_features.supports_face_detection;i++) {
-				if( face_modes[i] == CameraCharacteristics.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
-					camera_features.supports_face_detection = true;
-				}
-			}
-			if( camera_features.supports_face_detection ) {
-				int face_count = characteristics.get(CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT);
-				if( face_count <= 0 ) {
-					camera_features.supports_face_detection = false;
-				}
-			}
-
-			StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-
-		    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
-			camera_features.picture_sizes = new ArrayList<CameraController.Size>();
-			for(android.util.Size camera_size : camera_picture_sizes) {
-				camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
-			}
-
-		    android.util.Size [] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
-			camera_features.video_sizes = new ArrayList<CameraController.Size>();
-			for(android.util.Size camera_size : camera_video_sizes) {
-				camera_features.video_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
-			}
-
-			//android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceHolder.class);
-			android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceTexture.class);
-			camera_features.preview_sizes = new ArrayList<CameraController.Size>();
-			for(android.util.Size camera_size : camera_preview_sizes) {
-				camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
-			}
-			
-			// TODO: current_fps_range
-			
-			if( characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ) {
-				// TODO: flash
-			}
-
-			int [] supported_focus_modes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES); // Android format
-			camera_features.supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
-			camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
+		CameraFeatures camera_features = new CameraFeatures();
+		if( MyDebug.LOG ) {
+			int hardware_level = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+			if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY )
+				Log.d(TAG, "Hardware Level: LEGACY");
+			else if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED )
+				Log.d(TAG, "Hardware Level: LIMITED");
+			else if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL )
+				Log.d(TAG, "Hardware Level: FULL");
+			else
+				Log.e(TAG, "Unknown Hardware Level!");
 		}
-		catch(CameraAccessException e) {
-			e.printStackTrace();
+
+	    // TODO: zoom
+	    
+		int [] face_modes = characteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
+		camera_features.supports_face_detection = false;
+		for(int i=0;i<face_modes.length && !camera_features.supports_face_detection;i++) {
+			if( face_modes[i] == CameraCharacteristics.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
+				camera_features.supports_face_detection = true;
+			}
 		}
+		if( camera_features.supports_face_detection ) {
+			int face_count = characteristics.get(CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT);
+			if( face_count <= 0 ) {
+				camera_features.supports_face_detection = false;
+			}
+		}
+
+		StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+	    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
+		camera_features.picture_sizes = new ArrayList<CameraController.Size>();
+		for(android.util.Size camera_size : camera_picture_sizes) {
+			camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+		}
+
+	    android.util.Size [] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
+		camera_features.video_sizes = new ArrayList<CameraController.Size>();
+		for(android.util.Size camera_size : camera_video_sizes) {
+			camera_features.video_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+		}
+
+		//android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceHolder.class);
+		android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceTexture.class);
+		camera_features.preview_sizes = new ArrayList<CameraController.Size>();
+		for(android.util.Size camera_size : camera_preview_sizes) {
+			camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+		}
+		
+		// TODO: current_fps_range
+		
+		if( characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ) {
+			// TODO: flash
+		}
+
+		int [] supported_focus_modes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES); // Android format
+		camera_features.supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
+
 	    return camera_features;
 	}
 
@@ -444,7 +440,7 @@ public class CameraController2 extends CameraController {
 	@Override
 	public String getDefaultISO() {
 		// TODO Auto-generated method stub
-		return null;
+		return "";
 	}
 
 	@Override
@@ -558,11 +554,63 @@ public class CameraController2 extends CameraController {
 		// TODO Auto-generated method stub
 
 	}
+	
+	private MeteringRectangle convertAreaToMeteringRectangle(Rect sensor_rect, Area area) {
+		// CameraController.Area is always [-1000, -1000] to [1000, 1000]
+		// but for CameraController2, we must convert to [0, 0] to [sensor width-1, sensor height-1] for use as a MeteringRectangle
+		double left_f = (area.rect.left+1000)/2000.0;
+		double top_f = (area.rect.top+1000)/2000.0;
+		double right_f = (area.rect.right+1000)/2000.0;
+		double bottom_f = (area.rect.bottom+1000)/2000.0;
+		int sensor_left = (int)(left_f * (sensor_rect.width()-1));
+		int sensor_right = (int)(right_f * (sensor_rect.width()-1));
+		int sensor_top = (int)(top_f * (sensor_rect.height()-1));
+		int sensor_bottom = (int)(bottom_f * (sensor_rect.height()-1));
+		sensor_left = Math.max(sensor_left, 0);
+		sensor_right = Math.max(sensor_right, 0);
+		sensor_top = Math.max(sensor_top, 0);
+		sensor_bottom = Math.max(sensor_bottom, 0);
+		sensor_left = Math.min(sensor_left, sensor_rect.width()-1);
+		sensor_right = Math.min(sensor_right, sensor_rect.width()-1);
+		sensor_top = Math.min(sensor_top, sensor_rect.height()-1);
+		sensor_bottom = Math.min(sensor_bottom, sensor_rect.height()-1);
+		MeteringRectangle metering_rectangle = new MeteringRectangle(sensor_left, sensor_top, sensor_right, sensor_bottom, area.weight);
+		return metering_rectangle;
+	}
 
 	@Override
 	boolean setFocusAndMeteringArea(List<Area> areas) {
-		// TODO Auto-generated method stub
-		return false;
+		if( previewBuilder == null || captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "capture session not available");
+			return false;
+		}
+
+		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		boolean has_focus = false;
+		boolean has_metering = false;
+		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
+			has_focus = true;
+			MeteringRectangle [] focus_areas = new MeteringRectangle[areas.size()];
+			int i = 0;
+			for(CameraController.Area area : areas) {
+				focus_areas[i++] = convertAreaToMeteringRectangle(sensor_rect, area);
+			}
+        	previewBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, focus_areas);
+		}
+		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
+			has_metering = true;
+			MeteringRectangle [] metering_areas = new MeteringRectangle[areas.size()];
+			int i = 0;
+			for(CameraController.Area area : areas) {
+				metering_areas[i++] = convertAreaToMeteringRectangle(sensor_rect, area);
+			}
+        	previewBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, metering_areas);
+		}
+		if( has_focus || has_metering ) {
+			setRepeatingRequest();
+		}
+		return has_focus;
 	}
 
 	@Override
@@ -646,6 +694,41 @@ public class CameraController2 extends CameraController {
 			e.printStackTrace();
 		}
 	}
+	
+	private void createPreviewRequest() {
+		if( camera == null || captureSession == null ) {
+			return;
+		}
+		try {
+			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+			if( MyDebug.LOG && holder != null ) {
+				Log.d(TAG, "holder surface: " + holder.getSurface());
+				if( holder.getSurface() == null )
+					Log.d(TAG, "holder surface is null!");
+				else if( !holder.getSurface().isValid() )
+					Log.d(TAG, "holder surface is not valid!");
+			}
+        	Surface surface = null;
+            if( holder != null ) {
+            	surface = holder.getSurface();
+            }
+            else if( texture != null ) {
+            	surface = new Surface(texture);
+            }
+			previewBuilder.addTarget(surface);
+
+			previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
+			//previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+			previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+			//previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+
+			setRepeatingRequest();
+		}
+		catch(CameraAccessException e) {
+			captureSession = null;
+			e.printStackTrace();
+		} 
+	}
 
 	@Override
 	void startPreview() {
@@ -660,23 +743,6 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "picture size: " + imageReader.getWidth() + " x " + imageReader.getHeight());
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "preview size: " + previewImageReader.getWidth() + " x " + previewImageReader.getHeight());*/
-        	Surface surface = null;
-            if( holder != null ) {
-            	surface = holder.getSurface();
-            }
-            else if( texture != null ) {
-            	surface = new Surface(texture);
-            }
-
-			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-			if( MyDebug.LOG && holder != null ) {
-				Log.d(TAG, "holder surface: " + holder.getSurface());
-				if( holder.getSurface() == null )
-					Log.d(TAG, "holder surface is null!");
-				else if( !holder.getSurface().isValid() )
-					Log.d(TAG, "holder surface is not valid!");
-			}
-			previewBuilder.addTarget(surface);
 
 			class MyStateCallback extends CameraCaptureSession.StateCallback {
 				@Override
@@ -687,10 +753,7 @@ public class CameraController2 extends CameraController {
 						return;
 					}
 					captureSession = session;
-					previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
-					//previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-					previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-					setRepeatingRequest();
+					createPreviewRequest();
 				}
 
 				@Override
@@ -701,6 +764,13 @@ public class CameraController2 extends CameraController {
 			}
 			MyStateCallback myStateCallback = new MyStateCallback();
 
+        	Surface surface = null;
+            if( holder != null ) {
+            	surface = holder.getSurface();
+            }
+            else if( texture != null ) {
+            	surface = new Surface(texture);
+            }
 			camera.createCaptureSession(Arrays.asList(surface/*, previewImageReader.getSurface()*/, imageReader.getSurface()),
 				myStateCallback,
 		 		null);
@@ -708,7 +778,7 @@ public class CameraController2 extends CameraController {
 		catch(CameraAccessException e) {
 			e.printStackTrace();
 			//throw new IOException();
-		} 
+		}
 	}
 
 	@Override
@@ -746,8 +816,27 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "capture session not available");
 			return;
 		}
-    	//previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+		if( MyDebug.LOG ) {
+			{
+				MeteringRectangle [] areas = previewBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
+				for(int i=0;i<areas.length;i++) {
+					Log.d(TAG, i + " focus area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
+				}
+			}
+			{
+				MeteringRectangle [] areas = previewBuilder.get(CaptureRequest.CONTROL_AE_REGIONS);
+				for(int i=0;i<areas.length;i++) {
+					Log.d(TAG, i + " metering area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
+				}
+			}
+		}
+    	/*if( focus_areas != null ) {
+        	previewBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, focus_areas);
+    	}
+    	if( metering_areas != null ) {
+        	previewBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, metering_areas);
+    	}*/
     	//previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
     	/*previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, 0.0f);
 		if( MyDebug.LOG ) {
@@ -757,6 +846,7 @@ public class CameraController2 extends CameraController {
     	//setRepeatingRequest();
     	capture();
 		this.autofocus_cb = cb;
+    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 	}
 
 	@Override
@@ -768,6 +858,7 @@ public class CameraController2 extends CameraController {
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
     	//setRepeatingRequest();
     	capture();
+    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 		this.autofocus_cb = null;
 	}
 
@@ -836,6 +927,7 @@ public class CameraController2 extends CameraController {
 			if( autofocus_cb != null ) {
 				// check for autofocus completing
 				int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+				//Log.d(TAG, "onCaptureCompleted: af_state: " + af_state);
 				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ) {
 					if( MyDebug.LOG ) {
 						if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
@@ -846,6 +938,7 @@ public class CameraController2 extends CameraController {
 					// we need to cancel af trigger, otherwise sometimes things seem to get confused, with the autofocus thinking it's completed too early
 			    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 			    	capture();
+			    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 
 					autofocus_cb.onAutoFocus(af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED);
 					autofocus_cb = null;
