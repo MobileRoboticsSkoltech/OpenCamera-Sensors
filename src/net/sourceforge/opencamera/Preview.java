@@ -4561,14 +4561,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	    	    showToast(null, R.string.failed_to_save_photo);
     	        }
 
-    			is_preview_started = false; // preview automatically stopped due to taking photo
+    	        if( !using_android_l ) {
+    	        	is_preview_started = false; // preview automatically stopped due to taking photo on original Camera API
+    	        }
     	        phase = PHASE_NORMAL; // need to set this even if remaining burst photos, so we can restart the preview
 	            if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
-	    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
-	    	    	// (otherwise this can fail, at least on Nexus 7)
-		            startCameraPreview();
-	        		if( MyDebug.LOG )
-	        			Log.d(TAG, "burst mode photos remaining: onPictureTaken started preview");
+	            	if( !is_preview_started ) {
+		    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
+		    	    	// (otherwise this can fail, at least on Nexus 7)
+			            startCameraPreview();
+		        		if( MyDebug.LOG )
+		        			Log.d(TAG, "burst mode photos remaining: onPictureTaken started preview");
+	            	}
 	            }
 	            else {
 	    	        phase = PHASE_NORMAL;
@@ -4576,13 +4580,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        		if( MyDebug.LOG )
 	        			Log.d(TAG, "pause_preview? " + pause_preview);
 					if( pause_preview && success ) {
+						if( is_preview_started ) {
+							// need to manually stop preview on Android L Camera2
+							camera_controller.stopPreview();
+							is_preview_started = false;
+						}
 		    			setPreviewPaused(true);
 		    			preview_image_name = picFileName;
 					}
 					else {
-		    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
-		    	    	// (otherwise this can fail, at least on Nexus 7)
-			            startCameraPreview();
+		            	if( !is_preview_started ) {
+			    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
+			    	    	// (otherwise this can fail, at least on Nexus 7)
+				            startCameraPreview();
+		            	}
 						showGUI(true);
 		        		if( MyDebug.LOG )
 		        			Log.d(TAG, "onPictureTaken started preview");
