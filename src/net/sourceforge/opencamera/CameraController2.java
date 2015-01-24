@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +24,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
+import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.os.Build;
@@ -45,6 +47,7 @@ public class CameraController2 extends CameraController {
 	private AutoFocusCallback autofocus_cb = null;
 	private FaceDetectionListener face_detection_listener = null;
 	private ImageReader imageReader = null;
+	private PictureCallback jpeg_cb = null;
 	//private ImageReader previewImageReader = null;
 	private SurfaceHolder holder = null;
 	private SurfaceTexture texture = null;
@@ -336,6 +339,28 @@ public class CameraController2 extends CameraController {
 			imageReader.close();
 		}
 		imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2); 
+		imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+			@Override
+			public void onImageAvailable(ImageReader reader) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "new still image available");
+				if( jpeg_cb == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "no picture callback available");
+					return;
+				}
+				Image image = reader.acquireNextImage();
+	            ByteBuffer buffer = image.getPlanes()[0].getBuffer(); 
+	            byte [] bytes = new byte[buffer.remaining()]; 
+				if( MyDebug.LOG )
+					Log.d(TAG, "read " + bytes.length + " bytes");
+	            buffer.get(bytes);
+	            image.close();
+	            image = null;
+	            jpeg_cb.onPictureTaken(bytes);
+				cancelAutoFocus();
+			}
+		}, null);
 	}
 
 	private int preview_width = 0;
@@ -777,7 +802,7 @@ public class CameraController2 extends CameraController {
 		if( /*previewBuilder == null ||*/ captureSession == null )
 			return;
 		try {
-			captureSession.setRepeatingRequest(previewBuilder.build(), mCaptureCallback, null);
+			captureSession.setRepeatingRequest(previewBuilder.build(), previewCaptureCallback, null);
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
@@ -790,7 +815,7 @@ public class CameraController2 extends CameraController {
 		if( /*previewBuilder == null ||*/ captureSession == null )
 			return;
 		try {
-			captureSession.capture(previewBuilder.build(), mCaptureCallback, null);
+			captureSession.capture(previewBuilder.build(), previewCaptureCallback, null);
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
@@ -840,6 +865,12 @@ public class CameraController2 extends CameraController {
 	void startPreview() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startPreview");
+		if( captureSession != null ) {
+			setRepeatingRequest();
+			return;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "create new preview");
 
 		try {
 			captureSession = null;
@@ -928,12 +959,12 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setFaceDetectionListener(FaceDetectionListener listener) {
+	void setFaceDetectionListener(final FaceDetectionListener listener) {
 		this.face_detection_listener = listener;
 	}
 
 	@Override
-	void autoFocus(AutoFocusCallback cb) {
+	void autoFocus(final AutoFocusCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoFocus");
 		if( /*previewBuilder == null ||*/ captureSession == null ) {
@@ -988,9 +1019,24 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void takePicture(PictureCallback raw, PictureCallback jpeg) {
-		// TODO Auto-generated method stub
+	void takePicture(final PictureCallback raw, final PictureCallback jpeg) {
+		try {
+			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			stillBuilder.addTarget(imageReader.getSurface());
 
+			CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
+				public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "still onCaptureCompleted");
+					// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
+				}
+			};
+			this.jpeg_cb = jpeg;
+			captureSession.capture(stillBuilder.build(), stillCaptureCallback, null);
+		}
+		catch(CameraAccessException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -1005,14 +1051,12 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	int getCameraOrientation() {
-		// TODO Auto-generated method stub
-		return 0;
+		return characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
 	}
 
 	@Override
 	boolean isFrontFacing() {
-		// TODO Auto-generated method stub
-		return false;
+		return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
 	}
 
 	@Override
@@ -1029,14 +1073,13 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	String getParametersString() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private CameraCaptureSession.CaptureCallback mCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
+	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
 		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
 			/*if( MyDebug.LOG )
-				Log.d(TAG, "onCaptureCompleted");*/
+				Log.d(TAG, "preview onCaptureCompleted");*/
 			/*int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			if( af_state != CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN ) {
 				if( MyDebug.LOG )
