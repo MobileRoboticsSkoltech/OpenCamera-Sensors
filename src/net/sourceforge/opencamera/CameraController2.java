@@ -636,8 +636,24 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void clearFocusAndMetering() {
-		// TODO Auto-generated method stub
-
+		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		boolean has_focus = false;
+		boolean has_metering = false;
+		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
+			has_focus = true;
+			MeteringRectangle [] focus_areas = new MeteringRectangle[1];
+			focus_areas[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
+        	previewBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, focus_areas);
+		}
+		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
+			has_metering = true;
+			MeteringRectangle [] metering_areas = new MeteringRectangle[1];
+			metering_areas[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
+        	previewBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, metering_areas);
+		}
+		if( has_focus || has_metering ) {
+			setRepeatingRequest();
+		}
 	}
 
 	@Override
