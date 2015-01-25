@@ -143,6 +143,7 @@ public abstract class CameraController {
 	abstract void reconnect() throws IOException;
 	abstract void setPreviewDisplay(SurfaceHolder holder) throws IOException;
 	abstract void setPreviewTexture(SurfaceTexture texture) throws IOException;
+	abstract void createCaptureSession(boolean video);
 	abstract void startPreview();
 	abstract void stopPreview();
 	public abstract boolean startFaceDetection();

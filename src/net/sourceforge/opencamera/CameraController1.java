@@ -821,26 +821,36 @@ class CameraController1 extends CameraController {
 		return focus_is_video;
 	}
 	
+	@Override
 	void reconnect() throws IOException {
 		camera.reconnect();
 	}
 	
+	@Override
 	void setPreviewDisplay(SurfaceHolder holder) throws IOException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewDisplay");
 		camera.setPreviewDisplay(holder);
 	}
 	
+	@Override
 	void setPreviewTexture(SurfaceTexture texture) throws IOException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewTexture");
 		camera.setPreviewTexture(texture);
 	}
 
+	@Override
+	void createCaptureSession(boolean video) {
+		// nothing needed to be done
+	}
+
+	@Override
 	void startPreview() {
 		camera.startPreview();
 	}
 	
+	@Override
 	void stopPreview() {
 		camera.stopPreview();
 	}

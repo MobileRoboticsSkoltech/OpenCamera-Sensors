@@ -893,7 +893,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchVideo");
 		this.closePopup();
-		this.preview.switchVideo(true, true);
+		this.preview.switchVideo(true, true, true);
     }
 
     public void clickedFlash(View view) {

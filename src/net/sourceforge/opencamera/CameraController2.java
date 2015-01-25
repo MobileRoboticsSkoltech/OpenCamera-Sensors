@@ -1115,16 +1115,30 @@ public class CameraController2 extends CameraController {
 		} 
 	}
 
+	private Surface getPreviewSurface() {
+		Surface surface = null;
+        if( holder != null ) {
+        	surface = holder.getSurface();
+        }
+        else if( texture != null ) {
+        	surface = new Surface(texture);
+        }
+        return surface;
+	}
+	
 	@Override
-	void startPreview() {
+	void createCaptureSession(boolean video) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "startPreview");
+			Log.d(TAG, "initCaptureSession");
 		if( captureSession != null ) {
-			setRepeatingRequest();
-			return;
+			if( MyDebug.LOG )
+				Log.d(TAG, "close old capture session");
+			captureSession.close();
+			captureSession = null;
 		}
+
 		if( MyDebug.LOG )
-			Log.d(TAG, "create new preview");
+			Log.d(TAG, "create capture session");
 
 		try {
 			captureSession = null;
@@ -1171,21 +1185,29 @@ public class CameraController2 extends CameraController {
 			}
 			MyStateCallback myStateCallback = new MyStateCallback();
 
-        	Surface surface = null;
-            if( holder != null ) {
-            	surface = holder.getSurface();
-            }
-            else if( texture != null ) {
-            	surface = new Surface(texture);
-            }
+        	Surface surface = getPreviewSurface();
 			camera.createCaptureSession(Arrays.asList(surface/*, previewImageReader.getSurface()*/, imageReader.getSurface()),
 				myStateCallback,
 		 		null);
 		}
 		catch(CameraAccessException e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "failed to create capture session");
 			e.printStackTrace();
 			//throw new IOException();
 		}
+	}
+	
+	@Override
+	void startPreview() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startPreview");
+		if( captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "capture session not created");
+			return;
+		}
+		setRepeatingRequest();
 	}
 
 	@Override
@@ -1322,8 +1344,13 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void initVideoRecorder(MediaRecorder video_recorder) {
-		// TODO Auto-generated method stub
-
+		try {
+			CaptureRequest.Builder videoBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+			videoBuilder.addTarget(video_recorder.getSurface());
+		}
+		catch(CameraAccessException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
