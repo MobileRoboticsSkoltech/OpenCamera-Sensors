@@ -7,9 +7,12 @@ import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.location.Location;
 import android.media.MediaRecorder;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 public abstract class CameraController {
+	private static final String TAG = "CameraController";
+
 	// for testing:
 	public int count_camera_parameters_exception = 0;
 
@@ -154,4 +157,28 @@ public abstract class CameraController {
 	abstract void unlock();
 	abstract void initVideoRecorder(MediaRecorder video_recorder);
 	abstract String getParametersString();
+
+	// gets the available values of a generic mode, e.g., scene, color etc, and makes sure the requested mode is available
+	protected SupportedValues checkModeIsSupported(List<String> values, String value, String default_value) {
+		if( values != null && values.size() > 1 ) { // n.b., if there is only 1 supported value, we also return null, as no point offering the choice to the user (there are some devices, e.g., Samsung, that only have a scene mode of "auto")
+			if( MyDebug.LOG ) {
+				for(int i=0;i<values.size();i++) {
+		        	Log.d(TAG, "supported value: " + values.get(i));
+				}
+			}
+			// make sure result is valid
+			if( !values.contains(value) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "value not valid!");
+				if( values.contains(default_value) )
+					value = default_value;
+				else
+					value = values.get(0);
+				if( MyDebug.LOG )
+					Log.d(TAG, "value is now: " + value);
+			}
+			return new SupportedValues(values, value);
+		}
+		return null;
+	}
 }

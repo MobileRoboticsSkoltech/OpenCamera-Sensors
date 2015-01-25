@@ -239,30 +239,6 @@ class CameraController1 extends CameraController {
 		return camera_features;
 	}
 	
-	// gets the available values of a generic mode, e.g., scene, color etc, and makes sure the requested mode is available
-	SupportedValues checkModeIsSupported(List<String> values, String value, String default_value) {
-		if( values != null && values.size() > 1 ) { // n.b., if there is only 1 supported value, we also return null, as no point offering the choice to the user (there are some devices, e.g., Samsung, that only have a scene mode of "auto")
-			if( MyDebug.LOG ) {
-				for(int i=0;i<values.size();i++) {
-		        	Log.d(TAG, "supported value: " + values.get(i));
-				}
-			}
-			// make sure result is valid
-			if( !values.contains(value) ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "value not valid!");
-				if( values.contains(default_value) )
-					value = default_value;
-				else
-					value = values.get(0);
-				if( MyDebug.LOG )
-					Log.d(TAG, "value is now: " + value);
-			}
-			return new SupportedValues(values, value);
-		}
-		return null;
-	}
-	
 	public String getDefaultSceneMode() {
 		return Camera.Parameters.SCENE_MODE_AUTO;
 	}

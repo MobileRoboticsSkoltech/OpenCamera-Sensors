@@ -279,28 +279,278 @@ public class CameraController2 extends CameraController {
 		return camera_features;
 	}
 
+	private String convertSceneMode(int value2) {
+		String value = null;
+		switch( value2 ) {
+		case CameraMetadata.CONTROL_SCENE_MODE_ACTION:
+			value = "action";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_BARCODE:
+			value = "barcode";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_BEACH:
+			value = "beach";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_CANDLELIGHT:
+			value = "candlelight";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_DISABLED:
+			value = "auto";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_FIREWORKS:
+			value = "fireworks";
+			break;
+		// "hdr" no longer available in Camera2
+		/*case CameraMetadata.CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO:
+			// new for Camera2
+			value = "high-speed-video";
+			break;*/
+		case CameraMetadata.CONTROL_SCENE_MODE_LANDSCAPE:
+			value = "landscape";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_NIGHT:
+			value = "night";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_NIGHT_PORTRAIT:
+			value = "night-portrait";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_PARTY:
+			value = "party";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_PORTRAIT:
+			value = "portrait";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_SNOW:
+			value = "snow";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_SPORTS:
+			value = "sports";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_STEADYPHOTO:
+			value = "steadyphoto";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_SUNSET:
+			value = "sunset";
+			break;
+		case CameraMetadata.CONTROL_SCENE_MODE_THEATRE:
+			value = "theatre";
+			break;
+		default:
+			if( MyDebug.LOG )
+				Log.d(TAG, "unknown scene mode: " + value2);
+			value = null;
+			break;
+		}
+		return value;
+	}
+
 	@Override
 	SupportedValues setSceneMode(String value) {
-		// TODO Auto-generated method stub
-		return null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "setSceneMode: " + value);
+		// we convert to/from strings to be compatible with original Android Camera API
+		String default_value = getDefaultSceneMode();
+		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES);
+		List<String> values = new ArrayList<String>();
+		for(int i=0;i<values2.length;i++) {
+			String this_value = convertSceneMode(values2[i]);
+			if( this_value != null ) {
+				values.add(this_value);
+			}
+		}
+		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		if( supported_values != null ) {
+			int selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
+			if( supported_values.selected_value.equals("action") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_ACTION;
+			}
+			else if( supported_values.selected_value.equals("barcode") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_BARCODE;
+			}
+			else if( supported_values.selected_value.equals("beach") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_BEACH;
+			}
+			else if( supported_values.selected_value.equals("candlelight") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_CANDLELIGHT;
+			}
+			else if( supported_values.selected_value.equals("auto") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
+			}
+			else if( supported_values.selected_value.equals("fireworks") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_FIREWORKS;
+			}
+			// "hdr" no longer available in Camera2
+			else if( supported_values.selected_value.equals("landscape") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_LANDSCAPE;
+			}
+			else if( supported_values.selected_value.equals("night") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_NIGHT;
+			}
+			else if( supported_values.selected_value.equals("night-portrait") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_NIGHT_PORTRAIT;
+			}
+			else if( supported_values.selected_value.equals("party") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_PARTY;
+			}
+			else if( supported_values.selected_value.equals("portrait") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_PORTRAIT;
+			}
+			else if( supported_values.selected_value.equals("snow") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_SNOW;
+			}
+			else if( supported_values.selected_value.equals("sports") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_SPORTS;
+			}
+			else if( supported_values.selected_value.equals("steadyphoto") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_STEADYPHOTO;
+			}
+			else if( supported_values.selected_value.equals("sunset") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_SUNSET;
+			}
+			else if( supported_values.selected_value.equals("theatre") ) {
+				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_THEATRE;
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+			}
+
+			if( previewBuilder.get(CaptureRequest.CONTROL_SCENE_MODE) == null && selected_value2 == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
+				// can leave off
+			}
+			else if( previewBuilder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || previewBuilder.get(CaptureRequest.CONTROL_SCENE_MODE) != selected_value2 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting scene mode: " + selected_value2);
+				if( selected_value2 == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
+					previewBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+				}
+				else {
+					previewBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_USE_SCENE_MODE);
+				}
+				previewBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, selected_value2);
+		    	setRepeatingRequest();
+			}
+		}
+		return supported_values;
 	}
 
 	@Override
 	public String getSceneMode() {
-		// TODO Auto-generated method stub
-		return null;
+		if( previewBuilder.get(CaptureRequest.CONTROL_SCENE_MODE) == null )
+			return null;
+		int value2 = previewBuilder.get(CaptureRequest.CONTROL_SCENE_MODE);
+		String value = convertSceneMode(value2);
+		return value;
+	}
+
+	private String convertColorEffect(int value2) {
+		String value = null;
+		switch( value2 ) {
+		case CameraMetadata.CONTROL_EFFECT_MODE_AQUA:
+			value = "aqua";
+			break;
+		case CameraMetadata.CONTROL_EFFECT_MODE_BLACKBOARD:
+			value = "blackboard";
+			break;
+		case CameraMetadata.CONTROL_EFFECT_MODE_MONO:
+			value = "mono";
+			break;
+		case CameraMetadata.CONTROL_EFFECT_MODE_NEGATIVE:
+			value = "negative";
+			break;
+		case CameraMetadata.CONTROL_EFFECT_MODE_OFF:
+			value = "none";
+			break;
+		case CameraMetadata.CONTROL_EFFECT_MODE_POSTERIZE:
+			value = "posterize";
+			break;
+		case CameraMetadata.CONTROL_EFFECT_MODE_SEPIA:
+			value = "sepia";
+			break;
+		case CameraMetadata.CONTROL_EFFECT_MODE_SOLARIZE:
+			value = "solarize";
+			break;
+		case CameraMetadata.CONTROL_EFFECT_MODE_WHITEBOARD:
+			value = "whiteboard";
+			break;
+		default:
+			if( MyDebug.LOG )
+				Log.d(TAG, "unknown effect mode: " + value2);
+			value = null;
+			break;
+		}
+		return value;
 	}
 
 	@Override
 	SupportedValues setColorEffect(String value) {
-		// TODO Auto-generated method stub
-		return null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "setColorEffect: " + value);
+		// we convert to/from strings to be compatible with original Android Camera API
+		String default_value = getDefaultColorEffect();
+		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_EFFECTS);
+		List<String> values = new ArrayList<String>();
+		for(int i=0;i<values2.length;i++) {
+			String this_value = convertColorEffect(values2[i]);
+			if( this_value != null ) {
+				values.add(this_value);
+			}
+		}
+		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		if( supported_values != null ) {
+			int selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
+			if( supported_values.selected_value.equals("aqua") ) {
+				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_AQUA;
+			}
+			else if( supported_values.selected_value.equals("blackboard") ) {
+				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_BLACKBOARD;
+			}
+			else if( supported_values.selected_value.equals("mono") ) {
+				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_MONO;
+			}
+			else if( supported_values.selected_value.equals("negative") ) {
+				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_NEGATIVE;
+			}
+			else if( supported_values.selected_value.equals("none") ) {
+				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
+			}
+			else if( supported_values.selected_value.equals("posterize") ) {
+				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_POSTERIZE;
+			}
+			else if( supported_values.selected_value.equals("sepia") ) {
+				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_SEPIA;
+			}
+			else if( supported_values.selected_value.equals("solarize") ) {
+				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_SOLARIZE;
+			}
+			else if( supported_values.selected_value.equals("whiteboard") ) {
+				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_WHITEBOARD;
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+			}
+
+			if( previewBuilder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null && selected_value2 == CameraMetadata.CONTROL_EFFECT_MODE_OFF ) {
+				// can leave off
+			}
+			else if( previewBuilder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null || previewBuilder.get(CaptureRequest.CONTROL_EFFECT_MODE) != selected_value2 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting color effect: " + selected_value2);
+				previewBuilder.set(CaptureRequest.CONTROL_EFFECT_MODE, selected_value2);
+		    	setRepeatingRequest();
+			}
+		}
+		return supported_values;
 	}
 
 	@Override
 	public String getColorEffect() {
-		// TODO Auto-generated method stub
-		return null;
+		if( previewBuilder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null )
+			return null;
+		int value2 = previewBuilder.get(CaptureRequest.CONTROL_EFFECT_MODE);
+		String value = convertColorEffect(value2);
+		return value;
 	}
 
 	@Override
@@ -432,12 +682,14 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	int getExposureCompensation() {
+		// key is available on all devices, so don't need to check for null
 		return previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION);
 	}
 
 	@Override
 	// Returns whether exposure was modified
 	boolean setExposureCompensation(int new_exposure) {
+		// key is available on all devices, so don't need to check for null
 		int current_exposure = previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION);
 		if( new_exposure != current_exposure ) {
 			if( MyDebug.LOG )
@@ -469,14 +721,12 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public String getDefaultSceneMode() {
-		// TODO Auto-generated method stub
-		return null;
+		return "auto";
 	}
 
 	@Override
 	public String getDefaultColorEffect() {
-		// TODO Auto-generated method stub
-		return null;
+		return "none";
 	}
 
 	@Override
@@ -542,6 +792,7 @@ public class CameraController2 extends CameraController {
 	public String getFocusValue() {
 		/*if( previewBuilder == null || captureSession == null )
 			return "";*/
+		// key is available on all devices, so don't need to check for null
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 		return convertFocusModeToValue(focus_mode);
 	}
@@ -575,6 +826,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean getAutoExposureLock() {
+		// key is available on all devices, so don't need to check for null
     	return previewBuilder.get(CaptureRequest.CONTROL_AE_LOCK);
 	}
 
@@ -759,6 +1011,7 @@ public class CameraController2 extends CameraController {
 	boolean supportsAutoFocus() {
 		/*if( previewBuilder == null || captureSession == null )
 			return false;*/
+		// key is available on all devices, so don't need to check for null
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_AUTO || focus_mode == CaptureRequest.CONTROL_AF_MODE_MACRO )
 			return true;
@@ -767,6 +1020,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	boolean focusIsVideo() {
+		// key is available on all devices, so don't need to check for null
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO ) {
 			return true;
@@ -950,6 +1204,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean startFaceDetection() {
+		// key is available on all devices, so don't need to check for null
     	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
     		return false;
     	}
@@ -976,13 +1231,13 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG ) {
 			{
 				MeteringRectangle [] areas = previewBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
-				for(int i=0;i<areas.length;i++) {
+				for(int i=0;areas != null && i<areas.length;i++) {
 					Log.d(TAG, i + " focus area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
 				}
 			}
 			{
 				MeteringRectangle [] areas = previewBuilder.get(CaptureRequest.CONTROL_AE_REGIONS);
-				for(int i=0;i<areas.length;i++) {
+				for(int i=0;areas != null && i<areas.length;i++) {
 					Log.d(TAG, i + " metering area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
 				}
 			}
@@ -1112,6 +1367,7 @@ public class CameraController2 extends CameraController {
 					autofocus_cb = null;
 				}
 			}
+			// key is available on all devices, so don't need to check for null
 			if( face_detection_listener != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
 				Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
 				android.hardware.camera2.params.Face [] camera_faces = result.get(CaptureResult.STATISTICS_FACES);
