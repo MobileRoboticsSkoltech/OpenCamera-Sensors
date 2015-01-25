@@ -841,11 +841,6 @@ class CameraController1 extends CameraController {
 	}
 
 	@Override
-	void createCaptureSession(boolean video) {
-		// nothing needed to be done
-	}
-
-	@Override
 	void startPreview() {
 		camera.startPreview();
 	}
@@ -952,10 +947,17 @@ class CameraController1 extends CameraController {
 		camera.unlock();
 	}
 	
-	void initVideoRecorder(MediaRecorder video_recorder) {
+	@Override
+	void initVideoRecorderPrePrepare(MediaRecorder video_recorder) {
     	video_recorder.setCamera(camera);
 	}
 	
+	@Override
+	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) {
+		// no further actions necessary
+	}
+	
+	@Override
 	String getParametersString() {
 		return this.getParameters().flatten();
 	}

@@ -1079,7 +1079,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "saved_is_video: " + saved_is_video);
 		}
 		if( saved_is_video != this.is_video ) {
-			this.switchVideo(false, false, false);
+			this.switchVideo(false, false);
 		}
 		else if( toast_message != null ) {
 			if( toast_message.length() > 0 )
@@ -1093,7 +1093,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// and must do it after setting photo vs video mode
 		if( !this.using_android_l || !this.using_surface_holder ) {
 			setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
-			camera_controller.createCaptureSession(is_video);
 			// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
 			startCameraPreview();
 		}
@@ -1102,7 +1101,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "set requested_preview_size to false");
 			setPreviewSize();
-			camera_controller.createCaptureSession(is_video);
 			// if surface isn't yet the correct size, we have to wait until surfaceChanged() is called with correct size
 			if( surface_holder_w == this.requested_preview_size_w && surface_holder_h == this.requested_preview_size_h ) {
 				if( MyDebug.LOG )
@@ -1124,7 +1122,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	    if( take_photo ) {
 			if( this.is_video ) {
-				this.switchVideo(true, true, true);
+				this.switchVideo(true, true);
 			}
 			// take photo after a delay - otherwise we sometimes get a black image?!
 	    	final Handler handler = new Handler();
@@ -3136,7 +3134,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 	}
 	
-	void switchVideo(boolean save, boolean update_preview_size, boolean update_capture_session) {
+	void switchVideo(boolean save, boolean update_preview_size) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
 		if( camera_controller == null ) {
@@ -3194,9 +3192,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					if( MyDebug.LOG )
 						Log.d(TAG, "    reset preview to current fps range: " + current_fps_range[0] + " to " + current_fps_range[1]);
 					camera_controller.setPreviewFpsRange(current_fps_range[0], current_fps_range[1]);
-				}
-				if( update_capture_session ) {
-					camera_controller.createCaptureSession(is_video);
 				}
 				// always start the camera preview, even if it was previously paused
 		        this.startCameraPreview();
@@ -3861,7 +3856,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						});
 					}
 				});
-	        	camera_controller.initVideoRecorder(video_recorder);
+	        	camera_controller.initVideoRecorderPrePrepare(video_recorder);
 				boolean record_audio = sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
 				if( record_audio ) {
 	        		String pref_audio_src = sharedPreferences.getString(MainActivity.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
@@ -3919,6 +3914,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			cameraSurface.setVideoRecorder(video_recorder);
 		        	video_recorder.setOrientationHint(getImageVideoRotation());
 					video_recorder.prepare();
+		        	camera_controller.initVideoRecorderPostPrepare(video_recorder);
 					if( MyDebug.LOG )
 						Log.d(TAG, "about to start video recorder");
 	            	video_recorder.start();
