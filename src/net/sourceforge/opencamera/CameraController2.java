@@ -1029,12 +1029,6 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void reconnect() throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	void setPreviewDisplay(SurfaceHolder holder) throws IOException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewDisplay");
@@ -1060,6 +1054,7 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
+			throw new RuntimeException();
 		}
 	}
 
@@ -1073,6 +1068,7 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
+			throw new RuntimeException();
 		}
 	}
 	
@@ -1086,32 +1082,16 @@ public class CameraController2 extends CameraController {
 		}
 		try {
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-			/*if( MyDebug.LOG && holder != null ) {
-				Log.d(TAG, "holder surface: " + holder.getSurface());
-				if( holder.getSurface() == null )
-					Log.d(TAG, "holder surface is null!");
-				else if( !holder.getSurface().isValid() )
-					Log.d(TAG, "holder surface is not valid!");
-			}
-        	Surface surface = null;
-            if( holder != null ) {
-            	surface = holder.getSurface();
-            }
-            else if( texture != null ) {
-            	surface = new Surface(texture);
-            }
-			previewBuilder.addTarget(surface);*/
 
 			previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
 			//previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 			previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
 			//previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-
-			setRepeatingRequest();
 		}
 		catch(CameraAccessException e) {
 			//captureSession = null;
 			e.printStackTrace();
+			throw new RuntimeException();
 		} 
 	}
 
@@ -1126,7 +1106,7 @@ public class CameraController2 extends CameraController {
         return surface;
 	}
 
-	private void createCaptureSession(MediaRecorder video_recorder) {
+	private void createCaptureSession(final MediaRecorder video_recorder) {
 		if( captureSession != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "close old capture session");
@@ -1150,7 +1130,9 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "picture size: " + imageReader.getWidth() + " x " + imageReader.getHeight());
 			}
 			/*if( MyDebug.LOG )
-				Log.d(TAG, "preview size: " + previewImageReader.getWidth() + " x " + previewImageReader.getHeight());*/
+			Log.d(TAG, "preview size: " + previewImageReader.getWidth() + " x " + previewImageReader.getHeight());*/
+			if( MyDebug.LOG )
+				Log.d(TAG, "preview size: " + this.preview_width + " x " + this.preview_height);
 
 			class MyStateCallback extends CameraCaptureSession.StateCallback {
 				boolean callback_done = false;
@@ -1163,7 +1145,6 @@ public class CameraController2 extends CameraController {
 						return;
 					}
 					captureSession = session;
-					//createPreviewRequest();
 					if( MyDebug.LOG && holder != null ) {
 						Log.d(TAG, "holder surface: " + holder.getSurface());
 						if( holder.getSurface() == null )
@@ -1172,7 +1153,7 @@ public class CameraController2 extends CameraController {
 							Log.d(TAG, "holder surface is not valid!");
 					}
 		        	Surface surface = getPreviewSurface();
-					previewBuilder.addTarget(surface);
+	        		previewBuilder.addTarget(surface);
 					setRepeatingRequest();
 					callback_done = true;
 				}
@@ -1186,9 +1167,9 @@ public class CameraController2 extends CameraController {
 			}
 			MyStateCallback myStateCallback = new MyStateCallback();
 
-        	Surface surface = getPreviewSurface();
+        	Surface preview_surface = getPreviewSurface();
         	Surface capture_surface = video_recorder != null ? video_recorder.getSurface() : imageReader.getSurface();
-			camera.createCaptureSession(Arrays.asList(surface/*, previewImageReader.getSurface()*/, capture_surface),
+			camera.createCaptureSession(Arrays.asList(preview_surface/*, previewImageReader.getSurface()*/, capture_surface),
 				myStateCallback,
 		 		handler);
 			if( MyDebug.LOG )
@@ -1201,6 +1182,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "failed to create capture session");
 			e.printStackTrace();
 			//throw new IOException();
+			throw new RuntimeException();
 		}
 	}
 
@@ -1226,6 +1208,7 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
+			throw new RuntimeException();
 		}
 	}
 
@@ -1318,6 +1301,7 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
+			throw new RuntimeException();
 		}
 	}
 
@@ -1354,14 +1338,44 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initVideoRecorderPostPrepare");
 		try {
-			CaptureRequest.Builder videoBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-			videoBuilder.addTarget(video_recorder.getSurface());
+			if( MyDebug.LOG )
+				Log.d(TAG, "obtain video_recorder surface");
+			/*if( texture != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set size of preview texture");
+				texture.setDefaultBufferSize(preview_width, preview_height);
+			}*/
+			Surface surface = video_recorder.getSurface();
+			if( MyDebug.LOG )
+				Log.d(TAG, "done");
+			//CaptureRequest.Builder videoBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+			//videoBuilder.addTarget(surface);
+			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+			previewBuilder.addTarget(surface);
+			createCaptureSession(video_recorder);
+			/*if( captureSession != null ) {
+				captureSession.setRepeatingRequest(videoBuilder.build(), null, null);
+			}*/
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
+			throw new RuntimeException();
 		}
-		createCaptureSession(video_recorder);
+	}
+
+	@Override
+	void reconnect() throws IOException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "reconnect");
+		createPreviewRequest();
+		if( MyDebug.LOG )
+			Log.d(TAG, "add preview surface to previewBuilder");
+    	Surface surface = getPreviewSurface();
+		previewBuilder.addTarget(surface);
+		//setRepeatingRequest();
 	}
 
 	@Override
