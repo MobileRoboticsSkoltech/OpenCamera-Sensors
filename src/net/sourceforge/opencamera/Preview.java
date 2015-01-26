@@ -19,6 +19,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -692,14 +693,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			try {
 				video_recorder.setOnErrorListener(null);
 				video_recorder.setOnInfoListener(null);
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "about to call video_recorder.stop()");
 				video_recorder.stop();
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "done video_recorder.stop()");
 			}
 			catch(RuntimeException e) {
 				// stop() can throw a RuntimeException if stop is called too soon after start - we have no way to detect this, so have to catch it
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "runtime exception when stopping video");
 			}
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "reset video_recorder");
     		video_recorder.reset();
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "release video_recorder");
     		video_recorder.release(); 
     		video_recorder = null;
 			reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
@@ -796,6 +805,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	private void reconnectCamera(boolean quiet) {
+		if( MyDebug.LOG )
+			Log.e(TAG, "reconnectCamera()");
         if( camera_controller != null ) { // just to be safe
     		try {
     			camera_controller.reconnect();
@@ -3718,6 +3729,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		stopVideo(false);
 	}
 	
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
@@ -3872,7 +3884,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "set video source");
-				video_recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+				video_recorder.setVideoSource(using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA);
 
 				if( store_location && main_activity.getLocation() != null ) {
 					Location location = main_activity.getLocation();
@@ -3913,6 +3925,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        			throw new IOException();*/
 	    			cameraSurface.setVideoRecorder(video_recorder);
 		        	video_recorder.setOrientationHint(getImageVideoRotation());
+					if( MyDebug.LOG )
+						Log.d(TAG, "about to prepare video recorder");
 					video_recorder.prepare();
 		        	camera_controller.initVideoRecorderPostPrepare(video_recorder);
 					if( MyDebug.LOG )
