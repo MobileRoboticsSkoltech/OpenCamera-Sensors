@@ -585,10 +585,22 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setPictureSize(int width, int height) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPictureSize: " + width + " x " + height);
+		if( captureSession != null ) {
+			// can only call this when captureSession not created - as the surface of the imageReader we create has to match the surface we pass to the captureSession
+			if( MyDebug.LOG )
+				Log.d(TAG, "can't set picture size when captureSession running!");
+			throw new RuntimeException();
+		}
 		if( imageReader != null ) {
 			imageReader.close();
 		}
 		imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2); 
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "created new imageReader: " + imageReader.toString());
+			Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
+		}
 		imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
 			@Override
 			public void onImageAvailable(ImageReader reader) {
@@ -611,6 +623,11 @@ public class CameraController2 extends CameraController {
 				cancelAutoFocus();
 			}
 		}, null);
+		/*if( captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "need to create a new capture session with new imageReader's surface");
+			createCaptureSession(null);
+		}*/
 	}
 
 	private int preview_width = 0;
@@ -1205,6 +1222,9 @@ public class CameraController2 extends CameraController {
 			return;
 		try {
 			captureSession.stopRepeating();
+			// although stopRepeating() alone will pause the preview, seems better to close captureSession altogether - this allows the app to make changes such as changing the picture size
+			captureSession.close();
+			captureSession = null;
 		}
 		catch(CameraAccessException e) {
 			e.printStackTrace();
@@ -1286,6 +1306,10 @@ public class CameraController2 extends CameraController {
 	@Override
 	void takePicture(final PictureCallback raw, final PictureCallback jpeg) {
 		try {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "imageReader: " + imageReader.toString());
+				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
+			}
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.addTarget(imageReader.getSurface());
 
