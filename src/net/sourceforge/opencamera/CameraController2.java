@@ -553,16 +553,108 @@ public class CameraController2 extends CameraController {
 		return value;
 	}
 
+	private String convertWhiteBalance(int value2) {
+		String value = null;
+		switch( value2 ) {
+		case CameraMetadata.CONTROL_AWB_MODE_AUTO:
+			value = "auto";
+			break;
+		case CameraMetadata.CONTROL_AWB_MODE_CLOUDY_DAYLIGHT:
+			value = "cloudy-daylight";
+			break;
+		case CameraMetadata.CONTROL_AWB_MODE_DAYLIGHT:
+			value = "daylight";
+			break;
+		case CameraMetadata.CONTROL_AWB_MODE_FLUORESCENT:
+			value = "fluorescent";
+			break;
+		case CameraMetadata.CONTROL_AWB_MODE_INCANDESCENT:
+			value = "incandescent";
+			break;
+		case CameraMetadata.CONTROL_AWB_MODE_SHADE:
+			value = "shade";
+			break;
+		case CameraMetadata.CONTROL_AWB_MODE_TWILIGHT:
+			value = "twilight";
+			break;
+		case CameraMetadata.CONTROL_AWB_MODE_WARM_FLUORESCENT:
+			value = "warm-fluorescent";
+			break;
+		default:
+			if( MyDebug.LOG )
+				Log.d(TAG, "unknown white balance: " + value2);
+			value = null;
+			break;
+		}
+		return value;
+	}
+
 	@Override
 	SupportedValues setWhiteBalance(String value) {
-		// TODO Auto-generated method stub
-		return null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "setWhiteBalance: " + value);
+		// we convert to/from strings to be compatible with original Android Camera API
+		String default_value = getDefaultWhiteBalance();
+		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
+		List<String> values = new ArrayList<String>();
+		for(int i=0;i<values2.length;i++) {
+			String this_value = convertWhiteBalance(values2[i]);
+			if( this_value != null ) {
+				values.add(this_value);
+			}
+		}
+		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		if( supported_values != null ) {
+			int selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
+			if( supported_values.selected_value.equals("auto") ) {
+				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
+			}
+			else if( supported_values.selected_value.equals("cloudy-daylight") ) {
+				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_CLOUDY_DAYLIGHT;
+			}
+			else if( supported_values.selected_value.equals("daylight") ) {
+				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_DAYLIGHT;
+			}
+			else if( supported_values.selected_value.equals("fluorescent") ) {
+				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_FLUORESCENT;
+			}
+			else if( supported_values.selected_value.equals("incandescent") ) {
+				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_INCANDESCENT;
+			}
+			else if( supported_values.selected_value.equals("shade") ) {
+				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_SHADE;
+			}
+			else if( supported_values.selected_value.equals("twilight") ) {
+				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_TWILIGHT;
+			}
+			else if( supported_values.selected_value.equals("warm-fluorescent") ) {
+				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_WARM_FLUORESCENT;
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+			}
+
+			if( previewBuilder.get(CaptureRequest.CONTROL_AWB_MODE) == null && selected_value2 == CameraMetadata.CONTROL_AWB_MODE_AUTO ) {
+				// can leave off
+			}
+			else if( previewBuilder.get(CaptureRequest.CONTROL_AWB_MODE) == null || previewBuilder.get(CaptureRequest.CONTROL_AWB_MODE) != selected_value2 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting white balance: " + selected_value2);
+				previewBuilder.set(CaptureRequest.CONTROL_AWB_MODE, selected_value2);
+		    	setRepeatingRequest();
+			}
+		}
+		return supported_values;
 	}
 
 	@Override
 	public String getWhiteBalance() {
-		// TODO Auto-generated method stub
-		return null;
+		if( previewBuilder.get(CaptureRequest.CONTROL_AWB_MODE) == null )
+			return null;
+		int value2 = previewBuilder.get(CaptureRequest.CONTROL_AWB_MODE);
+		String value = convertWhiteBalance(value2);
+		return value;
 	}
 
 	@Override
@@ -785,8 +877,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public String getDefaultWhiteBalance() {
-		// TODO Auto-generated method stub
-		return null;
+		return "auto";
 	}
 
 	@Override
