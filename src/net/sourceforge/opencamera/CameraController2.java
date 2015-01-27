@@ -567,14 +567,51 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	SupportedValues setISO(String value) {
-		// TODO Auto-generated method stub
-		return null;
+		String default_value = getDefaultISO();
+		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
+		if( iso_range == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "iso not supported");
+			return null;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "iso range from " + iso_range.getLower() + " to " + iso_range.getUpper());
+		List<String> values = new ArrayList<String>();
+		values.add("auto");
+		int [] iso_values = {100, 200, 400, 800, 1600};
+		for(int i=0;i<iso_values.length;i++) {
+			if( iso_values[i] >= iso_range.getLower() && iso_values[i] <= iso_range.getUpper() ) {
+				values.add("" + iso_values[i]);
+			}
+		}
+		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		if( supported_values != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set iso to: " + supported_values.selected_value);
+			if( supported_values.selected_value.equals("auto") ) {
+				previewBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, null);
+			}
+			else {
+				try {
+					int selected_value2 = Integer.parseInt(supported_values.selected_value);
+					if( MyDebug.LOG )
+						Log.d(TAG, "iso: " + selected_value2);
+					previewBuilder.set(CaptureRequest.SENSOR_SENSITIVITY , selected_value2);
+				}
+				catch(NumberFormatException exception) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "iso invalid format, can't parse to int");
+					previewBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, null);
+				}
+			}
+	    	setRepeatingRequest();
+		}
+		return supported_values;
 	}
 
 	@Override
 	String getISOKey() {
-		// TODO Auto-generated method stub
-		return null;
+		return "";
 	}
 
 	@Override
@@ -754,8 +791,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public String getDefaultISO() {
-		// TODO Auto-generated method stub
-		return "";
+		return "auto";
 	}
 
 	@Override
