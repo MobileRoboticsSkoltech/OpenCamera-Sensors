@@ -828,7 +828,8 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	int getExposureCompensation() {
-		// key is available on all devices, so don't need to check for null
+		if( previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null )
+			return 0;
 		return previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION);
 	}
 
@@ -836,10 +837,9 @@ public class CameraController2 extends CameraController {
 	// Returns whether exposure was modified
 	boolean setExposureCompensation(int new_exposure) {
 		// key is available on all devices, so don't need to check for null
-		int current_exposure = previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION);
-		if( new_exposure != current_exposure ) {
+		if( previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null || new_exposure != previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "change exposure from " + current_exposure + " to " + new_exposure);
+				Log.d(TAG, "change exposure to " + new_exposure);
 	    	previewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, new_exposure);
 	    	setRepeatingRequest();
         	return true;
@@ -934,10 +934,8 @@ public class CameraController2 extends CameraController {
 	
 	@Override
 	public String getFocusValue() {
-		/*if( previewBuilder == null || captureSession == null )
-			return "";*/
-		// key is available on all devices, so don't need to check for null
-		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) != null ?
+				previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) : CaptureRequest.CONTROL_AF_MODE_AUTO;
 		return convertFocusModeToValue(focus_mode);
 	}
 
@@ -970,7 +968,8 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean getAutoExposureLock() {
-		// key is available on all devices, so don't need to check for null
+		if( previewBuilder.get(CaptureRequest.CONTROL_AE_LOCK) == null )
+			return false;
     	return previewBuilder.get(CaptureRequest.CONTROL_AE_LOCK);
 	}
 
@@ -1153,9 +1152,8 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	boolean supportsAutoFocus() {
-		/*if( previewBuilder == null || captureSession == null )
-			return false;*/
-		// key is available on all devices, so don't need to check for null
+		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
+			return true;
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_AUTO || focus_mode == CaptureRequest.CONTROL_AF_MODE_MACRO )
 			return true;
@@ -1164,7 +1162,8 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	boolean focusIsVideo() {
-		// key is available on all devices, so don't need to check for null
+		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
+			return false;
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO ) {
 			return true;
@@ -1361,8 +1360,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean startFaceDetection() {
-		// key is available on all devices, so don't need to check for null
-    	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
+    	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
     		return false;
     	}
     	previewBuilder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE);
@@ -1570,8 +1568,7 @@ public class CameraController2 extends CameraController {
 					autofocus_cb = null;
 				}
 			}
-			// key is available on all devices, so don't need to check for null
-			if( face_detection_listener != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
+			if( face_detection_listener != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
 				Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
 				android.hardware.camera2.params.Face [] camera_faces = result.get(CaptureResult.STATISTICS_FACES);
 				CameraController.Face [] faces = new CameraController.Face[camera_faces.length];
