@@ -42,6 +42,8 @@ public class CameraController2 extends CameraController {
 	private CameraDevice camera = null;
 	private String cameraIdS = null;
 	private CameraCharacteristics characteristics = null;
+	private List<Integer> zoom_ratios = null;
+	private int current_zoom_value = 0;
 	private CameraCaptureSession captureSession = null;
 	private CaptureRequest.Builder previewBuilder = null;
 	private AutoFocusCallback autofocus_cb = null;
@@ -223,8 +225,35 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "Unknown Hardware Level!");
 		}
 
-	    // TODO: zoom
-	    
+		float max_zoom = characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM);
+		camera_features.is_zoom_supported = max_zoom > 0.0f;
+		if( MyDebug.LOG )
+			Log.d(TAG, "max_zoom: " + max_zoom);
+		if( camera_features.is_zoom_supported ) {
+			// set 20 steps per 2x factor
+			final int steps_per_2x_factor = 20;
+			//final double scale_factor = Math.pow(2.0, 1.0/(double)steps_per_2x_factor);
+			int n_steps =(int)( (steps_per_2x_factor * Math.log(max_zoom + 1.0e-11)) / Math.log(2.0));
+			final double scale_factor = Math.pow(max_zoom, 1.0/(double)n_steps);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "n_steps: " + n_steps);
+				Log.d(TAG, "scale_factor: " + scale_factor);
+			}
+			camera_features.zoom_ratios = new ArrayList<Integer>();
+			camera_features.zoom_ratios.add(100);
+			double zoom = 1.0;
+			for(int i=0;i<n_steps-1;i++) {
+				zoom *= scale_factor;
+				camera_features.zoom_ratios.add((int)(zoom*100));
+			}
+			camera_features.zoom_ratios.add((int)(max_zoom*100));
+			camera_features.max_zoom = camera_features.zoom_ratios.size()-1;
+			this.zoom_ratios = camera_features.zoom_ratios;
+		}
+		else {
+			this.zoom_ratios = null;
+		}
+
 		int [] face_modes = characteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
 		camera_features.supports_face_detection = false;
 		for(int i=0;i<face_modes.length && !camera_features.supports_face_detection;i++) {
@@ -816,14 +845,43 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public int getZoom() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.current_zoom_value;
 	}
 
 	@Override
 	void setZoom(int value) {
 		// TODO Auto-generated method stub
-
+		if( zoom_ratios == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "zoom not supported");
+			return;
+		}
+		if( value < 0 || value > zoom_ratios.size() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "invalid zoom value");
+			throw new RuntimeException();
+		}
+		float zoom = zoom_ratios.get(value)/100.0f;
+		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		int left = sensor_rect.centerX();
+		int right = left;
+		int top = sensor_rect.centerY();
+		int bottom = top;
+		int hwidth = (int)(sensor_rect.width() / (2.0*zoom));
+		int hheight = (int)(sensor_rect.height() / (2.0*zoom));
+		left -= hwidth;
+		right += hwidth;
+		top -= hheight;
+		bottom += hheight;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "zoom: " + zoom);
+			Log.d(TAG, "hwidth: " + hwidth);
+			Log.d(TAG, "hheight: " + hheight);
+		}
+		Rect zoom_rect = new Rect(left, top, right, bottom);
+    	previewBuilder.set(CaptureRequest.SCALER_CROP_REGION, zoom_rect);
+    	setRepeatingRequest();
+    	this.current_zoom_value = value;
 	}
 
 	@Override
