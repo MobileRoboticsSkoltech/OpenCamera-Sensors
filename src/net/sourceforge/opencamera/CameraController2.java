@@ -55,6 +55,8 @@ public class CameraController2 extends CameraController {
 	private SurfaceTexture texture = null;
 	private HandlerThread thread = null; 
 	Handler handler = null;
+	
+	private Location location = null;
 
 	//private MeteringRectangle [] focus_areas = null;
 	//private MeteringRectangle [] metering_areas = null;
@@ -1041,12 +1043,12 @@ public class CameraController2 extends CameraController {
 	void setLocationInfo(Location location) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setLocationInfo: " + location.getLongitude() + " , " + location.getLatitude());
-		previewBuilder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
+		this.location = location;
 	}
 
 	@Override
 	void removeLocationInfo() {
-		previewBuilder.set(CaptureRequest.JPEG_GPS_LOCATION, null);
+		this.location = null;
 	}
 
 	@Override
@@ -1495,6 +1497,10 @@ public class CameraController2 extends CameraController {
 			}
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.addTarget(imageReader.getSurface());
+
+			if( location != null ) {
+				stillBuilder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
+			}
 
 			CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
 				public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
