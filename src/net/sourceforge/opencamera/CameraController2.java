@@ -56,7 +56,10 @@ public class CameraController2 extends CameraController {
 	private HandlerThread thread = null; 
 	Handler handler = null;
 	
+	// data that we need to store, to pass to the stillBuilder (should set sensible defaults)
+	private int rotation = 0;
 	private Location location = null;
+	private byte jpeg_quality = 90;
 
 	//private MeteringRectangle [] focus_areas = null;
 	//private MeteringRectangle [] metering_areas = null;
@@ -835,14 +838,17 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public int getJpegQuality() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.jpeg_quality;
 	}
 
 	@Override
 	void setJpegQuality(int quality) {
-		// TODO Auto-generated method stub
-
+		if( quality < 0 || quality > 100 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "invalid jpeg quality" + quality);
+			throw new RuntimeException();
+		}
+		this.jpeg_quality = (byte)quality;
 	}
 
 	@Override
@@ -852,7 +858,6 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setZoom(int value) {
-		// TODO Auto-generated method stub
 		if( zoom_ratios == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "zoom not supported");
@@ -860,7 +865,7 @@ public class CameraController2 extends CameraController {
 		}
 		if( value < 0 || value > zoom_ratios.size() ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "invalid zoom value");
+				Log.d(TAG, "invalid zoom value" + value);
 			throw new RuntimeException();
 		}
 		float zoom = zoom_ratios.get(value)/100.0f;
@@ -1035,8 +1040,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setRotation(int rotation) {
-		// TODO Auto-generated method stub
-
+		this.rotation = rotation;
 	}
 
 	@Override
@@ -1499,8 +1503,10 @@ public class CameraController2 extends CameraController {
 			stillBuilder.addTarget(imageReader.getSurface());
 
 			if( location != null ) {
-				stillBuilder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
+				//stillBuilder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
 			}
+			stillBuilder.set(CaptureRequest.JPEG_ORIENTATION, rotation);
+			stillBuilder.set(CaptureRequest.JPEG_QUALITY, jpeg_quality);
 
 			CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
 				public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
