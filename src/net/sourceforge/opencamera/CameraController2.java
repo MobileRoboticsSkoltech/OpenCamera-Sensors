@@ -1039,14 +1039,14 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setLocationInfo(Location location) {
-		// TODO Auto-generated method stub
-
+		if( MyDebug.LOG )
+			Log.d(TAG, "setLocationInfo: " + location.getLongitude() + " , " + location.getLatitude());
+		previewBuilder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
 	}
 
 	@Override
 	void removeLocationInfo() {
-		// TODO Auto-generated method stub
-
+		previewBuilder.set(CaptureRequest.JPEG_GPS_LOCATION, null);
 	}
 
 	@Override
