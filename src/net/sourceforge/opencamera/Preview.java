@@ -3056,10 +3056,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					}
 				}
 			}
-			String iso_value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
-			if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
-				toast_string += "\nISO: " + iso_value;
-			}
+		}
+		String iso_value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
+		if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
+			toast_string += "\nISO: " + iso_value;
 		}
 		int current_exposure = camera_controller.getExposureCompensation();
 		if( current_exposure != 0 ) {
@@ -3068,6 +3068,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		String scene_mode = camera_controller.getSceneMode();
     	if( scene_mode != null && !scene_mode.equals(camera_controller.getDefaultSceneMode()) ) {
     		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + scene_mode;
+    	}
+		String white_balance = camera_controller.getWhiteBalance();
+    	if( white_balance != null && !white_balance.equals(camera_controller.getDefaultWhiteBalance()) ) {
+    		toast_string += "\n" + getResources().getString(R.string.white_balance) + ": " + white_balance;
+    	}
+		String color_effect = camera_controller.getColorEffect();
+    	if( color_effect != null && !color_effect.equals(camera_controller.getDefaultColorEffect()) ) {
+    		toast_string += "\n" + getResources().getString(R.string.color_effect) + ": " + color_effect;
     	}
 		String lock_orientation = sharedPreferences.getString(MainActivity.getLockOrientationPreferenceKey(), "none");
 		if( !lock_orientation.equals("none") ) {
