@@ -701,9 +701,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.d(TAG, "done video_recorder.stop()");
 			}
 			catch(RuntimeException e) {
-				// stop() can throw a RuntimeException if stop is called too soon after start - we have no way to detect this, so have to catch it
+				// stop() can throw a RuntimeException if stop is called too soon after start - this indicates the video file is corrupt, and should be deleted
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "runtime exception when stopping video");
+	    		if( video_name != null ) {
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "delete corrupt video: " + video_name);
+	    			File file = new File(video_name);
+	    			if( file != null ) {
+	    				file.delete();
+	    			}
+	    			video_name = null;
+	    		}
+	    		// if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
+    			if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
+    	    	    showToast(null, R.string.failed_to_record_video);
+    			}
 			}
     		if( MyDebug.LOG )
     			Log.d(TAG, "reset video_recorder");
