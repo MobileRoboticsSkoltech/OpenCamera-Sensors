@@ -309,6 +309,7 @@ public class CameraController2 extends CameraController {
 		Range<Integer> exposure_range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
 		camera_features.min_exposure = exposure_range.getLower();
 		camera_features.max_exposure = exposure_range.getUpper();
+		camera_features.exposure_step = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP).floatValue();
 
 		return camera_features;
 	}

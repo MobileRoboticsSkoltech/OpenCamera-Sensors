@@ -206,6 +206,7 @@ class CameraController1 extends CameraController {
         
         camera_features.min_exposure = parameters.getMinExposureCompensation();
         camera_features.max_exposure = parameters.getMaxExposureCompensation();
+        camera_features.exposure_step = parameters.getExposureCompensationStep();
 
 		List<Camera.Size> camera_video_sizes = parameters.getSupportedVideoSizes();
     	if( camera_video_sizes == null ) {

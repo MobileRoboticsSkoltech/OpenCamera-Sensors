@@ -33,6 +33,7 @@ public abstract class CameraController {
 		boolean is_video_stabilization_supported = false;
 		int min_exposure = 0;
 		int max_exposure = 0;
+		float exposure_step = 0.0f;
 		boolean can_disable_shutter_sound = false;
 	}
 	

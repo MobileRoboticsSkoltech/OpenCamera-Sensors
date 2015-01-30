@@ -178,9 +178,11 @@ which means the camera will never refocus when taking a photo, instead you shoul
 
 <p><img src="exposure.png" width="32" height="32"><b>Exposure compensation</b> - Clicking this will bring up a
 slider and plus/minus buttons which can be used to control the exposure compensation. A higher value increases
-the exposure, so that pictures come out brighter in low light; a lower value makes pictures darker. Set to 0 for
-the default exposure. To get rid of the slider and buttons, either click the Exposure button again, or click
-elsewhere on the screen. See <a href="http://en.wikipedia.org/wiki/Exposure_compensation">Exposure compensation</a>.
+the exposure, so that pictures come out brighter in low light; a lower value makes pictures darker. One unit of
+EV changes the brightness of the captured image by a factor of two. +1 EV doubles the image brightness, while -1
+EV halves the image brightness. Set to 0 for the default exposure. To get rid of the slider and buttons, either
+click the Exposure button again, or click elsewhere on the screen. See
+<a href="http://en.wikipedia.org/wiki/Exposure_compensation">Exposure compensation</a>.
 (Only available if the camera supports control of the exposure.)</p>
 
 <p><img src="exposure_unlocked.png" width="32" height="32"><b>Exposure lock</b> - Click to lock or unlock the exposure.
@@ -706,6 +708,7 @@ UPDATED Now uses dark theme for Settings (more consistent with rest of app;
         same Activity).
 UPDATED "Photo and video settings" preference screen now split up into "Photo
         settings", "Video settings" and "Location settings".
+UPDATED Exposure level now displayed in units of "EV".
 UPDATED Photo toast now displays if focus or ISO modes are non-default.
 
 Version 1.22 (2015/01/04)

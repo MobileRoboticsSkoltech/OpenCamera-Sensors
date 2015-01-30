@@ -179,6 +179,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<String> exposures = null;
 	private int min_exposure = 0;
 	private int max_exposure = 0;
+	private float exposure_step = 0.0f;
 
 	private List<CameraController.Size> supported_preview_sizes = null;
 	
@@ -957,6 +958,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		exposures = null;
 		min_exposure = 0;
 		max_exposure = 0;
+		exposure_step = 0.0f;
 		sizes = null;
 		current_size_index = -1;
 		video_quality = null;
@@ -1216,6 +1218,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
 			this.min_exposure = camera_features.min_exposure;
 			this.max_exposure = camera_features.max_exposure;
+			this.exposure_step = camera_features.exposure_step;
 			this.video_sizes = camera_features.video_sizes;
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
@@ -2963,7 +2966,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putString(MainActivity.getExposurePreferenceKey(), "" + new_exposure);
 				editor.apply();
-	    		showToast(change_exposure_toast, getResources().getString(R.string.exposure_compensation) + " " + (new_exposure > 0 ? "+" : "") + new_exposure);
+				float exposure_ev = new_exposure * exposure_step;
+	    		showToast(change_exposure_toast, getResources().getString(R.string.exposure_compensation) + " " + (new_exposure > 0 ? "+" : "") + new DecimalFormat("#.##").format(exposure_ev) + " EV");
 	    		if( update_seek_bar ) {
 	    			MainActivity main_activity = (MainActivity)this.getContext();
 	    			main_activity.setSeekBarExposure();
