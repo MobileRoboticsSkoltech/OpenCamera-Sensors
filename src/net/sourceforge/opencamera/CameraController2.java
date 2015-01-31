@@ -214,6 +214,7 @@ public class CameraController2 extends CameraController {
 			public void onClosed(CameraDevice camera) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera closed");
+				CameraController2.this.camera = null;
 			}
 
 			@Override
@@ -230,6 +231,8 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera error: " + error);
 				callback_done = true;
+				camera.close();
+				CameraController2.this.camera = null;
 				throw new RuntimeException();
 			}
 		};
