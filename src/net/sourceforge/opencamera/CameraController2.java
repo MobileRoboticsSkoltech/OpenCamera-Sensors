@@ -1639,8 +1639,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void unlock() {
-		// TODO Auto-generated method stub
-
+		// do nothing at this stage
 	}
 
 	@Override
