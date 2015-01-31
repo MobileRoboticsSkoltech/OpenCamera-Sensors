@@ -94,6 +94,7 @@ public abstract class CameraController {
 
 	abstract void release();
 
+	abstract String getAPI();
 	abstract CameraFeatures getCameraFeatures();
 	abstract SupportedValues setSceneMode(String value);
 	public abstract String getSceneMode();

@@ -341,6 +341,10 @@ public class CameraController2 extends CameraController {
 		return output_modes;
 	}
 
+	String getAPI() {
+		return "Camera2 (Android L)";
+	}
+	
 	@Override
 	CameraFeatures getCameraFeatures() {
 		if( MyDebug.LOG )

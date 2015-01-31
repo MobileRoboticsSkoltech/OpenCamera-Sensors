@@ -142,6 +142,10 @@ class CameraController1 extends CameraController {
 		return output_modes;
 	}
 	
+	String getAPI() {
+		return "Camera";
+	}
+	
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	CameraFeatures getCameraFeatures() {
 		if( MyDebug.LOG )

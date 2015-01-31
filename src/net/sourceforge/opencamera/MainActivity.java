@@ -1085,6 +1085,7 @@ public class MainActivity extends Activity {
 		
 		Bundle bundle = new Bundle();
 		bundle.putInt("cameraId", this.preview.getCameraId());
+		bundle.putString("camera_api", this.preview.getCameraAPI());
 		bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);
 		bundle.putBoolean("supports_force_video_4k", this.supports_force_video_4k);
 		bundle.putBoolean("supports_face_detection", this.preview.supportsFaceDetection());

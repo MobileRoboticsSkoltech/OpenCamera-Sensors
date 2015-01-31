@@ -41,6 +41,8 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
 		
+		final String camera_api = bundle.getString("camera_api");
+		
 		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 
 		final boolean supports_auto_stabilise = bundle.getBoolean("supports_auto_stabilise");
@@ -308,6 +310,8 @@ public class MyPreferenceFragment extends PreferenceFragment {
                         }
                         about_string.append("\nCurrent camera ID: ");
                         about_string.append(cameraId);
+                        about_string.append("\nCamera API: ");
+                        about_string.append(camera_api);
                         {
                         	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MyPreferenceFragment.this.getActivity());
                         	String last_video_error = sharedPreferences.getString("last_video_error", "");

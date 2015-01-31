@@ -5331,6 +5331,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.cameraId;
     }
     
+    String getCameraAPI() {
+    	if( camera_controller == null )
+    		return "None";
+    	return camera_controller.getAPI();
+    }
+    
     private int getImageQuality(){
 		if( MyDebug.LOG )
 			Log.d(TAG, "getImageQuality");
