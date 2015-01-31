@@ -251,6 +251,11 @@ public class CameraController2 extends CameraController {
 		    characteristics = manager.getCameraCharacteristics(cameraIdS);
 		}
 		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "failed to open camera");
+				Log.d(TAG, "reason: " + e.getReason());
+				Log.d(TAG, "message: " + e.getMessage());
+			}
 			e.printStackTrace();
 			// throw as a RuntimeException instead, as this is what callers will catch
 			throw new RuntimeException();
@@ -1319,6 +1324,11 @@ public class CameraController2 extends CameraController {
     	if( metering_rectangles == null )
     		return null;
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		camera_settings.af_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
+		if( metering_rectangles.length == 1 && metering_rectangles[0].getRect().left == 0 && metering_rectangles[0].getRect().top == 0 && metering_rectangles[0].getRect().right == sensor_rect.width()-1 && metering_rectangles[0].getRect().bottom == sensor_rect.height()-1 ) {
+			// for compatibility with CameraController1
+			return null;
+		}
 		List<Area> areas = new ArrayList<CameraController.Area>();
 		for(int i=0;i<metering_rectangles.length;i++) {
 			areas.add(convertMeteringRectangleToArea(sensor_rect, metering_rectangles[i]));
@@ -1334,6 +1344,10 @@ public class CameraController2 extends CameraController {
     	if( metering_rectangles == null )
     		return null;
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		if( metering_rectangles.length == 1 && metering_rectangles[0].getRect().left == 0 && metering_rectangles[0].getRect().top == 0 && metering_rectangles[0].getRect().right == sensor_rect.width()-1 && metering_rectangles[0].getRect().bottom == sensor_rect.height()-1 ) {
+			// for compatibility with CameraController1
+			return null;
+		}
 		List<Area> areas = new ArrayList<CameraController.Area>();
 		for(int i=0;i<metering_rectangles.length;i++) {
 			areas.add(convertMeteringRectangleToArea(sensor_rect, metering_rectangles[i]));
@@ -1388,6 +1402,11 @@ public class CameraController2 extends CameraController {
 			captureSession.setRepeatingRequest(previewBuilder.build(), previewCaptureCallback, null);
 		}
 		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "failed to set repeating request");
+				Log.d(TAG, "reason: " + e.getReason());
+				Log.d(TAG, "message: " + e.getMessage());
+			}
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
@@ -1402,6 +1421,11 @@ public class CameraController2 extends CameraController {
 			captureSession.capture(previewBuilder.build(), previewCaptureCallback, null);
 		}
 		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "failed to capture");
+				Log.d(TAG, "reason: " + e.getReason());
+				Log.d(TAG, "message: " + e.getMessage());
+			}
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
@@ -1421,6 +1445,11 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			//captureSession = null;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "failed to create capture request");
+				Log.d(TAG, "reason: " + e.getReason());
+				Log.d(TAG, "message: " + e.getMessage());
+			}
 			e.printStackTrace();
 			throw new RuntimeException();
 		} 
@@ -1436,15 +1465,15 @@ public class CameraController2 extends CameraController {
 
 	// throws RuntimeException if fails to create captureSession
 	private void createCaptureSession(final MediaRecorder video_recorder) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "create capture session");
+
 		if( captureSession != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "close old capture session");
 			captureSession.close();
 			captureSession = null;
 		}
-
-		if( MyDebug.LOG )
-			Log.d(TAG, "create capture session");
 
 		try {
 			captureSession = null;
@@ -1485,6 +1514,7 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG )
 						Log.d(TAG, "onConfigureFailed");
 					callback_done = true;
+					// don't throw RuntimeException, should be handled by CameraAccessException below?
 					throw new RuntimeException();
 				}
 			}
@@ -1501,8 +1531,11 @@ public class CameraController2 extends CameraController {
 			}
 		}
 		catch(CameraAccessException e) {
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "failed to create capture session");
+				Log.d(TAG, "reason: " + e.getReason());
+				Log.d(TAG, "message: " + e.getMessage());
+			}
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
@@ -1529,10 +1562,17 @@ public class CameraController2 extends CameraController {
 		try {
 			captureSession.stopRepeating();
 			// although stopRepeating() alone will pause the preview, seems better to close captureSession altogether - this allows the app to make changes such as changing the picture size
+			if( MyDebug.LOG )
+				Log.d(TAG, "close capture session");
 			captureSession.close();
 			captureSession = null;
 		}
 		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "failed to stop repeating");
+				Log.d(TAG, "reason: " + e.getReason());
+				Log.d(TAG, "message: " + e.getMessage());
+			}
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
@@ -1632,6 +1672,11 @@ public class CameraController2 extends CameraController {
 			captureSession.capture(stillBuilder.build(), stillCaptureCallback, null);
 		}
 		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "failed to take picture");
+				Log.d(TAG, "reason: " + e.getReason());
+				Log.d(TAG, "message: " + e.getMessage());
+			}
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
@@ -1694,6 +1739,11 @@ public class CameraController2 extends CameraController {
 			}*/
 		}
 		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "failed to create catpure request for video");
+				Log.d(TAG, "reason: " + e.getReason());
+				Log.d(TAG, "message: " + e.getMessage());
+			}
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
