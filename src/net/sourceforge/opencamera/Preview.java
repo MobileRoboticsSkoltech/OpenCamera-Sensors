@@ -2143,7 +2143,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return aspect_ratio;
     }
 
-    private int getDisplayRotation() {
+    public int getDisplayRotation() {
     	// gets the display rotation (as a Surface.ROTATION_* constant), taking into account the getRotatePreviewPreferenceKey() setting
 		Activity activity = (Activity)this.getContext();
 	    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
@@ -5605,10 +5605,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     public boolean isPreviewStarted() {
     	return this.is_preview_started;
-    }
-    
-    public int getDisplayOrientation() {
-    	return camera_controller==null ? 0 : camera_controller.getDisplayOrientation();
     }
     
     public boolean isFocusWaiting() {
