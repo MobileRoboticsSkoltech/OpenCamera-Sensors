@@ -61,18 +61,21 @@ public class CameraController2 extends CameraController {
 		private Location location = null;
 		private byte jpeg_quality = 90;
 
-		// keys that we have passed to the previewBuilder, that we need to store to also pass to the stillBuilder (should set sensible defaults)
+		// keys that we have passed to the previewBuilder, that we need to store to also pass to the stillBuilder (should set sensible defaults, or use a has_ boolean if we don't want to set a default)
 		private int scene_mode = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
 		private int color_effect = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
 		private int white_balance = CameraMetadata.CONTROL_AWB_MODE_AUTO;
-		private Rect scalar_crop_region = null;
+		private Rect scalar_crop_region = null; // no need for has_scalar_crop_region, as we can set to null instead
+		private boolean has_ae_exposure_compensation = false;
 		private int ae_exposure_compensation = 0;
+		private boolean has_af_mode = false;
 		private int af_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
 		private boolean ae_lock = false;
-		private MeteringRectangle [] af_regions = null;
-		private MeteringRectangle [] ae_regions = null;
+		private MeteringRectangle [] af_regions = null; // no need for has_scalar_crop_region, as we can set to null instead
+		private MeteringRectangle [] ae_regions = null; // no need for has_scalar_crop_region, as we can set to null instead
+		private boolean has_face_detect_mode = false;
 		private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
-		
+
 		private void setupBuilder(CaptureRequest.Builder builder, boolean is_still) {
 			setSceneMode(builder);
 			setColorEffect(builder);
@@ -150,6 +153,8 @@ public class CameraController2 extends CameraController {
 		}
 
 		private boolean setExposureCompensation(CaptureRequest.Builder builder) {
+			if( !has_ae_exposure_compensation )
+				return false;
 			if( builder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null || ae_exposure_compensation != builder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "change exposure to " + ae_exposure_compensation);
@@ -160,7 +165,8 @@ public class CameraController2 extends CameraController {
 		}
 
 		private void setFocusMode(CaptureRequest.Builder builder) {
-	    	builder.set(CaptureRequest.CONTROL_AF_MODE, af_mode);
+			if( has_af_mode )
+				builder.set(CaptureRequest.CONTROL_AF_MODE, af_mode);
 		}
 
 		private void setAutoExposureLock(CaptureRequest.Builder builder) {
@@ -180,7 +186,8 @@ public class CameraController2 extends CameraController {
 		}
 
 		private void setFaceDetectMode(CaptureRequest.Builder builder) {
-	    	builder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, face_detect_mode);
+			if( has_face_detect_mode )
+				builder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, face_detect_mode);
 		}
 		
 		// n.b., if we add more methods, remember to update setupBuilder() above!
@@ -1011,6 +1018,7 @@ public class CameraController2 extends CameraController {
 	@Override
 	// Returns whether exposure was modified
 	boolean setExposureCompensation(int new_exposure) {
+		camera_settings.has_ae_exposure_compensation = true;
 		camera_settings.ae_exposure_compensation = new_exposure;
 		if( camera_settings.setExposureCompensation(previewBuilder) ) {
 	    	setRepeatingRequest();
@@ -1081,6 +1089,7 @@ public class CameraController2 extends CameraController {
     			Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
     		return;
     	}
+    	camera_settings.has_af_mode = true;
     	camera_settings.af_mode = focus_mode;
     	camera_settings.setFocusMode(previewBuilder);
     	setRepeatingRequest();
@@ -1532,6 +1541,7 @@ public class CameraController2 extends CameraController {
     	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
     		return false;
     	}
+    	camera_settings.has_face_detect_mode = true;
     	camera_settings.face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE;
     	camera_settings.setFaceDetectMode(previewBuilder);
     	setRepeatingRequest();
