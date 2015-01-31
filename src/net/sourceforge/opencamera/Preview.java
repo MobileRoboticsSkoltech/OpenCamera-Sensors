@@ -81,7 +81,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
 
 	private boolean using_android_l = false;
-	private boolean using_surface_holder = false;
 
 	private CameraSurface cameraSurface = null;
 	private CanvasView canvasView = null;
@@ -130,11 +129,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int remaining_burst_photos = 0;
 	private int remaining_restart_video = 0;
 
-	private boolean requested_preview_size = false; // Android L and SurfaceHolder only
-	private int requested_preview_size_w = 0; // Android L and SurfaceHolder only
-	private int requested_preview_size_h = 0; // Android L and SurfaceHolder only
-	private int surface_holder_w = 0; // Android L and SurfaceHolder only
-	private int surface_holder_h = 0; // Android L and SurfaceHolder only
 	private boolean is_preview_started = false;
 	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
 	private String preview_image_name = null;
@@ -259,21 +253,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-        	//this.using_android_l = true;
+        	this.using_android_l = true;
         }
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "using_android_l?: " + using_android_l);
 		}
 
         if( using_android_l ) {
-        	this.using_surface_holder = false;
+        	// use a TextureView for Android L - had bugs with SurfaceView not resizing properly on Nexus 7; and good to use a TextureView anyway
+        	// ideally we'd use a TextureView for older camera API too, but sticking with SurfaceView to avoid risk of breaking behaviour
     		this.cameraSurface = new MyTextureView(context, savedInstanceState, this);
     		// a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CanvasView
     		this.canvasView = new CanvasView(context, savedInstanceState, this);
     		camera_controller_manager = new CameraControllerManager2(context);
         }
         else {
-        	this.using_surface_holder = true;
     		this.cameraSurface = new MySurfaceView(context, savedInstanceState, this);
     		camera_controller_manager = new CameraControllerManager1();
         }
@@ -567,8 +561,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// Surface will be destroyed when we return, so stop the preview.
 		// Because the CameraDevice object is not a shared resource, it's very
 		// important to release it when the activity is paused.
-		this.surface_holder_w = 0;
-		this.surface_holder_h = 0;
 		mySurfaceDestroyed();
 	}
 	
@@ -576,42 +568,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "surfaceChanged " + w + ", " + h);
-		this.surface_holder_w = w;
-		this.surface_holder_h = h;
         if( holder.getSurface() == null ) {
             // preview surface does not exist
             return;
         }
 		mySurfaceChanged();
-
-		if( using_android_l ) {
-        	/*if( !this.requested_preview_size )  {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "request preview size");
-    			setPreviewSize();
-    			if( this.requested_preview_size_w == w && this.requested_preview_size_h == h ) {
-    				// if the surface is already the correct size, we can start the preview straight away - and indeed, we must do, as we won't receive another surfaceChanged call
-        			if( MyDebug.LOG )
-        				Log.d(TAG, "surface is already correct size");
-        			startCameraPreview();
-    			}
-        	}
-        	else*/
-			if( this.requested_preview_size && this.requested_preview_size_w == w && this.requested_preview_size_h == h ) {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "have now set preview size, so can start camera preview");
-    			startCameraPreview();
-    	    	/*final Handler handler = new Handler();
-    			handler.postDelayed(new Runnable() {
-    				@Override
-    				public void run() {
-    					if( MyDebug.LOG )
-    						Log.d(TAG, "delayed start camera preview");
-    					startCameraPreview();
-    				}
-    			}, 5000);*/
-        	}
-        }
 	}
 	
 	@Override
@@ -1117,23 +1078,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
-		if( !this.using_android_l || !this.using_surface_holder ) {
-			setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
-			// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
-			startCameraPreview();
-		}
-		else {
-			this.requested_preview_size = false;
-			if( MyDebug.LOG )
-				Log.d(TAG, "set requested_preview_size to false");
-			setPreviewSize();
-			// if surface isn't yet the correct size, we have to wait until surfaceChanged() is called with correct size
-			if( surface_holder_w == this.requested_preview_size_w && surface_holder_h == this.requested_preview_size_h ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "surface already correct size, so start preview");
-				startCameraPreview();
-			}
-		}
+		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
+		// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
+		startCameraPreview();
 		if( MyDebug.LOG ) {
 			//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 		}
@@ -1703,12 +1650,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	this.set_preview_size = true;
         	this.preview_w = best_size.width;
         	this.preview_h = best_size.height;
-    		if( this.using_android_l && this.using_surface_holder ) {
-    			// in Android L, calling setPreviewSize changes the size of the SurfaceHolder
-    			this.requested_preview_size = true;
-    			this.requested_preview_size_w = best_size.width;
-    			this.requested_preview_size_h = best_size.height;
-    		}
     		this.setAspectRatio( ((double)best_size.width) / (double)best_size.height );
         }
 	}

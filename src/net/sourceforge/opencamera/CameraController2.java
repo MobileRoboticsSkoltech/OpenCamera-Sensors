@@ -51,7 +51,6 @@ public class CameraController2 extends CameraController {
 	private ImageReader imageReader = null;
 	private PictureCallback jpeg_cb = null;
 	//private ImageReader previewImageReader = null;
-	private SurfaceHolder holder = null;
 	private SurfaceTexture texture = null;
 	private HandlerThread thread = null; 
 	Handler handler = null;
@@ -416,7 +415,6 @@ public class CameraController2 extends CameraController {
 			camera_features.video_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 
-		//android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceHolder.class);
 		android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceTexture.class);
 		camera_features.preview_sizes = new ArrayList<CameraController.Size>();
 		for(android.util.Size camera_size : camera_preview_sizes) {
@@ -914,11 +912,6 @@ public class CameraController2 extends CameraController {
 	void setPreviewSize(int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewSize: " + width + " , " + height);
-		if( holder != null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "set size of surface holder");
-			holder.setFixedSize(width, height);
-		}
 		if( texture != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set size of preview texture");
@@ -1353,10 +1346,12 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setPreviewDisplay(SurfaceHolder holder) throws IOException {
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "setPreviewDisplay");
-		this.holder = holder;
-		this.texture = null;
+			Log.d(TAG, "SurfaceHolder not supported for CameraController2!");
+			Log.d(TAG, "Should use setPreviewTexture() instead");
+		}
+		throw new RuntimeException();
 	}
 
 	@Override
@@ -1364,7 +1359,6 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewTexture");
 		this.texture = texture;
-		this.holder = null;
 	}
 	
 	private void setRepeatingRequest() {
@@ -1416,10 +1410,7 @@ public class CameraController2 extends CameraController {
 
 	private Surface getPreviewSurface() {
 		Surface surface = null;
-        if( holder != null ) {
-        	surface = holder.getSurface();
-        }
-        else if( texture != null ) {
+        if( texture != null ) {
         	surface = new Surface(texture);
         }
         return surface;
@@ -1465,13 +1456,6 @@ public class CameraController2 extends CameraController {
 						return;
 					}
 					captureSession = session;
-					if( MyDebug.LOG && holder != null ) {
-						Log.d(TAG, "holder surface: " + holder.getSurface());
-						if( holder.getSurface() == null )
-							Log.d(TAG, "holder surface is null!");
-						else if( !holder.getSurface().isValid() )
-							Log.d(TAG, "holder surface is not valid!");
-					}
 		        	Surface surface = getPreviewSurface();
 	        		previewBuilder.addTarget(surface);
 					setRepeatingRequest();
