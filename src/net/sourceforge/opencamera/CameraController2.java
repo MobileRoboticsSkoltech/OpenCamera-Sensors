@@ -55,14 +55,139 @@ public class CameraController2 extends CameraController {
 	private SurfaceTexture texture = null;
 	private HandlerThread thread = null; 
 	Handler handler = null;
-	
-	// data that we need to store, to pass to the stillBuilder (should set sensible defaults)
-	private int rotation = 0;
-	private Location location = null;
-	private byte jpeg_quality = 90;
 
-	//private MeteringRectangle [] focus_areas = null;
-	//private MeteringRectangle [] metering_areas = null;
+	class CameraSettings {
+		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
+		private int rotation = 0;
+		private Location location = null;
+		private byte jpeg_quality = 90;
+
+		// keys that we have passed to the previewBuilder, that we need to store to also pass to the stillBuilder (should set sensible defaults)
+		private int scene_mode = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
+		private int color_effect = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
+		private int white_balance = CameraMetadata.CONTROL_AWB_MODE_AUTO;
+		private Rect scalar_crop_region = null;
+		private int ae_exposure_compensation = 0;
+		private int af_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
+		private boolean ae_lock = false;
+		private MeteringRectangle [] af_regions = null;
+		private MeteringRectangle [] ae_regions = null;
+		private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
+		
+		private void setupBuilder(CaptureRequest.Builder builder, boolean is_still) {
+			setSceneMode(builder);
+			setColorEffect(builder);
+			setWhiteBalance(builder);
+			setCropRegion(builder);
+			setExposureCompensation(builder);
+			setFocusMode(builder);
+			setAutoExposureLock(builder);
+			setAFRegions(builder);
+			setAERegions(builder);
+			setFaceDetectMode(builder);
+
+			builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+			//builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+
+			if( is_still ) {
+				if( location != null ) {
+					//builder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
+					// settings location messes up date on Nexus 7?!
+				}
+				builder.set(CaptureRequest.JPEG_ORIENTATION, rotation);
+				builder.set(CaptureRequest.JPEG_QUALITY, jpeg_quality);
+			}
+		}
+
+		private boolean setSceneMode(CaptureRequest.Builder builder) {
+			if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null && scene_mode == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
+				// can leave off
+			}
+			else if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || builder.get(CaptureRequest.CONTROL_SCENE_MODE) != scene_mode ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting scene mode: " + scene_mode);
+				if( scene_mode == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
+					builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+				}
+				else {
+					builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_USE_SCENE_MODE);
+				}
+				builder.set(CaptureRequest.CONTROL_SCENE_MODE, scene_mode);
+				return true;
+			}
+			return false;
+		}
+
+		private boolean setColorEffect(CaptureRequest.Builder builder) {
+			if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null && color_effect == CameraMetadata.CONTROL_EFFECT_MODE_OFF ) {
+				// can leave off
+			}
+			else if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null || builder.get(CaptureRequest.CONTROL_EFFECT_MODE) != color_effect ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting color effect: " + color_effect);
+				builder.set(CaptureRequest.CONTROL_EFFECT_MODE, color_effect);
+				return true;
+			}
+			return false;
+		}
+
+		private boolean setWhiteBalance(CaptureRequest.Builder builder) {
+			if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null && white_balance == CameraMetadata.CONTROL_AWB_MODE_AUTO ) {
+				// can leave off
+			}
+			else if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null || builder.get(CaptureRequest.CONTROL_AWB_MODE) != white_balance ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting white balance: " + white_balance);
+				builder.set(CaptureRequest.CONTROL_AWB_MODE, white_balance);
+				return true;
+			}
+			return false;
+		}
+
+		private void setCropRegion(CaptureRequest.Builder builder) {
+			if( scalar_crop_region != null ) {
+				builder.set(CaptureRequest.SCALER_CROP_REGION, scalar_crop_region);
+			}
+		}
+
+		private boolean setExposureCompensation(CaptureRequest.Builder builder) {
+			if( builder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null || ae_exposure_compensation != builder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "change exposure to " + ae_exposure_compensation);
+				builder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, ae_exposure_compensation);
+	        	return true;
+			}
+			return false;
+		}
+
+		private void setFocusMode(CaptureRequest.Builder builder) {
+	    	builder.set(CaptureRequest.CONTROL_AF_MODE, af_mode);
+		}
+
+		private void setAutoExposureLock(CaptureRequest.Builder builder) {
+	    	builder.set(CaptureRequest.CONTROL_AE_LOCK, ae_lock);
+		}
+
+		private void setAFRegions(CaptureRequest.Builder builder) {
+			if( af_regions != null && characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
+				builder.set(CaptureRequest.CONTROL_AF_REGIONS, af_regions);
+			}
+		}
+
+		private void setAERegions(CaptureRequest.Builder builder) {
+			if( ae_regions != null && characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
+				builder.set(CaptureRequest.CONTROL_AE_REGIONS, ae_regions);
+			}
+		}
+
+		private void setFaceDetectMode(CaptureRequest.Builder builder) {
+	    	builder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, face_detect_mode);
+		}
+		
+		// n.b., if we add more methods, remember to update setupBuilder() above!
+	}
+	
+	CameraSettings camera_settings = new CameraSettings();
 
 	public CameraController2(Context context, int cameraId) {
 		if( MyDebug.LOG )
@@ -450,25 +575,14 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
 			}
 
-			if( previewBuilder.get(CaptureRequest.CONTROL_SCENE_MODE) == null && selected_value2 == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
-				// can leave off
-			}
-			else if( previewBuilder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || previewBuilder.get(CaptureRequest.CONTROL_SCENE_MODE) != selected_value2 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "setting scene mode: " + selected_value2);
-				if( selected_value2 == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
-					previewBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-				}
-				else {
-					previewBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_USE_SCENE_MODE);
-				}
-				previewBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, selected_value2);
+			camera_settings.scene_mode = selected_value2;
+			if( camera_settings.setSceneMode(previewBuilder) ) {
 		    	setRepeatingRequest();
 			}
 		}
 		return supported_values;
 	}
-
+	
 	@Override
 	public String getSceneMode() {
 		if( previewBuilder.get(CaptureRequest.CONTROL_SCENE_MODE) == null )
@@ -566,13 +680,8 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
 			}
 
-			if( previewBuilder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null && selected_value2 == CameraMetadata.CONTROL_EFFECT_MODE_OFF ) {
-				// can leave off
-			}
-			else if( previewBuilder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null || previewBuilder.get(CaptureRequest.CONTROL_EFFECT_MODE) != selected_value2 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "setting color effect: " + selected_value2);
-				previewBuilder.set(CaptureRequest.CONTROL_EFFECT_MODE, selected_value2);
+			camera_settings.color_effect = selected_value2;
+			if( camera_settings.setColorEffect(previewBuilder) ) {
 		    	setRepeatingRequest();
 			}
 		}
@@ -670,13 +779,8 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
 			}
 
-			if( previewBuilder.get(CaptureRequest.CONTROL_AWB_MODE) == null && selected_value2 == CameraMetadata.CONTROL_AWB_MODE_AUTO ) {
-				// can leave off
-			}
-			else if( previewBuilder.get(CaptureRequest.CONTROL_AWB_MODE) == null || previewBuilder.get(CaptureRequest.CONTROL_AWB_MODE) != selected_value2 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "setting white balance: " + selected_value2);
-				previewBuilder.set(CaptureRequest.CONTROL_AWB_MODE, selected_value2);
+			camera_settings.white_balance = selected_value2;
+			if( camera_settings.setWhiteBalance(previewBuilder) ) {
 		    	setRepeatingRequest();
 			}
 		}
@@ -839,7 +943,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public int getJpegQuality() {
-		return this.jpeg_quality;
+		return this.camera_settings.jpeg_quality;
 	}
 
 	@Override
@@ -849,7 +953,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "invalid jpeg quality" + quality);
 			throw new RuntimeException();
 		}
-		this.jpeg_quality = (byte)quality;
+		this.camera_settings.jpeg_quality = (byte)quality;
 	}
 
 	@Override
@@ -886,12 +990,12 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "hwidth: " + hwidth);
 			Log.d(TAG, "hheight: " + hheight);
 		}
-		Rect zoom_rect = new Rect(left, top, right, bottom);
-    	previewBuilder.set(CaptureRequest.SCALER_CROP_REGION, zoom_rect);
+		camera_settings.scalar_crop_region = new Rect(left, top, right, bottom);
+		camera_settings.setCropRegion(previewBuilder);
     	setRepeatingRequest();
     	this.current_zoom_value = value;
 	}
-
+	
 	@Override
 	int getExposureCompensation() {
 		if( previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null )
@@ -902,17 +1006,14 @@ public class CameraController2 extends CameraController {
 	@Override
 	// Returns whether exposure was modified
 	boolean setExposureCompensation(int new_exposure) {
-		// key is available on all devices, so don't need to check for null
-		if( previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null || new_exposure != previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "change exposure to " + new_exposure);
-	    	previewBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, new_exposure);
+		camera_settings.ae_exposure_compensation = new_exposure;
+		if( camera_settings.setExposureCompensation(previewBuilder) ) {
 	    	setRepeatingRequest();
         	return true;
 		}
 		return false;
 	}
-
+	
 	@Override
 	void setPreviewFpsRange(int min, int max) {
 		// TODO Auto-generated method stub
@@ -975,10 +1076,11 @@ public class CameraController2 extends CameraController {
     			Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
     		return;
     	}
-    	previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, focus_mode);
+    	camera_settings.af_mode = focus_mode;
+    	camera_settings.setFocusMode(previewBuilder);
     	setRepeatingRequest();
 	}
-
+	
 	private String convertFocusModeToValue(int focus_mode) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFocusModeToValue: " + focus_mode);
@@ -1028,10 +1130,11 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setAutoExposureLock(boolean enabled) {
-    	previewBuilder.set(CaptureRequest.CONTROL_AE_LOCK, enabled);
+		camera_settings.ae_lock = enabled;
+		camera_settings.setAutoExposureLock(previewBuilder);
     	setRepeatingRequest();
 	}
-
+	
 	@Override
 	public boolean getAutoExposureLock() {
 		if( previewBuilder.get(CaptureRequest.CONTROL_AE_LOCK) == null )
@@ -1041,19 +1144,19 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setRotation(int rotation) {
-		this.rotation = rotation;
+		this.camera_settings.rotation = rotation;
 	}
 
 	@Override
 	void setLocationInfo(Location location) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setLocationInfo: " + location.getLongitude() + " , " + location.getLatitude());
-		this.location = location;
+		this.camera_settings.location = location;
 	}
 
 	@Override
 	void removeLocationInfo() {
-		this.location = null;
+		this.camera_settings.location = null;
 	}
 
 	@Override
@@ -1141,28 +1244,32 @@ public class CameraController2 extends CameraController {
 		boolean has_metering = false;
 		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
 			has_focus = true;
-			MeteringRectangle [] focus_areas = new MeteringRectangle[areas.size()];
+			camera_settings.af_regions = new MeteringRectangle[areas.size()];
 			int i = 0;
 			for(CameraController.Area area : areas) {
-				focus_areas[i++] = convertAreaToMeteringRectangle(sensor_rect, area);
+				camera_settings.af_regions[i++] = convertAreaToMeteringRectangle(sensor_rect, area);
 			}
-        	previewBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, focus_areas);
+			camera_settings.setAFRegions(previewBuilder);
 		}
+		else
+			camera_settings.af_regions = null;
 		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
 			has_metering = true;
-			MeteringRectangle [] metering_areas = new MeteringRectangle[areas.size()];
+			camera_settings.ae_regions = new MeteringRectangle[areas.size()];
 			int i = 0;
 			for(CameraController.Area area : areas) {
-				metering_areas[i++] = convertAreaToMeteringRectangle(sensor_rect, area);
+				camera_settings.ae_regions[i++] = convertAreaToMeteringRectangle(sensor_rect, area);
 			}
-        	previewBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, metering_areas);
+			camera_settings.setAERegions(previewBuilder);
 		}
+		else
+			camera_settings.ae_regions = null;
 		if( has_focus || has_metering ) {
 			setRepeatingRequest();
 		}
 		return has_focus;
 	}
-
+	
 	@Override
 	void clearFocusAndMetering() {
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
@@ -1170,16 +1277,20 @@ public class CameraController2 extends CameraController {
 		boolean has_metering = false;
 		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
 			has_focus = true;
-			MeteringRectangle [] focus_areas = new MeteringRectangle[1];
-			focus_areas[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
-        	previewBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, focus_areas);
+			camera_settings.af_regions = new MeteringRectangle[1];
+			camera_settings.af_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
+			camera_settings.setAFRegions(previewBuilder);
 		}
+		else
+			camera_settings.af_regions = null;
 		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
 			has_metering = true;
-			MeteringRectangle [] metering_areas = new MeteringRectangle[1];
-			metering_areas[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
-        	previewBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, metering_areas);
+			camera_settings.ae_regions = new MeteringRectangle[1];
+			camera_settings.ae_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
+			camera_settings.setAERegions(previewBuilder);
 		}
+		else
+			camera_settings.ae_regions = null;
 		if( has_focus || has_metering ) {
 			setRepeatingRequest();
 		}
@@ -1290,11 +1401,7 @@ public class CameraController2 extends CameraController {
 		}
 		try {
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-
-			previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
-			//previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-			previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-			//previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+			camera_settings.setupBuilder(previewBuilder, false);
 		}
 		catch(CameraAccessException e) {
 			//captureSession = null;
@@ -1428,11 +1535,12 @@ public class CameraController2 extends CameraController {
     	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
     		return false;
     	}
-    	previewBuilder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE);
+    	camera_settings.face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE;
+    	camera_settings.setFaceDetectMode(previewBuilder);
     	setRepeatingRequest();
 		return true;
 	}
-
+	
 	@Override
 	void setFaceDetectionListener(final FaceDetectionListener listener) {
 		this.face_detection_listener = listener;
@@ -1501,13 +1609,8 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
 			}
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			camera_settings.setupBuilder(stillBuilder, true);
 			stillBuilder.addTarget(imageReader.getSurface());
-
-			if( location != null ) {
-				//stillBuilder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
-			}
-			stillBuilder.set(CaptureRequest.JPEG_ORIENTATION, rotation);
-			stillBuilder.set(CaptureRequest.JPEG_QUALITY, jpeg_quality);
 
 			CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
 				public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
@@ -1574,6 +1677,7 @@ public class CameraController2 extends CameraController {
 			//CaptureRequest.Builder videoBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
 			//videoBuilder.addTarget(surface);
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+			camera_settings.setupBuilder(previewBuilder, false);
 			previewBuilder.addTarget(surface);
 			createCaptureSession(video_recorder);
 			/*if( captureSession != null ) {
