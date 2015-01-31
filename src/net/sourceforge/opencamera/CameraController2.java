@@ -1121,8 +1121,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setRecordingHint(boolean hint) {
-		// TODO Auto-generated method stub
-
+		// not relevant for CameraController2
 	}
 
 	@Override
