@@ -841,6 +841,7 @@ class CameraController1 extends CameraController {
 		camera.setPreviewTexture(texture);
 	}
 
+	// throws RuntimeException if fails to start preview
 	@Override
 	void startPreview() {
 		camera.startPreview();

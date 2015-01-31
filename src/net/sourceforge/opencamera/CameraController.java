@@ -144,7 +144,7 @@ public abstract class CameraController {
 	abstract void reconnect() throws IOException;
 	abstract void setPreviewDisplay(SurfaceHolder holder) throws IOException;
 	abstract void setPreviewTexture(SurfaceTexture texture) throws IOException;
-	abstract void startPreview();
+	abstract void startPreview(); // throws RuntimeException if fails to start preview
 	abstract void stopPreview();
 	public abstract boolean startFaceDetection();
 	abstract void setFaceDetectionListener(final CameraController.FaceDetectionListener listener);
@@ -157,7 +157,7 @@ public abstract class CameraController {
 	abstract boolean isFrontFacing();
 	abstract void unlock();
 	abstract void initVideoRecorderPrePrepare(MediaRecorder video_recorder);
-	abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder);
+	abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder); // throws RuntimeException if fails to prepare video recorder
 	abstract String getParametersString();
 
 	// gets the available values of a generic mode, e.g., scene, color etc, and makes sure the requested mode is available

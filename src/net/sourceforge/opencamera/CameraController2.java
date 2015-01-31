@@ -1421,6 +1421,7 @@ public class CameraController2 extends CameraController {
         return surface;
 	}
 
+	// throws RuntimeException if fails to create captureSession
 	private void createCaptureSession(final MediaRecorder video_recorder) {
 		if( captureSession != null ) {
 			if( MyDebug.LOG )
@@ -1478,6 +1479,7 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG )
 						Log.d(TAG, "onConfigureFailed");
 					callback_done = true;
+					throw new RuntimeException();
 				}
 			}
 			MyStateCallback myStateCallback = new MyStateCallback();
@@ -1496,11 +1498,11 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "failed to create capture session");
 			e.printStackTrace();
-			//throw new IOException();
 			throw new RuntimeException();
 		}
 	}
 
+	// throws RuntimeException if fails to start preview
 	@Override
 	void startPreview() {
 		if( MyDebug.LOG )
@@ -1659,6 +1661,7 @@ public class CameraController2 extends CameraController {
 		// do nothing at this stage
 	}
 
+	// throws RuntimeException if fails to prepare video recorder
 	@Override
 	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) {
 		if( MyDebug.LOG )

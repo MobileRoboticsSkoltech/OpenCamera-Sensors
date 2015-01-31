@@ -4051,6 +4051,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 	        	catch(RuntimeException e) {
 	        		// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
+	        		// also initVideoRecorderPostPrepare throws RuntimeException if it fails on Android L Camera2 API
 		    		if( MyDebug.LOG )
 		    			Log.e(TAG, "runtime exception starting video recorder");
 					e.printStackTrace();
