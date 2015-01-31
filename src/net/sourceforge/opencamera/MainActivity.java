@@ -1666,6 +1666,13 @@ public class MainActivity extends Activity {
     }
     
     private void updateFolderHistory(String folder_name) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "updateFolderHistory: " + folder_name);
+			Log.d(TAG, "save_location_history size: " + save_location_history.size());
+			for(int i=0;i<save_location_history.size();i++) {
+				Log.d(TAG, save_location_history.get(i));
+			}
+		}
 		while( save_location_history.remove(folder_name) ) {
 		}
 		save_location_history.add(folder_name);
@@ -1673,9 +1680,18 @@ public class MainActivity extends Activity {
 			save_location_history.remove(0);
 		}
 		writeSaveLocations();
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "updateFolderHistory exit:");
+			Log.d(TAG, "save_location_history size: " + save_location_history.size());
+			for(int i=0;i<save_location_history.size();i++) {
+				Log.d(TAG, save_location_history.get(i));
+			}
+		}
     }
     
     public void clearFolderHistory() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearFolderHistory");
 		save_location_history.clear();
 		updateFolderHistory(); // to re-add the current choice, and save
     }
