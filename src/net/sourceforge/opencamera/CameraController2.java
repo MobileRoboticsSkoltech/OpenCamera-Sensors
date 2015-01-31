@@ -230,6 +230,7 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera error: " + error);
 				callback_done = true;
+				throw new RuntimeException();
 			}
 		};
 		MyStateCallback myStateCallback = new MyStateCallback();
