@@ -86,6 +86,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private CanvasView canvasView = null;
 	private boolean set_preview_size = false;
 	private int preview_w = 0, preview_h = 0;
+	private boolean set_textureview_size = false;
+	private int textureview_w = 0, textureview_h = 0;
 
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
@@ -579,14 +581,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void onSurfaceTextureAvailable(SurfaceTexture arg0, int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSurfaceTextureAvailable()");
+		this.set_textureview_size = true;
+		this.textureview_w = width;
+		this.textureview_h = height;
 		mySurfaceCreated();
-		configureTransform(width, height);
+		configureTransform();
 	}
 
 	@Override
 	public boolean onSurfaceTextureDestroyed(SurfaceTexture arg0) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSurfaceTextureDestroyed()");
+		this.set_textureview_size = false;
+		this.textureview_w = 0;
+		this.textureview_h = 0;
 		mySurfaceDestroyed();
 		return true;
 	}
@@ -595,21 +603,27 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void onSurfaceTextureSizeChanged(SurfaceTexture arg0, int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSurfaceTextureSizeChanged " + width + ", " + height);
+		this.set_textureview_size = true;
+		this.textureview_w = width;
+		this.textureview_h = height;
 		mySurfaceChanged();
-		configureTransform(width, height);
+		configureTransform();
 	}
 
 	@Override
 	public void onSurfaceTextureUpdated(SurfaceTexture arg0) {
 	}
 
-    private void configureTransform(int viewWidth, int viewHeight) { 
-    	Activity activity = (Activity)this.getContext();
-    	if( camera_controller == null || !this.set_preview_size )
+    private void configureTransform() { 
+		if( MyDebug.LOG )
+			Log.d(TAG, "configureTransform");
+    	if( camera_controller == null || !this.set_preview_size || !this.set_textureview_size )
     		return;
-    	int rotation = activity.getWindowManager().getDefaultDisplay().getRotation(); 
-		Matrix matrix = new Matrix(); 
-		RectF viewRect = new RectF(0, 0, viewWidth, viewHeight); 
+		if( MyDebug.LOG )
+			Log.d(TAG, "textureview size: " + textureview_w + ", " + textureview_h);
+    	int rotation = getDisplayRotation();
+    	Matrix matrix = new Matrix(); 
+		RectF viewRect = new RectF(0, 0, this.textureview_w, this.textureview_h); 
 		RectF bufferRect = new RectF(0, 0, this.preview_h, this.preview_w); 
 		float centerX = viewRect.centerX(); 
 		float centerY = viewRect.centerY(); 
@@ -617,8 +631,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY()); 
 	        matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL); 
 	        float scale = Math.max(
-	        		(float) viewHeight / preview_h, 
-                    (float) viewWidth / preview_w); 
+	        		(float) textureview_h / preview_h, 
+                    (float) textureview_w / preview_w); 
             matrix.postScale(scale, scale, centerX, centerY); 
             matrix.postRotate(90 * (rotation - 2), centerX, centerY); 
         } 
@@ -2129,6 +2143,27 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return aspect_ratio;
     }
 
+    private int getDisplayRotation() {
+    	// gets the display rotation (as a Surface.ROTATION_* constant), taking into account the getRotatePreviewPreferenceKey() setting
+		Activity activity = (Activity)this.getContext();
+	    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String rotate_preview = sharedPreferences.getString(MainActivity.getRotatePreviewPreferenceKey(), "0");
+		if( MyDebug.LOG )
+			Log.d(TAG, "    rotate_preview = " + rotate_preview);
+		if( rotate_preview.equals("180") ) {
+		    switch (rotation) {
+		    	case Surface.ROTATION_0: rotation = Surface.ROTATION_180; break;
+		    	case Surface.ROTATION_90: rotation = Surface.ROTATION_270; break;
+		    	case Surface.ROTATION_180: rotation = Surface.ROTATION_0; break;
+		    	case Surface.ROTATION_270: rotation = Surface.ROTATION_90; break;
+		    }
+		}
+
+		return rotation;
+    }
+    
     // for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
 	// note, if orientation is locked to landscape this is only called when setting up the activity, and will always have the same orientation
 	void setCameraDisplayOrientation() {
@@ -2139,8 +2174,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-		Activity activity = (Activity)this.getContext();
-	    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+	    int rotation = getDisplayRotation();
 	    int degrees = 0;
 	    switch (rotation) {
 	    	case Surface.ROTATION_0: degrees = 0; break;
@@ -2151,15 +2185,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "    degrees = " + degrees);
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String rotate_preview = sharedPreferences.getString(MainActivity.getRotatePreviewPreferenceKey(), "0");
-		if( MyDebug.LOG )
-			Log.d(TAG, "    rotate_preview = " + rotate_preview);
-		if( rotate_preview.equals("180") ) {
-			degrees = (degrees + 180) % 360;
-		}
-		
 	    camera_controller.setDisplayOrientation(degrees);
+	    if( using_android_l ) {
+	    	// need to configure the textureview
+			configureTransform();
+	    }
 	}
 	
 	// for taking photos - from http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setRotation(int)
