@@ -1253,6 +1253,8 @@ public class CameraController2 extends CameraController {
 		}*/
 
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		if( MyDebug.LOG )
+			Log.d(TAG, "sensor_rect: " + sensor_rect.left + " , " + sensor_rect.top + " x " + sensor_rect.right + " , " + sensor_rect.bottom);
 		boolean has_focus = false;
 		boolean has_metering = false;
 		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
