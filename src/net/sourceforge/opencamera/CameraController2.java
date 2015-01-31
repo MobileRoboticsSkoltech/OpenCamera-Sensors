@@ -432,11 +432,15 @@ public class CameraController2 extends CameraController {
 		camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
 
 		camera_features.is_exposure_lock_supported = true;
+		
+		// TODO: is_video_stabilization_supported
 
 		Range<Integer> exposure_range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
 		camera_features.min_exposure = exposure_range.getLower();
 		camera_features.max_exposure = exposure_range.getUpper();
 		camera_features.exposure_step = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP).floatValue();
+
+		// TODO: can_disable_shutter_sound
 
 		return camera_features;
 	}
