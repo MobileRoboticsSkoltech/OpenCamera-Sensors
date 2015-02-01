@@ -55,6 +55,12 @@ public class CameraController2 extends CameraController {
 	private HandlerThread thread = null; 
 	Handler handler = null;
 
+	private int preview_width = 0;
+	private int preview_height = 0;
+	
+	private int picture_width = 0;
+	private int picture_height = 0;
+	
 	class CameraSettings {
 		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
 		private int rotation = 0;
@@ -102,6 +108,10 @@ public class CameraController2 extends CameraController {
 		}
 
 		private boolean setSceneMode(CaptureRequest.Builder builder) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "setSceneMode");
+				Log.d(TAG, "builder: " + builder);
+			}
 			if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null && scene_mode == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
 				// can leave off
 			}
@@ -239,7 +249,6 @@ public class CameraController2 extends CameraController {
 				callback_done = true;
 				camera.close();
 				CameraController2.this.camera = null;
-				throw new RuntimeException();
 			}
 		};
 		MyStateCallback myStateCallback = new MyStateCallback();
@@ -252,9 +261,9 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "failed to open camera");
-				Log.d(TAG, "reason: " + e.getReason());
-				Log.d(TAG, "message: " + e.getMessage());
+				Log.e(TAG, "failed to open camera");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
 			// throw as a RuntimeException instead, as this is what callers will catch
@@ -268,7 +277,7 @@ public class CameraController2 extends CameraController {
 		}
 		if( camera == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "camera failed to open");
+				Log.e(TAG, "camera failed to open");
 			throw new RuntimeException();
 		}
 		if( MyDebug.LOG )
@@ -869,7 +878,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public Size getPictureSize() {
-		Size size = new Size(imageReader.getWidth(), imageReader.getHeight());
+		Size size = new Size(picture_width, picture_height);
 		return size;
 	}
 
@@ -880,13 +889,31 @@ public class CameraController2 extends CameraController {
 		if( captureSession != null ) {
 			// can only call this when captureSession not created - as the surface of the imageReader we create has to match the surface we pass to the captureSession
 			if( MyDebug.LOG )
-				Log.d(TAG, "can't set picture size when captureSession running!");
+				Log.e(TAG, "can't set picture size when captureSession running!");
+			throw new RuntimeException();
+		}
+		this.picture_width = width;
+		this.picture_height = height;
+	}
+
+	private void createPictureImageReader() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "createPictureImageReader");
+		if( captureSession != null ) {
+			// can only call this when captureSession not created - as the surface of the imageReader we create has to match the surface we pass to the captureSession
+			if( MyDebug.LOG )
+				Log.e(TAG, "can't create picture image reader when captureSession running!");
 			throw new RuntimeException();
 		}
 		if( imageReader != null ) {
 			imageReader.close();
 		}
-		imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 2); 
+		if( picture_width == 0 || picture_height == 0 ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "application needs to call setPictureSize()");
+			throw new RuntimeException();
+		}
+		imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2); 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "created new imageReader: " + imageReader.toString());
 			Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
@@ -911,18 +938,11 @@ public class CameraController2 extends CameraController {
 	            image = null;
 	            jpeg_cb.onPictureTaken(bytes);
 				cancelAutoFocus();
+				if( MyDebug.LOG )
+					Log.d(TAG, "done onImageAvailable");
 			}
 		}, null);
-		/*if( captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "need to create a new capture session with new imageReader's surface");
-			createCaptureSession(null);
-		}*/
 	}
-
-	private int preview_width = 0;
-	private int preview_height = 0;
-	
 	@Override
 	public Size getPreviewSize() {
 		return new Size(preview_width, preview_height);
@@ -932,11 +952,11 @@ public class CameraController2 extends CameraController {
 	void setPreviewSize(int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewSize: " + width + " , " + height);
-		if( texture != null ) {
+		/*if( texture != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set size of preview texture");
 			texture.setDefaultBufferSize(width, height);
-		}
+		}*/
 		preview_width = width;
 		preview_height = height;
 		/*if( previewImageReader != null ) {
@@ -967,7 +987,7 @@ public class CameraController2 extends CameraController {
 	void setJpegQuality(int quality) {
 		if( quality < 0 || quality > 100 ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "invalid jpeg quality" + quality);
+				Log.e(TAG, "invalid jpeg quality" + quality);
 			throw new RuntimeException();
 		}
 		this.camera_settings.jpeg_quality = (byte)quality;
@@ -987,7 +1007,7 @@ public class CameraController2 extends CameraController {
 		}
 		if( value < 0 || value > zoom_ratios.size() ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "invalid zoom value" + value);
+				Log.e(TAG, "invalid zoom value" + value);
 			throw new RuntimeException();
 		}
 		float zoom = zoom_ratios.get(value)/100.0f;
@@ -1380,8 +1400,8 @@ public class CameraController2 extends CameraController {
 	void setPreviewDisplay(SurfaceHolder holder) throws IOException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setPreviewDisplay");
-			Log.d(TAG, "SurfaceHolder not supported for CameraController2!");
-			Log.d(TAG, "Should use setPreviewTexture() instead");
+			Log.e(TAG, "SurfaceHolder not supported for CameraController2!");
+			Log.e(TAG, "Should use setPreviewTexture() instead");
 		}
 		throw new RuntimeException();
 	}
@@ -1403,9 +1423,9 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "failed to set repeating request");
-				Log.d(TAG, "reason: " + e.getReason());
-				Log.d(TAG, "message: " + e.getMessage());
+				Log.e(TAG, "failed to set repeating request");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
 			throw new RuntimeException();
@@ -1422,9 +1442,9 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "failed to capture");
-				Log.d(TAG, "reason: " + e.getReason());
-				Log.d(TAG, "message: " + e.getMessage());
+				Log.e(TAG, "failed to capture");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
 			throw new RuntimeException();
@@ -1446,9 +1466,9 @@ public class CameraController2 extends CameraController {
 		catch(CameraAccessException e) {
 			//captureSession = null;
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "failed to create capture request");
-				Log.d(TAG, "reason: " + e.getReason());
-				Log.d(TAG, "message: " + e.getMessage());
+				Log.e(TAG, "failed to create capture request");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
 			throw new RuntimeException();
@@ -1477,8 +1497,19 @@ public class CameraController2 extends CameraController {
 
 		try {
 			captureSession = null;
-			//previewBuilder = null;
 
+			// in some cases need to recreate picture imageReader and the texture default buffer size (e.g., see test testTakePhotoPreviewPaused())
+			createPictureImageReader();
+			if( texture != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set size of preview texture");
+				if( preview_width == 0 || preview_height == 0 ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "application needs to call setPreviewSize()");
+					throw new RuntimeException();
+				}
+				texture.setDefaultBufferSize(preview_width, preview_height);
+			}
 			if( video_recorder != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "creating capture session for video recording");
@@ -1496,9 +1527,14 @@ public class CameraController2 extends CameraController {
 				boolean callback_done = false;
 				@Override
 				public void onConfigured(CameraCaptureSession session) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "onConfigured");
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "onConfigured: " + session);
+						Log.d(TAG, "captureSession was: " + captureSession);
+					}
 					if( camera == null ) {
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "camera is closed");
+						}
 						callback_done = true;
 						return;
 					}
@@ -1511,17 +1547,27 @@ public class CameraController2 extends CameraController {
 
 				@Override
 				public void onConfigureFailed(CameraCaptureSession session) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "onConfigureFailed");
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "onConfigureFailed: " + session);
+						Log.d(TAG, "captureSession was: " + captureSession);
+					}
 					callback_done = true;
-					// don't throw RuntimeException, should be handled by CameraAccessException below?
-					throw new RuntimeException();
+					// don't throw RuntimeException here, as won't be caught - instead we throw RuntimeException below
 				}
 			}
 			MyStateCallback myStateCallback = new MyStateCallback();
 
         	Surface preview_surface = getPreviewSurface();
         	Surface capture_surface = video_recorder != null ? video_recorder.getSurface() : imageReader.getSurface();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "texture: " + texture);
+				Log.d(TAG, "preview_surface: " + preview_surface);
+				Log.d(TAG, "capture_surface: " + capture_surface);
+				Log.d(TAG, "imageReader: " + imageReader);
+				Log.d(TAG, "imageReader: " + imageReader.getWidth());
+				Log.d(TAG, "imageReader: " + imageReader.getHeight());
+				Log.d(TAG, "imageReader: " + imageReader.getImageFormat());
+			}
 			camera.createCaptureSession(Arrays.asList(preview_surface/*, previewImageReader.getSurface()*/, capture_surface),
 				myStateCallback,
 		 		handler);
@@ -1529,12 +1575,20 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "wait until session created...");
 			while( !myStateCallback.callback_done ) {
 			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "created captureSession: " + captureSession);
+			}
+			if( captureSession == null ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to create capture session");
+				throw new RuntimeException();
+			}
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "failed to create capture session");
-				Log.d(TAG, "reason: " + e.getReason());
-				Log.d(TAG, "message: " + e.getMessage());
+				Log.e(TAG, "CameraAccessException trying to create capture session");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
 			throw new RuntimeException();
@@ -1569,9 +1623,9 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "failed to stop repeating");
-				Log.d(TAG, "reason: " + e.getReason());
-				Log.d(TAG, "message: " + e.getMessage());
+				Log.e(TAG, "failed to stop repeating");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
 			throw new RuntimeException();
@@ -1599,9 +1653,11 @@ public class CameraController2 extends CameraController {
 	void autoFocus(final AutoFocusCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoFocus");
-		if( /*previewBuilder == null ||*/ captureSession == null ) {
+		if( captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "capture session not available");
+			// should call the callback, so the application isn't left waiting (e.g., when we autofocus before trying to take a photo)
+			cb.onAutoFocus(false);
 			return;
 		}
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
@@ -1641,8 +1697,11 @@ public class CameraController2 extends CameraController {
 	void cancelAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
-		if( /*previewBuilder == null ||*/ captureSession == null )
+		if( captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "no capture session");
 			return;
+		}
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
     	//setRepeatingRequest();
     	capture();
@@ -1652,6 +1711,14 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void takePicture(final PictureCallback raw, final PictureCallback jpeg) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicture");
+		if( captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "no capture session");
+			// throw a RuntimeException so that application knows this fails
+			throw new RuntimeException();
+		}
 		try {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "imageReader: " + imageReader.toString());
@@ -1673,9 +1740,9 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "failed to take picture");
-				Log.d(TAG, "reason: " + e.getReason());
-				Log.d(TAG, "message: " + e.getMessage());
+				Log.e(TAG, "failed to take picture");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
 			throw new RuntimeException();
@@ -1740,9 +1807,9 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "failed to create catpure request for video");
-				Log.d(TAG, "reason: " + e.getReason());
-				Log.d(TAG, "message: " + e.getMessage());
+				Log.e(TAG, "failed to create capture request for video");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
 			throw new RuntimeException();
