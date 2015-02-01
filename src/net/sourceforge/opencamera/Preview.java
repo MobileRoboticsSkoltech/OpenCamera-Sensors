@@ -4740,6 +4740,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        			takePictureOnTimer(timer_delay, true);
 	        		}
 	            }
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "onPictureTaken complete");
     	    }
     	};
     	{
@@ -4759,6 +4761,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		}
     		catch(RuntimeException e) {
     			// just in case? We got a RuntimeException report here from 1 user on Google Play; I also encountered it myself once of Galaxy Nexus when starting up
+    			// also this can happen on camera2 API - if we failed to create the capture session, we'll be unable to take photos, so CameraController2.takePicture() will throw a RuntimeException
     			if( MyDebug.LOG )
 					Log.e(TAG, "runtime exception from takePicture");
     			e.printStackTrace();
