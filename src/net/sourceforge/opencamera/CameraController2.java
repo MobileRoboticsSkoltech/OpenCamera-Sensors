@@ -216,39 +216,53 @@ public class CameraController2 extends CameraController {
 		class MyStateCallback extends CameraDevice.StateCallback {
 			boolean callback_done = false;
 			@Override
-			public void onOpened(CameraDevice camera) {
+			public void onOpened(CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera opened");
-				CameraController2.this.camera = camera;
-				callback_done = true;
+				CameraController2.this.camera = cam;
 
 				// note, this won't start the preview yet, but we create the previewBuilder in order to start setting camera parameters
 				createPreviewRequest();
+
+				callback_done = true;
 			}
 
 			@Override
-			public void onClosed(CameraDevice camera) {
+			public void onClosed(CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera closed");
-				CameraController2.this.camera = null;
+				// caller should ensure camera variables are set to null
 			}
 
 			@Override
-			public void onDisconnected(CameraDevice camera) {
+			public void onDisconnected(CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera disconnected");
-				camera.close();
+				// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
 				CameraController2.this.camera = null;
+				if( MyDebug.LOG )
+					Log.d(TAG, "onDisconnected: camera is now set to null");
+				cam.close();
+				if( MyDebug.LOG )
+					Log.d(TAG, "onDisconnected: camera is now closed");
 				callback_done = true;
 			}
 
 			@Override
-			public void onError(CameraDevice camera, int error) {
-				if( MyDebug.LOG )
+			public void onError(CameraDevice cam, int error) {
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "camera error: " + error);
-				callback_done = true;
-				camera.close();
+					Log.d(TAG, "received camera: " + cam);
+					Log.d(TAG, "actual camera: " + CameraController2.this.camera);
+				}
+				// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
 				CameraController2.this.camera = null;
+				if( MyDebug.LOG )
+					Log.d(TAG, "onError: camera is now set to null");
+				cam.close();
+				if( MyDebug.LOG )
+					Log.d(TAG, "onError: camera is now closed");
+				callback_done = true;
 			}
 		};
 		MyStateCallback myStateCallback = new MyStateCallback();
@@ -281,7 +295,7 @@ public class CameraController2 extends CameraController {
 			throw new RuntimeException();
 		}
 		if( MyDebug.LOG )
-			Log.d(TAG, "camera now opened");
+			Log.d(TAG, "camera now opened: " + camera);
 
 		/*CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
 	    StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
@@ -1094,8 +1108,6 @@ public class CameraController2 extends CameraController {
 	void setFocusValue(String focus_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusValue: " + focus_value);
-		/*if( previewBuilder == null || captureSession == null )
-			return;*/
 		int focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
     	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_manual") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
@@ -1271,12 +1283,6 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	boolean setFocusAndMeteringArea(List<Area> areas) {
-		/*if( previewBuilder == null || captureSession == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "capture session not available");
-			return false;
-		}*/
-
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
 		if( MyDebug.LOG )
 			Log.d(TAG, "sensor_rect: " + sensor_rect.left + " , " + sensor_rect.top + " x " + sensor_rect.right + " , " + sensor_rect.bottom);
@@ -1416,8 +1422,11 @@ public class CameraController2 extends CameraController {
 	private void setRepeatingRequest() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setRepeatingRequest");
-		if( /*previewBuilder == null ||*/ captureSession == null )
+		if( camera == null || captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "no camera or capture session");
 			return;
+		}
 		try {
 			captureSession.setRepeatingRequest(previewBuilder.build(), previewCaptureCallback, null);
 		}
@@ -1435,8 +1444,11 @@ public class CameraController2 extends CameraController {
 	private void capture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "capture");
-		if( /*previewBuilder == null ||*/ captureSession == null )
+		if( camera == null || captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "no camera or capture session");
 			return;
+		}
 		try {
 			captureSession.capture(previewBuilder.build(), previewCaptureCallback, null);
 		}
@@ -1454,11 +1466,13 @@ public class CameraController2 extends CameraController {
 	private void createPreviewRequest() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createPreviewRequest");
-		if( camera == null /*|| captureSession == null*/ ) {
+		if( camera == null  ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not available!");
 			return;
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "camera: " + camera);
 		try {
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
 			camera_settings.setupBuilder(previewBuilder, false);
@@ -1611,8 +1625,11 @@ public class CameraController2 extends CameraController {
 	void stopPreview() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopPreview");
-		if( captureSession == null )
+		if( camera == null || captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "no camera or capture session");
 			return;
+		}
 		try {
 			captureSession.stopRepeating();
 			// although stopRepeating() alone will pause the preview, seems better to close captureSession altogether - this allows the app to make changes such as changing the picture size
@@ -1653,9 +1670,9 @@ public class CameraController2 extends CameraController {
 	void autoFocus(final AutoFocusCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoFocus");
-		if( captureSession == null ) {
+		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "capture session not available");
+				Log.d(TAG, "no camera or capture session");
 			// should call the callback, so the application isn't left waiting (e.g., when we autofocus before trying to take a photo)
 			cb.onAutoFocus(false);
 			return;
@@ -1697,9 +1714,9 @@ public class CameraController2 extends CameraController {
 	void cancelAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
-		if( captureSession == null ) {
+		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "no capture session");
+				Log.d(TAG, "no camera or capture session");
 			return;
 		}
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
@@ -1713,9 +1730,9 @@ public class CameraController2 extends CameraController {
 	void takePicture(final PictureCallback raw, final PictureCallback jpeg) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
-		if( captureSession == null ) {
+		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
-				Log.e(TAG, "no capture session");
+				Log.d(TAG, "no camera or capture session");
 			// throw a RuntimeException so that application knows this fails
 			throw new RuntimeException();
 		}
