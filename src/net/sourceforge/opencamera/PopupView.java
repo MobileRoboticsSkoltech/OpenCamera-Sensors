@@ -34,6 +34,7 @@ public class PopupView extends LinearLayout {
 	private static final String TAG = "PopupView";
 
 	private int picture_size_index = -1;
+	private int video_size_index = -1;
 	private int timer_index = -1;
 	private int burst_mode_index = -1;
 
@@ -179,7 +180,58 @@ public class PopupView extends LinearLayout {
 				}
     		});
 
-        	final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
+    		final List<String> video_sizes = preview.getSupportedVideoQuality();
+    		video_size_index = preview.getCurrentVideoQualityIndex();
+    		final List<String> video_size_strings = new ArrayList<String>();
+    		for(String video_size : video_sizes) {
+    			String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
+    			video_size_strings.add(quality_string);
+    		}
+    		addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), video_size_index, new ArrayOptionsPopupListener() {
+		    	final Handler handler = new Handler();
+				Runnable update_runnable = new Runnable() {
+					@Override
+					public void run() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "update settings due to video resolution change");
+						main_activity.updateForSettings("");
+					}
+				};
+
+				private void update() {
+    				if( video_size_index == -1 )
+    					return;
+    				String quality = video_sizes.get(video_size_index);
+    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString(MainActivity.getVideoQualityPreferenceKey(preview.getCameraId()), quality);
+					editor.apply();
+
+					// make it easier to scroll through the list of resolutions without a pause each time
+					handler.removeCallbacks(update_runnable);
+					handler.postDelayed(update_runnable, 400);
+    			}
+				@Override
+				public int onClickPrev() {
+	        		if( video_size_index != -1 && video_size_index > 0 ) {
+	        			video_size_index--;
+	        			update();
+	    				return video_size_index;
+	        		}
+					return -1;
+				}
+				@Override
+				public int onClickNext() {
+	                if( video_size_index != -1 && video_size_index < video_sizes.size()-1 ) {
+	                	video_size_index++;
+	        			update();
+	    				return video_size_index;
+	        		}
+					return -1;
+				}
+    		});
+
+    		final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
         	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
     		String timer_value = sharedPreferences.getString(MainActivity.getTimerPreferenceKey(), "0");
     		timer_index = Arrays.asList(timer_values).indexOf(timer_value);

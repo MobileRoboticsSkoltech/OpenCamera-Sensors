@@ -1952,11 +1952,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return width + ":" + height;
 	}
 	
-	static String getAspectRatioMPString(int width, int height) {
+	static String getMPString(int width, int height) {
 		float mp = (width*height)/1000000.0f;
-		return "(" + getAspectRatio(width, height) + ", " + formatFloatToString(mp) + "MP)";
+		return formatFloatToString(mp) + "MP";
 	}
 	
+	static String getAspectRatioMPString(int width, int height) {
+		return "(" + getAspectRatio(width, height) + ", " + getMPString(width, height) + ")";
+	}
+	
+	String getCamcorderProfileDescriptionShort(String quality) {
+		CamcorderProfile profile = getCamcorderProfile(quality);
+		String desc = profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getMPString(profile.videoFrameWidth, profile.videoFrameHeight);
+		return desc;
+	}
+
 	String getCamcorderProfileDescription(String quality) {
 		CamcorderProfile profile = getCamcorderProfile(quality);
 		String highest = "";
@@ -5402,6 +5412,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedVideoQuality");
 		return this.video_quality;
+    }
+    
+    int getCurrentVideoQualityIndex() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getCurrentVideoQualityIndex");
+    	return this.current_video_quality;
     }
     
     List<CameraController.Size> getSupportedVideoSizes() {
