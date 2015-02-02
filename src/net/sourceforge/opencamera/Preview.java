@@ -2349,6 +2349,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( preference_crop_guide.equals("crop_guide_1.33") ) {
 					crop_ratio = 1.33333333;
 				}
+				else if( preference_crop_guide.equals("crop_guide_1.5") ) {
+					crop_ratio = 1.5;
+				}
 				else if( preference_crop_guide.equals("crop_guide_1.78") ) {
 					crop_ratio = 1.77777778;
 				}
