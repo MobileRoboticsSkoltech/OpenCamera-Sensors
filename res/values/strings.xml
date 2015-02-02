@@ -170,6 +170,10 @@
     <string name="preference_require_location_summary">If location data is enabled, only take photo/video if location data is available</string>
     <string name="preference_stamp">Stamp photos</string>
     <string name="preference_stamp_summary">Stamp photos with date and time; and also GPS info if location/direction data is enabled</string>
+    <string name="preference_textstamp">Custom text</string>
+    <string name="preference_textstamp_summary">Stamp photos with a custom text</string>
+    <string name="preference_stamp_fontsize">Font size</string>
+    <string name="preference_stamp_fontsize_summary">Font size to use when stamping text onto photos</string>
     <string name="video_quality">Video resolution</string>
     <string name="video_quality_summary">Set the resolution of videos</string>
     <string name="preference_force_video_4k">Force 4K UHD video (experimental)</string>

@@ -2234,6 +2234,14 @@ public class MainActivity extends Activity {
     	return "preference_stamp";
     }
 
+    public static String getTextStampPreferenceKey() {
+    	return "preference_textstamp";
+    }
+
+    public static String getStampFontSizePreferenceKey() {
+    	return "preference_stamp_fontsize";
+    }
+
     public static String getUIPlacementPreferenceKey() {
     	return "preference_ui_placement";
     }

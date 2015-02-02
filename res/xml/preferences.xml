@@ -362,7 +362,35 @@
 		        android:summary="@string/preference_quality_summary"
 		        android:defaultValue="90"
 		        />
-	    
+
+	        <ListPreference 
+	            android:key="preference_stamp"
+	            android:title="@string/preference_stamp"
+	            android:summary="@string/preference_stamp_summary"
+	            android:entries="@array/preference_stamp_entries"
+	            android:entryValues="@array/preference_stamp_values"
+	            android:defaultValue="preference_stamp_no"
+	            />
+
+	        <EditTextPreference
+	            android:key="preference_textstamp"
+	            android:title="@string/preference_textstamp"
+	            android:summary="@string/preference_textstamp_summary"
+		        android:dialogTitle="@string/preference_textstamp"
+		        android:dialogMessage="@string/preference_textstamp_summary"
+		        android:inputType="text"
+	            android:defaultValue=""
+		        />
+
+	        <ListPreference 
+	            android:key="preference_stamp_fontsize"
+	            android:title="@string/preference_stamp_fontsize"
+	            android:summary="@string/preference_stamp_fontsize_summary"
+	            android:entries="@array/preference_stamp_fontsize_entries"
+	            android:entryValues="@array/preference_stamp_fontsize_values"
+	            android:defaultValue="12"
+	            />
+
         </PreferenceScreen>
 
 	    <PreferenceScreen
@@ -480,15 +508,6 @@
 	            android:defaultValue="false"
 	            />
 		    
-	        <ListPreference 
-	            android:key="preference_stamp"
-	            android:title="@string/preference_stamp"
-	            android:summary="@string/preference_stamp_summary"
-	            android:entries="@array/preference_stamp_entries"
-	            android:entryValues="@array/preference_stamp_values"
-	            android:defaultValue="preference_stamp_no"
-	            />
-
 	    </PreferenceScreen>
 	        
 	</PreferenceCategory>

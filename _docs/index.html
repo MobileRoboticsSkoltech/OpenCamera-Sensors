@@ -431,6 +431,19 @@ images will in general come out as a slightly lower resolution (due to the rotat
 <p><b>Image quality</b> - The image quality of saved JPEG images. Higher means better quality, but the image files will take up
 more storage space.</p>
 
+<p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
+location data" is enabled (see "Location settings" below), then the current location latitude
+and longitude coordinates will also be stamped on the resultant photos (if the location is known).
+Similarly for "Store compass direction". Note that if this option is enabled, then it will take
+longer to save the photo. Also note that this option is only supported for photos, not video.</p>
+
+<p><b>Custom text</b> - Here you can enter some text to be stamped onto resultant photos (e.g.,
+this could be used for a copyright image). Note that if this option is enabled, then it will take
+longer to save the photo. Also note that this option is only supported for photos, not video.</p>
+
+<p><b>Font size</b> - Sets the font size used for text for options "Stamp photos" or
+"Custom text".</p>
+
 <p><b>Video settings</b> - Select to access the following controls:</p>
 
 <p><b>Video resolution</b> - Select the resolution of videos taken by the camera.</p>
@@ -489,12 +502,6 @@ when Open Camera is run as a standalone app. Also not supported for videos.</p>
 <p><b>Require location data</b> - If "Store location data" is enabled, then also enabling this option means that
 photos and videos can only be taken if location data is present (this can be useful if you need pictures/videos to
 have location data in them).</p>
-
-<p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
-location data" is enabled, then the current location latitude and longitude coordinates will
-also be stamped on the resultant photos (if the location is known). Similarly for "Store compass
-direction". Note that if this option is enabled, then it will take longer to save the photo.
-Also note that this option is only supported for photos, not video.</p>
 
 <p><b>Misc:</b></p>
 
@@ -695,11 +702,15 @@ FIXED   Some devices displayed "ISO ISO100" etc on popup menu.
 FIXED   Pressing "No" to "Clear Save History" left screen as all black.
 FIXED   Don't created corrupted video file if video recording stopped too
         quickly after starting (when no video data is received).
+FIXED   Font size used for date/geo stamping photos now scales sensibly with
+        photo resolution.
 ADDED   Italian translation (thanks to Valerio Bozzolan).
 ADDED   Options to customise photo and video filenames.
 ADDED   New option "Keep display on", can now disable the behaviour to keep the
         screen on.
 ADDED   Burst mode control now available on popup menu.
+ADDED   A custom text can now be stamped onto photos.
+ADDED   New option to choose font size for date/geo/text stamping on photos.
 UPDATED GPS listener now prefers GPS provider to Network provider if both are
         available.
 UPDATED GPS listener now sets min time of 1s, to improve battery usage.

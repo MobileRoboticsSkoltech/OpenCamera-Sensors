@@ -4300,7 +4300,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         			}
     			}
     			String preference_stamp = sharedPreferences.getString(MainActivity.getStampPreferenceKey(), "preference_stamp_no");
-    			if( preference_stamp.equals("preference_stamp_yes") ) {
+    			String preference_textstamp = sharedPreferences.getString(MainActivity.getTextStampPreferenceKey(), "");
+    			boolean dategeo_stamp = preference_stamp.equals("preference_stamp_yes");
+    			boolean text_stamp = preference_textstamp.length() > 0;
+    			if( dategeo_stamp || text_stamp ) {
     				if( bitmap == null ) {
             			if( MyDebug.LOG )
             				Log.d(TAG, "decode bitmap in order to stamp info");
@@ -4326,41 +4329,78 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        				Log.d(TAG, "bitmap size: " + width*height*4);
 	        			}
 	        			Canvas canvas = new Canvas(bitmap);
-	        			final float scale = getResources().getDisplayMetrics().density;
 	        			p.setColor(Color.WHITE);
-	        			p.setTextSize(20 * scale + 0.5f); // convert dps to pixels
-	        			// doesn't respect user preferences such as 12/24 hour - see note about in draw() about DateFormat.getTimeInstance()
-	        	        String time_stamp = DateFormat.getDateTimeInstance().format(new Date());
-	        	        int offset_x = (int)(8 * scale + 0.5f); // convert dps to pixels
-	        	        int offset_y = (int)(8 * scale + 0.5f); // convert dps to pixels
-	        	        int diff_y = (int)(24 * scale + 0.5f); // convert dps to pixels
+	        			int font_size = 20;
+	        			{
+	        				// get font size
+	        				String value = sharedPreferences.getString(MainActivity.getStampFontSizePreferenceKey(), "12");
+	        				if( MyDebug.LOG )
+	        					Log.d(TAG, "saved font size: " + value);
+	        				try {
+	        					font_size = Integer.parseInt(value);
+	        					if( MyDebug.LOG )
+	        						Log.d(TAG, "font_size: " + font_size);
+	        				}
+	        				catch(NumberFormatException exception) {
+	        					if( MyDebug.LOG )
+	        						Log.d(TAG, "font size invalid format, can't parse to int");
+	        				}
+	        			}
+	        			// we don't use the density of the screen, because we're stamping to the image, not drawing on the screen (we don't want the font height to depend on the device's resolution
+	        			// instead we go by 1 pt == 1/72 inch height, and scale for an image height of 4" (this means the font height is also independent of the photo resolution)
+	        			float scale = ((float)height) / (72.0f*4.0f);
+	        			int font_size_pixel = (int)(font_size * scale + 0.5f); // convert pt to pixels
+	        			if( MyDebug.LOG ) {
+	        				Log.d(TAG, "scale: " + scale);
+	        				Log.d(TAG, "font_size: " + font_size);
+	        				Log.d(TAG, "font_size_pixel: " + font_size_pixel);
+	        			}
+	        			p.setTextSize(font_size_pixel);
+	        	        int offset_x = (int)(8 * scale + 0.5f); // convert pt to pixels
+	        	        int offset_y = (int)(8 * scale + 0.5f); // convert pt to pixels
+	        	        int diff_y = (int)((font_size+4) * scale + 0.5f); // convert pt to pixels
+	        	        int ypos = height - offset_y;
 	        	        p.setTextAlign(Align.RIGHT);
-	    				drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, height - offset_y);
-	    				String location_string = "";
-	    				boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
-	    				if( store_location && main_activity.getLocation() != null ) {
-	    					Location location = main_activity.getLocation();
-	    					location_string += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
-	    					if( location.hasAltitude() ) {
-		    					location_string += ", " + decimalFormat.format(location.getAltitude()) + getResources().getString(R.string.metres_abbreviation);
-	    					}
-	    				}
-    			    	if( Preview.this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false) ) {
-    						float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
-    						if( geo_angle < 0.0f ) {
-    							geo_angle += 360.0f;
-    						}
+	        	        if( dategeo_stamp ) {
     	        			if( MyDebug.LOG )
-    	        				Log.d(TAG, "geo_angle: " + geo_angle);
-        			    	if( location_string.length() > 0 )
-        			    		location_string += ", ";
-    						location_string += "" + Math.round(geo_angle) + (char)0x00B0;
-    			    	}
-    			    	if( location_string.length() > 0 ) {
+    	        				Log.d(TAG, "stamp date");
+		        			// doesn't respect user preferences such as 12/24 hour - see note about in draw() about DateFormat.getTimeInstance()
+		        	        String time_stamp = DateFormat.getDateTimeInstance().format(new Date());
+		    				drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+		    				ypos -= diff_y;
+		    				String location_string = "";
+		    				boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
+		    				if( store_location && main_activity.getLocation() != null ) {
+		    					Location location = main_activity.getLocation();
+		    					location_string += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
+		    					if( location.hasAltitude() ) {
+			    					location_string += ", " + decimalFormat.format(location.getAltitude()) + getResources().getString(R.string.metres_abbreviation);
+		    					}
+		    				}
+	    			    	if( Preview.this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false) ) {
+	    						float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
+	    						if( geo_angle < 0.0f ) {
+	    							geo_angle += 360.0f;
+	    						}
+	    	        			if( MyDebug.LOG )
+	    	        				Log.d(TAG, "geo_angle: " + geo_angle);
+	        			    	if( location_string.length() > 0 )
+	        			    		location_string += ", ";
+	    						location_string += "" + Math.round(geo_angle) + (char)0x00B0;
+	    			    	}
+	    			    	if( location_string.length() > 0 ) {
+	    	        			if( MyDebug.LOG )
+	    	        				Log.d(TAG, "stamp with location_string: " + location_string);
+	    			    		drawTextWithBackground(canvas, p, location_string, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+			    				ypos -= diff_y;
+	    			    	}
+	        	        }
+	        	        if( text_stamp ) {
     	        			if( MyDebug.LOG )
-    	        				Log.d(TAG, "stamp with location_string: " + location_string);
-    			    		drawTextWithBackground(canvas, p, location_string, Color.WHITE, Color.BLACK, width - offset_x, height - offset_y - diff_y);
-    			    	}
+    	        				Log.d(TAG, "stamp text");
+    			    		drawTextWithBackground(canvas, p, preference_textstamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+		    				ypos -= diff_y;
+	        	        }
     				}
     			}
 
