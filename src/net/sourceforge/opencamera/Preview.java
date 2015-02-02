@@ -4654,36 +4654,44 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					}
 	            }
 
-	            if( bitmap != null ) {
-        		    bitmap.recycle();
-        		    bitmap = null;
-	            }
-
 				// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
 	            if( success && picFile != null && camera_controller != null ) {
 	            	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
 	            	long time_s = System.currentTimeMillis();
 		        	CameraController.Size size = camera_controller.getPictureSize();
 	        		int ratio = (int) Math.ceil((double) size.width / cameraSurface.getView().getWidth());
-    				BitmapFactory.Options options = new BitmapFactory.Options();
-    				options.inMutable = false;
-    				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-    					// setting is ignored in Android 5 onwards
-    					options.inPurgeable = true;
-    				}
-    				options.inSampleSize = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality 
+	        		int sample_size = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality
         			if( !sharedPreferences.getBoolean(MainActivity.getThumbnailAnimationPreferenceKey(), true) ) {
         				// can use lower resolution if we don't have the thumbnail animation
-        				options.inSampleSize *= 4;
+        				sample_size *= 4;
         			}
     	    		if( MyDebug.LOG ) {
-    	    			Log.d(TAG, "    picture width   : " + size.width);
-    	    			Log.d(TAG, "    preview width   : " + cameraSurface.getView().getWidth());
-    	    			Log.d(TAG, "    ratio           : " + ratio);
-    	    			Log.d(TAG, "    inSampleSize    : " + options.inSampleSize);
+    	    			Log.d(TAG, "    picture width: " + size.width);
+    	    			Log.d(TAG, "    preview width: " + cameraSurface.getView().getWidth());
+    	    			Log.d(TAG, "    ratio        : " + ratio);
+    	    			Log.d(TAG, "    sample_size  : " + sample_size);
     	    		}
     	    		Bitmap old_thumbnail = thumbnail;
-        			thumbnail = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        			if( bitmap == null ) {
+	    				BitmapFactory.Options options = new BitmapFactory.Options();
+	    				options.inMutable = false;
+	    				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+	    					// setting is ignored in Android 5 onwards
+	    					options.inPurgeable = true;
+	    				}
+	    				options.inSampleSize = sample_size;
+	        			thumbnail = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        			}
+        			else {
+	        			int width = bitmap.getWidth();
+	        			int height = bitmap.getHeight();
+	        		    Matrix matrix = new Matrix();
+	        		    float scale = 1.0f / (float)sample_size;
+	        		    matrix.postScale(scale, scale);
+	    	    		if( MyDebug.LOG )
+	    	    			Log.d(TAG, "    scale: " + scale);
+	        		    thumbnail = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+        			}
         			int thumbnail_rotation = 0;
     				// now get the rotation from the Exif data
 					try {
@@ -4748,6 +4756,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	    		}
     	    		if( MyDebug.LOG )
     	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
+	            }
+
+	            if( bitmap != null ) {
+        		    bitmap.recycle();
+        		    bitmap = null;
 	            }
 
 	            System.gc();
