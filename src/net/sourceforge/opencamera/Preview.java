@@ -3888,6 +3888,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        		if( pref_audio_src.equals("audio_src_mic") ) {
 		        		audio_source = MediaRecorder.AudioSource.MIC;
 	        		}
+	        		else if( pref_audio_src.equals("audio_src_default") ) {
+		        		audio_source = MediaRecorder.AudioSource.DEFAULT;
+	        		}
+	        		else if( pref_audio_src.equals("audio_src_voice_communication") ) {
+		        		audio_source = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+	        		}
 		    		if( MyDebug.LOG )
 		    			Log.d(TAG, "audio_source: " + audio_source);
 					video_recorder.setAudioSource(audio_source);

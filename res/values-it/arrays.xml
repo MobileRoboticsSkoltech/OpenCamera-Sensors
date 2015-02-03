@@ -349,9 +349,13 @@
     <string-array name="preference_record_audio_src_entries">
         <item>Videocamera</item>
         <item>Microfono esterno (se presente)</item>
+        <item>Default audio source</item>
+        <item>Optimised for voice</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>
         <item>audio_src_mic</item>
+        <item>audio_src_default</item>
+        <item>audio_src_voice_communication</item>
     </string-array>
 </resources>
