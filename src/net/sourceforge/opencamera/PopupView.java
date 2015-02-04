@@ -20,9 +20,11 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -328,7 +330,34 @@ public class PopupView extends LinearLayout {
         	String [] values = values_id != -1 ? getResources().getStringArray(values_id) : null;
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 2: " + (System.currentTimeMillis() - time_s));
-        	for(final String supported_option : supported_options) {
+
+			final float scale = getResources().getDisplayMetrics().density;
+			int total_width = 280;
+			{
+				Activity activity = (Activity)this.getContext();
+			    Display display = activity.getWindowManager().getDefaultDisplay();
+			    DisplayMetrics outMetrics = new DisplayMetrics();
+			    display.getMetrics(outMetrics);
+
+			    // the height should limit the width, due to when held in portrait
+			    int dpHeight = (int)(outMetrics.heightPixels / scale);
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "dpHeight: " + dpHeight);
+    			dpHeight -= 50; // allow space for the icons at top/right of screen
+    			if( total_width > dpHeight )
+    				total_width = dpHeight;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "total_width: " + total_width);
+			int button_width_dp = total_width/supported_options.size();
+			boolean use_scrollview = false;
+			if( button_width_dp < 40 ) {
+				button_width_dp = 40;
+				use_scrollview = true;
+			}
+			View current_view = null;
+
+			for(final String supported_option : supported_options) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "supported_option: " + supported_option);
         		int resource = -1;
@@ -348,7 +377,6 @@ public class PopupView extends LinearLayout {
     				Log.d(TAG, "addButtonOptionsToPopup time 2.1: " + (System.currentTimeMillis() - time_s));
 
         		View view = null;
-    			final float scale = getResources().getDisplayMetrics().density;
         		if( resource != -1 ) {
         			ImageButton image_button = new ImageButton(this.getContext());
         			if( MyDebug.LOG )
@@ -398,32 +426,15 @@ public class PopupView extends LinearLayout {
     			if( MyDebug.LOG )
     				Log.d(TAG, "addButtonOptionsToPopup time 2.2: " + (System.currentTimeMillis() - time_s));
 
-    			int total_width = 280;
-    			{
-    				Activity activity = (Activity)this.getContext();
-    			    Display display = activity.getWindowManager().getDefaultDisplay();
-    			    DisplayMetrics outMetrics = new DisplayMetrics();
-    			    display.getMetrics(outMetrics);
-
-    			    // the height should limit the width, due to when held in portrait
-    			    float density  = getResources().getDisplayMetrics().density;
-    			    int dpHeight = (int)(outMetrics.heightPixels / density);
-        			if( MyDebug.LOG )
-        				Log.d(TAG, "dpHeight: " + dpHeight);
-        			dpHeight -= 50; // allow space for the icons at top/right of screen
-        			if( total_width > dpHeight )
-        				total_width = dpHeight;
-    			}
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "total_width: " + total_width);
     			ViewGroup.LayoutParams params = view.getLayoutParams();
-    			params.width = (int) ((total_width/supported_options.size()) * scale + 0.5f); // convert dps to pixels
+    			params.width = (int) (button_width_dp * scale + 0.5f); // convert dps to pixels
     			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
     			view.setLayoutParams(params);
 
     			view.setContentDescription(string);
     			if( supported_option.equals(current_value) ) {
     				view.setAlpha(1.0f);
+    				current_view = view;
     			}
     			else {
     				view.setAlpha(0.6f);
@@ -444,7 +455,38 @@ public class PopupView extends LinearLayout {
     		}
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 3: " + (System.currentTimeMillis() - time_s));
-    		this.addView(ll2);
+			if( use_scrollview ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "using scrollview");
+	        	final HorizontalScrollView scroll = new HorizontalScrollView(this.getContext());
+	        	scroll.addView(ll2);
+	        	{
+	    			ViewGroup.LayoutParams params = new LayoutParams(
+	    					(int) (total_width * scale + 0.5f), // convert dps to pixels
+	    			        LayoutParams.WRAP_CONTENT);
+	    			scroll.setLayoutParams(params);
+	        	}
+	        	this.addView(scroll);
+	        	if( current_view != null ) {
+	        		// scroll to the selected button
+	        		final View final_current_view = current_view;
+	        		this.getViewTreeObserver().addOnGlobalLayoutListener( 
+	        			new OnGlobalLayoutListener() {
+							@Override
+							public void onGlobalLayout() {
+								if( MyDebug.LOG )
+									Log.d(TAG, "jump to " + final_current_view.getLeft());
+				        		scroll.scrollTo(final_current_view.getLeft(), 0);
+							}
+	        			}
+	        		);
+	        	}
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "not using scrollview");
+	    		this.addView(ll2);
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 4: " + (System.currentTimeMillis() - time_s));
         }

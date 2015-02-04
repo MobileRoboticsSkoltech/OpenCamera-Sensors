@@ -363,13 +363,31 @@ class CameraController1 extends CameraController {
 			}
 		}
 		/*values = new ArrayList<String>();
-		values.add("auto");
-		values.add("ISO_HJR");
+		//values.add("auto");
+		//values.add("ISO_HJR");
+		values.add("ISO50");
+		values.add("ISO64");
+		values.add("ISO80");
 		values.add("ISO100");
+		values.add("ISO125");
+		values.add("ISO160");
 		values.add("ISO200");
-		values.add("400");
-		values.add("800");
-		values.add("1600");*/
+		values.add("ISO250");
+		values.add("ISO320");
+		values.add("ISO400");
+		values.add("ISO500");
+		values.add("ISO640");
+		values.add("ISO800");
+		values.add("ISO1000");
+		values.add("ISO1250");
+		values.add("ISO1600");
+		values.add("ISO2000");
+		values.add("ISO2500");
+		values.add("ISO3200");
+		values.add("auto");
+		//values.add("400");
+		//values.add("800");
+		//values.add("1600");*/
 		if( iso_key != null ){
 			if( values == null ) {
 				// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
