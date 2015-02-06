@@ -681,6 +681,8 @@ class CameraController1 extends CameraController {
 	}
 	
 	void setRecordingHint(boolean hint) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setRecordingHint: " + hint);
 		Camera.Parameters parameters = this.getParameters();
 		// Calling setParameters here with continuous video focus mode causes preview to not restart after taking a photo on Galaxy Nexus?! (fine on my Nexus 7).
 		// The issue seems to specifically be with setParameters (i.e., the problem occurs even if we don't setRecordingHint).
