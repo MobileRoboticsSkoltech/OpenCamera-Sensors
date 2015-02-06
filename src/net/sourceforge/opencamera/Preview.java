@@ -81,6 +81,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
 
 	private boolean using_android_l = false;
+	private boolean using_texture_view = false;
 
 	private CameraSurface cameraSurface = null;
 	private CanvasView canvasView = null;
@@ -260,10 +261,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "using_android_l?: " + using_android_l);
 		}
-
-        if( using_android_l ) {
+		
+		if( using_android_l ) {
         	// use a TextureView for Android L - had bugs with SurfaceView not resizing properly on Nexus 7; and good to use a TextureView anyway
         	// ideally we'd use a TextureView for older camera API too, but sticking with SurfaceView to avoid risk of breaking behaviour
+			this.using_texture_view = true;
+		}
+
+        if( using_texture_view ) {
     		this.cameraSurface = new MyTextureView(context, savedInstanceState, this);
     		// a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CanvasView
     		this.canvasView = new CanvasView(context, savedInstanceState, this);
@@ -332,8 +337,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// Need mirror for front camera
 		boolean mirror = camera_controller.isFrontFacing();
 		camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
-		// This is the value for android.hardware.Camera.setDisplayOrientation.
-		camera_to_preview_matrix.postRotate(camera_controller.getDisplayOrientation());
+	    if( !using_texture_view ) {
+			// This is the value for android.hardware.Camera.setDisplayOrientation.
+			camera_to_preview_matrix.postRotate(camera_controller.getDisplayOrientation());
+	    }
 		// Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
 		// UI coordinates range from (0, 0) to (width, height).
 		camera_to_preview_matrix.postScale(cameraSurface.getView().getWidth() / 2000f, cameraSurface.getView().getHeight() / 2000f);
@@ -2195,10 +2202,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "    degrees = " + degrees);
 
-	    camera_controller.setDisplayOrientation(degrees);
-	    if( using_android_l ) {
+	    if( using_texture_view ) {
 	    	// need to configure the textureview
 			configureTransform();
+	    }
+	    else {
+		    camera_controller.setDisplayOrientation(degrees);
 	    }
 	}
 	
