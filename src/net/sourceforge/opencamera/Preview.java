@@ -112,8 +112,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
 	private String video_name = null;
-	private boolean has_current_fps_range = false;
-	private int [] current_fps_range = new int[2];
 
 	private final int PHASE_NORMAL = 0;
 	private final int PHASE_TIMER = 1;
@@ -1187,10 +1185,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			this.supports_face_detection = camera_features.supports_face_detection;
 			this.sizes = camera_features.picture_sizes;
-			this.has_current_fps_range = camera_features.has_current_fps_range;
-			if( this.has_current_fps_range ) {
-				this.current_fps_range = camera_features.current_fps_range;
-			}
 	        supported_flash_values = camera_features.supported_flash_values;
 	        supported_focus_values = camera_features.supported_focus_values;
 	        this.max_num_focus_areas = camera_features.max_num_focus_areas;
@@ -3098,22 +3092,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		showToast(switch_video_toast, toast_string, Toast.LENGTH_LONG);
 	}
 
-	private void matchPreviewFpsToVideo() {
+	private int [] matchPreviewFpsToVideo(List<int []> fps_ranges, int video_frame_rate) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "matchPreviewFpsToVideo()");
-		if( !has_current_fps_range ) {
-			// exit, as we don't have a current fps to reset back to later
-			if( MyDebug.LOG )
-				Log.d(TAG, "current fps not available");
-			return;
-		}
-		CamcorderProfile profile = getCamcorderProfile();
-		List<int []> fps_ranges = camera_controller.getSupportedPreviewFpsRange();
-		if( fps_ranges == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "fps_ranges not available");
-			return;
-		}
 		int selected_min_fps = -1, selected_max_fps = -1, selected_diff = -1;
         for(int [] fps_range : fps_ranges) {
 	    	if( MyDebug.LOG ) {
@@ -3121,7 +3102,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    	}
 			int min_fps = fps_range[0];
 			int max_fps = fps_range[1];
-			if( min_fps <= profile.videoFrameRate*1000 && max_fps >= profile.videoFrameRate*1000 ) {
+			if( min_fps <= video_frame_rate && max_fps >= video_frame_rate ) {
     			int diff = max_fps - min_fps;
     			if( selected_diff == -1 || diff < selected_diff ) {
     				selected_min_fps = min_fps;
@@ -3130,7 +3111,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			}
 			}
         }
-        if( selected_min_fps == -1 ) {
+        if( selected_min_fps != -1 ) {
+	    	if( MyDebug.LOG ) {
+    			Log.d(TAG, "    chosen fps range: " + selected_min_fps + " to " + selected_max_fps);
+	    	}
+        }
+        else {
         	selected_diff = -1;
         	int selected_dist = -1;
             for(int [] fps_range : fps_ranges) {
@@ -3138,10 +3124,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			int max_fps = fps_range[1];
     			int diff = max_fps - min_fps;
     			int dist = -1;
-    			if( max_fps < profile.videoFrameRate*1000 )
-    				dist = profile.videoFrameRate*1000 - max_fps;
+    			if( max_fps < video_frame_rate )
+    				dist = video_frame_rate - max_fps;
     			else
-    				dist = min_fps - profile.videoFrameRate*1000;
+    				dist = min_fps - video_frame_rate;
     	    	if( MyDebug.LOG ) {
         			Log.d(TAG, "    supported fps range: " + min_fps + " to " + max_fps + " has dist " + dist + " and diff " + diff);
     	    	}
@@ -3154,14 +3140,94 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
 	    	if( MyDebug.LOG )
 	    		Log.d(TAG, "    can't find match for fps range, so choose closest: " + selected_min_fps + " to " + selected_max_fps);
-	        camera_controller.setPreviewFpsRange(selected_min_fps, selected_max_fps);
         }
-        else {
+    	return new int[]{selected_min_fps, selected_max_fps};
+	}
+
+	private int [] chooseBestPreviewFps(List<int []> fps_ranges) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "chooseBestPreviewFps()");
+
+		// find value with lowest min that has max >= 30; if more than one of these, pick the one with highest max
+		int selected_min_fps = -1, selected_max_fps = -1;
+        for(int [] fps_range : fps_ranges) {
+	    	if( MyDebug.LOG ) {
+    			Log.d(TAG, "    supported fps range: " + fps_range[0] + " to " + fps_range[1]);
+	    	}
+			int min_fps = fps_range[0];
+			int max_fps = fps_range[1];
+			if( max_fps >= 30000 ) {
+				if( selected_min_fps == -1 || min_fps < selected_min_fps ) {
+    				selected_min_fps = min_fps;
+    				selected_max_fps = max_fps;
+				}
+				else if( min_fps == selected_min_fps && max_fps > selected_max_fps ) {
+    				selected_min_fps = min_fps;
+    				selected_max_fps = max_fps;
+				}
+			}
+        }
+
+        if( selected_min_fps != -1 ) {
 	    	if( MyDebug.LOG ) {
     			Log.d(TAG, "    chosen fps range: " + selected_min_fps + " to " + selected_max_fps);
 	    	}
-	    	camera_controller.setPreviewFpsRange(selected_min_fps, selected_max_fps);
         }
+        else {
+        	// just pick the widest range; if more than one, pick the one with highest max
+        	int selected_diff = -1;
+            for(int [] fps_range : fps_ranges) {
+    			int min_fps = fps_range[0];
+    			int max_fps = fps_range[1];
+    			int diff = max_fps - min_fps;
+    			if( selected_diff == -1 || diff > selected_diff ) {
+    				selected_min_fps = min_fps;
+    				selected_max_fps = max_fps;
+    				selected_diff = diff;
+    			}
+    			else if( diff == selected_diff && max_fps > selected_max_fps ) {
+    				selected_min_fps = min_fps;
+    				selected_max_fps = max_fps;
+    				selected_diff = diff;
+    			}
+            }
+	    	if( MyDebug.LOG )
+	    		Log.d(TAG, "    can't find fps range 30fps or better, so picked widest range: " + selected_min_fps + " to " + selected_max_fps);
+        }
+    	return new int[]{selected_min_fps, selected_max_fps};
+	}
+
+	/* It's important to set a preview FPS using chooseBestPreviewFps() rather than just leaving it to the default, as some devices
+	 * have a poor choice of default - e.g., Nexus 5 and Nexus 6 on original Camera API default to (15000, 15000), which means very dark
+	 * preview and photos in low light, as well as a less smooth framerate in good light.
+	 * We only set the FPS to a specific value if the user has requested video with a non-default FPS.
+	 * See http://stackoverflow.com/questions/18882461/why-is-the-default-android-camera-preview-smoother-than-my-own-camera-preview .
+	 */
+	private void setPreviewFps() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "switchVideo()");
+		CamcorderProfile profile = getCamcorderProfile();
+		List<int []> fps_ranges = camera_controller.getSupportedPreviewFpsRange();
+		if( fps_ranges == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "fps_ranges not available");
+			return;
+		}
+		int [] selected_fps = null;
+		if( this.is_video ) {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+			String fps_value = sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
+			if( !fps_value.equals("default") ) {
+				selected_fps = matchPreviewFpsToVideo(fps_ranges, profile.videoFrameRate*1000);
+			}
+			else {
+				selected_fps = chooseBestPreviewFps(fps_ranges);
+			}
+		}
+		else {
+			selected_fps = chooseBestPreviewFps(fps_ranges);
+		}
+        camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);
 	}
 	
 	void switchVideo(boolean save, boolean update_preview_size) {
@@ -3217,13 +3283,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					this.is_preview_started = false;
 				}
 				setPreviewSize();
-				if( !is_video && has_current_fps_range ) {
-					// if is_video is true, we set the preview fps range in startCameraPreview()
-					if( MyDebug.LOG )
-						Log.d(TAG, "    reset preview to current fps range: " + current_fps_range[0] + " to " + current_fps_range[1]);
-					camera_controller.setPreviewFpsRange(current_fps_range[0], current_fps_range[1]);
-				}
-				// always start the camera preview, even if it was previously paused
+				// always start the camera preview, even if it was previously paused (also needed to update preview fps)
 		        this.startCameraPreview();
 			}
 		}
@@ -3818,13 +3878,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality));
 	    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
 	    			Log.d(TAG, "bit rate " + profile.videoBitRate);
-	    	    	if( MyDebug.LOG ) {
-		    			int [] fps_range = new int[2];
-		                camera_controller.getPreviewFpsRange(fps_range);
-	    				if( this.supports_video_stabilization ) {
-	    					Log.d(TAG, "recording with video stabilization? " + (camera_controller.getVideoStabilization() ? "yes" : "no"));
-	    				}
-	    	    	}
 	    		}
 
 	    		video_recorder = new MediaRecorder();
@@ -5086,10 +5139,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "setRecordingHint: " + is_video);
 				camera_controller.setRecordingHint(this.is_video);
 			}
-    		if( this.is_video ) {
-				matchPreviewFpsToVideo();
-    		}
-    		// else, we reset the preview fps to default in switchVideo
+			setPreviewFps();
     		try {
     			camera_controller.startPreview();
 		    	count_cameraStartPreview++;

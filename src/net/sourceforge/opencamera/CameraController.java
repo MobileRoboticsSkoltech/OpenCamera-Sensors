@@ -24,8 +24,6 @@ public abstract class CameraController {
 		List<CameraController.Size> picture_sizes = null;
 		List<CameraController.Size> video_sizes = null;
 		List<CameraController.Size> preview_sizes = null;
-		boolean has_current_fps_range = false;
-		int [] current_fps_range = new int[2];
 		List<String> supported_flash_values = null;
 		List<String> supported_focus_values = null;
 		int max_num_focus_areas = 0;
@@ -117,7 +115,6 @@ public abstract class CameraController {
 	abstract int getExposureCompensation();
 	abstract boolean setExposureCompensation(int new_exposure);
 	abstract void setPreviewFpsRange(int min, int max);
-	abstract void getPreviewFpsRange(int [] fps_range);
 	abstract List<int []> getSupportedPreviewFpsRange();
 
 	public abstract String getDefaultSceneMode();

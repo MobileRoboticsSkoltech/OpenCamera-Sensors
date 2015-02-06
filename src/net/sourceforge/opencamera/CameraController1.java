@@ -179,23 +179,6 @@ class CameraController1 extends CameraController {
 			camera_features.picture_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
 
-        if( MyDebug.LOG )
-			Log.d(TAG, "get preview fps range");
-        camera_features.has_current_fps_range = false;
-        try {
-			parameters.getPreviewFpsRange(camera_features.current_fps_range);
-			camera_features.has_current_fps_range = true;
-	    	if( MyDebug.LOG ) {
-				Log.d(TAG, "    current fps range: " + camera_features.current_fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + camera_features.current_fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-	    	}
-        }
-        catch(NumberFormatException e) {
-        	// needed to trap NumberFormatException reported on "mb526" running SlimKat 4.6, based on Android 4.4.2
-	    	if( MyDebug.LOG )
-				Log.d(TAG, "parameters.getPreviewFpsRange failed!");
-	    	e.printStackTrace();
-        }
-
         //camera_features.supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
         List<String> supported_flash_modes = parameters.getSupportedFlashModes(); // Android format
 		camera_features.supported_flash_values = convertFlashModesToValues(supported_flash_modes); // convert to our format (also resorts)
@@ -505,24 +488,6 @@ class CameraController1 extends CameraController {
 		Camera.Parameters parameters = this.getParameters();
         parameters.setPreviewFpsRange(min, max);
     	setCameraParameters(parameters);
-	}
-	
-	void getPreviewFpsRange(int [] fps_range) {
-        try {
-    		Camera.Parameters parameters = this.getParameters();
-			parameters.getPreviewFpsRange(fps_range);
-        }
-        catch(NumberFormatException e) {
-        	// needed to trap NumberFormatException reported on "mb526" running SlimKat 4.6, based on Android 4.4.2
-	    	if( MyDebug.LOG )
-				Log.d(TAG, "parameters.getPreviewFpsRange failed!");
-	    	e.printStackTrace();
-			fps_range[0] = 0;
-			fps_range[1] = 0;
-        }
-    	if( MyDebug.LOG ) {
-    		Log.d(TAG, "recording with preview fps range: " + fps_range[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] + " to " + fps_range[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-    	}
 	}
 	
 	List<int []> getSupportedPreviewFpsRange() {

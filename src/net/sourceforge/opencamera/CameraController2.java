@@ -460,8 +460,6 @@ public class CameraController2 extends CameraController {
 			camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 		
-		// TODO: current_fps_range
-		
 		if( characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ) {
 			// TODO: flash
 		}
@@ -1068,12 +1066,6 @@ public class CameraController2 extends CameraController {
 	
 	@Override
 	void setPreviewFpsRange(int min, int max) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	void getPreviewFpsRange(int[] fps_range) {
 		// TODO Auto-generated method stub
 
 	}
