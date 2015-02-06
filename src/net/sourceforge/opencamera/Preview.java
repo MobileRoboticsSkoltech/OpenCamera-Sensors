@@ -1198,6 +1198,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
 		
+		MainActivity main_activity = (MainActivity)this.getContext();
+		if( main_activity.supportsForceVideo4K() && video_sizes != null ) {
+			for(CameraController.Size size : video_sizes) {
+				if( size.width >= 3840 && size.height >= 2160 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "camera natively supports 4K, so can disable the force option");
+					main_activity.disableForceVideo4K();
+				}
+			}
+		}
+		
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up zoom");

@@ -2127,6 +2127,10 @@ public class MainActivity extends Activity {
     public boolean supportsForceVideo4K() {
     	return this.supports_force_video_4k;
     }
+    
+    void disableForceVideo4K() {
+    	this.supports_force_video_4k = false;
+    }
 
     @SuppressWarnings("deprecation")
 	public long freeMemory() { // return free memory in MB
