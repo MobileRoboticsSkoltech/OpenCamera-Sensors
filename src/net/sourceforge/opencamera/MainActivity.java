@@ -2131,8 +2131,8 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
 	public long freeMemory() { // return free memory in MB
     	try {
-    		File image_folder = this.getImageFolder();
-	        StatFs statFs = new StatFs(image_folder.getAbsolutePath());
+    		File folder = this.getImageFolder();
+	        StatFs statFs = new StatFs(folder.getAbsolutePath());
 	        // cast to long to avoid overflow!
 	        long blocks = statFs.getAvailableBlocks();
 	        long size = statFs.getBlockSize();
@@ -2143,9 +2143,28 @@ public class MainActivity extends Activity {
 	        return free;
     	}
     	catch(IllegalArgumentException e) {
-    		// can fail on emulator, at least!
-    		return -1;
+    		// this can happen if folder doesn't exist, or don't have read access
+    		// if the save folder is a subfolder of DCIM, we can just use that instead
+        	try {
+        		String folder_name = getSaveLocation();
+        		if( !folder_name.startsWith("/") ) {
+        			File folder = getBaseFolder();
+        	        StatFs statFs = new StatFs(folder.getAbsolutePath());
+        	        // cast to long to avoid overflow!
+        	        long blocks = statFs.getAvailableBlocks();
+        	        long size = statFs.getBlockSize();
+        	        long free  = (blocks*size) / 1048576;
+        			/*if( MyDebug.LOG ) {
+        				Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
+        			}*/
+        	        return free;
+        		}
+        	}
+        	catch(IllegalArgumentException e2) {
+        		// just in case
+        	}
     	}
+		return -1;
     }
     
     public static String getDonateLink() {
