@@ -370,7 +370,8 @@ class CameraController1 extends CameraController {
 		values.add("auto");
 		//values.add("400");
 		//values.add("800");
-		//values.add("1600");*/
+		//values.add("1600");
+		iso_key = "iso";*/
 		if( iso_key != null ){
 			if( values == null ) {
 				// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
