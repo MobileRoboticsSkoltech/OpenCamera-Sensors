@@ -5241,8 +5241,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			    	exposureButton.setVisibility(visibility);
 			    if( is_exposure_lock_supported )
 			    	exposureLockButton.setVisibility(visibility);
-			    if( supported_flash_values == null )
-			    	popupButton.setVisibility(visibility);
+		    	popupButton.setVisibility(visibility);
 			    galleryButton.setVisibility(visibility);
 			    settingsButton.setVisibility(visibility);
 				if( MyDebug.LOG ) {
