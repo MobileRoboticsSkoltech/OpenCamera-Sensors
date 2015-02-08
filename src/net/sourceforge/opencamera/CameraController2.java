@@ -554,12 +554,18 @@ public class CameraController2 extends CameraController {
 		// we convert to/from strings to be compatible with original Android Camera API
 		String default_value = getDefaultSceneMode();
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES);
+		boolean has_disabled = false;
 		List<String> values = new ArrayList<String>();
 		for(int i=0;i<values2.length;i++) {
+			if( values2[i] == CameraMetadata.CONTROL_SCENE_MODE_DISABLED )
+				has_disabled = true;
 			String this_value = convertSceneMode(values2[i]);
 			if( this_value != null ) {
 				values.add(this_value);
 			}
+		}
+		if( !has_disabled ) {
+			values.add(0, "auto");
 		}
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
