@@ -134,7 +134,7 @@ public class PopupView extends LinearLayout {
     		picture_size_index = preview.getCurrentPictureSizeIndex();
     		final List<String> picture_size_strings = new ArrayList<String>();
     		for(CameraController.Size picture_size : picture_sizes) {
-    			String size_string = picture_size.width + " x " + picture_size.height;
+    			String size_string = picture_size.width + " x " + picture_size.height + " " + Preview.getMPString(picture_size.width, picture_size.height);
     			picture_size_strings.add(size_string);
     		}
     		addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), picture_size_index, new ArrayOptionsPopupListener() {

@@ -175,6 +175,7 @@ class CameraController1 extends CameraController {
 		// get available sizes
 		List<Camera.Size> camera_picture_sizes = parameters.getSupportedPictureSizes();
 		camera_features.picture_sizes = new ArrayList<CameraController.Size>();
+		//camera_features.picture_sizes.add(new CameraController.Size(1920, 1080)); // test
 		for(Camera.Size camera_size : camera_picture_sizes) {
 			camera_features.picture_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
@@ -203,6 +204,7 @@ class CameraController1 extends CameraController {
     		camera_video_sizes = parameters.getSupportedPreviewSizes();
     	}
 		camera_features.video_sizes = new ArrayList<CameraController.Size>();
+		//camera_features.video_sizes.add(new CameraController.Size(1920, 1080)); // test
 		for(Camera.Size camera_size : camera_video_sizes) {
 			camera_features.video_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
