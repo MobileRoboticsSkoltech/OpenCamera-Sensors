@@ -904,6 +904,11 @@ public class CameraController2 extends CameraController {
 	void setPictureSize(int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPictureSize: " + width + " x " + height);
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "no camera");
+			return;
+		}
 		if( captureSession != null ) {
 			// can only call this when captureSession not created - as the surface of the imageReader we create has to match the surface we pass to the captureSession
 			if( MyDebug.LOG )
