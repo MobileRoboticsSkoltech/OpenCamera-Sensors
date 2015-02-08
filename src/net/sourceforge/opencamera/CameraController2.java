@@ -52,6 +52,7 @@ public class CameraController2 extends CameraController {
 	private PictureCallback jpeg_cb = null;
 	//private ImageReader previewImageReader = null;
 	private SurfaceTexture texture = null;
+	private Surface surface_texture = null;
 	private HandlerThread thread = null; 
 	Handler handler = null;
 
@@ -322,6 +323,7 @@ public class CameraController2 extends CameraController {
 			captureSession.close();
 			captureSession = null;
 		}
+		previewBuilder = null;
 		if( camera != null ) {
 			camera.close();
 			camera = null;
@@ -1419,7 +1421,13 @@ public class CameraController2 extends CameraController {
 	void setPreviewTexture(SurfaceTexture texture) throws IOException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewTexture");
+		if( this.texture != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "preview texture already set");
+			throw new RuntimeException();
+		}
 		this.texture = texture;
+		this.surface_texture = new Surface(texture);
 	}
 	
 	private void setRepeatingRequest() {
@@ -1493,11 +1501,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	private Surface getPreviewSurface() {
-		Surface surface = null;
-        if( texture != null ) {
-        	surface = new Surface(texture);
-        }
-        return surface;
+		return surface_texture;
 	}
 
 	// throws RuntimeException if fails to create captureSession
