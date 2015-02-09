@@ -804,7 +804,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( camera_controller != null ) { // just to be safe
     		try {
     			camera_controller.reconnect();
-		        this.startCameraPreview();
 			}
     		catch (IOException e) {
         		if( MyDebug.LOG )
@@ -3892,7 +3891,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    		}
 
 	    		video_recorder = new MediaRecorder();
-	    		this.camera_controller.stopPreview(); // although not documented, we need to stop preview to prevent device freeze or video errors shortly after video recording starts on some devices (e.g., device freeze on Samsung Galaxy S2 - I could reproduce this on Samsung RTL; also video recording fails and preview becomes corrupted on Galaxy S3 variant "SGH-I747-US2"); also see http://stackoverflow.com/questions/4244999/problem-with-video-recording-after-auto-focus-in-android
 	    		this.camera_controller.unlock();
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "set video listeners");

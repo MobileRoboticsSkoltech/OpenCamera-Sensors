@@ -1519,8 +1519,16 @@ public class CameraController2 extends CameraController {
 		try {
 			captureSession = null;
 
-			// in some cases need to recreate picture imageReader and the texture default buffer size (e.g., see test testTakePhotoPreviewPaused())
-			createPictureImageReader();
+			if( video_recorder != null ) {
+				if( imageReader != null ) {
+					imageReader.close();
+					imageReader = null;
+				}
+			}
+			else {
+				// in some cases need to recreate picture imageReader and the texture default buffer size (e.g., see test testTakePhotoPreviewPaused())
+				createPictureImageReader();
+			}
 			if( texture != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set size of preview texture");
@@ -1584,10 +1592,12 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "texture: " + texture);
 				Log.d(TAG, "preview_surface: " + preview_surface);
 				Log.d(TAG, "capture_surface: " + capture_surface);
-				Log.d(TAG, "imageReader: " + imageReader);
-				Log.d(TAG, "imageReader: " + imageReader.getWidth());
-				Log.d(TAG, "imageReader: " + imageReader.getHeight());
-				Log.d(TAG, "imageReader: " + imageReader.getImageFormat());
+				if( video_recorder == null ) {
+					Log.d(TAG, "imageReader: " + imageReader);
+					Log.d(TAG, "imageReader: " + imageReader.getWidth());
+					Log.d(TAG, "imageReader: " + imageReader.getHeight());
+					Log.d(TAG, "imageReader: " + imageReader.getImageFormat());
+				}
 			}
 			camera.createCaptureSession(Arrays.asList(preview_surface/*, previewImageReader.getSurface()*/, capture_surface),
 				myStateCallback,
@@ -1845,10 +1855,11 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "reconnect");
 		createPreviewRequest();
-		if( MyDebug.LOG )
+		createCaptureSession(null);
+		/*if( MyDebug.LOG )
 			Log.d(TAG, "add preview surface to previewBuilder");
     	Surface surface = getPreviewSurface();
-		previewBuilder.addTarget(surface);
+		previewBuilder.addTarget(surface);*/
 		//setRepeatingRequest();
 	}
 
