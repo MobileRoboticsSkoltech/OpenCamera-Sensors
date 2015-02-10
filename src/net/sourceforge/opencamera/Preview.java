@@ -804,6 +804,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( camera_controller != null ) { // just to be safe
     		try {
     			camera_controller.reconnect();
+    			this.setPreviewPaused(false);
 			}
     		catch (IOException e) {
         		if( MyDebug.LOG )
