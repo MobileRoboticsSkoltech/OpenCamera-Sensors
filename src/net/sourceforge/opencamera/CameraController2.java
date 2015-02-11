@@ -72,6 +72,8 @@ public class CameraController2 extends CameraController {
 		private int scene_mode = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
 		private int color_effect = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
 		private int white_balance = CameraMetadata.CONTROL_AWB_MODE_AUTO;
+		private boolean has_iso = false;
+		private int iso = 0;
 		private Rect scalar_crop_region = null; // no need for has_scalar_crop_region, as we can set to null instead
 		private boolean has_ae_exposure_compensation = false;
 		private int ae_exposure_compensation = 0;
@@ -87,6 +89,7 @@ public class CameraController2 extends CameraController {
 			setSceneMode(builder);
 			setColorEffect(builder);
 			setWhiteBalance(builder);
+			setISO(builder);
 			setCropRegion(builder);
 			setExposureCompensation(builder);
 			setFocusMode(builder);
@@ -155,6 +158,20 @@ public class CameraController2 extends CameraController {
 				return true;
 			}
 			return false;
+		}
+
+		private boolean setISO(CaptureRequest.Builder builder) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "setISO: " + has_iso + " : " + iso);
+			}
+			if( has_iso ) {
+				builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
+				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
+			}
+			else {
+				builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+			}
+			return true;
 		}
 
 		private void setCropRegion(CaptureRequest.Builder builder) {
@@ -447,18 +464,28 @@ public class CameraController2 extends CameraController {
 	    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
 		camera_features.picture_sizes = new ArrayList<CameraController.Size>();
 		for(android.util.Size camera_size : camera_picture_sizes) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "picture size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
 			camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 
 	    android.util.Size [] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
 		camera_features.video_sizes = new ArrayList<CameraController.Size>();
 		for(android.util.Size camera_size : camera_video_sizes) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "video size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
+			if( camera_size.getWidth() > 3840 || camera_size.getHeight() > 2160 )
+				continue; // Nexus 6 returns these, even though not supported?!
 			camera_features.video_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 
 		android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceTexture.class);
 		camera_features.preview_sizes = new ArrayList<CameraController.Size>();
 		for(android.util.Size camera_size : camera_preview_sizes) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "preview size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
+			if( camera_size.getWidth() > 1920 || camera_size.getHeight() > 1440 )
+				continue; // Nexus 6 returns these, even though not supported?! (get green corruption lines if we allow these)
 			camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 		
@@ -871,22 +898,33 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set iso to: " + supported_values.selected_value);
 			if( supported_values.selected_value.equals("auto") ) {
-				previewBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, null);
+				camera_settings.has_iso = false;
+				camera_settings.iso = 0;
+				if( camera_settings.setISO(previewBuilder) ) {
+			    	setRepeatingRequest();
+				}
 			}
 			else {
 				try {
 					int selected_value2 = Integer.parseInt(supported_values.selected_value);
 					if( MyDebug.LOG )
 						Log.d(TAG, "iso: " + selected_value2);
-					previewBuilder.set(CaptureRequest.SENSOR_SENSITIVITY , selected_value2);
+					camera_settings.has_iso = true;
+					camera_settings.iso = selected_value2;
+					if( camera_settings.setISO(previewBuilder) ) {
+				    	setRepeatingRequest();
+					}
 				}
 				catch(NumberFormatException exception) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "iso invalid format, can't parse to int");
-					previewBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, null);
+					camera_settings.has_iso = false;
+					camera_settings.iso = 0;
+					if( camera_settings.setISO(previewBuilder) ) {
+				    	setRepeatingRequest();
+					}
 				}
 			}
-	    	setRepeatingRequest();
 		}
 		return supported_values;
 	}
