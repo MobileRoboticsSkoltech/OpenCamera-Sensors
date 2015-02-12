@@ -606,7 +606,7 @@ class CameraController1 extends CameraController {
     			// workaround for bug on Nexus 5 where torch doesn't switch off until we set FLASH_MODE_OFF
     			if( MyDebug.LOG )
     				Log.d(TAG, "first turn torch off");
-        		parameters.setFlashMode(flash_mode);
+        		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
             	setCameraParameters(parameters);
         		parameters = this.getParameters();
     		}
