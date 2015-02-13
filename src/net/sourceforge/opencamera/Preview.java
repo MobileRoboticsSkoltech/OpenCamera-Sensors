@@ -3216,7 +3216,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 */
 	private void setPreviewFps() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "switchVideo()");
+			Log.d(TAG, "setPreviewFps()");
 		CamcorderProfile profile = getCamcorderProfile();
 		List<int []> fps_ranges = camera_controller.getSupportedPreviewFpsRange();
 		if( fps_ranges == null ) {
