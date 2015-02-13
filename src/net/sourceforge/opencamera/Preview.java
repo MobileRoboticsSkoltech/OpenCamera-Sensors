@@ -3226,16 +3226,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		int [] selected_fps = null;
 		if( this.is_video ) {
+			// For Nexus 5 and Nexus 6, we need to set the preview fps using matchPreviewFpsToVideo to avoid problem of dark image in low light, as described above.
+			// However the Google Camera doesn't do this for video - instead it chooses the maximum preview fps. For some reason the Google Camera doesn't have the
+			// problem on my Nexus 6, but in Open Camera, we do. I'm also wary of changing the behaviour for all devices at the moment, since getting devices can be
+			// very picky about what works when it comes to recording video - e.g., corruption in preview or resultant video.
+			// So for now, I'm just fixing the Nexus 5/6 behaviour without changing behaviour for other devices. Later we can test on other devices, to see if we can
+			// use chooseBestPreviewFps() more widely (or alternatively, use the max preview fps like Google Camera, if we can find how to fix the Nexus 5/6 lighting
+			// problem).
+			boolean preview_too_dark = Build.MODEL.equals("Nexus 5") || Build.MODEL.equals("Nexus 6");
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 			String fps_value = sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
-			if( !fps_value.equals("default") ) {
-				selected_fps = matchPreviewFpsToVideo(fps_ranges, profile.videoFrameRate*1000);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "preview_too_dark? " + preview_too_dark);
+				Log.d(TAG, "fps_value: " + fps_value);
+			}
+			if( fps_value.equals("default") && preview_too_dark ) {
+				selected_fps = chooseBestPreviewFps(fps_ranges);
 			}
 			else {
-				selected_fps = chooseBestPreviewFps(fps_ranges);
+				selected_fps = matchPreviewFpsToVideo(fps_ranges, profile.videoFrameRate*1000);
 			}
 		}
 		else {
+			// note that setting an fps here in continuous video focus mode causes preview to not restart after taking a photo on Galaxy Nexus
+			// but we need to do this, to get good light for Nexus 5 or 6
+			// we could hardcode behaviour like we do for video, but this is the same way that Google Camera chooses preview fps for photos
+			// or I could hardcode behaviour for Galaxy Nexus, but since it's an old device (and an obscure bug anyway - most users don't really need continuous focus in photo mode), better to live with the bug rather than complicating the code
 			selected_fps = chooseBestPreviewFps(fps_ranges);
 		}
         camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);

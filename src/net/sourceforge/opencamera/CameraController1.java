@@ -660,6 +660,8 @@ class CameraController1 extends CameraController {
 		// This worked fine in 1.7, then not in 1.8 and 1.9, then was fixed again in 1.10
 		// The only thing in common to 1.7->1.8 and 1.9-1.10, that seems relevant, was adding this code to setRecordingHint() and setParameters() (unclear which would have been the problem),
 		// so we should be very careful about enabling this code again!
+		// Update for v1.23: the bug with Galaxy Nexus has come back (see comments in Preview.setPreviewFps()) and is now unavoidable,
+		// but I've still kept this check here - if nothing else, because it apparently caused video recording problems on other devices too.
 		String focus_mode = parameters.getFocusMode();
 		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
         if( focus_mode != null && !focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
