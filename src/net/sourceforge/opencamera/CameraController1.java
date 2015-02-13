@@ -488,6 +488,8 @@ class CameraController1 extends CameraController {
 	}
 	
 	void setPreviewFpsRange(int min, int max) {
+    	if( MyDebug.LOG )
+    		Log.d(TAG, "setPreviewFpsRange: " + min + " to " + max);
 		Camera.Parameters parameters = this.getParameters();
         parameters.setPreviewFpsRange(min, max);
     	setCameraParameters(parameters);
