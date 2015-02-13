@@ -3219,7 +3219,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "setPreviewFps()");
 		CamcorderProfile profile = getCamcorderProfile();
 		List<int []> fps_ranges = camera_controller.getSupportedPreviewFpsRange();
-		if( fps_ranges == null ) {
+		if( fps_ranges == null || fps_ranges.size() == 0 ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "fps_ranges not available");
 			return;
