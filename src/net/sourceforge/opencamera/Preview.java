@@ -4698,10 +4698,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 	    		}
         	            	}
 
-            	            main_activity.broadcastFile(picFile, true, false);
-        	            	test_last_saved_image = picFileName;
+        	            	// shouldn't currently have a picFile if image_capture_intent, but put this here in case we ever do want to try reading intent's file (if it exists)
+            	            if( !image_capture_intent ) {
+	            	            main_activity.broadcastFile(picFile, true, false);
+	        	            	test_last_saved_image = picFileName;
+            	            }
         	            }
         	            if( image_capture_intent ) {
+            	    		if( MyDebug.LOG )
+            	    			Log.d(TAG, "finish activity due to being called from intent");
         	            	main_activity.setResult(Activity.RESULT_OK);
         	            	main_activity.finish();
         	            }
