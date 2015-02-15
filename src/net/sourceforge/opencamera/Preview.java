@@ -3211,7 +3211,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	/* It's important to set a preview FPS using chooseBestPreviewFps() rather than just leaving it to the default, as some devices
 	 * have a poor choice of default - e.g., Nexus 5 and Nexus 6 on original Camera API default to (15000, 15000), which means very dark
 	 * preview and photos in low light, as well as a less smooth framerate in good light.
-	 * We only set the FPS to a specific value if the user has requested video with a non-default FPS.
 	 * See http://stackoverflow.com/questions/18882461/why-is-the-default-android-camera-preview-smoother-than-my-own-camera-preview .
 	 */
 	private void setPreviewFps() {
@@ -3226,13 +3225,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		int [] selected_fps = null;
 		if( this.is_video ) {
-			// For Nexus 5 and Nexus 6, we need to set the preview fps using matchPreviewFpsToVideo to avoid problem of dark image in low light, as described above.
-			// However the Google Camera doesn't do this for video - instead it chooses the maximum preview fps. For some reason the Google Camera doesn't have the
-			// problem on my Nexus 6, but in Open Camera, we do. I'm also wary of changing the behaviour for all devices at the moment, since getting devices can be
+			// For Nexus 5 and Nexus 6, we need to set the preview fps using matchPreviewFpsToVideo to avoid problem of dark preview in low light, as described above.
+			// When the video recording starts, the preview automatically adjusts, but still good to avoid too-dark preview before the user starts recording.
+			// However I'm wary of changing the behaviour for all devices at the moment, since some devices can be
 			// very picky about what works when it comes to recording video - e.g., corruption in preview or resultant video.
 			// So for now, I'm just fixing the Nexus 5/6 behaviour without changing behaviour for other devices. Later we can test on other devices, to see if we can
-			// use chooseBestPreviewFps() more widely (or alternatively, use the max preview fps like Google Camera, if we can find how to fix the Nexus 5/6 lighting
-			// problem).
+			// use chooseBestPreviewFps() more widely.
 			boolean preview_too_dark = Build.MODEL.equals("Nexus 5") || Build.MODEL.equals("Nexus 6");
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 			String fps_value = sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
