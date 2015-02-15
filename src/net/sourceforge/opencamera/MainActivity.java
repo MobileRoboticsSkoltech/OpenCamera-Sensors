@@ -103,7 +103,7 @@ public class MainActivity extends Activity {
 	public boolean is_test = false;
 	public Bitmap gallery_bitmap = null;
 	public boolean failed_to_scan = false;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if( MyDebug.LOG ) {
@@ -1955,6 +1955,8 @@ public class MainActivity extends Activity {
         	// both of these work fine, but using MediaScannerConnection.scanFile() seems to be preferred over sending an intent
     		//this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
  			failed_to_scan = true; // set to true until scanned okay
+ 			if( MyDebug.LOG )
+ 				Log.d(TAG, "failed_to_scan set to true");
         	MediaScannerConnection.scanFile(this, new String[] { file.getAbsolutePath() }, null,
         			new MediaScannerConnection.OnScanCompletedListener() {
 					public void onScanCompleted(String path, Uri uri) {
@@ -1985,23 +1987,17 @@ public class MainActivity extends Activity {
     			        	        String file_path = c.getString(c.getColumnIndex(Images.Media.DATA)); 
     			        	        String file_name = c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME)); 
     			        	        String mime_type = c.getString(c.getColumnIndex(Images.Media.MIME_TYPE)); 
-    		    		 			if( MyDebug.LOG ) {
-    		    		 				Log.d(TAG, "file_path: " + file_path); 
-    		    		 				Log.d(TAG, "file_name: " + file_name); 
-    		    		 				Log.d(TAG, "mime_type: " + mime_type); 
-    		    		 			}
+		    		 				Log.d(TAG, "file_path: " + file_path); 
+		    		 				Log.d(TAG, "file_name: " + file_name); 
+		    		 				Log.d(TAG, "mime_type: " + mime_type); 
     			        	        c.close(); 
-    		    		 			failed_to_scan = false;
     		        	        }
     		        		}
     		        	}
     		        	else if( is_new_video ) {
     		        		sendBroadcast(new Intent("android.hardware.action.NEW_VIDEO", uri));
-	    		 			failed_to_scan = true;
     		        	}
-    		        	else {
-	    		 			failed_to_scan = true;
-    		        	}
+    		 			failed_to_scan = false;
     		 		}
     			}
     		);
