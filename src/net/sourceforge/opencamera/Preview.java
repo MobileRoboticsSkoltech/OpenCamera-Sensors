@@ -2154,6 +2154,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
     			Log.d(TAG, "new aspect ratio: " + aspect_ratio);
     		cameraSurface.getView().requestLayout();
+    		if( canvasView != null ) {
+    			canvasView.requestLayout();
+    		}
         }
     }
     
