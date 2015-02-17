@@ -1465,7 +1465,6 @@ public class CameraController2 extends CameraController {
 			throw new RuntimeException();
 		}
 		this.texture = texture;
-		this.surface_texture = new Surface(texture);
 	}
 	
 	private void setRepeatingRequest() {
@@ -1568,6 +1567,7 @@ public class CameraController2 extends CameraController {
 				createPictureImageReader();
 			}
 			if( texture != null ) {
+				// need to set the texture size
 				if( MyDebug.LOG )
 					Log.d(TAG, "set size of preview texture");
 				if( preview_width == 0 || preview_height == 0 ) {
@@ -1576,6 +1576,15 @@ public class CameraController2 extends CameraController {
 					throw new RuntimeException();
 				}
 				texture.setDefaultBufferSize(preview_width, preview_height);
+				// also need to create a new surface for the texture, in case the size has changed - but make sure we remove the old one first!
+				if( surface_texture != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "remove old target: " + surface_texture);
+					previewBuilder.removeTarget(surface_texture);
+				}
+				this.surface_texture = new Surface(texture);
+				if( MyDebug.LOG )
+					Log.d(TAG, "created new target: " + surface_texture);
 			}
 			if( video_recorder != null ) {
 				if( MyDebug.LOG )
