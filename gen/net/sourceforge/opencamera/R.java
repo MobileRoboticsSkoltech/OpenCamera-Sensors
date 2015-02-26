@@ -157,6 +157,7 @@ public final class R {
         /**  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
+ whether a setting is turned off, e.g., "Auto-stabilise: Off" 
          */
         public static final int choose_save_location=0x7f070009;
         public static final int clear_folder_history=0x7f07000a;
@@ -178,6 +179,7 @@ public final class R {
   intentionally starts lower case 
   intentionally starts lower case 
  @TODO PER FAVORE VERIFICARE QUESTA TRADUZIONE! 
+  intentionally starts lower case 
          */
         public static final int failed_to_reconnect_camera=0x7f070010;
         public static final int failed_to_record_video=0x7f070022;
@@ -204,6 +206,7 @@ public final class R {
         /**  whether a setting is turned on, e.g., "Auto-stabilise: On" 
  whether a setting is turned on, e.g., "Auto-stabilise: On" 
  whether a setting is turned on, e.g., "Auto-stabilise: On" 
+ whether a setting is turned on, e.g., "Auto-stabilise: On" 
          */
         public static final int off=0x7f070008;
         public static final int on=0x7f070007;
@@ -220,6 +223,7 @@ public final class R {
         public static final int preference_burst_mode_summary=0x7f070058;
         public static final int preference_category_camera_controls=0x7f070052;
         /**  symbol short for metres 
+ symbol short for metres 
          */
         public static final int preference_category_camera_effects=0x7f070041;
         public static final int preference_category_camera_quality=0x7f070091;
@@ -363,6 +367,7 @@ public final class R {
         public static final int video=0x7f07001b;
         public static final int video_error_server_died=0x7f070014;
         /**   intentionally starts lower case 
+  intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 
          */
