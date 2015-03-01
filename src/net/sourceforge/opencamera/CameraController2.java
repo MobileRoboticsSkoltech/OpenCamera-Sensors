@@ -26,6 +26,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaActionSound;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
@@ -67,6 +68,9 @@ public class CameraController2 extends CameraController {
 	private static final int STATE_WAITING_PRECAPTURE_START = 2;
 	private static final int STATE_WAITING_PRECAPTURE_DONE = 3;
 	private int state = STATE_NORMAL;
+	
+	private MediaActionSound media_action_sound = new MediaActionSound();
+	private boolean sounds_enabled = true;
 	
 	class CameraSettings {
 		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
@@ -552,7 +556,7 @@ public class CameraController2 extends CameraController {
 		camera_features.max_exposure = exposure_range.getUpper();
 		camera_features.exposure_step = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP).floatValue();
 
-		// TODO: can_disable_shutter_sound
+		camera_features.can_disable_shutter_sound = true;
 
 		return camera_features;
 	}
@@ -1325,8 +1329,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void enableShutterSound(boolean enabled) {
-		// TODO Auto-generated method stub
-
+		this.sounds_enabled = enabled;
 	}
 
 	private Rect convertRectToCamera2(Rect sensor_rect, Rect rect) {
@@ -1877,6 +1880,13 @@ public class CameraController2 extends CameraController {
 			stillBuilder.addTarget(imageReader.getSurface());
 
 			CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
+				public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long frameNumber) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "still onCaptureStarted");
+					if( sounds_enabled )
+						media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+				}
+
 				public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "still onCaptureCompleted");
