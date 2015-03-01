@@ -436,8 +436,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( !this.is_video ) {
 			startCameraPreview();
 		}
-		if( !using_android_l )
-			cancelAutoFocus();
+		cancelAutoFocus();
 
         if( camera_controller != null && !this.using_face_detection ) {
     		this.has_focus_area = false;
@@ -480,8 +479,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-		if( !using_android_l )
-			cancelAutoFocus();
+		cancelAutoFocus();
         camera_controller.clearFocusAndMetering();
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
@@ -1652,8 +1650,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "setPreviewSize() shouldn't be called when preview is running");
 			throw new RuntimeException();
 		}
-		if( !using_android_l )
+		if( !using_android_l ) {
+			// don't do for Android L, else this means we get flash on startup autofocus if flash is on
 			this.cancelAutoFocus();
+		}
 		// first set picture size (for photo mode, must be done now so we can set the picture size from this; for video, doesn't really matter when we set it)
 		CameraController.Size new_size = null;
     	if( this.is_video ) {
@@ -2983,8 +2983,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExposure(): " + new_exposure);
 		if( camera_controller != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
-			if( !using_android_l )
-				cancelAutoFocus();
+			cancelAutoFocus();
 			if( new_exposure < min_exposure )
 				new_exposure = min_exposure;
 			if( new_exposure > max_exposure )
@@ -3483,8 +3482,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-		if( !using_android_l )
-			cancelAutoFocus();
+		cancelAutoFocus();
         camera_controller.setFlashValue(flash_value);
 	}
 
@@ -3619,8 +3617,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-		if( !using_android_l )
-			cancelAutoFocus();
+		cancelAutoFocus();
         camera_controller.setFocusValue(focus_value);
 		clearFocusAreas();
 		// n.b., we reset even for manual focus mode
@@ -3652,8 +3649,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		}
 		if( is_exposure_lock_supported ) {
-			if( !using_android_l )
-				cancelAutoFocus();
+			cancelAutoFocus();
 	        camera_controller.setAutoExposureLock(is_exposure_locked);
 			Activity activity = (Activity)this.getContext();
 		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
@@ -3826,14 +3822,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		if( flash_value.equals("flash_torch") ) {
 			// shouldn't happen? but set to what the UI is
-			if( !using_android_l )
-				cancelAutoFocus();
+			cancelAutoFocus();
 	        camera_controller.setFlashValue(flash_value_ui);
 			return;
 		}
 		// turn on torch
-		if( !using_android_l )
-			cancelAutoFocus();
+		cancelAutoFocus();
         camera_controller.setFlashValue("flash_torch");
 		try {
 			Thread.sleep(100);
@@ -3842,8 +3836,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			e.printStackTrace();
 		}
 		// turn off torch
-		if( !using_android_l )
-			cancelAutoFocus();
+		cancelAutoFocus();
         camera_controller.setFlashValue(flash_value_ui);
 	}
 	
@@ -5037,8 +5030,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	void requestAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "requestAutoFocus");
-		if( !using_android_l )
-			cancelAutoFocus();
+		cancelAutoFocus();
 		tryAutoFocus(false, true);
 	}
 
