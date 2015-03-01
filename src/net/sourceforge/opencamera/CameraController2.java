@@ -96,7 +96,10 @@ public class CameraController2 extends CameraController {
 
 		private void setupBuilder(CaptureRequest.Builder builder, boolean is_still) {
 			//builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+			//builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+			//builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
 			//builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+			//builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
 
 			setSceneMode(builder);
 			setColorEffect(builder);
@@ -182,8 +185,10 @@ public class CameraController2 extends CameraController {
 				// TODO: set flash via CaptureRequest.FLASH
 			}
 			else {
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "auto mode");
+					Log.d(TAG, "flash_value: " + flash_value);
+				}
 				// prefer to set flash via the ae mode, except for torch which we can't
 		    	if( flash_value.equals("flash_off") ) {
 					builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
@@ -256,7 +261,8 @@ public class CameraController2 extends CameraController {
 		// n.b., if we add more methods, remember to update setupBuilder() above!
 	}
 	
-	CameraSettings camera_settings = new CameraSettings();
+	private CameraSettings camera_settings = new CameraSettings();
+	private boolean push_repeating_request_when_torch_off = false;
 
 	public CameraController2(Context context, int cameraId) {
 		if( MyDebug.LOG )
@@ -1041,7 +1047,6 @@ public class CameraController2 extends CameraController {
 	            image = null;
 	            jpeg_cb.onPictureTaken(bytes);
 	            jpeg_cb = null;
-				cancelAutoFocus();
 				if( MyDebug.LOG )
 					Log.d(TAG, "done onImageAvailable");
 			}
@@ -1253,16 +1258,23 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 
-		/*if( camera_settings.flash_value.equals("flash_torch") ) {
-			// first need to turn torch off, otherwise torch remains on (at least on Nexus 6)
+		if( camera_settings.flash_value.equals("flash_torch") ) {
+			// hack - first need to turn torch off, otherwise torch remains on (at least on Nexus 6)
 			camera_settings.flash_value = "flash_off";
 			if( camera_settings.setAEMode(previewBuilder) ) {
 		    	setRepeatingRequest();
 			}
-		}*/
-		camera_settings.flash_value = flash_value;
-		if( camera_settings.setAEMode(previewBuilder) ) {
-	    	setRepeatingRequest();
+			camera_settings.flash_value = flash_value;
+			if( camera_settings.setAEMode(previewBuilder) ) {
+				// need to wait until torch actually turned off
+				push_repeating_request_when_torch_off = true;
+			}
+		}
+		else {
+			camera_settings.flash_value = flash_value;
+			if( camera_settings.setAEMode(previewBuilder) ) {
+		    	setRepeatingRequest();
+			}
 		}
 	}
 
@@ -1544,7 +1556,6 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			throw new RuntimeException();
 		}
 	}
 
@@ -1566,7 +1577,6 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			throw new RuntimeException();
 		}
 	}
 	
@@ -1592,7 +1602,6 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			throw new RuntimeException();
 		} 
 	}
 
@@ -1768,7 +1777,6 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			throw new RuntimeException();
 		}
 	}
 
@@ -1829,9 +1837,9 @@ public class CameraController2 extends CameraController {
 		}*/
 		state = STATE_WAITING_AUTOFOCUS;
 		this.autofocus_cb = cb;
-    	//setRepeatingRequest();
-    	capture();
-    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+		// Camera2Basic sets a repeating request rather than capture, for doing autofocus (and if we do a capture(), sometimes have problem that autofocus never returns)
+    	setRepeatingRequest();
+		previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 	}
 
 	@Override
@@ -1844,11 +1852,12 @@ public class CameraController2 extends CameraController {
 			return;
 		}
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-    	//setRepeatingRequest();
+		// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
     	capture();
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 		this.autofocus_cb = null;
 		state = STATE_NORMAL;
+		setRepeatingRequest();
 	}
 
 	void takePictureAfterPrecapture() {
@@ -1872,8 +1881,14 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG )
 						Log.d(TAG, "still onCaptureCompleted");
 					// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
+					// need to cancel the autofocus, and restart the preview after taking the photo
+					previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+					camera_settings.setAEMode(previewBuilder); // not sure if needed, but the AE mode is set again in Camera2Basic
+		            capture();
+		            setRepeatingRequest();
 				}
 			};
+			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
 			captureSession.capture(stillBuilder.build(), stillCaptureCallback, null);
 		}
 		catch(CameraAccessException e) {
@@ -1883,7 +1898,36 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			throw new RuntimeException();
+		}
+	}
+
+	private void runPrecapture() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "runPrecapture");
+		/*takePictureAfterPrecapture();
+		if( true )
+			return;*/
+		// first run precapture sequence
+		// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
+    	/*previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+    	state = STATE_WAITING_PRECAPTURE_START;
+    	capture();*/
+		try {
+			// use TEMPLATE_PREVIEW - with TEMPLATE_STILL_CAPTURE, causes problems with flash auto (pics sometimes too bright, or with bluish tinge)
+			CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+			camera_settings.setupBuilder(precaptureBuilder, false);
+			precaptureBuilder.addTarget(getPreviewSurface());
+			precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+	    	state = STATE_WAITING_PRECAPTURE_START;
+			captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, null);
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to precapture");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
 		}
 	}
 	
@@ -1898,11 +1942,13 @@ public class CameraController2 extends CameraController {
 			throw new RuntimeException();
 		}
 		this.jpeg_cb = jpeg;
-		//takePictureAfterPrecapture();
-		// first run precapture sequence
-    	previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-    	state = STATE_WAITING_PRECAPTURE_START;
-    	capture();
+		runPrecapture();
+
+		/*camera_settings.setupBuilder(previewBuilder, false);
+    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+		state = STATE_WAITING_AUTOFOCUS;
+    	//capture();
+    	setRepeatingRequest();*/
 	}
 
 	@Override
@@ -1991,7 +2037,15 @@ public class CameraController2 extends CameraController {
 	}
 
 	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
+		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
+			process(partialResult);
+		}
+
 		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+			process(result);
+		}
+
+		private void process(CaptureResult result) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "preview onCaptureCompleted, state: " + state);*/
 			/*int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
@@ -2024,12 +2078,17 @@ public class CameraController2 extends CameraController {
 					}
 					state = STATE_NORMAL;
 					// we need to cancel af trigger, otherwise sometimes things seem to get confused, with the autofocus thinking it's completed too early
-			    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+			    	/*previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 			    	capture();
-			    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+			    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);*/
 
-					autofocus_cb.onAutoFocus(af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED);
-					autofocus_cb = null;
+					/*if( jpeg_cb != null ) {
+						runPrecapture();
+					}
+					else*/ if( autofocus_cb != null ) {
+						autofocus_cb.onAutoFocus(af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED);
+						autofocus_cb = null;
+					}
 				}
 			}
 			else if( state == STATE_WAITING_PRECAPTURE_START ) {
@@ -2045,8 +2104,8 @@ public class CameraController2 extends CameraController {
 						else
 							Log.d(TAG, "CONTROL_AE_STATE is null");
 					}
+					state = STATE_WAITING_PRECAPTURE_DONE;
 				}
-				state = STATE_WAITING_PRECAPTURE_DONE;
 			}
 			else if( state == STATE_WAITING_PRECAPTURE_DONE ) {
 				if( MyDebug.LOG )
@@ -2074,6 +2133,22 @@ public class CameraController2 extends CameraController {
 					faces[i] = convertFromCameraFace(sensor_rect, camera_faces[i]);
 				}
 				face_detection_listener.onFaceDetection(faces);
+			}
+			
+			if( push_repeating_request_when_torch_off ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "received push_repeating_request_when_torch_off");
+				Integer flash_state = result.get(CaptureResult.FLASH_STATE);
+				if( MyDebug.LOG ) {
+					if( flash_state != null )
+						Log.d(TAG, "flash_state: " + flash_state);
+					else
+						Log.d(TAG, "flash_state is null");
+				}
+				if( flash_state != null && flash_state == CaptureResult.FLASH_STATE_READY ) {
+					push_repeating_request_when_torch_off = false;
+					setRepeatingRequest();
+				}
 			}
 		}
 	};

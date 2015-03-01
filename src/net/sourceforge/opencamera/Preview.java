@@ -436,7 +436,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( !this.is_video ) {
 			startCameraPreview();
 		}
-        cancelAutoFocus();
+		if( !using_android_l )
+			cancelAutoFocus();
 
         if( camera_controller != null && !this.using_face_detection ) {
     		this.has_focus_area = false;
@@ -479,7 +480,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-        cancelAutoFocus();
+		if( !using_android_l )
+			cancelAutoFocus();
         camera_controller.clearFocusAndMetering();
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
@@ -1095,6 +1097,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			showPhotoVideoToast();
 		}
 
+		if( !take_photo && using_android_l ) {
+			// need to switch flash off for autofocus - and for Android L, need to do this before starting preview (otherwise it won't work in time); for old camera API, need to do this after starting preview!
+			set_flash_value_after_autofocus = "";
+			String old_flash_value = camera_controller.getFlashValue();
+			// getFlashValue() may return "" if flash not supported!
+			if( old_flash_value.length() > 0 && !old_flash_value.equals("flash_off") ) {
+				set_flash_value_after_autofocus = old_flash_value;
+				camera_controller.setFlashValue("flash_off");
+			}
+		}
+
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
 		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
@@ -1639,7 +1652,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "setPreviewSize() shouldn't be called when preview is running");
 			throw new RuntimeException();
 		}
-		this.cancelAutoFocus();
+		if( !using_android_l )
+			this.cancelAutoFocus();
 		// first set picture size (for photo mode, must be done now so we can set the picture size from this; for video, doesn't really matter when we set it)
 		CameraController.Size new_size = null;
     	if( this.is_video ) {
@@ -2969,7 +2983,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExposure(): " + new_exposure);
 		if( camera_controller != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
-	        cancelAutoFocus();
+			if( !using_android_l )
+				cancelAutoFocus();
 			if( new_exposure < min_exposure )
 				new_exposure = min_exposure;
 			if( new_exposure > max_exposure )
@@ -3468,7 +3483,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-        cancelAutoFocus();
+		if( !using_android_l )
+			cancelAutoFocus();
         camera_controller.setFlashValue(flash_value);
 	}
 
@@ -3603,7 +3619,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-        cancelAutoFocus();
+		if( !using_android_l )
+			cancelAutoFocus();
         camera_controller.setFocusValue(focus_value);
 		clearFocusAreas();
 		// n.b., we reset even for manual focus mode
@@ -3635,7 +3652,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		}
 		if( is_exposure_lock_supported ) {
-	        cancelAutoFocus();
+			if( !using_android_l )
+				cancelAutoFocus();
 	        camera_controller.setAutoExposureLock(is_exposure_locked);
 			Activity activity = (Activity)this.getContext();
 		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
@@ -3808,12 +3826,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		if( flash_value.equals("flash_torch") ) {
 			// shouldn't happen? but set to what the UI is
-	        cancelAutoFocus();
+			if( !using_android_l )
+				cancelAutoFocus();
 	        camera_controller.setFlashValue(flash_value_ui);
 			return;
 		}
 		// turn on torch
-        cancelAutoFocus();
+		if( !using_android_l )
+			cancelAutoFocus();
         camera_controller.setFlashValue("flash_torch");
 		try {
 			Thread.sleep(100);
@@ -3822,7 +3842,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			e.printStackTrace();
 		}
 		// turn off torch
-        cancelAutoFocus();
+		if( !using_android_l )
+			cancelAutoFocus();
         camera_controller.setFlashValue(flash_value_ui);
 	}
 	
@@ -4232,8 +4253,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// make sure there isn't an autofocus in progress - can happen if in manual mode we take a photo while autofocusing - see testTakePhotoManualFocus() (although that test doesn't always properly test the bug...)
 			// we only cancel when in manual mode and if still focusing, as I had 2 bug reports for v1.16 that the photo was being taken out of focus; both reports said it worked fine in 1.15, and one confirmed that it was due to the cancelAutoFocus() line, and that it's now fixed with this fix
 			// they said this happened in every focus mode, including manual - so possible that on some devices, cancelAutoFocus() actually pulls the camera out of focus, or reverts to preview focus?
-			if( MyDebug.LOG )
-				Log.d(TAG, "cancelAutoFocus()");
 			cancelAutoFocus();
 		}
 		focus_success = FOCUS_DONE; // clear focus rectangle if not already done
@@ -5018,7 +5037,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	void requestAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "requestAutoFocus");
-		cancelAutoFocus();
+		if( !using_android_l )
+			cancelAutoFocus();
 		tryAutoFocus(false, true);
 	}
 
@@ -5054,13 +5074,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        if( camera_controller.supportsAutoFocus() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "try to start autofocus");
-				set_flash_value_after_autofocus = "";
-				String old_flash_value = camera_controller.getFlashValue();
-    			// getFlashValue() may return "" if flash not supported!
-    			if( startup && old_flash_value.length() > 0 && !old_flash_value.equals("flash_off") ) {
-    				set_flash_value_after_autofocus = old_flash_value;
-        			camera_controller.setFlashValue("flash_off");
-    			}
+				if( !using_android_l ) {
+					set_flash_value_after_autofocus = "";
+					String old_flash_value = camera_controller.getFlashValue();
+	    			// getFlashValue() may return "" if flash not supported!
+	    			if( startup && old_flash_value.length() > 0 && !old_flash_value.equals("flash_off") ) {
+	    				set_flash_value_after_autofocus = old_flash_value;
+	        			camera_controller.setFlashValue("flash_off");
+	    			}
+				}
     			CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
 					@Override
 					public void onAutoFocus(boolean success) {
