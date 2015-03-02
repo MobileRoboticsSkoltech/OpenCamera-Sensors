@@ -56,7 +56,7 @@ public class CameraController2 extends CameraController {
 	private Surface surface_texture = null;
 	private HandlerThread thread = null; 
 	Handler handler = null;
-
+	
 	private int preview_width = 0;
 	private int preview_height = 0;
 	
@@ -512,10 +512,12 @@ public class CameraController2 extends CameraController {
 
 		int [] face_modes = characteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
 		camera_features.supports_face_detection = false;
-		for(int i=0;i<face_modes.length && !camera_features.supports_face_detection;i++) {
+		for(int i=0;i<face_modes.length;i++) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "face detection mode: " + face_modes[i]);
-			if( face_modes[i] == CameraCharacteristics.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
+			// Although we currently only make use of the "SIMPLE" features, some devices (e.g., Nexus 6) support FULL and not SIMPLE.
+			// We don't support SIMPLE yet, as I don't have any devices to test this.
+			if( face_modes[i] == CameraCharacteristics.STATISTICS_FACE_DETECT_MODE_FULL ) {
 				camera_features.supports_face_detection = true;
 			}
 		}
@@ -1809,11 +1811,11 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean startFaceDetection() {
-    	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
+    	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL ) {
     		return false;
     	}
     	camera_settings.has_face_detect_mode = true;
-    	camera_settings.face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE;
+    	camera_settings.face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL;
     	camera_settings.setFaceDetectMode(previewBuilder);
     	setRepeatingRequest();
 		return true;
@@ -1999,12 +2001,17 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setDisplayOrientation(int degrees) {
-		// do nothing - for CameraController2, the preview display orientation is handled via the TextureView's transform
+		// for CameraController2, the preview display orientation is handled via the TextureView's transform
+		if( MyDebug.LOG )
+			Log.d(TAG, "setDisplayOrientation not supported by this API");
+		throw new RuntimeException();
 	}
 
 	@Override
 	int getDisplayOrientation() {
-		return 0;
+		if( MyDebug.LOG )
+			Log.d(TAG, "getDisplayOrientation not supported by this API");
+		throw new RuntimeException();
 	}
 
 	@Override
@@ -2161,14 +2168,16 @@ public class CameraController2 extends CameraController {
 				}
 			}
 
-			if( face_detection_listener != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
+			if( face_detection_listener != null && previewBuilder != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL ) {
 				Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
 				android.hardware.camera2.params.Face [] camera_faces = result.get(CaptureResult.STATISTICS_FACES);
-				CameraController.Face [] faces = new CameraController.Face[camera_faces.length];
-				for(int i=0;i<camera_faces.length;i++) {
-					faces[i] = convertFromCameraFace(sensor_rect, camera_faces[i]);
+				if( camera_faces != null ) {
+					CameraController.Face [] faces = new CameraController.Face[camera_faces.length];
+					for(int i=0;i<camera_faces.length;i++) {
+						faces[i] = convertFromCameraFace(sensor_rect, camera_faces[i]);
+					}
+					face_detection_listener.onFaceDetection(faces);
 				}
-				face_detection_listener.onFaceDetection(faces);
 			}
 			
 			if( push_repeating_request_when_torch_off ) {

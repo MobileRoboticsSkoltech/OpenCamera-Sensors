@@ -331,13 +331,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( camera_controller == null )
 			return;
 		camera_to_preview_matrix.reset();
-		// from http://developer.android.com/reference/android/hardware/Camera.Face.html#rect
-		// Need mirror for front camera
-		boolean mirror = camera_controller.isFrontFacing();
-		camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
-	    if( !using_texture_view ) {
+	    if( !using_android_l ) {
+			// from http://developer.android.com/reference/android/hardware/Camera.Face.html#rect
+			// Need mirror for front camera
+			boolean mirror = camera_controller.isFrontFacing();
+			camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
 			// This is the value for android.hardware.Camera.setDisplayOrientation.
 			camera_to_preview_matrix.postRotate(camera_controller.getDisplayOrientation());
+	    }
+	    else {
+	    	// unfortunately the transformation for Android L API isn't documented, but this seems to work for Nexus 6
+			boolean mirror = camera_controller.isFrontFacing();
+			camera_to_preview_matrix.setScale(1, mirror ? -1 : 1);
 	    }
 		// Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
 		// UI coordinates range from (0, 0) to (width, height).
@@ -2213,23 +2218,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-	    int rotation = getDisplayRotation();
-	    int degrees = 0;
-	    switch (rotation) {
-	    	case Surface.ROTATION_0: degrees = 0; break;
-	        case Surface.ROTATION_90: degrees = 90; break;
-	        case Surface.ROTATION_180: degrees = 180; break;
-	        case Surface.ROTATION_270: degrees = 270; break;
-	    }
-		if( MyDebug.LOG )
-			Log.d(TAG, "    degrees = " + degrees);
-
-	    if( using_texture_view ) {
+	    if( using_android_l ) {
 	    	// need to configure the textureview
 			configureTransform();
 	    }
 	    else {
-		    camera_controller.setDisplayOrientation(degrees);
+		    int rotation = getDisplayRotation();
+		    int degrees = 0;
+		    switch (rotation) {
+		    	case Surface.ROTATION_0: degrees = 0; break;
+		        case Surface.ROTATION_90: degrees = 90; break;
+		        case Surface.ROTATION_180: degrees = 180; break;
+		        case Surface.ROTATION_270: degrees = 270; break;
+		    }
+			if( MyDebug.LOG )
+				Log.d(TAG, "    degrees = " + degrees);
+
+			camera_controller.setDisplayOrientation(degrees);
 	    }
 	}
 	
