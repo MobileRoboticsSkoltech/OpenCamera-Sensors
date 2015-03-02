@@ -513,6 +513,8 @@ public class CameraController2 extends CameraController {
 		int [] face_modes = characteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
 		camera_features.supports_face_detection = false;
 		for(int i=0;i<face_modes.length && !camera_features.supports_face_detection;i++) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "face detection mode: " + face_modes[i]);
 			if( face_modes[i] == CameraCharacteristics.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
 				camera_features.supports_face_detection = true;
 			}
@@ -957,7 +959,7 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "iso range from " + iso_range.getLower() + " to " + iso_range.getUpper());
 		List<String> values = new ArrayList<String>();
 		values.add("auto");
-		int [] iso_values = {100, 200, 400, 800, 1600};
+		int [] iso_values = {50, 100, 200, 400, 800, 1600, 3200, 6400};
 		for(int i=0;i<iso_values.length;i++) {
 			if( iso_values[i] >= iso_range.getLower() && iso_values[i] <= iso_range.getUpper() ) {
 				values.add("" + iso_values[i]);
@@ -1708,7 +1710,9 @@ public class CameraController2 extends CameraController {
 					captureSession = session;
 		        	Surface surface = getPreviewSurface();
 	        		previewBuilder.addTarget(surface);
-					setRepeatingRequest();
+	        		if( video_recorder != null )
+	        			previewBuilder.addTarget(video_recorder.getSurface());
+        			setRepeatingRequest();
 					callback_done = true;
 				}
 
@@ -2031,23 +2035,11 @@ public class CameraController2 extends CameraController {
 		try {
 			if( MyDebug.LOG )
 				Log.d(TAG, "obtain video_recorder surface");
-			/*if( texture != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "set size of preview texture");
-				texture.setDefaultBufferSize(preview_width, preview_height);
-			}*/
-			Surface surface = video_recorder.getSurface();
 			if( MyDebug.LOG )
 				Log.d(TAG, "done");
-			//CaptureRequest.Builder videoBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-			//videoBuilder.addTarget(surface);
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
 			camera_settings.setupBuilder(previewBuilder, false);
-			previewBuilder.addTarget(surface);
 			createCaptureSession(video_recorder);
-			/*if( captureSession != null ) {
-				captureSession.setRepeatingRequest(videoBuilder.build(), null, null);
-			}*/
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
