@@ -108,7 +108,7 @@ public class CameraController2 extends CameraController {
 			setSceneMode(builder);
 			setColorEffect(builder);
 			setWhiteBalance(builder);
-			setAEMode(builder);
+			setAEMode(builder, is_still);
 			setCropRegion(builder);
 			setExposureCompensation(builder);
 			setFocusMode(builder);
@@ -176,7 +176,7 @@ public class CameraController2 extends CameraController {
 			return false;
 		}
 
-		private boolean setAEMode(CaptureRequest.Builder builder) {
+		private boolean setAEMode(CaptureRequest.Builder builder, boolean is_still) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "setAEMode");
 			if( has_iso ) {
@@ -186,7 +186,27 @@ public class CameraController2 extends CameraController {
 				}
 				builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
-				// TODO: set flash via CaptureRequest.FLASH
+				/*Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+				if( exposure_time_range != null ) {
+				}*/
+				// for now set some sensible defaults, as we don't yet expose these controls to the user
+				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, 1000000000l/30);
+				// set flash via CaptureRequest.FLASH
+		    	if( flash_value.equals("flash_off") ) {
+					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+		    	}
+		    	else if( flash_value.equals("flash_auto") ) {
+					builder.set(CaptureRequest.FLASH_MODE, is_still ? CameraMetadata.FLASH_MODE_SINGLE : CameraMetadata.FLASH_MODE_OFF);
+		    	}
+		    	else if( flash_value.equals("flash_on") ) {
+					builder.set(CaptureRequest.FLASH_MODE, is_still ? CameraMetadata.FLASH_MODE_SINGLE : CameraMetadata.FLASH_MODE_OFF);
+		    	}
+		    	else if( flash_value.equals("flash_torch") ) {
+					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+		    	}
+		    	else if( flash_value.equals("flash_red_eye") ) {
+					builder.set(CaptureRequest.FLASH_MODE, is_still ? CameraMetadata.FLASH_MODE_SINGLE : CameraMetadata.FLASH_MODE_OFF);
+		    	}
 			}
 			else {
 				if( MyDebug.LOG ) {
@@ -950,7 +970,7 @@ public class CameraController2 extends CameraController {
 			if( supported_values.selected_value.equals("auto") ) {
 				camera_settings.has_iso = false;
 				camera_settings.iso = 0;
-				if( camera_settings.setAEMode(previewBuilder) ) {
+				if( camera_settings.setAEMode(previewBuilder, false) ) {
 			    	setRepeatingRequest();
 				}
 			}
@@ -961,7 +981,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "iso: " + selected_value2);
 					camera_settings.has_iso = true;
 					camera_settings.iso = selected_value2;
-					if( camera_settings.setAEMode(previewBuilder) ) {
+					if( camera_settings.setAEMode(previewBuilder, false) ) {
 				    	setRepeatingRequest();
 					}
 				}
@@ -970,7 +990,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "iso invalid format, can't parse to int");
 					camera_settings.has_iso = false;
 					camera_settings.iso = 0;
-					if( camera_settings.setAEMode(previewBuilder) ) {
+					if( camera_settings.setAEMode(previewBuilder, false) ) {
 				    	setRepeatingRequest();
 					}
 				}
@@ -1265,18 +1285,18 @@ public class CameraController2 extends CameraController {
 		if( camera_settings.flash_value.equals("flash_torch") ) {
 			// hack - first need to turn torch off, otherwise torch remains on (at least on Nexus 6)
 			camera_settings.flash_value = "flash_off";
-			if( camera_settings.setAEMode(previewBuilder) ) {
+			if( camera_settings.setAEMode(previewBuilder, false) ) {
 		    	setRepeatingRequest();
 			}
 			camera_settings.flash_value = flash_value;
-			if( camera_settings.setAEMode(previewBuilder) ) {
+			if( camera_settings.setAEMode(previewBuilder, false) ) {
 				// need to wait until torch actually turned off
 				push_repeating_request_when_torch_off = true;
 			}
 		}
 		else {
 			camera_settings.flash_value = flash_value;
-			if( camera_settings.setAEMode(previewBuilder) ) {
+			if( camera_settings.setAEMode(previewBuilder, false) ) {
 		    	setRepeatingRequest();
 			}
 		}
@@ -1811,6 +1831,13 @@ public class CameraController2 extends CameraController {
 			cb.onAutoFocus(false);
 			return;
 		}
+		/*if( state == STATE_WAITING_AUTOFOCUS ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "already waiting for an autofocus");
+			// need to update the callback!
+			this.autofocus_cb = cb;
+			return;
+		}*/
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
 		if( MyDebug.LOG ) {
 			{
@@ -1893,7 +1920,7 @@ public class CameraController2 extends CameraController {
 					// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
 					// need to cancel the autofocus, and restart the preview after taking the photo
 					previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-					camera_settings.setAEMode(previewBuilder); // not sure if needed, but the AE mode is set again in Camera2Basic
+					camera_settings.setAEMode(previewBuilder, false); // not sure if needed, but the AE mode is set again in Camera2Basic
 		            capture();
 		            setRepeatingRequest();
 				}
@@ -1952,7 +1979,12 @@ public class CameraController2 extends CameraController {
 			throw new RuntimeException();
 		}
 		this.jpeg_cb = jpeg;
-		runPrecapture();
+		if( camera_settings.has_iso ) {
+			takePictureAfterPrecapture();
+		}
+		else {
+			runPrecapture();
+		}
 
 		/*camera_settings.setupBuilder(previewBuilder, false);
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
@@ -2106,13 +2138,15 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "waiting for precapture start...");
 				// CONTROL_AE_STATE can be null on some devices
 				Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
+				if( MyDebug.LOG ) {
+					if( ae_state != null )
+						Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
+					else
+						Log.d(TAG, "CONTROL_AE_STATE is null");
+				}
 				if( ae_state == null || ae_state == CaptureResult.CONTROL_AE_STATE_PRECAPTURE || ae_state == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED ) {
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "precapture started");
-						if( ae_state != null )
-							Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
-						else
-							Log.d(TAG, "CONTROL_AE_STATE is null");
 					}
 					state = STATE_WAITING_PRECAPTURE_DONE;
 				}
