@@ -97,6 +97,7 @@ public class CameraController2 extends CameraController {
 		private MeteringRectangle [] ae_regions = null; // no need for has_scalar_crop_region, as we can set to null instead
 		private boolean has_face_detect_mode = false;
 		private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
+		private boolean video_stabilization = false;
 
 		private void setupBuilder(CaptureRequest.Builder builder, boolean is_still) {
 			//builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
@@ -116,6 +117,7 @@ public class CameraController2 extends CameraController {
 			setAFRegions(builder);
 			setAERegions(builder);
 			setFaceDetectMode(builder);
+			setVideoStabilization(builder);
 
 			if( is_still ) {
 				if( location != null ) {
@@ -280,6 +282,10 @@ public class CameraController2 extends CameraController {
 		private void setFaceDetectMode(CaptureRequest.Builder builder) {
 			if( has_face_detect_mode )
 				builder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, face_detect_mode);
+		}
+		
+		private void setVideoStabilization(CaptureRequest.Builder builder) {
+			builder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, video_stabilization ? CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON : CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
 		}
 		
 		// n.b., if we add more methods, remember to update setupBuilder() above!
@@ -573,7 +579,7 @@ public class CameraController2 extends CameraController {
 
 		camera_features.is_exposure_lock_supported = true;
 		
-		// TODO: is_video_stabilization_supported
+        camera_features.is_video_stabilization_supported = true;
 
 		Range<Integer> exposure_range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
 		camera_features.min_exposure = exposure_range.getLower();
@@ -1105,14 +1111,14 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	void setVideoStabilization(boolean enabled) {
-		// TODO Auto-generated method stub
-
+		camera_settings.video_stabilization = enabled;
+		camera_settings.setVideoStabilization(previewBuilder);
+    	setRepeatingRequest();
 	}
 
 	@Override
 	public boolean getVideoStabilization() {
-		// TODO Auto-generated method stub
-		return false;
+		return camera_settings.video_stabilization;
 	}
 
 	@Override
