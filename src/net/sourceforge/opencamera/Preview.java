@@ -1105,7 +1105,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			set_flash_value_after_autofocus = "";
 			String old_flash_value = camera_controller.getFlashValue();
 			// getFlashValue() may return "" if flash not supported!
-			if( old_flash_value.length() > 0 && !old_flash_value.equals("flash_off") ) {
+			// also set flash_torch - otherwise we get bug where torch doesn't turn on when starting up in video mode (and it's not like we want to turn torch off for startup focus, anyway)
+			if( old_flash_value.length() > 0 && !old_flash_value.equals("flash_off") && !old_flash_value.equals("flash_torch") ) {
 				set_flash_value_after_autofocus = old_flash_value;
 				camera_controller.setFlashValue("flash_off");
 			}
