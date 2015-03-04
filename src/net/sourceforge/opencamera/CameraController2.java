@@ -1962,8 +1962,7 @@ public class CameraController2 extends CameraController {
     	state = STATE_WAITING_PRECAPTURE_START;
     	capture();*/
 		try {
-			// use TEMPLATE_PREVIEW - with TEMPLATE_STILL_CAPTURE, causes problems with flash auto (pics sometimes too bright, or with bluish tinge)
-			CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+			CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 			camera_settings.setupBuilder(precaptureBuilder, false);
 			precaptureBuilder.addTarget(getPreviewSurface());
 			precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
