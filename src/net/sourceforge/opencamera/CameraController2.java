@@ -1155,9 +1155,9 @@ public class CameraController2 extends CameraController {
 		}
 		float zoom = zoom_ratios.get(value)/100.0f;
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
-		int left = sensor_rect.centerX();
+		int left = sensor_rect.width()/2;
 		int right = left;
-		int top = sensor_rect.centerY();
+		int top = sensor_rect.height()/2;
 		int bottom = top;
 		int hwidth = (int)(sensor_rect.width() / (2.0*zoom));
 		int hheight = (int)(sensor_rect.height() / (2.0*zoom));
@@ -1169,6 +1169,19 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "zoom: " + zoom);
 			Log.d(TAG, "hwidth: " + hwidth);
 			Log.d(TAG, "hheight: " + hheight);
+			Log.d(TAG, "sensor_rect left: " + sensor_rect.left);
+			Log.d(TAG, "sensor_rect top: " + sensor_rect.top);
+			Log.d(TAG, "sensor_rect right: " + sensor_rect.right);
+			Log.d(TAG, "sensor_rect bottom: " + sensor_rect.bottom);
+			Log.d(TAG, "left: " + left);
+			Log.d(TAG, "top: " + top);
+			Log.d(TAG, "right: " + right);
+			Log.d(TAG, "bottom: " + bottom);
+			/*Rect current_rect = previewBuilder.get(CaptureRequest.SCALER_CROP_REGION);
+			Log.d(TAG, "current_rect left: " + current_rect.left);
+			Log.d(TAG, "current_rect top: " + current_rect.top);
+			Log.d(TAG, "current_rect right: " + current_rect.right);
+			Log.d(TAG, "current_rect bottom: " + current_rect.bottom);*/
 		}
 		camera_settings.scalar_crop_region = new Rect(left, top, right, bottom);
 		camera_settings.setCropRegion(previewBuilder);
