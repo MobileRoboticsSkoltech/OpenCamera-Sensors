@@ -4182,7 +4182,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "focus_value is " + focus_value);
 
-		if( this.successfully_focused && System.currentTimeMillis() < this.successfully_focused_time + 5000 ) {
+		if( !using_android_l && this.successfully_focused && System.currentTimeMillis() < this.successfully_focused_time + 5000 ) {
+			// Android L API seems to have poor results with flash if we don't lock focus for taking a photo (photos can come out too bright or too dark), so we always force a focus
 			if( MyDebug.LOG )
 				Log.d(TAG, "recently focused successfully, so no need to refocus");
 			takePictureWhenFocused();
