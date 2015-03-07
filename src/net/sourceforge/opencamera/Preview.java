@@ -1737,12 +1737,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 	}
 
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initialiseVideoQuality() {
 		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<Pair<Integer, Integer>>();
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
         	profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
         }
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_2160P) ) {
+	    		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_2160P);
+	        	profiles.put(CamcorderProfile.QUALITY_2160P, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+	        }
+		}
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_1080P);
         	profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
@@ -2599,7 +2606,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
     			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
     			p.setTextAlign(Paint.Align.CENTER);
-				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom label
+				int pixels_offset_y = 4*text_y; // avoid overwriting the zoom or ISO label
 				int color = Color.rgb(229, 28, 35); // Red 500
             	if( main_activity.isScreenLocked() ) {
             		// writing in reverse order, bottom to top
@@ -2632,7 +2639,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			int iso = camera_controller.captureResultIso();
-			drawTextWithBackground(canvas, p, getResources().getString(R.string.iso) + ": " + iso, Color.YELLOW, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
+			drawTextWithBackground(canvas, p, getResources().getString(R.string.iso) + ": " + iso, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text); // Yellow 500
 		}
 		if( this.has_zoom && camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowZoomPreferenceKey(), true) ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
