@@ -253,8 +253,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "new Preview");
 		}
 		
-        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-        	//this.using_android_l = true;
+		MainActivity main_activity = (MainActivity)context;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if( main_activity.supportsCamera2() ) {
+    		this.using_android_l = sharedPreferences.getBoolean(MainActivity.getUseCamera2PreferenceKey(), false);
         }
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "using_android_l?: " + using_android_l);

@@ -88,6 +88,7 @@ public class MainActivity extends Activity {
 	private OrientationEventListener orientationEventListener = null;
 	private boolean supports_auto_stabilise = false;
 	private boolean supports_force_video_4k = false;
+	private boolean supports_camera2 = false;
 	private ArrayList<String> save_location_history = new ArrayList<String>();
 	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
     private GestureDetector gestureDetector;
@@ -146,6 +147,8 @@ public class MainActivity extends Activity {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_force_video_4k? " + supports_force_video_4k);
+
+		initCamera2Support();
 
         setWindowFlagsForCamera();
 
@@ -258,6 +261,27 @@ public class MainActivity extends Activity {
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for Activity startup: " + (System.currentTimeMillis() - time_s));
+	}
+	
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void initCamera2Support() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initCamera2Support");
+    	supports_camera2 = false;
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+        	// currently Camera2 only supported if all camera have FULL support
+        	CameraControllerManager2 manager2 = new CameraControllerManager2(this);
+        	supports_camera2 = true;
+        	for(int i=0;i<manager2.getNumberOfCameras() && supports_camera2;i++) {
+        		if( !manager2.allowCamera2Support(i) ) {
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "camera " + i + " doesn't have limited or full support for Camera2 API");
+                	supports_camera2 = false;
+        		}
+        	}
+        }
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_camera2? " + supports_camera2);
 	}
 	
 	private void preloadIcons(int icons_id) {
@@ -1089,6 +1113,7 @@ public class MainActivity extends Activity {
 		bundle.putBoolean("using_android_l", this.preview.usingCamera2API());
 		bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);
 		bundle.putBoolean("supports_force_video_4k", this.supports_force_video_4k);
+		bundle.putBoolean("supports_camera2", this.supports_camera2);
 		bundle.putBoolean("supports_face_detection", this.preview.supportsFaceDetection());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
 		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
@@ -2124,7 +2149,11 @@ public class MainActivity extends Activity {
     public boolean supportsForceVideo4K() {
     	return this.supports_force_video_4k;
     }
-    
+
+    public boolean supportsCamera2() {
+    	return this.supports_camera2;
+    }
+
     void disableForceVideo4K() {
     	this.supports_force_video_4k = false;
     }
@@ -2184,6 +2213,10 @@ public class MainActivity extends Activity {
 
     public static String getFirstTimePreferenceKey() {
         return "done_first_time";
+    }
+
+    public static String getUseCamera2PreferenceKey() {
+    	return "preference_use_camera2";
     }
 
     public static String getFlashPreferenceKey(int cameraId) {

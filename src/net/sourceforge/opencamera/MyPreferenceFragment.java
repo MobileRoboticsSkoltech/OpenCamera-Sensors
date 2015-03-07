@@ -183,6 +183,33 @@ public class MyPreferenceFragment extends PreferenceFragment {
         	pg.removePreference(pref);
         }
 
+		final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_camera2: " + supports_camera2);
+        if( supports_camera2 ) {
+        	final Preference pref = findPreference("preference_use_camera2");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                	if( pref.getKey().equals("preference_use_camera2") ) {
+                		if( MyDebug.LOG )
+                			Log.d(TAG, "user clicked camera2 API - need to restart");
+                		// see http://stackoverflow.com/questions/2470870/force-application-to-restart-on-first-activity
+                		Intent i = getActivity().getBaseContext().getPackageManager().getLaunchIntentForPackage( getActivity().getBaseContext().getPackageName() );
+	                	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	                	startActivity(i);
+	                	return false;
+                	}
+                	return false;
+                }
+            });
+        }
+        else {
+        	Preference pref = findPreference("preference_use_camera2");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_online");
+        	pg.removePreference(pref);
+        }
+        
         {
             final Preference pref = findPreference("preference_online_help");
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {

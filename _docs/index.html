@@ -121,9 +121,9 @@ Thanks! Donations can be used for: purchasing hardware for porting/testing; app 
 
 <p><a name="requirements"><b>Requirements</b></p>
 
-<p>This requires Android 4.0 or better. I've tested this successfully on the Samsung Galaxy Nexus and Asus Nexus 7 (2013),
-running Android 4.3. The auto-stabilise feature may not be available if the app deems there is not enough memory (RAM) available
-(technical explanation: requires 128MB of "large heap").</p>
+<p>This requires Android 4.0 or better. I've tested this successfully on the Galaxy Nexus running Android 4.3, and
+the Nexus 6 and Nexus 7 (2013) running Android 5. The auto-stabilise feature may not be available if the app deems
+there is not enough memory (RAM) available (technical explanation: requires 128MB of "large heap").</p>
 
 <p>Note that I've had reports of problems on CyanogenMod (CM11) - unfortunately I don't have any CM11 devices to test on,
 and CyanogenMod doesn't appear to offer any means of testing without a real device (e.g., no emulator AVD images, no
@@ -506,6 +506,15 @@ have location data in them).</p>
 <p><b>Donate to support development</b> - Loads the page for
 <a href="https://play.google.com/store/apps/details?id=harman.mark.donation">my donation app</a>.</p>
 
+<p><b>Use Camera2 API</b> - If selected, this enables support for the Camera2 API that was introduced
+in Android 5. This enables some new features, but is currently experimental. Note that not all Android 5
+devices have full support for the Camera2 API (Open Camera will only show this option if all cameras
+report either "LIMITED" or "FULL" support for the API; "LEGACY" devices are not supported). Supported devices
+include the Nexus 5 and Nexus 6. Known issues with the Camera2 API include bugs with flash (sometimes shots come
+out too bright or dark, or auto-exposure routine stops - I've seen this on the Nexus 6 with other camera apps
+using Camera2 API), and problem that ISO doesn't work for recording video. Turning this option on or off will
+cause Open Camera to restart. (Requires Android 5.0 or higher.)</p>
+
 <p><b>About</b> - Provides various debug information about the app and your device's camera. You can also copy
 this information to the clipboard.</p>
 
@@ -690,9 +699,11 @@ available from
 <textarea style="width:100%; height:50%; white-space: pre; word-wrap: normal; overflow-x: scroll">
 Version 1.24 (Work in progress)
 
-ADDED   Chinese Simplified translation (thanks to Michael Lu).
+ADDED   New option to enable Android 5's Camera2 API! Currently experimental.
+        Restricted to only some devices (e.g., Nexus 6).
 ADDED   Option to display current ISO on screen (only if Camera2 API is
         enabled).
+ADDED   Chinese Simplified translation (thanks to Michael Lu).
 
 Version 1.23 (2015/02/16)
 
