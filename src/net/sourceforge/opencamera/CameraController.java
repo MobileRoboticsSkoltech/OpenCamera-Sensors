@@ -157,6 +157,12 @@ public abstract class CameraController {
 	abstract void initVideoRecorderPrePrepare(MediaRecorder video_recorder);
 	abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder); // throws RuntimeException if fails to prepare video recorder
 	abstract String getParametersString();
+	boolean captureResultHasIso() {
+		return false;
+	}
+	int captureResultIso() {
+		return 0;
+	}
 
 	// gets the available values of a generic mode, e.g., scene, color etc, and makes sure the requested mode is available
 	protected SupportedValues checkModeIsSupported(List<String> values, String value, String default_value) {

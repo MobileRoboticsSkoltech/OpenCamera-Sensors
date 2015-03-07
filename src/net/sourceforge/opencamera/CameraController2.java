@@ -72,6 +72,9 @@ public class CameraController2 extends CameraController {
 	private MediaActionSound media_action_sound = new MediaActionSound();
 	private boolean sounds_enabled = true;
 	
+	private boolean capture_result_has_iso = false;
+	private int capture_result_iso = 0;
+	
 	class CameraSettings {
 		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
 		private int rotation = 0;
@@ -293,6 +296,9 @@ public class CameraController2 extends CameraController {
 	
 	private CameraSettings camera_settings = new CameraSettings();
 	private boolean push_repeating_request_when_torch_off = false;
+	private CaptureRequest push_repeating_request_when_torch_off_id = null;
+	private boolean push_set_ae_lock = false;
+	private CaptureRequest push_set_ae_lock_id = null;
 
 	public CameraController2(Context context, int cameraId) {
 		if( MyDebug.LOG )
@@ -1308,14 +1314,16 @@ public class CameraController2 extends CameraController {
 		if( camera_settings.flash_value.equals("flash_torch") ) {
 			// hack - first need to turn torch off, otherwise torch remains on (at least on Nexus 6)
 			camera_settings.flash_value = "flash_off";
-			if( camera_settings.setAEMode(previewBuilder, false) ) {
-		    	setRepeatingRequest();
-			}
-			camera_settings.flash_value = flash_value;
-			if( camera_settings.setAEMode(previewBuilder, false) ) {
-				// need to wait until torch actually turned off
-				push_repeating_request_when_torch_off = true;
-			}
+			camera_settings.setAEMode(previewBuilder, false);
+			CaptureRequest request = previewBuilder.build();
+
+			// need to wait until torch actually turned off
+	    	camera_settings.flash_value = flash_value;
+			camera_settings.setAEMode(previewBuilder, false);
+			push_repeating_request_when_torch_off = true;
+			push_repeating_request_when_torch_off_id = request;
+
+			setRepeatingRequest(request);
 		}
 		else {
 			camera_settings.flash_value = flash_value;
@@ -1583,8 +1591,12 @@ public class CameraController2 extends CameraController {
 		}
 		this.texture = texture;
 	}
-	
+
 	private void setRepeatingRequest() {
+		setRepeatingRequest(previewBuilder.build());
+	}
+
+	private void setRepeatingRequest(CaptureRequest request) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setRepeatingRequest");
 		if( camera == null || captureSession == null ) {
@@ -1593,7 +1605,7 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 		try {
-			captureSession.setRepeatingRequest(previewBuilder.build(), previewCaptureCallback, null);
+			captureSession.setRepeatingRequest(request, previewCaptureCallback, null);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -1606,6 +1618,10 @@ public class CameraController2 extends CameraController {
 	}
 
 	private void capture() {
+		capture(previewBuilder.build());
+	}
+
+	private void capture(CaptureRequest request) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "capture");
 		if( camera == null || captureSession == null ) {
@@ -1614,7 +1630,7 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 		try {
-			captureSession.capture(previewBuilder.build(), previewCaptureCallback, null);
+			captureSession.capture(request, previewCaptureCallback, null);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -1946,7 +1962,17 @@ public class CameraController2 extends CameraController {
 					// need to cancel the autofocus, and restart the preview after taking the photo
 					previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 					camera_settings.setAEMode(previewBuilder, false); // not sure if needed, but the AE mode is set again in Camera2Basic
-		            capture();
+		            if( !camera_settings.ae_lock && camera_settings.flash_value.equals("flash_on") ) {
+						// hack - needed to fix bug on Nexus 6 where auto-exposure sometimes locks when taking a photo of bright scene with flash on!
+		            	// this doesn't completely resolve the issue, but seems to make it far less common; also when it does happen, taking another photo usually fixes it
+		            	previewBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
+		            	push_set_ae_lock = true;
+		            	push_set_ae_lock_id = previewBuilder.build();
+		            	capture(push_set_ae_lock_id);
+		            }
+		            else {
+		            	capture();
+		            }
 		            setRepeatingRequest();
 				}
 			};
@@ -2095,16 +2121,26 @@ public class CameraController2 extends CameraController {
 		return null;
 	}
 
+	@Override
+	boolean captureResultHasIso() {
+		return capture_result_has_iso;
+	}
+
+	@Override
+	int captureResultIso() {
+		return capture_result_iso;
+	}
+
 	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
 		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
-			process(partialResult);
+			process(request, partialResult, false);
 		}
 
 		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-			process(result);
+			process(request, result, true);
 		}
 
-		private void process(CaptureResult result) {
+		private void process(CaptureRequest request, CaptureResult result, boolean is_total) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "preview onCaptureCompleted, state: " + state);*/
 			/*int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
@@ -2185,6 +2221,18 @@ public class CameraController2 extends CameraController {
 					takePictureAfterPrecapture();
 				}
 			}
+			
+			if( is_total ) {
+				if( result.get(CaptureResult.SENSOR_SENSITIVITY) != null ) {
+					capture_result_has_iso = true;
+					capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
+					/*if( MyDebug.LOG )
+						Log.d(TAG, "capture_result_iso: " + capture_result_iso);*/
+				}
+				else {
+					capture_result_has_iso = false;
+				}
+			}
 
 			if( face_detection_listener != null && previewBuilder != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL ) {
 				Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
@@ -2198,7 +2246,7 @@ public class CameraController2 extends CameraController {
 				}
 			}
 			
-			if( push_repeating_request_when_torch_off ) {
+			if( is_total && push_repeating_request_when_torch_off && push_repeating_request_when_torch_off_id == request ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "received push_repeating_request_when_torch_off");
 				Integer flash_state = result.get(CaptureResult.FLASH_STATE);
@@ -2210,8 +2258,17 @@ public class CameraController2 extends CameraController {
 				}
 				if( flash_state != null && flash_state == CaptureResult.FLASH_STATE_READY ) {
 					push_repeating_request_when_torch_off = false;
+					push_repeating_request_when_torch_off_id = null;
 					setRepeatingRequest();
 				}
+			}
+			if( is_total && push_set_ae_lock && push_set_ae_lock_id == request ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "received push_set_ae_lock");
+				push_set_ae_lock = false;
+				push_set_ae_lock_id = null;
+				camera_settings.setAutoExposureLock(previewBuilder);
+				setRepeatingRequest();
 			}
 		}
 	};
