@@ -175,6 +175,13 @@ public class MyPreferenceFragment extends PreferenceFragment {
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
         	pg.removePreference(pref);
         }
+        
+		final boolean using_android_l = bundle.getBoolean("using_android_l");
+        if( !using_android_l ) {
+        	Preference pref = findPreference("preference_show_iso");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+        	pg.removePreference(pref);
+        }
 
         {
             final Preference pref = findPreference("preference_online_help");

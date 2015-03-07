@@ -64,6 +64,7 @@
     <string name="failed_to_open_camera_1">FAILED TO OPEN CAMERA.</string>
     <string name="failed_to_open_camera_2">CAMERA MAY BE IN USE</string>
     <string name="failed_to_open_camera_3">BY ANOTHER APPLICATION?</string>
+    <string name="iso">ISO</string>
     <string name="zoom">Zoom</string>
     <string name="free_memory">Free memory</string>
     <string name="screen_lock_message_1">[LOCKED:</string>
@@ -131,6 +132,8 @@
     <string name="preference_show_zoom_controls_summary">Show the -/+ buttons for zoom control</string>
     <string name="preference_show_zoom_slider_controls">Show zoom slider control</string>
     <string name="preference_show_zoom_slider_controls_summary">Show the slider for zoom control</string>
+    <string name="preference_show_iso">Show ISO</string>
+    <string name="preference_show_iso_summary">Display the current ISO level (requires Camera2 API)</string>
     <string name="preference_free_memory">Show free memory</string>
     <string name="preference_free_memory_summary">Display the remaining device storage space on screen</string>
     <string name="preference_show_angle">Show angle</string>

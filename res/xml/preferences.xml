@@ -255,6 +255,14 @@
                 android:summary="@string/preference_show_zoom_slider_controls_summary"
                 android:defaultValue="true"
                 />
+
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+            <CheckBoxPreference
+                android:key="preference_show_iso"
+                android:title="@string/preference_show_iso"
+                android:summary="@string/preference_show_iso_summary"
+                android:defaultValue="true"
+                />
         
             <CheckBoxPreference
                 android:key="preference_free_memory"

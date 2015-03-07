@@ -2620,6 +2620,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
+		if( camera_controller != null && camera_controller.captureResultHasIso() && sharedPreferences.getBoolean(MainActivity.getShowISOPreferenceKey(), true) ) {
+			int pixels_offset_y = 3*text_y;
+			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+			p.setTextAlign(Paint.Align.CENTER);
+			int iso = camera_controller.captureResultIso();
+			drawTextWithBackground(canvas, p, getResources().getString(R.string.iso) + ": " + iso, Color.YELLOW, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
+		}
 		if( this.has_zoom && camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowZoomPreferenceKey(), true) ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
 			// only show when actually zoomed in
@@ -5747,6 +5754,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
     public boolean isTakingPhoto() {
     	return this.phase == PHASE_TAKING_PHOTO;
+    }
+    
+    boolean usingCamera2API() {
+    	return this.using_android_l;
     }
 
     // for testing:

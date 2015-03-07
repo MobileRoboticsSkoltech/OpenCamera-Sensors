@@ -73,7 +73,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
 class MyDebug {
-	static final boolean LOG = false;
+	static final boolean LOG = true;
 }
 
 public class MainActivity extends Activity {
@@ -1086,6 +1086,7 @@ public class MainActivity extends Activity {
 		Bundle bundle = new Bundle();
 		bundle.putInt("cameraId", this.preview.getCameraId());
 		bundle.putString("camera_api", this.preview.getCameraAPI());
+		bundle.putBoolean("using_android_l", this.preview.usingCamera2API());
 		bundle.putBoolean("supports_auto_stabilise", this.supports_auto_stabilise);
 		bundle.putBoolean("supports_force_video_4k", this.supports_force_video_4k);
 		bundle.putBoolean("supports_face_detection", this.preview.supportsFaceDetection());
@@ -2307,6 +2308,10 @@ public class MainActivity extends Activity {
     
     public static String getShowZoomPreferenceKey() {
     	return "preference_show_zoom";
+    }
+    
+    public static String getShowISOPreferenceKey() {
+    	return "preference_show_iso";
     }
 
     public static String getShowAnglePreferenceKey() {
