@@ -1218,6 +1218,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		
 		MainActivity main_activity = (MainActivity)this.getContext();
+		if( main_activity.supportsForceVideo4K() && this.using_android_l ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "using Camera2 API, so can disable the force 4K option");
+			main_activity.disableForceVideo4K();
+		}
 		if( main_activity.supportsForceVideo4K() && video_sizes != null ) {
 			for(CameraController.Size size : video_sizes) {
 				if( size.width >= 3840 && size.height >= 2160 ) {
