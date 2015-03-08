@@ -839,7 +839,7 @@ class CameraController1 extends CameraController {
 
 	// throws RuntimeException if fails to start preview
 	@Override
-	void startPreview() {
+	void startPreview() throws RuntimeException {
 		camera.startPreview();
 	}
 	
@@ -961,7 +961,7 @@ class CameraController1 extends CameraController {
 	}
 	
 	@Override
-	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) {
+	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws RuntimeException {
 		// no further actions necessary
 	}
 	

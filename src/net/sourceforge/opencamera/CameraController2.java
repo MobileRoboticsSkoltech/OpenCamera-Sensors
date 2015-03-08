@@ -1777,9 +1777,15 @@ public class CameraController2 extends CameraController {
 	}
 
 	// throws RuntimeException if fails to create captureSession
-	private void createCaptureSession(final MediaRecorder video_recorder) {
+	private void createCaptureSession(final MediaRecorder video_recorder) throws RuntimeException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "create capture session");
+		
+		if( previewBuilder == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "previewBuilder not present!");
+			throw new RuntimeException();
+		}
 
 		if( captureSession != null ) {
 			if( MyDebug.LOG )
@@ -1923,7 +1929,7 @@ public class CameraController2 extends CameraController {
 
 	// throws RuntimeException if fails to start preview
 	@Override
-	void startPreview() {
+	void startPreview() throws RuntimeException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startPreview");
 		if( captureSession != null ) {
@@ -2286,7 +2292,7 @@ public class CameraController2 extends CameraController {
 
 	// throws RuntimeException if fails to prepare video recorder
 	@Override
-	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) {
+	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws RuntimeException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initVideoRecorderPostPrepare");
 		try {
