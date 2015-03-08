@@ -999,8 +999,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "test failing to open camera");
 				throw new RuntimeException();
 			}
-	        if( using_android_l )
-				camera_controller = new CameraController2(this.getContext(), cameraId);
+	        if( using_android_l ) {
+	    		CameraController.ErrorCallback previewErrorCallback = new CameraController.ErrorCallback() {
+	    			public void onError() {
+	        			if( MyDebug.LOG )
+	    					Log.e(TAG, "error from CameraController: preview failed to start");
+	        			showToast(null, R.string.failed_to_start_camera_preview);
+	        	    }
+	    		};
+	        	camera_controller = new CameraController2(this.getContext(), cameraId, previewErrorCallback);
+	        }
 	        else
 				camera_controller = new CameraController1(cameraId);
 			//throw new RuntimeException(); // uncomment to test camera not opening

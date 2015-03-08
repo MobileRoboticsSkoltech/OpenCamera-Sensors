@@ -45,6 +45,7 @@ public class CameraController2 extends CameraController {
 	private CameraCharacteristics characteristics = null;
 	private List<Integer> zoom_ratios = null;
 	private int current_zoom_value = 0;
+	private ErrorCallback preview_error_cb = null;
 	private CameraCaptureSession captureSession = null;
 	private CaptureRequest.Builder previewBuilder = null;
 	private AutoFocusCallback autofocus_cb = null;
@@ -301,9 +302,11 @@ public class CameraController2 extends CameraController {
 	private boolean push_set_ae_lock = false;
 	private CaptureRequest push_set_ae_lock_id = null;
 
-	public CameraController2(Context context, int cameraId) {
+	public CameraController2(Context context, int cameraId, ErrorCallback preview_error_cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController2: " + cameraId);
+
+		this.preview_error_cb = preview_error_cb;
 
 		thread = new HandlerThread("CameraBackground"); 
 		thread.start(); 
@@ -742,7 +745,17 @@ public class CameraController2 extends CameraController {
 
 			camera_settings.scene_mode = selected_value2;
 			if( camera_settings.setSceneMode(previewBuilder) ) {
-		    	setRepeatingRequest();
+				try {
+					setRepeatingRequest();
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to set scene mode");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+				} 
 			}
 		}
 		return supported_values;
@@ -847,7 +860,17 @@ public class CameraController2 extends CameraController {
 
 			camera_settings.color_effect = selected_value2;
 			if( camera_settings.setColorEffect(previewBuilder) ) {
-		    	setRepeatingRequest();
+				try {
+					setRepeatingRequest();
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to set color effect");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+				} 
 			}
 		}
 		return supported_values;
@@ -946,7 +969,17 @@ public class CameraController2 extends CameraController {
 
 			camera_settings.white_balance = selected_value2;
 			if( camera_settings.setWhiteBalance(previewBuilder) ) {
-		    	setRepeatingRequest();
+				try {
+					setRepeatingRequest();
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to set white balance");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+				} 
 			}
 		}
 		return supported_values;
@@ -984,34 +1017,44 @@ public class CameraController2 extends CameraController {
 		if( supported_values != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set iso to: " + supported_values.selected_value);
-			if( supported_values.selected_value.equals("auto") ) {
-				camera_settings.has_iso = false;
-				camera_settings.iso = 0;
-				if( camera_settings.setAEMode(previewBuilder, false) ) {
-			    	setRepeatingRequest();
-				}
-			}
-			else {
-				try {
-					int selected_value2 = Integer.parseInt(supported_values.selected_value);
-					if( MyDebug.LOG )
-						Log.d(TAG, "iso: " + selected_value2);
-					camera_settings.has_iso = true;
-					camera_settings.iso = selected_value2;
-					if( camera_settings.setAEMode(previewBuilder, false) ) {
-				    	setRepeatingRequest();
-					}
-				}
-				catch(NumberFormatException exception) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "iso invalid format, can't parse to int");
+			try {
+				if( supported_values.selected_value.equals("auto") ) {
 					camera_settings.has_iso = false;
 					camera_settings.iso = 0;
 					if( camera_settings.setAEMode(previewBuilder, false) ) {
 				    	setRepeatingRequest();
 					}
 				}
+				else {
+					try {
+						int selected_value2 = Integer.parseInt(supported_values.selected_value);
+						if( MyDebug.LOG )
+							Log.d(TAG, "iso: " + selected_value2);
+						camera_settings.has_iso = true;
+						camera_settings.iso = selected_value2;
+						if( camera_settings.setAEMode(previewBuilder, false) ) {
+					    	setRepeatingRequest();
+						}
+					}
+					catch(NumberFormatException exception) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "iso invalid format, can't parse to int");
+						camera_settings.has_iso = false;
+						camera_settings.iso = 0;
+						if( camera_settings.setAEMode(previewBuilder, false) ) {
+					    	setRepeatingRequest();
+						}
+					}
+				}
 			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to set ISO");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+			} 
 		}
 		return supported_values;
 	}
@@ -1121,7 +1164,17 @@ public class CameraController2 extends CameraController {
 	void setVideoStabilization(boolean enabled) {
 		camera_settings.video_stabilization = enabled;
 		camera_settings.setVideoStabilization(previewBuilder);
-    	setRepeatingRequest();
+		try {
+			setRepeatingRequest();
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set video stabilization");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
 	}
 
 	@Override
@@ -1193,8 +1246,18 @@ public class CameraController2 extends CameraController {
 		}
 		camera_settings.scalar_crop_region = new Rect(left, top, right, bottom);
 		camera_settings.setCropRegion(previewBuilder);
-    	setRepeatingRequest();
     	this.current_zoom_value = value;
+    	try {
+    		setRepeatingRequest();
+    	}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set zoom");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
 	}
 	
 	@Override
@@ -1210,7 +1273,17 @@ public class CameraController2 extends CameraController {
 		camera_settings.has_ae_exposure_compensation = true;
 		camera_settings.ae_exposure_compensation = new_exposure;
 		if( camera_settings.setExposureCompensation(previewBuilder) ) {
-	    	setRepeatingRequest();
+			try {
+				setRepeatingRequest();
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to set exposure compensation");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+			} 
         	return true;
 		}
 		return false;
@@ -1273,7 +1346,17 @@ public class CameraController2 extends CameraController {
     	camera_settings.has_af_mode = true;
     	camera_settings.af_mode = focus_mode;
     	camera_settings.setFocusMode(previewBuilder);
-    	setRepeatingRequest();
+    	try {
+    		setRepeatingRequest();
+    	}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set focus mode");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
 	}
 	
 	private String convertFocusModeToValue(int focus_mode) {
@@ -1313,26 +1396,36 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 
-		if( camera_settings.flash_value.equals("flash_torch") ) {
-			// hack - first need to turn torch off, otherwise torch remains on (at least on Nexus 6)
-			camera_settings.flash_value = "flash_off";
-			camera_settings.setAEMode(previewBuilder, false);
-			CaptureRequest request = previewBuilder.build();
-
-			// need to wait until torch actually turned off
-	    	camera_settings.flash_value = flash_value;
-			camera_settings.setAEMode(previewBuilder, false);
-			push_repeating_request_when_torch_off = true;
-			push_repeating_request_when_torch_off_id = request;
-
-			setRepeatingRequest(request);
-		}
-		else {
-			camera_settings.flash_value = flash_value;
-			if( camera_settings.setAEMode(previewBuilder, false) ) {
-		    	setRepeatingRequest();
+		try {
+			if( camera_settings.flash_value.equals("flash_torch") ) {
+				// hack - first need to turn torch off, otherwise torch remains on (at least on Nexus 6)
+				camera_settings.flash_value = "flash_off";
+				camera_settings.setAEMode(previewBuilder, false);
+				CaptureRequest request = previewBuilder.build();
+	
+				// need to wait until torch actually turned off
+		    	camera_settings.flash_value = flash_value;
+				camera_settings.setAEMode(previewBuilder, false);
+				push_repeating_request_when_torch_off = true;
+				push_repeating_request_when_torch_off_id = request;
+	
+				setRepeatingRequest(request);
+			}
+			else {
+				camera_settings.flash_value = flash_value;
+				if( camera_settings.setAEMode(previewBuilder, false) ) {
+			    	setRepeatingRequest();
+				}
 			}
 		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set flash mode");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
 	}
 
 	@Override
@@ -1353,7 +1446,17 @@ public class CameraController2 extends CameraController {
 	void setAutoExposureLock(boolean enabled) {
 		camera_settings.ae_lock = enabled;
 		camera_settings.setAutoExposureLock(previewBuilder);
-    	setRepeatingRequest();
+		try {
+			setRepeatingRequest();
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set auto exposure lock");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
 	}
 	
 	@Override
@@ -1481,7 +1584,17 @@ public class CameraController2 extends CameraController {
 		else
 			camera_settings.ae_regions = null;
 		if( has_focus || has_metering ) {
-			setRepeatingRequest();
+			try {
+				setRepeatingRequest();
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to set focus and/or metering regions");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+			} 
 		}
 		return has_focus;
 	}
@@ -1508,7 +1621,17 @@ public class CameraController2 extends CameraController {
 		else
 			camera_settings.ae_regions = null;
 		if( has_focus || has_metering ) {
-			setRepeatingRequest();
+			try {
+				setRepeatingRequest();
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to clear focus and metering regions");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+			} 
 		}
 	}
 
@@ -1594,11 +1717,11 @@ public class CameraController2 extends CameraController {
 		this.texture = texture;
 	}
 
-	private void setRepeatingRequest() {
+	private void setRepeatingRequest() throws CameraAccessException {
 		setRepeatingRequest(previewBuilder.build());
 	}
 
-	private void setRepeatingRequest(CaptureRequest request) {
+	private void setRepeatingRequest(CaptureRequest request) throws CameraAccessException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setRepeatingRequest");
 		if( camera == null || captureSession == null ) {
@@ -1606,24 +1729,14 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "no camera or capture session");
 			return;
 		}
-		try {
-			captureSession.setRepeatingRequest(request, previewCaptureCallback, null);
-		}
-		catch(CameraAccessException e) {
-			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to set repeating request");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
-			}
-			e.printStackTrace();
-		}
+		captureSession.setRepeatingRequest(request, previewCaptureCallback, null);
 	}
 
-	private void capture() {
+	private void capture() throws CameraAccessException {
 		capture(previewBuilder.build());
 	}
 
-	private void capture(CaptureRequest request) {
+	private void capture(CaptureRequest request) throws CameraAccessException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "capture");
 		if( camera == null || captureSession == null ) {
@@ -1631,17 +1744,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "no camera or capture session");
 			return;
 		}
-		try {
-			captureSession.capture(request, previewCaptureCallback, null);
-		}
-		catch(CameraAccessException e) {
-			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to capture");
-				Log.e(TAG, "reason: " + e.getReason());
-				Log.e(TAG, "message: " + e.getMessage());
-			}
-			e.printStackTrace();
-		}
+		captureSession.capture(request, previewCaptureCallback, null);
 	}
 	
 	private void createPreviewRequest() {
@@ -1751,7 +1854,18 @@ public class CameraController2 extends CameraController {
 	        		previewBuilder.addTarget(surface);
 	        		if( video_recorder != null )
 	        			previewBuilder.addTarget(video_recorder.getSurface());
-        			setRepeatingRequest();
+	        		try {
+	        			setRepeatingRequest();
+	        		}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to start preview");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+						preview_error_cb.onError();
+					} 
 					callback_done = true;
 				}
 
@@ -1813,7 +1927,19 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startPreview");
 		if( captureSession != null ) {
-			setRepeatingRequest();
+			try {
+				setRepeatingRequest();
+			}
+			catch(CameraAccessException e) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "failed to start preview");
+					Log.e(TAG, "reason: " + e.getReason());
+					Log.e(TAG, "message: " + e.getMessage());
+				}
+				e.printStackTrace();
+				// do via RuntimeException instead of preview_error_cb, so caller immediately knows preview has failed
+				throw new RuntimeException();
+			} 
 			return;
 		}
 		createCaptureSession(null);
@@ -1854,7 +1980,17 @@ public class CameraController2 extends CameraController {
     	camera_settings.has_face_detect_mode = true;
     	camera_settings.face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL;
     	camera_settings.setFaceDetectMode(previewBuilder);
-    	setRepeatingRequest();
+    	try {
+    		setRepeatingRequest();
+    	}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to start face detection");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
 		return true;
 	}
 	
@@ -1911,7 +2047,20 @@ public class CameraController2 extends CameraController {
 		state = STATE_WAITING_AUTOFOCUS;
 		this.autofocus_cb = cb;
 		// Camera2Basic sets a repeating request rather than capture, for doing autofocus (and if we do a capture(), sometimes have problem that autofocus never returns)
-    	setRepeatingRequest();
+		try {
+			setRepeatingRequest();
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to autofocus");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+			state = STATE_NORMAL;
+			autofocus_cb.onAutoFocus(false);
+			autofocus_cb = null;
+		} 
 		previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 	}
 
@@ -1926,11 +2075,31 @@ public class CameraController2 extends CameraController {
 		}
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 		// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
-    	capture();
+    	try {
+    		capture();
+    	}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to cancel autofocus [capture]");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		}
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 		this.autofocus_cb = null;
 		state = STATE_NORMAL;
-		setRepeatingRequest();
+		try {
+			setRepeatingRequest();
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set repeating request after cancelling autofocus");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
 	}
 
 	void takePictureAfterPrecapture() {
@@ -1964,18 +2133,40 @@ public class CameraController2 extends CameraController {
 					// need to cancel the autofocus, and restart the preview after taking the photo
 					previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 					camera_settings.setAEMode(previewBuilder, false); // not sure if needed, but the AE mode is set again in Camera2Basic
-		            if( !camera_settings.ae_lock && camera_settings.flash_value.equals("flash_on") ) {
-						// hack - needed to fix bug on Nexus 6 where auto-exposure sometimes locks when taking a photo of bright scene with flash on!
-		            	// this doesn't completely resolve the issue, but seems to make it far less common; also when it does happen, taking another photo usually fixes it
-		            	previewBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
-		            	push_set_ae_lock = true;
-		            	push_set_ae_lock_id = previewBuilder.build();
-		            	capture(push_set_ae_lock_id);
-		            }
-		            else {
-		            	capture();
-		            }
-		            setRepeatingRequest();
+					// n.b., if capture/setRepeatingRequest throw exception, we don't call the take_picture_error_cb.onError() callback, as the photo should have been taken by this point
+					try {
+			            if( !camera_settings.ae_lock && camera_settings.flash_value.equals("flash_on") ) {
+							// hack - needed to fix bug on Nexus 6 where auto-exposure sometimes locks when taking a photo of bright scene with flash on!
+			            	// this doesn't completely resolve the issue, but seems to make it far less common; also when it does happen, taking another photo usually fixes it
+			            	previewBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
+			            	push_set_ae_lock = true;
+			            	push_set_ae_lock_id = previewBuilder.build();
+			            	capture(push_set_ae_lock_id);
+			            }
+			            else {
+			            	capture();
+			            }
+					}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to cancel autofocus after taking photo");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+					}
+					try {
+						setRepeatingRequest();
+					}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to start preview after taking photo");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+						preview_error_cb.onError();
+					} 
 				}
 			};
 			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
@@ -2274,7 +2465,17 @@ public class CameraController2 extends CameraController {
 				if( flash_state != null && flash_state == CaptureResult.FLASH_STATE_READY ) {
 					push_repeating_request_when_torch_off = false;
 					push_repeating_request_when_torch_off_id = null;
-					setRepeatingRequest();
+					try {
+						setRepeatingRequest();
+					}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to set flash [from torch/flash off hack]");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+					} 
 				}
 			}
 			if( is_total && push_set_ae_lock && push_set_ae_lock_id == request ) {
@@ -2283,7 +2484,17 @@ public class CameraController2 extends CameraController {
 				push_set_ae_lock = false;
 				push_set_ae_lock_id = null;
 				camera_settings.setAutoExposureLock(previewBuilder);
-				setRepeatingRequest();
+				try {
+					setRepeatingRequest();
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to set ae lock [from ae lock hack]");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+				} 
 			}
 		}
 	};
