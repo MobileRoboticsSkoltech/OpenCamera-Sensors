@@ -4951,6 +4951,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.d(TAG, "onPictureTaken complete");
     	    }
     	};
+		CameraController.ErrorCallback errorCallback = new CameraController.ErrorCallback() {
+			public void onError() {
+    			if( MyDebug.LOG )
+					Log.e(TAG, "error from takePicture");
+        		count_cameraTakePicture--; // cancel out the increment from after the takePicture() call
+	    	    showToast(null, R.string.failed_to_take_picture);
+				phase = PHASE_NORMAL;
+	            startCameraPreview();
+				showGUI(true);
+    	    }
+		};
     	{
     		camera_controller.setRotation(getImageVideoRotation());
 
@@ -4961,22 +4972,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	camera_controller.enableShutterSound(enable_sound);
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
-    		try {
-    			camera_controller.takePicture(null, jpegPictureCallback);
-        		count_cameraTakePicture++;
-    			//showToast(take_photo_toast, toast_text);
-    		}
-    		catch(RuntimeException e) {
-    			// just in case? We got a RuntimeException report here from 1 user on Google Play; I also encountered it myself once of Galaxy Nexus when starting up
-    			// also this can happen on camera2 API - if we failed to create the capture session, we'll be unable to take photos, so CameraController2.takePicture() will throw a RuntimeException
-    			if( MyDebug.LOG )
-					Log.e(TAG, "runtime exception from takePicture");
-    			e.printStackTrace();
-	    	    showToast(null, R.string.failed_to_take_picture);
-				this.phase = PHASE_NORMAL;
-	            startCameraPreview();
-				showGUI(true);
-    		}
+			camera_controller.takePicture(null, jpegPictureCallback, errorCallback);
+    		count_cameraTakePicture++;
     	}
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");

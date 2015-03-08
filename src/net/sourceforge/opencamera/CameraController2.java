@@ -2019,14 +2019,14 @@ public class CameraController2 extends CameraController {
 	}
 	
 	@Override
-	void takePicture(final PictureCallback raw, final PictureCallback jpeg) {
+	void takePicture(final PictureCallback raw, final PictureCallback jpeg, final ErrorCallback error) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no camera or capture session");
-			// throw a RuntimeException so that application knows this fails
-			throw new RuntimeException();
+			error.onError();
+			return;
 		}
 		this.jpeg_cb = jpeg;
 		if( camera_settings.has_iso ) {

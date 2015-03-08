@@ -887,7 +887,7 @@ class CameraController1 extends CameraController {
 		camera.cancelAutoFocus();
 	}
 	
-	void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg) {
+	void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error) {
     	Camera.ShutterCallback shutter = new Camera.ShutterCallback() {
     		// don't do anything here, but we need to implement the callback to get the shutter sound (at least on Galaxy Nexus and Nexus 7)
             public void onShutter() {
@@ -908,7 +908,16 @@ class CameraController1 extends CameraController {
     	    }
         };
 
-		camera.takePicture(shutter, camera_raw, camera_jpeg);
+        try {
+        	camera.takePicture(shutter, camera_raw, camera_jpeg);
+        }
+		catch(RuntimeException e) {
+			// just in case? We got a RuntimeException report here from 1 user on Google Play; I also encountered it myself once of Galaxy Nexus when starting up
+			if( MyDebug.LOG )
+				Log.e(TAG, "runtime exception from takePicture");
+			e.printStackTrace();
+			error.onError();
+		}
 	}
 	
 	void setDisplayOrientation(int degrees) {

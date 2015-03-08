@@ -71,6 +71,10 @@ public abstract class CameraController {
 		public abstract void onAutoFocus(boolean success);
 	}
 	
+	static interface ErrorCallback {
+		public abstract void onError();
+	}
+	
 	static class Face {
 		public int score = 0;
 		public Rect rect = null;
@@ -148,7 +152,7 @@ public abstract class CameraController {
 	abstract void setFaceDetectionListener(final CameraController.FaceDetectionListener listener);
 	abstract void autoFocus(final CameraController.AutoFocusCallback cb);
 	abstract void cancelAutoFocus();
-	abstract void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg);
+	abstract void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error);
 	abstract void setDisplayOrientation(int degrees);
 	abstract int getDisplayOrientation();
 	abstract int getCameraOrientation();
