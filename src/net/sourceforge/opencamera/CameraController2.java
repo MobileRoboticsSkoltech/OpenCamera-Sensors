@@ -51,6 +51,7 @@ public class CameraController2 extends CameraController {
 	private FaceDetectionListener face_detection_listener = null;
 	private ImageReader imageReader = null;
 	private PictureCallback jpeg_cb = null;
+	private ErrorCallback take_picture_error_cb = null;
 	//private ImageReader previewImageReader = null;
 	private SurfaceTexture texture = null;
 	private Surface surface_texture = null;
@@ -1087,6 +1088,7 @@ public class CameraController2 extends CameraController {
 	            image = null;
 	            jpeg_cb.onPictureTaken(bytes);
 	            jpeg_cb = null;
+	            take_picture_error_cb = null;
 				if( MyDebug.LOG )
 					Log.d(TAG, "done onImageAvailable");
 			}
@@ -1986,6 +1988,12 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
+			jpeg_cb = null;
+			if( take_picture_error_cb != null ) {
+				take_picture_error_cb.onError();
+				take_picture_error_cb = null;
+				return;
+			}
 		}
 	}
 
@@ -2015,6 +2023,12 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
+			jpeg_cb = null;
+			if( take_picture_error_cb != null ) {
+				take_picture_error_cb.onError();
+				take_picture_error_cb = null;
+				return;
+			}
 		}
 	}
 	
@@ -2029,6 +2043,7 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 		this.jpeg_cb = jpeg;
+		this.take_picture_error_cb = error;
 		if( camera_settings.has_iso ) {
 			takePictureAfterPrecapture();
 		}
