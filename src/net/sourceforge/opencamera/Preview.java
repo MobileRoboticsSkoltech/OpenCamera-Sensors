@@ -5755,7 +5755,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			Location location = main_activity.getLocation();
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "updating parameters from location...");
-	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
+	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy() + " timestamp " + location.getTime());
 	    		}
 	    		camera_controller.setLocationInfo(location);
     		}
