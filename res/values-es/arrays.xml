@@ -25,7 +25,7 @@
         <item>drawable/focus_mode_auto</item>
         <item>drawable/focus_mode_infinity</item>
         <item>drawable/focus_mode_macro</item>
-        <item>drawable/focus_mode_manual</item>
+        <item>drawable/focus_mode_locked</item>
         <item>drawable/focus_mode_fixed</item>
         <item>drawable/focus_mode_edof</item>
         <item>drawable/focus_mode_continuous_video</item>
@@ -34,7 +34,7 @@
         <item>Enfoque Auto</item>
         <item>Enfoque Infinito</item>
         <item>Enfoque Macro</item>
-        <item>Enfoque Manual</item>
+        <item>Enfoque Bloqueado</item>
         <item>Enfoque Fijo</item>
         <item>Enfoque EDOF</item>
         <item>Enfoque Continuo</item>
@@ -43,7 +43,7 @@
         <item>focus_mode_auto</item>
         <item>focus_mode_infinity</item>
         <item>focus_mode_macro</item>
-        <item>focus_mode_manual</item>
+        <item>focus_mode_locked</item>
         <item>focus_mode_fixed</item>
         <item>focus_mode_edof</item>
         <item>focus_mode_continuous_video</item>
@@ -138,7 +138,7 @@
     </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Tomar Foto (o Comenzar/Detener Grabacion Video)</item>
-        <item>Enfoque (si está en modo Auto/Manual/Macro)</item>
+        <item>Enfoque (si está en modo Auto/Bloqueado/Macro)</item>
         <item>Zoom</item>
         <item>Cambiar Nivel de Exposición</item>
         <item>Cambiar Auto-Estabilizar ON/OFF</item>

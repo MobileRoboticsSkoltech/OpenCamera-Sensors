@@ -1631,7 +1631,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			supported_focus_values.add("focus_mode_auto");
 			supported_focus_values.add("focus_mode_infinity");
 			supported_focus_values.add("focus_mode_macro");
-			supported_focus_values.add("focus_mode_manual");
+			supported_focus_values.add("focus_mode_locked");
 			supported_focus_values.add("focus_mode_fixed");
 			supported_focus_values.add("focus_mode_edof");
 			supported_focus_values.add("focus_mode_continuous_video");*/
@@ -3655,8 +3655,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		cancelAutoFocus();
         camera_controller.setFocusValue(focus_value);
 		clearFocusAreas();
-		// n.b., we reset even for manual focus mode
-		if( auto_focus ) {
+		if( auto_focus && !focus_value.equals("focus_mode_locked") ) {
 			tryAutoFocus(false, false);
 		}
 	}
@@ -4278,10 +4277,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "focus_success is " + focus_success);
 		}
 
-		if( focus_value != null && focus_value.equals("focus_mode_manual") && focus_success == FOCUS_WAITING ) {
-			// make sure there isn't an autofocus in progress - can happen if in manual mode we take a photo while autofocusing - see testTakePhotoManualFocus() (although that test doesn't always properly test the bug...)
-			// we only cancel when in manual mode and if still focusing, as I had 2 bug reports for v1.16 that the photo was being taken out of focus; both reports said it worked fine in 1.15, and one confirmed that it was due to the cancelAutoFocus() line, and that it's now fixed with this fix
-			// they said this happened in every focus mode, including manual - so possible that on some devices, cancelAutoFocus() actually pulls the camera out of focus, or reverts to preview focus?
+		if( focus_value != null && focus_value.equals("focus_mode_locked") && focus_success == FOCUS_WAITING ) {
+			// make sure there isn't an autofocus in progress - can happen if in locked mode we take a photo while autofocusing - see testTakePhotoLockedFocus() (although that test doesn't always properly test the bug...)
+			// we only cancel when in locked mode and if still focusing, as I had 2 bug reports for v1.16 that the photo was being taken out of focus; both reports said it worked fine in 1.15, and one confirmed that it was due to the cancelAutoFocus() line, and that it's now fixed with this fix
+			// they said this happened in every focus mode, including locked - so possible that on some devices, cancelAutoFocus() actually pulls the camera out of focus, or reverts to preview focus?
 			cancelAutoFocus();
 		}
 		focus_success = FOCUS_DONE; // clear focus rectangle if not already done

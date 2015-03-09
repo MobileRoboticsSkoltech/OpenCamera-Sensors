@@ -25,7 +25,7 @@
         <item>drawable/focus_mode_auto</item>
         <item>drawable/focus_mode_infinity</item>
         <item>drawable/focus_mode_macro</item>
-        <item>drawable/focus_mode_manual</item>
+        <item>drawable/focus_mode_locked</item>
         <item>drawable/focus_mode_fixed</item>
         <item>drawable/focus_mode_edof</item>
         <item>drawable/focus_mode_continuous_video</item>
@@ -34,7 +34,7 @@
         <item>Messa a fuoco Auto</item>
         <item>Messa a fuoco Infinita</item>
         <item>Messa a fuoco Macro</item>
-        <item>Messa a fuoco Manuale</item>
+        <item>Messa a fuoco Locked</item>
         <item>Messa a fuoco Fissa</item>
         <item>Messa a fuoco EDOF</item>
         <item>Messa a fuoco Continua</item>
@@ -43,7 +43,7 @@
         <item>focus_mode_auto</item>
         <item>focus_mode_infinity</item>
         <item>focus_mode_macro</item>
-        <item>focus_mode_manual</item>
+        <item>focus_mode_locked</item>
         <item>focus_mode_fixed</item>
         <item>focus_mode_edof</item>
         <item>focus_mode_continuous_video</item>
@@ -138,7 +138,7 @@
     </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Scatta foto (o fai partire/interrompere il video)</item>
-        <item>Messa a fuoco (se in modalità auto/manuale/macro)</item>
+        <item>Messa a fuoco (se in modalità auto/locked/macro)</item>
         <item>Controllo zoom</item>
         <item>Variazione livello esposizione</item>
         <item>Stabilizzatore on/off</item>

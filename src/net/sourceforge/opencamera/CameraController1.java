@@ -118,9 +118,9 @@ class CameraController1 extends CameraController {
 					Log.d(TAG, " supports focus_mode_macro");
 			}
 			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
-				output_modes.add("focus_mode_manual");
+				output_modes.add("focus_mode_locked");
 				if( MyDebug.LOG ) {
-					Log.d(TAG, " supports focus_mode_manual");
+					Log.d(TAG, " supports focus_mode_locked");
 				}
 			}
 			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_FIXED) ) {
@@ -516,7 +516,7 @@ class CameraController1 extends CameraController {
 	
 	void setFocusValue(String focus_value) {
 		Camera.Parameters parameters = this.getParameters();
-    	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_manual") ) {
+    	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_locked") ) {
     		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
     	}
     	else if( focus_value.equals("focus_mode_infinity") ) {

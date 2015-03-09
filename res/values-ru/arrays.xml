@@ -25,7 +25,7 @@
         <item>drawable/focus_mode_auto</item>
         <item>drawable/focus_mode_infinity</item>
         <item>drawable/focus_mode_macro</item>
-        <item>drawable/focus_mode_manual</item>
+        <item>drawable/focus_mode_locked</item>
         <item>drawable/focus_mode_fixed</item>
         <item>drawable/focus_mode_edof</item>
         <item>drawable/focus_mode_continuous_video</item>
@@ -34,7 +34,7 @@
         <item>Автофокус</item>
         <item>Бесконеч. фокус</item>
         <item>Макро фокус</item>
-        <item>Ручной фокус</item>
+        <item>запертый фокус</item>
         <item>Фиксир. фокус</item>
         <item>EDOF фокус</item>
         <item>Непрер. фокус</item>
@@ -43,7 +43,7 @@
         <item>focus_mode_auto</item>
         <item>focus_mode_infinity</item>
         <item>focus_mode_macro</item>
-        <item>focus_mode_manual</item>
+        <item>focus_mode_locked</item>
         <item>focus_mode_fixed</item>
         <item>focus_mode_edof</item>
         <item>focus_mode_continuous_video</item>
@@ -138,7 +138,7 @@
     </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Сделать фото (или запустить/остановить запись видео)</item>
-        <item>Фокус (авто/ручн/макро)</item>
+        <item>Фокус (авто/запертый/макро)</item>
         <item>Увеличить/уменьшить масштаб</item>
         <item>Изменить уровень экспозиции</item>
         <item>Авто стабилизация вкл/выкл</item>

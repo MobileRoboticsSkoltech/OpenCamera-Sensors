@@ -456,9 +456,9 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, " supports focus_mode_macro");
 			}
 			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_AUTO) ) {
-				output_modes.add("focus_mode_manual");
+				output_modes.add("focus_mode_locked");
 				if( MyDebug.LOG ) {
-					Log.d(TAG, " supports focus_mode_manual");
+					Log.d(TAG, " supports focus_mode_locked");
 				}
 			}
 			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_EDOF) ) {
@@ -1325,7 +1325,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusValue: " + focus_value);
 		int focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
-    	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_manual") ) {
+    	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_locked") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
     	}
     	else if( focus_value.equals("focus_mode_macro") ) {
