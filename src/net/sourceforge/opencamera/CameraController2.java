@@ -126,8 +126,7 @@ public class CameraController2 extends CameraController {
 
 			if( is_still ) {
 				if( location != null ) {
-					//builder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
-					// settings location messes up date on Nexus 7 and Nexus 6?!
+					builder.set(CaptureRequest.JPEG_GPS_LOCATION, location);
 				}
 				builder.set(CaptureRequest.JPEG_ORIENTATION, rotation);
 				builder.set(CaptureRequest.JPEG_QUALITY, jpeg_quality);

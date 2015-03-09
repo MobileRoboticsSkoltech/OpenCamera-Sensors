@@ -1999,7 +1999,7 @@ public class MainActivity extends Activity {
 
 	    		 			if( MyDebug.LOG ) // this code only used for debugging/logging
 	    		 			{
-    		        	        String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE }; 
+    		        	        String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE, Images.Media.DATE_TAKEN, Images.Media.DATE_ADDED }; 
     		        	        Cursor c = getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
     		        	        if( c == null ) { 
     		    		 			if( MyDebug.LOG )
@@ -2013,12 +2013,40 @@ public class MainActivity extends Activity {
     			        	        String file_path = c.getString(c.getColumnIndex(Images.Media.DATA)); 
     			        	        String file_name = c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME)); 
     			        	        String mime_type = c.getString(c.getColumnIndex(Images.Media.MIME_TYPE)); 
+    			        	        long date_taken = c.getLong(c.getColumnIndex(Images.Media.DATE_TAKEN)); 
+    			        	        long date_added = c.getLong(c.getColumnIndex(Images.Media.DATE_ADDED)); 
 		    		 				Log.d(TAG, "file_path: " + file_path); 
 		    		 				Log.d(TAG, "file_name: " + file_name); 
 		    		 				Log.d(TAG, "mime_type: " + mime_type); 
+		    		 				Log.d(TAG, "date_taken: " + date_taken); 
+		    		 				Log.d(TAG, "date_added: " + date_added); 
     			        	        c.close(); 
     		        	        }
     		        		}
+	    		 			/*{
+	    		 				// hack: problem on Camera2 API (at least on Nexus 6) that if geotagging is enabled, then the resultant image has incorrect Exif TAG_GPS_DATESTAMP (GPSDateStamp) set (tends to be around 2038 - possibly a driver bug of casting long to int?)
+	    		 				// whilst we don't yet correct for that bug, the more immediate problem is that it also messes up the DATE_TAKEN field in the media store, which messes up Gallery apps
+	    		 				// so for now, we correct it based on the DATE_ADDED value.
+    		        	        String[] CONTENT_PROJECTION = { Images.Media.DATE_ADDED }; 
+    		        	        Cursor c = getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
+    		        	        if( c == null ) { 
+    		    		 			if( MyDebug.LOG )
+    		    		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
+    		        	        }
+    		        	        else if( !c.moveToFirst() ) { 
+    		    		 			if( MyDebug.LOG )
+    		    		 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
+    		        	        }
+    		        	        else {
+    			        	        long date_added = c.getLong(c.getColumnIndex(Images.Media.DATE_ADDED)); 
+    		    		 			if( MyDebug.LOG )
+    		    		 				Log.e(TAG, "replace date_taken with date_added: " + date_added); 
+									ContentValues values = new ContentValues(); 
+									values.put(Images.Media.DATE_TAKEN, date_added*1000); 
+									getContentResolver().update(uri, values, null, null);
+    			        	        c.close(); 
+    		        	        }
+	    		 			}*/
     		        	}
     		        	else if( is_new_video ) {
     		        		sendBroadcast(new Intent("android.hardware.action.NEW_VIDEO", uri));

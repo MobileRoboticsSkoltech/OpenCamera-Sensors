@@ -4732,6 +4732,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	            	            	exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
 	            	            setGPSDirectionExif(exif_new);
 	            	            setDateTimeExif(exif_new);
+	            	            if( needGPSTimestampHack() ) {
+	            	            	fixGPSTimestamp(exif_new);
+	            	            }
             	            	exif_new.saveAttributes();
                 	    		if( MyDebug.LOG )
                 	    			Log.d(TAG, "now saved EXIF data");
@@ -4743,9 +4746,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
 	            	            setGPSDirectionExif(exif);
 	            	            setDateTimeExif(exif);
+	            	            if( needGPSTimestampHack() ) {
+	            	            	fixGPSTimestamp(exif);
+	            	            }
             	            	exif.saveAttributes();
                 	    		if( MyDebug.LOG ) {
                 	    			Log.d(TAG, "done adding GPS direction exif info, time taken: " + (System.currentTimeMillis() - time_s));
+                	    		}
+        	            	}
+        	            	else if( needGPSTimestampHack() ) {
+            	            	if( MyDebug.LOG )
+                	    			Log.d(TAG, "remove GPS timestamp hack");
+            	            	long time_s = System.currentTimeMillis();
+            	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
+            	            	fixGPSTimestamp(exif);
+            	            	exif.saveAttributes();
+                	    		if( MyDebug.LOG ) {
+                	    			Log.d(TAG, "done removing GPS timestamp exif info, time taken: " + (System.currentTimeMillis() - time_s));
                 	    		}
         	            	}
 
@@ -5013,6 +5030,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	exif.setAttribute("DateTimeOriginal", exif_datetime);
         	exif.setAttribute("DateTimeDigitized", exif_datetime);
     	}
+	}
+	
+	private void fixGPSTimestamp(ExifInterface exif) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "fixGPSTimestamp");
+		// hack: problem on Camera2 API (at least on Nexus 6) that if geotagging is enabled, then the resultant image has incorrect Exif TAG_GPS_DATESTAMP (GPSDateStamp) set (tends to be around 2038 - possibly a driver bug of casting long to int?)
+		// whilst we don't yet correct for that bug, the more immediate problem is that it also messes up the DATE_TAKEN field in the media store, which messes up Gallery apps
+		// so for now, we correct it based on the DATE_ADDED value.
+    	// see http://stackoverflow.com/questions/4879435/android-put-gpstimestamp-into-jpg-exif-tags
+    	exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, Long.toString(System.currentTimeMillis()));
+	}
+	
+	private boolean needGPSTimestampHack() {
+		if( using_android_l ) {
+    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+    		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
+    		return store_location;
+		}
+		return false;
 	}
 	
 	void clickedShare() {
