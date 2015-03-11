@@ -97,6 +97,7 @@ public class CameraController2 extends CameraController {
 		private int ae_exposure_compensation = 0;
 		private boolean has_af_mode = false;
 		private int af_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
+		private float focus_distance = 0.0f;
 		private boolean ae_lock = false;
 		private MeteringRectangle [] af_regions = null; // no need for has_scalar_crop_region, as we can set to null instead
 		private MeteringRectangle [] ae_regions = null; // no need for has_scalar_crop_region, as we can set to null instead
@@ -118,6 +119,7 @@ public class CameraController2 extends CameraController {
 			setCropRegion(builder);
 			setExposureCompensation(builder);
 			setFocusMode(builder);
+			setFocusDistance(builder);
 			setAutoExposureLock(builder);
 			setAFRegions(builder);
 			setAERegions(builder);
@@ -263,8 +265,13 @@ public class CameraController2 extends CameraController {
 		}
 
 		private void setFocusMode(CaptureRequest.Builder builder) {
-			if( has_af_mode )
+			if( has_af_mode ) {
 				builder.set(CaptureRequest.CONTROL_AF_MODE, af_mode);
+			}
+		}
+		
+		private void setFocusDistance(CaptureRequest.Builder builder) {
+			builder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
 		}
 
 		private void setAutoExposureLock(CaptureRequest.Builder builder) {
@@ -435,7 +442,7 @@ public class CameraController2 extends CameraController {
 		}*/
 	}
 
-	private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr) {
+	private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr, float minimum_focus_distance) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFocusModesToValues()");
 	    List<Integer> supported_focus_modes = new ArrayList<Integer>();
@@ -459,6 +466,14 @@ public class CameraController2 extends CameraController {
 				output_modes.add("focus_mode_locked");
 				if( MyDebug.LOG ) {
 					Log.d(TAG, " supports focus_mode_locked");
+				}
+			}
+			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_OFF) ) {
+				if( minimum_focus_distance > 0.0f ) {
+					output_modes.add("focus_mode_manual2");
+					if( MyDebug.LOG ) {
+						Log.d(TAG, " supports focus_mode_manual2");
+					}
 				}
 			}
 			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_EDOF) ) {
@@ -582,8 +597,11 @@ public class CameraController2 extends CameraController {
 			camera_features.supported_flash_values.add("flash_red_eye");
 		}
 
+		camera_features.minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
+		if( MyDebug.LOG )
+			Log.d(TAG, "minimum_focus_distance: " + camera_features.minimum_focus_distance);
 		int [] supported_focus_modes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES); // Android format
-		camera_features.supported_focus_values = convertFocusModesToValues(supported_focus_modes); // convert to our format (also resorts)
+		camera_features.supported_focus_values = convertFocusModesToValues(supported_focus_modes, camera_features.minimum_focus_distance); // convert to our format (also resorts)
 		camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
 
 		camera_features.is_exposure_lock_supported = true;
@@ -1328,6 +1346,9 @@ public class CameraController2 extends CameraController {
     	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_locked") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
     	}
+    	else if( focus_value.equals("focus_mode_manual2") ) {
+    		focus_mode = CaptureRequest.CONTROL_AF_MODE_OFF;
+    	}
     	else if( focus_value.equals("focus_mode_macro") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_MACRO;
     	}
@@ -1382,6 +1403,25 @@ public class CameraController2 extends CameraController {
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) != null ?
 				previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) : CaptureRequest.CONTROL_AF_MODE_AUTO;
 		return convertFocusModeToValue(focus_mode);
+	}
+
+	@Override
+	void setFocusDistance(float focus_distance) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFocusDistance: " + focus_distance);
+    	camera_settings.focus_distance = focus_distance;
+    	camera_settings.setFocusDistance(previewBuilder);
+    	try {
+    		setRepeatingRequest();
+    	}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set focus distance");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
 	}
 
 	@Override

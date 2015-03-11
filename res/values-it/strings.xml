@@ -59,7 +59,7 @@
     <string name="failed_to_open_camera_2">LA FOTOCAMERA POTREBBE GIÀ ESSERE IN USO</string>
     <string name="failed_to_open_camera_3">DA UN\'ALTRA APPLICAZIONE?</string>
     <string name="zoom">Zoom</string>
-    <string name="free_memory">Memoria libera</string>
+    <string name="free_memory">Libera</string>
     <string name="screen_lock_message_1">[BLOCCATO:</string>
     <string name="screen_lock_message_2">Trascina per sbloccare]</string>
     

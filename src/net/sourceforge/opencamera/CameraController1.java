@@ -514,6 +514,7 @@ class CameraController1 extends CameraController {
 		return null;
 	}
 	
+	@Override
 	void setFocusValue(String focus_value) {
 		Camera.Parameters parameters = this.getParameters();
     	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_locked") ) {
@@ -570,12 +571,18 @@ class CameraController1 extends CameraController {
     	return focus_value;
 	}
 	
+	@Override
 	public String getFocusValue() {
 		// returns "" if Parameters.getFocusMode() returns null
 		Camera.Parameters parameters = this.getParameters();
 		String focus_mode = parameters.getFocusMode();
 		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
 		return convertFocusModeToValue(focus_mode);
+	}
+
+	@Override
+	void setFocusDistance(float focus_distance) {
+		// not supported for CameraController1!
 	}
 
 	private String convertFlashValueToMode(String flash_value) {

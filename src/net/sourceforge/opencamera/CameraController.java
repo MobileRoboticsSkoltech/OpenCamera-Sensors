@@ -27,6 +27,7 @@ public abstract class CameraController {
 		List<String> supported_flash_values = null;
 		List<String> supported_focus_values = null;
 		int max_num_focus_areas = 0;
+		float minimum_focus_distance = 0.0f;
 		boolean is_exposure_lock_supported = false;
 		boolean is_video_stabilization_supported = false;
 		int min_exposure = 0;
@@ -128,6 +129,7 @@ public abstract class CameraController {
 
 	abstract void setFocusValue(String focus_value);
 	abstract public String getFocusValue();
+	abstract void setFocusDistance(float focus_distance);
 	abstract void setFlashValue(String flash_value);
 	abstract public String getFlashValue();
 	abstract void setRecordingHint(boolean hint);

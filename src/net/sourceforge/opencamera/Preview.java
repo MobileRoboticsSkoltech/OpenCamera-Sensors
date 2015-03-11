@@ -155,6 +155,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int max_zoom_factor = 0;
 	private ScaleGestureDetector scaleGestureDetector;
 	private List<Integer> zoom_ratios = null;
+	private float minimum_focus_distance = 0.0f;
+	private int focus_distance_percent = 0;
 	private boolean touch_was_multitouch = false;
 
 	private List<String> supported_flash_values = null; // our "values" format
@@ -200,6 +202,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private ToastBoxer take_photo_toast = new ToastBoxer();
 	private ToastBoxer stopstart_video_toast = new ToastBoxer();
 	private ToastBoxer change_exposure_toast = new ToastBoxer();
+	private ToastBoxer change_focus_distance_toast = new ToastBoxer();
 	
 	private int ui_rotation = 0;
 
@@ -295,6 +298,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		zoom_factor = savedInstanceState.getInt("zoom_factor", 0);
 			if( MyDebug.LOG )
 				Log.d(TAG, "found zoom_factor: " + zoom_factor);
+			focus_distance_percent = savedInstanceState.getInt("focus_distance_percent", 0);
+			if( MyDebug.LOG )
+				Log.d(TAG, "found focus_distance_percent: " + focus_distance_percent);
         }
 
     	location_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth);
@@ -946,6 +952,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		scene_modes = null;
 		has_zoom = false;
 		max_zoom_factor = 0;
+		minimum_focus_distance = 0.0f;
 		zoom_ratios = null;
 		faces_detected = null;
 		supports_face_detection = false;
@@ -1138,6 +1145,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			zoom_factor = 0; // force zoomTo to actually update the zoom!
 			zoomTo(new_zoom_factor, true);
 		}
+		
+		setFocusDistance(false);
 
 	    if( take_photo ) {
 			if( this.is_video ) {
@@ -1210,6 +1219,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				this.max_zoom_factor = camera_features.max_zoom;
 				this.zoom_ratios = camera_features.zoom_ratios;
 			}
+			this.minimum_focus_distance = camera_features.minimum_focus_distance;
 			this.supports_face_detection = camera_features.supports_face_detection;
 			this.sizes = camera_features.picture_sizes;
 	        supported_flash_values = camera_features.supported_flash_values;
@@ -1303,6 +1313,29 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				zoomControls.setVisibility(View.GONE);
 				zoomSeekBar.setVisibility(View.GONE);
 			}
+		}
+		
+		{
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up manual focus");
+		    SeekBar focusSeekBar = (SeekBar) activity.findViewById(R.id.focus_seekbar);
+		    focusSeekBar.setMax(100);
+		    focusSeekBar.setProgress(focus_distance_percent);
+		    focusSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+					focus_distance_percent = progress;
+					setFocusDistance(true);
+				}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {
+				}
+
+				@Override
+				public void onStopTrackingTouch(SeekBar seekBar) {
+				}
+			});
 		}
 
 		{
@@ -1632,6 +1665,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			supported_focus_values.add("focus_mode_infinity");
 			supported_focus_values.add("focus_mode_macro");
 			supported_focus_values.add("focus_mode_locked");
+			supported_focus_values.add("focus_mode_manual2");
 			supported_focus_values.add("focus_mode_fixed");
 			supported_focus_values.add("focus_mode_edof");
 			supported_focus_values.add("focus_mode_continuous_video");*/
@@ -2548,7 +2582,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
 
-		final String ybounds_text = getResources().getString(R.string.zoom) + getResources().getString(R.string.free_memory) + getResources().getString(R.string.angle) + getResources().getString(R.string.direction);
+		final String ybounds_text = getResources().getString(R.string.zoom) + getResources().getString(R.string.angle) + getResources().getString(R.string.direction);
 		final double close_angle = 1.0f;
 		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
@@ -2614,7 +2648,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
     			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
     			p.setTextAlign(Paint.Align.CENTER);
-				int pixels_offset_y = 4*text_y; // avoid overwriting the zoom or ISO label
+				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom or ISO label
 				int color = Color.rgb(229, 28, 35); // Red 500
             	if( main_activity.isScreenLocked() ) {
             		// writing in reverse order, bottom to top
@@ -2643,7 +2677,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
 		if( camera_controller != null && camera_controller.captureResultHasIso() && sharedPreferences.getBoolean(MainActivity.getShowISOPreferenceKey(), true) ) {
-			int pixels_offset_y = 3*text_y;
+			int pixels_offset_y = 2*text_y;
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			int iso = camera_controller.captureResultIso();
@@ -2654,29 +2688,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// only show when actually zoomed in
 			if( zoom_ratio > 1.0f + 1.0e-5f ) {
 				// Convert the dps to pixels, based on density scale
-				int pixels_offset_y = 2*text_y;
+				int pixels_offset_y = text_y;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.CENTER);
 				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
 			}
 		}
-		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowFreeMemoryPreferenceKey(), true) ) {
-			int pixels_offset_y = 1*text_y;
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.CENTER);
-			long time_now = System.currentTimeMillis();
-			if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
-				long free_mb = main_activity.freeMemory();
-				if( free_mb >= 0 ) {
-					free_memory_gb = free_mb/1024.0f;
-					last_free_memory_time = time_now;
-				}
-			}
-			if( free_memory_gb >= 0.0f ) {
-				drawTextWithBackground(canvas, p, getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
-			}
-		}
-		
+
 		if( sharedPreferences.getBoolean(MainActivity.getShowBatteryPreferenceKey(), true) ) {
 			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
@@ -2771,6 +2789,36 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
 	        drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, true);
 	    }
+
+		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowFreeMemoryPreferenceKey(), true) ) {
+			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+			p.setTextAlign(Paint.Align.LEFT);
+			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
+			int location_y = top_y + (int) (14 * scale + 0.5f); // convert dps to pixels
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				int diff = canvas.getWidth() - canvas.getHeight();
+				location_x += diff/2;
+				location_y -= diff/2;
+			}
+			if( ui_rotation == 90 ) {
+				location_y = canvas.getHeight() - location_y - location_size;
+			}
+			if( ui_rotation == 180 ) {
+				location_x = canvas.getWidth() - location_x;
+				p.setTextAlign(Paint.Align.RIGHT);
+			}
+			long time_now = System.currentTimeMillis();
+			if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
+				long free_mb = main_activity.freeMemory();
+				if( free_mb >= 0 ) {
+					free_memory_gb = free_mb/1024.0f;
+					last_free_memory_time = time_now;
+				}
+			}
+			if( free_memory_gb >= 0.0f ) {
+				drawTextWithBackground(canvas, p, getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, location_x, location_y, true);
+			}
+		}
 
 		canvas.restore();
 		
@@ -3002,6 +3050,29 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    		clearFocusAreas();
 			}
         }
+	}
+	
+	private void setFocusDistance(boolean show_toast) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFocusDistance: focus_distance_percent = " + focus_distance_percent);
+		if( camera_controller != null ) {
+			//float focus_distance = ((float)focus_distance_percent * minimum_focus_distance)/100.0f;
+			// we use the formula: min_dist*[100^(percent/100) - 1]/99.0 - we want something that allows the user to focus into the distance, as well as allowing close up control
+			double focus_distance_frac = ((double)focus_distance_percent)/100.0;
+			float focus_distance = (float)((minimum_focus_distance * (Math.pow(100.0, focus_distance_frac) - 1.0)) / 99.0);
+			camera_controller.setFocusDistance(focus_distance);
+			if( show_toast ) {
+				String focus_distance_s = "";
+				if( focus_distance > 0.0f ) {
+					float real_focus_distance = 1.0f / focus_distance;
+					focus_distance_s = new DecimalFormat("#.##").format(real_focus_distance) + "m";
+				}
+				else {
+					focus_distance_s = getResources().getString(R.string.infinite);
+				}
+	    		showToast(change_focus_distance_toast, getResources().getString(R.string.focus_distance) + " " + focus_distance_s);
+			}
+		}
 	}
 	
 	public void changeExposure(int change, boolean update_seek_bar) {
@@ -3651,6 +3722,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return;
+		}
+		{
+	    	final int visibility = focus_value.equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
+			MainActivity main_activity = (MainActivity)this.getContext();
+		    View focusSeekbar = (View) main_activity.findViewById(R.id.focus_seekbar);
+		    focusSeekbar.setVisibility(visibility);
 		}
 		cancelAutoFocus();
         camera_controller.setFocusValue(focus_value);
@@ -5673,6 +5750,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "save zoom_factor: " + zoom_factor);
     	state.putInt("zoom_factor", zoom_factor);
+		if( MyDebug.LOG )
+			Log.d(TAG, "save focus_distance_percent: " + focus_distance_percent);
+    	state.putInt("focus_distance_percent", focus_distance_percent);
 	}
 
     public void showToast(final ToastBoxer clear_toast, final int message_id) {

@@ -28,6 +28,8 @@
     <string name="video_max_duration">Video reached max duration</string>
     <string name="video_max_filesize">Video reached max filesize</string>
     <string name="exposure_compensation">Exposure compensation</string>
+    <string name="focus_distance">Focus distance</string>
+    <string name="infinite">Infinite</string>
     <string name="front_camera">Front Camera</string>
     <string name="back_camera">Back Camera</string>
     <string name="photo">Photo</string>
@@ -66,7 +68,7 @@
     <string name="failed_to_open_camera_3">BY ANOTHER APPLICATION?</string>
     <string name="iso">ISO</string>
     <string name="zoom">Zoom</string>
-    <string name="free_memory">Free memory</string>
+    <string name="free_memory">Free</string>
     <string name="screen_lock_message_1">[LOCKED:</string>
     <string name="screen_lock_message_2">Swipe to unlock]</string>
     

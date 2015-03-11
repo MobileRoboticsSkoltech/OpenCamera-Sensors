@@ -633,8 +633,8 @@ public class MainActivity extends Activity {
 		preview.setUIRotation(ui_rotation);
 		int align_left = RelativeLayout.ALIGN_LEFT;
 		int align_right = RelativeLayout.ALIGN_RIGHT;
-		//int align_top = RelativeLayout.ALIGN_TOP;
-		//int align_bottom = RelativeLayout.ALIGN_BOTTOM;
+		int align_top = RelativeLayout.ALIGN_TOP;
+		int align_bottom = RelativeLayout.ALIGN_BOTTOM;
 		int left_of = RelativeLayout.LEFT_OF;
 		int right_of = RelativeLayout.RIGHT_OF;
 		int above = RelativeLayout.ABOVE;
@@ -644,8 +644,8 @@ public class MainActivity extends Activity {
 		int align_parent_top = RelativeLayout.ALIGN_PARENT_TOP;
 		int align_parent_bottom = RelativeLayout.ALIGN_PARENT_BOTTOM;
 		if( !ui_placement_right ) {
-			//align_top = RelativeLayout.ALIGN_BOTTOM;
-			//align_bottom = RelativeLayout.ALIGN_TOP;
+			align_top = RelativeLayout.ALIGN_BOTTOM;
+			align_bottom = RelativeLayout.ALIGN_TOP;
 			above = RelativeLayout.BELOW;
 			below = RelativeLayout.ABOVE;
 			align_parent_top = RelativeLayout.ALIGN_PARENT_BOTTOM;
@@ -770,8 +770,18 @@ public class MainActivity extends Activity {
 			layoutParams.addRule(above, R.id.zoom);
 			layoutParams.addRule(below, 0);
 			view.setLayoutParams(layoutParams);
+
+			view = findViewById(R.id.focus_seekbar);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_left, R.id.preview);
+			layoutParams.addRule(align_right, 0);
+			layoutParams.addRule(left_of, R.id.zoom_seekbar);
+			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(align_top, 0);
+			layoutParams.addRule(align_bottom, R.id.zoom_seekbar);
+			view.setLayoutParams(layoutParams);
 		}
-		
+
 		{
 			// set seekbar info
 			View view = findViewById(R.id.seekbar);

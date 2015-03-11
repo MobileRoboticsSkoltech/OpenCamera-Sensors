@@ -26,6 +26,7 @@
         <item>drawable/focus_mode_infinity</item>
         <item>drawable/focus_mode_macro</item>
         <item>drawable/focus_mode_locked</item>
+        <item>drawable/focus_mode_manual</item>
         <item>drawable/focus_mode_fixed</item>
         <item>drawable/focus_mode_edof</item>
         <item>drawable/focus_mode_continuous_video</item>
@@ -35,6 +36,7 @@
         <item>无限对焦</item>
         <item>宏对焦</item>
         <item>锁定焦点</item>
+        <item>手工对焦</item>
         <item>固定对焦</item>
         <item>EDOF对焦</item>
         <item>持续对焦</item>
@@ -44,6 +46,7 @@
         <item>focus_mode_infinity</item>
         <item>focus_mode_macro</item>
         <item>focus_mode_locked</item>
+        <item>focus_mode_manual2</item>
         <item>focus_mode_fixed</item>
         <item>focus_mode_edof</item>
         <item>focus_mode_continuous_video</item>
@@ -138,7 +141,7 @@
     </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>对焦 (或开始/停止录像)</item>
-        <item>对焦 (如果处于自动/锁/宏模式中)</item>
+        <item>对焦</item>
         <item>放大/缩小</item>
         <item>更改曝光水平</item>
         <item>切换自动稳定开/关</item>

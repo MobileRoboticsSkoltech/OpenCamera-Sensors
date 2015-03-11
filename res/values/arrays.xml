@@ -26,6 +26,7 @@
         <item>drawable/focus_mode_infinity</item>
         <item>drawable/focus_mode_macro</item>
         <item>drawable/focus_mode_locked</item>
+        <item>drawable/focus_mode_manual</item>
         <item>drawable/focus_mode_fixed</item>
         <item>drawable/focus_mode_edof</item>
         <item>drawable/focus_mode_continuous_video</item>
@@ -35,6 +36,7 @@
         <item>Focus Infinity</item>
         <item>Focus Macro</item>
         <item>Focus Locked</item>
+        <item>Focus Manual</item>
         <item>Focus Fixed</item>
         <item>Focus EDOF</item>
         <item>Focus Continuous</item>
@@ -44,6 +46,7 @@
         <item>focus_mode_infinity</item>
         <item>focus_mode_macro</item>
         <item>focus_mode_locked</item>
+        <item>focus_mode_manual2</item>
         <item>focus_mode_fixed</item>
         <item>focus_mode_edof</item>
         <item>focus_mode_continuous_video</item>
@@ -138,7 +141,7 @@
     </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Take photo (or start/stop video recording)</item>
-        <item>Focus (if in auto/locked/macro mode)</item>
+        <item>Focus</item>
         <item>Zoom in/out</item>
         <item>Change exposure level</item>
         <item>Switch auto-stabilise on/off</item>
