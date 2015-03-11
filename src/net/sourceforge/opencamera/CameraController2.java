@@ -97,7 +97,8 @@ public class CameraController2 extends CameraController {
 		private int ae_exposure_compensation = 0;
 		private boolean has_af_mode = false;
 		private int af_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
-		private float focus_distance = 0.0f;
+		private float focus_distance = 0.0f; // actual value passed to camera device (set to 0.0 if in infinity mode)
+		private float focus_distance_manual = 0.0f; // saved setting when in manual mode
 		private boolean ae_lock = false;
 		private MeteringRectangle [] af_regions = null; // no need for has_scalar_crop_region, as we can set to null instead
 		private MeteringRectangle [] ae_regions = null; // no need for has_scalar_crop_region, as we can set to null instead
@@ -266,11 +267,15 @@ public class CameraController2 extends CameraController {
 
 		private void setFocusMode(CaptureRequest.Builder builder) {
 			if( has_af_mode ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "change af mode to " + af_mode);
 				builder.set(CaptureRequest.CONTROL_AF_MODE, af_mode);
 			}
 		}
 		
 		private void setFocusDistance(CaptureRequest.Builder builder) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "change focus distance to " + focus_distance);
 			builder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
 		}
 
@@ -469,6 +474,7 @@ public class CameraController2 extends CameraController {
 				}
 			}
 			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_OFF) ) {
+				output_modes.add("focus_mode_infinity");
 				if( minimum_focus_distance > 0.0f ) {
 					output_modes.add("focus_mode_manual2");
 					if( MyDebug.LOG ) {
@@ -1346,8 +1352,13 @@ public class CameraController2 extends CameraController {
     	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_locked") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
     	}
+    	else if( focus_value.equals("focus_mode_infinity") ) {
+    		focus_mode = CaptureRequest.CONTROL_AF_MODE_OFF;
+        	camera_settings.focus_distance = 0.0f;
+    	}
     	else if( focus_value.equals("focus_mode_manual2") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_OFF;
+        	camera_settings.focus_distance = camera_settings.focus_distance_manual;
     	}
     	else if( focus_value.equals("focus_mode_macro") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_MACRO;
@@ -1366,6 +1377,7 @@ public class CameraController2 extends CameraController {
     	camera_settings.has_af_mode = true;
     	camera_settings.af_mode = focus_mode;
     	camera_settings.setFocusMode(previewBuilder);
+    	camera_settings.setFocusDistance(previewBuilder); // also need to set distance, in case changed between infinity, manual or other modes
     	try {
     		setRepeatingRequest();
     	}
@@ -1410,6 +1422,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusDistance: " + focus_distance);
     	camera_settings.focus_distance = focus_distance;
+    	camera_settings.focus_distance_manual = focus_distance;
     	camera_settings.setFocusDistance(previewBuilder);
     	try {
     		setRepeatingRequest();
