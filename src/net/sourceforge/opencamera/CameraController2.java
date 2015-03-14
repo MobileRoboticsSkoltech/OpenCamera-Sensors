@@ -256,6 +256,11 @@ public class CameraController2 extends CameraController {
 		private boolean setExposureCompensation(CaptureRequest.Builder builder) {
 			if( !has_ae_exposure_compensation )
 				return false;
+			if( has_iso ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "don't set exposure compensation in manual iso mode");
+				return false;
+			}
 			if( builder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null || ae_exposure_compensation != builder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "change exposure to " + ae_exposure_compensation);
@@ -613,6 +618,13 @@ public class CameraController2 extends CameraController {
 		camera_features.is_exposure_lock_supported = true;
 		
         camera_features.is_video_stabilization_supported = true;
+
+		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
+		if( iso_range != null ) {
+			camera_features.supports_iso_range = true;
+			camera_features.min_iso = iso_range.getLower();
+			camera_features.max_iso = iso_range.getUpper();
+		}
 
 		Range<Integer> exposure_range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
 		camera_features.min_exposure = exposure_range.getLower();
@@ -1029,62 +1041,102 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "iso range from " + iso_range.getLower() + " to " + iso_range.getUpper());
 		List<String> values = new ArrayList<String>();
-		values.add("auto");
+		values.add(default_value);
 		int [] iso_values = {50, 100, 200, 400, 800, 1600, 3200, 6400};
+		values.add("" + iso_range.getLower());
 		for(int i=0;i<iso_values.length;i++) {
-			if( iso_values[i] >= iso_range.getLower() && iso_values[i] <= iso_range.getUpper() ) {
+			if( iso_values[i] > iso_range.getLower() && iso_values[i] < iso_range.getUpper() ) {
 				values.add("" + iso_values[i]);
 			}
 		}
-		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
-		if( supported_values != null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "set iso to: " + supported_values.selected_value);
-			try {
-				if( supported_values.selected_value.equals("auto") ) {
+		values.add("" + iso_range.getUpper());
+
+		// n.b., we don't use checkModeIsSupported as ISO is a special case with CameraController2: we return a set of ISO values to use in the popup menu, but any ISO within the iso_range is valid
+		SupportedValues supported_values = null;
+		try {
+			if( value.equals(default_value) ) {
+				supported_values = new SupportedValues(values, value);
+				camera_settings.has_iso = false;
+				camera_settings.iso = 0;
+				if( camera_settings.setAEMode(previewBuilder, false) ) {
+			    	setRepeatingRequest();
+				}
+			}
+			else {
+				try {
+					int selected_value2 = Integer.parseInt(value);
+					if( selected_value2 < iso_range.getLower() )
+						selected_value2 = iso_range.getLower();
+					if( selected_value2 > iso_range.getUpper() )
+						selected_value2 = iso_range.getUpper();
+					if( MyDebug.LOG )
+						Log.d(TAG, "iso: " + selected_value2);
+					supported_values = new SupportedValues(values, "" + selected_value2);
+					camera_settings.has_iso = true;
+					camera_settings.iso = selected_value2;
+					if( camera_settings.setAEMode(previewBuilder, false) ) {
+				    	setRepeatingRequest();
+					}
+				}
+				catch(NumberFormatException exception) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "iso invalid format, can't parse to int");
+					supported_values = new SupportedValues(values, default_value);
 					camera_settings.has_iso = false;
 					camera_settings.iso = 0;
 					if( camera_settings.setAEMode(previewBuilder, false) ) {
 				    	setRepeatingRequest();
 					}
 				}
-				else {
-					try {
-						int selected_value2 = Integer.parseInt(supported_values.selected_value);
-						if( MyDebug.LOG )
-							Log.d(TAG, "iso: " + selected_value2);
-						camera_settings.has_iso = true;
-						camera_settings.iso = selected_value2;
-						if( camera_settings.setAEMode(previewBuilder, false) ) {
-					    	setRepeatingRequest();
-						}
-					}
-					catch(NumberFormatException exception) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "iso invalid format, can't parse to int");
-						camera_settings.has_iso = false;
-						camera_settings.iso = 0;
-						if( camera_settings.setAEMode(previewBuilder, false) ) {
-					    	setRepeatingRequest();
-						}
-					}
-				}
 			}
-			catch(CameraAccessException e) {
-				if( MyDebug.LOG ) {
-					Log.e(TAG, "failed to set ISO");
-					Log.e(TAG, "reason: " + e.getReason());
-					Log.e(TAG, "message: " + e.getMessage());
-				}
-				e.printStackTrace();
-			} 
 		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set ISO");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
+
 		return supported_values;
 	}
 
 	@Override
 	String getISOKey() {
 		return "";
+	}
+
+	@Override
+	int getISO() {
+		return camera_settings.iso;
+	}
+
+	@Override
+	// Returns whether exposure was modified
+	boolean setISO(int iso) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setISO: " + iso);
+		if( camera_settings.iso == iso ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "already set");
+			return false;
+		}
+		try {
+			camera_settings.iso = iso;
+			if( camera_settings.setAEMode(previewBuilder, false) ) {
+		    	setRepeatingRequest();
+			}
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set ISO");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
+		return true;
 	}
 
 	@Override

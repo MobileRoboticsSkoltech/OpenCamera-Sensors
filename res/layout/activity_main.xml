@@ -162,7 +162,7 @@
         />
 
     <SeekBar
-        android:id="@+id/seekbar"
+        android:id="@+id/exposure_seekbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -170,11 +170,27 @@
         />
 
     <ZoomControls
-        android:id="@+id/seekbar_zoom"
+        android:id="@+id/exposure_seekbar_zoom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        />
+
+    <SeekBar
+        android:id="@+id/iso_seekbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        />
+
+    <SeekBar
+        android:id="@+id/exposure_time_seekbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/iso_seekbar"
         />
 
     <FrameLayout

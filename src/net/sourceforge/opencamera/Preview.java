@@ -173,6 +173,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<String> scene_modes = null;
 	private List<String> white_balances = null;
 	private List<String> isos = null;
+	private boolean supports_iso_range = false;
+	private int min_iso = 0;
+	private int max_iso = 0;
 	private List<String> exposures = null;
 	private int min_exposure = 0;
 	private int max_exposure = 0;
@@ -962,6 +965,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		color_effects = null;
 		white_balances = null;
 		isos = null;
+		supports_iso_range = false;
+		min_iso = 0;
+		max_iso = 0;
 		exposures = null;
 		min_exposure = 0;
 		max_exposure = 0;
@@ -1207,6 +1213,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				editor.putString(MainActivity.getSceneModePreferenceKey(), supported_values.selected_value);
 				editor.apply();
 			}
+			else {
+				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.remove(MainActivity.getSceneModePreferenceKey());
+				editor.apply();
+			}
 		}
 		
 		{
@@ -1228,6 +1240,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        this.is_exposure_lock_supported = camera_features.is_exposure_lock_supported;
 	        this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
 	        this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
+	        this.supports_iso_range = camera_features.supports_iso_range;
+	        this.min_iso = camera_features.min_iso;
+	        this.max_iso = camera_features.max_iso;
 			this.min_exposure = camera_features.min_exposure;
 			this.max_exposure = camera_features.max_exposure;
 			this.exposure_step = camera_features.exposure_step;
@@ -1393,6 +1408,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				editor.putString(MainActivity.getColorEffectPreferenceKey(), supported_values.selected_value);
 				editor.apply();
 			}
+			else {
+				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.remove(MainActivity.getColorEffectPreferenceKey());
+				editor.apply();
+			}
 		}
 
 		{
@@ -1410,14 +1431,26 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				editor.putString(MainActivity.getWhiteBalancePreferenceKey(), supported_values.selected_value);
 				editor.apply();
 			}
+			else {
+				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.remove(MainActivity.getWhiteBalancePreferenceKey());
+				editor.apply();
+			}
 		}
 		
+		boolean has_manual_iso = false;
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up iso");
 			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved iso: " + value);
+			if( !value.equals(camera_controller.getDefaultISO()) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "has manual iso");
+				has_manual_iso = true;
+			}
 
 			CameraController.SupportedValues supported_values = camera_controller.setISO(value);
 			if( supported_values != null ) {
@@ -1425,6 +1458,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    		// now save, so it's available for PreferenceActivity
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putString(MainActivity.getISOPreferenceKey(), supported_values.selected_value);
+				editor.apply();
+			}
+			else {
+				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.remove(MainActivity.getISOPreferenceKey());
 				editor.apply();
 			}
 		}
@@ -1439,33 +1478,42 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				for(int i=min_exposure;i<=max_exposure;i++) {
 					exposures.add("" + i);
 				}
-				String value = sharedPreferences.getString(MainActivity.getExposurePreferenceKey(), "0");
-				if( MyDebug.LOG )
-					Log.d(TAG, "saved exposure value: " + value);
-				int exposure = 0;
-				try {
-					exposure = Integer.parseInt(value);
+				// if in manual ISO mode, we still want to get the valid exposure compensations, but shouldn't set exposure compensation
+				if( !has_manual_iso ) {
+					String value = sharedPreferences.getString(MainActivity.getExposurePreferenceKey(), "0");
 					if( MyDebug.LOG )
-						Log.d(TAG, "exposure: " + exposure);
-				}
-				catch(NumberFormatException exception) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "exposure invalid format, can't parse to int");
-				}
-				if( exposure < min_exposure || exposure > max_exposure ) {
-					exposure = 0;
-					if( MyDebug.LOG )
-						Log.d(TAG, "saved exposure not supported, reset to 0");
-					if( exposure < min_exposure || exposure > max_exposure ) {
+						Log.d(TAG, "saved exposure value: " + value);
+					int exposure = 0;
+					try {
+						exposure = Integer.parseInt(value);
 						if( MyDebug.LOG )
-							Log.d(TAG, "zero isn't an allowed exposure?! reset to min " + min_exposure);
-						exposure = min_exposure;
+							Log.d(TAG, "exposure: " + exposure);
 					}
+					catch(NumberFormatException exception) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "exposure invalid format, can't parse to int");
+					}
+					if( exposure < min_exposure || exposure > max_exposure ) {
+						exposure = 0;
+						if( MyDebug.LOG )
+							Log.d(TAG, "saved exposure not supported, reset to 0");
+						if( exposure < min_exposure || exposure > max_exposure ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "zero isn't an allowed exposure?! reset to min " + min_exposure);
+							exposure = min_exposure;
+						}
+					}
+					camera_controller.setExposureCompensation(exposure);
+		    		// now save, so it's available for PreferenceActivity
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString(MainActivity.getExposurePreferenceKey(), "" + exposure);
+					editor.apply();
 				}
-				camera_controller.setExposureCompensation(exposure);
-	    		// now save, so it's available for PreferenceActivity
+			}
+			else {
+				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getExposurePreferenceKey(), "" + exposure);
+				editor.remove(MainActivity.getExposurePreferenceKey());
 				editor.apply();
 			}
 			View exposureButton = (View) activity.findViewById(R.id.exposure);
@@ -3106,6 +3154,24 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			MainActivity main_activity = (MainActivity)this.getContext();
 	    			main_activity.setSeekBarExposure();
 	    		}
+			}
+		}
+	}
+	
+	void setISO(int new_iso) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setISO(): " + new_iso);
+		if( camera_controller != null && supports_iso_range ) {
+			if( new_iso < min_iso )
+				new_iso = min_iso;
+			if( new_iso > max_iso )
+				new_iso = max_iso;
+			if( camera_controller.setISO(new_iso) ) {
+				// now save
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(MainActivity.getISOPreferenceKey(), "" + new_iso);
+				editor.apply();
 			}
 		}
 	}
@@ -5607,6 +5673,24 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedISOs");
 		return this.isos;
+    }
+    
+    public boolean supportsISORange() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsISORange");
+    	return this.supports_iso_range;
+    }
+    
+    public int getMinimumISO() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getMinimumISO");
+    	return this.min_iso;
+    }
+    
+    public int getMaximumISO() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getMaximumISO");
+    	return this.max_iso;
     }
     
     public boolean supportsExposures() {

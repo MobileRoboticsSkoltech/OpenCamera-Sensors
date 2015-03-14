@@ -312,6 +312,7 @@ class CameraController1 extends CameraController {
     	return parameters.getWhiteBalance();
 	}
 
+	@Override
 	SupportedValues setISO(String value) {
 		String default_value = getDefaultISO();
     	Camera.Parameters parameters = this.getParameters();
@@ -397,18 +398,31 @@ class CameraController1 extends CameraController {
 		return null;
 	}
 
+	@Override
     String getISOKey() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getISOKey");
     	return this.iso_key;
     }
-    
+
+	int getISO() {
+		// not supported for CameraController1
+		return 0;
+	}
+
+	boolean setISO(int iso) {
+		// not supported for CameraController1
+		return false;
+	}
+
+	@Override
     public CameraController.Size getPictureSize() {
     	Camera.Parameters parameters = this.getParameters();
     	Camera.Size camera_size = parameters.getPictureSize();
     	return new CameraController.Size(camera_size.width, camera_size.height);
     }
 
+	@Override
     void setPictureSize(int width, int height) {
     	Camera.Parameters parameters = this.getParameters();
 		parameters.setPictureSize(width, height);
@@ -417,6 +431,7 @@ class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
 	}
     
+	@Override
     public CameraController.Size getPreviewSize() {
     	Camera.Parameters parameters = this.getParameters();
     	Camera.Size camera_size = parameters.getPreviewSize();

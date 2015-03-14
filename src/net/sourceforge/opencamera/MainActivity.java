@@ -784,9 +784,6 @@ public class MainActivity extends Activity {
 
 		{
 			// set seekbar info
-			View view = findViewById(R.id.seekbar);
-			view.setRotation(ui_rotation);
-
 			int width_dp = 0;
 			if( ui_rotation == 0 || ui_rotation == 180 ) {
 				width_dp = 300;
@@ -798,12 +795,29 @@ public class MainActivity extends Activity {
 			final float scale = getResources().getDisplayMetrics().density;
 			int width_pixels = (int) (width_dp * scale + 0.5f); // convert dps to pixels
 			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
+
+			View view = findViewById(R.id.exposure_seekbar);
+			view.setRotation(ui_rotation);
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
 			view.setLayoutParams(lp);
 
-			view = findViewById(R.id.seekbar_zoom);
+			view = findViewById(R.id.iso_seekbar);
+			view.setRotation(ui_rotation);
+			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+
+			view = findViewById(R.id.exposure_time_seekbar);
+			view.setRotation(ui_rotation);
+			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+
+			view = findViewById(R.id.exposure_seekbar_zoom);
 			view.setRotation(ui_rotation);
 			view.setAlpha(0.5f);
 			// n.b., using left_of etc doesn't work properly when using rotation (as the amount of space reserved is based on the UI elements before being rotated)
@@ -943,62 +957,103 @@ public class MainActivity extends Activity {
     }
 
     void clearSeekBar() {
-		View view = findViewById(R.id.seekbar);
+		View view = findViewById(R.id.exposure_seekbar);
 		view.setVisibility(View.GONE);
-		view = findViewById(R.id.seekbar_zoom);
+		view = findViewById(R.id.iso_seekbar);
+		view.setVisibility(View.GONE);
+		view = findViewById(R.id.exposure_time_seekbar);
+		view.setVisibility(View.GONE);
+		view = findViewById(R.id.exposure_seekbar_zoom);
 		view.setVisibility(View.GONE);
     }
     
     void setSeekBarExposure() {
-		SeekBar seek_bar = ((SeekBar)findViewById(R.id.seekbar));
+		SeekBar seek_bar = ((SeekBar)findViewById(R.id.exposure_seekbar));
 		final int min_exposure = preview.getMinimumExposure();
 		seek_bar.setMax( preview.getMaximumExposure() - min_exposure );
 		seek_bar.setProgress( preview.getCurrentExposure() - min_exposure );
     }
     
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void clickedExposure(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposure");
 		this.closePopup();
-		SeekBar seek_bar = ((SeekBar)findViewById(R.id.seekbar));
+		SeekBar seek_bar = ((SeekBar)findViewById(R.id.exposure_seekbar));
 		int visibility = seek_bar.getVisibility();
-		if( visibility == View.GONE && preview.getCameraController() != null && preview.supportsExposures() ) {
-			final int min_exposure = preview.getMinimumExposure();
-			seek_bar.setVisibility(View.VISIBLE);
-			setSeekBarExposure();
-			seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-				@Override
-				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "exposure seekbar onProgressChanged");
-					preview.setExposure(min_exposure + progress, false);
-				}
-
-				@Override
-				public void onStartTrackingTouch(SeekBar seekBar) {
-				}
-
-				@Override
-				public void onStopTrackingTouch(SeekBar seekBar) {
-				}
-			});
-
-			ZoomControls seek_bar_zoom = (ZoomControls)findViewById(R.id.seekbar_zoom);
-			seek_bar_zoom.setVisibility(View.VISIBLE);
-			seek_bar_zoom.setOnZoomInClickListener(new View.OnClickListener(){
-	            public void onClick(View v){
-	            	preview.changeExposure(1, true);
-	            }
-	        });
-			seek_bar_zoom.setOnZoomOutClickListener(new View.OnClickListener(){
-		    	public void onClick(View v){
-	            	preview.changeExposure(-1, true);
-		        }
-		    });
-		}
-		else if( visibility == View.VISIBLE ) {
+		SeekBar iso_seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
+		int iso_visibility = iso_seek_bar.getVisibility();
+		//SeekBar exposure_time_seek_bar = ((SeekBar)findViewById(R.id.exposure_time_seekbar));
+		int exposure_time_visibility = iso_seek_bar.getVisibility();
+		boolean is_open = visibility == View.VISIBLE || iso_visibility == View.VISIBLE || exposure_time_visibility == View.VISIBLE;
+		if( is_open ) {
 			clearSeekBar();
+		}
+		else if( preview.getCameraController() != null ) {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
+			if( !value.equals(preview.getCameraController().getDefaultISO()) ) {
+				if( preview.supportsISORange()) {
+					iso_seek_bar.setVisibility(View.VISIBLE);
+					final int min_iso = preview.getMinimumISO();
+					final int max_iso = preview.getMaximumISO();
+					iso_seek_bar.setMax( max_iso - min_iso );
+					iso_seek_bar.setProgress( preview.getCameraController().getISO() - min_iso );
+					iso_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+						@Override
+						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "iso seekbar onProgressChanged");
+							preview.setISO(min_iso + progress);
+						}
+
+						@Override
+						public void onStartTrackingTouch(SeekBar seekBar) {
+						}
+
+						@Override
+						public void onStopTrackingTouch(SeekBar seekBar) {
+						}
+					});
+				}
+			}
+			else {
+				if( preview.supportsExposures() ) {
+					final int min_exposure = preview.getMinimumExposure();
+					seek_bar.setVisibility(View.VISIBLE);
+					setSeekBarExposure();
+					seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+						@Override
+						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "exposure seekbar onProgressChanged");
+							preview.setExposure(min_exposure + progress, false);
+						}
+
+						@Override
+						public void onStartTrackingTouch(SeekBar seekBar) {
+						}
+
+						@Override
+						public void onStopTrackingTouch(SeekBar seekBar) {
+						}
+					});
+
+					ZoomControls seek_bar_zoom = (ZoomControls)findViewById(R.id.exposure_seekbar_zoom);
+					seek_bar_zoom.setVisibility(View.VISIBLE);
+					seek_bar_zoom.setOnZoomInClickListener(new View.OnClickListener(){
+			            public void onClick(View v){
+			            	preview.changeExposure(1, true);
+			            }
+			        });
+					seek_bar_zoom.setOnZoomOutClickListener(new View.OnClickListener(){
+				    	public void onClick(View v){
+			            	preview.changeExposure(-1, true);
+				        }
+				    });
+				}
+			}
 		}
     }
     

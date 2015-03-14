@@ -162,14 +162,16 @@ device has two cameras).</p>
 recording video mode. When in video mode, the take photo icon will change to the record video icon
 <img src="take_video.png" width="32" height="32">.</p>
 
-<p><img src="exposure.png" width="32" height="32"><b>Exposure compensation</b> - Clicking this will bring up a
-slider and plus/minus buttons which can be used to control the exposure compensation. A higher value increases
+<p><img src="exposure.png" width="32" height="32"><b>Exposure compensation and ISO</b> - Clicking this will bring
+up a slider and plus/minus buttons which can be used to control the exposure compensation. A higher value increases
 the exposure, so that pictures come out brighter in low light; a lower value makes pictures darker. One unit of
 EV changes the brightness of the captured image by a factor of two. +1 EV doubles the image brightness, while -1
 EV halves the image brightness. Set to 0 for the default exposure. To get rid of the slider and buttons, either
 click the Exposure button again, or click elsewhere on the screen. See
 <a href="http://en.wikipedia.org/wiki/Exposure_compensation">Exposure compensation</a>.
-(Only available if the camera supports control of the exposure.)</p>
+(Only available if the camera supports control of the exposure, and ISO is "auto".) If Camera2 API is used, and
+a non-auto ISO mode is selected, then instead clicking this icon will bring up a slider allowing you to control the ISO
+setting.</p>
 
 <p><img src="exposure_unlocked.png" width="32" height="32"><b>Exposure lock</b> - Click to lock or unlock the exposure.
 When locked, the icon will change to <img src="exposure_locked.png" width="32" height="32">. Locking the exposure means
@@ -185,7 +187,10 @@ you to directly control the focus distance. The other options are:<ul>
 <li><b>ISO</b> - A higher ISO setting means the camera is more sensitive to light, though may also
 result in more noise. This mimics the film speed on traditional film cameras. Note that this
 setting may not be supported on all cameras. See
-<a href="http://digital-photography-school.com/iso-settings">here</a> for more details on ISO.</li>
+<a href="http://digital-photography-school.com/iso-settings">here</a> for more details on ISO.
+If Camera2 API is used, then if a non-auto ISO is used, then selecting the exposure compensation icon
+<img src="exposure.png" width="32" height="32"> will bring up a slider allowing direct control over the ISO, allowing you
+to specify an exact value.</li>
 <li><b>White balance</b> - Choose a method to control how the white balance is set. See
 <a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an
 explanation of white balance. (Only available if the camera supports different white balance
@@ -709,6 +714,9 @@ ADDED   True manual focus mode, which allows setting the focus distance with a
         slider (only if Camera2 API is enabled).
 ADDED   Option to display current ISO on screen (only if Camera2 API is
         enabled).
+ADDED   If using non-auto ISO, a specific ISO value can now be selected via a
+        slider by clicking the exposure compensation button (only if Camera2
+        API is enabled).
 ADDED   Chinese Simplified translation (thanks to Michael Lu).
 UPDATED Focus Manual mode renamed to Focus Locked; also it no longer refocuses
         when switching to this mode.

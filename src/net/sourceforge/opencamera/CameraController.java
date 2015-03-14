@@ -30,12 +30,15 @@ public abstract class CameraController {
 		float minimum_focus_distance = 0.0f;
 		boolean is_exposure_lock_supported = false;
 		boolean is_video_stabilization_supported = false;
+		boolean supports_iso_range = false;
+		int min_iso = 0;
+		int max_iso = 0;
 		int min_exposure = 0;
 		int max_exposure = 0;
 		float exposure_step = 0.0f;
 		boolean can_disable_shutter_sound = false;
 	}
-	
+
 	public static class Size {
 		public int width = 0;
 		public int height = 0;
@@ -107,6 +110,8 @@ public abstract class CameraController {
 	public abstract String getWhiteBalance();
 	abstract SupportedValues setISO(String value);
     abstract String getISOKey();
+	abstract int getISO();
+	abstract boolean setISO(int iso);
     public abstract CameraController.Size getPictureSize();
     abstract void setPictureSize(int width, int height);
     public abstract CameraController.Size getPreviewSize();
