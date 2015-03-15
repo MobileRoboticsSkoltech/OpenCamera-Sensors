@@ -176,6 +176,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean supports_iso_range = false;
 	private int min_iso = 0;
 	private int max_iso = 0;
+	private boolean supports_exposure_time = false;
+	private long min_exposure_time = 0l;
+	private long max_exposure_time = 0l;
 	private List<String> exposures = null;
 	private int min_exposure = 0;
 	private int max_exposure = 0;
@@ -205,6 +208,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private ToastBoxer take_photo_toast = new ToastBoxer();
 	private ToastBoxer stopstart_video_toast = new ToastBoxer();
 	private ToastBoxer change_exposure_toast = new ToastBoxer();
+	private ToastBoxer change_exposure_time_toast = new ToastBoxer();
 	private ToastBoxer change_focus_distance_toast = new ToastBoxer();
 	
 	private int ui_rotation = 0;
@@ -968,6 +972,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		supports_iso_range = false;
 		min_iso = 0;
 		max_iso = 0;
+		supports_exposure_time = false;
+		min_exposure_time = 0l;
+		max_exposure_time = 0l;
 		exposures = null;
 		min_exposure = 0;
 		max_exposure = 0;
@@ -1243,6 +1250,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        this.supports_iso_range = camera_features.supports_iso_range;
 	        this.min_iso = camera_features.min_iso;
 	        this.max_iso = camera_features.max_iso;
+	        this.supports_exposure_time = camera_features.supports_exposure_time;
+	        this.min_exposure_time = camera_features.min_exposure_time;
+	        this.max_exposure_time = camera_features.max_exposure_time;
 			this.min_exposure = camera_features.min_exposure;
 			this.max_exposure = camera_features.max_exposure;
 			this.exposure_step = camera_features.exposure_step;
@@ -1446,19 +1456,42 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved iso: " + value);
-			if( !value.equals(camera_controller.getDefaultISO()) ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "has manual iso");
-				has_manual_iso = true;
-			}
 
 			CameraController.SupportedValues supported_values = camera_controller.setISO(value);
 			if( supported_values != null ) {
 				isos = supported_values.values;
+				if( !supported_values.selected_value.equals(camera_controller.getDefaultISO()) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "has manual iso");
+					has_manual_iso = true;
+				}
 	    		// now save, so it's available for PreferenceActivity
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putString(MainActivity.getISOPreferenceKey(), supported_values.selected_value);
 				editor.apply();
+				
+				if( has_manual_iso ) {
+					if( supports_exposure_time ) {
+						long exposure_time_value = sharedPreferences.getLong(MainActivity.getExposureTimePreferenceKey(), camera_controller.getDefaultExposureTime());
+						if( MyDebug.LOG )
+							Log.d(TAG, "saved exposure_time: " + exposure_time_value);
+						if( exposure_time_value < min_exposure_time )
+							exposure_time_value = min_exposure_time;
+						else if( exposure_time_value > max_exposure_time )
+							exposure_time_value = max_exposure_time;
+						camera_controller.setExposureTime(exposure_time_value);
+						// now save
+						editor = sharedPreferences.edit();
+						editor.putLong(MainActivity.getExposureTimePreferenceKey(), exposure_time_value);
+						editor.apply();
+					}
+					else {
+						// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
+						editor = sharedPreferences.edit();
+						editor.remove(MainActivity.getExposureTimePreferenceKey());
+						editor.apply();
+					}
+				}
 			}
 			else {
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
@@ -3175,6 +3208,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 	}
+	
+	void setExposureTime(long new_exposure_time) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setExposureTime(): " + new_exposure_time);
+		if( camera_controller != null && supports_exposure_time ) {
+			if( new_exposure_time < min_exposure_time )
+				new_exposure_time = min_exposure_time;
+			else if( new_exposure_time > max_exposure_time )
+				new_exposure_time = max_exposure_time;
+			if( camera_controller.setExposureTime(new_exposure_time) ) {
+				// now save
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putLong(MainActivity.getExposureTimePreferenceKey(), new_exposure_time);
+				editor.apply();
+	    		showToast(change_exposure_time_toast, getExposureTimeString(new_exposure_time));
+			}
+		}
+	}
+	
+	private String getExposureTimeString(long exposure_time) {
+		double exposure_time_s = exposure_time/1000000000.0;
+		double exposure_time_r = 1.0/exposure_time_s;
+		return getResources().getString(R.string.exposure_time) + " 1/" + new DecimalFormat("#.#").format(exposure_time_r) + "s";
+	}
 
 	void switchCamera() {
 		if( MyDebug.LOG )
@@ -3260,6 +3318,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		String iso_value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
 		if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
 			toast_string += "\nISO: " + iso_value;
+			if( supports_exposure_time ) {
+				long exposure_time_value = sharedPreferences.getLong(MainActivity.getExposureTimePreferenceKey(), camera_controller.getDefaultExposureTime());
+				toast_string += " " + getExposureTimeString(exposure_time_value);
+			}
 		}
 		int current_exposure = camera_controller.getExposureCompensation();
 		if( current_exposure != 0 ) {
@@ -5691,6 +5753,24 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "getMaximumISO");
     	return this.max_iso;
+    }
+    
+    public boolean supportsExposureTime() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsExposureTime");
+    	return this.supports_exposure_time;
+    }
+    
+    public long getMinimumExposureTime() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getMinimumExposureTime");
+    	return this.min_exposure_time;
+    }
+    
+    public long getMaximumExposureTime() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getMaximumExposureTime");
+    	return this.max_exposure_time;
     }
     
     public boolean supportsExposures() {

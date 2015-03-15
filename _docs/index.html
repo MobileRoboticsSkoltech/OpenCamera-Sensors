@@ -48,10 +48,9 @@
 <small>
 <li>Option to auto-stabilise so your pictures are perfectly level no matter what (<a href="#auto_stabilise">see below</a>).</li>
 <li>Zoom via multi-touch gesture and single-touch control.</li>
-<li>Choice of focus modes (including "locked" focus, and support for Android 5's manual focus distance).</li>
 <li>Touch to select focus area and metering area (metering area is used to determine exposure).</li>
 <li>Face detection option.</li>
-<li>Support for flash, torch, scene modes, color effects, white balance, ISO, exposure compensation and exposure lock.</li>
+<li>Support for flash, torch, focus modes, scene modes, color effects, white balance, ISO, exposure compensation and exposure lock.</li>
 <li>Video recording (with optional audio, and support for video stabilization).</li>
 <li>Option to lock orientation to portrait or landscape for photo or video.</li>
 <li>Timer option.</li>
@@ -64,6 +63,7 @@
 <li>Option to apply a date and timestamp to photos, and also to stamp photos with the location coordinates.</li>
 <li>Support for external microphones (may not be supported by all devices).</li>
 <li>Widget to automatically take a photo after launching.</li>
+<li>Experimental support for Android 5 Camera2 API: manual focus distance; manual ISO; manual exposure time.</li>
 <li>Small file size.</li>
 <li>Completely free and ad-free, unlike most Android apps. Open Source.</li>
 </small>
@@ -170,8 +170,8 @@ EV halves the image brightness. Set to 0 for the default exposure. To get rid of
 click the Exposure button again, or click elsewhere on the screen. See
 <a href="http://en.wikipedia.org/wiki/Exposure_compensation">Exposure compensation</a>.
 (Only available if the camera supports control of the exposure, and ISO is "auto".) If Camera2 API is used, and
-a non-auto ISO mode is selected, then instead clicking this icon will bring up a slider allowing you to control the ISO
-setting.</p>
+a non-auto ISO mode is selected, then instead clicking this icon will bring up sliders allowing you to control the ISO
+setting and (if supported) the exposure time.</p>
 
 <p><img src="exposure_unlocked.png" width="32" height="32"><b>Exposure lock</b> - Click to lock or unlock the exposure.
 When locked, the icon will change to <img src="exposure_locked.png" width="32" height="32">. Locking the exposure means
@@ -189,8 +189,8 @@ result in more noise. This mimics the film speed on traditional film cameras. No
 setting may not be supported on all cameras. See
 <a href="http://digital-photography-school.com/iso-settings">here</a> for more details on ISO.
 If Camera2 API is used, then if a non-auto ISO is used, then selecting the exposure compensation icon
-<img src="exposure.png" width="32" height="32"> will bring up a slider allowing direct control over the ISO, allowing you
-to specify an exact value.</li>
+<img src="exposure.png" width="32" height="32"> will bring up sliders allowing direct control over the ISO and exposure
+time.</li>
 <li><b>White balance</b> - Choose a method to control how the white balance is set. See
 <a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an
 explanation of white balance. (Only available if the camera supports different white balance
@@ -714,9 +714,9 @@ ADDED   True manual focus mode, which allows setting the focus distance with a
         slider (only if Camera2 API is enabled).
 ADDED   Option to display current ISO on screen (only if Camera2 API is
         enabled).
-ADDED   If using non-auto ISO, a specific ISO value can now be selected via a
-        slider by clicking the exposure compensation button (only if Camera2
-        API is enabled).
+ADDED   If using non-auto ISO, a specific ISO value and exposure time can now
+        be selected via sliders by clicking the exposure compensation button
+        (only if Camera2 API is enabled).
 ADDED   Chinese Simplified translation (thanks to Michael Lu).
 UPDATED Focus Manual mode renamed to Focus Locked; also it no longer refocuses
         when switching to this mode.

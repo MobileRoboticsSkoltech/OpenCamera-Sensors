@@ -803,23 +803,10 @@ public class MainActivity extends Activity {
 			lp.height = height_pixels;
 			view.setLayoutParams(lp);
 
-			view = findViewById(R.id.iso_seekbar);
-			view.setRotation(ui_rotation);
-			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			lp.width = width_pixels;
-			lp.height = height_pixels;
-			view.setLayoutParams(lp);
-
-			view = findViewById(R.id.exposure_time_seekbar);
-			view.setRotation(ui_rotation);
-			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			lp.width = width_pixels;
-			lp.height = height_pixels;
-			view.setLayoutParams(lp);
-
 			view = findViewById(R.id.exposure_seekbar_zoom);
 			view.setRotation(ui_rotation);
 			view.setAlpha(0.5f);
+
 			// n.b., using left_of etc doesn't work properly when using rotation (as the amount of space reserved is based on the UI elements before being rotated)
 			if( ui_rotation == 0 ) {
 				view.setTranslationX(0);
@@ -837,6 +824,37 @@ public class MainActivity extends Activity {
 				view.setTranslationX(height_pixels);
 				view.setTranslationY(0);
 			}
+
+			view = findViewById(R.id.iso_seekbar);
+			view.setRotation(ui_rotation);
+			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+
+			view = findViewById(R.id.exposure_time_seekbar);
+			view.setRotation(ui_rotation);
+			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+			if( ui_rotation == 0 ) {
+				view.setTranslationX(0);
+				view.setTranslationY(height_pixels);
+			}
+			else if( ui_rotation == 90 ) {
+				view.setTranslationX(-height_pixels);
+				view.setTranslationY(0);
+			}
+			else if( ui_rotation == 180 ) {
+				view.setTranslationX(0);
+				view.setTranslationY(-height_pixels);
+			}
+			else if( ui_rotation == 270 ) {
+				view.setTranslationX(height_pixels);
+				view.setTranslationY(0);
+			}
+
 		}
 
 		{
@@ -983,7 +1001,7 @@ public class MainActivity extends Activity {
 		int visibility = seek_bar.getVisibility();
 		SeekBar iso_seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
 		int iso_visibility = iso_seek_bar.getVisibility();
-		//SeekBar exposure_time_seek_bar = ((SeekBar)findViewById(R.id.exposure_time_seekbar));
+		SeekBar exposure_time_seek_bar = ((SeekBar)findViewById(R.id.exposure_time_seekbar));
 		int exposure_time_visibility = iso_seek_bar.getVisibility();
 		boolean is_open = visibility == View.VISIBLE || iso_visibility == View.VISIBLE || exposure_time_visibility == View.VISIBLE;
 		if( is_open ) {
@@ -1003,7 +1021,7 @@ public class MainActivity extends Activity {
 						@Override
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 							if( MyDebug.LOG )
-								Log.d(TAG, "iso seekbar onProgressChanged");
+								Log.d(TAG, "iso seekbar onProgressChanged: " + progress);
 							preview.setISO(min_iso + progress);
 						}
 
@@ -1015,6 +1033,56 @@ public class MainActivity extends Activity {
 						public void onStopTrackingTouch(SeekBar seekBar) {
 						}
 					});
+					if( preview.supportsExposureTime() ) {
+						exposure_time_seek_bar.setVisibility(View.VISIBLE);
+						exposure_time_seek_bar.setMax(100);
+						final long min_exposure_time = preview.getMinimumExposureTime();
+						final long max_exposure_time = preview.getMaximumExposureTime();
+						long exposure_time = preview.getCameraController().getExposureTime();
+						//double frac = (exposure_time - min_exposure_time)/(double)(max_exposure_time - min_exposure_time);
+						double scaling = (exposure_time - min_exposure_time)/(double)(max_exposure_time - min_exposure_time);
+						double frac = Math.log(99.0*scaling + 1.0) / Math.log(100.0);
+						// see below for formula
+						int exposure_time_percent = (int)(frac*100.0 + 0.5); // add 0.5 for rounding
+						if( exposure_time_percent < 0 )
+							exposure_time_percent = 0;
+						else if( exposure_time_percent > 100 )
+							exposure_time_percent = 100;
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "exposure_time: " + exposure_time);
+							Log.d(TAG, "exposure_time scaling: " + scaling);
+							Log.d(TAG, "exposure_time frac: " + frac);
+							Log.d(TAG, "exposure_time_percent: " + exposure_time_percent);
+						}
+						exposure_time_seek_bar.setProgress(exposure_time_percent);
+						exposure_time_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+							@Override
+							public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "exposure_time seekbar onProgressChanged: " + progress);
+								double frac = progress/(double)100.0;
+								if( MyDebug.LOG )
+									Log.d(TAG, "exposure_time frac: " + frac);
+								//long exposure_time = min_exposure_time + (long)(frac * (max_exposure_time - min_exposure_time));
+								//double exposure_time_r = min_exposure_time_r + (frac * (max_exposure_time_r - min_exposure_time_r));
+								//long exposure_time = (long)(1.0 / exposure_time_r);
+								// we use the formula: [100^(percent/100) - 1]/99.0 rather than a simple linear scaling
+								double scaling = (Math.pow(100.0, frac) - 1.0) / 99.0;
+								if( MyDebug.LOG )
+									Log.d(TAG, "exposure_time scaling: " + scaling);
+								long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));
+								preview.setExposureTime(exposure_time);
+							}
+
+							@Override
+							public void onStartTrackingTouch(SeekBar seekBar) {
+							}
+
+							@Override
+							public void onStopTrackingTouch(SeekBar seekBar) {
+							}
+						});
+					}
 				}
 			}
 			else {
@@ -1027,7 +1095,7 @@ public class MainActivity extends Activity {
 						@Override
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 							if( MyDebug.LOG )
-								Log.d(TAG, "exposure seekbar onProgressChanged");
+								Log.d(TAG, "exposure seekbar onProgressChanged: " + progress);
 							preview.setExposure(min_exposure + progress, false);
 						}
 
@@ -2350,6 +2418,10 @@ public class MainActivity extends Activity {
 
     public static String getISOPreferenceKey() {
     	return "preference_iso";
+    }
+    
+    public static String getExposureTimePreferenceKey() {
+    	return "preference_exposure_time";
     }
     
     public static String getVolumeKeysPreferenceKey() {

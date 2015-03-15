@@ -28,6 +28,7 @@
     <string name="video_max_duration">Video reached max duration</string>
     <string name="video_max_filesize">Video reached max filesize</string>
     <string name="exposure_compensation">Exposure compensation</string>
+    <string name="exposure_time">Exposure time</string>
     <string name="focus_distance">Focus distance</string>
     <string name="infinite">Infinite</string>
     <string name="front_camera">Front Camera</string>

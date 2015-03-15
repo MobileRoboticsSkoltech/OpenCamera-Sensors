@@ -33,6 +33,9 @@ public abstract class CameraController {
 		boolean supports_iso_range = false;
 		int min_iso = 0;
 		int max_iso = 0;
+		boolean supports_exposure_time = false;
+		long min_exposure_time = 0l;
+		long max_exposure_time = 0l;
 		int min_exposure = 0;
 		int max_exposure = 0;
 		float exposure_step = 0.0f;
@@ -112,6 +115,8 @@ public abstract class CameraController {
     abstract String getISOKey();
 	abstract int getISO();
 	abstract boolean setISO(int iso);
+	abstract long getExposureTime();
+	abstract boolean setExposureTime(long exposure_time);
     public abstract CameraController.Size getPictureSize();
     abstract void setPictureSize(int width, int height);
     public abstract CameraController.Size getPreviewSize();
@@ -131,6 +136,7 @@ public abstract class CameraController {
 	public abstract String getDefaultColorEffect();
 	public abstract String getDefaultWhiteBalance();
 	public abstract String getDefaultISO();
+	public abstract long getDefaultExposureTime();
 
 	abstract void setFocusValue(String focus_value);
 	abstract public String getFocusValue();

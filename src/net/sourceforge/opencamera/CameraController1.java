@@ -244,7 +244,12 @@ class CameraController1 extends CameraController {
 	public String getDefaultISO() {
 		return "auto";
 	}
-	
+
+	public long getDefaultExposureTime() {
+		// not supported for CameraController1
+		return 0l;
+	}
+
 	// important, from docs:
 	// "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance).
 	// For example, suppose originally flash mode is on and supported flash modes are on/off. In night
@@ -405,12 +410,26 @@ class CameraController1 extends CameraController {
     	return this.iso_key;
     }
 
+	@Override
 	int getISO() {
 		// not supported for CameraController1
 		return 0;
 	}
 
+	@Override
 	boolean setISO(int iso) {
+		// not supported for CameraController1
+		return false;
+	}
+
+	@Override
+	long getExposureTime() {
+		// not supported for CameraController1
+		return 0l;
+	}
+
+	@Override
+	boolean setExposureTime(long exposure_time) {
 		// not supported for CameraController1
 		return false;
 	}

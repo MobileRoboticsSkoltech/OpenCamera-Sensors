@@ -92,6 +92,7 @@ public class CameraController2 extends CameraController {
 		//private int ae_mode = CameraMetadata.CONTROL_AE_MODE_ON;
 		//private int flash_mode = CameraMetadata.FLASH_MODE_OFF;
 		private int iso = 0;
+		private long exposure_time = 1000000000l/30;
 		private Rect scalar_crop_region = null; // no need for has_scalar_crop_region, as we can set to null instead
 		private boolean has_ae_exposure_compensation = false;
 		private int ae_exposure_compensation = 0;
@@ -192,14 +193,11 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "manual mode");
 					Log.d(TAG, "iso: " + iso);
+					Log.d(TAG, "exposure_time: " + exposure_time);
 				}
 				builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
-				/*Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
-				if( exposure_time_range != null ) {
-				}*/
-				// for now set some sensible defaults, as we don't yet expose these controls to the user
-				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, 1000000000l/30);
+				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
 				// set flash via CaptureRequest.FLASH
 		    	if( flash_value.equals("flash_off") ) {
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
@@ -624,6 +622,13 @@ public class CameraController2 extends CameraController {
 			camera_features.supports_iso_range = true;
 			camera_features.min_iso = iso_range.getLower();
 			camera_features.max_iso = iso_range.getUpper();
+			// we only expose exposure_time if iso_range is supported
+			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+			if( exposure_time_range != null ) {
+				camera_features.supports_exposure_time = true;
+				camera_features.min_exposure_time = exposure_time_range.getLower();
+				camera_features.max_exposure_time = exposure_time_range.getUpper();
+			}
 		}
 
 		Range<Integer> exposure_range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE);
@@ -1111,9 +1116,10 @@ public class CameraController2 extends CameraController {
 	int getISO() {
 		return camera_settings.iso;
 	}
-
+	
 	@Override
-	// Returns whether exposure was modified
+	// Returns whether ISO was modified
+	// N.B., use setISO(String) to switch between auto and manual mode
 	boolean setISO(int iso) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setISO: " + iso);
@@ -1131,6 +1137,39 @@ public class CameraController2 extends CameraController {
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
 				Log.e(TAG, "failed to set ISO");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		} 
+		return true;
+	}
+
+	@Override
+	long getExposureTime() {
+		return camera_settings.exposure_time;
+	}
+
+	@Override
+	// Returns whether exposure time was modified
+	// N.B., use setISO(String) to switch between auto and manual mode
+	boolean setExposureTime(long exposure_time) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setExposureTime: " + exposure_time);
+		if( camera_settings.exposure_time == exposure_time ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "already set");
+			return false;
+		}
+		try {
+			camera_settings.exposure_time = exposure_time;
+			if( camera_settings.setAEMode(previewBuilder, false) ) {
+		    	setRepeatingRequest();
+			}
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set exposure time");
 				Log.e(TAG, "reason: " + e.getReason());
 				Log.e(TAG, "message: " + e.getMessage());
 			}
@@ -1394,6 +1433,12 @@ public class CameraController2 extends CameraController {
 	@Override
 	public String getDefaultISO() {
 		return "auto";
+	}
+
+	@Override
+	// note, responsibility of callers to check that this is within the valid min/max range
+	public long getDefaultExposureTime() {
+		return 1000000000l/30;
 	}
 
 	@Override
