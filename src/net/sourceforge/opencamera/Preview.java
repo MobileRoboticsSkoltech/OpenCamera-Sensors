@@ -1159,7 +1159,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			zoomTo(new_zoom_factor, true);
 		}
 		
-		setFocusDistance(false);
+		setFocusDistance(false, false);
 
 	    if( take_photo ) {
 			if( this.is_video ) {
@@ -1350,7 +1350,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 					focus_distance_percent = progress;
-					setFocusDistance(true);
+					setFocusDistance(true, false);
 				}
 
 				@Override
@@ -3133,10 +3133,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 	}
 	
-	private void setFocusDistance(boolean show_toast) {
+	void changeFocusDistance(int change, boolean update_seek_bar) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "changeFocusDistance(): " + change);
+		if( change != 0 && camera_controller != null ) {
+			focus_distance_percent += change;
+			setFocusDistance(true, update_seek_bar);
+		}
+	}
+	
+	private void setFocusDistance(boolean show_toast, boolean update_seek_bar) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusDistance: focus_distance_percent = " + focus_distance_percent);
 		if( camera_controller != null ) {
+			if( focus_distance_percent < 0 )
+				focus_distance_percent = 0;
+			else if( focus_distance_percent > 100 )
+				focus_distance_percent = 100;
 			//float focus_distance = ((float)focus_distance_percent * minimum_focus_distance)/100.0f;
 			// we use the formula: min_dist*[100^(percent/100) - 1]/99.0 - we want something that allows the user to focus into the distance, as well as allowing close up control
 			double focus_distance_frac = ((double)focus_distance_percent)/100.0;
@@ -3153,6 +3166,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 	    		showToast(change_focus_distance_toast, getResources().getString(R.string.focus_distance) + " " + focus_distance_s);
 			}
+    		if( update_seek_bar ) {
+    			Activity activity = (Activity)getContext();
+    			SeekBar seek_bar = ((SeekBar)activity.findViewById(R.id.focus_seekbar));
+    			seek_bar.setProgress(focus_distance_percent);
+    		}
 		}
 	}
 	
@@ -3173,7 +3191,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			cancelAutoFocus();
 			if( new_exposure < min_exposure )
 				new_exposure = min_exposure;
-			if( new_exposure > max_exposure )
+			else if( new_exposure > max_exposure )
 				new_exposure = max_exposure;
 			if( camera_controller.setExposureCompensation(new_exposure) ) {
 				// now save

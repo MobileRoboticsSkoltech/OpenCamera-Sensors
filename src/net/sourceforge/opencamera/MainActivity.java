@@ -344,7 +344,15 @@ public class MainActivity extends Activity {
 	                return true;
 	    		}
 	    		else if( volume_keys.equals("volume_focus") ) {
-					preview.requestAutoFocus();
+	    			if( preview.getCurrentFocusValue().equals("focus_mode_manual2") ) {
+		    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+		    				preview.changeFocusDistance(-1, true);
+		    			else
+		    				preview.changeFocusDistance(1, true);
+	    			}
+	    			else {
+	    				preview.requestAutoFocus();
+	    			}
 					return true;
 	    		}
 	    		else if( volume_keys.equals("volume_zoom") ) {
