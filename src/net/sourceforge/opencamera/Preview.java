@@ -1017,7 +1017,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( test_fail_open_camera ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "test failing to open camera");
-				throw new RuntimeException();
+				throw new CameraControllerException();
 			}
 	        if( using_android_l ) {
 	    		CameraController.ErrorCallback previewErrorCallback = new CameraController.ErrorCallback() {
@@ -1784,7 +1784,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( is_preview_started ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "setPreviewSize() shouldn't be called when preview is running");
-			throw new RuntimeException();
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		if( !using_android_l ) {
 			// don't do for Android L, else this means we get flash on startup autofocus if flash is on
@@ -2875,7 +2875,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.LEFT);
 			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-			int location_y = top_y + (int) (14 * scale + 0.5f); // convert dps to pixels
+			int location_y = top_y + (int) (16 * scale + 0.5f); // convert dps to pixels
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
 				int diff = canvas.getWidth() - canvas.getHeight();
 				location_x += diff/2;
@@ -4421,19 +4421,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        };
 			if( MyDebug.LOG )
 				Log.d(TAG, "start autofocus to take picture");
-    		try {
-    			camera_controller.autoFocus(autoFocusCallback);
-    			count_cameraAutoFocus++;
-    		}
-    		catch(RuntimeException e) {
-    			// just in case? We got a RuntimeException report here from 1 user on Google Play:
-    			// 21 Dec 2013, Xperia Go, Android 4.1
-    			autoFocusCallback.onAutoFocus(false);
-
-    			if( MyDebug.LOG )
-					Log.e(TAG, "runtime exception from autoFocus when trying to take photo");
-    			e.printStackTrace();
-    		}
+			camera_controller.autoFocus(autoFocusCallback);
+			count_cameraAutoFocus++;
 		}
 		else {
 			takePictureWhenFocused();
@@ -5367,20 +5356,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "set focus_success to " + focus_success);
 	    		this.focus_complete_time = -1;
 	    		this.successfully_focused = false;
-	    		try {
-	    			camera_controller.autoFocus(autoFocusCallback);
-	    			count_cameraAutoFocus++;
-					if( MyDebug.LOG )
-						Log.d(TAG, "autofocus started");
-	    		}
-	    		catch(RuntimeException e) {
-	    			// just in case? We got a RuntimeException report here from 1 user on Google Play
-	    			autoFocusCallback.onAutoFocus(false);
-
-	    			if( MyDebug.LOG )
-						Log.e(TAG, "runtime exception from autoFocus");
-	    			e.printStackTrace();
-	    		}
+    			camera_controller.autoFocus(autoFocusCallback);
+    			count_cameraAutoFocus++;
+				if( MyDebug.LOG )
+					Log.d(TAG, "autofocus started");
 	        }
 	        else if( has_focus_area ) {
 	        	// do this so we get the focus box, for focus modes that support focus area, but don't support autofocus
@@ -5394,15 +5373,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
         if( camera_controller != null ) {
-			try {
-				camera_controller.cancelAutoFocus();
-			}
-			catch(RuntimeException e) {
-				// had a report of crash on some devices, see comment at https://sourceforge.net/p/opencamera/tickets/4/ made on 20140520
-				if( MyDebug.LOG )
-					Log.d(TAG, "cancelAutoFocus() failed");
-	    		e.printStackTrace();
-			}
+			camera_controller.cancelAutoFocus();
     		autoFocusCompleted(false, false, true);
         }
     }
@@ -5436,14 +5407,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// On some devices such as mtk6589, face detection does not resume as written in documentation so we have
 			// to cancelfocus when focus is finished
 			if( camera_controller != null ) {
-				try {
-					camera_controller.cancelAutoFocus();
-				}
-				catch(RuntimeException e) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "cancelAutoFocus() failed");
-					e.printStackTrace();
-				}
+				camera_controller.cancelAutoFocus();
 			}
 		}
     }
@@ -5482,17 +5446,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( this.using_face_detection ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "start face detection");
-				try {
-					camera_controller.startFaceDetection();
-				}
-				catch(RuntimeException e) {
-					// I didn't think this could happen, as we only call startFaceDetection() after we've called takePicture() or stopPreview(), which the Android docs say stops the face detection
-					// however I had a crash reported on Google Play for Open Camera v1.4
-					// 2 Jan 2014, "maxx_ax5", Android 4.0.3-4.0.4
-					// startCameraPreview() was called after taking photo in burst mode, but I tested with burst mode and face detection, and can't reproduce the crash on Galaxy Nexus
-					if( MyDebug.LOG )
-						Log.d(TAG, "face detection already started");
-				}
+				camera_controller.startFaceDetection();
 				faces_detected = null;
 			}
 		}

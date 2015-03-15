@@ -934,6 +934,8 @@ class CameraController1 extends CameraController {
 			camera.startFaceDetection();
 	    }
 	    catch(RuntimeException e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "face detection failed or already started");
 	    	return false;
 	    }
 	    return true;
@@ -960,11 +962,30 @@ class CameraController1 extends CameraController {
 				cb.onAutoFocus(success);
 			}
         };
-		camera.autoFocus(camera_cb);
+        try {
+        	camera.autoFocus(camera_cb);
+        }
+		catch(RuntimeException e) {
+			// just in case? We got a RuntimeException report here from 1 user on Google Play:
+			// 21 Dec 2013, Xperia Go, Android 4.1
+			if( MyDebug.LOG )
+				Log.e(TAG, "runtime exception from autoFocus when trying to take photo");
+			e.printStackTrace();
+			// should call the callback, so the application isn't left waiting (e.g., when we autofocus before trying to take a photo)
+			cb.onAutoFocus(false);
+		}
 	}
 	
 	void cancelAutoFocus() {
-		camera.cancelAutoFocus();
+		try {
+			camera.cancelAutoFocus();
+		}
+		catch(RuntimeException e) {
+			// had a report of crash on some devices, see comment at https://sourceforge.net/p/opencamera/tickets/4/ made on 20140520
+			if( MyDebug.LOG )
+				Log.d(TAG, "cancelAutoFocus() failed");
+    		e.printStackTrace();
+		}
 	}
 	
 	void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error) {
