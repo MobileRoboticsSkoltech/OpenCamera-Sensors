@@ -3199,8 +3199,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putString(MainActivity.getExposurePreferenceKey(), "" + new_exposure);
 				editor.apply();
-				float exposure_ev = new_exposure * exposure_step;
-	    		showToast(change_exposure_toast, getResources().getString(R.string.exposure_compensation) + " " + (new_exposure > 0 ? "+" : "") + new DecimalFormat("#.##").format(exposure_ev) + " EV");
+	    		showToast(change_exposure_toast, getExposureCompensationString(new_exposure));
 	    		if( update_seek_bar ) {
 	    			MainActivity main_activity = (MainActivity)this.getContext();
 	    			main_activity.setSeekBarExposure();
@@ -3261,6 +3260,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
+	private String getExposureCompensationString(int exposure) {
+		float exposure_ev = exposure * exposure_step;
+		return getResources().getString(R.string.exposure_compensation) + " " + (exposure > 0 ? "+" : "") + new DecimalFormat("#.##").format(exposure_ev) + " EV";
+	}
+
 	private String getExposureTimeString(long exposure_time) {
 		double exposure_time_s = exposure_time/1000000000.0;
 		double exposure_time_r = 1.0/exposure_time_s;
@@ -3358,8 +3362,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		int current_exposure = camera_controller.getExposureCompensation();
 		if( current_exposure != 0 ) {
-			float exposure_ev = current_exposure * exposure_step;
-			toast_string += "\n" + getResources().getString(R.string.exposure) + ": " + (current_exposure > 0 ? "+" : "") + new DecimalFormat("#.##").format(exposure_ev) + " EV";
+			toast_string += "\n" + getExposureCompensationString(current_exposure);
 		}
 		String scene_mode = camera_controller.getSceneMode();
     	if( scene_mode != null && !scene_mode.equals(camera_controller.getDefaultSceneMode()) ) {
