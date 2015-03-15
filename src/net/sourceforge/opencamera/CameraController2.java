@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Vector;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -32,6 +34,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 import android.util.Range;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -39,6 +42,7 @@ import android.view.SurfaceHolder;
 public class CameraController2 extends CameraController {
 	private static final String TAG = "CameraController2";
 
+	private Context context = null;
 	private CameraDevice camera = null;
 	private String cameraIdS = null;
 	private CameraCharacteristics characteristics = null;
@@ -319,6 +323,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController2: " + cameraId);
 
+		this.context = context;
 		this.preview_error_cb = preview_error_cb;
 
 		thread = new HandlerThread("CameraBackground"); 
@@ -587,10 +592,18 @@ public class CameraController2 extends CameraController {
 
 		android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceTexture.class);
 		camera_features.preview_sizes = new ArrayList<CameraController.Size>();
+        Point display_size = new Point();
+		Activity activity = (Activity)context;
+        {
+            Display display = activity.getWindowManager().getDefaultDisplay();
+            display.getRealSize(display_size);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
+        }
 		for(android.util.Size camera_size : camera_preview_sizes) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
-			if( camera_size.getWidth() > 1920 || camera_size.getHeight() > 1440 )
+			if( camera_size.getWidth() > display_size.x || camera_size.getHeight() > display_size.y )
 				continue; // Nexus 6 returns these, even though not supported?! (get green corruption lines if we allow these)
 			camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
