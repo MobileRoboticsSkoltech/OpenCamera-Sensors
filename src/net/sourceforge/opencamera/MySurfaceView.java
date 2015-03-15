@@ -1,7 +1,5 @@
 package net.sourceforge.opencamera;
 
-import java.io.IOException;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -47,7 +45,7 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 		try {
 			camera_controller.setPreviewDisplay(this.getHolder());
 		}
-		catch(IOException e) {
+		catch(CameraControllerException e) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "Failed to set preview display: " + e.getMessage());
 			e.printStackTrace();

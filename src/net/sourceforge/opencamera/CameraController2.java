@@ -1,6 +1,5 @@
 package net.sourceforge.opencamera;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -316,7 +315,7 @@ public class CameraController2 extends CameraController {
 	private boolean push_set_ae_lock = false;
 	private CaptureRequest push_set_ae_lock_id = null;
 
-	public CameraController2(Context context, int cameraId, ErrorCallback preview_error_cb) {
+	public CameraController2(Context context, int cameraId, ErrorCallback preview_error_cb) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController2: " + cameraId);
 
@@ -393,8 +392,7 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			// throw as a RuntimeException instead, as this is what callers will catch
-			throw new RuntimeException();
+			throw new CameraControllerException();
 		}
 
 		if( MyDebug.LOG )
@@ -405,7 +403,7 @@ public class CameraController2 extends CameraController {
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "camera failed to open");
-			throw new RuntimeException();
+			throw new CameraControllerException();
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "camera now opened: " + camera);
@@ -1197,7 +1195,7 @@ public class CameraController2 extends CameraController {
 			// can only call this when captureSession not created - as the surface of the imageReader we create has to match the surface we pass to the captureSession
 			if( MyDebug.LOG )
 				Log.e(TAG, "can't set picture size when captureSession running!");
-			throw new RuntimeException();
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		this.picture_width = width;
 		this.picture_height = height;
@@ -1210,7 +1208,7 @@ public class CameraController2 extends CameraController {
 			// can only call this when captureSession not created - as the surface of the imageReader we create has to match the surface we pass to the captureSession
 			if( MyDebug.LOG )
 				Log.e(TAG, "can't create picture image reader when captureSession running!");
-			throw new RuntimeException();
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		if( imageReader != null ) {
 			imageReader.close();
@@ -1218,7 +1216,7 @@ public class CameraController2 extends CameraController {
 		if( picture_width == 0 || picture_height == 0 ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "application needs to call setPictureSize()");
-			throw new RuntimeException();
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2); 
 		if( MyDebug.LOG ) {
@@ -1306,7 +1304,7 @@ public class CameraController2 extends CameraController {
 		if( quality < 0 || quality > 100 ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "invalid jpeg quality" + quality);
-			throw new RuntimeException();
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		this.camera_settings.jpeg_quality = (byte)quality;
 	}
@@ -1326,7 +1324,7 @@ public class CameraController2 extends CameraController {
 		if( value < 0 || value > zoom_ratios.size() ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "invalid zoom value" + value);
-			throw new RuntimeException();
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		float zoom = zoom_ratios.get(value)/100.0f;
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
@@ -1845,23 +1843,23 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setPreviewDisplay(SurfaceHolder holder) throws IOException {
+	void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setPreviewDisplay");
 			Log.e(TAG, "SurfaceHolder not supported for CameraController2!");
 			Log.e(TAG, "Should use setPreviewTexture() instead");
 		}
-		throw new RuntimeException();
+		throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 	}
 
 	@Override
-	void setPreviewTexture(SurfaceTexture texture) throws IOException {
+	void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewTexture");
 		if( this.texture != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview texture already set");
-			throw new RuntimeException();
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		this.texture = texture;
 	}
@@ -1925,15 +1923,14 @@ public class CameraController2 extends CameraController {
 		return surface_texture;
 	}
 
-	// throws RuntimeException if fails to create captureSession
-	private void createCaptureSession(final MediaRecorder video_recorder) throws RuntimeException {
+	private void createCaptureSession(final MediaRecorder video_recorder) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "create capture session");
 		
 		if( previewBuilder == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "previewBuilder not present!");
-			throw new RuntimeException();
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 
 		if( captureSession != null ) {
@@ -1963,7 +1960,7 @@ public class CameraController2 extends CameraController {
 				if( preview_width == 0 || preview_height == 0 ) {
 					if( MyDebug.LOG )
 						Log.e(TAG, "application needs to call setPreviewSize()");
-					throw new RuntimeException();
+					throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 				}
 				texture.setDefaultBufferSize(preview_width, preview_height);
 				// also need to create a new surface for the texture, in case the size has changed - but make sure we remove the old one first!
@@ -2031,7 +2028,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "captureSession was: " + captureSession);
 					}
 					callback_done = true;
-					// don't throw RuntimeException here, as won't be caught - instead we throw RuntimeException below
+					// don't throw CameraControllerException here, as won't be caught - instead we throw CameraControllerException below
 				}
 			}
 			MyStateCallback myStateCallback = new MyStateCallback();
@@ -2062,7 +2059,7 @@ public class CameraController2 extends CameraController {
 			if( captureSession == null ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "failed to create capture session");
-				throw new RuntimeException();
+				throw new CameraControllerException();
 			}
 		}
 		catch(CameraAccessException e) {
@@ -2072,13 +2069,12 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			throw new RuntimeException();
+			throw new CameraControllerException();
 		}
 	}
 
-	// throws RuntimeException if fails to start preview
 	@Override
-	void startPreview() throws RuntimeException {
+	void startPreview() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startPreview");
 		if( captureSession != null ) {
@@ -2092,8 +2088,8 @@ public class CameraController2 extends CameraController {
 					Log.e(TAG, "message: " + e.getMessage());
 				}
 				e.printStackTrace();
-				// do via RuntimeException instead of preview_error_cb, so caller immediately knows preview has failed
-				throw new RuntimeException();
+				// do via CameraControllerException instead of preview_error_cb, so caller immediately knows preview has failed
+				throw new CameraControllerException();
 			} 
 			return;
 		}
@@ -2409,14 +2405,14 @@ public class CameraController2 extends CameraController {
 		// for CameraController2, the preview display orientation is handled via the TextureView's transform
 		if( MyDebug.LOG )
 			Log.d(TAG, "setDisplayOrientation not supported by this API");
-		throw new RuntimeException();
+		throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 	}
 
 	@Override
 	int getDisplayOrientation() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getDisplayOrientation not supported by this API");
-		throw new RuntimeException();
+		throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 	}
 
 	@Override
@@ -2439,9 +2435,8 @@ public class CameraController2 extends CameraController {
 		// do nothing at this stage
 	}
 
-	// throws RuntimeException if fails to prepare video recorder
 	@Override
-	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws RuntimeException {
+	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initVideoRecorderPostPrepare");
 		try {
@@ -2460,12 +2455,12 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
-			throw new RuntimeException();
+			throw new CameraControllerException();
 		}
 	}
 
 	@Override
-	void reconnect() throws IOException {
+	void reconnect() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "reconnect");
 		createPreviewRequest();

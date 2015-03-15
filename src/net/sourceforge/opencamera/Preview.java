@@ -826,7 +826,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			camera_controller.reconnect();
     			this.setPreviewPaused(false);
 			}
-    		catch (IOException e) {
+    		catch(CameraControllerException e) {
         		if( MyDebug.LOG )
         			Log.e(TAG, "failed to reconnect to camera");
 				e.printStackTrace();
@@ -1031,9 +1031,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        }
 	        else
 				camera_controller = new CameraController1(cameraId);
-			//throw new RuntimeException(); // uncomment to test camera not opening
+			//throw new CameraControllerException(); // uncomment to test camera not opening
 		}
-		catch(RuntimeException e) {
+		catch(CameraControllerException e) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "Failed to open camera: " + e.getMessage());
 			e.printStackTrace();
@@ -4376,35 +4376,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    		video_recorder.reset();
 		    		video_recorder.release(); 
 		    		video_recorder = null;
-					/*is_taking_photo = false;
-					is_taking_photo_on_timer = false;*/
 					this.phase = PHASE_NORMAL;
 					showGUI(true);
 					this.reconnectCamera(true);
 				}
 	        	catch(RuntimeException e) {
 	        		// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
-	        		// also initVideoRecorderPostPrepare throws RuntimeException if it fails on Android L Camera2 API
 		    		if( MyDebug.LOG )
 		    			Log.e(TAG, "runtime exception starting video recorder");
 					e.printStackTrace();
-					String error_message = "";
-					String features = getErrorFeatures(profile);
-					if( features.length() > 0 ) {
-						error_message = getResources().getString(R.string.sorry) + ", " + features + " " + getResources().getString(R.string.not_supported);
-					}
-					else {
-						error_message = getResources().getString(R.string.failed_to_record_video);
-					}
-		    	    showToast(null, error_message);
-		    		video_recorder.reset();
-		    		video_recorder.release(); 
-		    		video_recorder = null;
-					/*is_taking_photo = false;
-					is_taking_photo_on_timer = false;*/
-					this.phase = PHASE_NORMAL;
-					showGUI(true);
-					this.reconnectCamera(true);
+					failedToStartVideoRecorder(profile);
+				}
+	        	catch(CameraControllerException e) {
+		    		if( MyDebug.LOG )
+		    			Log.e(TAG, "camera exception starting video recorder");
+					e.printStackTrace();
+					failedToStartVideoRecorder(profile);
 				}
 			}
         	return;
@@ -4451,6 +4438,24 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else {
 			takePictureWhenFocused();
 		}
+	}
+	
+	private void failedToStartVideoRecorder(CamcorderProfile profile) {
+		String error_message = "";
+		String features = getErrorFeatures(profile);
+		if( features.length() > 0 ) {
+			error_message = getResources().getString(R.string.sorry) + ", " + features + " " + getResources().getString(R.string.not_supported);
+		}
+		else {
+			error_message = getResources().getString(R.string.failed_to_record_video);
+		}
+	    showToast(null, error_message);
+		video_recorder.reset();
+		video_recorder.release(); 
+		video_recorder = null;
+		this.phase = PHASE_NORMAL;
+		showGUI(true);
+		this.reconnectCamera(true);
 	}
 
 	private void takePictureWhenFocused() {
@@ -5463,9 +5468,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			camera_controller.startPreview();
 		    	count_cameraStartPreview++;
     		}
-    		catch(RuntimeException e) {
+    		catch(CameraControllerException e) {
     			if( MyDebug.LOG )
-    				Log.d(TAG, "RuntimeException trying to startPreview");
+    				Log.d(TAG, "CameraControllerException trying to startPreview");
     			e.printStackTrace();
     			showToast(null, R.string.failed_to_start_camera_preview);
     			return;

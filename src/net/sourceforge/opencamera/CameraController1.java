@@ -23,10 +23,18 @@ class CameraController1 extends CameraController {
     private Camera.CameraInfo camera_info = new Camera.CameraInfo();
 	private String iso_key = null;
 
-	CameraController1(int cameraId) {
+	CameraController1(int cameraId) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController1: " + cameraId);
-		camera = Camera.open(cameraId);
+		try {
+			camera = Camera.open(cameraId);
+		}
+		catch(RuntimeException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "failed to open camera");
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
 	    Camera.getCameraInfo(cameraId, camera_info);
 	}
 	
@@ -860,28 +868,59 @@ class CameraController1 extends CameraController {
 	}
 	
 	@Override
-	void reconnect() throws IOException {
-		camera.reconnect();
+	void reconnect() throws CameraControllerException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "reconnect");
+		try {
+			camera.reconnect();
+		}
+		catch(IOException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "reconnect threw IOException");
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
 	}
 	
 	@Override
-	void setPreviewDisplay(SurfaceHolder holder) throws IOException {
+	void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewDisplay");
-		camera.setPreviewDisplay(holder);
-	}
-	
-	@Override
-	void setPreviewTexture(SurfaceTexture texture) throws IOException {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setPreviewTexture");
-		camera.setPreviewTexture(texture);
+		try {
+			camera.setPreviewDisplay(holder);
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
 	}
 
-	// throws RuntimeException if fails to start preview
 	@Override
-	void startPreview() throws RuntimeException {
-		camera.startPreview();
+	void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPreviewTexture");
+		try {
+			camera.setPreviewTexture(texture);
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
+	}
+
+	@Override
+	void startPreview() throws CameraControllerException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startPreview");
+		try {
+			camera.startPreview();
+		}
+		catch(RuntimeException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "failed to start preview");
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
 	}
 	
 	@Override
@@ -1002,7 +1041,7 @@ class CameraController1 extends CameraController {
 	}
 	
 	@Override
-	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws RuntimeException {
+	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException {
 		// no further actions necessary
 	}
 	

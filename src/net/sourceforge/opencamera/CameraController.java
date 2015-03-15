@@ -1,6 +1,5 @@
 package net.sourceforge.opencamera;
 
-import java.io.IOException;
 import java.util.List;
 
 import android.graphics.Rect;
@@ -9,6 +8,11 @@ import android.location.Location;
 import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
+
+class CameraControllerException extends Exception {
+	private static final long serialVersionUID = 7904697847749213106L;
+
+};
 
 public abstract class CameraController {
 	private static final String TAG = "CameraController";
@@ -156,10 +160,10 @@ public abstract class CameraController {
 	public abstract List<CameraController.Area> getMeteringAreas();
 	abstract boolean supportsAutoFocus();
 	abstract boolean focusIsVideo();
-	abstract void reconnect() throws IOException;
-	abstract void setPreviewDisplay(SurfaceHolder holder) throws IOException;
-	abstract void setPreviewTexture(SurfaceTexture texture) throws IOException;
-	abstract void startPreview() throws RuntimeException; // throws RuntimeException if fails to start preview
+	abstract void reconnect() throws CameraControllerException;
+	abstract void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException;
+	abstract void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException;
+	abstract void startPreview() throws CameraControllerException;
 	abstract void stopPreview();
 	public abstract boolean startFaceDetection();
 	abstract void setFaceDetectionListener(final CameraController.FaceDetectionListener listener);
@@ -172,7 +176,7 @@ public abstract class CameraController {
 	abstract boolean isFrontFacing();
 	abstract void unlock();
 	abstract void initVideoRecorderPrePrepare(MediaRecorder video_recorder);
-	abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws RuntimeException; // throws RuntimeException if fails to prepare video recorder
+	abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException;
 	abstract String getParametersString();
 	boolean captureResultHasIso() {
 		return false;
