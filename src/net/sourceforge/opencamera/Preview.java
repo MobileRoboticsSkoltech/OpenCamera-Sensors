@@ -5980,14 +5980,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// Also see http://stackoverflow.com/questions/13267239/toast-from-a-non-ui-thread
 		activity.runOnUiThread(new Runnable() {
 			public void run() {
-				if( clear_toast != null && clear_toast.toast != null )
+				/*if( clear_toast != null && clear_toast.toast != null )
 					clear_toast.toast.cancel();
-				/*clear_toast = Toast.makeText(activity.getApplicationContext(), message, Toast.LENGTH_SHORT);
-				clear_toast.show();*/
 
 				Toast toast = new Toast(activity);
 				if( clear_toast != null )
-					clear_toast.toast = toast;
+					clear_toast.toast = toast;*/
+				// This method is better, as otherwise a previous toast (with different or no clear_toast) never seems to clear if we repeatedly issue new toasts - this doesn't happen if we reuse existing toasts if possible
+				Toast toast = null;
+				if( clear_toast != null && clear_toast.toast != null )
+					toast = clear_toast.toast;
+				else {
+					toast = new Toast(activity);
+					if( clear_toast != null )
+						clear_toast.toast = toast;
+				}
 				View text = new RotatedTextView(message, activity);
 				toast.setView(text);
 				toast.setDuration(duration);
