@@ -3209,13 +3209,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	void setISO(int new_iso) {
+	void changeISO(int change, boolean update_seek_bar) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "changeISO(): " + change);
+		if( change != 0 && camera_controller != null && supports_iso_range ) {
+			int current_iso = camera_controller.getISO();
+			int new_iso = current_iso + change;
+			setISO(new_iso, update_seek_bar);
+		}
+	}
+
+	void setISO(int new_iso, boolean update_seek_bar) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setISO(): " + new_iso);
 		if( camera_controller != null && supports_iso_range ) {
 			if( new_iso < min_iso )
 				new_iso = min_iso;
-			if( new_iso > max_iso )
+			else if( new_iso > max_iso )
 				new_iso = max_iso;
 			if( camera_controller.setISO(new_iso) ) {
 				// now save
@@ -3223,6 +3233,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putString(MainActivity.getISOPreferenceKey(), "" + new_iso);
 				editor.apply();
+	    		if( update_seek_bar ) {
+	    			Activity activity = (Activity)getContext();
+	    			SeekBar seek_bar = ((SeekBar)activity.findViewById(R.id.iso_seekbar));
+	    			seek_bar.setProgress(camera_controller.getISO() - min_iso);
+	    		}
 			}
 		}
 	}

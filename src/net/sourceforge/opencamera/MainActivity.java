@@ -363,10 +363,24 @@ public class MainActivity extends Activity {
 	                return true;
 	    		}
 	    		else if( volume_keys.equals("volume_exposure") ) {
-	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-	    				this.preview.changeExposure(1, true);
-	    			else
-	    				this.preview.changeExposure(-1, true);
+	    			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
+	    			boolean manual_iso = !value.equals(preview.getCameraController().getDefaultISO());
+	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP ) {
+	    				if( manual_iso ) {
+	    					if( preview.supportsISORange() )
+		    					this.preview.changeISO(1, true);
+	    				}
+	    				else
+	    					this.preview.changeExposure(1, true);
+	    			}
+	    			else {
+	    				if( manual_iso ) {
+	    					if( preview.supportsISORange() )
+		    					this.preview.changeISO(-1, true);
+	    				}
+	    				else
+	    					this.preview.changeExposure(-1, true);
+	    			}
 	                return true;
 	    		}
 	    		else if( volume_keys.equals("volume_auto_stabilise") ) {
@@ -1030,7 +1044,7 @@ public class MainActivity extends Activity {
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "iso seekbar onProgressChanged: " + progress);
-							preview.setISO(min_iso + progress);
+							preview.setISO(min_iso + progress, false);
 						}
 
 						@Override
