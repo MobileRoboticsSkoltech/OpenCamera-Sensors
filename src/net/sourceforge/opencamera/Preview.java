@@ -820,7 +820,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	private void reconnectCamera(boolean quiet) {
 		if( MyDebug.LOG )
-			Log.e(TAG, "reconnectCamera()");
+			Log.d(TAG, "reconnectCamera()");
         if( camera_controller != null ) { // just to be safe
     		try {
     			camera_controller.reconnect();
