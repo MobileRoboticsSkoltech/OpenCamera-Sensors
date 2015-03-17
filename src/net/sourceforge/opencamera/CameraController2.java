@@ -130,6 +130,12 @@ public class CameraController2 extends CameraController {
 			setAERegions(builder);
 			setFaceDetectMode(builder);
 			setVideoStabilization(builder);
+			/*builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+			builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
+			builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
+			builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, 33333333l);
+			builder.set(CaptureRequest.SENSOR_SENSITIVITY, 40);
+			builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 33333333l);*/
 
 			if( is_still ) {
 				if( location != null ) {
@@ -2597,10 +2603,42 @@ public class CameraController2 extends CameraController {
 					capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
 					/*if( MyDebug.LOG )
 						Log.d(TAG, "capture_result_iso: " + capture_result_iso);*/
+					if( camera_settings.has_iso && camera_settings.iso != capture_result_iso ) {
+						// ugly hack: problem that when we start recording video (video_recorder.start() call), this often causes the ISO setting to reset to the wrong value!
+						// seems to happen more often with shorter exposure time
+						// seems to happen on other camera apps with Camera2 API too
+						// this workaround still means a brief flash with incorrect ISO, but is best we can do for now!
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "ISO " + capture_result_iso + " different to requested ISO " + camera_settings.iso);
+							Log.d(TAG, "    requested ISO was: " + request.get(CaptureRequest.SENSOR_SENSITIVITY));
+							Log.d(TAG, "    requested AE mode was: " + request.get(CaptureRequest.CONTROL_AE_MODE));
+						}
+						try {
+							setRepeatingRequest();
+						}
+						catch(CameraAccessException e) {
+							if( MyDebug.LOG ) {
+								Log.e(TAG, "failed to set repeating request after ISO hack");
+								Log.e(TAG, "reason: " + e.getReason());
+								Log.e(TAG, "message: " + e.getMessage());
+							}
+							e.printStackTrace();
+						} 
+					}
 				}
 				else {
 					capture_result_has_iso = false;
 				}
+				/*if( MyDebug.LOG ) {
+					if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {
+						long capture_result_exposure_time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+						Log.d(TAG, "capture_result_exposure_time: " + capture_result_exposure_time);
+					}
+					if( result.get(CaptureResult.SENSOR_FRAME_DURATION) != null ) {
+						long capture_result_frame_duration = result.get(CaptureResult.SENSOR_FRAME_DURATION);
+						Log.d(TAG, "capture_result_frame_duration: " + capture_result_frame_duration);
+					}
+				}*/
 			}
 
 			if( face_detection_listener != null && previewBuilder != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL ) {
