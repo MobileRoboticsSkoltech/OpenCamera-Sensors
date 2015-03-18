@@ -3151,9 +3151,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			else if( focus_distance_percent > 100 )
 				focus_distance_percent = 100;
 			//float focus_distance = ((float)focus_distance_percent * minimum_focus_distance)/100.0f;
-			// we use the formula: min_dist*[100^(percent/100) - 1]/99.0 - we want something that allows the user to focus into the distance, as well as allowing close up control
 			double focus_distance_frac = ((double)focus_distance_percent)/100.0;
-			float focus_distance = (float)((minimum_focus_distance * (Math.pow(100.0, focus_distance_frac) - 1.0)) / 99.0);
+			float focus_distance = (float)(minimum_focus_distance * MainActivity.seekbarScaling(focus_distance_frac));
 			camera_controller.setFocusDistance(focus_distance);
 			if( show_toast ) {
 				String focus_distance_s = "";

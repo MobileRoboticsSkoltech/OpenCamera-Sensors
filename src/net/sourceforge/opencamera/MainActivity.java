@@ -1037,14 +1037,33 @@ public class MainActivity extends Activity {
 					iso_seek_bar.setVisibility(View.VISIBLE);
 					final int min_iso = preview.getMinimumISO();
 					final int max_iso = preview.getMaximumISO();
-					iso_seek_bar.setMax( max_iso - min_iso );
-					iso_seek_bar.setProgress( preview.getCameraController().getISO() - min_iso );
+					/*iso_seek_bar.setMax( max_iso - min_iso );
+					iso_seek_bar.setProgress( preview.getCameraController().getISO() - min_iso );*/
+					{
+						iso_seek_bar.setMax(100);
+						double scaling = (preview.getCameraController().getISO() - min_iso)/(double)(max_iso - min_iso);
+						double frac = MainActivity.seekbarScalingInverse(scaling);
+						int iso_percent = (int)(frac*100.0 + 0.5); // add 0.5 for rounding
+						if( iso_percent < 0 )
+							iso_percent = 0;
+						else if( iso_percent > 100 )
+							iso_percent = 100;
+						iso_seek_bar.setProgress(iso_percent);
+					}
 					iso_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 						@Override
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "iso seekbar onProgressChanged: " + progress);
-							preview.setISO(min_iso + progress, false);
+							//preview.setISO(min_iso + progress, false);
+							double frac = progress/(double)100.0;
+							if( MyDebug.LOG )
+								Log.d(TAG, "exposure_time frac: " + frac);
+							double scaling = MainActivity.seekbarScaling(frac);
+							if( MyDebug.LOG )
+								Log.d(TAG, "exposure_time scaling: " + scaling);
+							int iso = min_iso + (int)(scaling * (max_iso - min_iso));
+							preview.setISO(iso, false);
 						}
 
 						@Override
@@ -1057,13 +1076,13 @@ public class MainActivity extends Activity {
 					});
 					if( preview.supportsExposureTime() ) {
 						exposure_time_seek_bar.setVisibility(View.VISIBLE);
-						exposure_time_seek_bar.setMax(100);
 						final long min_exposure_time = preview.getMinimumExposureTime();
 						final long max_exposure_time = preview.getMaximumExposureTime();
 						long exposure_time = preview.getCameraController().getExposureTime();
+						exposure_time_seek_bar.setMax(100);
 						//double frac = (exposure_time - min_exposure_time)/(double)(max_exposure_time - min_exposure_time);
 						double scaling = (exposure_time - min_exposure_time)/(double)(max_exposure_time - min_exposure_time);
-						double frac = Math.log(99.0*scaling + 1.0) / Math.log(100.0);
+						double frac = MainActivity.seekbarScalingInverse(scaling);
 						// see below for formula
 						int exposure_time_percent = (int)(frac*100.0 + 0.5); // add 0.5 for rounding
 						if( exposure_time_percent < 0 )
@@ -1089,7 +1108,7 @@ public class MainActivity extends Activity {
 								//double exposure_time_r = min_exposure_time_r + (frac * (max_exposure_time_r - min_exposure_time_r));
 								//long exposure_time = (long)(1.0 / exposure_time_r);
 								// we use the formula: [100^(percent/100) - 1]/99.0 rather than a simple linear scaling
-								double scaling = (Math.pow(100.0, frac) - 1.0) / 99.0;
+								double scaling = MainActivity.seekbarScaling(frac);
 								if( MyDebug.LOG )
 									Log.d(TAG, "exposure_time scaling: " + scaling);
 								long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));
@@ -1145,6 +1164,17 @@ public class MainActivity extends Activity {
 				}
 			}
 		}
+    }
+    
+    static double seekbarScaling(double frac) {
+    	// For various seekbars, we want to use a non-linear scaling, so user has more control over smaller values
+    	double scaling = (Math.pow(100.0, frac) - 1.0) / 99.0;
+    	return scaling;
+    }
+
+    static double seekbarScalingInverse(double scaling) {
+    	double frac = Math.log(99.0*scaling + 1.0) / Math.log(100.0);
+    	return frac;
     }
     
     public void clickedExposureLock(View view) {
