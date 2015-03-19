@@ -207,9 +207,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private ToastBoxer exposure_lock_toast = new ToastBoxer();
 	private ToastBoxer take_photo_toast = new ToastBoxer();
 	private ToastBoxer stopstart_video_toast = new ToastBoxer();
-	private ToastBoxer change_exposure_toast = new ToastBoxer();
-	private ToastBoxer change_exposure_time_toast = new ToastBoxer();
-	private ToastBoxer change_focus_distance_toast = new ToastBoxer();
+	private ToastBoxer seekbar_toast = new ToastBoxer();
 	
 	private int ui_rotation = 0;
 
@@ -2766,7 +2764,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				int iso = camera_controller.captureResultIso();
 				if( string.length() > 0 )
 					string += " ";
-				string += getResources().getString(R.string.iso) + " " + iso;
+				string += getISOString(iso);
 			}
 			if( camera_controller.captureResultHasExposureTime() ) {
 				long exposure_time = camera_controller.captureResultExposureTime();
@@ -3183,7 +3181,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				else {
 					focus_distance_s = getResources().getString(R.string.infinite);
 				}
-	    		showToast(change_focus_distance_toast, getResources().getString(R.string.focus_distance) + " " + focus_distance_s);
+	    		showToast(seekbar_toast, getResources().getString(R.string.focus_distance) + " " + focus_distance_s);
 			}
     		if( update_seek_bar ) {
     			Activity activity = (Activity)getContext();
@@ -3218,7 +3216,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putString(MainActivity.getExposurePreferenceKey(), "" + new_exposure);
 				editor.apply();
-	    		showToast(change_exposure_toast, getExposureCompensationString(new_exposure));
+	    		showToast(seekbar_toast, getExposureCompensationString(new_exposure), Toast.LENGTH_SHORT, 96);
 	    		if( update_seek_bar ) {
 	    			MainActivity main_activity = (MainActivity)this.getContext();
 	    			main_activity.setSeekBarExposure();
@@ -3251,6 +3249,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putString(MainActivity.getISOPreferenceKey(), "" + new_iso);
 				editor.apply();
+	    		showToast(seekbar_toast, getISOString(new_iso), Toast.LENGTH_SHORT, 96);
 	    		if( update_seek_bar ) {
 	    			Activity activity = (Activity)getContext();
 	    			SeekBar seek_bar = ((SeekBar)activity.findViewById(R.id.iso_seekbar));
@@ -3274,7 +3273,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putLong(MainActivity.getExposureTimePreferenceKey(), new_exposure_time);
 				editor.apply();
-	    		showToast(change_exposure_time_toast, getExposureTimeString(new_exposure_time));
+	    		showToast(seekbar_toast, getExposureTimeString(new_exposure_time), Toast.LENGTH_SHORT, 96);
 			}
 		}
 	}
@@ -3282,6 +3281,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private String getExposureCompensationString(int exposure) {
 		float exposure_ev = exposure * exposure_step;
 		return getResources().getString(R.string.exposure_compensation) + " " + (exposure > 0 ? "+" : "") + new DecimalFormat("#.##").format(exposure_ev) + " EV";
+	}
+	
+	private String getISOString(int iso) {
+		return getResources().getString(R.string.iso) + " " + iso;
 	}
 
 	private String getExposureTimeString(long exposure_time) {
@@ -5946,8 +5949,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public void showToast(final ToastBoxer clear_toast, final String message) {
     	showToast(clear_toast, message, Toast.LENGTH_SHORT);
     }
-    
+
     public void showToast(final ToastBoxer clear_toast, final String message, final int duration) {
+    	showToast(clear_toast, message, Toast.LENGTH_SHORT, 32);
+    }
+
+    public void showToast(final ToastBoxer clear_toast, final String message, final int duration, final int offset_y_dp) {
 		class RotatedTextView extends View {
 			private String [] lines = null;
 			private Paint paint = new Paint();
@@ -5991,7 +5998,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				bounds.bottom += ((lines.length-1) * height)/2;
 				bounds.top -= ((lines.length-1) * height)/2;
 				final int padding = (int) (14 * scale + 0.5f); // convert dps to pixels
-				final int offset_y = (int) (32 * scale + 0.5f); // convert dps to pixels
+				final int offset_y = (int) (offset_y_dp * scale + 0.5f); // convert dps to pixels
 				canvas.save();
 				canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
 
