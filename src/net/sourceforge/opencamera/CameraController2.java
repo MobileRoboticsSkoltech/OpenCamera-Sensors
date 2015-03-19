@@ -233,7 +233,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "auto mode");
 					Log.d(TAG, "flash_value: " + flash_value);
 				}
-				// prefer to set flash via the ae mode, except for torch which we can't
+				// prefer to set flash via the ae mode (otherwise get even worse results), except for torch which we can't
 		    	if( flash_value.equals("flash_off") ) {
 					builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
