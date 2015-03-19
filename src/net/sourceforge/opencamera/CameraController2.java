@@ -79,6 +79,10 @@ public class CameraController2 extends CameraController {
 	
 	private boolean capture_result_has_iso = false;
 	private int capture_result_iso = 0;
+	private boolean capture_result_has_exposure_time = false;
+	private long capture_result_exposure_time = 0;
+	private boolean capture_result_has_frame_duration = false;
+	private long capture_result_frame_duration = 0;
 	
 	class CameraSettings {
 		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
@@ -2506,6 +2510,26 @@ public class CameraController2 extends CameraController {
 		return capture_result_iso;
 	}
 
+	@Override
+	boolean captureResultHasExposureTime() {
+		return capture_result_has_exposure_time;
+	}
+
+	@Override
+	long captureResultExposureTime() {
+		return capture_result_exposure_time;
+	}
+
+	@Override
+	boolean captureResultHasFrameDuration() {
+		return capture_result_has_frame_duration;
+	}
+
+	@Override
+	long captureResultFrameDuration() {
+		return capture_result_frame_duration;
+	}
+
 	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
 		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
 			process(request, partialResult, false);
@@ -2628,6 +2652,20 @@ public class CameraController2 extends CameraController {
 				}
 				else {
 					capture_result_has_iso = false;
+				}
+				if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {
+					capture_result_has_exposure_time = true;
+					capture_result_exposure_time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+				}
+				else {
+					capture_result_has_exposure_time = false;
+				}
+				if( result.get(CaptureResult.SENSOR_FRAME_DURATION) != null ) {
+					capture_result_has_frame_duration = true;
+					capture_result_frame_duration = result.get(CaptureResult.SENSOR_FRAME_DURATION);
+				}
+				else {
+					capture_result_has_frame_duration = false;
 				}
 				/*if( MyDebug.LOG ) {
 					if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {

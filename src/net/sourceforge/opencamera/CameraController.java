@@ -184,6 +184,18 @@ public abstract class CameraController {
 	int captureResultIso() {
 		return 0;
 	}
+	boolean captureResultHasExposureTime() {
+		return false;
+	}
+	long captureResultExposureTime() {
+		return 0;
+	}
+	boolean captureResultHasFrameDuration() {
+		return false;
+	}
+	long captureResultFrameDuration() {
+		return 0;
+	}
 
 	// gets the available values of a generic mode, e.g., scene, color etc, and makes sure the requested mode is available
 	protected SupportedValues checkModeIsSupported(List<String> values, String value, String default_value) {

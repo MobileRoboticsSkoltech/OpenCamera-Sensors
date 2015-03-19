@@ -2757,12 +2757,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
-		if( camera_controller != null && camera_controller.captureResultHasIso() && sharedPreferences.getBoolean(MainActivity.getShowISOPreferenceKey(), true) ) {
+		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowISOPreferenceKey(), true) ) {
 			int pixels_offset_y = 2*text_y;
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
-			int iso = camera_controller.captureResultIso();
-			drawTextWithBackground(canvas, p, getResources().getString(R.string.iso) + ": " + iso, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text); // Yellow 500
+			String string = "";
+			if( camera_controller.captureResultHasIso() ) {
+				int iso = camera_controller.captureResultIso();
+				if( string.length() > 0 )
+					string += " ";
+				string += getResources().getString(R.string.iso) + " " + iso;
+			}
+			if( camera_controller.captureResultHasExposureTime() ) {
+				long exposure_time = camera_controller.captureResultExposureTime();
+				if( string.length() > 0 )
+					string += " ";
+				string += getExposureTimeString(exposure_time);
+			}
+			if( camera_controller.captureResultHasFrameDuration() ) {
+				long frame_duration = camera_controller.captureResultFrameDuration();
+				if( string.length() > 0 )
+					string += " ";
+				string += getFrameDurationString(frame_duration);
+			}
+			if( string.length() > 0 ) {
+				drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text); // Yellow 500
+			}
 		}
 		if( this.has_zoom && camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowZoomPreferenceKey(), true) ) {
 			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
@@ -3267,7 +3287,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private String getExposureTimeString(long exposure_time) {
 		double exposure_time_s = exposure_time/1000000000.0;
 		double exposure_time_r = 1.0/exposure_time_s;
-		return getResources().getString(R.string.exposure_time) + " 1/" + new DecimalFormat("#.#").format(exposure_time_r) + "s";
+		return getResources().getString(R.string.exposure) + " 1/" + new DecimalFormat("#.#").format(exposure_time_r);
+	}
+
+	private String getFrameDurationString(long frame_duration) {
+		double frame_duration_s = frame_duration/1000000000.0;
+		double frame_duration_r = 1.0/frame_duration_s;
+		return getResources().getString(R.string.fps) + " " + new DecimalFormat("#.#").format(frame_duration_r);
 	}
 
 	void switchCamera() {

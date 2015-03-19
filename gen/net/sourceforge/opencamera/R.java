@@ -173,7 +173,6 @@ public final class R {
         public static final int exposure_compensation=0x7f070017;
         public static final int exposure_lock=0x7f0700d1;
         public static final int exposure_locked=0x7f07001f;
-        public static final int exposure_time=0x7f070018;
         public static final int exposure_unlocked=0x7f070020;
         public static final int failed_create_folder=0x7f0700de;
         public static final int failed_to_auto_stabilise=0x7f07002a;
@@ -198,6 +197,7 @@ public final class R {
         public static final int focus_distance=0x7f070019;
         public static final int focus_mode=0x7f0700d2;
         public static final int folder_exists=0x7f0700df;
+        public static final int fps=0x7f070018;
         public static final int free_memory=0x7f070040;
         public static final int front_camera=0x7f07001b;
         public static final int gallery=0x7f0700cf;
