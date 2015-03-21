@@ -1,5 +1,8 @@
 package net.sourceforge.opencamera;
 
+import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.CameraController.CameraControllerException;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;

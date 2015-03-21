@@ -1,4 +1,6 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.CameraController;
+
+import net.sourceforge.opencamera.MyDebug;
 
 import java.util.List;
 
@@ -9,41 +11,36 @@ import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-class CameraControllerException extends Exception {
-	private static final long serialVersionUID = 7904697847749213106L;
-
-};
-
 public abstract class CameraController {
 	private static final String TAG = "CameraController";
 
 	// for testing:
 	public int count_camera_parameters_exception = 0;
 
-	static class CameraFeatures {
-		boolean is_zoom_supported = false;
-		int max_zoom = 0;
-		List<Integer> zoom_ratios = null;
-		boolean supports_face_detection = false;
-		List<CameraController.Size> picture_sizes = null;
-		List<CameraController.Size> video_sizes = null;
-		List<CameraController.Size> preview_sizes = null;
-		List<String> supported_flash_values = null;
-		List<String> supported_focus_values = null;
-		int max_num_focus_areas = 0;
-		float minimum_focus_distance = 0.0f;
-		boolean is_exposure_lock_supported = false;
-		boolean is_video_stabilization_supported = false;
-		boolean supports_iso_range = false;
-		int min_iso = 0;
-		int max_iso = 0;
-		boolean supports_exposure_time = false;
-		long min_exposure_time = 0l;
-		long max_exposure_time = 0l;
-		int min_exposure = 0;
-		int max_exposure = 0;
-		float exposure_step = 0.0f;
-		boolean can_disable_shutter_sound = false;
+	public static class CameraFeatures {
+		public boolean is_zoom_supported = false;
+		public int max_zoom = 0;
+		public List<Integer> zoom_ratios = null;
+		public boolean supports_face_detection = false;
+		public List<CameraController.Size> picture_sizes = null;
+		public List<CameraController.Size> video_sizes = null;
+		public List<CameraController.Size> preview_sizes = null;
+		public List<String> supported_flash_values = null;
+		public List<String> supported_focus_values = null;
+		public int max_num_focus_areas = 0;
+		public float minimum_focus_distance = 0.0f;
+		public boolean is_exposure_lock_supported = false;
+		public boolean is_video_stabilization_supported = false;
+		public boolean supports_iso_range = false;
+		public int min_iso = 0;
+		public int max_iso = 0;
+		public boolean supports_exposure_time = false;
+		public long min_exposure_time = 0l;
+		public long max_exposure_time = 0l;
+		public int min_exposure = 0;
+		public int max_exposure = 0;
+		public float exposure_step = 0.0f;
+		public boolean can_disable_shutter_sound = false;
 	}
 
 	public static class Size {
@@ -60,7 +57,7 @@ public abstract class CameraController {
 		}
 	}
 	
-	static class Area {
+	public static class Area {
 		public Rect rect = null;
 		public int weight = 0;
 		
@@ -70,23 +67,23 @@ public abstract class CameraController {
 		}
 	}
 	
-	static interface FaceDetectionListener {
+	public static interface FaceDetectionListener {
 		public abstract void onFaceDetection(Face[] faces);
 	}
 	
-	static interface PictureCallback {
+	public static interface PictureCallback {
 		public abstract void onPictureTaken(byte[] data);
 	}
 	
-	static interface AutoFocusCallback {
+	public static interface AutoFocusCallback {
 		public abstract void onAutoFocus(boolean success);
 	}
 	
-	static interface ErrorCallback {
+	public static interface ErrorCallback {
 		public abstract void onError();
 	}
 	
-	static class Face {
+	public static class Face {
 		public int score = 0;
 		public Rect rect = null;
 
@@ -96,45 +93,45 @@ public abstract class CameraController {
 		}
 	}
 	
-	class SupportedValues {
-		List<String> values = null;
-		String selected_value = null;
+	public class SupportedValues {
+		public List<String> values = null;
+		public String selected_value = null;
 		SupportedValues(List<String> values, String selected_value) {
 			this.values = values;
 			this.selected_value = selected_value;
 		}
 	}
 
-	abstract void release();
+	public abstract void release();
 
-	abstract String getAPI();
-	abstract CameraFeatures getCameraFeatures();
-	abstract SupportedValues setSceneMode(String value);
+	public abstract String getAPI();
+	public abstract CameraFeatures getCameraFeatures();
+	public abstract SupportedValues setSceneMode(String value);
 	public abstract String getSceneMode();
-	abstract SupportedValues setColorEffect(String value);
+	public abstract SupportedValues setColorEffect(String value);
 	public abstract String getColorEffect();
-	abstract SupportedValues setWhiteBalance(String value);
+	public abstract SupportedValues setWhiteBalance(String value);
 	public abstract String getWhiteBalance();
-	abstract SupportedValues setISO(String value);
-    abstract String getISOKey();
-	abstract int getISO();
-	abstract boolean setISO(int iso);
-	abstract long getExposureTime();
-	abstract boolean setExposureTime(long exposure_time);
+	public abstract SupportedValues setISO(String value);
+    public abstract String getISOKey();
+	public abstract int getISO();
+	public abstract boolean setISO(int iso);
+	public abstract long getExposureTime();
+	public abstract boolean setExposureTime(long exposure_time);
     public abstract CameraController.Size getPictureSize();
-    abstract void setPictureSize(int width, int height);
+    public abstract void setPictureSize(int width, int height);
     public abstract CameraController.Size getPreviewSize();
-    abstract void setPreviewSize(int width, int height);
-	abstract void setVideoStabilization(boolean enabled);
+    public abstract void setPreviewSize(int width, int height);
+	public abstract void setVideoStabilization(boolean enabled);
 	public abstract boolean getVideoStabilization();
-	abstract public int getJpegQuality();
-	abstract void setJpegQuality(int quality);
-	abstract public int getZoom();
-	abstract void setZoom(int value);
-	abstract int getExposureCompensation();
-	abstract boolean setExposureCompensation(int new_exposure);
-	abstract void setPreviewFpsRange(int min, int max);
-	abstract List<int []> getSupportedPreviewFpsRange();
+	public abstract int getJpegQuality();
+	public abstract void setJpegQuality(int quality);
+	public abstract int getZoom();
+	public abstract void setZoom(int value);
+	public abstract int getExposureCompensation();
+	public abstract boolean setExposureCompensation(int new_exposure);
+	public abstract void setPreviewFpsRange(int min, int max);
+	public abstract List<int []> getSupportedPreviewFpsRange();
 
 	public abstract String getDefaultSceneMode();
 	public abstract String getDefaultColorEffect();
@@ -142,58 +139,58 @@ public abstract class CameraController {
 	public abstract String getDefaultISO();
 	public abstract long getDefaultExposureTime();
 
-	abstract void setFocusValue(String focus_value);
-	abstract public String getFocusValue();
-	abstract void setFocusDistance(float focus_distance);
-	abstract void setFlashValue(String flash_value);
-	abstract public String getFlashValue();
-	abstract void setRecordingHint(boolean hint);
-	abstract void setAutoExposureLock(boolean enabled);
-	abstract public boolean getAutoExposureLock();
-	abstract void setRotation(int rotation);
-	abstract void setLocationInfo(Location location);
-	abstract void removeLocationInfo();
-	abstract void enableShutterSound(boolean enabled);
-	abstract boolean setFocusAndMeteringArea(List<CameraController.Area> areas);
-	abstract void clearFocusAndMetering();
+	public abstract void setFocusValue(String focus_value);
+	public abstract String getFocusValue();
+	public abstract void setFocusDistance(float focus_distance);
+	public abstract void setFlashValue(String flash_value);
+	public abstract String getFlashValue();
+	public abstract void setRecordingHint(boolean hint);
+	public abstract void setAutoExposureLock(boolean enabled);
+	public abstract boolean getAutoExposureLock();
+	public abstract void setRotation(int rotation);
+	public abstract void setLocationInfo(Location location);
+	public abstract void removeLocationInfo();
+	public abstract void enableShutterSound(boolean enabled);
+	public abstract boolean setFocusAndMeteringArea(List<CameraController.Area> areas);
+	public abstract void clearFocusAndMetering();
 	public abstract List<CameraController.Area> getFocusAreas();
 	public abstract List<CameraController.Area> getMeteringAreas();
-	abstract boolean supportsAutoFocus();
-	abstract boolean focusIsVideo();
-	abstract void reconnect() throws CameraControllerException;
-	abstract void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException;
-	abstract void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException;
-	abstract void startPreview() throws CameraControllerException;
-	abstract void stopPreview();
+	public abstract boolean supportsAutoFocus();
+	public abstract boolean focusIsVideo();
+	public abstract void reconnect() throws CameraControllerException;
+	public abstract void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException;
+	public abstract void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException;
+	public abstract void startPreview() throws CameraControllerException;
+	public abstract void stopPreview();
 	public abstract boolean startFaceDetection();
-	abstract void setFaceDetectionListener(final CameraController.FaceDetectionListener listener);
-	abstract void autoFocus(final CameraController.AutoFocusCallback cb);
-	abstract void cancelAutoFocus();
-	abstract void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error);
-	abstract void setDisplayOrientation(int degrees);
-	abstract int getDisplayOrientation();
-	abstract int getCameraOrientation();
-	abstract boolean isFrontFacing();
-	abstract void unlock();
-	abstract void initVideoRecorderPrePrepare(MediaRecorder video_recorder);
-	abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException;
-	abstract String getParametersString();
-	boolean captureResultHasIso() {
+	public abstract void setFaceDetectionListener(final CameraController.FaceDetectionListener listener);
+	public abstract void autoFocus(final CameraController.AutoFocusCallback cb);
+	public abstract void cancelAutoFocus();
+	public abstract void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error);
+	public abstract void setDisplayOrientation(int degrees);
+	public abstract int getDisplayOrientation();
+	public abstract int getCameraOrientation();
+	public abstract boolean isFrontFacing();
+	public abstract void unlock();
+	public abstract void initVideoRecorderPrePrepare(MediaRecorder video_recorder);
+	public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException;
+	public abstract String getParametersString();
+	public boolean captureResultHasIso() {
 		return false;
 	}
-	int captureResultIso() {
+	public int captureResultIso() {
 		return 0;
 	}
-	boolean captureResultHasExposureTime() {
+	public boolean captureResultHasExposureTime() {
 		return false;
 	}
-	long captureResultExposureTime() {
+	public long captureResultExposureTime() {
 		return 0;
 	}
-	boolean captureResultHasFrameDuration() {
+	public boolean captureResultHasFrameDuration() {
 		return false;
 	}
-	long captureResultFrameDuration() {
+	public long captureResultFrameDuration() {
 		return 0;
 	}
 

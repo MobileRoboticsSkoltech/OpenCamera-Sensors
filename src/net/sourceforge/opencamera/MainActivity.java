@@ -1,5 +1,8 @@
 package net.sourceforge.opencamera;
 
+import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -71,10 +74,6 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
-
-class MyDebug {
-	static final boolean LOG = true;
-}
 
 public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";

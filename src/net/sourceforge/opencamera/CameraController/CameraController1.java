@@ -1,4 +1,6 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.CameraController;
+
+import net.sourceforge.opencamera.MyDebug;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 @SuppressWarnings("deprecation")
-class CameraController1 extends CameraController {
+public class CameraController1 extends CameraController {
 	private static final String TAG = "CameraController1";
 
 	private Camera camera = null;
@@ -23,7 +25,7 @@ class CameraController1 extends CameraController {
     private Camera.CameraInfo camera_info = new Camera.CameraInfo();
 	private String iso_key = null;
 
-	CameraController1(int cameraId) throws CameraControllerException {
+	public CameraController1(int cameraId) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController1: " + cameraId);
 		try {
@@ -38,7 +40,7 @@ class CameraController1 extends CameraController {
 	    Camera.getCameraInfo(cameraId, camera_info);
 	}
 	
-	void release() {
+	public void release() {
 		camera.release();
 		camera = null;
 	}
@@ -150,12 +152,12 @@ class CameraController1 extends CameraController {
 		return output_modes;
 	}
 	
-	String getAPI() {
+	public String getAPI() {
 		return "Camera";
 	}
 	
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-	CameraFeatures getCameraFeatures() {
+	public CameraFeatures getCameraFeatures() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCameraFeatures()");
 	    Camera.Parameters parameters = this.getParameters();
@@ -263,7 +265,7 @@ class CameraController1 extends CameraController {
 	// For example, suppose originally flash mode is on and supported flash modes are on/off. In night
 	// scene mode, both flash mode and supported flash mode may be changed to off. After setting scene
 	// mode, applications should call getParameters to know if some parameters are changed."
-	SupportedValues setSceneMode(String value) {
+	public SupportedValues setSceneMode(String value) {
 		String default_value = getDefaultSceneMode();
     	Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedSceneModes();
@@ -287,7 +289,7 @@ class CameraController1 extends CameraController {
     	return parameters.getSceneMode();
 	}
 
-	SupportedValues setColorEffect(String value) {
+	public SupportedValues setColorEffect(String value) {
 		String default_value = getDefaultColorEffect();
     	Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedColorEffects();
@@ -306,7 +308,7 @@ class CameraController1 extends CameraController {
     	return parameters.getColorEffect();
 	}
 
-	SupportedValues setWhiteBalance(String value) {
+	public SupportedValues setWhiteBalance(String value) {
 		String default_value = getDefaultWhiteBalance();
     	Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedWhiteBalance();
@@ -326,7 +328,7 @@ class CameraController1 extends CameraController {
 	}
 
 	@Override
-	SupportedValues setISO(String value) {
+	public SupportedValues setISO(String value) {
 		String default_value = getDefaultISO();
     	Camera.Parameters parameters = this.getParameters();
 		// get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting
@@ -412,32 +414,32 @@ class CameraController1 extends CameraController {
 	}
 
 	@Override
-    String getISOKey() {
+	public String getISOKey() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getISOKey");
     	return this.iso_key;
     }
 
 	@Override
-	int getISO() {
+	public int getISO() {
 		// not supported for CameraController1
 		return 0;
 	}
 
 	@Override
-	boolean setISO(int iso) {
+	public boolean setISO(int iso) {
 		// not supported for CameraController1
 		return false;
 	}
 
 	@Override
-	long getExposureTime() {
+	public long getExposureTime() {
 		// not supported for CameraController1
 		return 0l;
 	}
 
 	@Override
-	boolean setExposureTime(long exposure_time) {
+	public boolean setExposureTime(long exposure_time) {
 		// not supported for CameraController1
 		return false;
 	}
@@ -450,7 +452,7 @@ class CameraController1 extends CameraController {
     }
 
 	@Override
-    void setPictureSize(int width, int height) {
+	public void setPictureSize(int width, int height) {
     	Camera.Parameters parameters = this.getParameters();
 		parameters.setPictureSize(width, height);
 		if( MyDebug.LOG )
@@ -465,7 +467,7 @@ class CameraController1 extends CameraController {
     	return new CameraController.Size(camera_size.width, camera_size.height);
     }
 
-    void setPreviewSize(int width, int height) {
+	public void setPreviewSize(int width, int height) {
     	Camera.Parameters parameters = this.getParameters();
 		if( MyDebug.LOG )
 			Log.d(TAG, "current preview size: " + parameters.getPreviewSize().width + ", " + parameters.getPreviewSize().height);
@@ -475,7 +477,7 @@ class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
     }
 	
-	void setVideoStabilization(boolean enabled) {
+	public void setVideoStabilization(boolean enabled) {
 	    Camera.Parameters parameters = this.getParameters();
         parameters.setVideoStabilization(enabled);
     	setCameraParameters(parameters);
@@ -491,7 +493,7 @@ class CameraController1 extends CameraController {
 	    return parameters.getJpegQuality();
 	}
 	
-	void setJpegQuality(int quality) {
+	public void setJpegQuality(int quality) {
 	    Camera.Parameters parameters = this.getParameters();
 		parameters.setJpegQuality(quality);
     	setCameraParameters(parameters);
@@ -502,7 +504,7 @@ class CameraController1 extends CameraController {
 		return parameters.getZoom();
 	}
 	
-	void setZoom(int value) {
+	public void setZoom(int value) {
 		Camera.Parameters parameters = this.getParameters();
 		if( MyDebug.LOG )
 			Log.d(TAG, "zoom was: " + parameters.getZoom());
@@ -510,13 +512,13 @@ class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
 	}
 
-	int getExposureCompensation() {
+	public int getExposureCompensation() {
 		Camera.Parameters parameters = this.getParameters();
 		return parameters.getExposureCompensation();
 	}
 	
 	// Returns whether exposure was modified
-	boolean setExposureCompensation(int new_exposure) {
+	public boolean setExposureCompensation(int new_exposure) {
 		Camera.Parameters parameters = this.getParameters();
 		int current_exposure = parameters.getExposureCompensation();
 		if( new_exposure != current_exposure ) {
@@ -529,7 +531,7 @@ class CameraController1 extends CameraController {
 		return false;
 	}
 	
-	void setPreviewFpsRange(int min, int max) {
+	public void setPreviewFpsRange(int min, int max) {
     	if( MyDebug.LOG )
     		Log.d(TAG, "setPreviewFpsRange: " + min + " to " + max);
 		Camera.Parameters parameters = this.getParameters();
@@ -537,7 +539,7 @@ class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
 	}
 	
-	List<int []> getSupportedPreviewFpsRange() {
+	public List<int []> getSupportedPreviewFpsRange() {
 		Camera.Parameters parameters = this.getParameters();
 		try {
 			List<int []> fps_ranges = parameters.getSupportedPreviewFpsRange();
@@ -557,7 +559,7 @@ class CameraController1 extends CameraController {
 	}
 	
 	@Override
-	void setFocusValue(String focus_value) {
+	public void setFocusValue(String focus_value) {
 		Camera.Parameters parameters = this.getParameters();
     	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_locked") ) {
     		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -623,7 +625,7 @@ class CameraController1 extends CameraController {
 	}
 
 	@Override
-	void setFocusDistance(float focus_distance) {
+	public void setFocusDistance(float focus_distance) {
 		// not supported for CameraController1!
 	}
 
@@ -647,7 +649,7 @@ class CameraController1 extends CameraController {
     	return flash_mode;
 	}
 	
-	void setFlashValue(String flash_value) {
+	public void setFlashValue(String flash_value) {
 		Camera.Parameters parameters = this.getParameters();
 		if( parameters.getFlashMode() == null )
 			return; // flash mode not supported
@@ -699,7 +701,7 @@ class CameraController1 extends CameraController {
 		return convertFlashModeToValue(flash_mode);
 	}
 	
-	void setRecordingHint(boolean hint) {
+	public void setRecordingHint(boolean hint) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setRecordingHint: " + hint);
 		Camera.Parameters parameters = this.getParameters();
@@ -719,7 +721,7 @@ class CameraController1 extends CameraController {
         }
 	}
 
-	void setAutoExposureLock(boolean enabled) {
+	public void setAutoExposureLock(boolean enabled) {
 		Camera.Parameters parameters = this.getParameters();
 		parameters.setAutoExposureLock(enabled);
     	setCameraParameters(parameters);
@@ -732,13 +734,13 @@ class CameraController1 extends CameraController {
 		return parameters.getAutoExposureLock();
 	}
 
-	void setRotation(int rotation) {
+	public void setRotation(int rotation) {
 		Camera.Parameters parameters = this.getParameters();
 		parameters.setRotation(rotation);
     	setCameraParameters(parameters);
 	}
 	
-	void setLocationInfo(Location location) {
+	public void setLocationInfo(Location location) {
         Camera.Parameters parameters = this.getParameters();
         parameters.removeGpsData();
         parameters.setGpsTimestamp(System.currentTimeMillis() / 1000); // initialise to a value (from Android camera source)
@@ -759,20 +761,20 @@ class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
 	}
 	
-	void removeLocationInfo() {
+	public void removeLocationInfo() {
         Camera.Parameters parameters = this.getParameters();
         parameters.removeGpsData();
     	setCameraParameters(parameters);
 	}
 
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-	void enableShutterSound(boolean enabled) {
+	public void enableShutterSound(boolean enabled) {
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
         	camera.enableShutterSound(enabled);
         }
 	}
 	
-	boolean setFocusAndMeteringArea(List<CameraController.Area> areas) {
+	public boolean setFocusAndMeteringArea(List<CameraController.Area> areas) {
 		List<Camera.Area> camera_areas = new ArrayList<Camera.Area>();
 		for(CameraController.Area area : areas) {
 			camera_areas.add(new Camera.Area(area.rect, area.weight));
@@ -804,7 +806,7 @@ class CameraController1 extends CameraController {
         return false;
 	}
 	
-	void clearFocusAndMetering() {
+	public void clearFocusAndMetering() {
         Camera.Parameters parameters = this.getParameters();
         boolean update_parameters = false;
         if( parameters.getMaxNumFocusAreas() > 0 ) {
@@ -844,7 +846,7 @@ class CameraController1 extends CameraController {
 		return areas;
 	}
 
-	boolean supportsAutoFocus() {
+	public boolean supportsAutoFocus() {
         Camera.Parameters parameters = this.getParameters();
 		String focus_mode = parameters.getFocusMode();
 		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play from the below line (v1.7),
@@ -855,7 +857,7 @@ class CameraController1 extends CameraController {
         return false;
 	}
 	
-	boolean focusIsVideo() {
+	public boolean focusIsVideo() {
 		Camera.Parameters parameters = this.getParameters();
 		String current_focus_mode = parameters.getFocusMode();
 		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
@@ -868,6 +870,7 @@ class CameraController1 extends CameraController {
 	}
 	
 	@Override
+	public 
 	void reconnect() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "reconnect");
@@ -883,7 +886,7 @@ class CameraController1 extends CameraController {
 	}
 	
 	@Override
-	void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException {
+	public void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewDisplay");
 		try {
@@ -896,7 +899,7 @@ class CameraController1 extends CameraController {
 	}
 
 	@Override
-	void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException {
+	public void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewTexture");
 		try {
@@ -909,7 +912,7 @@ class CameraController1 extends CameraController {
 	}
 
 	@Override
-	void startPreview() throws CameraControllerException {
+	public void startPreview() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startPreview");
 		try {
@@ -924,7 +927,7 @@ class CameraController1 extends CameraController {
 	}
 	
 	@Override
-	void stopPreview() {
+	public void stopPreview() {
 		camera.stopPreview();
 	}
 	
@@ -941,7 +944,7 @@ class CameraController1 extends CameraController {
 	    return true;
 	}
 	
-	void setFaceDetectionListener(final CameraController.FaceDetectionListener listener) {
+	public void setFaceDetectionListener(final CameraController.FaceDetectionListener listener) {
 		class CameraFaceDetectionListener implements Camera.FaceDetectionListener {
 		    @Override
 		    public void onFaceDetection(Camera.Face[] camera_faces, Camera camera) {
@@ -955,7 +958,7 @@ class CameraController1 extends CameraController {
 		camera.setFaceDetectionListener(new CameraFaceDetectionListener());
 	}
 
-	void autoFocus(final CameraController.AutoFocusCallback cb) {
+	public void autoFocus(final CameraController.AutoFocusCallback cb) {
         Camera.AutoFocusCallback camera_cb = new Camera.AutoFocusCallback() {
 			@Override
 			public void onAutoFocus(boolean success, Camera camera) {
@@ -969,14 +972,14 @@ class CameraController1 extends CameraController {
 			// just in case? We got a RuntimeException report here from 1 user on Google Play:
 			// 21 Dec 2013, Xperia Go, Android 4.1
 			if( MyDebug.LOG )
-				Log.e(TAG, "runtime exception from autoFocus when trying to take photo");
+				Log.e(TAG, "runtime exception from autoFocus");
 			e.printStackTrace();
 			// should call the callback, so the application isn't left waiting (e.g., when we autofocus before trying to take a photo)
 			cb.onAutoFocus(false);
 		}
 	}
 	
-	void cancelAutoFocus() {
+	public void cancelAutoFocus() {
 		try {
 			camera.cancelAutoFocus();
 		}
@@ -988,7 +991,7 @@ class CameraController1 extends CameraController {
 		}
 	}
 	
-	void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error) {
+	public void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error) {
     	Camera.ShutterCallback shutter = new Camera.ShutterCallback() {
     		// don't do anything here, but we need to implement the callback to get the shutter sound (at least on Galaxy Nexus and Nexus 7)
             public void onShutter() {
@@ -1021,7 +1024,7 @@ class CameraController1 extends CameraController {
 		}
 	}
 	
-	void setDisplayOrientation(int degrees) {
+	public void setDisplayOrientation(int degrees) {
 	    int result = 0;
 	    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
 	        result = (camera_info.orientation + degrees) % 360;
@@ -1039,35 +1042,35 @@ class CameraController1 extends CameraController {
 	    this.display_orientation = result;
 	}
 	
-	int getDisplayOrientation() {
+	public int getDisplayOrientation() {
 		return this.display_orientation;
 	}
 	
-	int getCameraOrientation() {
+	public int getCameraOrientation() {
 		return camera_info.orientation;
 	}
 	
-	boolean isFrontFacing() {
+	public boolean isFrontFacing() {
 		return (camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
 	}
 	
-	void unlock() {
+	public void unlock() {
 		this.stopPreview(); // although not documented, we need to stop preview to prevent device freeze or video errors shortly after video recording starts on some devices (e.g., device freeze on Samsung Galaxy S2 - I could reproduce this on Samsung RTL; also video recording fails and preview becomes corrupted on Galaxy S3 variant "SGH-I747-US2"); also see http://stackoverflow.com/questions/4244999/problem-with-video-recording-after-auto-focus-in-android
 		camera.unlock();
 	}
 	
 	@Override
-	void initVideoRecorderPrePrepare(MediaRecorder video_recorder) {
+	public void initVideoRecorderPrePrepare(MediaRecorder video_recorder) {
     	video_recorder.setCamera(camera);
 	}
 	
 	@Override
-	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException {
+	public void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException {
 		// no further actions necessary
 	}
 	
 	@Override
-	String getParametersString() {
+	public String getParametersString() {
 		return this.getParameters().flatten();
 	}
 }

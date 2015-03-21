@@ -1,6 +1,6 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.CameraController;
 
 public abstract class CameraControllerManager {
 	public abstract int getNumberOfCameras();
-	abstract boolean isFrontFacing(int cameraId);
+	public abstract boolean isFrontFacing(int cameraId);
 }

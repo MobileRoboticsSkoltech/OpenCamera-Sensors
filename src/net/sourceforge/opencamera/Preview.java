@@ -1,5 +1,13 @@
 package net.sourceforge.opencamera;
 
+import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.CameraController.CameraController1;
+import net.sourceforge.opencamera.CameraController.CameraController2;
+import net.sourceforge.opencamera.CameraController.CameraControllerException;
+import net.sourceforge.opencamera.CameraController.CameraControllerManager;
+import net.sourceforge.opencamera.CameraController.CameraControllerManager1;
+import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

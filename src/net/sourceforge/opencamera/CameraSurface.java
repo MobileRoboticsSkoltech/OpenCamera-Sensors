@@ -1,5 +1,7 @@
 package net.sourceforge.opencamera;
 
+import net.sourceforge.opencamera.CameraController.CameraController;
+
 import android.graphics.Matrix;
 import android.media.MediaRecorder;
 import android.view.View;

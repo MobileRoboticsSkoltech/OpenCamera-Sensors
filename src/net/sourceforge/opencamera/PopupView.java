@@ -1,5 +1,7 @@
 package net.sourceforge.opencamera;
 
+import net.sourceforge.opencamera.CameraController.CameraController;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;

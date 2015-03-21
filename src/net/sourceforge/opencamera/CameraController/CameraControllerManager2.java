@@ -1,4 +1,6 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.CameraController;
+
+import net.sourceforge.opencamera.MyDebug;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -32,7 +34,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
 	}
 
 	@Override
-	boolean isFrontFacing(int cameraId) {
+	public boolean isFrontFacing(int cameraId) {
 		CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 		try {
 			String cameraIdS = manager.getCameraIdList()[cameraId];
@@ -49,7 +51,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
 	 * (E.g., Nexus 6 has FULL support on back camera, LIMITED support on front camera.)
 	 * For now, devices with only LEGACY support should still with the old API.
 	 */
-	boolean allowCamera2Support(int cameraId) {
+	public boolean allowCamera2Support(int cameraId) {
 		CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 		try {
 			String cameraIdS = manager.getCameraIdList()[cameraId];

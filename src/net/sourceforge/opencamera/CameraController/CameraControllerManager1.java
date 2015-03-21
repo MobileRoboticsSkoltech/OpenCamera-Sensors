@@ -1,16 +1,18 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.CameraController;
+
+import net.sourceforge.opencamera.MyDebug;
 
 import android.hardware.Camera;
 import android.util.Log;
 
 @SuppressWarnings("deprecation")
-class CameraControllerManager1 extends CameraControllerManager {
+public class CameraControllerManager1 extends CameraControllerManager {
 	private static final String TAG = "CameraControllerManager1";
 	public int getNumberOfCameras() {
 		return Camera.getNumberOfCameras();
 	}
 
-	boolean isFrontFacing(int cameraId) {
+	public boolean isFrontFacing(int cameraId) {
 	    try {
 		    Camera.CameraInfo camera_info = new Camera.CameraInfo();
 			Camera.getCameraInfo(cameraId, camera_info);

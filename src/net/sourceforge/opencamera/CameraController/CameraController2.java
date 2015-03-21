@@ -1,4 +1,6 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.CameraController;
+
+import net.sourceforge.opencamera.MyDebug;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -84,7 +86,7 @@ public class CameraController2 extends CameraController {
 	private boolean capture_result_has_frame_duration = false;
 	private long capture_result_frame_duration = 0;
 	
-	class CameraSettings {
+	private class CameraSettings {
 		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
 		private int rotation = 0;
 		private Location location = null;
@@ -430,7 +432,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void release() {
+	public void release() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "release");
 		if( thread != null ) {
@@ -512,12 +514,12 @@ public class CameraController2 extends CameraController {
 		return output_modes;
 	}
 
-	String getAPI() {
+	public String getAPI() {
 		return "Camera2 (Android L)";
 	}
 	
 	@Override
-	CameraFeatures getCameraFeatures() {
+	public CameraFeatures getCameraFeatures() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCameraFeatures()");
 		CameraFeatures camera_features = new CameraFeatures();
@@ -728,7 +730,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	SupportedValues setSceneMode(String value) {
+	public SupportedValues setSceneMode(String value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setSceneMode: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
@@ -871,7 +873,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	SupportedValues setColorEffect(String value) {
+	public SupportedValues setColorEffect(String value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setColorEffect: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
@@ -983,7 +985,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	SupportedValues setWhiteBalance(String value) {
+	public SupportedValues setWhiteBalance(String value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setWhiteBalance: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
@@ -1056,7 +1058,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	SupportedValues setISO(String value) {
+	public SupportedValues setISO(String value) {
 		String default_value = getDefaultISO();
 		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
 		if( iso_range == null ) {
@@ -1129,19 +1131,19 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	String getISOKey() {
+	public String getISOKey() {
 		return "";
 	}
 
 	@Override
-	int getISO() {
+	public int getISO() {
 		return camera_settings.iso;
 	}
 	
 	@Override
 	// Returns whether ISO was modified
 	// N.B., use setISO(String) to switch between auto and manual mode
-	boolean setISO(int iso) {
+	public boolean setISO(int iso) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setISO: " + iso);
 		if( camera_settings.iso == iso ) {
@@ -1167,14 +1169,14 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	long getExposureTime() {
+	public long getExposureTime() {
 		return camera_settings.exposure_time;
 	}
 
 	@Override
 	// Returns whether exposure time was modified
 	// N.B., use setISO(String) to switch between auto and manual mode
-	boolean setExposureTime(long exposure_time) {
+	public boolean setExposureTime(long exposure_time) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExposureTime: " + exposure_time);
 		if( camera_settings.exposure_time == exposure_time ) {
@@ -1206,7 +1208,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setPictureSize(int width, int height) {
+	public void setPictureSize(int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPictureSize: " + width + " x " + height);
 		if( camera == null ) {
@@ -1278,7 +1280,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setPreviewSize(int width, int height) {
+	public void setPreviewSize(int width, int height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewSize: " + width + " , " + height);
 		/*if( texture != null ) {
@@ -1296,7 +1298,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setVideoStabilization(boolean enabled) {
+	public void setVideoStabilization(boolean enabled) {
 		camera_settings.video_stabilization = enabled;
 		camera_settings.setVideoStabilization(previewBuilder);
 		try {
@@ -1323,7 +1325,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setJpegQuality(int quality) {
+	public void setJpegQuality(int quality) {
 		if( quality < 0 || quality > 100 ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "invalid jpeg quality" + quality);
@@ -1338,7 +1340,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setZoom(int value) {
+	public void setZoom(int value) {
 		if( zoom_ratios == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "zoom not supported");
@@ -1396,7 +1398,7 @@ public class CameraController2 extends CameraController {
 	}
 	
 	@Override
-	int getExposureCompensation() {
+	public int getExposureCompensation() {
 		if( previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION) == null )
 			return 0;
 		return previewBuilder.get(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION);
@@ -1404,7 +1406,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	// Returns whether exposure was modified
-	boolean setExposureCompensation(int new_exposure) {
+	public boolean setExposureCompensation(int new_exposure) {
 		camera_settings.has_ae_exposure_compensation = true;
 		camera_settings.ae_exposure_compensation = new_exposure;
 		if( camera_settings.setExposureCompensation(previewBuilder) ) {
@@ -1425,13 +1427,13 @@ public class CameraController2 extends CameraController {
 	}
 	
 	@Override
-	void setPreviewFpsRange(int min, int max) {
+	public void setPreviewFpsRange(int min, int max) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	List<int[]> getSupportedPreviewFpsRange() {
+	public List<int[]> getSupportedPreviewFpsRange() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1463,7 +1465,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setFocusValue(String focus_value) {
+	public void setFocusValue(String focus_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusValue: " + focus_value);
 		int focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
@@ -1536,7 +1538,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setFocusDistance(float focus_distance) {
+	public void setFocusDistance(float focus_distance) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusDistance: " + focus_distance);
     	camera_settings.focus_distance = focus_distance;
@@ -1556,7 +1558,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setFlashValue(String flash_value) {
+	public void setFlashValue(String flash_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFlashValue: " + flash_value);
 		if( !characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ) {
@@ -1608,12 +1610,12 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setRecordingHint(boolean hint) {
+	public void setRecordingHint(boolean hint) {
 		// not relevant for CameraController2
 	}
 
 	@Override
-	void setAutoExposureLock(boolean enabled) {
+	public void setAutoExposureLock(boolean enabled) {
 		camera_settings.ae_lock = enabled;
 		camera_settings.setAutoExposureLock(previewBuilder);
 		try {
@@ -1637,24 +1639,24 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setRotation(int rotation) {
+	public void setRotation(int rotation) {
 		this.camera_settings.rotation = rotation;
 	}
 
 	@Override
-	void setLocationInfo(Location location) {
+	public void setLocationInfo(Location location) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setLocationInfo: " + location.getLongitude() + " , " + location.getLatitude());
 		this.camera_settings.location = location;
 	}
 
 	@Override
-	void removeLocationInfo() {
+	public void removeLocationInfo() {
 		this.camera_settings.location = null;
 	}
 
 	@Override
-	void enableShutterSound(boolean enabled) {
+	public void enableShutterSound(boolean enabled) {
 		this.sounds_enabled = enabled;
 	}
 
@@ -1725,7 +1727,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	boolean setFocusAndMeteringArea(List<Area> areas) {
+	public boolean setFocusAndMeteringArea(List<Area> areas) {
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
 		if( MyDebug.LOG )
 			Log.d(TAG, "sensor_rect: " + sensor_rect.left + " , " + sensor_rect.top + " x " + sensor_rect.right + " , " + sensor_rect.bottom);
@@ -1770,7 +1772,7 @@ public class CameraController2 extends CameraController {
 	}
 	
 	@Override
-	void clearFocusAndMetering() {
+	public void clearFocusAndMetering() {
 		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
 		boolean has_focus = false;
 		boolean has_metering = false;
@@ -1845,7 +1847,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	boolean supportsAutoFocus() {
+	public boolean supportsAutoFocus() {
 		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
 			return true;
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
@@ -1855,7 +1857,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	boolean focusIsVideo() {
+	public boolean focusIsVideo() {
 		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
 			return false;
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
@@ -1866,7 +1868,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException {
+	public void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setPreviewDisplay");
 			Log.e(TAG, "SurfaceHolder not supported for CameraController2!");
@@ -1876,7 +1878,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException {
+	public void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewTexture");
 		if( this.texture != null ) {
@@ -2097,7 +2099,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void startPreview() throws CameraControllerException {
+	public void startPreview() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startPreview");
 		if( captureSession != null ) {
@@ -2120,7 +2122,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void stopPreview() {
+	public void stopPreview() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopPreview");
 		if( camera == null || captureSession == null ) {
@@ -2169,12 +2171,12 @@ public class CameraController2 extends CameraController {
 	}
 	
 	@Override
-	void setFaceDetectionListener(final FaceDetectionListener listener) {
+	public void setFaceDetectionListener(final FaceDetectionListener listener) {
 		this.face_detection_listener = listener;
 	}
 
 	@Override
-	void autoFocus(final AutoFocusCallback cb) {
+	public void autoFocus(final AutoFocusCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoFocus");
 		if( camera == null || captureSession == null ) {
@@ -2239,7 +2241,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void cancelAutoFocus() {
+	public void cancelAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
 		if( camera == null || captureSession == null ) {
@@ -2276,7 +2278,7 @@ public class CameraController2 extends CameraController {
 		} 
 	}
 
-	void takePictureAfterPrecapture() {
+	private void takePictureAfterPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureAfterPrecapture");
 		if( camera == null || captureSession == null ) {
@@ -2398,7 +2400,7 @@ public class CameraController2 extends CameraController {
 	}
 	
 	@Override
-	void takePicture(final PictureCallback raw, final PictureCallback jpeg, final ErrorCallback error) {
+	public void takePicture(final PictureCallback raw, final PictureCallback jpeg, final ErrorCallback error) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
 		if( camera == null || captureSession == null ) {
@@ -2424,7 +2426,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void setDisplayOrientation(int degrees) {
+	public void setDisplayOrientation(int degrees) {
 		// for CameraController2, the preview display orientation is handled via the TextureView's transform
 		if( MyDebug.LOG )
 			Log.d(TAG, "setDisplayOrientation not supported by this API");
@@ -2432,34 +2434,34 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	int getDisplayOrientation() {
+	public int getDisplayOrientation() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getDisplayOrientation not supported by this API");
 		throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 	}
 
 	@Override
-	int getCameraOrientation() {
+	public int getCameraOrientation() {
 		return characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
 	}
 
 	@Override
-	boolean isFrontFacing() {
+	public boolean isFrontFacing() {
 		return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
 	}
 
 	@Override
-	void unlock() {
+	public void unlock() {
 		// do nothing at this stage
 	}
 
 	@Override
-	void initVideoRecorderPrePrepare(MediaRecorder video_recorder) {
+	public void initVideoRecorderPrePrepare(MediaRecorder video_recorder) {
 		// do nothing at this stage
 	}
 
 	@Override
-	void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException {
+	public void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initVideoRecorderPostPrepare");
 		try {
@@ -2483,7 +2485,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	void reconnect() throws CameraControllerException {
+	public void reconnect() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "reconnect");
 		createPreviewRequest();
@@ -2496,37 +2498,37 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	String getParametersString() {
+	public String getParametersString() {
 		return null;
 	}
 
 	@Override
-	boolean captureResultHasIso() {
+	public boolean captureResultHasIso() {
 		return capture_result_has_iso;
 	}
 
 	@Override
-	int captureResultIso() {
+	public int captureResultIso() {
 		return capture_result_iso;
 	}
 
 	@Override
-	boolean captureResultHasExposureTime() {
+	public boolean captureResultHasExposureTime() {
 		return capture_result_has_exposure_time;
 	}
 
 	@Override
-	long captureResultExposureTime() {
+	public long captureResultExposureTime() {
 		return capture_result_exposure_time;
 	}
 
 	@Override
-	boolean captureResultHasFrameDuration() {
+	public boolean captureResultHasFrameDuration() {
 		return capture_result_has_frame_duration;
 	}
 
 	@Override
-	long captureResultFrameDuration() {
+	public long captureResultFrameDuration() {
 		return capture_result_frame_duration;
 	}
 
