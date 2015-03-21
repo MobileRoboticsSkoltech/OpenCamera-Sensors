@@ -25,9 +25,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 
-// N.B., actually a Fragment, but called MyPreferenceActivity for historical reasons (this was originally an Activity)
 public class MyPreferenceFragment extends PreferenceFragment {
-	private static final String TAG = "MyPreferenceActivity";
+	private static final String TAG = "MyPreferenceFragment";
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
