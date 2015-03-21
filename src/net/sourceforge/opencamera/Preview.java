@@ -71,8 +71,6 @@ import android.view.View.MeasureSpec;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.Toast;
-import android.widget.ZoomControls;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
 	private static final String TAG = "Preview";
@@ -1274,92 +1272,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 		
-		{
-			if( MyDebug.LOG )
-				Log.d(TAG, "set up zoom");
-			if( MyDebug.LOG )
-				Log.d(TAG, "has_zoom? " + has_zoom);
-		    ZoomControls zoomControls = (ZoomControls) activity.findViewById(R.id.zoom);
-		    SeekBar zoomSeekBar = (SeekBar) activity.findViewById(R.id.zoom_seekbar);
-
-			if( this.has_zoom ) {
-				if( sharedPreferences.getBoolean(MainActivity.getShowZoomControlsPreferenceKey(), false) ) {
-				    zoomControls.setIsZoomInEnabled(true);
-			        zoomControls.setIsZoomOutEnabled(true);
-			        zoomControls.setZoomSpeed(20);
-
-			        zoomControls.setOnZoomInClickListener(new View.OnClickListener(){
-			            public void onClick(View v){
-			            	zoomIn();
-			            }
-			        });
-				    zoomControls.setOnZoomOutClickListener(new View.OnClickListener(){
-				    	public void onClick(View v){
-				    		zoomOut();
-				        }
-				    });
-					if( !immersive_mode ) {
-						zoomControls.setVisibility(View.VISIBLE);
-					}
-				}
-				else {
-					zoomControls.setVisibility(View.INVISIBLE); // must be INVISIBLE not GONE, so we can still position the zoomSeekBar relative to it
-				}
-				
-				zoomSeekBar.setMax(max_zoom_factor);
-				zoomSeekBar.setProgress(max_zoom_factor-zoom_factor);
-				zoomSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-					@Override
-					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-						zoomTo(max_zoom_factor-progress, false);
-					}
-
-					@Override
-					public void onStartTrackingTouch(SeekBar seekBar) {
-					}
-
-					@Override
-					public void onStopTrackingTouch(SeekBar seekBar) {
-					}
-				});
-
-				if( sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), true) ) {
-					if( !immersive_mode ) {
-						zoomSeekBar.setVisibility(View.VISIBLE);
-					}
-				}
-				else {
-					zoomSeekBar.setVisibility(View.INVISIBLE);
-				}
-			}
-			else {
-				zoomControls.setVisibility(View.GONE);
-				zoomSeekBar.setVisibility(View.GONE);
-			}
-		}
-		
-		{
-			if( MyDebug.LOG )
-				Log.d(TAG, "set up manual focus");
-		    SeekBar focusSeekBar = (SeekBar) activity.findViewById(R.id.focus_seekbar);
-		    focusSeekBar.setMax(100);
-		    focusSeekBar.setProgress(focus_distance_percent);
-		    focusSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-				@Override
-				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-					focus_distance_percent = progress;
-					setFocusDistance(true, false);
-				}
-
-				@Override
-				public void onStartTrackingTouch(SeekBar seekBar) {
-				}
-
-				@Override
-				public void onStopTrackingTouch(SeekBar seekBar) {
-				}
-			});
-		}
+		main_activity.cameraSetup();
 
 		{
 			if( MyDebug.LOG )
@@ -3156,6 +3069,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "changeFocusDistance(): " + change);
 		if( change != 0 && camera_controller != null ) {
 			focus_distance_percent += change;
+			setFocusDistance(true, update_seek_bar);
+		}
+	}
+	
+	void setFocusDistance(int new_focus_distance_percent, boolean update_seek_bar) {
+		if( new_focus_distance_percent != focus_distance_percent ) {
+			focus_distance_percent = new_focus_distance_percent;
 			setFocusDistance(true, update_seek_bar);
 		}
 	}
@@ -6092,7 +6012,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.using_android_l;
     }
 
-    // for testing:
     public CameraController getCameraController() {
     	return this.camera_controller;
     }
@@ -6121,12 +6040,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.max_zoom_factor;
     }
     
+    int getZoom() {
+    	return this.zoom_factor;
+    }
+    
     public boolean hasFocusArea() {
     	return this.has_focus_area;
     }
     
     public int getMaxNumFocusAreas() {
     	return this.max_num_focus_areas;
+    }
+    
+    int getFocusDistancePercent() {
+    	return this.focus_distance_percent;
     }
     
     public boolean isTakingPhotoOrOnTimer() {
@@ -6145,5 +6072,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     
     public boolean isFocusWaiting() {
     	return focus_success == FOCUS_WAITING;
+    }
+    
+    boolean inImmersiveMode() {
+    	return immersive_mode;
     }
 }

@@ -2355,6 +2355,95 @@ public class MainActivity extends Activity {
         return mediaFile;
     }
     
+    void cameraSetup() {
+    	// called when the camera is (re-)set up - should update UI elements/parameters that depend on camera settings
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		{
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up zoom");
+			if( MyDebug.LOG )
+				Log.d(TAG, "has_zoom? " + preview.supportsZoom());
+		    ZoomControls zoomControls = (ZoomControls) findViewById(R.id.zoom);
+		    SeekBar zoomSeekBar = (SeekBar) findViewById(R.id.zoom_seekbar);
+
+			if( preview.supportsZoom() ) {
+				if( sharedPreferences.getBoolean(MainActivity.getShowZoomControlsPreferenceKey(), false) ) {
+				    zoomControls.setIsZoomInEnabled(true);
+			        zoomControls.setIsZoomOutEnabled(true);
+			        zoomControls.setZoomSpeed(20);
+
+			        zoomControls.setOnZoomInClickListener(new View.OnClickListener(){
+			            public void onClick(View v){
+			            	preview.zoomIn();
+			            }
+			        });
+				    zoomControls.setOnZoomOutClickListener(new View.OnClickListener(){
+				    	public void onClick(View v){
+				    		preview.zoomOut();
+				        }
+				    });
+					if( !preview.inImmersiveMode() ) {
+						zoomControls.setVisibility(View.VISIBLE);
+					}
+				}
+				else {
+					zoomControls.setVisibility(View.INVISIBLE); // must be INVISIBLE not GONE, so we can still position the zoomSeekBar relative to it
+				}
+				
+				zoomSeekBar.setMax(preview.getMaxZoom());
+				zoomSeekBar.setProgress(preview.getMaxZoom()-preview.getZoom());
+				zoomSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						preview.zoomTo(preview.getMaxZoom()-progress, false);
+					}
+
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {
+					}
+
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {
+					}
+				});
+
+				if( sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), true) ) {
+					if( !preview.inImmersiveMode() ) {
+						zoomSeekBar.setVisibility(View.VISIBLE);
+					}
+				}
+				else {
+					zoomSeekBar.setVisibility(View.INVISIBLE);
+				}
+			}
+			else {
+				zoomControls.setVisibility(View.GONE);
+				zoomSeekBar.setVisibility(View.GONE);
+			}
+		}
+		{
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up manual focus");
+		    SeekBar focusSeekBar = (SeekBar) findViewById(R.id.focus_seekbar);
+		    focusSeekBar.setMax(100);
+		    focusSeekBar.setProgress(preview.getFocusDistancePercent());
+		    focusSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+					preview.setFocusDistance(progress, false);
+				}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {
+				}
+
+				@Override
+				public void onStopTrackingTouch(SeekBar seekBar) {
+				}
+			});
+		}
+    }
+    
     public boolean supportsAutoStabilise() {
     	return this.supports_auto_stabilise;
     }
