@@ -1,5 +1,9 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.UI;
 
+import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.Preview;
+import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.CameraController.CameraController;
 
 import java.util.ArrayList;
@@ -124,7 +128,7 @@ public class PopupView extends LinearLayout {
 						editor.apply();
 
 						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
-						preview.showToast(main_activity.changed_auto_stabilise_toast, message);
+						preview.showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
 						main_activity.closePopup();
 					}
         		});
@@ -626,14 +630,14 @@ public class PopupView extends LinearLayout {
     	}
     }
 
-    void close() {
+    public void close() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "close");
 		popup_buttons.clear();
     }
 
     // for testing
-    View getPopupButton(String key) {
+    public View getPopupButton(String key) {
     	return popup_buttons.get(key);
     }
 }

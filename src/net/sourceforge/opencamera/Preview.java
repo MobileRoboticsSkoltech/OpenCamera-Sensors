@@ -2044,7 +2044,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return width + ":" + height;
 	}
 	
-	static String getMPString(int width, int height) {
+	public static String getMPString(int width, int height) {
 		float mp = (width*height)/1000000.0f;
 		return formatFloatToString(mp) + "MP";
 	}
@@ -2053,7 +2053,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return "(" + getAspectRatio(width, height) + ", " + getMPString(width, height) + ")";
 	}
 	
-	String getCamcorderProfileDescriptionShort(String quality) {
+	public String getCamcorderProfileDescriptionShort(String quality) {
 		CamcorderProfile profile = getCamcorderProfile(quality);
 		String desc = profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getMPString(profile.videoFrameWidth, profile.videoFrameHeight);
 		return desc;
@@ -3635,7 +3635,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
-	void updateFlash(String focus_value) {
+	public void updateFlash(String focus_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFlash(): " + focus_value);
 		if( this.phase == PHASE_TAKING_PHOTO && !is_video ) {
@@ -3748,7 +3748,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
-	void updateFocus(String focus_value, boolean quiet, boolean auto_focus) {
+	public void updateFocus(String focus_value, boolean quiet, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + focus_value);
 		if( this.phase == PHASE_TAKING_PHOTO ) {
@@ -5776,7 +5776,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return this.sizes;
     }
     
-    int getCurrentPictureSizeIndex() {
+    public int getCurrentPictureSizeIndex() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentPictureSizeIndex");
     	return this.current_size_index;
@@ -5788,7 +5788,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return this.video_quality;
     }
     
-    int getCurrentVideoQualityIndex() {
+    public int getCurrentVideoQualityIndex() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentVideoQualityIndex");
     	return this.current_video_quality;

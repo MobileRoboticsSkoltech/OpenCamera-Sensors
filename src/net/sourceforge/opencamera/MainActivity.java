@@ -2,6 +2,8 @@ package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
+import net.sourceforge.opencamera.UI.FolderChooserDialog;
+import net.sourceforge.opencamera.UI.PopupView;
 import net.sourceforge.opencamera.Widgets.TakePhoto;
 
 import java.io.File;
@@ -1201,7 +1203,7 @@ public class MainActivity extends Activity {
     	return popup_view.getPopupButton(key);
     }
 
-    void closePopup() {
+    public void closePopup() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "close popup");
 		if( popupIsOpen() ) {
@@ -1213,7 +1215,7 @@ public class MainActivity extends Activity {
 		}
     }
     
-    Bitmap getPreloadedBitmap(int resource) {
+    public Bitmap getPreloadedBitmap(int resource) {
 		Bitmap bm = this.preloaded_bitmap_resources.get(resource);
 		return bm;
     }
@@ -2275,11 +2277,11 @@ public class MainActivity extends Activity {
 		return folder_name;
     }
     
-    static File getBaseFolder() {
+    public static File getBaseFolder() {
     	return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
     }
 
-    static File getImageFolder(String folder_name) {
+    public static File getImageFolder(String folder_name) {
 		File file = null;
 		if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
 			// ignore final '/' character
@@ -2509,6 +2511,10 @@ public class MainActivity extends Activity {
 
     public Preview getPreview() {
     	return this.preview;
+    }
+    
+    public ToastBoxer getChangedAutoStabiliseToastBoxer() {
+    	return changed_auto_stabilise_toast;
     }
 
     // must be static, to safely call from other Activities:

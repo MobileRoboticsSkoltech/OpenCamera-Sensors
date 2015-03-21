@@ -1,5 +1,7 @@
 package net.sourceforge.opencamera;
 
+import net.sourceforge.opencamera.UI.FolderChooserDialog;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;

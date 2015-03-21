@@ -1,4 +1,8 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.UI;
+
+import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.R;
 
 import java.io.File;
 import java.util.ArrayList;
