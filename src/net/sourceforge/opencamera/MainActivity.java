@@ -2,6 +2,7 @@ package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
+import net.sourceforge.opencamera.Widgets.TakePhoto;
 
 import java.io.File;
 import java.io.IOException;

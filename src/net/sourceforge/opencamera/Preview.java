@@ -10,6 +10,7 @@ import net.sourceforge.opencamera.CameraController.CameraControllerException;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager1;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
+import net.sourceforge.opencamera.Widgets.TakePhoto;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -1,4 +1,7 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.Widgets;
+
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.MainActivity;
 
 import android.app.Activity;
 import android.content.Intent;
