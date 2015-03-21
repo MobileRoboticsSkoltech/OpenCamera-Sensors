@@ -1,5 +1,8 @@
 package net.sourceforge.opencamera;
 
+import net.sourceforge.opencamera.CameraSurface.CameraSurface;
+import net.sourceforge.opencamera.CameraSurface.MySurfaceView;
+import net.sourceforge.opencamera.CameraSurface.MyTextureView;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraController1;
 import net.sourceforge.opencamera.CameraController.CameraController2;
@@ -418,7 +421,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    return areas;
 	}
 
-	boolean touchEvent(MotionEvent event) {
+	public boolean touchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
         if( camera_controller == null ) {
     		if( MyDebug.LOG )
@@ -510,7 +513,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		successfully_focused = false;
     }
 
-    protected void getMeasureSpec(int [] spec, int widthSpec, int heightSpec) {
+    public void getMeasureSpec(int [] spec, int widthSpec, int heightSpec) {
     	if( !this.hasAspectRatio() ) {
     		spec[0] = widthSpec;
     		spec[1] = heightSpec;
@@ -2397,7 +2400,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return this.current_rotation;
 	}
 
-	void draw(Canvas canvas) {
+	public void draw(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "draw()");*/
 		if( this.app_is_paused ) {

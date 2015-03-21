@@ -1,5 +1,7 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.CameraSurface;
 
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.Preview;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraControllerException;
 
@@ -13,13 +15,13 @@ import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
 
-class MyTextureView extends TextureView implements CameraSurface {
+public class MyTextureView extends TextureView implements CameraSurface {
 	private static final String TAG = "MyTextureView";
 
 	private Preview preview = null;
 	private int [] measure_spec = new int[2];
 	
-	MyTextureView(Context context, Bundle savedInstanceState, Preview preview) {
+	public MyTextureView(Context context, Bundle savedInstanceState, Preview preview) {
 		super(context);
 		this.preview = preview;
 		if( MyDebug.LOG ) {

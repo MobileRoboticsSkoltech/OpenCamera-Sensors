@@ -1,5 +1,7 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.CameraSurface;
 
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.Preview;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraControllerException;
 
@@ -22,6 +24,7 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 	private int [] measure_spec = new int[2];
 	
 	@SuppressWarnings("deprecation")
+	public
 	MySurfaceView(Context context, Bundle savedInstanceState, Preview preview) {
 		super(context);
 		this.preview = preview;
