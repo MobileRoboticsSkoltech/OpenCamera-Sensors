@@ -16,14 +16,20 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	MainActivity main_activity = null;
 	LocationSupplier locationSupplier = null;
+	StorageUtils storageUtils = null;
 	
 	MyApplicationInterface(MainActivity main_activity) {
 		this.main_activity = main_activity;
 		this.locationSupplier = new LocationSupplier(main_activity);
+		this.storageUtils = new StorageUtils(main_activity);
 	}
 	
 	LocationSupplier getLocationSupplier() {
 		return locationSupplier;
+	}
+	
+	StorageUtils getStorageUtils() {
+		return storageUtils;
 	}
 
     @Override
@@ -47,7 +53,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public File getOutputMediaFile(int type) {
-		return main_activity.getOutputMediaFile(type);
+		return storageUtils.getOutputMediaFile(type);
 	}
 
     @Override
@@ -407,7 +413,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public void broadcastFile(File file, boolean is_new_picture, boolean is_new_video) {
-		main_activity.broadcastFile(file, is_new_picture, is_new_video);
+		storageUtils.broadcastFile(file, is_new_picture, is_new_video);
 	}
 
 	@Override

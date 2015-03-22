@@ -3,6 +3,7 @@ package net.sourceforge.opencamera.UI;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.R;
+import net.sourceforge.opencamera.StorageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class FolderChooserDialog extends DialogFragment {
 		String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
 		if( MyDebug.LOG )
 			Log.d(TAG, "folder_name: " + folder_name);
-		File new_folder = MainActivity.getImageFolder(folder_name);
+		File new_folder = StorageUtils.getImageFolder(folder_name);
 		if( MyDebug.LOG )
 			Log.d(TAG, "start in folder: " + new_folder);
 
@@ -216,7 +217,7 @@ public class FolderChooserDialog extends DialogFragment {
 		if( current_folder == null )
 			return false;
 		if( canWrite() ) {
-        	File base_folder = MainActivity.getBaseFolder();
+        	File base_folder = StorageUtils.getBaseFolder();
         	String new_save_location = current_folder.getAbsolutePath();
         	if( current_folder.getParentFile() != null && current_folder.getParentFile().equals(base_folder) ) {
 				if( MyDebug.LOG )
