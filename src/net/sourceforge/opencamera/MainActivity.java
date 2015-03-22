@@ -58,6 +58,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.util.Log;
+import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
@@ -78,7 +79,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ApplicationInterface {
 	private static final String TAG = "MainActivity";
 	private SensorManager mSensorManager = null;
 	private Sensor mSensorAccelerometer = null;
@@ -195,7 +196,7 @@ public class MainActivity extends Activity {
 
 		clearSeekBar();
 
-		preview = new Preview(this, savedInstanceState);
+		preview = new Preview(this, savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
 		
 		orientationEventListener = new OrientationEventListener(this) {
 			@Override
@@ -370,18 +371,18 @@ public class MainActivity extends Activity {
 	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP ) {
 	    				if( manual_iso ) {
 	    					if( preview.supportsISORange() )
-		    					this.preview.changeISO(1, true);
+		    					this.changeISO(1);
 	    				}
 	    				else
-	    					this.preview.changeExposure(1, true);
+	    					this.changeExposure(1);
 	    			}
 	    			else {
 	    				if( manual_iso ) {
 	    					if( preview.supportsISORange() )
-		    					this.preview.changeISO(-1, true);
+		    					this.changeISO(-1);
 	    				}
 	    				else
-	    					this.preview.changeExposure(-1, true);
+	    					this.changeExposure(-1);
 	    			}
 	                return true;
 	    		}
@@ -440,6 +441,22 @@ public class MainActivity extends Activity {
 		}
         return super.onKeyDown(keyCode, event); 
     }
+	
+	public void changeExposure(int change) {
+		this.preview.changeExposure(change);
+		this.setSeekBarExposure();
+	}
+
+	public void setExposure(int new_exposure) {
+		this.preview.setExposure(new_exposure);
+		this.setSeekBarExposure();
+	}
+	
+	public void changeISO(int change) {
+		this.preview.changeISO(change);
+		SeekBar seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
+		seek_bar.setProgress(preview.getCameraController().getISO() - preview.getMinimumISO());
+	}
 
 	private SensorEventListener accelerometerListener = new SensorEventListener() {
 		@Override
@@ -463,6 +480,7 @@ public class MainActivity extends Activity {
 		}
 	};
 
+	@Override
 	public Location getLocation() {
 		// returns null if not available
 		if( locationListeners == null )
@@ -625,6 +643,7 @@ public class MainActivity extends Activity {
 		preview.onPause();
     }
 
+    @Override
     public void layoutUI() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "layoutUI");
@@ -1065,7 +1084,7 @@ public class MainActivity extends Activity {
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure_time scaling: " + scaling);
 							int iso = min_iso + (int)(scaling * (max_iso - min_iso));
-							preview.setISO(iso, false);
+							preview.setISO(iso);
 						}
 
 						@Override
@@ -1139,7 +1158,7 @@ public class MainActivity extends Activity {
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure seekbar onProgressChanged: " + progress);
-							preview.setExposure(min_exposure + progress, false);
+							preview.setExposure(min_exposure + progress);
 						}
 
 						@Override
@@ -1155,12 +1174,14 @@ public class MainActivity extends Activity {
 					seek_bar_zoom.setVisibility(View.VISIBLE);
 					seek_bar_zoom.setOnZoomInClickListener(new View.OnClickListener(){
 			            public void onClick(View v){
-			            	preview.changeExposure(1, true);
+			            	preview.changeExposure(1);
+	    	    			setSeekBarExposure();
 			            }
 			        });
 					seek_bar_zoom.setOnZoomOutClickListener(new View.OnClickListener(){
 				    	public void onClick(View v){
-			            	preview.changeExposure(-1, true);
+			            	preview.changeExposure(-1);
+	    	    			setSeekBarExposure();
 				        }
 				    });
 				}
@@ -1751,12 +1772,13 @@ public class MainActivity extends Activity {
 		gallery_bitmap = null;
     }
     
-    public void updateGalleryIconToBitmap(Bitmap bitmap) {
+	@Override
+    public void updateThumbnail(Bitmap thumbnail) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "updateGalleryIconToBitmap");
+			Log.d(TAG, "updateThumbnail");
     	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
-		galleryButton.setImageBitmap(bitmap);
-		gallery_bitmap = bitmap;
+		galleryButton.setImageBitmap(thumbnail);
+		gallery_bitmap = thumbnail;
     }
     
     public void updateGalleryIcon() {
@@ -1798,7 +1820,7 @@ public class MainActivity extends Activity {
     	if( thumbnail != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set gallery button to thumbnail");
-			updateGalleryIconToBitmap(thumbnail);
+			updateThumbnail(thumbnail);
     	}
     	else {
 			if( MyDebug.LOG )
@@ -2154,6 +2176,7 @@ public class MainActivity extends Activity {
 	    }
 	}
 
+    @Override
     public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFile");
@@ -2267,9 +2290,6 @@ public class MainActivity extends Activity {
     	    }*/
     	}
 	}
-    
-    public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final int MEDIA_TYPE_VIDEO = 2;
 
     private String getSaveLocation() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -2306,9 +2326,9 @@ public class MainActivity extends Activity {
 		return getImageFolder(folder_name);
     }
 
-    /** Create a File for saving an image or video */
+    @Override
     @SuppressLint("SimpleDateFormat")
-	public File getOutputMediaFile(int type){
+	public File getOutputMediaFile(int type) {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
 
@@ -2357,9 +2377,26 @@ public class MainActivity extends Activity {
         return mediaFile;
     }
     
-    void cameraSetup() {
+    @Override
+    public void cameraSetup() {
     	// called when the camera is (re-)set up - should update UI elements/parameters that depend on camera settings
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+		if( this.supportsForceVideo4K() && preview.usingCamera2API() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "using Camera2 API, so can disable the force 4K option");
+			this.disableForceVideo4K();
+		}
+		if( this.supportsForceVideo4K() && preview.getSupportedVideoSizes() != null ) {
+			for(CameraController.Size size : preview.getSupportedVideoSizes()) {
+				if( size.width >= 3840 && size.height >= 2160 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "camera natively supports 4K, so can disable the force option");
+					this.disableForceVideo4K();
+				}
+			}
+		}
+
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up zoom");
@@ -2457,7 +2494,7 @@ public class MainActivity extends Activity {
     public boolean supportsCamera2() {
     	return this.supports_camera2;
     }
-
+    
     void disableForceVideo4K() {
     	this.supports_force_video_4k = false;
     }
@@ -2771,6 +2808,529 @@ public class MainActivity extends Activity {
     	return "preference_immersive_mode";
     }
     
+    // ApplicationInterface
+
+    @Override
+	public Context getContext() {
+    	return this;
+    }
+    
+    @Override
+	public boolean useCamera2() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if( this.supportsCamera2() ) {
+    		return sharedPreferences.getBoolean(getUseCamera2PreferenceKey(), false);
+        }
+        return false;
+    }
+    
+    @Override
+	public String getFlashPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getString(MainActivity.getFlashPreferenceKey(preview.getCameraId()), "");
+    }
+
+    @Override
+	public String getFocusPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getString(MainActivity.getFocusPreferenceKey(preview.getCameraId()), "");
+    }
+
+    @Override
+	public boolean isVideoPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getBoolean(MainActivity.getIsVideoPreferenceKey(), false);
+    }
+
+    @Override
+	public String getSceneModePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String value = sharedPreferences.getString(MainActivity.getSceneModePreferenceKey(), "auto");
+		return value;
+    }
+    
+    @Override
+    public String getColorEffectPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getString(MainActivity.getColorEffectPreferenceKey(), "none");
+    }
+
+    @Override
+    public String getWhiteBalancePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getString(MainActivity.getWhiteBalancePreferenceKey(), "auto");
+    }
+
+    @Override
+	public String getISOPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getString(MainActivity.getISOPreferenceKey(), "auto");
+    }
+    
+    @Override
+	public int getExposureCompensationPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String value = sharedPreferences.getString(MainActivity.getExposurePreferenceKey(), "0");
+		if( MyDebug.LOG )
+			Log.d(TAG, "saved exposure value: " + value);
+		int exposure = 0;
+		try {
+			exposure = Integer.parseInt(value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "exposure: " + exposure);
+		}
+		catch(NumberFormatException exception) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "exposure invalid format, can't parse to int");
+		}
+		return exposure;
+    }
+
+    @Override
+	public Pair<Integer, Integer> getCameraResolutionPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String resolution_value = sharedPreferences.getString(MainActivity.getResolutionPreferenceKey(preview.getCameraId()), "");
+		if( MyDebug.LOG )
+			Log.d(TAG, "resolution_value: " + resolution_value);
+		if( resolution_value.length() > 0 ) {
+			// parse the saved size, and make sure it is still valid
+			int index = resolution_value.indexOf(' ');
+			if( index == -1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "resolution_value invalid format, can't find space");
+			}
+			else {
+				String resolution_w_s = resolution_value.substring(0, index);
+				String resolution_h_s = resolution_value.substring(index+1);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "resolution_w_s: " + resolution_w_s);
+					Log.d(TAG, "resolution_h_s: " + resolution_h_s);
+				}
+				try {
+					int resolution_w = Integer.parseInt(resolution_w_s);
+					if( MyDebug.LOG )
+						Log.d(TAG, "resolution_w: " + resolution_w);
+					int resolution_h = Integer.parseInt(resolution_h_s);
+					if( MyDebug.LOG )
+						Log.d(TAG, "resolution_h: " + resolution_h);
+					return new Pair<Integer, Integer>(resolution_w, resolution_h);
+				}
+				catch(NumberFormatException exception) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "resolution_value invalid format, can't parse w or h to int");
+				}
+			}
+		}
+		return null;
+    }
+    
+    @Override
+    public int getImageQualityPref(){
+		if( MyDebug.LOG )
+			Log.d(TAG, "getImageQualityPref");
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String image_quality_s = sharedPreferences.getString(MainActivity.getQualityPreferenceKey(), "90");
+		int image_quality = 0;
+		try {
+			image_quality = Integer.parseInt(image_quality_s);
+		}
+		catch(NumberFormatException exception) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "image_quality_s invalid format: " + image_quality_s);
+			image_quality = 90;
+		}
+		return image_quality;
+    }
+    
+	@Override
+	public boolean getFaceDetectionPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getBoolean(MainActivity.getFaceDetectionPreferenceKey(), false);
+    }
+    
+    @Override
+	public boolean getVideoStabilizationPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getBoolean(MainActivity.getVideoStabilizationPreferenceKey(), false);
+    }
+    
+    @Override
+	public boolean getForce4KPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		if( preview.getCameraId() == 0 && sharedPreferences.getBoolean(MainActivity.getForceVideo4KPreferenceKey(), false) && this.supportsForceVideo4K() ) {
+			return true;
+		}
+		return false;
+    }
+    
+    @Override
+    public String getVideoBitratePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getString(MainActivity.getVideoBitratePreferenceKey(), "default");
+    }
+
+    @Override
+    public String getVideoFPSPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
+    }
+    
+    @Override
+    public long getVideoMaxDurationPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String video_max_duration_value = sharedPreferences.getString(MainActivity.getVideoMaxDurationPreferenceKey(), "0");
+		long video_max_duration = 0;
+		try {
+			video_max_duration = Integer.parseInt(video_max_duration_value) * 1000;
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "failed to parse preference_video_max_duration value: " + video_max_duration_value);
+    		e.printStackTrace();
+    		video_max_duration = 0;
+        }
+		return video_max_duration;
+    }
+    
+    @Override
+    public int getVideoRestartTimesPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String restart_value = sharedPreferences.getString(MainActivity.getVideoRestartPreferenceKey(), "0");
+		int remaining_restart_video = 0;
+		try {
+			remaining_restart_video = Integer.parseInt(restart_value);
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "failed to parse preference_video_restart value: " + restart_value);
+    		e.printStackTrace();
+    		remaining_restart_video = 0;
+        }
+		return remaining_restart_video;
+    }
+    
+    @Override
+    public boolean getVideoFlashPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getBoolean(MainActivity.getVideoFlashPreferenceKey(), false);
+    }
+    
+    @Override
+	public String getPreviewSizePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getString(MainActivity.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg");
+    }
+    
+    @Override
+    public String getPreviewRotationPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getString(MainActivity.getRotatePreviewPreferenceKey(), "0");
+    }
+    
+    @Override
+    public String getLockOrientationPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getString(MainActivity.getLockOrientationPreferenceKey(), "none");
+    }
+
+    @Override
+    public boolean getPausePreviewPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getBoolean(MainActivity.getPausePreviewPreferenceKey(), false);
+    }
+    
+    @Override
+    public boolean getThumbnailAnimationPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getBoolean(MainActivity.getThumbnailAnimationPreferenceKey(), true);
+    }
+    
+    @Override
+    public boolean getShutterSoundPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getBoolean(MainActivity.getShutterSoundPreferenceKey(), true);
+    }
+
+    @Override
+    public long getTimerPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String timer_value = sharedPreferences.getString(MainActivity.getTimerPreferenceKey(), "0");
+		long timer_delay = 0;
+		try {
+			timer_delay = Integer.parseInt(timer_value) * 1000;
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "failed to parse preference_timer value: " + timer_value);
+    		e.printStackTrace();
+    		timer_delay = 0;
+        }
+		return timer_delay;
+    }
+    
+    @Override
+    public String getRepeatPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getString(MainActivity.getBurstModePreferenceKey(), "1");
+    }
+    
+    @Override
+    public long getRepeatIntervalPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String timer_value = sharedPreferences.getString(MainActivity.getBurstIntervalPreferenceKey(), "0");
+		long timer_delay = 0;
+		try {
+			timer_delay = Integer.parseInt(timer_value) * 1000;
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "failed to parse preference_burst_interval value: " + timer_value);
+    		e.printStackTrace();
+    		timer_delay = 0;
+        }
+		return timer_delay;
+    }
+    
+    @Override
+    public boolean getGeotaggingPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
+    }
+    
+    @Override
+    public boolean getRequireLocationPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getBoolean(MainActivity.getRequireLocationPreferenceKey(), false);
+    }
+    
+    @Override
+    public boolean getGeodirectionPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false);
+    }
+    
+    @Override
+	public boolean getRecordAudioPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
+    }
+    
+    @Override
+    public String getRecordAudioSourcePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getString(MainActivity.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
+    }
+
+    @Override
+    public boolean getAutoStabilisePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean auto_stabilise = sharedPreferences.getBoolean(MainActivity.getAutoStabilisePreferenceKey(), false);
+		if( auto_stabilise && this.supportsAutoStabilise() )
+			return true;
+		return false;
+    }
+    
+    @Override
+    public String getStampPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getString(MainActivity.getStampPreferenceKey(), "preference_stamp_no");
+    }
+    
+    @Override
+    public String getTextStampPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getString(MainActivity.getTextStampPreferenceKey(), "");
+    }
+    
+    @Override
+    public int getTextStampFontSizePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	int font_size = 12;
+		String value = sharedPreferences.getString(MainActivity.getStampFontSizePreferenceKey(), "12");
+		if( MyDebug.LOG )
+			Log.d(TAG, "saved font size: " + value);
+		try {
+			font_size = Integer.parseInt(value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "font_size: " + font_size);
+		}
+		catch(NumberFormatException exception) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "font size invalid format, can't parse to int");
+		}
+		return font_size;
+    }
+    
+    @Override
+    public long getExposureTimePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    	return sharedPreferences.getLong(MainActivity.getExposureTimePreferenceKey(), 1000000000l/30);
+    }
+    
+    @Override
+    public boolean isTestAlwaysFocus() {
+    	return is_test;
+    }
+
+    @Override
+	public void touchEvent(MotionEvent event) {
+		this.clearSeekBar();
+		this.closePopup();
+		if( this.usingKitKatImmersiveMode() ) {
+			this.setImmersiveMode(false);
+		}
+    }
+    
+    @Override
+    public void startingVideo() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		if( sharedPreferences.getBoolean(MainActivity.getLockVideoPreferenceKey(), false) ) {
+			this.lockScreen();
+		}
+    }
+    
+    @Override
+	public void stoppingVideo() {
+		this.unlockScreen();
+    }
+    
+    @Override
+	public void cameraClosed() {
+		this.clearSeekBar();
+    }
+    
+    @Override
+    public void setFlashPref(String flash_value) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(MainActivity.getFlashPreferenceKey(preview.getCameraId()), flash_value);
+		editor.apply();
+    }
+
+    @Override
+    public void setFocusPref(String focus_value) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(MainActivity.getFocusPreferenceKey(preview.getCameraId()), focus_value);
+		editor.apply();
+    }
+
+    @Override
+	public void setVideoPref(boolean is_video) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putBoolean(MainActivity.getIsVideoPreferenceKey(), is_video);
+		editor.apply();
+    }
+
+    @Override
+    public void setSceneModePref(String scene_mode) {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(MainActivity.getSceneModePreferenceKey(), scene_mode);
+		editor.apply();
+    }
+    
+    @Override
+	public void clearSceneModePref() {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.remove(MainActivity.getSceneModePreferenceKey());
+		editor.apply();
+    }
+	
+    @Override
+	public void setColorEffectPref(String color_effect) {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(MainActivity.getColorEffectPreferenceKey(), color_effect);
+		editor.apply();
+    }
+	
+    @Override
+	public void clearColorEffectPref() {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.remove(MainActivity.getColorEffectPreferenceKey());
+		editor.apply();
+    }
+	
+    @Override
+	public void setWhiteBalancePref(String white_balance) {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(MainActivity.getWhiteBalancePreferenceKey(), white_balance);
+		editor.apply();
+    }
+
+    @Override
+	public void clearWhiteBalancePref() {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.remove(MainActivity.getWhiteBalancePreferenceKey());
+		editor.apply();
+    }
+	
+    @Override
+	public void setISOPref(String iso) {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(MainActivity.getISOPreferenceKey(), iso);
+		editor.apply();
+    }
+
+    @Override
+	public void clearISOPref() {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.remove(MainActivity.getISOPreferenceKey());
+		editor.apply();
+    }
+	
+    @Override
+	public void setExposureCompensationPref(int exposure) {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(MainActivity.getExposurePreferenceKey(), "" + exposure);
+		editor.apply();
+    }
+
+    @Override
+	public void clearExposureCompensationPref() {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.remove(MainActivity.getExposurePreferenceKey());
+		editor.apply();
+    }
+	
+    @Override
+	public void setCameraResolutionPref(int width, int height) {
+		String resolution_value = width + " " + height;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "save new resolution_value: " + resolution_value);
+		}
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(MainActivity.getResolutionPreferenceKey(preview.getCameraId()), resolution_value);
+		editor.apply();
+    }
+    
+    @Override
+	public void setExposureTimePref(long exposure_time) {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putLong(MainActivity.getExposureTimePreferenceKey(), exposure_time);
+		editor.apply();
+	}
+
+    @Override
+	public void clearExposureTimePref() {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.remove(MainActivity.getExposureTimePreferenceKey());
+		editor.apply();
+    }
+	
     // for testing:
 	public ArrayList<String> getSaveLocationHistory() {
 		return this.save_location_history;

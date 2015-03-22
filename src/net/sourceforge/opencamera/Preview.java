@@ -93,6 +93,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean using_android_l = false;
 	private boolean using_texture_view = false;
 
+	private ApplicationInterface applicationInterface = null;
 	private CameraSurface cameraSurface = null;
 	private CanvasView canvasView = null;
 	private boolean set_preview_size = false;
@@ -266,16 +267,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public float test_angle = 0.0f;
 	public String test_last_saved_image = null;
 
-	Preview(Context context, Bundle savedInstanceState) {
+	Preview(ApplicationInterface applicationInterface, Bundle savedInstanceState, ViewGroup parent) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "new Preview");
 		}
 		
-		MainActivity main_activity = (MainActivity)context;
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        if( main_activity.supportsCamera2() ) {
-    		this.using_android_l = sharedPreferences.getBoolean(MainActivity.getUseCamera2PreferenceKey(), false);
-        }
+		this.applicationInterface = applicationInterface;
+		
+		this.using_android_l = applicationInterface.useCamera2();
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "using_android_l?: " + using_android_l);
 		}
@@ -287,17 +286,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
         if( using_texture_view ) {
-    		this.cameraSurface = new MyTextureView(context, savedInstanceState, this);
+    		this.cameraSurface = new MyTextureView(getContext(), savedInstanceState, this);
     		// a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CanvasView
-    		this.canvasView = new CanvasView(context, savedInstanceState, this);
-    		camera_controller_manager = new CameraControllerManager2(context);
+    		this.canvasView = new CanvasView(getContext(), savedInstanceState, this);
+    		camera_controller_manager = new CameraControllerManager2(getContext());
         }
         else {
-    		this.cameraSurface = new MySurfaceView(context, savedInstanceState, this);
+    		this.cameraSurface = new MySurfaceView(getContext(), savedInstanceState, this);
     		camera_controller_manager = new CameraControllerManager1();
         }
 
-	    scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
+	    scaleGestureDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
 
         if( savedInstanceState != null ) {
     		if( MyDebug.LOG )
@@ -321,10 +320,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	location_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth);
     	location_off_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth_off);
 
-		Activity activity = (Activity)context;
-		((ViewGroup) activity.findViewById(R.id.preview)).addView(cameraSurface.getView());
+		parent.addView(cameraSurface.getView());
 		if( canvasView != null ) {
-			((ViewGroup) activity.findViewById(R.id.preview)).addView(canvasView);
+			parent.addView(canvasView);
 		}
 	}
 	
@@ -430,12 +428,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		this.openCamera();
     		return true;
         }
-		MainActivity main_activity = (MainActivity)this.getContext();
-		main_activity.clearSeekBar();
-		main_activity.closePopup();
-		if( main_activity.usingKitKatImmersiveMode() ) {
-			main_activity.setImmersiveMode(false);
-		}
+        applicationInterface.touchEvent(event);
         //invalidate();
 		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "touch event: " + event.getAction());
@@ -574,9 +567,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
             return;
         }
-
-		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-		main_activity.layoutUI(); // need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed)
+        
+		// need to force a layoutUI update (e.g., so UI is oriented correctly when app goes idle, device is then rotated, and app is then resumed)
+        applicationInterface.layoutUI();
     }
     
 	@Override
@@ -675,8 +668,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     void stopVideo(boolean from_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopVideo()");
-		final MainActivity main_activity = (MainActivity)this.getContext();
-		main_activity.unlockScreen();
+		applicationInterface.stoppingVideo();
 		if( restartVideoTimerTask != null ) {
 			restartVideoTimerTask.cancel();
 			restartVideoTimerTask = null;
@@ -738,7 +730,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			File file = new File(video_name);
     			if( file != null ) {
     				// need to scan when finished, so we update for the completed file
-    	            main_activity.broadcastFile(file, false, true);
+    	            applicationInterface.broadcastFile(file, false, true);
     			}
     			// create thumbnail
     			{
@@ -764,7 +756,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	    	    	}
     	    	    }
     	    	    if( thumbnail != null && thumbnail != old_thumbnail ) {
-    	    	    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
+    					Activity activity = (Activity)Preview.this.getContext();
+    	    	    	ImageButton galleryButton = (ImageButton) activity.findViewById(R.id.gallery);
     	    	    	int width = thumbnail.getWidth();
     	    	    	int height = thumbnail.getHeight();
     					if( MyDebug.LOG )
@@ -782,9 +775,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	        		    	thumbnail = scaled_thumbnail;
     	        		    }
     	    	    	}
-						main_activity.runOnUiThread(new Runnable() {
+    	    	    	activity.runOnUiThread(new Runnable() {
 							public void run() {
-		    	    	    	main_activity.updateGalleryIconToBitmap(thumbnail);
+    	    	    	    	applicationInterface.updateThumbnail(thumbnail);
 							}
 						});
         	    		if( old_thumbnail != null ) {
@@ -801,7 +794,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	private Context getContext() {
-		return cameraSurface.getView().getContext();
+		return applicationInterface.getContext();
 	}
 
 	private void restartVideo() {
@@ -877,8 +870,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
 		// n.b., don't reset has_set_location, as we can remember the location when switching camera
-		MainActivity main_activity = (MainActivity)this.getContext();
-		main_activity.clearSeekBar();
+		applicationInterface.cameraClosed();
 		cancelTimer();
 		if( camera_controller != null ) {
 			if( video_recorder != null ) {
@@ -1122,8 +1114,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		setupCameraParameters();
 		
 		// now switch to video if saved
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		boolean saved_is_video = sharedPreferences.getBoolean(MainActivity.getIsVideoPreferenceKey(), false);
+		boolean saved_is_video = applicationInterface.isVideoPref();
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saved_is_video: " + saved_is_video);
 		}
@@ -1216,7 +1207,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// mode, applications should call getParameters to know if some parameters are changed."
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up scene mode");
-			String value = sharedPreferences.getString(MainActivity.getSceneModePreferenceKey(), camera_controller.getDefaultSceneMode());
+			String value = applicationInterface.getSceneModePref();
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved scene mode: " + value);
 
@@ -1224,15 +1215,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( supported_values != null ) {
 				scene_modes = supported_values.values;
 	    		// now save, so it's available for PreferenceActivity
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getSceneModePreferenceKey(), supported_values.selected_value);
-				editor.apply();
+				applicationInterface.setSceneModePref(supported_values.selected_value);
 			}
 			else {
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.remove(MainActivity.getSceneModePreferenceKey());
-				editor.apply();
+				applicationInterface.clearSceneModePref();
 			}
 		}
 		
@@ -1268,23 +1255,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
 		
-		MainActivity main_activity = (MainActivity)this.getContext();
-		if( main_activity.supportsForceVideo4K() && this.using_android_l ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "using Camera2 API, so can disable the force 4K option");
-			main_activity.disableForceVideo4K();
-		}
-		if( main_activity.supportsForceVideo4K() && video_sizes != null ) {
-			for(CameraController.Size size : video_sizes) {
-				if( size.width >= 3840 && size.height >= 2160 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "camera natively supports 4K, so can disable the force option");
-					main_activity.disableForceVideo4K();
-				}
-			}
-		}
-		
-		main_activity.cameraSetup();
+		applicationInterface.cameraSetup();
 
 		{
 			if( MyDebug.LOG )
@@ -1292,7 +1263,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// get face detection supported
 			this.faces_detected = null;
 			if( this.supports_face_detection ) {
-				this.using_face_detection = sharedPreferences.getBoolean(MainActivity.getFaceDetectionPreferenceKey(), false);
+				this.using_face_detection = applicationInterface.getFaceDetectionPref();
 			}
 			else {
 				this.using_face_detection = false;
@@ -1317,7 +1288,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up video stabilization");
 			if( this.supports_video_stabilization ) {
-				boolean using_video_stabilization = sharedPreferences.getBoolean(MainActivity.getVideoStabilizationPreferenceKey(), false);
+				boolean using_video_stabilization = applicationInterface.getVideoStabilizationPref();
 				if( MyDebug.LOG )
 					Log.d(TAG, "using_video_stabilization?: " + using_video_stabilization);
 				camera_controller.setVideoStabilization(using_video_stabilization);
@@ -1329,7 +1300,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up color effect");
-			String value = sharedPreferences.getString(MainActivity.getColorEffectPreferenceKey(), camera_controller.getDefaultColorEffect());
+			String value = applicationInterface.getColorEffectPref();
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved color effect: " + value);
 
@@ -1337,22 +1308,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( supported_values != null ) {
 				color_effects = supported_values.values;
 	    		// now save, so it's available for PreferenceActivity
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getColorEffectPreferenceKey(), supported_values.selected_value);
-				editor.apply();
+				applicationInterface.setColorEffectPref(supported_values.selected_value);
 			}
 			else {
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.remove(MainActivity.getColorEffectPreferenceKey());
-				editor.apply();
+				applicationInterface.clearColorEffectPref();
 			}
 		}
 
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up white balance");
-			String value = sharedPreferences.getString(MainActivity.getWhiteBalancePreferenceKey(), camera_controller.getDefaultWhiteBalance());
+			String value = applicationInterface.getWhiteBalancePref();
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved white balance: " + value);
 
@@ -1360,15 +1327,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( supported_values != null ) {
 				white_balances = supported_values.values;
 	    		// now save, so it's available for PreferenceActivity
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getWhiteBalancePreferenceKey(), supported_values.selected_value);
-				editor.apply();
+				applicationInterface.setWhiteBalancePref(supported_values.selected_value);
 			}
 			else {
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.remove(MainActivity.getWhiteBalancePreferenceKey());
-				editor.apply();
+				applicationInterface.clearWhiteBalancePref();
 			}
 		}
 		
@@ -1376,7 +1339,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up iso");
-			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
+			String value = applicationInterface.getISOPref();
 			if( MyDebug.LOG )
 				Log.d(TAG, "saved iso: " + value);
 
@@ -1389,13 +1352,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					has_manual_iso = true;
 				}
 	    		// now save, so it's available for PreferenceActivity
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getISOPreferenceKey(), supported_values.selected_value);
-				editor.apply();
+				applicationInterface.setISOPref(supported_values.selected_value);
 				
 				if( has_manual_iso ) {
 					if( supports_exposure_time ) {
-						long exposure_time_value = sharedPreferences.getLong(MainActivity.getExposureTimePreferenceKey(), camera_controller.getDefaultExposureTime());
+						long exposure_time_value = applicationInterface.getExposureTimePref();
 						if( MyDebug.LOG )
 							Log.d(TAG, "saved exposure_time: " + exposure_time_value);
 						if( exposure_time_value < min_exposure_time )
@@ -1404,23 +1365,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 							exposure_time_value = max_exposure_time;
 						camera_controller.setExposureTime(exposure_time_value);
 						// now save
-						editor = sharedPreferences.edit();
-						editor.putLong(MainActivity.getExposureTimePreferenceKey(), exposure_time_value);
-						editor.apply();
+						applicationInterface.setExposureTimePref(exposure_time_value);
 					}
 					else {
 						// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
-						editor = sharedPreferences.edit();
-						editor.remove(MainActivity.getExposureTimePreferenceKey());
-						editor.apply();
+						applicationInterface.clearExposureTimePref();
 					}
 				}
 			}
 			else {
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.remove(MainActivity.getISOPreferenceKey());
-				editor.apply();
+				applicationInterface.clearISOPref();
 			}
 		}
 
@@ -1436,19 +1391,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 				// if in manual ISO mode, we still want to get the valid exposure compensations, but shouldn't set exposure compensation
 				if( !has_manual_iso ) {
-					String value = sharedPreferences.getString(MainActivity.getExposurePreferenceKey(), "0");
-					if( MyDebug.LOG )
-						Log.d(TAG, "saved exposure value: " + value);
-					int exposure = 0;
-					try {
-						exposure = Integer.parseInt(value);
-						if( MyDebug.LOG )
-							Log.d(TAG, "exposure: " + exposure);
-					}
-					catch(NumberFormatException exception) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "exposure invalid format, can't parse to int");
-					}
+					int exposure = applicationInterface.getExposureCompensationPref();
 					if( exposure < min_exposure || exposure > max_exposure ) {
 						exposure = 0;
 						if( MyDebug.LOG )
@@ -1461,16 +1404,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					}
 					camera_controller.setExposureCompensation(exposure);
 		    		// now save, so it's available for PreferenceActivity
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(MainActivity.getExposurePreferenceKey(), "" + exposure);
-					editor.apply();
+					applicationInterface.setExposureCompensationPref(exposure);
 				}
 			}
 			else {
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.remove(MainActivity.getExposurePreferenceKey());
-				editor.apply();
+				applicationInterface.clearExposureCompensationPref();
 			}
 			View exposureButton = (View) activity.findViewById(R.id.exposure);
 		    exposureButton.setVisibility(exposures != null && !immersive_mode ? View.VISIBLE : View.GONE);
@@ -1486,48 +1425,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 			}
 			current_size_index = -1;
-			String resolution_value = sharedPreferences.getString(MainActivity.getResolutionPreferenceKey(cameraId), "");
-			if( MyDebug.LOG )
-				Log.d(TAG, "resolution_value: " + resolution_value);
-			if( resolution_value.length() > 0 ) {
-				// parse the saved size, and make sure it is still valid
-				int index = resolution_value.indexOf(' ');
-				if( index == -1 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "resolution_value invalid format, can't find space");
+			Pair<Integer, Integer> resolution = applicationInterface.getCameraResolutionPref();
+			if( resolution != null ) {
+				int resolution_w = resolution.first;
+				int resolution_h = resolution.second;
+				// now find size in valid list
+				for(int i=0;i<sizes.size() && current_size_index==-1;i++) {
+					CameraController.Size size = sizes.get(i);
+		        	if( size.width == resolution_w && size.height == resolution_h ) {
+		        		current_size_index = i;
+						if( MyDebug.LOG )
+							Log.d(TAG, "set current_size_index to: " + current_size_index);
+		        	}
 				}
-				else {
-					String resolution_w_s = resolution_value.substring(0, index);
-					String resolution_h_s = resolution_value.substring(index+1);
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "resolution_w_s: " + resolution_w_s);
-						Log.d(TAG, "resolution_h_s: " + resolution_h_s);
-					}
-					try {
-						int resolution_w = Integer.parseInt(resolution_w_s);
-						if( MyDebug.LOG )
-							Log.d(TAG, "resolution_w: " + resolution_w);
-						int resolution_h = Integer.parseInt(resolution_h_s);
-						if( MyDebug.LOG )
-							Log.d(TAG, "resolution_h: " + resolution_h);
-						// now find size in valid list
-						for(int i=0;i<sizes.size() && current_size_index==-1;i++) {
-							CameraController.Size size = sizes.get(i);
-				        	if( size.width == resolution_w && size.height == resolution_h ) {
-				        		current_size_index = i;
-								if( MyDebug.LOG )
-									Log.d(TAG, "set current_size_index to: " + current_size_index);
-				        	}
-						}
-						if( current_size_index == -1 ) {
-							if( MyDebug.LOG )
-								Log.e(TAG, "failed to find valid size");
-						}
-					}
-					catch(NumberFormatException exception) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "resolution_value invalid format, can't parse w or h to int");
-					}
+				if( current_size_index == -1 ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "failed to find valid size");
 				}
 			}
 
@@ -1548,13 +1461,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.d(TAG, "Current size index " + current_size_index + ": " + current_size.width + ", " + current_size.height);
 
 	    		// now save, so it's available for PreferenceActivity
-				resolution_value = current_size.width + " " + current_size.height;
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "save new resolution_value: " + resolution_value);
-				}
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getResolutionPreferenceKey(cameraId), resolution_value);
-				editor.apply();
+	    		applicationInterface.setCameraResolutionPref(current_size.width, current_size.height);
 			}
 			// size set later in setPreviewSize()
 		}
@@ -1562,7 +1469,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up jpeg quality");
-			int image_quality = getImageQuality();
+			int image_quality = applicationInterface.getImageQualityPref();
 			camera_controller.setJpegQuality(image_quality);
 			if( MyDebug.LOG )
 				Log.d(TAG, "image quality: " + image_quality);
@@ -1612,7 +1519,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "flash values: " + supported_flash_values);
 
-				String flash_value = sharedPreferences.getString(MainActivity.getFlashPreferenceKey(cameraId), "");
+				String flash_value = applicationInterface.getFlashPref();
 				if( flash_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing flash_value: " + flash_value);
@@ -1643,7 +1550,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "focus values: " + supported_focus_values);
 	
-				String focus_value = sharedPreferences.getString(MainActivity.getFocusPreferenceKey(cameraId), "");
+				String focus_value = applicationInterface.getFocusPref();
 				if( focus_value.length() > 0 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found existing focus_value: " + focus_value);
@@ -1974,10 +1881,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public CamcorderProfile getCamcorderProfile() {
 		// 4K UHD video is not yet supported by Android API (at least testing on Samsung S5 and Note 3, they do not return it via getSupportedVideoSizes(), nor via a CamcorderProfile (either QUALITY_HIGH, or anything else)
 		// but it does work if we explicitly set the resolution (at least tested on an S5)
-		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		CamcorderProfile profile = null;
-		if( cameraId == 0 && sharedPreferences.getBoolean(MainActivity.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K() ) {
+		if( applicationInterface.getForce4KPref() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "force 4K UHD video");
 			profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
@@ -1992,7 +1897,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
 		}
 
-		String bitrate_value = sharedPreferences.getString(MainActivity.getVideoBitratePreferenceKey(), "default");
+		String bitrate_value = applicationInterface.getVideoBitratePref();
 		if( !bitrate_value.equals("default") ) {
 			try {
 				int bitrate = Integer.parseInt(bitrate_value);
@@ -2005,7 +1910,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "bitrate invalid format, can't parse to int: " + bitrate_value);
 			}
 		}
-		String fps_value = sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
+		String fps_value = applicationInterface.getVideoFPSPref();
 		if( !fps_value.equals("default") ) {
 			try {
 				int fps = Integer.parseInt(fps_value);
@@ -2096,9 +2001,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	public double getTargetRatioForPreview(Point display_size) {
         double targetRatio = 0.0f;
-		Activity activity = (Activity)this.getContext();
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
-		String preview_size = sharedPreferences.getString(MainActivity.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg");
+		String preview_size = applicationInterface.getPreviewSizePref();
 		// should always use wysiwig for video mode, otherwise we get incorrect aspect ratio shown when recording video (at least on Galaxy Nexus, e.g., at 640x480)
 		// also not using wysiwyg mode with video caused corruption on Samsung cameras (tested with Samsung S3, Android 4.3, front camera, infinity focus)
 		if( preview_size.equals("preference_preview_size_wysiwyg") || this.is_video ) {
@@ -2253,8 +2156,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		Activity activity = (Activity)this.getContext();
 	    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String rotate_preview = sharedPreferences.getString(MainActivity.getRotatePreviewPreferenceKey(), "0");
+		String rotate_preview = applicationInterface.getPreviewRotationPref();
 		if( MyDebug.LOG )
 			Log.d(TAG, "    rotate_preview = " + rotate_preview);
 		if( rotate_preview.equals("180") ) {
@@ -2352,8 +2254,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int getImageVideoRotation() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getImageVideoRotation() from current_rotation " + current_rotation);
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String lock_orientation = sharedPreferences.getString(MainActivity.getLockOrientationPreferenceKey(), "none");
+		String lock_orientation = applicationInterface.getLockOrientationPref();
 		if( lock_orientation.equals("landscape") ) {
 			int camera_orientation = camera_controller.getCameraOrientation();
 		    int device_orientation = getDeviceDefaultOrientation();
@@ -3123,17 +3024,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	public void changeExposure(int change, boolean update_seek_bar) {
+	public void changeExposure(int change) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "changeExposure(): " + change);
 		if( change != 0 && camera_controller != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
 			int current_exposure = camera_controller.getExposureCompensation();
 			int new_exposure = current_exposure + change;
-			setExposure(new_exposure, update_seek_bar);
+			setExposure(new_exposure);
 		}
 	}
 
-	public void setExposure(int new_exposure, boolean update_seek_bar) {
+	public void setExposure(int new_exposure) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExposure(): " + new_exposure);
 		if( camera_controller != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
@@ -3144,30 +3045,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				new_exposure = max_exposure;
 			if( camera_controller.setExposureCompensation(new_exposure) ) {
 				// now save
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getExposurePreferenceKey(), "" + new_exposure);
-				editor.apply();
+				applicationInterface.setExposureCompensationPref(new_exposure);
 	    		showToast(seekbar_toast, getExposureCompensationString(new_exposure), Toast.LENGTH_SHORT, 96);
-	    		if( update_seek_bar ) {
-	    			MainActivity main_activity = (MainActivity)this.getContext();
-	    			main_activity.setSeekBarExposure();
-	    		}
 			}
 		}
 	}
 	
-	void changeISO(int change, boolean update_seek_bar) {
+	void changeISO(int change) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "changeISO(): " + change);
 		if( change != 0 && camera_controller != null && supports_iso_range ) {
 			int current_iso = camera_controller.getISO();
 			int new_iso = current_iso + change;
-			setISO(new_iso, update_seek_bar);
+			setISO(new_iso);
 		}
 	}
 
-	void setISO(int new_iso, boolean update_seek_bar) {
+	void setISO(int new_iso) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setISO(): " + new_iso);
 		if( camera_controller != null && supports_iso_range ) {
@@ -3177,16 +3071,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				new_iso = max_iso;
 			if( camera_controller.setISO(new_iso) ) {
 				// now save
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getISOPreferenceKey(), "" + new_iso);
-				editor.apply();
+				applicationInterface.setISOPref("" + new_iso);
 	    		showToast(seekbar_toast, getISOString(new_iso), Toast.LENGTH_SHORT, 96);
-	    		if( update_seek_bar ) {
-	    			Activity activity = (Activity)getContext();
-	    			SeekBar seek_bar = ((SeekBar)activity.findViewById(R.id.iso_seekbar));
-	    			seek_bar.setProgress(camera_controller.getISO() - min_iso);
-	    		}
 			}
 		}
 	}
@@ -3201,10 +3087,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				new_exposure_time = max_exposure_time;
 			if( camera_controller.setExposureTime(new_exposure_time) ) {
 				// now save
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putLong(MainActivity.getExposureTimePreferenceKey(), new_exposure_time);
-				editor.apply();
+				applicationInterface.setExposureTimePref(new_exposure_time);
 	    		showToast(seekbar_toast, getExposureTimeString(new_exposure_time), Toast.LENGTH_SHORT, 96);
 			}
 		}
@@ -3479,8 +3362,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// So for now, I'm just fixing the Nexus 5/6 behaviour without changing behaviour for other devices. Later we can test on other devices, to see if we can
 			// use chooseBestPreviewFps() more widely.
 			boolean preview_too_dark = Build.MODEL.equals("Nexus 5") || Build.MODEL.equals("Nexus 6");
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-			String fps_value = sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
+			String fps_value = applicationInterface.getVideoFPSPref();
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "preview_too_dark? " + preview_too_dark);
 				Log.d(TAG, "fps_value: " + fps_value);
@@ -3543,10 +3425,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 			if( save ) {
 				// now save
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putBoolean(MainActivity.getIsVideoPreferenceKey(), is_video);
-				editor.apply();
+				applicationInterface.setVideoPref(is_video);
 	    	}
 			
 			if( update_preview_size ) {
@@ -3589,12 +3468,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
 			was_4k = true;
 		}
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String bitrate_value = sharedPreferences.getString(MainActivity.getVideoBitratePreferenceKey(), "default");
+		String bitrate_value = applicationInterface.getVideoBitratePref();
 		if( !bitrate_value.equals("default") ) {
 			was_bitrate = true;
 		}
-		String fps_value = sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
+		String fps_value = applicationInterface.getVideoFPSPref();
 		if( !fps_value.equals("default") ) {
 			was_fps = true;
 		}
@@ -3695,10 +3573,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    	this.setFlash(flash_value);
 	    	if( save ) {
 				// now save
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getFlashPreferenceKey(cameraId), flash_value);
-				editor.apply();
+	    		applicationInterface.setFlashPref(flash_value);
 	    	}
 		}
 	}
@@ -3817,10 +3692,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	    	if( save ) {
 				// now save
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(MainActivity.getFocusPreferenceKey(cameraId), focus_value);
-				editor.apply();
+	    		applicationInterface.setFocusPref(focus_value);
 	    	}
 		}
 	}
@@ -3946,20 +3818,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         this.startCameraPreview();
 
         //is_taking_photo = true;
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String timer_value = sharedPreferences.getString(MainActivity.getTimerPreferenceKey(), "0");
-		long timer_delay = 0;
-		try {
-			timer_delay = Integer.parseInt(timer_value) * 1000;
-		}
-        catch(NumberFormatException e) {
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "failed to parse preference_timer value: " + timer_value);
-    		e.printStackTrace();
-    		timer_delay = 0;
-        }
+		long timer_delay = applicationInterface.getTimerPref();
 
-		String burst_mode_value = sharedPreferences.getString(MainActivity.getBurstModePreferenceKey(), "1");
+		String burst_mode_value = applicationInterface.getRepeatPref();
 		int n_burst = 1;
 		if( burst_mode_value.equals("unlimited") ) {
     		if( MyDebug.LOG )
@@ -4002,8 +3863,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					beepTimerTask.cancel();
 					beepTimerTask = null;
 				}
-				MainActivity main_activity = (MainActivity)Preview.this.getContext();
-				main_activity.runOnUiThread(new Runnable() {
+				Activity activity = (Activity)Preview.this.getContext();
+				activity.runOnUiThread(new Runnable() {
 					public void run() {
 						// we run on main thread to avoid problem of camera closing at the same time
 						// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
@@ -4112,13 +3973,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		updateParametersFromLocation();
 
-		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
+		boolean store_location = applicationInterface.getGeotaggingPref();
 		if( store_location ) {
-			boolean require_location = sharedPreferences.getBoolean(MainActivity.getRequireLocationPreferenceKey(), false);
+			boolean require_location = applicationInterface.getRequireLocationPref();
 			if( require_location ) {
-				if( main_activity.getLocation() != null ) {
+				if( applicationInterface.getLocation() != null ) {
 					// fine, we have location
 				}
 				else {
@@ -4136,7 +3995,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
     		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
-			File videoFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_VIDEO);
+			File videoFile = applicationInterface.getOutputMediaFile(ApplicationInterface.MEDIA_TYPE_VIDEO);
     		if( videoFile == null ) {
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
 	    	    showToast(null, R.string.failed_to_save_video);
@@ -4181,8 +4040,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 							final int final_message_id = message_id;
 							final int final_what = what;
 							final int final_extra = extra;
-							MainActivity main_activity = (MainActivity)Preview.this.getContext();
-							main_activity.runOnUiThread(new Runnable() {
+							Activity activity = (Activity)Preview.this.getContext();
+							activity.runOnUiThread(new Runnable() {
 								public void run() {
 									// we run on main thread to avoid problem of camera closing at the same time
 									String debug_value = "info_" + final_what + "_" + final_extra;
@@ -4206,8 +4065,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						final int final_message_id = message_id;
 						final int final_what = what;
 						final int final_extra = extra;
-						MainActivity main_activity = (MainActivity)Preview.this.getContext();
-						main_activity.runOnUiThread(new Runnable() {
+						Activity activity = (Activity)Preview.this.getContext();
+						activity.runOnUiThread(new Runnable() {
 							public void run() {
 								// we run on main thread to avoid problem of camera closing at the same time
 								String debug_value = "error_" + final_what + "_" + final_extra;
@@ -4217,9 +4076,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					}
 				});
 	        	camera_controller.initVideoRecorderPrePrepare(video_recorder);
-				boolean record_audio = sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
+				boolean record_audio = applicationInterface.getRecordAudioPref();
 				if( record_audio ) {
-	        		String pref_audio_src = sharedPreferences.getString(MainActivity.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
+	        		String pref_audio_src = applicationInterface.getRecordAudioSourcePref();
 		    		if( MyDebug.LOG )
 		    			Log.d(TAG, "pref_audio_src: " + pref_audio_src);
 	        		int audio_source = MediaRecorder.AudioSource.CAMCORDER;
@@ -4240,8 +4099,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.d(TAG, "set video source");
 				video_recorder.setVideoSource(using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA);
 
-				if( store_location && main_activity.getLocation() != null ) {
-					Location location = main_activity.getLocation();
+				if( store_location && applicationInterface.getLocation() != null ) {
+					Location location = applicationInterface.getLocation();
 		    		if( MyDebug.LOG ) {
 		    			Log.d(TAG, "set video location: lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
 		    		}
@@ -4272,9 +4131,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        	video_recorder.setOutputFile(video_name);
 	        	try {
 	        		showGUI(false);
-	    			if( sharedPreferences.getBoolean(MainActivity.getLockVideoPreferenceKey(), false) ) {
-	    				main_activity.lockScreen();
-	    			}
+	        		applicationInterface.startingVideo();
 	        		/*if( true ) // test
 	        			throw new IOException();*/
 	    			cameraSurface.setVideoRecorder(video_recorder);
@@ -4294,37 +4151,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
 
     				// handle restart timer
-    				String timer_value = sharedPreferences.getString(MainActivity.getVideoMaxDurationPreferenceKey(), "0");
-    				long timer_delay = 0;
-    				try {
-    					timer_delay = Integer.parseInt(timer_value) * 1000;
-    				}
-    		        catch(NumberFormatException e) {
-    		    		if( MyDebug.LOG )
-    		    			Log.e(TAG, "failed to parse preference_video_max_duration value: " + timer_value);
-    		    		e.printStackTrace();
-    		    		timer_delay = 0;
-    		        }
+    				long video_max_duration = applicationInterface.getVideoMaxDurationPref();
 
-    				if( timer_delay > 0 ) {
+    				if( video_max_duration > 0 ) {
     					if( remaining_restart_video == 0 ) {
-        					String restart_value = sharedPreferences.getString(MainActivity.getVideoRestartPreferenceKey(), "0");
-        					try {
-        						remaining_restart_video = Integer.parseInt(restart_value);
-        					}
-        			        catch(NumberFormatException e) {
-        			    		if( MyDebug.LOG )
-        			    			Log.e(TAG, "failed to parse preference_video_restart value: " + restart_value);
-        			    		e.printStackTrace();
-        			    		remaining_restart_video = 0;
-        			        }
+    						remaining_restart_video = applicationInterface.getVideoRestartTimesPref();
     					}
     					class RestartVideoTimerTask extends TimerTask {
         					public void run() {
         			    		if( MyDebug.LOG )
         			    			Log.e(TAG, "stop video on timer");
-        						MainActivity main_activity = (MainActivity)Preview.this.getContext();
-        						main_activity.runOnUiThread(new Runnable() {
+        						Activity activity = (Activity)Preview.this.getContext();
+        						activity.runOnUiThread(new Runnable() {
         							public void run() {
         								// we run on main thread to avoid problem of camera closing at the same time
         								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
@@ -4338,16 +4176,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         						});
         					}
         				}
-        		    	restartVideoTimer.schedule(restartVideoTimerTask = new RestartVideoTimerTask(), timer_delay);
+        		    	restartVideoTimer.schedule(restartVideoTimerTask = new RestartVideoTimerTask(), video_max_duration);
     				}
 
-    				if( sharedPreferences.getBoolean(MainActivity.getVideoFlashPreferenceKey(), false) && supportsFlash() ) {
+    				if( applicationInterface.getVideoFlashPref() && supportsFlash() ) {
     					class FlashVideoTimerTask extends TimerTask {
         					public void run() {
         			    		if( MyDebug.LOG )
         			    			Log.e(TAG, "FlashVideoTimerTask");
-        						MainActivity main_activity = (MainActivity)Preview.this.getContext();
-        						main_activity.runOnUiThread(new Runnable() {
+        						Activity activity = (Activity)Preview.this.getContext();
+        						activity.runOnUiThread(new Runnable() {
         							public void run() {
         								// we run on main thread to avoid problem of camera closing at the same time
         								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
@@ -4491,15 +4329,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			if( MyDebug.LOG )
     				Log.d(TAG, "onPictureTaken");
 
-        		MainActivity main_activity = (MainActivity)Preview.this.getContext();
+        		Activity activity = (Activity)Preview.this.getContext();
         		boolean image_capture_intent = false;
        	        Uri image_capture_intent_uri = null;
-    	        String action = main_activity.getIntent().getAction();
+    	        String action = activity.getIntent().getAction();
     	        if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) ) {
         			if( MyDebug.LOG )
         				Log.d(TAG, "from image capture intent");
         			image_capture_intent = true;
-        	        Bundle myExtras = main_activity.getIntent().getExtras();
+        	        Bundle myExtras = activity.getIntent().getExtras();
         	        if (myExtras != null) {
         	        	image_capture_intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
             			if( MyDebug.LOG )
@@ -4509,9 +4347,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     	        boolean success = false;
     	        Bitmap bitmap = null;
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Preview.this.getContext());
-				boolean auto_stabilise = sharedPreferences.getBoolean(MainActivity.getAutoStabilisePreferenceKey(), false);
-    			if( auto_stabilise && has_level_angle && main_activity.supportsAutoStabilise() )
+    			if( applicationInterface.getAutoStabilisePref() && has_level_angle )
     			{
     				//level_angle = -129;
     				if( test_have_angle )
@@ -4649,8 +4485,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        			}
         			}
     			}
-    			String preference_stamp = sharedPreferences.getString(MainActivity.getStampPreferenceKey(), "preference_stamp_no");
-    			String preference_textstamp = sharedPreferences.getString(MainActivity.getTextStampPreferenceKey(), "");
+    			String preference_stamp = applicationInterface.getStampPref();
+    			String preference_textstamp = applicationInterface.getTextStampPref();
     			boolean dategeo_stamp = preference_stamp.equals("preference_stamp_yes");
     			boolean text_stamp = preference_textstamp.length() > 0;
     			if( dategeo_stamp || text_stamp ) {
@@ -4680,22 +4516,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        			}
 	        			Canvas canvas = new Canvas(bitmap);
 	        			p.setColor(Color.WHITE);
-	        			int font_size = 20;
-	        			{
-	        				// get font size
-	        				String value = sharedPreferences.getString(MainActivity.getStampFontSizePreferenceKey(), "12");
-	        				if( MyDebug.LOG )
-	        					Log.d(TAG, "saved font size: " + value);
-	        				try {
-	        					font_size = Integer.parseInt(value);
-	        					if( MyDebug.LOG )
-	        						Log.d(TAG, "font_size: " + font_size);
-	        				}
-	        				catch(NumberFormatException exception) {
-	        					if( MyDebug.LOG )
-	        						Log.d(TAG, "font size invalid format, can't parse to int");
-	        				}
-	        			}
+	        			int font_size = applicationInterface.getTextStampFontSizePref();
 	        			// we don't use the density of the screen, because we're stamping to the image, not drawing on the screen (we don't want the font height to depend on the device's resolution
 	        			// instead we go by 1 pt == 1/72 inch height, and scale for an image height (or width if in portrait) of 4" (this means the font height is also independent of the photo resolution)
 	        			int smallest_size = (width<height) ? width : height;
@@ -4720,15 +4541,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    				drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
 		    				ypos -= diff_y;
 		    				String location_string = "";
-		    				boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
-		    				if( store_location && main_activity.getLocation() != null ) {
-		    					Location location = main_activity.getLocation();
+		    				boolean store_location = applicationInterface.getGeotaggingPref();
+		    				if( store_location && applicationInterface.getLocation() != null ) {
+		    					Location location = applicationInterface.getLocation();
 		    					location_string += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
 		    					if( location.hasAltitude() ) {
 			    					location_string += ", " + decimalFormat.format(location.getAltitude()) + getResources().getString(R.string.metres_abbreviation);
 		    					}
 		    				}
-	    			    	if( Preview.this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false) ) {
+	    			    	if( Preview.this.has_geo_direction && applicationInterface.getGeodirectionPref() ) {
 	    						float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
 	    						if( geo_angle < 0.0f ) {
 	    							geo_angle += 360.0f;
@@ -4768,7 +4589,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        			    // Save the bitmap to the specified URI (use a try/catch block)
 		        			if( MyDebug.LOG )
 		        				Log.d(TAG, "save to: " + image_capture_intent_uri);
-	        			    outputStream = main_activity.getContentResolver().openOutputStream(image_capture_intent_uri);
+	        			    outputStream = activity.getContentResolver().openOutputStream(image_capture_intent_uri);
 	        			}
 	        			else
 	        			{
@@ -4813,12 +4634,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		        				Log.d(TAG, "returned bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
 		        				Log.d(TAG, "returned bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
 		        			}
-	        				main_activity.setResult(Activity.RESULT_OK, new Intent("inline-data").putExtra("data", bitmap));
-	        				main_activity.finish();
+	        				activity.setResult(Activity.RESULT_OK, new Intent("inline-data").putExtra("data", bitmap));
+	        				activity.finish();
 	        			}
 	    			}
 	    			else {
-	        			picFile = main_activity.getOutputMediaFile(MainActivity.MEDIA_TYPE_IMAGE);
+	        			picFile = applicationInterface.getOutputMediaFile(ApplicationInterface.MEDIA_TYPE_IMAGE);
 	        	        if( picFile == null ) {
 	        	            Log.e(TAG, "Couldn't create media image file; check storage permissions?");
 	        	    	    showToast(null, R.string.failed_to_save_image);
@@ -4833,7 +4654,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			
 	    			if( outputStream != null ) {
         	            if( bitmap != null ) {
-        	    			int image_quality = getImageQuality();
+        	    			int image_quality = applicationInterface.getImageQualityPref();
             	            bitmap.compress(Bitmap.CompressFormat.JPEG, image_quality, outputStream);
         	            }
         	            else {
@@ -4933,7 +4754,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 	    		if( MyDebug.LOG )
                 	    			Log.d(TAG, "now saved EXIF data");
         	            	}
-        	            	else if( Preview.this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false) ) {
+        	            	else if( Preview.this.has_geo_direction && applicationInterface.getGeodirectionPref() ) {
             	            	if( MyDebug.LOG )
                 	    			Log.d(TAG, "add GPS direction exif info");
             	            	long time_s = System.currentTimeMillis();
@@ -4962,15 +4783,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
         	            	// shouldn't currently have a picFile if image_capture_intent, but put this here in case we ever do want to try reading intent's file (if it exists)
             	            if( !image_capture_intent ) {
-	            	            main_activity.broadcastFile(picFile, true, false);
+            	            	applicationInterface.broadcastFile(picFile, true, false);
 	        	            	test_last_saved_image = picFileName;
             	            }
         	            }
         	            if( image_capture_intent ) {
             	    		if( MyDebug.LOG )
             	    			Log.d(TAG, "finish activity due to being called from intent");
-        	            	main_activity.setResult(Activity.RESULT_OK);
-        	            	main_activity.finish();
+        	            	activity.setResult(Activity.RESULT_OK);
+        	            	activity.finish();
         	            }
         	        }
     			}
@@ -5002,7 +4823,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	            }
 	            else {
 	    	        phase = PHASE_NORMAL;
-					boolean pause_preview = sharedPreferences.getBoolean(MainActivity.getPausePreviewPreferenceKey(), false);
+					boolean pause_preview = applicationInterface.getPausePreviewPref();
 	        		if( MyDebug.LOG )
 	        			Log.d(TAG, "pause_preview? " + pause_preview);
 					if( pause_preview && success ) {
@@ -5033,7 +4854,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		        	CameraController.Size size = camera_controller.getPictureSize();
 	        		int ratio = (int) Math.ceil((double) size.width / cameraSurface.getView().getWidth());
 	        		int sample_size = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality
-        			if( !sharedPreferences.getBoolean(MainActivity.getThumbnailAnimationPreferenceKey(), true) ) {
+        			if( !applicationInterface.getThumbnailAnimationPref() ) {
         				// can use lower resolution if we don't have the thumbnail animation
         				sample_size *= 4;
         			}
@@ -5117,11 +4938,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         				}
         			}
 
-        			if( sharedPreferences.getBoolean(MainActivity.getThumbnailAnimationPreferenceKey(), true) ) {
+        			if( applicationInterface.getThumbnailAnimationPref() ) {
             			thumbnail_anim = true;
             			thumbnail_anim_start_ms = System.currentTimeMillis();
         			}
-	    	    	main_activity.updateGalleryIconToBitmap(thumbnail);
+	    	    	applicationInterface.updateThumbnail(thumbnail);
     	    		if( old_thumbnail != null ) {
     	    			// only recycle after we've set the new thumbnail
     	    			old_thumbnail.recycle();
@@ -5143,18 +4964,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	            	if( remaining_burst_photos > 0 )
 	            		remaining_burst_photos--;
 
-	        		String timer_value = sharedPreferences.getString(MainActivity.getBurstIntervalPreferenceKey(), "0");
-	        		long timer_delay = 0;
-	        		try {
-	        			timer_delay = Integer.parseInt(timer_value) * 1000;
-	        		}
-	                catch(NumberFormatException e) {
-	            		if( MyDebug.LOG )
-	            			Log.e(TAG, "failed to parse preference_burst_interval value: " + timer_value);
-	            		e.printStackTrace();
-	            		timer_delay = 0;
-	                }
-
+	        		long timer_delay = applicationInterface.getRepeatIntervalPref();
 	        		if( timer_delay == 0 ) {
 	        			// we go straight to taking a photo rather than refocusing, for speed
 	        			// need to manually set the phase and rehide the GUI
@@ -5184,8 +4994,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	{
     		camera_controller.setRotation(getImageVideoRotation());
 
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-			boolean enable_sound = sharedPreferences.getBoolean(MainActivity.getShutterSoundPreferenceKey(), true);
+			boolean enable_sound = applicationInterface.getShutterSoundPref();
     		if( MyDebug.LOG )
     			Log.d(TAG, "enable_sound? " + enable_sound);
         	camera_controller.enableShutterSound(enable_sound);
@@ -5199,8 +5008,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
 	private void setGPSDirectionExif(ExifInterface exif) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-    	if( this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false) ) {
+    	if( this.has_geo_direction && applicationInterface.getGeodirectionPref() ) {
 			float geo_angle = (float)Math.toDegrees(Preview.this.geo_direction[0]);
 			if( geo_angle < 0.0f ) {
 				geo_angle += 360.0f;
@@ -5238,8 +5046,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	private boolean needGPSTimestampHack() {
 		if( using_android_l ) {
-    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-    		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
+    		boolean store_location = applicationInterface.getGeotaggingPref();
     		return store_location;
 		}
 		return false;
@@ -5281,8 +5088,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					if( MyDebug.LOG )
 						Log.d(TAG, "successfully deleted " + preview_image_name);
     	    	    showToast(null, R.string.photo_deleted);
-					MainActivity main_activity = (MainActivity)this.getContext();
-    	            main_activity.broadcastFile(file, false, false);
+					applicationInterface.broadcastFile(file, false, false);
 				}
 			}
 			startCameraPreview();
@@ -5388,8 +5194,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			focus_success = success ? FOCUS_SUCCESS : FOCUS_FAILED;
 			focus_complete_time = System.currentTimeMillis();
 		}
-		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-		if( manual && !cancelled && ( success || main_activity.is_test ) ) {
+		if( manual && !cancelled && ( success || applicationInterface.isTestAlwaysFocus() ) ) {
 			successfully_focused = true;
 			successfully_focused_time = focus_complete_time;
 		}
@@ -5818,23 +5623,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return camera_controller.getAPI();
     }
     
-    private int getImageQuality(){
-		if( MyDebug.LOG )
-			Log.d(TAG, "getImageQuality");
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String image_quality_s = sharedPreferences.getString(MainActivity.getQualityPreferenceKey(), "90");
-		int image_quality = 0;
-		try {
-			image_quality = Integer.parseInt(image_quality_s);
-		}
-		catch(NumberFormatException exception) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "image_quality_s invalid format: " + image_quality_s);
-			image_quality = 90;
-		}
-		return image_quality;
-    }
-    
     void onResume() {
     	onResume(null);
     }
@@ -5993,11 +5781,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     private void updateParametersFromLocation() {
     	if( camera_controller != null ) {
-    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-    		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
-    		MainActivity main_activity = (MainActivity)this.getContext();
-    		if( store_location && main_activity.getLocation() != null ) {
-    			Location location = main_activity.getLocation();
+    		boolean store_location = applicationInterface.getGeotaggingPref();
+    		if( store_location && applicationInterface.getLocation() != null ) {
+    			Location location = applicationInterface.getLocation();
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "updating parameters from location...");
 	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy() + " timestamp " + location.getTime());
