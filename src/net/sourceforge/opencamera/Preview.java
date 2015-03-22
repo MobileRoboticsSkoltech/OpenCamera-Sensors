@@ -2670,13 +2670,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				location_x = canvas.getWidth() - location_x - location_size;
 			}
 			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
-			if( main_activity.getLocation() != null ) {
+			if( applicationInterface.getLocation() != null ) {
 				canvas.drawBitmap(location_bitmap, null, location_dest, p);
 				int location_radius = location_size/10;
 				int indicator_x = location_x + location_size;
 				int indicator_y = location_y + location_radius/2 + 1;
 				p.setStyle(Paint.Style.FILL_AND_STROKE);
-				p.setColor(main_activity.getLocation().getAccuracy() < 25.01f ? Color.rgb(37, 155, 36) : Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
+				p.setColor(applicationInterface.getLocation().getAccuracy() < 25.01f ? Color.rgb(37, 155, 36) : Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
 				canvas.drawCircle(indicator_x, indicator_y, location_radius, p);
 			}
 			else {

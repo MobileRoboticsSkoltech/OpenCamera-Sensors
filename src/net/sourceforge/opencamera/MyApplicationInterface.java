@@ -15,9 +15,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private static final String TAG = "MyApplicationInterface";
 	
 	MainActivity main_activity = null;
+	LocationSupplier locationSupplier = null;
 	
 	MyApplicationInterface(MainActivity main_activity) {
 		this.main_activity = main_activity;
+		this.locationSupplier = new LocationSupplier(main_activity);
+	}
+	
+	LocationSupplier getLocationSupplier() {
+		return locationSupplier;
 	}
 
     @Override
@@ -36,7 +42,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     
 	@Override
 	public Location getLocation() {
-		return main_activity.getLocation();
+		return locationSupplier.getLocation();
 	}
 
 	@Override

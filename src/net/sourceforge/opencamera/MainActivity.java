@@ -24,10 +24,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -83,8 +79,7 @@ public class MainActivity extends Activity {
 	private SensorManager mSensorManager = null;
 	private Sensor mSensorAccelerometer = null;
 	private Sensor mSensorMagnetic = null;
-	private LocationManager mLocationManager = null;
-	private MyLocationListener [] locationListeners = null;
+	private MyApplicationInterface applicationInterface = null;
 	private Preview preview = null;
 	private int current_orientation = 0;
 	private OrientationEventListener orientationEventListener = null;
@@ -191,11 +186,10 @@ public class MainActivity extends Activity {
 				Log.d(TAG, "no support for magnetic sensor");
 		}
 
-		mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-
 		clearSeekBar();
 
-		preview = new Preview(new MyApplicationInterface(this), savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
+		applicationInterface = new MyApplicationInterface(this);
+		preview = new Preview(applicationInterface, savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
 		
 		orientationEventListener = new OrientationEventListener(this) {
 			@Override
@@ -479,118 +473,6 @@ public class MainActivity extends Activity {
 		}
 	};
 
-	public Location getLocation() {
-		// returns null if not available
-		if( locationListeners == null )
-			return null;
-		// location listeners should be stored in order best to worst
-		for(int i=0;i<locationListeners.length;i++) {
-			Location location = locationListeners[i].getLocation();
-			if( location != null )
-				return location;
-		}
-		return null;
-	}
-	
-	public boolean testHasReceivedLocation() {
-		if( locationListeners == null )
-			return false;
-		for(int i=0;i<locationListeners.length;i++) {
-			if( locationListeners[i].test_has_received_location )
-				return true;
-		}
-		return false;
-	}
-	
-	private class MyLocationListener implements LocationListener {
-		private Location location = null;
-		public boolean test_has_received_location = false;
-		
-		Location getLocation() {
-			return location;
-		}
-		
-	    public void onLocationChanged(Location location) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "onLocationChanged");
-			this.test_has_received_location = true;
-    		// Android camera source claims we need to check lat/long != 0.0d
-    		if( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) {
-	    		if( MyDebug.LOG ) {
-	    			Log.d(TAG, "received location:");
-	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
-	    		}
-				this.location = location;
-    		}
-	    }
-
-	    public void onStatusChanged(String provider, int status, Bundle extras) {
-	         switch( status ) {
-	         	case LocationProvider.OUT_OF_SERVICE:
-	         	case LocationProvider.TEMPORARILY_UNAVAILABLE:
-	         	{
-					if( MyDebug.LOG ) {
-						if( status == LocationProvider.OUT_OF_SERVICE )
-							Log.d(TAG, "location provider out of service");
-						else if( status == LocationProvider.TEMPORARILY_UNAVAILABLE )
-							Log.d(TAG, "location provider temporarily unavailable");
-					}
-					this.location = null;
-					this.test_has_received_location = false;
-	         		break;
-	         	}
-	         }
-	    }
-
-	    public void onProviderEnabled(String provider) {
-	    }
-
-	    public void onProviderDisabled(String provider) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "onProviderDisabled");
-			this.location = null;
-			this.test_has_received_location = false;
-	    }
-	}
-	
-	private void setupLocationListener() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setupLocationListener");
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		// Define a listener that responds to location updates
-		// we only set it up if store_location is true, to avoid unnecessarily wasting battery
-		boolean store_location = sharedPreferences.getBoolean(getLocationPreferenceKey(), false);
-		if( store_location && locationListeners == null ) {
-			locationListeners = new MyLocationListener[2];
-			locationListeners[0] = new MyLocationListener();
-			locationListeners[1] = new MyLocationListener();
-			
-			// location listeners should be stored in order best to worst
-			// also see https://sourceforge.net/p/opencamera/tickets/1/ - need to check provider is available
-			if( mLocationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER) ) {
-				mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListeners[1]);
-			}
-			if( mLocationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER) ) {
-				mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListeners[0]);
-			}
-		}
-		else if( !store_location ) {
-			freeLocationListeners();
-		}
-	}
-	
-	private void freeLocationListeners() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "freeLocationListeners");
-		if( locationListeners != null ) {
-			for(int i=0;i<locationListeners.length;i++) {
-	            mLocationManager.removeUpdates(locationListeners[i]);
-	            locationListeners[i] = null;
-			}
-            locationListeners = null;
-		}
-	}
-
 	@Override
     protected void onResume() {
 		if( MyDebug.LOG )
@@ -605,7 +487,7 @@ public class MainActivity extends Activity {
         mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
 
-        setupLocationListener();
+        applicationInterface.getLocationSupplier().setupLocationListener();
 
 		layoutUI();
 
@@ -637,7 +519,7 @@ public class MainActivity extends Activity {
         mSensorManager.unregisterListener(accelerometerListener);
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
-		freeLocationListeners();
+        applicationInterface.getLocationSupplier().freeLocationListeners();
 		preview.onPause();
     }
 
@@ -1439,7 +1321,7 @@ public class MainActivity extends Activity {
 		}
 
 		layoutUI(); // needed in case we've changed left/right handed UI
-        setupLocationListener(); // in case we've enabled GPS
+		applicationInterface.getLocationSupplier().setupLocationListener(); // in case we've enabled GPS
 		if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
 			preview.onResume(toast_message);
@@ -2543,6 +2425,10 @@ public class MainActivity extends Activity {
     	return this.preview;
     }
     
+    public LocationSupplier getLocationSupplier() {
+    	return this.applicationInterface.getLocationSupplier();
+    }
+
     public ToastBoxer getChangedAutoStabiliseToastBoxer() {
     	return changed_auto_stabilise_toast;
     }
@@ -2809,16 +2695,4 @@ public class MainActivity extends Activity {
     public void usedFolderPicker() {
     	updateFolderHistory();
     }
-
-    public boolean hasLocationListeners() {
-		if( this.locationListeners == null )
-			return false;
-		if( this.locationListeners.length != 2 )
-			return false;
-		for(int i=0;i<this.locationListeners.length;i++) {
-			if( this.locationListeners[i] == null )
-				return false;
-		}
-		return true;
-	}
 }
