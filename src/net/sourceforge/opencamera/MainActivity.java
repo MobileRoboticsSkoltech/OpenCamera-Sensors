@@ -2948,6 +2948,12 @@ public class MainActivity extends Activity implements ApplicationInterface {
 		return sharedPreferences.getBoolean(MainActivity.getFaceDetectionPreferenceKey(), false);
     }
     
+	@Override
+	public String getVideoQualityPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getString(MainActivity.getVideoQualityPreferenceKey(preview.getCameraId()), "");
+	}
+	
     @Override
 	public boolean getVideoStabilizationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -3314,6 +3320,15 @@ public class MainActivity extends Activity implements ApplicationInterface {
 		editor.putString(MainActivity.getResolutionPreferenceKey(preview.getCameraId()), resolution_value);
 		editor.apply();
     }
+    
+    @Override
+    public void setVideoQualityPref(String video_quality) {
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(MainActivity.getVideoQualityPreferenceKey(preview.getCameraId()), video_quality);
+		editor.apply();
+    }
+
     
     @Override
 	public void setExposureTimePref(long exposure_time) {

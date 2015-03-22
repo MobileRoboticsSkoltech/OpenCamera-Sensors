@@ -1196,7 +1196,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			debug_time = System.currentTimeMillis();
 		}
 		Activity activity = (Activity)this.getContext();
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 
 		{
 			// get available scene modes
@@ -1480,7 +1479,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		initialiseVideoQuality();
 
 		current_video_quality = -1;
-		String video_quality_value_s = sharedPreferences.getString(MainActivity.getVideoQualityPreferenceKey(cameraId), "");
+		String video_quality_value_s = applicationInterface.getVideoQualityPref();
 		if( MyDebug.LOG )
 			Log.d(TAG, "video_quality_value: " + video_quality_value_s);
 		if( video_quality_value_s.length() > 0 ) {
@@ -1506,9 +1505,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		if( current_video_quality != -1 ) {
     		// now save, so it's available for PreferenceActivity
-			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString(MainActivity.getVideoQualityPreferenceKey(cameraId), video_quality.get(current_video_quality));
-			editor.apply();
+			applicationInterface.setVideoQualityPref(video_quality.get(current_video_quality));
 		}
 
 		{
@@ -1826,7 +1823,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	private CamcorderProfile getCamcorderProfile(String quality) {
+	CamcorderProfile getCamcorderProfile(String quality) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCamcorderProfile(): " + quality);
 		CamcorderProfile camcorder_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH); // default
