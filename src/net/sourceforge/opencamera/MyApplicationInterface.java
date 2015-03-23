@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
@@ -18,12 +19,31 @@ public class MyApplicationInterface implements ApplicationInterface {
 	LocationSupplier locationSupplier = null;
 	StorageUtils storageUtils = null;
 	
-	MyApplicationInterface(MainActivity main_activity) {
+    // camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
+	private int zoom_factor = 0;
+    
+	MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "MyApplicationInterface");
 		this.main_activity = main_activity;
 		this.locationSupplier = new LocationSupplier(main_activity);
 		this.storageUtils = new StorageUtils(main_activity);
+
+        if( savedInstanceState != null ) {
+    		zoom_factor = savedInstanceState.getInt("zoom_factor", 0);
+			if( MyDebug.LOG )
+				Log.d(TAG, "found zoom_factor: " + zoom_factor);
+        }
 	}
 	
+	void onSaveInstanceState(Bundle state) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onSaveInstanceState");
+		if( MyDebug.LOG )
+			Log.d(TAG, "save zoom_factor: " + zoom_factor);
+    	state.putInt("zoom_factor", zoom_factor);
+	}
+
 	LocationSupplier getLocationSupplier() {
 		return locationSupplier;
 	}
@@ -404,6 +424,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getLong(MainActivity.getExposureTimePreferenceKey(), 1000000000l/30);
     }
+    
+    @Override
+    public int getZoomPref() {
+		Log.d(TAG, "getZoomPref: " + zoom_factor);
+    	return zoom_factor;
+    }
 
     @Override
     public boolean isTestAlwaysFocus() {
@@ -456,6 +482,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void layoutUI() {
 		main_activity.layoutUI();
+	}
+	
+	@Override
+	public void multitouchZoom(int new_zoom) {
+		main_activity.setSeekbarZoom();
 	}
 
     @Override
@@ -580,6 +611,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString(MainActivity.getVideoQualityPreferenceKey(main_activity.getPreview().getCameraId()), video_quality);
 		editor.apply();
+    }
+    
+    @Override
+	public void setZoomPref(int zoom) {
+		Log.d(TAG, "setZoomPref: " + zoom);
+    	this.zoom_factor = zoom;
     }
     
     @Override

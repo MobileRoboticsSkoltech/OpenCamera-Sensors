@@ -57,6 +57,7 @@ public interface ApplicationInterface {
 	String getStampPref(); // "preference_stamp_no" for default, or "preference_stamp_yes" to stamp date/time and location (if geotagging) onto resultant photos
 	String getTextStampPref(); // optional text to stamp on resultant photos
 	int getTextStampFontSizePref(); // only relevant if stamping onto photos
+	int getZoomPref(); // index into Preview.getSupportedZoomRatios() array (each entry is the zoom factor, scaled by 100; array is sorted from min to max zoom)
 	// Camera2 only modes:
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
 	// for testing purposes:
@@ -75,6 +76,7 @@ public interface ApplicationInterface {
 
 	// methods that request actions
 	void layoutUI(); // application should layout UI that's on top of the preview
+	void multitouchZoom(int new_zoom); // zoom has changed due to multitouch gesture on preview
 	// the set/clear*Pref() methods are called if Preview decides to override the requested pref (because Camera device doesn't support requested pref) (clear*Pref() is called if the feature isn't supported at all)
 	// the application can use this information to update its preferences
 	void setFlashPref(String flash_value);
@@ -92,6 +94,7 @@ public interface ApplicationInterface {
 	void clearExposureCompensationPref();
 	void setCameraResolutionPref(int width, int height);
 	void setVideoQualityPref(String video_quality);
+	void setZoomPref(int zoom);
 	// Camera2 only modes:
 	void setExposureTimePref(long exposure_time);
 	void clearExposureTimePref();

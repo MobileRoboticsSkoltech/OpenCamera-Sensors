@@ -132,7 +132,7 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_force_video_4k? " + supports_force_video_4k);
 
-		applicationInterface = new MyApplicationInterface(this);
+		applicationInterface = new MyApplicationInterface(this, savedInstanceState);
 
 		initCamera2Support();
 
@@ -176,8 +176,8 @@ public class MainActivity extends Activity {
 		}
 
 		clearSeekBar();
-
-		preview = new Preview(applicationInterface, savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
+		
+        preview = new Preview(applicationInterface, savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
 		
 		orientationEventListener = new OrientationEventListener(this) {
 			@Override
@@ -341,9 +341,9 @@ public class MainActivity extends Activity {
 	    		}
 	    		else if( volume_keys.equals("volume_zoom") ) {
 	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-	    				this.preview.zoomIn();
+	    				this.zoomIn();
 	    			else
-	    				this.preview.zoomOut();
+	    				this.zoomOut();
 	                return true;
 	    		}
 	    		else if( volume_keys.equals("volume_exposure") ) {
@@ -411,18 +411,38 @@ public class MainActivity extends Activity {
 			}
 		case KeyEvent.KEYCODE_ZOOM_IN:
 			{
-				preview.zoomIn();
+				this.zoomIn();
 	            return true;
 			}
 		case KeyEvent.KEYCODE_ZOOM_OUT:
 			{
-				preview.zoomOut();
+				this.zoomOut();
 	            return true;
 			}
 		}
         return super.onKeyDown(keyCode, event); 
     }
 	
+	void setSeekbarZoom() {
+	    SeekBar zoomSeekBar = (SeekBar) findViewById(R.id.zoom_seekbar);
+		zoomSeekBar.setProgress(preview.getMaxZoom()-preview.getCameraController().getZoom());
+	}
+	
+	public void zoomIn() {
+		this.preview.zoomIn();
+		setSeekbarZoom();
+	}
+	
+	public void zoomOut() {
+		this.preview.zoomOut();
+		setSeekbarZoom();
+	}
+	
+	public void zoomTo(int new_zoom_factor) {
+		this.preview.zoomTo(new_zoom_factor);
+		setSeekbarZoom();
+	}
+
 	public void changeExposure(int change) {
 		this.preview.changeExposure(change);
 		this.setSeekBarExposure();
@@ -1920,6 +1940,9 @@ public class MainActivity extends Activity {
 	    if( this.preview != null ) {
 	    	preview.onSaveInstanceState(state);
 	    }
+	    if( this.applicationInterface != null ) {
+	    	applicationInterface.onSaveInstanceState(state);
+	    }
 	}
 
     void cameraSetup() {
@@ -1957,12 +1980,12 @@ public class MainActivity extends Activity {
 
 			        zoomControls.setOnZoomInClickListener(new View.OnClickListener(){
 			            public void onClick(View v){
-			            	preview.zoomIn();
+			            	zoomIn();
 			            }
 			        });
 				    zoomControls.setOnZoomOutClickListener(new View.OnClickListener(){
 				    	public void onClick(View v){
-				    		preview.zoomOut();
+				    		zoomOut();
 				        }
 				    });
 					if( !preview.inImmersiveMode() ) {
@@ -1974,11 +1997,11 @@ public class MainActivity extends Activity {
 				}
 				
 				zoomSeekBar.setMax(preview.getMaxZoom());
-				zoomSeekBar.setProgress(preview.getMaxZoom()-preview.getZoom());
+				zoomSeekBar.setProgress(preview.getMaxZoom()-preview.getCameraController().getZoom());
 				zoomSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-						preview.zoomTo(preview.getMaxZoom()-progress, false);
+						preview.zoomTo(preview.getMaxZoom()-progress);
 					}
 
 					@Override
