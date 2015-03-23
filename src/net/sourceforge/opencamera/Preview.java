@@ -2938,24 +2938,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	void zoomIn() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "zoomIn()");
-		int zoom_factor = camera_controller.getZoom();
-    	if( zoom_factor < max_zoom_factor ) {
-			zoomTo(zoom_factor+1);
-        }
-	}
-	
-	void zoomOut() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "zoomOut()");
-		int zoom_factor = camera_controller.getZoom();
-		if( zoom_factor > 0 ) {
-			zoomTo(zoom_factor-1);
-        }
-	}
-	
 	void zoomTo(int new_zoom_factor) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "ZoomTo(): " + new_zoom_factor);
@@ -2999,16 +2981,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	public void changeExposure(int change) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "changeExposure(): " + change);
-		if( change != 0 && camera_controller != null && ( min_exposure != 0 || max_exposure != 0 ) ) {
-			int current_exposure = camera_controller.getExposureCompensation();
-			int new_exposure = current_exposure + change;
-			setExposure(new_exposure);
-		}
-	}
-
 	public void setExposure(int new_exposure) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExposure(): " + new_exposure);
@@ -3026,16 +2998,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	void changeISO(int change) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "changeISO(): " + change);
-		if( change != 0 && camera_controller != null && supports_iso_range ) {
-			int current_iso = camera_controller.getISO();
-			int new_iso = current_iso + change;
-			setISO(new_iso);
-		}
-	}
-
 	void setISO(int new_iso) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setISO(): " + new_iso);

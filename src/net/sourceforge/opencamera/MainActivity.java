@@ -429,13 +429,11 @@ public class MainActivity extends Activity {
 	}
 	
 	public void zoomIn() {
-		this.preview.zoomIn();
-		setSeekbarZoom();
+	    changeSeekbar((SeekBar) findViewById(R.id.zoom_seekbar), -1);
 	}
 	
 	public void zoomOut() {
-		this.preview.zoomOut();
-		setSeekbarZoom();
+	    changeSeekbar((SeekBar) findViewById(R.id.zoom_seekbar), 1);
 	}
 	
 	public void zoomTo(int new_zoom_factor) {
@@ -444,8 +442,7 @@ public class MainActivity extends Activity {
 	}
 
 	public void changeExposure(int change) {
-		this.preview.changeExposure(change);
-		this.setSeekBarExposure();
+	    changeSeekbar((SeekBar) findViewById(R.id.exposure_seekbar), change);
 	}
 
 	public void setExposure(int new_exposure) {
@@ -454,21 +451,29 @@ public class MainActivity extends Activity {
 	}
 	
 	public void changeISO(int change) {
-		this.preview.changeISO(change);
-		SeekBar seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
-		seek_bar.setProgress(preview.getCameraController().getISO() - preview.getMinimumISO());
+	    changeSeekbar((SeekBar) findViewById(R.id.iso_seekbar), change);
 	}
 	
 	void changeFocusDistance(int change) {
-	    SeekBar focusSeekBar = (SeekBar) findViewById(R.id.focus_seekbar);
-	    int percent = focusSeekBar.getProgress();
-	    int new_percent = percent + change;
-	    if( new_percent < 0 )
-	    	new_percent = 0;
-	    else if( new_percent > 100 )
-	    	new_percent = 100;
-	    if( new_percent != percent ) {
-		    focusSeekBar.setProgress(new_percent);
+	    changeSeekbar((SeekBar) findViewById(R.id.focus_seekbar), change);
+	}
+	
+	private void changeSeekbar(SeekBar seekBar, int change) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "changeSeekbar: " + change);
+	    int value = seekBar.getProgress();
+	    int new_value = value + change;
+	    if( new_value < 0 )
+	    	new_value = 0;
+	    else if( new_value > seekBar.getMax() )
+	    	new_value = seekBar.getMax();
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "value: " + value);
+			Log.d(TAG, "new_value: " + new_value);
+			Log.d(TAG, "max: " + seekBar.getMax());
+		}
+	    if( new_value != value ) {
+		    seekBar.setProgress(new_value);
 	    }
 	}
 
@@ -928,7 +933,7 @@ public class MainActivity extends Activity {
 		view.setVisibility(View.GONE);
     }
     
-    void setSeekBarExposure() {
+    private void setSeekBarExposure() {
 		SeekBar seek_bar = ((SeekBar)findViewById(R.id.exposure_seekbar));
 		final int min_exposure = preview.getMinimumExposure();
 		seek_bar.setMax( preview.getMaximumExposure() - min_exposure );
@@ -940,13 +945,13 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposure");
 		this.closePopup();
-		SeekBar seek_bar = ((SeekBar)findViewById(R.id.exposure_seekbar));
-		int visibility = seek_bar.getVisibility();
+		SeekBar exposure_seek_bar = ((SeekBar)findViewById(R.id.exposure_seekbar));
+		int exposure_visibility = exposure_seek_bar.getVisibility();
 		SeekBar iso_seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
 		int iso_visibility = iso_seek_bar.getVisibility();
 		SeekBar exposure_time_seek_bar = ((SeekBar)findViewById(R.id.exposure_time_seekbar));
 		int exposure_time_visibility = iso_seek_bar.getVisibility();
-		boolean is_open = visibility == View.VISIBLE || iso_visibility == View.VISIBLE || exposure_time_visibility == View.VISIBLE;
+		boolean is_open = exposure_visibility == View.VISIBLE || iso_visibility == View.VISIBLE || exposure_time_visibility == View.VISIBLE;
 		if( is_open ) {
 			clearSeekBar();
 		}
@@ -956,104 +961,16 @@ public class MainActivity extends Activity {
 			if( !value.equals(preview.getCameraController().getDefaultISO()) ) {
 				if( preview.supportsISORange()) {
 					iso_seek_bar.setVisibility(View.VISIBLE);
-					setSeekbarScaled(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
-					iso_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-						@Override
-						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "iso seekbar onProgressChanged: " + progress);
-							double frac = progress/(double)100.0;
-							if( MyDebug.LOG )
-								Log.d(TAG, "exposure_time frac: " + frac);
-							double scaling = MainActivity.seekbarScaling(frac);
-							if( MyDebug.LOG )
-								Log.d(TAG, "exposure_time scaling: " + scaling);
-							int min_iso = preview.getMinimumISO();
-							int max_iso = preview.getMaximumISO();
-							int iso = min_iso + (int)(scaling * (max_iso - min_iso));
-							preview.setISO(iso);
-						}
-
-						@Override
-						public void onStartTrackingTouch(SeekBar seekBar) {
-						}
-
-						@Override
-						public void onStopTrackingTouch(SeekBar seekBar) {
-						}
-					});
 					if( preview.supportsExposureTime() ) {
 						exposure_time_seek_bar.setVisibility(View.VISIBLE);
-						setSeekbarScaled(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
-						exposure_time_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-							@Override
-							public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-								if( MyDebug.LOG )
-									Log.d(TAG, "exposure_time seekbar onProgressChanged: " + progress);
-								double frac = progress/(double)100.0;
-								if( MyDebug.LOG )
-									Log.d(TAG, "exposure_time frac: " + frac);
-								//long exposure_time = min_exposure_time + (long)(frac * (max_exposure_time - min_exposure_time));
-								//double exposure_time_r = min_exposure_time_r + (frac * (max_exposure_time_r - min_exposure_time_r));
-								//long exposure_time = (long)(1.0 / exposure_time_r);
-								// we use the formula: [100^(percent/100) - 1]/99.0 rather than a simple linear scaling
-								double scaling = MainActivity.seekbarScaling(frac);
-								if( MyDebug.LOG )
-									Log.d(TAG, "exposure_time scaling: " + scaling);
-								long min_exposure_time = preview.getMinimumExposureTime();
-								long max_exposure_time = preview.getMaximumExposureTime();
-								long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));
-								preview.setExposureTime(exposure_time);
-							}
-
-							@Override
-							public void onStartTrackingTouch(SeekBar seekBar) {
-							}
-
-							@Override
-							public void onStopTrackingTouch(SeekBar seekBar) {
-							}
-						});
 					}
 				}
 			}
 			else {
 				if( preview.supportsExposures() ) {
-					final int min_exposure = preview.getMinimumExposure();
-					seek_bar.setVisibility(View.VISIBLE);
-					setSeekBarExposure();
-					seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-						@Override
-						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "exposure seekbar onProgressChanged: " + progress);
-							preview.setExposure(min_exposure + progress);
-						}
-
-						@Override
-						public void onStartTrackingTouch(SeekBar seekBar) {
-						}
-
-						@Override
-						public void onStopTrackingTouch(SeekBar seekBar) {
-						}
-					});
-
+					exposure_seek_bar.setVisibility(View.VISIBLE);
 					ZoomControls seek_bar_zoom = (ZoomControls)findViewById(R.id.exposure_seekbar_zoom);
 					seek_bar_zoom.setVisibility(View.VISIBLE);
-					seek_bar_zoom.setOnZoomInClickListener(new View.OnClickListener(){
-			            public void onClick(View v){
-			            	preview.changeExposure(1);
-	    	    			setSeekBarExposure();
-			            }
-			        });
-					seek_bar_zoom.setOnZoomOutClickListener(new View.OnClickListener(){
-				    	public void onClick(View v){
-			            	preview.changeExposure(-1);
-	    	    			setSeekBarExposure();
-				        }
-				    });
 				}
 			}
 		}
@@ -2044,6 +1961,112 @@ public class MainActivity extends Activity {
 				public void onStopTrackingTouch(SeekBar seekBar) {
 				}
 			});
+		}
+		{
+			if( preview.supportsISORange()) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set up iso");
+				SeekBar iso_seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
+				setSeekbarScaled(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
+				iso_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "iso seekbar onProgressChanged: " + progress);
+						double frac = progress/(double)100.0;
+						if( MyDebug.LOG )
+							Log.d(TAG, "exposure_time frac: " + frac);
+						double scaling = MainActivity.seekbarScaling(frac);
+						if( MyDebug.LOG )
+							Log.d(TAG, "exposure_time scaling: " + scaling);
+						int min_iso = preview.getMinimumISO();
+						int max_iso = preview.getMaximumISO();
+						int iso = min_iso + (int)(scaling * (max_iso - min_iso));
+						preview.setISO(iso);
+					}
+
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {
+					}
+
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {
+					}
+				});
+				if( preview.supportsExposureTime() ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "set up exposure time");
+					SeekBar exposure_time_seek_bar = ((SeekBar)findViewById(R.id.exposure_time_seekbar));
+					setSeekbarScaled(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
+					exposure_time_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+						@Override
+						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "exposure_time seekbar onProgressChanged: " + progress);
+							double frac = progress/(double)100.0;
+							if( MyDebug.LOG )
+								Log.d(TAG, "exposure_time frac: " + frac);
+							//long exposure_time = min_exposure_time + (long)(frac * (max_exposure_time - min_exposure_time));
+							//double exposure_time_r = min_exposure_time_r + (frac * (max_exposure_time_r - min_exposure_time_r));
+							//long exposure_time = (long)(1.0 / exposure_time_r);
+							// we use the formula: [100^(percent/100) - 1]/99.0 rather than a simple linear scaling
+							double scaling = MainActivity.seekbarScaling(frac);
+							if( MyDebug.LOG )
+								Log.d(TAG, "exposure_time scaling: " + scaling);
+							long min_exposure_time = preview.getMinimumExposureTime();
+							long max_exposure_time = preview.getMaximumExposureTime();
+							long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));
+							preview.setExposureTime(exposure_time);
+						}
+
+						@Override
+						public void onStartTrackingTouch(SeekBar seekBar) {
+						}
+
+						@Override
+						public void onStopTrackingTouch(SeekBar seekBar) {
+						}
+					});
+				}
+			}
+		}
+		{
+			if( preview.supportsExposures() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set up exposure compensation");
+				final int min_exposure = preview.getMinimumExposure();
+				setSeekBarExposure();
+				SeekBar exposure_seek_bar = ((SeekBar)findViewById(R.id.exposure_seekbar));
+				exposure_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "exposure seekbar onProgressChanged: " + progress);
+						preview.setExposure(min_exposure + progress);
+					}
+
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {
+					}
+
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {
+					}
+				});
+
+				ZoomControls seek_bar_zoom = (ZoomControls)findViewById(R.id.exposure_seekbar_zoom);
+				seek_bar_zoom.setOnZoomInClickListener(new View.OnClickListener(){
+		            public void onClick(View v){
+		            	changeExposure(1);
+		            }
+		        });
+				seek_bar_zoom.setOnZoomOutClickListener(new View.OnClickListener(){
+			    	public void onClick(View v){
+		            	changeExposure(-1);
+			        }
+			    });
+			}
 		}
     }
     
