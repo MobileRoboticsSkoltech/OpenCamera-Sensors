@@ -424,8 +424,12 @@ public class MainActivity extends Activity {
     }
 	
 	void setSeekbarZoom() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setSeekbarZoom");
 	    SeekBar zoomSeekBar = (SeekBar) findViewById(R.id.zoom_seekbar);
 		zoomSeekBar.setProgress(preview.getMaxZoom()-preview.getCameraController().getZoom());
+		if( MyDebug.LOG )
+			Log.d(TAG, "progress is now: " + zoomSeekBar.getProgress());
 	}
 	
 	public void zoomIn() {
@@ -436,20 +440,10 @@ public class MainActivity extends Activity {
 	    changeSeekbar((SeekBar) findViewById(R.id.zoom_seekbar), 1);
 	}
 	
-	public void zoomTo(int new_zoom_factor) {
-		this.preview.zoomTo(new_zoom_factor);
-		setSeekbarZoom();
-	}
-
 	public void changeExposure(int change) {
 	    changeSeekbar((SeekBar) findViewById(R.id.exposure_seekbar), change);
 	}
 
-	public void setExposure(int new_exposure) {
-		this.preview.setExposure(new_exposure);
-		this.setSeekBarExposure();
-	}
-	
 	public void changeISO(int change) {
 	    changeSeekbar((SeekBar) findViewById(R.id.iso_seekbar), change);
 	}
@@ -1913,6 +1907,8 @@ public class MainActivity extends Activity {
 				zoomSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "zoom onProgressChanged: " + progress);
 						preview.zoomTo(preview.getMaxZoom()-progress);
 					}
 
