@@ -60,6 +60,7 @@ public interface ApplicationInterface {
 	int getZoomPref(); // index into Preview.getSupportedZoomRatios() array (each entry is the zoom factor, scaled by 100; array is sorted from min to max zoom)
 	// Camera2 only modes:
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
+	float getFocusDistancePref();
 	// for testing purposes:
 	boolean isTestAlwaysFocus(); // if true, pretend autofocus always successful
 
@@ -98,4 +99,5 @@ public interface ApplicationInterface {
 	// Camera2 only modes:
 	void setExposureTimePref(long exposure_time);
 	void clearExposureTimePref();
+	void setFocusDistancePref(float focus_distance);
 }

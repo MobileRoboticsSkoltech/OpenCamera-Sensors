@@ -1538,9 +1538,19 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	public void setFocusDistance(float focus_distance) {
+	public float getFocusDistance() {
+		return camera_settings.focus_distance;
+	}
+
+	@Override
+	public boolean setFocusDistance(float focus_distance) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusDistance: " + focus_distance);
+		if( camera_settings.focus_distance == focus_distance ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "already set");
+			return false;
+		}
     	camera_settings.focus_distance = focus_distance;
     	camera_settings.focus_distance_manual = focus_distance;
     	camera_settings.setFocusDistance(previewBuilder);
@@ -1555,6 +1565,7 @@ public class CameraController2 extends CameraController {
 			}
 			e.printStackTrace();
 		} 
+    	return true;
 	}
 
 	@Override

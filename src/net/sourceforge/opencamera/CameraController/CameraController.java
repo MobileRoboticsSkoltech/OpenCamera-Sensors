@@ -141,7 +141,8 @@ public abstract class CameraController {
 
 	public abstract void setFocusValue(String focus_value);
 	public abstract String getFocusValue();
-	public abstract void setFocusDistance(float focus_distance);
+	public abstract float getFocusDistance();
+	public abstract boolean setFocusDistance(float focus_distance);
 	public abstract void setFlashValue(String flash_value);
 	public abstract String getFlashValue();
 	public abstract void setRecordingHint(boolean hint);

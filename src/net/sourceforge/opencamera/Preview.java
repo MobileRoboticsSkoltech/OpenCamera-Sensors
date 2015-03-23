@@ -81,7 +81,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.MeasureSpec;
 import android.widget.ImageButton;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
@@ -166,7 +165,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private ScaleGestureDetector scaleGestureDetector;
 	private List<Integer> zoom_ratios = null;
 	private float minimum_focus_distance = 0.0f;
-	private int focus_distance_percent = 0;
 	private boolean touch_was_multitouch = false;
 
 	private List<String> supported_flash_values = null; // our "values" format
@@ -308,9 +306,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     				Log.d(TAG, "cameraID not valid for " + camera_controller_manager.getNumberOfCameras() + " cameras!");
     			cameraId = 0;
     		}
-			focus_distance_percent = savedInstanceState.getInt("focus_distance_percent", 0);
-			if( MyDebug.LOG )
-				Log.d(TAG, "found focus_distance_percent: " + focus_distance_percent);
         }
 
     	location_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth);
@@ -1152,8 +1147,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			zoomTo(applicationInterface.getZoomPref());
 		}
 		
-		setFocusDistance(false, false);
-
 		applicationInterface.cameraSetup();
 
 	    if( take_photo ) {
@@ -1573,6 +1566,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			supported_focus_values.add("focus_mode_continuous_video");*/
 		    /*View focusModeButton = (View) activity.findViewById(R.id.focus_mode);
 			focusModeButton.setVisibility(supported_focus_values != null && !immersive_mode ? View.VISIBLE : View.GONE);*/
+		}
+
+		{
+			float focus_distance_value = applicationInterface.getFocusDistancePref();
+			if( MyDebug.LOG )
+				Log.d(TAG, "saved focus_distance: " + focus_distance_value);
+			if( focus_distance_value < 0.0f )
+				focus_distance_value = 0.0f;
+			else if( focus_distance_value > minimum_focus_distance )
+				focus_distance_value = minimum_focus_distance;
+			camera_controller.setFocusDistance(focus_distance_value);
+			// now save
+			applicationInterface.setFocusDistancePref(focus_distance_value);
 		}
 
 		{
@@ -2955,7 +2961,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "ZoomTo(): " + new_zoom_factor);
 		if( new_zoom_factor < 0 )
 			new_zoom_factor = 0;
-		if( new_zoom_factor > max_zoom_factor )
+		else if( new_zoom_factor > max_zoom_factor )
 			new_zoom_factor = max_zoom_factor;
 		// problem where we crashed due to calling this function with null camera should be fixed now, but check again just to be safe
     	if( camera_controller != null ) {
@@ -2967,50 +2973,29 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 	}
 	
-	void changeFocusDistance(int change, boolean update_seek_bar) {
+	void setFocusDistance(float new_focus_distance) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "changeFocusDistance(): " + change);
-		if( change != 0 && camera_controller != null ) {
-			focus_distance_percent += change;
-			setFocusDistance(true, update_seek_bar);
-		}
-	}
-	
-	void setFocusDistance(int new_focus_distance_percent, boolean update_seek_bar) {
-		if( new_focus_distance_percent != focus_distance_percent ) {
-			focus_distance_percent = new_focus_distance_percent;
-			setFocusDistance(true, update_seek_bar);
-		}
-	}
-	
-	private void setFocusDistance(boolean show_toast, boolean update_seek_bar) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setFocusDistance: focus_distance_percent = " + focus_distance_percent);
+			Log.d(TAG, "setFocusDistance: " + new_focus_distance);
 		if( camera_controller != null ) {
-			if( focus_distance_percent < 0 )
-				focus_distance_percent = 0;
-			else if( focus_distance_percent > 100 )
-				focus_distance_percent = 100;
-			//float focus_distance = ((float)focus_distance_percent * minimum_focus_distance)/100.0f;
-			double focus_distance_frac = ((double)focus_distance_percent)/100.0;
-			float focus_distance = (float)(minimum_focus_distance * MainActivity.seekbarScaling(focus_distance_frac));
-			camera_controller.setFocusDistance(focus_distance);
-			if( show_toast ) {
-				String focus_distance_s = "";
-				if( focus_distance > 0.0f ) {
-					float real_focus_distance = 1.0f / focus_distance;
-					focus_distance_s = new DecimalFormat("#.##").format(real_focus_distance) + "m";
+			if( new_focus_distance < 0.0f )
+				new_focus_distance = 0.0f;
+			else if( new_focus_distance > minimum_focus_distance )
+				new_focus_distance = minimum_focus_distance;
+			if( camera_controller.setFocusDistance(new_focus_distance) ) {
+				// now save
+				applicationInterface.setFocusDistancePref(new_focus_distance);
+				{
+					String focus_distance_s = "";
+					if( new_focus_distance > 0.0f ) {
+						float real_focus_distance = 1.0f / new_focus_distance;
+						focus_distance_s = new DecimalFormat("#.##").format(real_focus_distance) + "m";
+					}
+					else {
+						focus_distance_s = getResources().getString(R.string.infinite);
+					}
+		    		showToast(seekbar_toast, getResources().getString(R.string.focus_distance) + " " + focus_distance_s);
 				}
-				else {
-					focus_distance_s = getResources().getString(R.string.infinite);
-				}
-	    		showToast(seekbar_toast, getResources().getString(R.string.focus_distance) + " " + focus_distance_s);
 			}
-    		if( update_seek_bar ) {
-    			Activity activity = (Activity)getContext();
-    			SeekBar seek_bar = ((SeekBar)activity.findViewById(R.id.focus_seekbar));
-    			seek_bar.setProgress(focus_distance_percent);
-    		}
 		}
 	}
 	
@@ -5504,6 +5489,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.max_iso;
     }
     
+    float getMinimumFocusDistance() {
+    	return this.minimum_focus_distance;
+    }
+    
     public boolean supportsExposureTime() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsExposureTime");
@@ -5647,9 +5636,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "save cameraId: " + cameraId);
     	state.putInt("cameraId", cameraId);
-		if( MyDebug.LOG )
-			Log.d(TAG, "save focus_distance_percent: " + focus_distance_percent);
-    	state.putInt("focus_distance_percent", focus_distance_percent);
 	}
 
     public void showToast(final ToastBoxer clear_toast, final int message_id) {
@@ -5834,10 +5820,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     
     public int getMaxNumFocusAreas() {
     	return this.max_num_focus_areas;
-    }
-    
-    int getFocusDistancePercent() {
-    	return this.focus_distance_percent;
     }
     
     public boolean isTakingPhotoOrOnTimer() {

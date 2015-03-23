@@ -21,6 +21,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
     // camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int zoom_factor = 0;
+	private float focus_distance = 0.0f;
     
 	MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
 		if( MyDebug.LOG )
@@ -33,6 +34,9 @@ public class MyApplicationInterface implements ApplicationInterface {
     		zoom_factor = savedInstanceState.getInt("zoom_factor", 0);
 			if( MyDebug.LOG )
 				Log.d(TAG, "found zoom_factor: " + zoom_factor);
+			focus_distance = savedInstanceState.getFloat("focus_distance", 0.0f);
+			if( MyDebug.LOG )
+				Log.d(TAG, "found focus_distance: " + focus_distance);
         }
 	}
 	
@@ -42,6 +46,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "save zoom_factor: " + zoom_factor);
     	state.putInt("zoom_factor", zoom_factor);
+		if( MyDebug.LOG )
+			Log.d(TAG, "save focus_distance: " + focus_distance);
+    	state.putFloat("focus_distance", focus_distance);
 	}
 
 	LocationSupplier getLocationSupplier() {
@@ -420,15 +427,20 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
     
     @Override
+    public int getZoomPref() {
+		Log.d(TAG, "getZoomPref: " + zoom_factor);
+    	return zoom_factor;
+    }
+
+    @Override
     public long getExposureTimePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getLong(MainActivity.getExposureTimePreferenceKey(), 1000000000l/30);
     }
     
     @Override
-    public int getZoomPref() {
-		Log.d(TAG, "getZoomPref: " + zoom_factor);
-    	return zoom_factor;
+	public float getFocusDistancePref() {
+    	return focus_distance;
     }
 
     @Override
@@ -635,4 +647,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		editor.apply();
     }
 
+    @Override
+	public void setFocusDistancePref(float focus_distance) {
+		this.focus_distance = focus_distance;
+	}
 }

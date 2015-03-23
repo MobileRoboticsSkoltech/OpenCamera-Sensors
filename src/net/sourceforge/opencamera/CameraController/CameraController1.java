@@ -625,8 +625,15 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
-	public void setFocusDistance(float focus_distance) {
+	public float getFocusDistance() {
 		// not supported for CameraController1!
+		return 0.0f;
+	}
+
+	@Override
+	public boolean setFocusDistance(float focus_distance) {
+		// not supported for CameraController1!
+		return false;
 	}
 
 	private String convertFlashValueToMode(String flash_value) {
