@@ -1064,9 +1064,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
 
-		    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
-		    switchCameraButton.setVisibility(camera_controller_manager.getNumberOfCameras() > 1 && !immersive_mode ? View.VISIBLE : View.GONE);
-
 		    setupCamera(toast_message, take_photo);
 		}
 
@@ -1180,8 +1177,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG ) {
 			debug_time = System.currentTimeMillis();
 		}
-		Activity activity = (Activity)this.getContext();
-
 		{
 			// get available scene modes
 			// important, from docs:
@@ -1393,8 +1388,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
 				applicationInterface.clearExposureCompensationPref();
 			}
-			View exposureButton = (View) activity.findViewById(R.id.exposure);
-		    exposureButton.setVisibility(exposures != null && !immersive_mode ? View.VISIBLE : View.GONE);
 		}
 
 		{
@@ -1580,14 +1573,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up exposure lock");
-		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
-		    exposureLockButton.setVisibility(is_exposure_lock_supported && !immersive_mode ? View.VISIBLE : View.GONE);
+	    	// exposure lock should always default to false, as doesn't make sense to save it - we can't really preserve a "lock" after the camera is reopened
+	    	// also note that it isn't safe to lock the exposure before starting the preview
 	    	is_exposure_locked = false;
-		    if( is_exposure_lock_supported ) {
-		    	// exposure lock should always default to false, as doesn't make sense to save it - we can't really preserve a "lock" after the camera is reopened
-		    	// also note that it isn't safe to lock the exposure before starting the preview
-				exposureLockButton.setImageResource(is_exposure_locked ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
-		    }
 		}
 
 		if( MyDebug.LOG ) {
@@ -5222,6 +5210,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     
     public boolean supportsExposureLock() {
     	return this.is_exposure_lock_supported;
+    }
+    
+    boolean isExposureLocked() {
+    	return this.is_exposure_locked;
     }
     
     public boolean supportsZoom() {

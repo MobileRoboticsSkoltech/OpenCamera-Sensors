@@ -181,7 +181,10 @@ public class MainActivity extends Activity {
 		
         preview = new Preview(applicationInterface, savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
 		
-		orientationEventListener = new OrientationEventListener(this) {
+	    View switchCameraButton = (View) findViewById(R.id.switch_camera);
+	    switchCameraButton.setVisibility(preview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
+
+	    orientationEventListener = new OrientationEventListener(this) {
 			@Override
 			public void onOrientationChanged(int orientation) {
 				MainActivity.this.onOrientationChanged(orientation);
@@ -2078,6 +2081,14 @@ public class MainActivity extends Activity {
 			    });
 			}
 		}
+
+		View exposureButton = (View) findViewById(R.id.exposure);
+	    exposureButton.setVisibility(preview.supportsExposures() && !preview.inImmersiveMode() ? View.VISIBLE : View.GONE);
+	    ImageButton exposureLockButton = (ImageButton) findViewById(R.id.exposure_lock);
+	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !preview.inImmersiveMode() ? View.VISIBLE : View.GONE);
+	    if( preview.supportsExposureLock() ) {
+			exposureLockButton.setImageResource(preview.isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+	    }
 
 		setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
     }
