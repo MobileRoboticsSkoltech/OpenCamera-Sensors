@@ -1069,7 +1069,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		    setupCamera(toast_message, take_photo);
 		}
-    	setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
@@ -2923,22 +2922,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return features;
 	}
 
-	void cycleFlash() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "cycleFlash()");
-		//if( is_taking_photo && !is_taking_photo_on_timer ) {
-		if( this.phase == PHASE_TAKING_PHOTO && !is_video ) {
-			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
-			if( MyDebug.LOG )
-				Log.d(TAG, "currently taking a photo");
-			return;
-		}
-		if( this.supported_flash_values != null && this.supported_flash_values.size() > 1 ) {
-			int new_flash_index = (current_flash_index+1) % this.supported_flash_values.size();
-			updateFlash(new_flash_index, true);
-		}
-	}
-
 	public void updateFlash(String focus_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFlash(): " + focus_value);
@@ -2995,7 +2978,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			break;
 	    		}
 	    	}
-	    	this.setPopupIcon();
 	    	this.setFlash(flash_value);
 	    	if( save ) {
 				// now save
@@ -3032,22 +3014,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		String flash_mode = convertFlashValueToMode(flash_value);
 		return flash_mode;
 	}*/
-
-	void cycleFocusMode() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "cycleFocusMode()");
-		//if( is_taking_photo && !is_taking_photo_on_timer ) {
-		if( this.phase == PHASE_TAKING_PHOTO ) {
-			// just to be safe - otherwise problem that changing the focus mode will cancel the autofocus before taking a photo, so we never take a photo, but is_taking_photo remains true!
-			if( MyDebug.LOG )
-				Log.d(TAG, "currently taking a photo");
-			return;
-		}
-		if( this.supported_focus_values != null && this.supported_focus_values.size() > 1 ) {
-			int new_focus_index = (current_focus_index+1) % this.supported_focus_values.size();
-			updateFocus(new_focus_index, false, true, true);
-		}
-	}
 
 	public void updateFocus(String focus_value, boolean quiet, boolean auto_focus) {
 		if( MyDebug.LOG )
@@ -4788,28 +4754,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		});
     }
     
-    private void setPopupIcon() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setPopupIcon");
-		MainActivity main_activity = (MainActivity)this.getContext();
-		ImageButton popup = (ImageButton)main_activity.findViewById(R.id.popup);
-		String flash_value = getCurrentFlashValue();
-		if( MyDebug.LOG )
-			Log.d(TAG, "flash_value: " + flash_value);
-		if( flash_value != null && flash_value.equals("flash_torch") ) {
-    		popup.setImageResource(R.drawable.popup_flash_torch);
-    	}
-		else if( flash_value != null && flash_value.equals("flash_auto") ) {
-    		popup.setImageResource(R.drawable.popup_flash_auto);
-    	}
-    	else if( flash_value != null && flash_value.equals("flash_on") ) {
-    		popup.setImageResource(R.drawable.popup_flash_on);
-    	}
-    	else {
-    		popup.setImageResource(R.drawable.popup);
-    	}
-    }
-
     void onAccelerometerSensorChanged(SensorEvent event) {
 		/*if( MyDebug.LOG )
     	Log.d(TAG, "onAccelerometerSensorChanged: " + event.values[0] + ", " + event.values[1] + ", " + event.values[2]);*/

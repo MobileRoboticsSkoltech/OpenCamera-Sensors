@@ -911,16 +911,25 @@ public class MainActivity extends Activity {
 		this.preview.switchVideo(true, true);
     }
 
-    public void clickedFlash(View view) {
+    public void setPopupIcon() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "clickedFlash");
-    	this.preview.cycleFlash();
-    }
-    
-    public void clickedFocusMode(View view) {
+			Log.d(TAG, "setPopupIcon");
+		ImageButton popup = (ImageButton)findViewById(R.id.popup);
+		String flash_value = preview.getCurrentFlashValue();
 		if( MyDebug.LOG )
-			Log.d(TAG, "clickedFocusMode");
-    	this.preview.cycleFocusMode();
+			Log.d(TAG, "flash_value: " + flash_value);
+		if( flash_value != null && flash_value.equals("flash_torch") ) {
+    		popup.setImageResource(R.drawable.popup_flash_torch);
+    	}
+		else if( flash_value != null && flash_value.equals("flash_auto") ) {
+    		popup.setImageResource(R.drawable.popup_flash_auto);
+    	}
+    	else if( flash_value != null && flash_value.equals("flash_on") ) {
+    		popup.setImageResource(R.drawable.popup_flash_on);
+    	}
+    	else {
+    		popup.setImageResource(R.drawable.popup);
+    	}
     }
 
     void clearSeekBar() {
@@ -1859,8 +1868,6 @@ public class MainActivity extends Activity {
 	}
 
     void cameraSetup() {
-    	// called when the camera is (re-)set up - should update UI elements/parameters that depend on camera settings
-
 		if( this.supportsForceVideo4K() && preview.usingCamera2API() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "using Camera2 API, so can disable the force 4K option");
@@ -2071,6 +2078,8 @@ public class MainActivity extends Activity {
 			    });
 			}
 		}
+
+		setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
     }
     
     public boolean supportsAutoStabilise() {
