@@ -82,6 +82,8 @@ public class MainActivity extends Activity {
     private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<Integer, Bitmap>();
     private PopupView popup_view = null;
 
+	private boolean ui_placement_right = true;
+
     private ToastBoxer screen_locked_toast = new ToastBoxer();
     ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
     
@@ -546,10 +548,11 @@ public class MainActivity extends Activity {
     void layoutUI() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "layoutUI");
-		this.preview.updateUIPlacement();
+		//this.preview.updateUIPlacement();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String ui_placement = sharedPreferences.getString(getUIPlacementPreferenceKey(), "ui_right");
-		boolean ui_placement_right = ui_placement.equals("ui_right");
+    	// we cache the preference_ui_placement to save having to check it in the draw() method
+		this.ui_placement_right = ui_placement.equals("ui_right");
 		if( MyDebug.LOG )
 			Log.d(TAG, "ui_placement: " + ui_placement);
 		// new code for orientation fixed to landscape	
@@ -847,6 +850,10 @@ public class MainActivity extends Activity {
 				view.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
 			}
 		}
+    }
+    
+    boolean getUIPlacementRight() {
+    	return this.ui_placement_right;
     }
 
     private void onOrientationChanged(int orientation) {

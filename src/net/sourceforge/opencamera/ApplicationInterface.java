@@ -4,6 +4,7 @@ import java.io.File;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.location.Location;
 import android.util.Pair;
 import android.view.MotionEvent;
@@ -74,6 +75,7 @@ public interface ApplicationInterface {
 	void stoppingVideo(); // called just before video recording stops
 	void cameraClosed();
 	void updateThumbnail(Bitmap thumbnail); // n.b., thumbnail will be recycled after updateThumbnail() is called again with a different thumbnail
+	void timerBeep(); // n.b., called once per second on timer countdown - so application can beep, or do whatever it likes
 
 	// methods that request actions
 	void layoutUI(); // application should layout UI that's on top of the preview
@@ -100,4 +102,8 @@ public interface ApplicationInterface {
 	void setExposureTimePref(long exposure_time);
 	void clearExposureTimePref();
 	void setFocusDistancePref(float focus_distance);
+	
+	// callbacks
+	void onDrawPreview(Canvas canvas);
+	void onPictureTaken(byte [] data);
 }

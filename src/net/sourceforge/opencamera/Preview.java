@@ -21,7 +21,6 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -35,7 +34,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -57,10 +55,7 @@ import android.media.CamcorderProfile;
 import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -104,11 +99,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
     private Matrix camera_to_preview_matrix = new Matrix();
     private Matrix preview_to_camera_matrix = new Matrix();
-	private RectF face_rect = new RectF();
+	//private RectF face_rect = new RectF();
 	private Rect text_bounds = new Rect();
     private double preview_targetRatio = 0.0;
 
-	private boolean ui_placement_right = true;
+	//private boolean ui_placement_right = true;
 
 	private boolean app_is_paused = true;
 	private boolean has_surface = false;
@@ -144,12 +139,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
 	private String preview_image_name = null;
 	private Bitmap thumbnail = null; // thumbnail of last picture taken
-	private boolean thumbnail_anim = false; // whether we are displaying the thumbnail animation
-	private long thumbnail_anim_start_ms = -1; // time that the thumbnail animation started
-	private RectF thumbnail_anim_src_rect = new RectF();
-	private RectF thumbnail_anim_dst_rect = new RectF();
-	private Matrix thumbnail_anim_matrix = new Matrix();
-	private int [] gui_location = new int[2];
+	//private int [] gui_location = new int[2];
 
 	private int current_orientation = 0; // orientation received by onOrientationChanged
 	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setRotation())
@@ -157,8 +147,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private double level_angle = 0.0f;
 	private double orig_level_angle = 0.0f;
 	
-	private float free_memory_gb = -1.0f;
-	private long last_free_memory_time = 0;
+	/*private float free_memory_gb = -1.0f;
+	private long last_free_memory_time = 0;*/
 
 	private boolean has_zoom = false;
 	private int max_zoom_factor = 0;
@@ -204,9 +194,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
 	private List<CameraController.Size> video_sizes = null;
 	
-	private Bitmap location_bitmap = null;
+	/*private Bitmap location_bitmap = null;
 	private Bitmap location_off_bitmap = null;
-	private Rect location_dest = new Rect();
+	private Rect location_dest = new Rect();*/
 	
 	private ToastBoxer switch_camera_toast = new ToastBoxer();
 	private ToastBoxer switch_video_toast = new ToastBoxer();
@@ -237,10 +227,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean successfully_focused = false;
 	private long successfully_focused_time = -1;
 
-	private IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+	/*private IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 	private boolean has_battery_frac = false;
 	private float battery_frac = 0.0f;
-	private long last_battery_time = 0;
+	private long last_battery_time = 0;*/
 
 	// accelerometer and geomagnetic sensor info
 	private final float sensor_alpha = 0.8f; // for filter
@@ -308,9 +298,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		}
         }
 
-    	location_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth);
-    	location_off_bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.earth_off);
-
 		parent.addView(cameraSurface.getView());
 		if( canvasView != null ) {
 			parent.addView(canvasView);
@@ -361,7 +348,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		camera_to_preview_matrix.postScale(cameraSurface.getView().getWidth() / 2000f, cameraSurface.getView().getHeight() / 2000f);
 		camera_to_preview_matrix.postTranslate(cameraSurface.getView().getWidth() / 2f, cameraSurface.getView().getHeight() / 2f);
 	}
-
+	
 	private void calculatePreviewToCameraMatrix() {
 		if( camera_controller == null )
 			return;
@@ -370,6 +357,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
     			Log.d(TAG, "calculatePreviewToCameraMatrix failed to invert matrix!?");
 		}
+	}
+
+	Matrix getCameraToPreviewMatrix() {
+		calculateCameraToPreviewMatrix();
+		return camera_to_preview_matrix;
+	}
+
+	Matrix getPreviewToCameraMatrix() {
+		calculatePreviewToCameraMatrix();
+		return preview_to_camera_matrix;
 	}
 
 	private ArrayList<CameraController.Area> getAreas(float x, float y) {
@@ -1996,7 +1993,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return desc;
 	}
 
-	public double getTargetRatioForPreview(Point display_size) {
+	public double getTargetRatio() {
+		return preview_targetRatio;
+	}
+
+	private double calculateTargetRatioForPreview(Point display_size) {
         double targetRatio = 0.0f;
 		String preview_size = applicationInterface.getPreviewSizePref();
 		// should always use wysiwig for video mode, otherwise we get incorrect aspect ratio shown when recording video (at least on Galaxy Nexus, e.g., at 640x480)
@@ -2063,7 +2064,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
     			Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
         }
-        double targetRatio = getTargetRatioForPreview(display_size);
+        double targetRatio = calculateTargetRatioForPreview(display_size);
         int targetHeight = Math.min(display_size.y, display_size.x);
         if( targetHeight <= 0 ) {
             targetHeight = display_size.y;
@@ -2316,534 +2317,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "surface frame " + mHolder.getSurfaceFrame().width() + ", " + mHolder.getSurfaceFrame().height());*/
 
-		MainActivity main_activity = (MainActivity)this.getContext();
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		if( immersive_mode ) {
-			String immersive_mode = sharedPreferences.getString(MainActivity.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-			if( immersive_mode.equals("immersive_mode_everything") ) {
-				// exit, to ensure we don't display anything!
-				return;
-			}
-		}
-		final float scale = getResources().getDisplayMetrics().density;
-		String preference_grid = sharedPreferences.getString(MainActivity.getShowGridPreferenceKey(), "preference_grid_none");
-		if( camera_controller != null && preference_grid.equals("preference_grid_3x3") ) {
-			p.setColor(Color.WHITE);
-			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(2.0f*canvas.getWidth()/3.0f, 0.0f, 2.0f*canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(0.0f, canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, canvas.getHeight()/3.0f, p);
-			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
-		}
-		if( camera_controller != null && preference_grid.equals("preference_grid_4x2") ) {
-			p.setColor(Color.GRAY);
-			canvas.drawLine(canvas.getWidth()/4.0f, 0.0f, canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(canvas.getWidth()/2.0f, 0.0f, canvas.getWidth()/2.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(3.0f*canvas.getWidth()/4.0f, 0.0f, 3.0f*canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(0.0f, canvas.getHeight()/2.0f, canvas.getWidth()-1.0f, canvas.getHeight()/2.0f, p);
-			p.setColor(Color.WHITE);
-			int crosshairs_radius = (int) (20 * scale + 0.5f); // convert dps to pixels
-			canvas.drawLine(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f - crosshairs_radius, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f + crosshairs_radius, p);
-			canvas.drawLine(canvas.getWidth()/2.0f - crosshairs_radius, canvas.getHeight()/2.0f, canvas.getWidth()/2.0f + crosshairs_radius, canvas.getHeight()/2.0f, p);
-		}
-		if( this.is_video || sharedPreferences.getString(MainActivity.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
-			String preference_crop_guide = sharedPreferences.getString(MainActivity.getShowCropGuidePreferenceKey(), "crop_guide_none");
-			if( camera_controller != null && preview_targetRatio > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
-				p.setStyle(Paint.Style.STROKE);
-				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
-				double crop_ratio = -1.0;
-				if( preference_crop_guide.equals("crop_guide_1.33") ) {
-					crop_ratio = 1.33333333;
-				}
-				else if( preference_crop_guide.equals("crop_guide_1.5") ) {
-					crop_ratio = 1.5;
-				}
-				else if( preference_crop_guide.equals("crop_guide_1.78") ) {
-					crop_ratio = 1.77777778;
-				}
-				else if( preference_crop_guide.equals("crop_guide_1.85") ) {
-					crop_ratio = 1.85;
-				}
-				else if( preference_crop_guide.equals("crop_guide_2.33") ) {
-					crop_ratio = 2.33333333;
-				}
-				else if( preference_crop_guide.equals("crop_guide_2.35") ) {
-					crop_ratio = 2.35006120; // actually 1920:817
-				}
-				else if( preference_crop_guide.equals("crop_guide_2.4") ) {
-					crop_ratio = 2.4;
-				}
-				if( crop_ratio > 0.0 && Math.abs(preview_targetRatio - crop_ratio) > 1.0e-5 ) {
-		    		/*if( MyDebug.LOG ) {
-		    			Log.d(TAG, "crop_ratio: " + crop_ratio);
-		    			Log.d(TAG, "preview_targetRatio: " + preview_targetRatio);
-		    			Log.d(TAG, "canvas width: " + canvas.getWidth());
-		    			Log.d(TAG, "canvas height: " + canvas.getHeight());
-		    		}*/
-					int left = 1, top = 1, right = canvas.getWidth()-1, bottom = canvas.getHeight()-1;
-					if( crop_ratio > preview_targetRatio ) {
-						// crop ratio is wider, so we have to crop top/bottom
-						double new_hheight = ((double)canvas.getWidth()) / (2.0f*crop_ratio);
-						top = (int)(canvas.getHeight()/2 - new_hheight);
-						bottom = (int)(canvas.getHeight()/2 + new_hheight);
-					}
-					else {
-						// crop ratio is taller, so we have to crop left/right
-						double new_hwidth = (((double)canvas.getHeight()) * crop_ratio) / 2.0f;
-						left = (int)(canvas.getWidth()/2 - new_hwidth);
-						right = (int)(canvas.getWidth()/2 + new_hwidth);
-					}
-					canvas.drawRect(left, top, right, bottom, p);
-				}
-			}
-		}
-
-		// note, no need to check preferences here, as we do that when setting thumbnail_anim
-		if( camera_controller != null && this.thumbnail_anim && this.thumbnail != null ) {
-			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
-			final long duration = 500;
-			if( time > duration ) {
-				this.thumbnail_anim = false;
-			}
-			else {
-				thumbnail_anim_src_rect.left = 0;
-				thumbnail_anim_src_rect.top = 0;
-				thumbnail_anim_src_rect.right = this.thumbnail.getWidth();
-				thumbnail_anim_src_rect.bottom = this.thumbnail.getHeight();
-			    View galleryButton = (View) main_activity.findViewById(R.id.gallery);
-				float alpha = ((float)time)/(float)duration;
-
-				int st_x = canvas.getWidth()/2;
-				int st_y = canvas.getHeight()/2;
-				int nd_x = galleryButton.getLeft() + galleryButton.getWidth()/2;
-				int nd_y = galleryButton.getTop() + galleryButton.getHeight()/2;
-				int thumbnail_x = (int)( (1.0f-alpha)*st_x + alpha*nd_x );
-				int thumbnail_y = (int)( (1.0f-alpha)*st_y + alpha*nd_y );
-
-				float st_w = canvas.getWidth();
-				float st_h = canvas.getHeight();
-				float nd_w = galleryButton.getWidth();
-				float nd_h = galleryButton.getHeight();
-				//int thumbnail_w = (int)( (1.0f-alpha)*st_w + alpha*nd_w );
-				//int thumbnail_h = (int)( (1.0f-alpha)*st_h + alpha*nd_h );
-				float correction_w = st_w/nd_w - 1.0f;
-				float correction_h = st_h/nd_h - 1.0f;
-				int thumbnail_w = (int)(st_w/(1.0f+alpha*correction_w));
-				int thumbnail_h = (int)(st_h/(1.0f+alpha*correction_h));
-				thumbnail_anim_dst_rect.left = thumbnail_x - thumbnail_w/2;
-				thumbnail_anim_dst_rect.top = thumbnail_y - thumbnail_h/2;
-				thumbnail_anim_dst_rect.right = thumbnail_x + thumbnail_w/2;
-				thumbnail_anim_dst_rect.bottom = thumbnail_y + thumbnail_h/2;
-				//canvas.drawBitmap(this.thumbnail, thumbnail_anim_src_rect, thumbnail_anim_dst_rect, p);
-				thumbnail_anim_matrix.setRectToRect(thumbnail_anim_src_rect, thumbnail_anim_dst_rect, Matrix.ScaleToFit.FILL);
-				//thumbnail_anim_matrix.reset();
-				if( ui_rotation == 90 || ui_rotation == 270 ) {
-					float ratio = ((float)thumbnail.getWidth())/(float)thumbnail.getHeight();
-					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, thumbnail.getWidth()/2, thumbnail.getHeight()/2);
-				}
-				thumbnail_anim_matrix.preRotate(ui_rotation, thumbnail.getWidth()/2, thumbnail.getHeight()/2);
-				canvas.drawBitmap(this.thumbnail, thumbnail_anim_matrix, p);
-			}
-		}
-		
-		canvas.save();
-		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
-
-		int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
-		// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
-		int text_base_y = 0;
-		if( ui_rotation == ( ui_placement_right ? 0 : 180 ) ) {
-			text_base_y = canvas.getHeight() - (int)(0.5*text_y);
-		}
-		else if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
-			text_base_y = canvas.getHeight() - (int)(2.5*text_y);
-		}
-		else if( ui_rotation == 90 || ui_rotation == 270 ) {
-			//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
-			ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
-			// align with "top" of the take_photo button, but remember to take the rotation into account!
-			view.getLocationOnScreen(gui_location);
-			int view_left = gui_location[0];
-			cameraSurface.getView().getLocationOnScreen(gui_location);
-			int this_left = gui_location[0];
-			int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
-    		/*if( MyDebug.LOG ) {
-    			Log.d(TAG, "view left: " + view_left);
-    			Log.d(TAG, "this left: " + this_left);
-    			Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
-    		}*/
-			int max_x = canvas.getWidth();
-			if( ui_rotation == 90 ) {
-				// so we don't interfere with the top bar info (time, etc)
-				max_x -= (int)(1.5*text_y);
-			}
-			if( canvas.getWidth()/2 + diff_x > max_x ) {
-				// in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
-				diff_x = max_x - canvas.getWidth()/2;
-			}
-			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
-		}
-		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
-
-		final String ybounds_text = getResources().getString(R.string.zoom) + getResources().getString(R.string.angle) + getResources().getString(R.string.direction);
-		final double close_angle = 1.0f;
-		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED ) {
-			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
-					canvas.getHeight() / 2, p);*/
-			boolean draw_angle = this.has_level_angle && sharedPreferences.getBoolean(MainActivity.getShowAnglePreferenceKey(), true);
-			boolean draw_geo_direction = this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getShowGeoDirectionPreferenceKey(), true);
-			if( draw_angle ) {
-				int color = Color.WHITE;
-				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				int pixels_offset_x = 0;
-				if( draw_geo_direction ) {
-					pixels_offset_x = - (int) (82 * scale + 0.5f); // convert dps to pixels
-					p.setTextAlign(Paint.Align.LEFT);
-				}
-				else {
-					p.setTextAlign(Paint.Align.CENTER);
-				}
-				if( Math.abs(this.level_angle) <= close_angle ) {
-					color = Color.rgb(20, 231, 21); // Green A400
-				}
-				String string = getResources().getString(R.string.angle) + ": " + decimalFormat.format(this.level_angle) + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
-			}
-			if( draw_geo_direction ) {
-				int color = Color.WHITE;
-				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				if( draw_angle ) {
-					p.setTextAlign(Paint.Align.LEFT);
-				}
-				else {
-					p.setTextAlign(Paint.Align.CENTER);
-				}
-				float geo_angle = (float)Math.toDegrees(this.geo_direction[0]);
-				if( geo_angle < 0.0f ) {
-					geo_angle += 360.0f;
-				}
-				String string = " " + getResources().getString(R.string.direction) + ": " + Math.round(geo_angle) + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, false, ybounds_text);
-			}
-			//if( this.is_taking_photo_on_timer ) {
-			if( this.isOnTimer() ) {
-				long remaining_time = (take_photo_time - System.currentTimeMillis() + 999)/1000;
-				if( MyDebug.LOG )
-					Log.d(TAG, "remaining_time: " + remaining_time);
-				if( remaining_time >= 0 ) {
-					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
-					p.setTextAlign(Paint.Align.CENTER);
-					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(229, 28, 35), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500
-				}
-			}
-			else if( this.video_recorder != null && video_start_time_set ) {
-            	long video_time = (System.currentTimeMillis() - video_start_time);
-            	//int ms = (int)(video_time % 1000);
-            	video_time /= 1000;
-            	int secs = (int)(video_time % 60);
-            	video_time /= 60;
-            	int mins = (int)(video_time % 60);
-            	video_time /= 60;
-            	long hours = video_time;
-            	//String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs) + ":" + String.format("%03d", ms);
-            	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
-            	/*if( MyDebug.LOG )
-					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
-    			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-    			p.setTextAlign(Paint.Align.CENTER);
-				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom or ISO label
-				int color = Color.rgb(229, 28, 35); // Red 500
-            	if( main_activity.isScreenLocked() ) {
-            		// writing in reverse order, bottom to top
-    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_2), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
-            		pixels_offset_y += text_y;
-    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_1), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
-            		pixels_offset_y += text_y;
-            	}
-				drawTextWithBackground(canvas, p, time_s, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
-			}
-		}
-		else if( camera_controller == null ) {
-			/*if( MyDebug.LOG ) {
-				Log.d(TAG, "no camera!");
-				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
-			}*/
-			p.setColor(Color.WHITE);
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.CENTER);
-			int pixels_offset = (int) (20 * scale + 0.5f); // convert dps to pixels
-			canvas.drawText(getResources().getString(R.string.failed_to_open_camera_1), canvas.getWidth() / 2, canvas.getHeight() / 2, p);
-			canvas.drawText(getResources().getString(R.string.failed_to_open_camera_2), canvas.getWidth() / 2, canvas.getHeight() / 2 + pixels_offset, p);
-			canvas.drawText(getResources().getString(R.string.failed_to_open_camera_3), canvas.getWidth() / 2, canvas.getHeight() / 2 + 2*pixels_offset, p);
-			//canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, p);
-			//canvas.drawRGB(255, 0, 0);
-			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
-		}
-		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowISOPreferenceKey(), true) ) {
-			int pixels_offset_y = 2*text_y;
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.CENTER);
-			String string = "";
-			if( camera_controller.captureResultHasIso() ) {
-				int iso = camera_controller.captureResultIso();
-				if( string.length() > 0 )
-					string += " ";
-				string += getISOString(iso);
-			}
-			if( camera_controller.captureResultHasExposureTime() ) {
-				long exposure_time = camera_controller.captureResultExposureTime();
-				if( string.length() > 0 )
-					string += " ";
-				string += getExposureTimeString(exposure_time);
-			}
-			if( camera_controller.captureResultHasFrameDuration() ) {
-				long frame_duration = camera_controller.captureResultFrameDuration();
-				if( string.length() > 0 )
-					string += " ";
-				string += getFrameDurationString(frame_duration);
-			}
-			if( string.length() > 0 ) {
-				drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text); // Yellow 500
-			}
-		}
-		if( this.has_zoom && camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowZoomPreferenceKey(), true) ) {
-			float zoom_ratio = this.zoom_ratios.get(camera_controller.getZoom())/100.0f;
-			// only show when actually zoomed in
-			if( zoom_ratio > 1.0f + 1.0e-5f ) {
-				// Convert the dps to pixels, based on density scale
-				int pixels_offset_y = text_y;
-				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				p.setTextAlign(Paint.Align.CENTER);
-				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
-			}
-		}
-
-		if( sharedPreferences.getBoolean(MainActivity.getShowBatteryPreferenceKey(), true) ) {
-			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
-				// only check periodically - unclear if checking is costly in any way
-				Intent batteryStatus = main_activity.registerReceiver(null, battery_ifilter);
-				int battery_level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-				int battery_scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-				has_battery_frac = true;
-				battery_frac = battery_level/(float)battery_scale;
-				last_battery_time = System.currentTimeMillis();
-				if( MyDebug.LOG )
-					Log.d(TAG, "Battery status is " + battery_level + " / " + battery_scale + " : " + battery_frac);
-			}
-			//battery_frac = 0.2999f; // test
-			int battery_x = (int) (5 * scale + 0.5f); // convert dps to pixels
-			int battery_y = top_y;
-			int battery_width = (int) (5 * scale + 0.5f); // convert dps to pixels
-			int battery_height = 4*battery_width;
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				int diff = canvas.getWidth() - canvas.getHeight();
-				battery_x += diff/2;
-				battery_y -= diff/2;
-			}
-			if( ui_rotation == 90 ) {
-				battery_y = canvas.getHeight() - battery_y - battery_height;
-			}
-			if( ui_rotation == 180 ) {
-				battery_x = canvas.getWidth() - battery_x - battery_width;
-			}
-			p.setColor(Color.WHITE);
-			p.setStyle(Paint.Style.STROKE);
-			canvas.drawRect(battery_x, battery_y, battery_x+battery_width, battery_y+battery_height, p);
-			p.setColor(battery_frac >= 0.3f ? Color.rgb(37, 155, 36) : Color.rgb(229, 28, 35)); // Green 500 or Red 500
-			p.setStyle(Paint.Style.FILL);
-			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
-		}
-		
-		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
-		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
-		if( store_location ) {
-			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
-			int location_y = top_y;
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				int diff = canvas.getWidth() - canvas.getHeight();
-				location_x += diff/2;
-				location_y -= diff/2;
-			}
-			if( ui_rotation == 90 ) {
-				location_y = canvas.getHeight() - location_y - location_size;
-			}
-			if( ui_rotation == 180 ) {
-				location_x = canvas.getWidth() - location_x - location_size;
-			}
-			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
-			if( applicationInterface.getLocation() != null ) {
-				canvas.drawBitmap(location_bitmap, null, location_dest, p);
-				int location_radius = location_size/10;
-				int indicator_x = location_x + location_size;
-				int indicator_y = location_y + location_radius/2 + 1;
-				p.setStyle(Paint.Style.FILL_AND_STROKE);
-				p.setColor(applicationInterface.getLocation().getAccuracy() < 25.01f ? Color.rgb(37, 155, 36) : Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
-				canvas.drawCircle(indicator_x, indicator_y, location_radius, p);
-			}
-			else {
-				canvas.drawBitmap(location_off_bitmap, null, location_dest, p);
-			}
-		}
-		
-		if( sharedPreferences.getBoolean(MainActivity.getShowTimePreferenceKey(), true) ) {
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.LEFT);
-			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-			int location_y = top_y;
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				int diff = canvas.getWidth() - canvas.getHeight();
-				location_x += diff/2;
-				location_y -= diff/2;
-			}
-			if( ui_rotation == 90 ) {
-				location_y = canvas.getHeight() - location_y - location_size;
-			}
-			if( ui_rotation == 180 ) {
-				location_x = canvas.getWidth() - location_x;
-				p.setTextAlign(Paint.Align.RIGHT);
-			}
-	        Calendar c = Calendar.getInstance();
-	        // n.b., DateFormat.getTimeInstance() ignores user preferences such as 12/24 hour or date format, but this is an Android bug.
-	        // Whilst DateUtils.formatDateTime doesn't have that problem, it doesn't print out seconds! See:
-	        // http://stackoverflow.com/questions/15981516/simpledateformat-gettimeinstance-ignores-24-hour-format
-	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
-	        // http://code.google.com/p/android/issues/detail?id=42104
-	        String current_time = DateFormat.getTimeInstance().format(c.getTime());
-	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
-	        drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, true);
-	    }
-
-		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowFreeMemoryPreferenceKey(), true) ) {
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.LEFT);
-			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-			int location_y = top_y + (int) (16 * scale + 0.5f); // convert dps to pixels
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				int diff = canvas.getWidth() - canvas.getHeight();
-				location_x += diff/2;
-				location_y -= diff/2;
-			}
-			if( ui_rotation == 90 ) {
-				location_y = canvas.getHeight() - location_y - location_size;
-			}
-			if( ui_rotation == 180 ) {
-				location_x = canvas.getWidth() - location_x;
-				p.setTextAlign(Paint.Align.RIGHT);
-			}
-			long time_now = System.currentTimeMillis();
-			if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
-				long free_mb = main_activity.freeMemory();
-				if( free_mb >= 0 ) {
-					free_memory_gb = free_mb/1024.0f;
-					last_free_memory_time = time_now;
-				}
-			}
-			if( free_memory_gb >= 0.0f ) {
-				drawTextWithBackground(canvas, p, getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, location_x, location_y, true);
-			}
-		}
-
-		canvas.restore();
-		
-		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED && has_level_angle && sharedPreferences.getBoolean(MainActivity.getShowAngleLinePreferenceKey(), false) ) {
-			// n.b., must draw this without canvas rotation
-			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
-			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
-			double angle = - this.orig_level_angle;
-			// see http://android-developers.blogspot.co.uk/2010/09/one-screen-turn-deserves-another.html
-		    int rotation = main_activity.getWindowManager().getDefaultDisplay().getRotation();
-		    switch (rotation) {
-	    	case Surface.ROTATION_90:
-	    	case Surface.ROTATION_270:
-	    		angle += 90.0;
-	    		break;
-		    }
-			/*if( MyDebug.LOG ) {
-				Log.d(TAG, "orig_level_angle: " + orig_level_angle);
-				Log.d(TAG, "angle: " + angle);
-			}*/
-			int off_x = (int) (radius * Math.cos( Math.toRadians(angle) ));
-			int off_y = (int) (radius * Math.sin( Math.toRadians(angle) ));
-			int cx = canvas.getWidth()/2;
-			int cy = canvas.getHeight()/2;
-			if( Math.abs(this.level_angle) <= close_angle ) { // n.b., use level_angle, not angle or orig_level_angle
-				p.setColor(Color.rgb(20, 231, 21)); // Green A400
-			}
-			else {
-				p.setColor(Color.WHITE);
-			}
-			canvas.drawLine(cx - off_x, cy - off_y, cx + off_x, cy + off_y, p);
-		}
-
 		if( this.focus_success != FOCUS_DONE ) {
-			int size = (int) (50 * scale + 0.5f); // convert dps to pixels
-			if( this.focus_success == FOCUS_SUCCESS )
-				p.setColor(Color.rgb(20, 231, 21)); // Green A400
-			else if( this.focus_success == FOCUS_FAILED )
-				p.setColor(Color.rgb(229, 28, 35)); // Red 500
-			else
-				p.setColor(Color.WHITE);
-			p.setStyle(Paint.Style.STROKE);
-			int pos_x = 0;
-			int pos_y = 0;
-			if( has_focus_area ) {
-				pos_x = focus_screen_x;
-				pos_y = focus_screen_y;
-			}
-			else {
-				pos_x = canvas.getWidth() / 2;
-				pos_y = canvas.getHeight() / 2;
-			}
-			canvas.drawRect(pos_x - size, pos_y - size, pos_x + size, pos_y + size, p);
 			if( focus_complete_time != -1 && System.currentTimeMillis() > focus_complete_time + 1000 ) {
 				focus_success = FOCUS_DONE;
 			}
-			p.setStyle(Paint.Style.FILL); // reset
 		}
-		if( this.using_face_detection && this.faces_detected != null ) {
-			p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
-			p.setStyle(Paint.Style.STROKE);
-			for(CameraController.Face face : faces_detected) {
-				// Android doc recommends filtering out faces with score less than 50 (same for both Camera and Camera2 APIs)
-				if( face.score >= 50 ) {
-					calculateCameraToPreviewMatrix();
-					face_rect.set(face.rect);
-					this.camera_to_preview_matrix.mapRect(face_rect);
-					/*int eye_radius = (int) (5 * scale + 0.5f); // convert dps to pixels
-					int mouth_radius = (int) (10 * scale + 0.5f); // convert dps to pixels
-					float [] top_left = {face.rect.left, face.rect.top};
-					float [] bottom_right = {face.rect.right, face.rect.bottom};
-					canvas.drawRect(top_left[0], top_left[1], bottom_right[0], bottom_right[1], p);*/
-					canvas.drawRect(face_rect, p);
-					/*if( face.leftEye != null ) {
-						float [] left_point = {face.leftEye.x, face.leftEye.y};
-						cameraToPreview(left_point);
-						canvas.drawCircle(left_point[0], left_point[1], eye_radius, p);
-					}
-					if( face.rightEye != null ) {
-						float [] right_point = {face.rightEye.x, face.rightEye.y};
-						cameraToPreview(right_point);
-						canvas.drawCircle(right_point[0], right_point[1], eye_radius, p);
-					}
-					if( face.mouth != null ) {
-						float [] mouth_point = {face.mouth.x, face.mouth.y};
-						cameraToPreview(mouth_point);
-						canvas.drawCircle(mouth_point[0], mouth_point[1], mouth_radius, p);
-					}*/
-				}
-			}
-			p.setStyle(Paint.Style.FILL); // reset
-		}
+		applicationInterface.onDrawPreview(canvas);
 	}
 
-	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
+	void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
 		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, false);
 	}
 
-	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top) {
+	void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top) {
 		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, align_top, null);
 	}
 
-	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top, String ybounds_text) {
+	void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top, String ybounds_text) {
 		final float scale = getResources().getDisplayMetrics().density;
 		p.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
@@ -2887,7 +2377,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		paint.setColor(foreground);
 		canvas.drawText(text, location_x, location_y, paint);
 	}
-
+	
 	public void scaleZoom(float scale_factor) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "scaleZoom() " + scale_factor);
@@ -3030,22 +2520,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	private String getExposureCompensationString(int exposure) {
+	String getExposureCompensationString(int exposure) {
 		float exposure_ev = exposure * exposure_step;
 		return getResources().getString(R.string.exposure_compensation) + " " + (exposure > 0 ? "+" : "") + new DecimalFormat("#.##").format(exposure_ev) + " EV";
 	}
 	
-	private String getISOString(int iso) {
+	String getISOString(int iso) {
 		return getResources().getString(R.string.iso) + " " + iso;
 	}
 
-	private String getExposureTimeString(long exposure_time) {
+	String getExposureTimeString(long exposure_time) {
 		double exposure_time_s = exposure_time/1000000000.0;
 		double exposure_time_r = 1.0/exposure_time_s;
 		return getResources().getString(R.string.exposure) + " 1/" + new DecimalFormat("#.#").format(exposure_time_r);
 	}
 
-	private String getFrameDurationString(long frame_duration) {
+	String getFrameDurationString(long frame_duration) {
 		double frame_duration_s = frame_duration/1000000000.0;
 		double frame_duration_r = 1.0/frame_duration_s;
 		return getResources().getString(R.string.fps) + " " + new DecimalFormat("#.#").format(frame_duration_r);
@@ -3822,22 +3312,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}*/
     	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		if( sharedPreferences.getBoolean(MainActivity.getTimerBeepPreferenceKey(), true) ) {
-    		class BeepTimerTask extends TimerTask {
-    			public void run() {
-    			    try {
-    			        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-    					Activity activity = (Activity)getContext();
-    			        Ringtone r = RingtoneManager.getRingtone(activity.getApplicationContext(), notification);
-    			        r.play();
-    			    }
-    			    catch(Exception e) {
-    			    }		
-    			}
-    		}
-        	beepTimer.schedule(beepTimerTask = new BeepTimerTask(), 0, 1000);
+		class BeepTimerTask extends TimerTask {
+			public void run() {
+				applicationInterface.timerBeep();
+			}
 		}
+    	beepTimer.schedule(beepTimerTask = new BeepTimerTask(), 0, 1000);
 	}
 	
 	private void flashVideo() {
@@ -3886,7 +3366,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
-		this.thumbnail_anim = false;
+		//this.thumbnail_anim = false;
         this.phase = PHASE_TAKING_PHOTO;
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
@@ -4874,10 +4354,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         				}
         			}
 
-        			if( applicationInterface.getThumbnailAnimationPref() ) {
+        			/*if( applicationInterface.getThumbnailAnimationPref() ) {
             			thumbnail_anim = true;
             			thumbnail_anim_start_ms = System.currentTimeMillis();
-        			}
+        			}*/
 	    	    	applicationInterface.updateThumbnail(thumbnail);
     	    		if( old_thumbnail != null ) {
     	    			// only recycle after we've set the new thumbnail
@@ -5359,6 +4839,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		cameraSurface.getView().invalidate();
 	}
+    
+    boolean hasLevelAngle() {
+    	return this.has_level_angle;
+    }
+    
+    double getLevelAngle() {
+    	return this.level_angle;
+    }
+    
+    double getOrigLevelAngle() {
+    	return this.orig_level_angle;
+    }
 
     void onMagneticSensorChanged(SensorEvent event) {
     	this.has_geomagnetic = true;
@@ -5385,6 +4877,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}*/
     }
     
+    boolean hasGeoDirection() {
+    	return has_geo_direction;
+    }
+    
+    double getGeoDirection() {
+    	return geo_direction[0];
+    }
+
     public boolean supportsFaceDetection() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsFaceDetection");
@@ -5585,12 +5085,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		this.closeCamera();
     }
     
-    void updateUIPlacement() {
+    /*void updateUIPlacement() {
     	// we cache the preference_ui_placement to save having to check it in the draw() method
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String ui_placement = sharedPreferences.getString(MainActivity.getUIPlacementPreferenceKey(), "ui_right");
 		this.ui_placement_right = ui_placement.equals("ui_right");
-    }
+    }*/
 
 	void onSaveInstanceState(Bundle state) {
 		if( MyDebug.LOG )
@@ -5716,6 +5216,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "setUIRotation");
 		this.ui_rotation = ui_rotation;
 	}
+	
+	int getUIRotation() {
+		return this.ui_rotation;
+	}
 
     private void updateParametersFromLocation() {
     	if( camera_controller != null ) {
@@ -5738,6 +5242,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	public boolean isVideo() {
 		return is_video;
+	}
+	
+	boolean isVideoRecording() {
+		return video_recorder != null && video_start_time_set;
+	}
+	
+	long getVideoTime() {
+		return System.currentTimeMillis() - video_start_time;
 	}
 	
     public boolean isTakingPhoto() {
@@ -5780,6 +5292,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.has_focus_area;
     }
     
+    Pair<Integer, Integer> getFocusPos() {
+    	return new Pair<Integer, Integer>(focus_screen_x, focus_screen_y);
+    }
+    
     public int getMaxNumFocusAreas() {
     	return this.max_num_focus_areas;
     }
@@ -5793,6 +5309,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	//return this.is_taking_photo_on_timer;
     	return this.phase == PHASE_TIMER;
     }
+    
+    long getTimerEndTime() {
+    	return take_photo_time;
+    }
+    
+    boolean isPreviewPaused() {
+    	return this.phase == PHASE_PREVIEW_PAUSED;
+    }
 
     public boolean isPreviewStarted() {
     	return this.is_preview_started;
@@ -5802,7 +5326,29 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return focus_success == FOCUS_WAITING;
     }
     
+    boolean isFocusRecentSuccess() {
+    	return focus_success == FOCUS_SUCCESS;
+    }
+    
+    boolean isFocusRecentFailure() {
+    	return focus_success == FOCUS_FAILED;
+    }
+    
     boolean inImmersiveMode() {
     	return immersive_mode;
     }
+
+    CameraController.Face [] getFacesDetected() {
+    	return this.faces_detected;
+    }
+    
+    Bitmap getThumbnail() {
+    	return this.thumbnail;
+    }
+
+	float getZoomRatio() {
+		int zoom_factor = camera_controller.getZoom();
+		float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
+		return zoom_ratio;
+	}
 }
