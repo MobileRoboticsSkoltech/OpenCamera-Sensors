@@ -105,5 +105,5 @@ public interface ApplicationInterface {
 	
 	// callbacks
 	void onDrawPreview(Canvas canvas);
-	void onPictureTaken(byte [] data);
+	boolean onPictureTaken(byte [] data);
 }

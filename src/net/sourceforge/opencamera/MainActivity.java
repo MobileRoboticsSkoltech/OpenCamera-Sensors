@@ -90,6 +90,10 @@ public class MainActivity extends Activity {
 	// for testing:
 	public boolean is_test = false;
 	public Bitmap gallery_bitmap = null;
+	public boolean test_low_memory = false;
+	public boolean test_have_angle = false;
+	public float test_angle = 0.0f;
+	public String test_last_saved_image = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -1776,13 +1780,42 @@ public class MainActivity extends Activity {
     public void clickedShare(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedShare");
-    	this.preview.clickedShare();
+		if( preview.isPreviewPaused() ) {
+			if( applicationInterface.getLastImageName() != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Share: " + applicationInterface.getLastImageName());
+				Intent intent = new Intent(Intent.ACTION_SEND);
+				intent.setType("image/jpeg");
+				intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + applicationInterface.getLastImageName()));
+				startActivity(Intent.createChooser(intent, "Photo"));
+			}
+			applicationInterface.clearLastImageName();
+			preview.startCameraPreview();
+		}
     }
 
     public void clickedTrash(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTrash");
-    	this.preview.clickedTrash();
+		if( preview.isPreviewPaused() ) {
+			if( applicationInterface.getLastImageName() != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Delete: " + applicationInterface.getLastImageName());
+				File file = new File(applicationInterface.getLastImageName());
+				if( !file.delete() ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "failed to delete " + applicationInterface.getLastImageName());
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "successfully deleted " + applicationInterface.getLastImageName());
+    	    	    preview.showToast(null, R.string.photo_deleted);
+					applicationInterface.broadcastFile(file, false, false);
+				}
+			}
+			applicationInterface.clearLastImageName();
+			preview.startCameraPreview();
+		}
     	// Calling updateGalleryIcon() immediately has problem that it still returns the latest image that we've just deleted!
     	// But works okay if we call after a delay. 100ms works fine on Nexus 7 and Galaxy Nexus, but set to 500 just to be safe.
     	final Handler handler = new Handler();
@@ -1871,6 +1904,8 @@ public class MainActivity extends Activity {
 	}
 
     void cameraSetup() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraSetup");
 		if( this.supportsForceVideo4K() && preview.usingCamera2API() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "using Camera2 API, so can disable the force 4K option");
@@ -2084,6 +2119,7 @@ public class MainActivity extends Activity {
 
 		View exposureButton = (View) findViewById(R.id.exposure);
 	    exposureButton.setVisibility(preview.supportsExposures() && !preview.inImmersiveMode() ? View.VISIBLE : View.GONE);
+
 	    ImageButton exposureLockButton = (ImageButton) findViewById(R.id.exposure_lock);
 	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !preview.inImmersiveMode() ? View.VISIBLE : View.GONE);
 	    if( preview.supportsExposureLock() ) {
