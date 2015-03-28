@@ -31,7 +31,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -44,7 +43,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.CamcorderProfile;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
@@ -121,10 +119,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int remaining_restart_video = 0;
 
 	private boolean is_preview_started = false;
-	//private boolean is_preview_paused = false; // whether we are in the paused state after taking a photo
-	//private String preview_image_name = null;
-	private Bitmap thumbnail = null; // thumbnail of last picture taken
-	//private int [] gui_location = new int[2];
 
 	private int current_orientation = 0; // orientation received by onOrientationChanged
 	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setRotation())
@@ -132,9 +126,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private double level_angle = 0.0f;
 	private double orig_level_angle = 0.0f;
 	
-	/*private float free_memory_gb = -1.0f;
-	private long last_free_memory_time = 0;*/
-
 	private boolean has_zoom = false;
 	private int max_zoom_factor = 0;
 	private ScaleGestureDetector scaleGestureDetector;
@@ -700,62 +691,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			if( file != null ) {
     				// need to scan when finished, so we update for the completed file
     	            applicationInterface.broadcastFile(file, false, true);
-    			}
-    			// create thumbnail
-    			{
-	            	long time_s = System.currentTimeMillis();
-	            	Bitmap old_thumbnail = thumbnail;
-    	    	    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-					try {
-						retriever.setDataSource(video_name);
-						thumbnail = retriever.getFrameAtTime(-1);
-					}
-    	    	    catch(IllegalArgumentException ex) {
-    	    	    	// corrupt video file?
-    	    	    }
-    	    	    catch(RuntimeException ex) {
-    	    	    	// corrupt video file?
-    	    	    }
-    	    	    finally {
-    	    	    	try {
-    	    	    		retriever.release();
-    	    	    	}
-    	    	    	catch(RuntimeException ex) {
-    	    	    		// ignore
-    	    	    	}
-    	    	    }
-    	    	    if( thumbnail != null && thumbnail != old_thumbnail ) {
-    					Activity activity = (Activity)Preview.this.getContext();
-    	    	    	ImageButton galleryButton = (ImageButton) activity.findViewById(R.id.gallery);
-    	    	    	int width = thumbnail.getWidth();
-    	    	    	int height = thumbnail.getHeight();
-    					if( MyDebug.LOG )
-    						Log.d(TAG, "    video thumbnail size " + width + " x " + height);
-    	    	    	if( width > galleryButton.getWidth() ) {
-    	    	    		float scale = (float) galleryButton.getWidth() / width;
-    	    	    		int new_width = Math.round(scale * width);
-    	    	    		int new_height = Math.round(scale * height);
-        					if( MyDebug.LOG )
-        						Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
-    	    	    		Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
-    	        		    // careful, as scaled_thumbnail is sometimes not a copy!
-    	        		    if( scaled_thumbnail != thumbnail ) {
-    	        		    	thumbnail.recycle();
-    	        		    	thumbnail = scaled_thumbnail;
-    	        		    }
-    	    	    	}
-    	    	    	activity.runOnUiThread(new Runnable() {
-							public void run() {
-    	    	    	    	applicationInterface.updateThumbnail(thumbnail);
-							}
-						});
-        	    		if( old_thumbnail != null ) {
-        	    			// only recycle after we've set the new thumbnail
-        	    			old_thumbnail.recycle();
-        	    		}
-    	    	    }
-					if( MyDebug.LOG )
-						Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
     			}
     			video_name = null;
     		}
@@ -4522,18 +4457,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.faces_detected;
     }
     
-    Bitmap getThumbnail() {
-    	return this.thumbnail;
-    }
-
-    void setThumbnail(Bitmap new_thumbnail) {
-    	Bitmap old_thumbnail = this.thumbnail;
-    	this.thumbnail = new_thumbnail;
-    	if( old_thumbnail != null ) {
-    		// only recycle after we've set the new thumbnail
-    		old_thumbnail.recycle();
-    	}
-    }
 
 	float getZoomRatio() {
 		int zoom_factor = camera_controller.getZoom();

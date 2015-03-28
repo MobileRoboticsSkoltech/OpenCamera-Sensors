@@ -28,6 +28,7 @@ import android.graphics.RectF;
 import android.graphics.Paint.Align;
 import android.location.Location;
 import android.media.ExifInterface;
+import android.media.MediaMetadataRetriever;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -75,6 +76,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	private String last_image_name = null;
 	
+	private Bitmap last_thumbnail = null; // thumbnail of last picture taken
 	private boolean thumbnail_anim = false; // whether we are displaying the thumbnail animation
 	private long thumbnail_anim_start_ms = -1; // time that the thumbnail animation started
 	private RectF thumbnail_anim_src_rect = new RectF();
@@ -517,6 +519,58 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void broadcastFile(File file, boolean is_new_picture, boolean is_new_video) {
 		storageUtils.broadcastFile(file, is_new_picture, is_new_video);
+		if( is_new_video ) {
+			// create thumbnail
+        	long time_s = System.currentTimeMillis();
+    		Bitmap thumbnail = null;
+    	    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+			try {
+				retriever.setDataSource(file.getPath());
+				thumbnail = retriever.getFrameAtTime(-1);
+			}
+    	    catch(IllegalArgumentException ex) {
+    	    	// corrupt video file?
+    	    }
+    	    catch(RuntimeException ex) {
+    	    	// corrupt video file?
+    	    }
+    	    finally {
+    	    	try {
+    	    		retriever.release();
+    	    	}
+    	    	catch(RuntimeException ex) {
+    	    		// ignore
+    	    	}
+    	    }
+    	    if( thumbnail != null ) {
+    	    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
+    	    	int width = thumbnail.getWidth();
+    	    	int height = thumbnail.getHeight();
+				if( MyDebug.LOG )
+					Log.d(TAG, "    video thumbnail size " + width + " x " + height);
+    	    	if( width > galleryButton.getWidth() ) {
+    	    		float scale = (float) galleryButton.getWidth() / width;
+    	    		int new_width = Math.round(scale * width);
+    	    		int new_height = Math.round(scale * height);
+					if( MyDebug.LOG )
+						Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
+    	    		Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
+        		    // careful, as scaled_thumbnail is sometimes not a copy!
+        		    if( scaled_thumbnail != thumbnail ) {
+        		    	thumbnail.recycle();
+        		    	thumbnail = scaled_thumbnail;
+        		    }
+    	    	}
+    	    	final Bitmap thumbnail_f = thumbnail;
+    	    	main_activity.runOnUiThread(new Runnable() {
+					public void run() {
+    	    	    	updateThumbnail(thumbnail_f);
+					}
+				});
+    	    }
+			if( MyDebug.LOG )
+				Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
+		}
 	}
 
 	@Override
@@ -654,6 +708,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		thumbnail_anim = true;
 		thumbnail_anim_start_ms = System.currentTimeMillis();
 		main_activity.updateThumbnail(thumbnail);
+
+    	Bitmap old_thumbnail = this.last_thumbnail;
+    	this.last_thumbnail = thumbnail;
+    	if( old_thumbnail != null ) {
+    		// only recycle after we've set the new thumbnail
+    		old_thumbnail.recycle();
+    	}
 	}
 	
 	@Override
@@ -928,7 +989,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 
 		// note, no need to check preferences here, as we do that when setting thumbnail_anim
-		if( camera_controller != null && this.thumbnail_anim && preview.getThumbnail() != null ) {
+		if( camera_controller != null && this.thumbnail_anim && last_thumbnail != null ) {
 			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
 			final long duration = 500;
 			if( time > duration ) {
@@ -937,8 +998,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			else {
 				thumbnail_anim_src_rect.left = 0;
 				thumbnail_anim_src_rect.top = 0;
-				thumbnail_anim_src_rect.right = preview.getThumbnail().getWidth();
-				thumbnail_anim_src_rect.bottom = preview.getThumbnail().getHeight();
+				thumbnail_anim_src_rect.right = last_thumbnail.getWidth();
+				thumbnail_anim_src_rect.bottom = last_thumbnail.getHeight();
 			    View galleryButton = (View) main_activity.findViewById(R.id.gallery);
 				float alpha = ((float)time)/(float)duration;
 
@@ -967,11 +1028,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 				thumbnail_anim_matrix.setRectToRect(thumbnail_anim_src_rect, thumbnail_anim_dst_rect, Matrix.ScaleToFit.FILL);
 				//thumbnail_anim_matrix.reset();
 				if( ui_rotation == 90 || ui_rotation == 270 ) {
-					float ratio = ((float)preview.getThumbnail().getWidth())/(float)preview.getThumbnail().getHeight();
-					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, preview.getThumbnail().getWidth()/2, preview.getThumbnail().getHeight()/2);
+					float ratio = ((float)last_thumbnail.getWidth())/(float)last_thumbnail.getHeight();
+					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, last_thumbnail.getWidth()/2, last_thumbnail.getHeight()/2);
 				}
-				thumbnail_anim_matrix.preRotate(ui_rotation, preview.getThumbnail().getWidth()/2, preview.getThumbnail().getHeight()/2);
-				canvas.drawBitmap(preview.getThumbnail(), thumbnail_anim_matrix, p);
+				thumbnail_anim_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2, last_thumbnail.getHeight()/2);
+				canvas.drawBitmap(last_thumbnail, thumbnail_anim_matrix, p);
 			}
 		}
 		
@@ -1940,7 +2001,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 
 	    	updateThumbnail(thumbnail);
-	    	main_activity.getPreview().setThumbnail(thumbnail);
     		if( MyDebug.LOG )
     			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
         }
