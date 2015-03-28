@@ -224,7 +224,7 @@ public class MainActivity extends Activity {
                     // The system bars are visible. Make any desired
                     // adjustments to your UI, such as showing the action bar or
                     // other navigational controls.
-                	preview.setImmersiveMode(false);
+            		applicationInterface.setImmersiveMode(false);
                 	setImmersiveTimer();
                 }
                 else {
@@ -233,7 +233,7 @@ public class MainActivity extends Activity {
                     // The system bars are NOT visible. Make any desired
                     // adjustments to your UI, such as hiding the action bar or
                     // other navigational controls.
-                	preview.setImmersiveMode(true);
+                	applicationInterface.setImmersiveMode(true);
                 }
             }
         });
@@ -1946,7 +1946,7 @@ public class MainActivity extends Activity {
 				    		zoomOut();
 				        }
 				    });
-					if( !preview.inImmersiveMode() ) {
+					if( !applicationInterface.inImmersiveMode() ) {
 						zoomControls.setVisibility(View.VISIBLE);
 					}
 				}
@@ -1974,7 +1974,7 @@ public class MainActivity extends Activity {
 				});
 
 				if( sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), true) ) {
-					if( !preview.inImmersiveMode() ) {
+					if( !applicationInterface.inImmersiveMode() ) {
 						zoomSeekBar.setVisibility(View.VISIBLE);
 					}
 				}
@@ -2118,10 +2118,10 @@ public class MainActivity extends Activity {
 		}
 
 		View exposureButton = (View) findViewById(R.id.exposure);
-	    exposureButton.setVisibility(preview.supportsExposures() && !preview.inImmersiveMode() ? View.VISIBLE : View.GONE);
+	    exposureButton.setVisibility(preview.supportsExposures() && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
 
 	    ImageButton exposureLockButton = (ImageButton) findViewById(R.id.exposure_lock);
-	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !preview.inImmersiveMode() ? View.VISIBLE : View.GONE);
+	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
 	    if( preview.supportsExposureLock() ) {
 			exposureLockButton.setImageResource(preview.isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
 	    }

@@ -898,7 +898,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		camera_controller.stopPreview();
 		this.phase = PHASE_NORMAL;
 		this.is_preview_started = false;
-		showGUI(true);
+		applicationInterface.cameraInOperation(false);
 	}
 	
 	//private int debug_count_opencamera = 0; // see usage below
@@ -957,7 +957,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		supported_focus_values = null;
 		current_focus_index = -1;
 		max_num_focus_areas = 0;
-		showGUI(true);
+		applicationInterface.cameraInOperation(false);
 		if( MyDebug.LOG )
 			Log.d(TAG, "done showGUI");
 		if( !this.has_surface ) {
@@ -3312,7 +3312,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			/*is_taking_photo_on_timer = false;
 			is_taking_photo = false;*/
 			this.phase = PHASE_NORMAL;
-			showGUI(true);
+			applicationInterface.cameraInOperation(false);
 			return;
 		}
 		if( !this.has_surface ) {
@@ -3321,7 +3321,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			/*is_taking_photo_on_timer = false;
 			is_taking_photo = false;*/
 			this.phase = PHASE_NORMAL;
-			showGUI(true);
+			applicationInterface.cameraInOperation(false);
 			return;
 		}
 
@@ -3339,7 +3339,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    			Log.d(TAG, "location data required, but not available");
 		    	    showToast(null, R.string.location_not_available);
 					this.phase = PHASE_NORMAL;
-					showGUI(true);
+					applicationInterface.cameraInOperation(false);
 		    	    return;
 				}
 			}
@@ -3354,7 +3354,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
 	    	    showToast(null, R.string.failed_to_save_video);
 				this.phase = PHASE_NORMAL;
-				showGUI(true);
+				applicationInterface.cameraInOperation(false);
 			}
 			else {
 				video_name = videoFile.getAbsolutePath();
@@ -3484,7 +3484,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	        	video_recorder.setOutputFile(video_name);
 	        	try {
-	        		showGUI(false);
+	        		applicationInterface.cameraInOperation(true);
 	        		applicationInterface.startingVideo();
 	        		/*if( true ) // test
 	        			throw new IOException();*/
@@ -3565,7 +3565,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    		video_recorder.release(); 
 		    		video_recorder = null;
 					this.phase = PHASE_NORMAL;
-					showGUI(true);
+					applicationInterface.cameraInOperation(false);
 					this.reconnectCamera(true);
 				}
 	        	catch(RuntimeException e) {
@@ -3585,7 +3585,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	return;
 		}
 
-		showGUI(false);
+		applicationInterface.cameraInOperation(true);
 		String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
 		if( MyDebug.LOG )
 			Log.d(TAG, "focus_value is " + focus_value);
@@ -3631,7 +3631,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		video_recorder.release(); 
 		video_recorder = null;
 		this.phase = PHASE_NORMAL;
-		showGUI(true);
+		applicationInterface.cameraInOperation(false);
 		this.reconnectCamera(true);
 	}
 
@@ -3645,7 +3645,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			/*is_taking_photo_on_timer = false;
 			is_taking_photo = false;*/
 			this.phase = PHASE_NORMAL;
-			showGUI(true);
+			applicationInterface.cameraInOperation(false);
 			return;
 		}
 		if( !this.has_surface ) {
@@ -3654,7 +3654,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			/*is_taking_photo_on_timer = false;
 			is_taking_photo = false;*/
 			this.phase = PHASE_NORMAL;
-			showGUI(true);
+			applicationInterface.cameraInOperation(false);
 			return;
 		}
 
@@ -3712,7 +3712,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		    	    	// (otherwise this can fail, at least on Nexus 7)
     			            startCameraPreview();
     	            	}
-    					showGUI(true);
+    	        		applicationInterface.cameraInOperation(false);
     	        		if( MyDebug.LOG )
     	        			Log.d(TAG, "onPictureTaken started preview");
     				}
@@ -3729,7 +3729,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	    			// we go straight to taking a photo rather than refocusing, for speed
     	    			// need to manually set the phase and rehide the GUI
     	    	        phase = PHASE_TAKING_PHOTO;
-    					showGUI(false);
+    	        		applicationInterface.cameraInOperation(true);
     	            	takePictureWhenFocused();
     	    		}
     	    		else {
@@ -3746,7 +3746,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    	    showToast(null, R.string.failed_to_take_picture);
 				phase = PHASE_NORMAL;
 	            startCameraPreview();
-				showGUI(true);
+	    		applicationInterface.cameraInOperation(false);
     	    }
 		};
     	{
@@ -3979,112 +3979,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    	this.phase = PHASE_PREVIEW_PAUSED;
 		    shareButton.setVisibility(View.VISIBLE);
 		    trashButton.setVisibility(View.VISIBLE);
-		    // shouldn't call showGUI(false), as should already have been disabled when we started to take a photo (or above when exiting immersive mode)
+		    // shouldn't call applicationInterface.cameraInOperation(true), as should already have done when we started to take a photo (or above when exiting immersive mode)
 		}
 		else {
 	    	this.phase = PHASE_NORMAL;
 			shareButton.setVisibility(View.GONE);
 		    trashButton.setVisibility(View.GONE);
 		    //preview_image_name = null;
-			showGUI(true);
+			applicationInterface.cameraInOperation(false);
 		}
     }
 
-    private boolean immersive_mode = false;
-    
-    void setImmersiveMode(final boolean immersive_mode) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setImmersiveMode: " + immersive_mode);
-    	this.immersive_mode = immersive_mode;
-		final MainActivity main_activity = (MainActivity)this.getContext();
-		main_activity.runOnUiThread(new Runnable() {
-			public void run() {
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-				// if going into immersive mode, the we should set GONE the ones that are set GONE in showGUI(false)
-		    	//final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
-		    	final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
-				if( MyDebug.LOG )
-					Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
-		    	// n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
-			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
-			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
-			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
-			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
-			    View popupButton = (View) main_activity.findViewById(R.id.popup);
-			    View galleryButton = (View) main_activity.findViewById(R.id.gallery);
-			    View settingsButton = (View) main_activity.findViewById(R.id.settings);
-			    View zoomControls = (View) main_activity.findViewById(R.id.zoom);
-			    View zoomSeekBar = (View) main_activity.findViewById(R.id.zoom_seekbar);
-			    if( camera_controller_manager.getNumberOfCameras() > 1 )
-			    	switchCameraButton.setVisibility(visibility);
-		    	switchVideoButton.setVisibility(visibility);
-			    if( exposures != null )
-			    	exposureButton.setVisibility(visibility);
-			    if( is_exposure_lock_supported )
-			    	exposureLockButton.setVisibility(visibility);
-		    	popupButton.setVisibility(visibility);
-			    galleryButton.setVisibility(visibility);
-			    settingsButton.setVisibility(visibility);
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "has_zoom: " + has_zoom);
-				}
-				if( has_zoom && sharedPreferences.getBoolean(MainActivity.getShowZoomControlsPreferenceKey(), false) ) {
-					zoomControls.setVisibility(visibility);
-				}
-				if( has_zoom && sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), true) ) {
-					zoomSeekBar.setVisibility(visibility);
-				}
-        		String pref_immersive_mode = sharedPreferences.getString(MainActivity.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-        		if( pref_immersive_mode.equals("immersive_mode_everything") ) {
-    			    View takePhotoButton = (View) main_activity.findViewById(R.id.take_photo);
-    			    takePhotoButton.setVisibility(visibility);
-        		}
-				if( !immersive_mode ) {
-					// make sure the GUI is set up as expected
-					showGUI(show_gui);
-				}
-			}
-		});
-    }
-    
-    private boolean show_gui = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
-    
-    private void showGUI(final boolean show) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "showGUI: " + show);
-		this.show_gui = show;
-		if( immersive_mode )
-			return;
-		final MainActivity main_activity = (MainActivity)this.getContext();
-		if( show && main_activity.usingKitKatImmersiveMode() ) {
-			// call to reset the timer
-			main_activity.initImmersiveMode();
-		}
-		main_activity.runOnUiThread(new Runnable() {
-			public void run() {
-		    	final int visibility = show ? View.VISIBLE : View.GONE;
-			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
-			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
-			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
-			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
-			    View popupButton = (View) main_activity.findViewById(R.id.popup);
-			    if( camera_controller_manager.getNumberOfCameras() > 1 )
-			    	switchCameraButton.setVisibility(visibility);
-			    if( !is_video )
-			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
-			    if( exposures != null && !is_video ) // still allow exposure when recording video
-			    	exposureButton.setVisibility(visibility);
-			    if( is_exposure_lock_supported && !is_video ) // still allow exposure lock when recording video
-			    	exposureLockButton.setVisibility(visibility);
-			    if( !show ) {
-			    	main_activity.closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
-			    }
-			    if( !is_video || supported_flash_values == null )
-			    	popupButton.setVisibility(visibility); // still allow popup in order to change flash mode when recording video
-			}
-		});
-    }
-    
     void onAccelerometerSensorChanged(SensorEvent event) {
 		/*if( MyDebug.LOG )
     	Log.d(TAG, "onAccelerometerSensorChanged: " + event.values[0] + ", " + event.values[1] + ", " + event.values[2]);*/
@@ -4613,10 +4518,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return focus_success == FOCUS_FAILED;
     }
     
-    boolean inImmersiveMode() {
-    	return immersive_mode;
-    }
-
     CameraController.Face [] getFacesDetected() {
     	return this.faces_detected;
     }
