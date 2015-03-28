@@ -79,11 +79,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean set_textureview_size = false;
 	private int textureview_w = 0, textureview_h = 0;
 
-	private Paint p = new Paint();
     private Matrix camera_to_preview_matrix = new Matrix();
     private Matrix preview_to_camera_matrix = new Matrix();
 	//private RectF face_rect = new RectF();
-	private Rect text_bounds = new Rect();
     private double preview_targetRatio = 0.0;
 
 	//private boolean ui_placement_right = true;
@@ -2231,59 +2229,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		applicationInterface.onDrawPreview(canvas);
 	}
 
-	void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
-		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, false);
-	}
-
-	void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top) {
-		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, align_top, null);
-	}
-
-	void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top, String ybounds_text) {
-		final float scale = getResources().getDisplayMetrics().density;
-		p.setStyle(Paint.Style.FILL);
-		paint.setColor(background);
-		paint.setAlpha(64);
-		int alt_height = 0;
-		if( ybounds_text != null ) {
-			paint.getTextBounds(ybounds_text, 0, ybounds_text.length(), text_bounds);
-			alt_height = text_bounds.bottom - text_bounds.top;
-		}
-		paint.getTextBounds(text, 0, text.length(), text_bounds);
-		if( ybounds_text != null ) {
-			text_bounds.bottom = text_bounds.top + alt_height;
-		}
-		final int padding = (int) (2 * scale + 0.5f); // convert dps to pixels
-		if( paint.getTextAlign() == Paint.Align.RIGHT || paint.getTextAlign() == Paint.Align.CENTER ) {
-			float width = paint.measureText(text); // n.b., need to use measureText rather than getTextBounds here
-			/*if( MyDebug.LOG )
-				Log.d(TAG, "width: " + width);*/
-			if( paint.getTextAlign() == Paint.Align.CENTER )
-				width /= 2.0f;
-			text_bounds.left -= width;
-			text_bounds.right -= width;
-		}
-		/*if( MyDebug.LOG )
-			Log.d(TAG, "text_bounds left-right: " + text_bounds.left + " , " + text_bounds.right);*/
-		text_bounds.left += location_x - padding;
-		text_bounds.right += location_x + padding;
-		if( align_top ) {
-			int height = text_bounds.bottom - text_bounds.top + 2*padding;
-			// unclear why we need the offset of -1, but need this to align properly on Galaxy Nexus at least
-			int y_diff = - text_bounds.top + padding - 1;
-			text_bounds.top = location_y - 1;
-			text_bounds.bottom = text_bounds.top + height;
-			location_y += y_diff;
-		}
-		else {
-			text_bounds.top += location_y - padding;
-			text_bounds.bottom += location_y + padding;
-		}
-		canvas.drawRect(text_bounds, paint);
-		paint.setColor(foreground);
-		canvas.drawText(text, location_x, location_y, paint);
-	}
-	
 	public void scaleZoom(float scale_factor) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "scaleZoom() " + scale_factor);

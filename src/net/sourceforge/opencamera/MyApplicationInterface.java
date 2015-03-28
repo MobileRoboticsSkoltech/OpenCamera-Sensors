@@ -58,6 +58,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     private boolean show_gui = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
     
 	private Paint p = new Paint();
+	private Rect text_bounds = new Rect();
 	private RectF face_rect = new RectF();
 	private int [] gui_location = new int[2];
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
@@ -1097,7 +1098,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					color = Color.rgb(20, 231, 21); // Green A400
 				}
 				String string = getContext().getResources().getString(R.string.angle) + ": " + decimalFormat.format(level_angle) + (char)0x00B0;
-				preview.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
 			}
 			if( draw_geo_direction ) {
 				int color = Color.WHITE;
@@ -1113,7 +1114,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					geo_angle += 360.0f;
 				}
 				String string = " " + getContext().getResources().getString(R.string.direction) + ": " + Math.round(geo_angle) + (char)0x00B0;
-				preview.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, false, ybounds_text);
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, false, ybounds_text);
 			}
 			if( preview.isOnTimer() ) {
 				long remaining_time = (preview.getTimerEndTime() - System.currentTimeMillis() + 999)/1000;
@@ -1122,7 +1123,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				if( remaining_time >= 0 ) {
 					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
-					preview.drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(229, 28, 35), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500
+					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(229, 28, 35), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500
 				}
 			}
 			else if( preview.isVideoRecording() ) {
@@ -1144,12 +1145,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 				int color = Color.rgb(229, 28, 35); // Red 500
             	if( main_activity.isScreenLocked() ) {
             		// writing in reverse order, bottom to top
-            		preview.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.screen_lock_message_2), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+            		drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.screen_lock_message_2), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
             		pixels_offset_y += text_y;
-            		preview.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.screen_lock_message_1), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+            		drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.screen_lock_message_1), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
             		pixels_offset_y += text_y;
             	}
-            	preview.drawTextWithBackground(canvas, p, time_s, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
+            	drawTextWithBackground(canvas, p, time_s, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 			}
 		}
 		else if( camera_controller == null ) {
@@ -1192,7 +1193,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				string += preview.getFrameDurationString(frame_duration);
 			}
 			if( string.length() > 0 ) {
-				preview.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text); // Yellow 500
+				drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text); // Yellow 500
 			}
 		}
 		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowZoomPreferenceKey(), true) ) {
@@ -1203,7 +1204,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				int pixels_offset_y = text_y;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.CENTER);
-				preview.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
+				drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
 			}
 		}
 
@@ -1299,7 +1300,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	        // http://code.google.com/p/android/issues/detail?id=42104
 	        String current_time = DateFormat.getTimeInstance().format(c.getTime());
 	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
-	        preview.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, true);
+	        drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, true);
 	    }
 
 		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowFreeMemoryPreferenceKey(), true) ) {
@@ -1328,7 +1329,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				}
 			}
 			if( free_memory_gb >= 0.0f ) {
-				preview.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, location_x, location_y, true);
+				drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, location_x, location_y, true);
 			}
 		}
 
@@ -1422,6 +1423,59 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
     }
 
+	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
+		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, false);
+	}
+
+	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top) {
+		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, align_top, null);
+	}
+
+	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top, String ybounds_text) {
+		final float scale = getContext().getResources().getDisplayMetrics().density;
+		p.setStyle(Paint.Style.FILL);
+		paint.setColor(background);
+		paint.setAlpha(64);
+		int alt_height = 0;
+		if( ybounds_text != null ) {
+			paint.getTextBounds(ybounds_text, 0, ybounds_text.length(), text_bounds);
+			alt_height = text_bounds.bottom - text_bounds.top;
+		}
+		paint.getTextBounds(text, 0, text.length(), text_bounds);
+		if( ybounds_text != null ) {
+			text_bounds.bottom = text_bounds.top + alt_height;
+		}
+		final int padding = (int) (2 * scale + 0.5f); // convert dps to pixels
+		if( paint.getTextAlign() == Paint.Align.RIGHT || paint.getTextAlign() == Paint.Align.CENTER ) {
+			float width = paint.measureText(text); // n.b., need to use measureText rather than getTextBounds here
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "width: " + width);*/
+			if( paint.getTextAlign() == Paint.Align.CENTER )
+				width /= 2.0f;
+			text_bounds.left -= width;
+			text_bounds.right -= width;
+		}
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "text_bounds left-right: " + text_bounds.left + " , " + text_bounds.right);*/
+		text_bounds.left += location_x - padding;
+		text_bounds.right += location_x + padding;
+		if( align_top ) {
+			int height = text_bounds.bottom - text_bounds.top + 2*padding;
+			// unclear why we need the offset of -1, but need this to align properly on Galaxy Nexus at least
+			int y_diff = - text_bounds.top + padding - 1;
+			text_bounds.top = location_y - 1;
+			text_bounds.bottom = text_bounds.top + height;
+			location_y += y_diff;
+		}
+		else {
+			text_bounds.top += location_y - padding;
+			text_bounds.bottom += location_y + padding;
+		}
+		canvas.drawRect(text_bounds, paint);
+		paint.setColor(foreground);
+		canvas.drawText(text, location_x, location_y, paint);
+	}
+	
     @Override
     @SuppressWarnings("deprecation")
 	public boolean onPictureTaken(byte [] data) {
@@ -1637,7 +1691,7 @@ public class MyApplicationInterface implements ApplicationInterface {
         				Log.d(TAG, "stamp date");
         			// doesn't respect user preferences such as 12/24 hour - see note about in draw() about DateFormat.getTimeInstance()
         	        String time_stamp = DateFormat.getDateTimeInstance().format(new Date());
-    				main_activity.getPreview().drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+    				drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
     				ypos -= diff_y;
     				String location_string = "";
     				boolean store_location = getGeotaggingPref();
@@ -1662,14 +1716,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 			    	if( location_string.length() > 0 ) {
 	        			if( MyDebug.LOG )
 	        				Log.d(TAG, "stamp with location_string: " + location_string);
-	        			main_activity.getPreview().drawTextWithBackground(canvas, p, location_string, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+	        			drawTextWithBackground(canvas, p, location_string, Color.WHITE, Color.BLACK, width - offset_x, ypos);
 	    				ypos -= diff_y;
 			    	}
     	        }
     	        if( text_stamp ) {
         			if( MyDebug.LOG )
         				Log.d(TAG, "stamp text");
-        			main_activity.getPreview().drawTextWithBackground(canvas, p, preference_textstamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+        			drawTextWithBackground(canvas, p, preference_textstamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
     				ypos -= diff_y;
     	        }
 			}
