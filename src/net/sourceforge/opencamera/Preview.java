@@ -1054,8 +1054,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			zoomTo(applicationInterface.getZoomPref());
 		}
 		
-		applicationInterface.cameraSetup();
-
 	    if( take_photo ) {
 			if( this.is_video ) {
 				this.switchVideo(true, true);
@@ -1071,7 +1069,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 			}, 500);
 		}
-	    else {
+
+		applicationInterface.cameraSetup(); // must call this after the above take_photo code in case it switches from video to photo mode
+
+	    if( !take_photo ) {
 	    	final Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
 				@Override
@@ -2696,10 +2697,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			updateFocusForVideo(false); // don't do autofocus, as it'll be cancelled when restarting preview
 			showPhotoVideoToast(); // must be after we update focus for video
 
-			Activity activity = (Activity)this.getContext();
-			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
-			view.setImageResource(is_video ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
-
 			if( save ) {
 				// now save
 				applicationInterface.setVideoPref(is_video);
@@ -2965,8 +2962,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		{
 	    	final int visibility = focus_value.equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
-			MainActivity main_activity = (MainActivity)this.getContext();
-		    View focusSeekbar = (View) main_activity.findViewById(R.id.focus_seekbar);
+			Activity activity = (Activity)this.getContext();
+		    View focusSeekbar = (View) activity.findViewById(R.id.focus_seekbar);
 		    focusSeekbar.setVisibility(visibility);
 		}
 		cancelAutoFocus();
@@ -3850,9 +3847,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private void setPreviewPaused(boolean paused) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewPaused: " + paused);
-		MainActivity main_activity = (MainActivity)this.getContext();
-	    View shareButton = (View) main_activity.findViewById(R.id.share);
-	    View trashButton = (View) main_activity.findViewById(R.id.trash);
+		Activity activity = (Activity)this.getContext();
+	    View shareButton = (View) activity.findViewById(R.id.share);
+	    View trashButton = (View) activity.findViewById(R.id.trash);
 		/*is_preview_paused = paused;
 		if( is_preview_paused ) {*/
 	    if( paused ) {

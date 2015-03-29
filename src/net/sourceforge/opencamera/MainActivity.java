@@ -916,6 +916,9 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "clickedSwitchVideo");
 		this.closePopup();
 		this.preview.switchVideo(true, true);
+
+		ImageButton imageButton = (ImageButton)findViewById(R.id.take_photo);
+		imageButton.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
     }
 
     public void setPopupIcon() {
@@ -2127,6 +2130,9 @@ public class MainActivity extends Activity {
 	    }
 
 		setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
+
+		ImageButton imageButton = (ImageButton)findViewById(R.id.take_photo);
+		imageButton.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
     }
     
     public boolean supportsAutoStabilise() {
