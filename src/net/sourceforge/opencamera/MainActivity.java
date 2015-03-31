@@ -2012,6 +2012,8 @@ public class MainActivity extends Activity {
 				public void onStopTrackingTouch(SeekBar seekBar) {
 				}
 			});
+	    	final int visibility = this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
+		    focusSeekBar.setVisibility(visibility);
 		}
 		{
 			if( preview.supportsISORange()) {

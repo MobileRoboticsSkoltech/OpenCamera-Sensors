@@ -2960,12 +2960,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-		{
-	    	final int visibility = focus_value.equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
-			Activity activity = (Activity)this.getContext();
-		    View focusSeekbar = (View) activity.findViewById(R.id.focus_seekbar);
-		    focusSeekbar.setVisibility(visibility);
-		}
 		cancelAutoFocus();
         camera_controller.setFocusValue(focus_value);
 		clearFocusAreas();
