@@ -87,7 +87,7 @@ public class MainActivity extends Activity {
     private ToastBoxer screen_locked_toast = new ToastBoxer();
     private ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
 	private ToastBoxer exposure_lock_toast = new ToastBoxer();
-	//private boolean block_startup_toast = false;
+	private boolean block_startup_toast = false;
     
 	// for testing:
 	public boolean is_test = false;
@@ -921,9 +921,9 @@ public class MainActivity extends Activity {
 
 		ImageButton imageButton = (ImageButton)findViewById(R.id.take_photo);
 		imageButton.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
-		/*if( !block_startup_toast ) {
+		if( !block_startup_toast ) {
 			preview.showPhotoVideoToast();
-		}*/
+		}
     }
 
     public void setPopupIcon() {
@@ -1263,8 +1263,8 @@ public class MainActivity extends Activity {
 
 		layoutUI(); // needed in case we've changed left/right handed UI
 		applicationInterface.getLocationSupplier().setupLocationListener(); // in case we've enabled GPS
-		/*if( toast_message != null )
-			block_startup_toast = true;*/
+		if( toast_message != null )
+			block_startup_toast = true;
 		if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
 			preview.onResume(toast_message);
@@ -1274,9 +1274,9 @@ public class MainActivity extends Activity {
 			preview.pausePreview();
 			preview.setupCamera(toast_message, false);
 		}
-		/*block_startup_toast = false;
+		block_startup_toast = false;
 		if( toast_message != null && toast_message.length() > 0 )
-			preview.showToast(null, toast_message);*/
+			preview.showToast(null, toast_message);
 
     	if( saved_focus_value != null ) {
 			if( MyDebug.LOG )
@@ -2150,7 +2150,9 @@ public class MainActivity extends Activity {
 		ImageButton imageButton = (ImageButton)findViewById(R.id.take_photo);
 		imageButton.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
 
-		//preview.showPhotoVideoToast();
+		if( !block_startup_toast ) {
+			preview.showPhotoVideoToast();
+		}
     }
     
     public boolean supportsAutoStabilise() {

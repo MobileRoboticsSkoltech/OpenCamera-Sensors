@@ -1017,13 +1017,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( saved_is_video != this.is_video ) {
 			this.switchVideo(false, false);
 		}
-		else if( toast_message != null ) {
-			if( toast_message.length() > 0 )
-				showToast(null, toast_message);
-		}
-		else {
-			showPhotoVideoToast();
-		}
 
 		if( !take_photo && using_android_l ) {
 			// need to switch flash off for autofocus - and for Android L, need to do this before starting preview (otherwise it won't work in time); for old camera API, need to do this after starting preview!
@@ -2420,7 +2413,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	private void showPhotoVideoToast() {
+	void showPhotoVideoToast() {
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
 		if( camera_controller == null || main_activity.cameraInBackground() )
 			return;
@@ -2693,7 +2686,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		
 		if( is_video != old_is_video ) {
 			updateFocusForVideo(false); // don't do autofocus, as it'll be cancelled when restarting preview
-			showPhotoVideoToast(); // must be after we update focus for video
 
 			if( save ) {
 				// now save
