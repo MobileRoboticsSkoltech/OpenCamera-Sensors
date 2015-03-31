@@ -87,6 +87,7 @@ public class MainActivity extends Activity {
     private ToastBoxer screen_locked_toast = new ToastBoxer();
     private ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
 	private ToastBoxer exposure_lock_toast = new ToastBoxer();
+	//private boolean block_startup_toast = false;
     
 	// for testing:
 	public boolean is_test = false;
@@ -338,7 +339,7 @@ public class MainActivity extends Activity {
 	                return true;
 	    		}
 	    		else if( volume_keys.equals("volume_focus") ) {
-	    			if( preview.getCurrentFocusValue().equals("focus_mode_manual2") ) {
+	    			if( preview.getCurrentFocusValue() != null && preview.getCurrentFocusValue().equals("focus_mode_manual2") ) {
 		    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
 		    				this.changeFocusDistance(-1);
 		    			else
@@ -920,6 +921,9 @@ public class MainActivity extends Activity {
 
 		ImageButton imageButton = (ImageButton)findViewById(R.id.take_photo);
 		imageButton.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
+		/*if( !block_startup_toast ) {
+			preview.showPhotoVideoToast();
+		}*/
     }
 
     public void setPopupIcon() {
@@ -1266,6 +1270,8 @@ public class MainActivity extends Activity {
 
 		layoutUI(); // needed in case we've changed left/right handed UI
 		applicationInterface.getLocationSupplier().setupLocationListener(); // in case we've enabled GPS
+		/*if( toast_message != null )
+			block_startup_toast = true;*/
 		if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
 			preview.onResume(toast_message);
@@ -1275,6 +1281,9 @@ public class MainActivity extends Activity {
 			preview.pausePreview();
 			preview.setupCamera(toast_message, false);
 		}
+		/*block_startup_toast = false;
+		if( toast_message != null && toast_message.length() > 0 )
+			preview.showToast(null, toast_message);*/
 
     	if( saved_focus_value != null ) {
 			if( MyDebug.LOG )
@@ -2016,7 +2025,7 @@ public class MainActivity extends Activity {
 				public void onStopTrackingTouch(SeekBar seekBar) {
 				}
 			});
-	    	final int visibility = this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
+	    	final int visibility = preview.getCurrentFocusValue() != null && this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
 		    focusSeekBar.setVisibility(visibility);
 		}
 		{
@@ -2142,6 +2151,8 @@ public class MainActivity extends Activity {
 
 		ImageButton imageButton = (ImageButton)findViewById(R.id.take_photo);
 		imageButton.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
+
+		//preview.showPhotoVideoToast();
     }
     
     public boolean supportsAutoStabilise() {
