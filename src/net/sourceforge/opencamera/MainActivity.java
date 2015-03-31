@@ -958,13 +958,6 @@ public class MainActivity extends Activity {
 		view.setVisibility(View.GONE);
     }
     
-    private void setSeekBarExposure() {
-		SeekBar seek_bar = ((SeekBar)findViewById(R.id.exposure_seekbar));
-		final int min_exposure = preview.getMinimumExposure();
-		seek_bar.setMax( preview.getMaximumExposure() - min_exposure );
-		seek_bar.setProgress( preview.getCurrentExposure() - min_exposure );
-    }
-    
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void clickedExposure(View view) {
 		if( MyDebug.LOG )
@@ -1012,7 +1005,7 @@ public class MainActivity extends Activity {
     	return frac;
     }
     
-	private void setSeekbarScaled(SeekBar seekBar, double min_value, double max_value, double value) {
+	private void setProgressSeekbarScaled(SeekBar seekBar, double min_value, double max_value, double value) {
 		seekBar.setMax(100);
 		double scaling = (value - min_value)/(max_value - min_value);
 		double frac = MainActivity.seekbarScalingInverse(scaling);
@@ -1970,6 +1963,7 @@ public class MainActivity extends Activity {
 					zoomControls.setVisibility(View.INVISIBLE); // must be INVISIBLE not GONE, so we can still position the zoomSeekBar relative to it
 				}
 				
+				zoomSeekBar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
 				zoomSeekBar.setMax(preview.getMaxZoom());
 				zoomSeekBar.setProgress(preview.getMaxZoom()-preview.getCameraController().getZoom());
 				zoomSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -2007,7 +2001,8 @@ public class MainActivity extends Activity {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up manual focus");
 		    SeekBar focusSeekBar = (SeekBar) findViewById(R.id.focus_seekbar);
-			setSeekbarScaled(focusSeekBar, 0.0, preview.getMinimumFocusDistance(), preview.getCameraController().getFocusDistance());
+		    focusSeekBar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
+			setProgressSeekbarScaled(focusSeekBar, 0.0, preview.getMinimumFocusDistance(), preview.getCameraController().getFocusDistance());
 		    focusSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -2033,7 +2028,8 @@ public class MainActivity extends Activity {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set up iso");
 				SeekBar iso_seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
-				setSeekbarScaled(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
+			    iso_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
+				setProgressSeekbarScaled(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
 				iso_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -2063,7 +2059,8 @@ public class MainActivity extends Activity {
 					if( MyDebug.LOG )
 						Log.d(TAG, "set up exposure time");
 					SeekBar exposure_time_seek_bar = ((SeekBar)findViewById(R.id.exposure_time_seekbar));
-					setSeekbarScaled(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
+					exposure_time_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
+					setProgressSeekbarScaled(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
 					exposure_time_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 						@Override
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -2101,10 +2098,11 @@ public class MainActivity extends Activity {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set up exposure compensation");
 				final int min_exposure = preview.getMinimumExposure();
-				setSeekBarExposure();
 				SeekBar exposure_seek_bar = ((SeekBar)findViewById(R.id.exposure_seekbar));
+				exposure_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
+				exposure_seek_bar.setMax( preview.getMaximumExposure() - min_exposure );
+				exposure_seek_bar.setProgress( preview.getCurrentExposure() - min_exposure );
 				exposure_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 						if( MyDebug.LOG )
