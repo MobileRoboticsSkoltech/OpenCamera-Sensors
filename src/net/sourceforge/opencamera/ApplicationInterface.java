@@ -73,6 +73,7 @@ public interface ApplicationInterface {
 	void touchEvent(MotionEvent event);
 	void startingVideo(); // called just before video recording starts
 	void stoppingVideo(); // called just before video recording stops
+	void hasPausedPreview(boolean paused); // called when the preview is paused or unpaused (due to getPausePreviewPref())
 	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video), use to disable GUI elements during camera operation
 	void cameraClosed();
 	void updateThumbnail(Bitmap thumbnail); // n.b., thumbnail will be recycled after updateThumbnail() is called again with a different thumbnail

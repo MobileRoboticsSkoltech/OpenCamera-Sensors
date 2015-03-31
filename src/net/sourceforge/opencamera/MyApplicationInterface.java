@@ -694,7 +694,22 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 		});
     }
-    
+
+    @Override
+	public void hasPausedPreview(boolean paused) {
+	    View shareButton = (View) main_activity.findViewById(R.id.share);
+	    View trashButton = (View) main_activity.findViewById(R.id.trash);
+	    if( paused ) {
+		    shareButton.setVisibility(View.VISIBLE);
+		    trashButton.setVisibility(View.VISIBLE);
+	    }
+	    else {
+			shareButton.setVisibility(View.GONE);
+		    trashButton.setVisibility(View.GONE);
+	    }
+		
+	}
+	
     @Override
     public void cameraInOperation(boolean in_operation) {
     	showGUI(!in_operation);

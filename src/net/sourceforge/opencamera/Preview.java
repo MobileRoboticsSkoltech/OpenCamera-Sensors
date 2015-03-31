@@ -3824,22 +3824,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private void setPreviewPaused(boolean paused) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewPaused: " + paused);
-		Activity activity = (Activity)this.getContext();
-	    View shareButton = (View) activity.findViewById(R.id.share);
-	    View trashButton = (View) activity.findViewById(R.id.trash);
-		/*is_preview_paused = paused;
-		if( is_preview_paused ) {*/
+		applicationInterface.hasPausedPreview(paused);
 	    if( paused ) {
 	    	this.phase = PHASE_PREVIEW_PAUSED;
-		    shareButton.setVisibility(View.VISIBLE);
-		    trashButton.setVisibility(View.VISIBLE);
 		    // shouldn't call applicationInterface.cameraInOperation(true), as should already have done when we started to take a photo (or above when exiting immersive mode)
 		}
 		else {
 	    	this.phase = PHASE_NORMAL;
-			shareButton.setVisibility(View.GONE);
-		    trashButton.setVisibility(View.GONE);
-		    //preview_image_name = null;
 			applicationInterface.cameraInOperation(false);
 		}
     }
