@@ -62,7 +62,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.MeasureSpec;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
@@ -176,7 +175,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private ToastBoxer switch_video_toast = new ToastBoxer();
 	private ToastBoxer flash_toast = new ToastBoxer();
 	private ToastBoxer focus_toast = new ToastBoxer();
-	private ToastBoxer exposure_lock_toast = new ToastBoxer();
 	private ToastBoxer take_photo_toast = new ToastBoxer();
 	private ToastBoxer stopstart_video_toast = new ToastBoxer();
 	private ToastBoxer seekbar_toast = new ToastBoxer();
@@ -2979,26 +2977,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		if( is_exposure_lock_supported ) {
 			is_exposure_locked = !is_exposure_locked;
-			setExposureLocked();
-			showToast(exposure_lock_toast, is_exposure_locked ? R.string.exposure_locked : R.string.exposure_unlocked);
+			cancelAutoFocus();
+	        camera_controller.setAutoExposureLock(is_exposure_locked);
 		}
 	}
 
-	private void setExposureLocked() {
-		if( camera_controller == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "camera not opened!");
-			return;
-		}
-		if( is_exposure_lock_supported ) {
-			cancelAutoFocus();
-	        camera_controller.setAutoExposureLock(is_exposure_locked);
-			Activity activity = (Activity)this.getContext();
-		    ImageButton exposureLockButton = (ImageButton) activity.findViewById(R.id.exposure_lock);
-			exposureLockButton.setImageResource(is_exposure_locked ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
-		}
-	}
-	
 	void takePicturePressed() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicturePressed");

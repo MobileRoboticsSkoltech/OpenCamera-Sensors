@@ -85,7 +85,8 @@ public class MainActivity extends Activity {
 	private boolean ui_placement_right = true;
 
     private ToastBoxer screen_locked_toast = new ToastBoxer();
-    ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
+    private ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
+	private ToastBoxer exposure_lock_toast = new ToastBoxer();
     
 	// for testing:
 	public boolean is_test = false;
@@ -1023,6 +1024,9 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposureLock");
     	this.preview.toggleExposureLock();
+	    ImageButton exposureLockButton = (ImageButton) findViewById(R.id.exposure_lock);
+		exposureLockButton.setImageResource(preview.isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
+		preview.showToast(exposure_lock_toast, preview.isExposureLocked() ? R.string.exposure_locked : R.string.exposure_unlocked);
     }
     
     public void clickedSettings(View view) {
