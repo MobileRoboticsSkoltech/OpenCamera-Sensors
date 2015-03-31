@@ -1177,8 +1177,10 @@ public class CameraController2 extends CameraController {
 	// Returns whether exposure time was modified
 	// N.B., use setISO(String) to switch between auto and manual mode
 	public boolean setExposureTime(long exposure_time) {
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "setExposureTime: " + exposure_time);
+			Log.d(TAG, "current exposure time: " + camera_settings.exposure_time);
+		}
 		if( camera_settings.exposure_time == exposure_time ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "already set");
