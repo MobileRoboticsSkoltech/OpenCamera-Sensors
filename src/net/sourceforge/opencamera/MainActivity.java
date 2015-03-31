@@ -2123,7 +2123,10 @@ public class MainActivity extends Activity {
 		}
 
 		View exposureButton = (View) findViewById(R.id.exposure);
-	    exposureButton.setVisibility(preview.supportsExposures() && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
+		String iso_value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
+		boolean manual_iso = !iso_value.equals(preview.getCameraController().getDefaultISO());
+		boolean supports_exposure = preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
+	    exposureButton.setVisibility(supports_exposure && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
 
 	    ImageButton exposureLockButton = (ImageButton) findViewById(R.id.exposure_lock);
 	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
