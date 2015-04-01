@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -172,7 +171,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private Rect location_dest = new Rect();*/
 	
 	private ToastBoxer switch_camera_toast = new ToastBoxer();
-	private ToastBoxer switch_video_toast = new ToastBoxer();
 	private ToastBoxer flash_toast = new ToastBoxer();
 	private ToastBoxer focus_toast = new ToastBoxer();
 	private ToastBoxer take_photo_toast = new ToastBoxer();
@@ -2413,95 +2411,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	void showPhotoVideoToast() {
-		MainActivity main_activity = (MainActivity)Preview.this.getContext();
-		if( camera_controller == null || main_activity.cameraInBackground() )
-			return;
-		String toast_string = "";
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		if( this.is_video ) {
-			CamcorderProfile profile = getCamcorderProfile();
-			String bitrate_string = "";
-			if( profile.videoBitRate >= 10000000 )
-				bitrate_string = profile.videoBitRate/1000000 + "Mbps";
-			else if( profile.videoBitRate >= 10000 )
-				bitrate_string = profile.videoBitRate/1000 + "Kbps";
-			else
-				bitrate_string = profile.videoBitRate + "bps";
-
-			String timer_value = sharedPreferences.getString(MainActivity.getVideoMaxDurationPreferenceKey(), "0");
-			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
-			boolean record_audio = sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
-			if( !record_audio ) {
-				toast_string += "\n" + getResources().getString(R.string.audio_disabled);
-			}
-			if( timer_value.length() > 0 && !timer_value.equals("0") ) {
-				String [] entries_array = getResources().getStringArray(R.array.preference_video_max_duration_entries);
-				String [] values_array = getResources().getStringArray(R.array.preference_video_max_duration_values);
-				int index = Arrays.asList(values_array).indexOf(timer_value);
-				if( index != -1 ) { // just in case!
-					String entry = entries_array[index];
-					toast_string += "\n" + getResources().getString(R.string.max_duration) +": " + entry;
-				}
-			}
-			if( sharedPreferences.getBoolean(MainActivity.getVideoFlashPreferenceKey(), false) && supportsFlash() ) {
-				toast_string += "\n" + getResources().getString(R.string.preference_video_flash);
-			}
-		}
-		else {
-			toast_string = getResources().getString(R.string.photo);
-			if( current_size_index != -1 && sizes != null ) {
-				CameraController.Size current_size = sizes.get(current_size_index);
-				toast_string += " " + current_size.width + "x" + current_size.height;
-			}
-			if( supported_focus_values != null && supported_focus_values.size() > 1 && current_focus_index != -1 ) {
-				String focus_value = supported_focus_values.get(current_focus_index);
-				if( !focus_value.equals("focus_mode_auto") ) {
-					String focus_entry = findFocusEntryForValue(focus_value);
-					if( focus_entry != null ) {
-						toast_string += "\n" + focus_entry;
-					}
-				}
-			}
-		}
-		String iso_value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
-		if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
-			toast_string += "\nISO: " + iso_value;
-			if( supports_exposure_time ) {
-				long exposure_time_value = sharedPreferences.getLong(MainActivity.getExposureTimePreferenceKey(), camera_controller.getDefaultExposureTime());
-				toast_string += " " + getExposureTimeString(exposure_time_value);
-			}
-		}
-		int current_exposure = camera_controller.getExposureCompensation();
-		if( current_exposure != 0 ) {
-			toast_string += "\n" + getExposureCompensationString(current_exposure);
-		}
-		String scene_mode = camera_controller.getSceneMode();
-    	if( scene_mode != null && !scene_mode.equals(camera_controller.getDefaultSceneMode()) ) {
-    		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + scene_mode;
-    	}
-		String white_balance = camera_controller.getWhiteBalance();
-    	if( white_balance != null && !white_balance.equals(camera_controller.getDefaultWhiteBalance()) ) {
-    		toast_string += "\n" + getResources().getString(R.string.white_balance) + ": " + white_balance;
-    	}
-		String color_effect = camera_controller.getColorEffect();
-    	if( color_effect != null && !color_effect.equals(camera_controller.getDefaultColorEffect()) ) {
-    		toast_string += "\n" + getResources().getString(R.string.color_effect) + ": " + color_effect;
-    	}
-		String lock_orientation = sharedPreferences.getString(MainActivity.getLockOrientationPreferenceKey(), "none");
-		if( !lock_orientation.equals("none") ) {
-			String [] entries_array = getResources().getStringArray(R.array.preference_lock_orientation_entries);
-			String [] values_array = getResources().getStringArray(R.array.preference_lock_orientation_values);
-			int index = Arrays.asList(values_array).indexOf(lock_orientation);
-			if( index != -1 ) { // just in case!
-				String entry = entries_array[index];
-				toast_string += "\n" + entry;
-			}
-		}
-		
-		showToast(switch_video_toast, toast_string, Toast.LENGTH_LONG);
-	}
-
 	public int [] matchPreviewFpsToVideo(List<int []> fps_ranges, int video_frame_rate) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "matchPreviewFpsToVideo()");
@@ -2896,7 +2805,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return null;
 	}
 	
-	private String findFocusEntryForValue(String focus_value) {
+	String findFocusEntryForValue(String focus_value) {
 		return findEntryForValue(focus_value, R.array.focus_mode_entries, R.array.focus_mode_values);
 	}
 	
