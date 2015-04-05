@@ -29,6 +29,7 @@ import android.graphics.Paint.Align;
 import android.location.Location;
 import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaRecorder;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -600,6 +601,51 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void stoppingVideo() {
 		main_activity.unlockScreen();
+	}
+
+	@Override
+	public void onVideoInfo(int what, int extra) {
+		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+			int message_id = 0;
+			if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "max duration reached");
+				message_id = R.string.video_max_duration;
+			}
+			else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "max filesize reached");
+				message_id = R.string.video_max_filesize;
+			}
+			if( message_id != 0 )
+				main_activity.getPreview().showToast(null, message_id);
+			String debug_value = "error_" + what + "_" + extra;
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putString("last_video_error", debug_value);
+			editor.apply();
+			main_activity.getPreview().stopVideo(false);
+		}
+	}
+
+	@Override
+	public void onVideoError(int what, int extra) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "onVideoError: " + what + " extra: " + extra);
+		}
+		int message_id = R.string.video_error_unknown;
+		if( what == MediaRecorder.MEDIA_ERROR_SERVER_DIED  ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "error: server died");
+			message_id = R.string.video_error_server_died;
+		}
+		main_activity.getPreview().showToast(null, message_id);
+		String debug_value = "info_" + what + "_" + extra;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString("last_video_error", debug_value);
+		editor.apply();
+		main_activity.getPreview().stopVideo(false);
 	}
 
     void setImmersiveMode(final boolean immersive_mode) {

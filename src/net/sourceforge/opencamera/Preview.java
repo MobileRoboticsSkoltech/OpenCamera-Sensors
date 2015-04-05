@@ -27,7 +27,6 @@ import java.util.Vector;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -46,7 +45,6 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -3041,15 +3039,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		cancelAutoFocus();
         camera_controller.setFlashValue(flash_value_ui);
 	}
+
+	private void onVideoInfo(int what, int extra) {
+		applicationInterface.onVideoInfo(what, extra);
+	}
 	
-	private void onVideoError(int message_id, int what, int extra, String debug_value) {
-		if( message_id != 0 )
-			showToast(null, message_id);
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString("last_video_error", debug_value);
-		editor.apply();
-		stopVideo(false);
+	private void onVideoError(int what, int extra) {
+		applicationInterface.onVideoError(what, extra);
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -3131,52 +3127,26 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					public void onInfo(MediaRecorder mr, int what, int extra) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "MediaRecorder info: " + what + " extra: " + extra);
-						if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
-							int message_id = 0;
-							if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED ) {
-								if( MyDebug.LOG )
-									Log.d(TAG, "max duration reached");
-								message_id = R.string.video_max_duration;
-							}
-							else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
-								if( MyDebug.LOG )
-									Log.d(TAG, "max filesize reached");
-								message_id = R.string.video_max_filesize;
-							}
-							final int final_message_id = message_id;
-							final int final_what = what;
-							final int final_extra = extra;
-							Activity activity = (Activity)Preview.this.getContext();
-							activity.runOnUiThread(new Runnable() {
-								public void run() {
-									// we run on main thread to avoid problem of camera closing at the same time
-									String debug_value = "info_" + final_what + "_" + final_extra;
-									onVideoError(final_message_id, final_what, final_extra, debug_value);
-								}
-							});
-						}
-					}
-				});
-	        	video_recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
-					public void onError(MediaRecorder mr, int what, int extra) {
-						int message_id = R.string.video_error_unknown;
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "MediaRecorder error: " + what + " extra: " + extra);
-						}
-						if( what == MediaRecorder.MEDIA_ERROR_SERVER_DIED  ) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "error: server died");
-							message_id = R.string.video_error_server_died;
-						}
-						final int final_message_id = message_id;
 						final int final_what = what;
 						final int final_extra = extra;
 						Activity activity = (Activity)Preview.this.getContext();
 						activity.runOnUiThread(new Runnable() {
 							public void run() {
 								// we run on main thread to avoid problem of camera closing at the same time
-								String debug_value = "error_" + final_what + "_" + final_extra;
-								onVideoError(final_message_id, final_what, final_extra, debug_value);
+								onVideoInfo(final_what, final_extra);
+							}
+						});
+					}
+				});
+	        	video_recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+					public void onError(MediaRecorder mr, int what, int extra) {
+						final int final_what = what;
+						final int final_extra = extra;
+						Activity activity = (Activity)Preview.this.getContext();
+						activity.runOnUiThread(new Runnable() {
+							public void run() {
+								// we run on main thread to avoid problem of camera closing at the same time
+								onVideoError(final_what, final_extra);
 							}
 						});
 					}
