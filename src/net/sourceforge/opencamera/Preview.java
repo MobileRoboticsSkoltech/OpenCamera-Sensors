@@ -169,7 +169,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	/*private Bitmap location_bitmap = null;
 	private Bitmap location_off_bitmap = null;
 	private Rect location_dest = new Rect();*/
-	
+
+	private Toast last_toast = null;
 	private ToastBoxer switch_camera_toast = new ToastBoxer();
 	private ToastBoxer flash_toast = new ToastBoxer();
 	private ToastBoxer focus_toast = new ToastBoxer();
@@ -4121,10 +4122,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( clear_toast != null )
 					clear_toast.toast = toast;*/
 				// This method is better, as otherwise a previous toast (with different or no clear_toast) never seems to clear if we repeatedly issue new toasts - this doesn't happen if we reuse existing toasts if possible
+				// However should only do this if the previous toast was the most recent toast (to avoid messing up ordering)
 				Toast toast = null;
-				if( clear_toast != null && clear_toast.toast != null )
+				if( clear_toast != null && clear_toast.toast != null && clear_toast.toast == last_toast )
 					toast = clear_toast.toast;
 				else {
+					if( clear_toast != null && clear_toast.toast != null )
+						clear_toast.toast.cancel();
 					toast = new Toast(activity);
 					if( clear_toast != null )
 						clear_toast.toast = toast;
@@ -4133,6 +4137,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				toast.setView(text);
 				toast.setDuration(duration);
 				toast.show();
+				last_toast = toast;
 			}
 		});
 	}
