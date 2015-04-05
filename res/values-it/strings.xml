@@ -97,7 +97,7 @@
     <string name="preference_shutter_sound_summary">Emette un suono quando scatta una foto (richiede Android 4.2 o versioni superiori per disabilitarlo)</string>
     <string name="preference_volume_keys">Tasti volume</string>
     <string name="preference_volume_keys_summary">Impostare il comportamento per quando si premono i tasti volume</string>
-    <string name="preference_save_location">Salva la posizione</string>
+    <string name="preference_save_location">Posizione di salvataggio</string>
     <string name="preference_save_location_summary">Cartella in cui salvare foto e video</string>
     <string name="preference_show_when_locked">Mostra la fotocamera quando bloccato</string>
     <string name="preference_show_when_locked_summary">Se abilitato, Open Camera sarà mostrata sopra il blocco schermo (dovrai comunque sbloccarlo per avere accesso alle Impostazioni, Galleria, ecc.)</string>
