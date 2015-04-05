@@ -169,11 +169,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private Rect location_dest = new Rect();*/
 
 	private Toast last_toast = null;
-	private ToastBoxer switch_camera_toast = new ToastBoxer();
 	private ToastBoxer flash_toast = new ToastBoxer();
 	private ToastBoxer focus_toast = new ToastBoxer();
 	private ToastBoxer take_photo_toast = new ToastBoxer();
-	private ToastBoxer stopstart_video_toast = new ToastBoxer();
 	private ToastBoxer seekbar_toast = new ToastBoxer();
 	
 	private int ui_rotation = 0;
@@ -636,11 +634,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( video_recorder != null ) { // check again, just to be safe
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
-			String toast = getResources().getString(R.string.stopped_recording_video);
-			if( remaining_restart_video > 0 ) {
-				toast += " (" + remaining_restart_video + " " + getResources().getString(R.string.repeats_to_go) + ")";
-			}
-    		showToast(stopstart_video_toast, toast);
 			/*is_taking_photo = false;
 			is_taking_photo_on_timer = false;*/
     		this.phase = PHASE_NORMAL;
@@ -668,7 +661,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    		}
 	    		// if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
     			if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
-    	    	    showToast(null, R.string.failed_to_record_video);
+    	        	CamcorderProfile profile = getCamcorderProfile();
+    				applicationInterface.onVideoRecordStopError(profile);
     			}
 			}
     		if( MyDebug.LOG )
@@ -728,7 +722,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         		if( MyDebug.LOG )
         			Log.e(TAG, "failed to reconnect to camera");
 				e.printStackTrace();
-	    	    showToast(null, R.string.failed_to_reconnect_camera);
+				applicationInterface.onFailedReconnectError();
 	    	    closeCamera();
 			}
     		try {
@@ -740,17 +734,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			e.printStackTrace();
     			// this happens on Nexus 7 if trying to record video at bitrate 50Mbits or higher - it's fair enough that it fails, but we need to recover without a crash!
     			// not safe to call closeCamera, as any call to getParameters may cause a RuntimeException
+    			// update: can no longer reproduce failures on Nexus 7?!
     			this.is_preview_started = false;
     			camera_controller.release();
     			camera_controller = null;
     			if( !quiet ) {
     	        	CamcorderProfile profile = getCamcorderProfile();
-					String features = getErrorFeatures(profile);
-					String error_message = getResources().getString(R.string.video_may_be_corrupted);
-					if( features.length() > 0 ) {
-						error_message += ", " + features + " " + getResources().getString(R.string.not_supported);
-					}
-    				showToast(null, error_message);
+    				applicationInterface.onVideoRecordStopError(profile);
     			}
     			openCamera();
     		}
@@ -2376,29 +2366,40 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		double frame_duration_r = 1.0/frame_duration_s;
 		return getResources().getString(R.string.fps) + " " + new DecimalFormat("#.#").format(frame_duration_r);
 	}
-
-	void switchCamera() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "switchCamera()");
-		//if( is_taking_photo && !is_taking_photo_on_timer ) {
+	
+	boolean canSwitchCamera() {
 		if( this.phase == PHASE_TAKING_PHOTO ) {
 			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
 			if( MyDebug.LOG )
 				Log.d(TAG, "currently taking a photo");
-			return;
+			return false;
 		}
 		int n_cameras = camera_controller_manager.getNumberOfCameras();
 		if( MyDebug.LOG )
 			Log.d(TAG, "found " + n_cameras + " cameras");
-		if( n_cameras > 1 ) {
+		if( n_cameras == 0 )
+			return false;
+		return true;
+	}
+	
+	int getNextCameraId() {
+		int n_cameras = camera_controller_manager.getNumberOfCameras();
+		if( n_cameras > 0 ) {
+			return (cameraId+1) % n_cameras;
+		}
+		else
+			return cameraId;
+	}
+
+	void switchCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "switchCamera()");
+		if( canSwitchCamera() ) {
+			int n_cameras = camera_controller_manager.getNumberOfCameras();
+			if( MyDebug.LOG )
+				Log.d(TAG, "found " + n_cameras + " cameras");
 			closeCamera();
 			cameraId = (cameraId+1) % n_cameras;
-		    if( camera_controller_manager.isFrontFacing(cameraId) ) {
-				showToast(switch_camera_toast, R.string.front_camera);
-		    }
-		    else {
-				showToast(switch_camera_toast, R.string.back_camera);
-		    }
 			this.openCamera();
 			
 			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
@@ -2631,7 +2632,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	private String getErrorFeatures(CamcorderProfile profile) {
+	String getErrorFeatures(CamcorderProfile profile) {
 		boolean was_4k = false, was_bitrate = false, was_fps = false;
 		if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
 			was_4k = true;
@@ -3340,15 +3341,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	private void failedToStartVideoRecorder(CamcorderProfile profile) {
-		String error_message = "";
-		String features = getErrorFeatures(profile);
-		if( features.length() > 0 ) {
-			error_message = getResources().getString(R.string.sorry) + ", " + features + " " + getResources().getString(R.string.not_supported);
-		}
-		else {
-			error_message = getResources().getString(R.string.failed_to_record_video);
-		}
-	    showToast(null, error_message);
+		applicationInterface.onVideoRecordStartError(profile);
 		video_recorder.reset();
 		video_recorder.release(); 
 		video_recorder = null;
@@ -4135,6 +4128,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	boolean isVideoRecording() {
 		return video_recorder != null && video_start_time_set;
+	}
+	
+	int getRemainingRestartVideo() {
+		return remaining_restart_video;
 	}
 	
 	long getVideoTime() {

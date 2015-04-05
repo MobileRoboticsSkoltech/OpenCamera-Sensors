@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.location.Location;
+import android.media.CamcorderProfile;
 import android.util.Pair;
 import android.view.MotionEvent;
 
@@ -75,6 +76,9 @@ public interface ApplicationInterface {
 	void stoppingVideo(); // called just before video recording stops
 	void onVideoInfo(int what, int extra); // callback for info when recording video (see MediaRecorder.OnInfoListener)
 	void onVideoError(int what, int extra); // callback for errors when recording video (see MediaRecorder.OnErrorListener)
+	void onVideoRecordStartError(CamcorderProfile profile); // callback for video recording failing to start
+	void onVideoRecordStopError(CamcorderProfile profile); // callback for video recording being corrupted
+	void onFailedReconnectError(); // failed to reconnect camera after stopping video recording
 	void hasPausedPreview(boolean paused); // called when the preview is paused or unpaused (due to getPausePreviewPref())
 	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video), use to disable GUI elements during camera operation
 	void cameraClosed();

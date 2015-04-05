@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Paint.Align;
 import android.location.Location;
+import android.media.CamcorderProfile;
 import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
@@ -86,6 +87,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private RectF thumbnail_anim_dst_rect = new RectF();
 	private Matrix thumbnail_anim_matrix = new Matrix();
 
+	private ToastBoxer stopstart_video_toast = new ToastBoxer();
+	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int zoom_factor = 0;
 	private float focus_distance = 0.0f;
@@ -601,6 +604,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void stoppingVideo() {
 		main_activity.unlockScreen();
+		if( main_activity.getPreview().isVideoRecording() ) {
+			String toast = getContext().getResources().getString(R.string.stopped_recording_video);
+			if( main_activity.getPreview().getRemainingRestartVideo() > 0 ) {
+				toast += " (" + main_activity.getPreview().getRemainingRestartVideo() + " " + getContext().getResources().getString(R.string.repeats_to_go) + ")";
+			}
+			main_activity.getPreview().showToast(stopstart_video_toast, toast);
+		}
 	}
 
 	@Override
@@ -646,6 +656,39 @@ public class MyApplicationInterface implements ApplicationInterface {
 		editor.putString("last_video_error", debug_value);
 		editor.apply();
 		main_activity.getPreview().stopVideo(false);
+	}
+	
+	@Override
+	public void onVideoRecordStartError(CamcorderProfile profile) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onVideoRecordStartError");
+		String error_message = "";
+		String features = main_activity.getPreview().getErrorFeatures(profile);
+		if( features.length() > 0 ) {
+			error_message = getContext().getResources().getString(R.string.sorry) + ", " + features + " " + getContext().getResources().getString(R.string.not_supported);
+		}
+		else {
+			error_message = getContext().getResources().getString(R.string.failed_to_record_video);
+		}
+		main_activity.getPreview().showToast(null, error_message);
+	}
+
+	@Override
+	public void onVideoRecordStopError(CamcorderProfile profile) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onVideoRecordStopError");
+		//main_activity.getPreview().showToast(null, R.string.failed_to_record_video);
+		String features = main_activity.getPreview().getErrorFeatures(profile);
+		String error_message = getContext().getResources().getString(R.string.video_may_be_corrupted);
+		if( features.length() > 0 ) {
+			error_message += ", " + features + " " + getContext().getResources().getString(R.string.not_supported);
+		}
+		main_activity.getPreview().showToast(null, error_message);
+	}
+	
+	@Override
+	public void onFailedReconnectError() {
+		main_activity.getPreview().showToast(null, R.string.failed_to_reconnect_camera);
 	}
 
     void setImmersiveMode(final boolean immersive_mode) {

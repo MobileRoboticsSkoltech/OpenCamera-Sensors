@@ -86,6 +86,7 @@ public class MainActivity extends Activity {
 
 	private boolean ui_placement_right = true;
 
+	private ToastBoxer switch_camera_toast = new ToastBoxer();
 	private ToastBoxer switch_video_toast = new ToastBoxer();
     private ToastBoxer screen_locked_toast = new ToastBoxer();
     private ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
@@ -913,7 +914,15 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchCamera");
 		this.closePopup();
-		this.preview.switchCamera();
+		if( this.preview.canSwitchCamera() ) {
+		    if( preview.getCameraControllerManager().isFrontFacing( this.preview.getNextCameraId() ) ) {
+		    	preview.showToast(switch_camera_toast, R.string.front_camera);
+		    }
+		    else {
+		    	preview.showToast(switch_camera_toast, R.string.back_camera);
+		    }
+			this.preview.switchCamera();
+		}
     }
 
     public void clickedSwitchVideo(View view) {
