@@ -2319,7 +2319,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( camera_controller.setExposureCompensation(new_exposure) ) {
 				// now save
 				applicationInterface.setExposureCompensationPref(new_exposure);
-	    		showToast(seekbar_toast, getExposureCompensationString(new_exposure), Toast.LENGTH_SHORT, 96);
+	    		showToast(seekbar_toast, getExposureCompensationString(new_exposure), 96);
 			}
 		}
 	}
@@ -2335,7 +2335,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( camera_controller.setISO(new_iso) ) {
 				// now save
 				applicationInterface.setISOPref("" + new_iso);
-	    		showToast(seekbar_toast, getISOString(new_iso), Toast.LENGTH_SHORT, 96);
+	    		showToast(seekbar_toast, getISOString(new_iso), 96);
 			}
 		}
 	}
@@ -2351,7 +2351,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( camera_controller.setExposureTime(new_exposure_time) ) {
 				// now save
 				applicationInterface.setExposureTimePref(new_exposure_time);
-	    		showToast(seekbar_toast, getExposureTimeString(new_exposure_time), Toast.LENGTH_SHORT, 96);
+	    		showToast(seekbar_toast, getExposureTimeString(new_exposure_time), 96);
 			}
 		}
 	}
@@ -3994,14 +3994,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     public void showToast(final ToastBoxer clear_toast, final String message) {
-    	showToast(clear_toast, message, Toast.LENGTH_SHORT);
+    	showToast(clear_toast, message, 32);
     }
 
-    public void showToast(final ToastBoxer clear_toast, final String message, final int duration) {
-    	showToast(clear_toast, message, Toast.LENGTH_SHORT, 32);
-    }
-
-    public void showToast(final ToastBoxer clear_toast, final String message, final int duration, final int offset_y_dp) {
+    public void showToast(final ToastBoxer clear_toast, final String message, final int offset_y_dp) {
 		class RotatedTextView extends View {
 			private String [] lines = null;
 			private Paint paint = new Paint();
@@ -4097,7 +4093,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 				View text = new RotatedTextView(message, activity);
 				toast.setView(text);
-				toast.setDuration(duration);
+				toast.setDuration(Toast.LENGTH_SHORT);
 				toast.show();
 				last_toast = toast;
 			}

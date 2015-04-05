@@ -62,7 +62,6 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
@@ -2326,7 +2325,7 @@ public class MainActivity extends Activity {
 			}
 		}
 		
-		preview.showToast(switch_video_toast, toast_string, Toast.LENGTH_LONG);
+		preview.showToast(switch_video_toast, toast_string);
 	}
 
     // must be static, to safely call from other Activities:
