@@ -157,7 +157,7 @@ public class StorageUtils {
 
     String getSaveLocation() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-		String folder_name = sharedPreferences.getString(MainActivity.getSaveLocationPreferenceKey(), "OpenCamera");
+		String folder_name = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
 		return folder_name;
     }
     
@@ -216,12 +216,12 @@ public class StorageUtils {
         for(int count=1;count<=100;count++) {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             if( type == ApplicationInterface.MEDIA_TYPE_IMAGE ) {
-        		String prefix = sharedPreferences.getString(MainActivity.getSavePhotoPrefixPreferenceKey(), "IMG_");
+        		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
                 mediaFile = new File(mediaStorageDir.getPath() + File.separator +
                 	prefix + timeStamp + index + ".jpg");
             }
             else if( type == ApplicationInterface.MEDIA_TYPE_VIDEO ) {
-        		String prefix = sharedPreferences.getString(MainActivity.getSaveVideoPrefixPreferenceKey(), "VID_");
+        		String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
                 mediaFile = new File(mediaStorageDir.getPath() + File.separator +
                 		prefix + timeStamp + index + ".mp4");
             }

@@ -1,7 +1,7 @@
 package net.sourceforge.opencamera.UI;
 
-import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.StorageUtils;
 
@@ -228,7 +228,7 @@ public class FolderChooserDialog extends DialogFragment {
 				Log.d(TAG, "new_save_location: " + new_save_location);
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString(MainActivity.getSaveLocationPreferenceKey(), new_save_location);
+			editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), new_save_location);
 			editor.apply();
 			return true;
 		}

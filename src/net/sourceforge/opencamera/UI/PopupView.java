@@ -2,6 +2,7 @@ package net.sourceforge.opencamera.UI;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.Preview;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.CameraController.CameraController;
@@ -84,7 +85,7 @@ public class PopupView extends LinearLayout {
             
     		List<String> supported_isos = preview.getSupportedISOs();
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-    		String current_iso = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), "auto");
+    		String current_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
     		// n.b., we hardcode the string "ISO" as we don't want it translated - firstly more consistent with the ISO values returned by the driver, secondly need to worry about the size of the buttons, so don't want risk of a translated string being too long
         	addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, "TEST_ISO", new ButtonOptionsPopupListener() {
     			@Override
@@ -93,7 +94,7 @@ public class PopupView extends LinearLayout {
     					Log.d(TAG, "clicked iso: " + option);
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     				SharedPreferences.Editor editor = sharedPreferences.edit();
-    				editor.putString(MainActivity.getISOPreferenceKey(), option);
+    				editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
     				editor.apply();
 
     				main_activity.updateForSettings("ISO: " + option);
@@ -104,13 +105,13 @@ public class PopupView extends LinearLayout {
         	// popup should only be opened if we have a camera controller, but check just to be safe
     		if( preview.getCameraController() != null ) {
 	        	List<String> supported_white_balances = preview.getSupportedWhiteBalances();
-	        	addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), MainActivity.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE");
+	        	addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE");
 	
 	        	List<String> supported_scene_modes = preview.getSupportedSceneModes();
-	        	addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), MainActivity.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE");
+	        	addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE");
 	
 	        	List<String> supported_color_effects = preview.getSupportedColorEffects();
-	        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), MainActivity.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT");
+	        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT");
     		}
         	
         	if( main_activity.supportsAutoStabilise() ) {
@@ -118,14 +119,14 @@ public class PopupView extends LinearLayout {
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
         		checkBox.setTextColor(Color.WHITE);
 
-        		boolean auto_stabilise = sharedPreferences.getBoolean(MainActivity.getAutoStabilisePreferenceKey(), false);
+        		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
         		checkBox.setChecked(auto_stabilise);
         		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
 	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putBoolean(MainActivity.getAutoStabilisePreferenceKey(), isChecked);
+						editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), isChecked);
 						editor.apply();
 
 						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
@@ -162,7 +163,7 @@ public class PopupView extends LinearLayout {
 	                String resolution_string = new_size.width + " " + new_size.height;
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(MainActivity.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
+					editor.putString(PreferenceKeys.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
 					editor.apply();
 
 					// make it easier to scroll through the list of resolutions without a pause each time
@@ -213,7 +214,7 @@ public class PopupView extends LinearLayout {
     				String quality = video_sizes.get(video_size_index);
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(MainActivity.getVideoQualityPreferenceKey(preview.getCameraId()), quality);
+					editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(preview.getCameraId()), quality);
 					editor.apply();
 
 					// make it easier to scroll through the list of resolutions without a pause each time
@@ -242,7 +243,7 @@ public class PopupView extends LinearLayout {
 
     		final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
         	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
-    		String timer_value = sharedPreferences.getString(MainActivity.getTimerPreferenceKey(), "0");
+    		String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
     		timer_index = Arrays.asList(timer_values).indexOf(timer_value);
     		if( timer_index == -1 ) {
 				if( MyDebug.LOG )
@@ -256,7 +257,7 @@ public class PopupView extends LinearLayout {
     				String new_timer_value = timer_values[timer_index];
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(MainActivity.getTimerPreferenceKey(), new_timer_value);
+					editor.putString(PreferenceKeys.getTimerPreferenceKey(), new_timer_value);
 					editor.apply();
     			}
 				@Override
@@ -281,7 +282,7 @@ public class PopupView extends LinearLayout {
 
         	final String [] burst_mode_values = getResources().getStringArray(R.array.preference_burst_mode_values);
         	String [] burst_mode_entries = getResources().getStringArray(R.array.preference_burst_mode_entries);
-    		String burst_mode_value = sharedPreferences.getString(MainActivity.getBurstModePreferenceKey(), "1");
+    		String burst_mode_value = sharedPreferences.getString(PreferenceKeys.getBurstModePreferenceKey(), "1");
     		burst_mode_index = Arrays.asList(burst_mode_values).indexOf(burst_mode_value);
     		if( burst_mode_index == -1 ) {
 				if( MyDebug.LOG )
@@ -295,7 +296,7 @@ public class PopupView extends LinearLayout {
     				String new_burst_mode_value = burst_mode_values[burst_mode_index];
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(MainActivity.getBurstModePreferenceKey(), new_burst_mode_value);
+					editor.putString(PreferenceKeys.getBurstModePreferenceKey(), new_burst_mode_value);
 					editor.apply();
     			}
 				@Override

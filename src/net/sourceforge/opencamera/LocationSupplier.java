@@ -92,7 +92,7 @@ public class LocationSupplier {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		// Define a listener that responds to location updates
 		// we only set it up if store_location is true, to avoid unnecessarily wasting battery
-		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
+		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
 		if( store_location && locationListeners == null ) {
 			locationListeners = new MyLocationListener[2];
 			locationListeners[0] = new MyLocationListener();

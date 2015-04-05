@@ -244,7 +244,7 @@ public class MainActivity extends Activity {
             }
         });
 
-		boolean has_done_first_time = sharedPreferences.contains(getFirstTimePreferenceKey());
+		boolean has_done_first_time = sharedPreferences.contains(PreferenceKeys.getFirstTimePreferenceKey());
         if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle(R.string.app_name);
@@ -325,7 +325,7 @@ public class MainActivity extends Activity {
 	private void setFirstTimeFlag() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putBoolean(getFirstTimePreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.getFirstTimePreferenceKey(), true);
 		editor.apply();
 	}
 
@@ -337,7 +337,7 @@ public class MainActivity extends Activity {
         case KeyEvent.KEYCODE_VOLUME_DOWN:
 	        {
 	    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-	    		String volume_keys = sharedPreferences.getString(getVolumeKeysPreferenceKey(), "volume_take_photo");
+	    		String volume_keys = sharedPreferences.getString(PreferenceKeys.getVolumeKeysPreferenceKey(), "volume_take_photo");
 	    		if( volume_keys.equals("volume_take_photo") ) {
 	            	takePicture();
 	                return true;
@@ -362,7 +362,7 @@ public class MainActivity extends Activity {
 	                return true;
 	    		}
 	    		else if( volume_keys.equals("volume_exposure") ) {
-	    			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
+	    			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
 	    			boolean manual_iso = !value.equals(preview.getCameraController().getDefaultISO());
 	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP ) {
 	    				if( manual_iso ) {
@@ -384,10 +384,10 @@ public class MainActivity extends Activity {
 	    		}
 	    		else if( volume_keys.equals("volume_auto_stabilise") ) {
 	    			if( this.supports_auto_stabilise ) {
-						boolean auto_stabilise = sharedPreferences.getBoolean(getAutoStabilisePreferenceKey(), false);
+						boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
 						auto_stabilise = !auto_stabilise;
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putBoolean(getAutoStabilisePreferenceKey(), auto_stabilise);
+						editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), auto_stabilise);
 						editor.apply();
 						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(auto_stabilise ? R.string.on : R.string.off);
 						preview.showToast(changed_auto_stabilise_toast, message);
@@ -563,7 +563,7 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "layoutUI");
 		//this.preview.updateUIPlacement();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String ui_placement = sharedPreferences.getString(getUIPlacementPreferenceKey(), "ui_right");
+		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
     	// we cache the preference_ui_placement to save having to check it in the draw() method
 		this.ui_placement_right = ui_placement.equals("ui_right");
 		if( MyDebug.LOG )
@@ -987,7 +987,7 @@ public class MainActivity extends Activity {
 		}
 		else if( preview.getCameraController() != null ) {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			String value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
+			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
 			if( !value.equals(preview.getCameraController().getDefaultISO()) ) {
 				if( preview.supportsISORange()) {
 					iso_seek_bar.setVisibility(View.VISIBLE);
@@ -1127,7 +1127,7 @@ public class MainActivity extends Activity {
 		            }
 
 		    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-		    		String ui_placement = sharedPreferences.getString(getUIPlacementPreferenceKey(), "ui_right");
+		    		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
 		    		boolean ui_placement_right = ui_placement.equals("ui_right");
 		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, ui_placement_right ? 0.0f : 1.0f);
 		    		animation.setDuration(100);
@@ -1263,7 +1263,7 @@ public class MainActivity extends Activity {
 			String scene_mode = preview.getCameraController().getSceneMode();
 			if( MyDebug.LOG )
 				Log.d(TAG, "scene mode was: " + scene_mode);
-			String key = getSceneModePreferenceKey();
+			String key = PreferenceKeys.getSceneModePreferenceKey();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			String value = sharedPreferences.getString(key, preview.getCameraController().getDefaultSceneMode());
 			if( !value.equals(scene_mode) ) {
@@ -1328,7 +1328,7 @@ public class MainActivity extends Activity {
     	// whether we are using a Kit Kat style immersive mode (either hiding GUI, or everything)
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    		String immersive_mode = sharedPreferences.getString(getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+    		String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
     		if( immersive_mode.equals("immersive_mode_gui") || immersive_mode.equals("immersive_mode_everything") )
     			return true;
 		}
@@ -1375,7 +1375,7 @@ public class MainActivity extends Activity {
     		}
     		else {
         		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        		String immersive_mode = sharedPreferences.getString(getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+        		String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
         		if( immersive_mode.equals("immersive_mode_low_profile") )
         			getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         		else
@@ -1403,7 +1403,7 @@ public class MainActivity extends Activity {
 		// force to landscape mode
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		// keep screen active - see http://stackoverflow.com/questions/2131948/force-screen-on
-		if( sharedPreferences.getBoolean(getKeepDisplayOnPreferenceKey(), true) ) {
+		if( sharedPreferences.getBoolean(PreferenceKeys.getKeepDisplayOnPreferenceKey(), true) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "do keep screen on");
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -1413,7 +1413,7 @@ public class MainActivity extends Activity {
 				Log.d(TAG, "don't keep screen on");
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
-		if( sharedPreferences.getBoolean(getShowWhenLockedPreferenceKey(), true) ) {
+		if( sharedPreferences.getBoolean(PreferenceKeys.getShowWhenLockedPreferenceKey(), true) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "do show when locked");
 	        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
@@ -1429,7 +1429,7 @@ public class MainActivity extends Activity {
 		// done here rather than onCreate, so that changing it in preferences takes effect without restarting app
 		{
 	        WindowManager.LayoutParams layout = getWindow().getAttributes();
-			if( sharedPreferences.getBoolean(getMaxBrightnessPreferenceKey(), true) ) {
+			if( sharedPreferences.getBoolean(PreferenceKeys.getMaxBrightnessPreferenceKey(), true) ) {
 		        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
 	        }
 			else {
@@ -1761,7 +1761,7 @@ public class MainActivity extends Activity {
 						preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder);
 						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putString(getSaveLocationPreferenceKey(), save_folder);
+						editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), save_folder);
 						editor.apply();
 						updateFolderHistory(); // to move new selection to most recent
 					}
@@ -1948,7 +1948,7 @@ public class MainActivity extends Activity {
 		    SeekBar zoomSeekBar = (SeekBar) findViewById(R.id.zoom_seekbar);
 
 			if( preview.supportsZoom() ) {
-				if( sharedPreferences.getBoolean(MainActivity.getShowZoomControlsPreferenceKey(), false) ) {
+				if( sharedPreferences.getBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), false) ) {
 				    zoomControls.setIsZoomInEnabled(true);
 			        zoomControls.setIsZoomOutEnabled(true);
 			        zoomControls.setZoomSpeed(20);
@@ -1991,7 +1991,7 @@ public class MainActivity extends Activity {
 					}
 				});
 
-				if( sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), true) ) {
+				if( sharedPreferences.getBoolean(PreferenceKeys.getShowZoomSliderControlsPreferenceKey(), true) ) {
 					if( !applicationInterface.inImmersiveMode() ) {
 						zoomSeekBar.setVisibility(View.VISIBLE);
 					}
@@ -2142,7 +2142,7 @@ public class MainActivity extends Activity {
 		}
 
 		View exposureButton = (View) findViewById(R.id.exposure);
-		String iso_value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
+		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
 		boolean manual_iso = !iso_value.equals(preview.getCameraController().getDefaultISO());
 		boolean supports_exposure = preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
 	    exposureButton.setVisibility(supports_exposure && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
@@ -2264,9 +2264,9 @@ public class MainActivity extends Activity {
 			else
 				bitrate_string = profile.videoBitRate + "bps";
 
-			String timer_value = sharedPreferences.getString(MainActivity.getVideoMaxDurationPreferenceKey(), "0");
+			String timer_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
 			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
-			boolean record_audio = sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
+			boolean record_audio = sharedPreferences.getBoolean(PreferenceKeys.getRecordAudioPreferenceKey(), true);
 			if( !record_audio ) {
 				toast_string += "\n" + getResources().getString(R.string.audio_disabled);
 			}
@@ -2279,7 +2279,7 @@ public class MainActivity extends Activity {
 					toast_string += "\n" + getResources().getString(R.string.max_duration) +": " + entry;
 				}
 			}
-			if( sharedPreferences.getBoolean(MainActivity.getVideoFlashPreferenceKey(), false) && preview.supportsFlash() ) {
+			if( sharedPreferences.getBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), false) && preview.supportsFlash() ) {
 				toast_string += "\n" + getResources().getString(R.string.preference_video_flash);
 			}
 		}
@@ -2299,11 +2299,11 @@ public class MainActivity extends Activity {
 				}
 			}
 		}
-		String iso_value = sharedPreferences.getString(MainActivity.getISOPreferenceKey(), camera_controller.getDefaultISO());
+		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), camera_controller.getDefaultISO());
 		if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
 			toast_string += "\nISO: " + iso_value;
 			if( preview.supportsExposureTime() ) {
-				long exposure_time_value = sharedPreferences.getLong(MainActivity.getExposureTimePreferenceKey(), camera_controller.getDefaultExposureTime());
+				long exposure_time_value = sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), camera_controller.getDefaultExposureTime());
 				toast_string += " " + preview.getExposureTimeString(exposure_time_value);
 			}
 		}
@@ -2323,7 +2323,7 @@ public class MainActivity extends Activity {
     	if( color_effect != null && !color_effect.equals(camera_controller.getDefaultColorEffect()) ) {
     		toast_string += "\n" + getResources().getString(R.string.color_effect) + ": " + color_effect;
     	}
-		String lock_orientation = sharedPreferences.getString(MainActivity.getLockOrientationPreferenceKey(), "none");
+		String lock_orientation = sharedPreferences.getString(PreferenceKeys.getLockOrientationPreferenceKey(), "none");
 		if( !lock_orientation.equals("none") ) {
 			String [] entries_array = getResources().getStringArray(R.array.preference_lock_orientation_entries);
 			String [] values_array = getResources().getStringArray(R.array.preference_lock_orientation_values);
@@ -2337,260 +2337,6 @@ public class MainActivity extends Activity {
 		preview.showToast(switch_video_toast, toast_string);
 	}
 
-    // must be static, to safely call from other Activities:
-
-    public static String getFirstTimePreferenceKey() {
-        return "done_first_time";
-    }
-
-    public static String getUseCamera2PreferenceKey() {
-    	return "preference_use_camera2";
-    }
-
-    public static String getFlashPreferenceKey(int cameraId) {
-    	return "flash_value_" + cameraId;
-    }
-
-    public static String getFocusPreferenceKey(int cameraId) {
-    	return "focus_value_" + cameraId;
-    }
-
-    public static String getResolutionPreferenceKey(int cameraId) {
-    	return "camera_resolution_" + cameraId;
-    }
-    
-    public static String getVideoQualityPreferenceKey(int cameraId) {
-    	return "video_quality_" + cameraId;
-    }
-    
-    public static String getIsVideoPreferenceKey() {
-    	return "is_video";
-    }
-    
-    public static String getExposurePreferenceKey() {
-    	return "preference_exposure";
-    }
-
-    public static String getColorEffectPreferenceKey() {
-    	return "preference_color_effect";
-    }
-
-    public static String getSceneModePreferenceKey() {
-    	return "preference_scene_mode";
-    }
-
-    public static String getWhiteBalancePreferenceKey() {
-    	return "preference_white_balance";
-    }
-
-    public static String getISOPreferenceKey() {
-    	return "preference_iso";
-    }
-    
-    public static String getExposureTimePreferenceKey() {
-    	return "preference_exposure_time";
-    }
-    
-    public static String getVolumeKeysPreferenceKey() {
-    	return "preference_volume_keys";
-    }
-    
-    public static String getQualityPreferenceKey() {
-    	return "preference_quality";
-    }
-    
-    public static String getAutoStabilisePreferenceKey() {
-    	return "preference_auto_stabilise";
-    }
-    
-    public static String getLocationPreferenceKey() {
-    	return "preference_location";
-    }
-    
-    public static String getGPSDirectionPreferenceKey() {
-    	return "preference_gps_direction";
-    }
-    
-    public static String getRequireLocationPreferenceKey() {
-    	return "preference_require_location";
-    }
-    
-    public static String getStampPreferenceKey() {
-    	return "preference_stamp";
-    }
-
-    public static String getTextStampPreferenceKey() {
-    	return "preference_textstamp";
-    }
-
-    public static String getStampFontSizePreferenceKey() {
-    	return "preference_stamp_fontsize";
-    }
-
-    public static String getUIPlacementPreferenceKey() {
-    	return "preference_ui_placement";
-    }
-    
-    public static String getPausePreviewPreferenceKey() {
-    	return "preference_pause_preview";
-    }
-    
-    public static String getThumbnailAnimationPreferenceKey() {
-    	return "preference_thumbnail_animation";
-    }
-
-    public static String getShowWhenLockedPreferenceKey() {
-    	return "preference_show_when_locked";
-    }
-
-    public static String getKeepDisplayOnPreferenceKey() {
-    	return "preference_keep_display_on";
-    }
-
-    public static String getMaxBrightnessPreferenceKey() {
-    	return "preference_max_brightness";
-    }
-
-    public static String getSaveLocationPreferenceKey() {
-    	return "preference_save_location";
-    }
-
-    public static String getSavePhotoPrefixPreferenceKey() {
-    	return "preference_save_photo_prefix";
-    }
-
-    public static String getSaveVideoPrefixPreferenceKey() {
-    	return "preference_save_video_prefix";
-    }
-
-    public static String getShowZoomControlsPreferenceKey() {
-    	return "preference_show_zoom_controls";
-    }
-
-    public static String getShowZoomSliderControlsPreferenceKey() {
-    	return "preference_show_zoom_slider_controls";
-    }
-    
-    public static String getShowZoomPreferenceKey() {
-    	return "preference_show_zoom";
-    }
-    
-    public static String getShowISOPreferenceKey() {
-    	return "preference_show_iso";
-    }
-
-    public static String getShowAnglePreferenceKey() {
-    	return "preference_show_angle";
-    }
-    
-    public static String getShowAngleLinePreferenceKey() {
-    	return "preference_show_angle_line";
-    }
-
-    public static String getShowGeoDirectionPreferenceKey() {
-    	return "preference_show_geo_direction";
-    }
-    
-    public static String getShowFreeMemoryPreferenceKey() {
-    	return "preference_free_memory";
-    }
-    
-    public static String getShowTimePreferenceKey() {
-    	return "preference_show_time";
-    }
-    
-    public static String getShowBatteryPreferenceKey() {
-    	return "preference_show_battery";
-    }
-    
-    public static String getShowGridPreferenceKey() {
-    	return "preference_grid";
-    }
-    
-    public static String getShowCropGuidePreferenceKey() {
-    	return "preference_crop_guide";
-    }
-    
-    public static String getFaceDetectionPreferenceKey() {
-    	return "preference_face_detection";
-    }
-
-    public static String getVideoStabilizationPreferenceKey() {
-    	return "preference_video_stabilization";
-    }
-    
-    public static String getForceVideo4KPreferenceKey() {
-    	return "preference_force_video_4k";
-    }
-    
-    public static String getVideoBitratePreferenceKey() {
-    	return "preference_video_bitrate";
-    }
-
-    public static String getVideoFPSPreferenceKey() {
-    	return "preference_video_fps";
-    }
-    
-    public static String getVideoMaxDurationPreferenceKey() {
-    	return "preference_video_max_duration";
-    }
-    
-    public static String getVideoRestartPreferenceKey() {
-    	return "preference_video_restart";
-    }
-    
-    public static String getVideoFlashPreferenceKey() {
-    	return "preference_video_flash";
-    }
-
-    public static String getLockVideoPreferenceKey() {
-    	return "preference_lock_video";
-    }
-    
-    public static String getRecordAudioPreferenceKey() {
-    	return "preference_record_audio";
-    }
-
-    public static String getRecordAudioSourcePreferenceKey() {
-    	return "preference_record_audio_src";
-    }
-
-    public static String getPreviewSizePreferenceKey() {
-    	return "preference_preview_size";
-    }
-
-    public static String getRotatePreviewPreferenceKey() {
-    	return "preference_rotate_preview";
-    }
-
-    public static String getLockOrientationPreferenceKey() {
-    	return "preference_lock_orientation";
-    }
-
-    public static String getTimerPreferenceKey() {
-    	return "preference_timer";
-    }
-    
-    public static String getTimerBeepPreferenceKey() {
-    	return "preference_timer_beep";
-    }
-    
-    public static String getBurstModePreferenceKey() {
-    	return "preference_burst_mode";
-    }
-    
-    public static String getBurstIntervalPreferenceKey() {
-    	return "preference_burst_interval";
-    }
-    
-    public static String getShutterSoundPreferenceKey() {
-    	return "preference_shutter_sound";
-    }
-    
-    public static String getImmersiveModePreferenceKey() {
-    	return "preference_immersive_mode";
-    }
-    
     // for testing:
 	public ArrayList<String> getSaveLocationHistory() {
 		return this.save_location_history;

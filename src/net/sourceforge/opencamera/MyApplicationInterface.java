@@ -141,7 +141,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public boolean useCamera2() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         if( main_activity.supportsCamera2() ) {
-    		return sharedPreferences.getBoolean(MainActivity.getUseCamera2PreferenceKey(), false);
+    		return sharedPreferences.getBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), false);
         }
         return false;
     }
@@ -159,50 +159,50 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public String getFlashPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(MainActivity.getFlashPreferenceKey(main_activity.getPreview().getCameraId()), "");
+		return sharedPreferences.getString(PreferenceKeys.getFlashPreferenceKey(main_activity.getPreview().getCameraId()), "");
     }
 
     @Override
 	public String getFocusPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(MainActivity.getFocusPreferenceKey(main_activity.getPreview().getCameraId()), "");
+		return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(main_activity.getPreview().getCameraId()), "");
     }
 
     @Override
 	public boolean isVideoPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getBoolean(MainActivity.getIsVideoPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), false);
     }
 
     @Override
 	public String getSceneModePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String value = sharedPreferences.getString(MainActivity.getSceneModePreferenceKey(), "auto");
+		String value = sharedPreferences.getString(PreferenceKeys.getSceneModePreferenceKey(), "auto");
 		return value;
     }
     
     @Override
     public String getColorEffectPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(MainActivity.getColorEffectPreferenceKey(), "none");
+		return sharedPreferences.getString(PreferenceKeys.getColorEffectPreferenceKey(), "none");
     }
 
     @Override
     public String getWhiteBalancePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(MainActivity.getWhiteBalancePreferenceKey(), "auto");
+		return sharedPreferences.getString(PreferenceKeys.getWhiteBalancePreferenceKey(), "auto");
     }
 
     @Override
 	public String getISOPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(MainActivity.getISOPreferenceKey(), "auto");
+    	return sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
     }
     
     @Override
 	public int getExposureCompensationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String value = sharedPreferences.getString(MainActivity.getExposurePreferenceKey(), "0");
+		String value = sharedPreferences.getString(PreferenceKeys.getExposurePreferenceKey(), "0");
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved exposure value: " + value);
 		int exposure = 0;
@@ -221,7 +221,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public Pair<Integer, Integer> getCameraResolutionPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String resolution_value = sharedPreferences.getString(MainActivity.getResolutionPreferenceKey(main_activity.getPreview().getCameraId()), "");
+		String resolution_value = sharedPreferences.getString(PreferenceKeys.getResolutionPreferenceKey(main_activity.getPreview().getCameraId()), "");
 		if( MyDebug.LOG )
 			Log.d(TAG, "resolution_value: " + resolution_value);
 		if( resolution_value.length() > 0 ) {
@@ -261,7 +261,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getImageQualityPref");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String image_quality_s = sharedPreferences.getString(MainActivity.getQualityPreferenceKey(), "90");
+		String image_quality_s = sharedPreferences.getString(PreferenceKeys.getQualityPreferenceKey(), "90");
 		int image_quality = 0;
 		try {
 			image_quality = Integer.parseInt(image_quality_s);
@@ -277,25 +277,25 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public boolean getFaceDetectionPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getBoolean(MainActivity.getFaceDetectionPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.getFaceDetectionPreferenceKey(), false);
     }
     
 	@Override
 	public String getVideoQualityPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(MainActivity.getVideoQualityPreferenceKey(main_activity.getPreview().getCameraId()), "");
+		return sharedPreferences.getString(PreferenceKeys.getVideoQualityPreferenceKey(main_activity.getPreview().getCameraId()), "");
 	}
 	
     @Override
 	public boolean getVideoStabilizationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getBoolean(MainActivity.getVideoStabilizationPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.getVideoStabilizationPreferenceKey(), false);
     }
     
     @Override
 	public boolean getForce4KPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		if( main_activity.getPreview().getCameraId() == 0 && sharedPreferences.getBoolean(MainActivity.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K() ) {
+		if( main_activity.getPreview().getCameraId() == 0 && sharedPreferences.getBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K() ) {
 			return true;
 		}
 		return false;
@@ -304,19 +304,19 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public String getVideoBitratePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(MainActivity.getVideoBitratePreferenceKey(), "default");
+    	return sharedPreferences.getString(PreferenceKeys.getVideoBitratePreferenceKey(), "default");
     }
 
     @Override
     public String getVideoFPSPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(MainActivity.getVideoFPSPreferenceKey(), "default");
+    	return sharedPreferences.getString(PreferenceKeys.getVideoFPSPreferenceKey(), "default");
     }
     
     @Override
     public long getVideoMaxDurationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String video_max_duration_value = sharedPreferences.getString(MainActivity.getVideoMaxDurationPreferenceKey(), "0");
+		String video_max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
 		long video_max_duration = 0;
 		try {
 			video_max_duration = Integer.parseInt(video_max_duration_value) * 1000;
@@ -333,7 +333,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public int getVideoRestartTimesPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String restart_value = sharedPreferences.getString(MainActivity.getVideoRestartPreferenceKey(), "0");
+		String restart_value = sharedPreferences.getString(PreferenceKeys.getVideoRestartPreferenceKey(), "0");
 		int remaining_restart_video = 0;
 		try {
 			remaining_restart_video = Integer.parseInt(restart_value);
@@ -350,49 +350,49 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public boolean getVideoFlashPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(MainActivity.getVideoFlashPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), false);
     }
     
     @Override
 	public String getPreviewSizePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(MainActivity.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg");
+		return sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg");
     }
     
     @Override
     public String getPreviewRotationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(MainActivity.getRotatePreviewPreferenceKey(), "0");
+    	return sharedPreferences.getString(PreferenceKeys.getRotatePreviewPreferenceKey(), "0");
     }
     
     @Override
     public String getLockOrientationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(MainActivity.getLockOrientationPreferenceKey(), "none");
+    	return sharedPreferences.getString(PreferenceKeys.getLockOrientationPreferenceKey(), "none");
     }
 
     @Override
     public boolean getPausePreviewPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(MainActivity.getPausePreviewPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), false);
     }
     
     @Override
     public boolean getThumbnailAnimationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(MainActivity.getThumbnailAnimationPreferenceKey(), true);
+    	return sharedPreferences.getBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), true);
     }
     
     @Override
     public boolean getShutterSoundPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(MainActivity.getShutterSoundPreferenceKey(), true);
+    	return sharedPreferences.getBoolean(PreferenceKeys.getShutterSoundPreferenceKey(), true);
     }
 
     @Override
     public long getTimerPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String timer_value = sharedPreferences.getString(MainActivity.getTimerPreferenceKey(), "0");
+		String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
 		long timer_delay = 0;
 		try {
 			timer_delay = Integer.parseInt(timer_value) * 1000;
@@ -409,13 +409,13 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public String getRepeatPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(MainActivity.getBurstModePreferenceKey(), "1");
+    	return sharedPreferences.getString(PreferenceKeys.getBurstModePreferenceKey(), "1");
     }
     
     @Override
     public long getRepeatIntervalPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String timer_value = sharedPreferences.getString(MainActivity.getBurstIntervalPreferenceKey(), "0");
+		String timer_value = sharedPreferences.getString(PreferenceKeys.getBurstIntervalPreferenceKey(), "0");
 		long timer_delay = 0;
 		try {
 			timer_delay = Integer.parseInt(timer_value) * 1000;
@@ -432,37 +432,37 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public boolean getGeotaggingPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
     }
     
     @Override
     public boolean getRequireLocationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(MainActivity.getRequireLocationPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.getRequireLocationPreferenceKey(), false);
     }
     
     @Override
     public boolean getGeodirectionPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(MainActivity.getGPSDirectionPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.getGPSDirectionPreferenceKey(), false);
     }
     
     @Override
 	public boolean getRecordAudioPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
+    	return sharedPreferences.getBoolean(PreferenceKeys.getRecordAudioPreferenceKey(), true);
     }
     
     @Override
     public String getRecordAudioSourcePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(MainActivity.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
+    	return sharedPreferences.getString(PreferenceKeys.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
     }
 
     @Override
     public boolean getAutoStabilisePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		boolean auto_stabilise = sharedPreferences.getBoolean(MainActivity.getAutoStabilisePreferenceKey(), false);
+		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
 		if( auto_stabilise && main_activity.supportsAutoStabilise() )
 			return true;
 		return false;
@@ -471,20 +471,20 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public String getStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(MainActivity.getStampPreferenceKey(), "preference_stamp_no");
+    	return sharedPreferences.getString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_no");
     }
     
     @Override
     public String getTextStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(MainActivity.getTextStampPreferenceKey(), "");
+    	return sharedPreferences.getString(PreferenceKeys.getTextStampPreferenceKey(), "");
     }
     
     @Override
     public int getTextStampFontSizePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	int font_size = 12;
-		String value = sharedPreferences.getString(MainActivity.getStampFontSizePreferenceKey(), "12");
+		String value = sharedPreferences.getString(PreferenceKeys.getStampFontSizePreferenceKey(), "12");
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved font size: " + value);
 		try {
@@ -508,7 +508,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public long getExposureTimePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getLong(MainActivity.getExposureTimePreferenceKey(), 1000000000l/30);
+    	return sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), 1000000000l/30);
     }
     
     @Override
@@ -596,7 +596,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void startingVideo() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		if( sharedPreferences.getBoolean(MainActivity.getLockVideoPreferenceKey(), false) ) {
+		if( sharedPreferences.getBoolean(PreferenceKeys.getLockVideoPreferenceKey(), false) ) {
 			main_activity.lockScreen();
 		}
 	}
@@ -741,13 +741,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "has_zoom: " + main_activity.getPreview().supportsZoom());
 				}
-				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(MainActivity.getShowZoomControlsPreferenceKey(), false) ) {
+				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), false) ) {
 					zoomControls.setVisibility(visibility);
 				}
-				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(MainActivity.getShowZoomSliderControlsPreferenceKey(), true) ) {
+				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomSliderControlsPreferenceKey(), true) ) {
 					zoomSeekBar.setVisibility(visibility);
 				}
-        		String pref_immersive_mode = sharedPreferences.getString(MainActivity.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+        		String pref_immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
         		if( pref_immersive_mode.equals("immersive_mode_everything") ) {
     			    View takePhotoButton = (View) main_activity.findViewById(R.id.take_photo);
     			    takePhotoButton.setVisibility(visibility);
@@ -843,7 +843,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "timerBeep()");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		if( sharedPreferences.getBoolean(MainActivity.getTimerBeepPreferenceKey(), true) ) {
+		if( sharedPreferences.getBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), true) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "play beep!");
 		    try {
@@ -871,7 +871,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public void setFlashPref(String flash_value) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(MainActivity.getFlashPreferenceKey(main_activity.getPreview().getCameraId()), flash_value);
+		editor.putString(PreferenceKeys.getFlashPreferenceKey(main_activity.getPreview().getCameraId()), flash_value);
 		editor.apply();
     }
 
@@ -879,7 +879,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public void setFocusPref(String focus_value) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(MainActivity.getFocusPreferenceKey(main_activity.getPreview().getCameraId()), focus_value);
+		editor.putString(PreferenceKeys.getFocusPreferenceKey(main_activity.getPreview().getCameraId()), focus_value);
 		editor.apply();
 		// focus may be updated by preview (e.g., when switching to/from video mode)
     	final int visibility = main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
@@ -891,7 +891,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void setVideoPref(boolean is_video) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putBoolean(MainActivity.getIsVideoPreferenceKey(), is_video);
+		editor.putBoolean(PreferenceKeys.getIsVideoPreferenceKey(), is_video);
 		editor.apply();
     }
 
@@ -899,7 +899,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public void setSceneModePref(String scene_mode) {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(MainActivity.getSceneModePreferenceKey(), scene_mode);
+		editor.putString(PreferenceKeys.getSceneModePreferenceKey(), scene_mode);
 		editor.apply();
     }
     
@@ -907,7 +907,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void clearSceneModePref() {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(MainActivity.getSceneModePreferenceKey());
+		editor.remove(PreferenceKeys.getSceneModePreferenceKey());
 		editor.apply();
     }
 	
@@ -915,7 +915,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void setColorEffectPref(String color_effect) {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(MainActivity.getColorEffectPreferenceKey(), color_effect);
+		editor.putString(PreferenceKeys.getColorEffectPreferenceKey(), color_effect);
 		editor.apply();
     }
 	
@@ -923,7 +923,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void clearColorEffectPref() {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(MainActivity.getColorEffectPreferenceKey());
+		editor.remove(PreferenceKeys.getColorEffectPreferenceKey());
 		editor.apply();
     }
 	
@@ -931,7 +931,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void setWhiteBalancePref(String white_balance) {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(MainActivity.getWhiteBalancePreferenceKey(), white_balance);
+		editor.putString(PreferenceKeys.getWhiteBalancePreferenceKey(), white_balance);
 		editor.apply();
     }
 
@@ -939,7 +939,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void clearWhiteBalancePref() {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(MainActivity.getWhiteBalancePreferenceKey());
+		editor.remove(PreferenceKeys.getWhiteBalancePreferenceKey());
 		editor.apply();
     }
 	
@@ -947,7 +947,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void setISOPref(String iso) {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(MainActivity.getISOPreferenceKey(), iso);
+		editor.putString(PreferenceKeys.getISOPreferenceKey(), iso);
 		editor.apply();
     }
 
@@ -955,7 +955,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void clearISOPref() {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(MainActivity.getISOPreferenceKey());
+		editor.remove(PreferenceKeys.getISOPreferenceKey());
 		editor.apply();
     }
 	
@@ -963,7 +963,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void setExposureCompensationPref(int exposure) {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(MainActivity.getExposurePreferenceKey(), "" + exposure);
+		editor.putString(PreferenceKeys.getExposurePreferenceKey(), "" + exposure);
 		editor.apply();
     }
 
@@ -971,7 +971,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void clearExposureCompensationPref() {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(MainActivity.getExposurePreferenceKey());
+		editor.remove(PreferenceKeys.getExposurePreferenceKey());
 		editor.apply();
     }
 	
@@ -983,7 +983,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(MainActivity.getResolutionPreferenceKey(main_activity.getPreview().getCameraId()), resolution_value);
+		editor.putString(PreferenceKeys.getResolutionPreferenceKey(main_activity.getPreview().getCameraId()), resolution_value);
 		editor.apply();
     }
     
@@ -991,7 +991,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public void setVideoQualityPref(String video_quality) {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(MainActivity.getVideoQualityPreferenceKey(main_activity.getPreview().getCameraId()), video_quality);
+		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(main_activity.getPreview().getCameraId()), video_quality);
 		editor.apply();
     }
     
@@ -1005,7 +1005,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void setExposureTimePref(long exposure_time) {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putLong(MainActivity.getExposureTimePreferenceKey(), exposure_time);
+		editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
 		editor.apply();
 	}
 
@@ -1013,7 +1013,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void clearExposureTimePref() {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(MainActivity.getExposureTimePreferenceKey());
+		editor.remove(PreferenceKeys.getExposureTimePreferenceKey());
 		editor.apply();
     }
 
@@ -1035,14 +1035,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 		double geo_direction = preview.getGeoDirection();
 		boolean ui_placement_right = main_activity.getUIPlacementRight();
 		if( inImmersiveMode() ) {
-			String immersive_mode = sharedPreferences.getString(MainActivity.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
 			if( immersive_mode.equals("immersive_mode_everything") ) {
 				// exit, to ensure we don't display anything!
 				return;
 			}
 		}
 		final float scale = getContext().getResources().getDisplayMetrics().density;
-		String preference_grid = sharedPreferences.getString(MainActivity.getShowGridPreferenceKey(), "preference_grid_none");
+		String preference_grid = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
 		if( camera_controller != null && preference_grid.equals("preference_grid_3x3") ) {
 			p.setColor(Color.WHITE);
 			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
@@ -1061,8 +1061,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			canvas.drawLine(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f - crosshairs_radius, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f + crosshairs_radius, p);
 			canvas.drawLine(canvas.getWidth()/2.0f - crosshairs_radius, canvas.getHeight()/2.0f, canvas.getWidth()/2.0f + crosshairs_radius, canvas.getHeight()/2.0f, p);
 		}
-		if( preview.isVideo() || sharedPreferences.getString(MainActivity.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
-			String preference_crop_guide = sharedPreferences.getString(MainActivity.getShowCropGuidePreferenceKey(), "crop_guide_none");
+		if( preview.isVideo() || sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
+			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.getShowCropGuidePreferenceKey(), "crop_guide_none");
 			if( camera_controller != null && preview.getTargetRatio() > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
 				p.setStyle(Paint.Style.STROKE);
 				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
@@ -1205,8 +1205,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( camera_controller != null && !preview.isPreviewPaused() ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
-			boolean draw_angle = has_level_angle && sharedPreferences.getBoolean(MainActivity.getShowAnglePreferenceKey(), true);
-			boolean draw_geo_direction = has_geo_direction && sharedPreferences.getBoolean(MainActivity.getShowGeoDirectionPreferenceKey(), true);
+			boolean draw_angle = has_level_angle && sharedPreferences.getBoolean(PreferenceKeys.getShowAnglePreferenceKey(), true);
+			boolean draw_geo_direction = has_geo_direction && sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionPreferenceKey(), true);
 			if( draw_angle ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
@@ -1293,7 +1293,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
-		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowISOPreferenceKey(), true) ) {
+		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
 			int pixels_offset_y = 2*text_y;
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
@@ -1320,7 +1320,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text); // Yellow 500
 			}
 		}
-		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowZoomPreferenceKey(), true) ) {
+		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {
 			float zoom_ratio = preview.getZoomRatio();
 			// only show when actually zoomed in
 			if( zoom_ratio > 1.0f + 1.0e-5f ) {
@@ -1332,7 +1332,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 		}
 
-		if( sharedPreferences.getBoolean(MainActivity.getShowBatteryPreferenceKey(), true) ) {
+		if( sharedPreferences.getBoolean(PreferenceKeys.getShowBatteryPreferenceKey(), true) ) {
 			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
 				Intent batteryStatus = main_activity.registerReceiver(null, battery_ifilter);
@@ -1368,7 +1368,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
 		}
 		
-		boolean store_location = sharedPreferences.getBoolean(MainActivity.getLocationPreferenceKey(), false);
+		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
 		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 		if( store_location ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
@@ -1399,7 +1399,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 		}
 		
-		if( sharedPreferences.getBoolean(MainActivity.getShowTimePreferenceKey(), true) ) {
+		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.LEFT);
 			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
@@ -1427,7 +1427,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	        drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, true);
 	    }
 
-		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowFreeMemoryPreferenceKey(), true) ) {
+		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.LEFT);
 			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
@@ -1459,7 +1459,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 		canvas.restore();
 		
-		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && sharedPreferences.getBoolean(MainActivity.getShowAngleLinePreferenceKey(), false) ) {
+		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false) ) {
 			// n.b., must draw this without canvas rotation
 			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
 			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
