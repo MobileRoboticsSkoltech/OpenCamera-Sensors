@@ -2239,6 +2239,8 @@ public class MainActivity extends Activity {
     }
 
 	private void showPhotoVideoToast() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "showPhotoVideoToast");
 		CameraController camera_controller = preview.getCameraController();
 		if( camera_controller == null || this.camera_in_background )
 			return;
