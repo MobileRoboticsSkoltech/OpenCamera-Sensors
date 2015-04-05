@@ -834,10 +834,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	//private int debug_count_opencamera = 0; // see usage below
 
 	private void openCamera() {
-		openCamera(null);
-	}
-	
-	private void openCamera(String toast_message) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera()");
@@ -975,7 +971,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
 
-		    setupCamera(toast_message, take_photo);
+		    setupCamera(take_photo);
 		}
 
 		if( MyDebug.LOG ) {
@@ -986,7 +982,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	/* Should only be called after camera first opened, or after preview is paused.
 	 */
-	void setupCamera(String toast_message, boolean take_photo) {
+	void setupCamera(boolean take_photo) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setupCamera()");
 		/*long debug_time = 0;
@@ -3995,14 +3991,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
     
     void onResume() {
-    	onResume(null);
-    }
-    
-    void onResume(String toast_message) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
 		this.app_is_paused = false;
-		this.openCamera(toast_message);
+		this.openCamera();
     }
 
     void onPause() {

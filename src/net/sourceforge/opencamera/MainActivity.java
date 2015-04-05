@@ -1271,12 +1271,12 @@ public class MainActivity extends Activity {
 			block_startup_toast = true;
 		if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
-			preview.onResume(toast_message);
+			preview.onResume();
 		}
 		else {
 			preview.setCameraDisplayOrientation(); // need to call in case the preview rotation option was changed
 			preview.pausePreview();
-			preview.setupCamera(toast_message, false);
+			preview.setupCamera(false);
 		}
 		block_startup_toast = false;
 		if( toast_message != null && toast_message.length() > 0 )
