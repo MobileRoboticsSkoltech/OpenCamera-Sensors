@@ -907,7 +907,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			public void onError() {
 	        			if( MyDebug.LOG )
 	    					Log.e(TAG, "error from CameraController: preview failed to start");
-	        			showToast(null, R.string.failed_to_start_camera_preview);
+	        			applicationInterface.onFailedStartPreview();
 	        	    }
 	    		};
 	        	camera_controller = new CameraController2(this.getContext(), cameraId, previewErrorCallback);
@@ -3101,7 +3101,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			File videoFile = applicationInterface.getOutputMediaFile(ApplicationInterface.MEDIA_TYPE_VIDEO);
     		if( videoFile == null ) {
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
-	    	    showToast(null, R.string.failed_to_save_video);
+	            applicationInterface.onFailedCreateVideoFileError();
 				this.phase = PHASE_NORMAL;
 				applicationInterface.cameraInOperation(false);
 			}
@@ -3283,7 +3283,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    		if( MyDebug.LOG )
 		    			Log.e(TAG, "failed to save video");
 					e.printStackTrace();
-		    	    showToast(null, R.string.failed_to_save_video);
+		    	    applicationInterface.onFailedCreateVideoFileError();
 		    		video_recorder.reset();
 		    		video_recorder.release(); 
 		    		video_recorder = null;
@@ -3458,7 +3458,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			if( MyDebug.LOG )
 					Log.e(TAG, "error from takePicture");
         		count_cameraTakePicture--; // cancel out the increment from after the takePicture() call
-	    	    showToast(null, R.string.failed_to_take_picture);
+	            applicationInterface.onPhotoError();
 				phase = PHASE_NORMAL;
 	            startCameraPreview();
 	    		applicationInterface.cameraInOperation(false);
@@ -3665,7 +3665,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			if( MyDebug.LOG )
     				Log.d(TAG, "CameraControllerException trying to startPreview");
     			e.printStackTrace();
-    			showToast(null, R.string.failed_to_start_camera_preview);
+    			applicationInterface.onFailedStartPreview();
     			return;
     		}
 			this.is_preview_started = true;

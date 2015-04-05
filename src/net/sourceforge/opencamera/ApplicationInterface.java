@@ -74,11 +74,14 @@ public interface ApplicationInterface {
 	void touchEvent(MotionEvent event);
 	void startingVideo(); // called just before video recording starts
 	void stoppingVideo(); // called just before video recording stops
+	void onFailedStartPreview(); // called if failed to start camera preview
+	void onPhotoError(); // callback for failing to take a photo
 	void onVideoInfo(int what, int extra); // callback for info when recording video (see MediaRecorder.OnInfoListener)
 	void onVideoError(int what, int extra); // callback for errors when recording video (see MediaRecorder.OnErrorListener)
 	void onVideoRecordStartError(CamcorderProfile profile); // callback for video recording failing to start
 	void onVideoRecordStopError(CamcorderProfile profile); // callback for video recording being corrupted
 	void onFailedReconnectError(); // failed to reconnect camera after stopping video recording
+	void onFailedCreateVideoFileError(); // callback if unable to create file for recording video
 	void hasPausedPreview(boolean paused); // called when the preview is paused or unpaused (due to getPausePreviewPref())
 	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video), use to disable GUI elements during camera operation
 	void cameraClosed();

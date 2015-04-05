@@ -592,7 +592,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			main_activity.setImmersiveMode(false);
 		}
 	}
-
+	
 	@Override
 	public void startingVideo() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -636,6 +636,16 @@ public class MyApplicationInterface implements ApplicationInterface {
 			editor.apply();
 			main_activity.getPreview().stopVideo(false);
 		}
+	}
+
+	@Override
+	public void onFailedStartPreview() {
+		main_activity.getPreview().showToast(null, R.string.failed_to_start_camera_preview);
+	}
+
+	@Override
+	public void onPhotoError() {
+	    main_activity.getPreview().showToast(null, R.string.failed_to_take_picture);
 	}
 
 	@Override
@@ -689,6 +699,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void onFailedReconnectError() {
 		main_activity.getPreview().showToast(null, R.string.failed_to_reconnect_camera);
+	}
+	
+	@Override
+	public void onFailedCreateVideoFileError() {
+		main_activity.getPreview().showToast(null, R.string.failed_to_save_video);
 	}
 
     void setImmersiveMode(final boolean immersive_mode) {
