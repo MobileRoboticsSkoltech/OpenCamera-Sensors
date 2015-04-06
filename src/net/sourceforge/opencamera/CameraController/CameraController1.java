@@ -239,22 +239,6 @@ public class CameraController1 extends CameraController {
 		return camera_features;
 	}
 	
-	public String getDefaultSceneMode() {
-		return Camera.Parameters.SCENE_MODE_AUTO;
-	}
-	
-	public String getDefaultColorEffect() {
-		return Camera.Parameters.EFFECT_NONE;
-	}
-	
-	public String getDefaultWhiteBalance() {
-		return Camera.Parameters.WHITE_BALANCE_AUTO;
-	}
-	
-	public String getDefaultISO() {
-		return "auto";
-	}
-
 	public long getDefaultExposureTime() {
 		// not supported for CameraController1
 		return 0l;

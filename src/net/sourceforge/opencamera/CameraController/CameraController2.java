@@ -1441,26 +1441,6 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	public String getDefaultSceneMode() {
-		return "auto";
-	}
-
-	@Override
-	public String getDefaultColorEffect() {
-		return "none";
-	}
-
-	@Override
-	public String getDefaultWhiteBalance() {
-		return "auto";
-	}
-
-	@Override
-	public String getDefaultISO() {
-		return "auto";
-	}
-
-	@Override
 	// note, responsibility of callers to check that this is within the valid min/max range
 	public long getDefaultExposureTime() {
 		return 1000000000l/30;

@@ -133,10 +133,18 @@ public abstract class CameraController {
 	public abstract void setPreviewFpsRange(int min, int max);
 	public abstract List<int []> getSupportedPreviewFpsRange();
 
-	public abstract String getDefaultSceneMode();
-	public abstract String getDefaultColorEffect();
-	public abstract String getDefaultWhiteBalance();
-	public abstract String getDefaultISO();
+	public String getDefaultSceneMode() {
+		return "auto"; // chosen to match Camera.Parameters.SCENE_MODE_AUTO, but we also use compatible values for Camera2 API
+	}
+	public String getDefaultColorEffect() {
+		return "none"; // chosen to match Camera.Parameters.EFFECT_NONE, but we also use compatible values for Camera2 API
+	}
+	public String getDefaultWhiteBalance() {
+		return "auto"; // chosen to match Camera.Parameters.WHITE_BALANCE_AUTO, but we also use compatible values for Camera2 API
+	}
+	public String getDefaultISO() {
+		return "auto";
+	}
 	public abstract long getDefaultExposureTime();
 
 	public abstract void setFocusValue(String focus_value);
