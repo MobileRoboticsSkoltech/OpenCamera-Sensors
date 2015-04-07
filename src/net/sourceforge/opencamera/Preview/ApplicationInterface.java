@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.Preview;
 
 import java.io.File;
 

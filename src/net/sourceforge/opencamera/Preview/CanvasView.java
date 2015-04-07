@@ -1,5 +1,6 @@
-package net.sourceforge.opencamera;
+package net.sourceforge.opencamera.Preview;
 
+import net.sourceforge.opencamera.MyDebug;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.os.Bundle;

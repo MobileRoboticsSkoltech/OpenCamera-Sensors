@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import net.sourceforge.opencamera.Preview.ApplicationInterface;
+
 import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.Context;

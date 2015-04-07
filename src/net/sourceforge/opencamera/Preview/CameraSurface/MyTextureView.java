@@ -1,42 +1,36 @@
-package net.sourceforge.opencamera.CameraSurface;
+package net.sourceforge.opencamera.Preview.CameraSurface;
 
 import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.Preview;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraControllerException;
+import net.sourceforge.opencamera.Preview.Preview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 
-public class MySurfaceView extends SurfaceView implements CameraSurface {
-	private static final String TAG = "MySurfaceView";
+public class MyTextureView extends TextureView implements CameraSurface {
+	private static final String TAG = "MyTextureView";
 
 	private Preview preview = null;
 	private int [] measure_spec = new int[2];
 	
-	@SuppressWarnings("deprecation")
-	public
-	MySurfaceView(Context context, Bundle savedInstanceState, Preview preview) {
+	public MyTextureView(Context context, Bundle savedInstanceState, Preview preview) {
 		super(context);
 		this.preview = preview;
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "new MySurfaceView");
+			Log.d(TAG, "new MyTextureView");
 		}
 
-		// Install a SurfaceHolder.Callback so we get notified when the
+		// Install a TextureView.SurfaceTextureListener so we get notified when the
 		// underlying surface is created and destroyed.
-		getHolder().addCallback(preview);
-        // deprecated setting, but required on Android versions prior to 3.0
-		getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // deprecated
+		this.setSurfaceTextureListener(preview);
 	}
 	
 	@Override
@@ -49,7 +43,7 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewDisplay");
 		try {
-			camera_controller.setPreviewDisplay(this.getHolder());
+			camera_controller.setPreviewTexture(this.getSurfaceTexture());
 		}
 		catch(CameraControllerException e) {
 			if( MyDebug.LOG )
@@ -60,7 +54,7 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 
 	@Override
 	public void setVideoRecorder(MediaRecorder video_recorder) {
-    	video_recorder.setPreviewDisplay(this.getHolder().getSurface());
+		// should be no need to do anything (see documentation for MediaRecorder.setPreviewDisplay())
 	}
 
 	@SuppressLint("ClickableViewAccessibility")
@@ -69,10 +63,10 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 		return preview.touchEvent(event);
     }
 
-	@Override
+	/*@Override
 	public void onDraw(Canvas canvas) {
 		preview.draw(canvas);
-	}
+	}*/
 
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
@@ -82,8 +76,6 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 
 	@Override
 	public void setTransform(Matrix matrix) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setting transforms not supported for MySurfaceView");
-		throw new RuntimeException();
+		super.setTransform(matrix);
 	}
 }

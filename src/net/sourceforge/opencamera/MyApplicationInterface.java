@@ -11,6 +11,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.Preview.ApplicationInterface;
+import net.sourceforge.opencamera.Preview.Preview;
 
 import android.app.Activity;
 import android.content.Context;
