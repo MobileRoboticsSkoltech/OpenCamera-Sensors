@@ -13,6 +13,7 @@ import android.view.SurfaceHolder;
 
 public abstract class CameraController {
 	private static final String TAG = "CameraController";
+	int cameraId = 0;
 
 	// for testing:
 	public int count_camera_parameters_exception = 0;
@@ -104,8 +105,14 @@ public abstract class CameraController {
 
 	public abstract void release();
 
+	public CameraController(int cameraId) {
+		this.cameraId = cameraId;
+	}
 	public abstract String getAPI();
 	public abstract CameraFeatures getCameraFeatures();
+	public int getCameraId() {
+		return cameraId;
+	}
 	public abstract SupportedValues setSceneMode(String value);
 	public abstract String getSceneMode();
 	public abstract SupportedValues setColorEffect(String value);

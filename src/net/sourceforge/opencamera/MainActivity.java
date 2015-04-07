@@ -916,13 +916,16 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "clickedSwitchCamera");
 		this.closePopup();
 		if( this.preview.canSwitchCamera() ) {
-		    if( preview.getCameraControllerManager().isFrontFacing( this.preview.getNextCameraId() ) ) {
+			int cameraId = preview.getCameraId();
+			int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
+			cameraId = (cameraId+1) % n_cameras;
+		    if( preview.getCameraControllerManager().isFrontFacing( cameraId ) ) {
 		    	preview.showToast(switch_camera_toast, R.string.front_camera);
 		    }
 		    else {
 		    	preview.showToast(switch_camera_toast, R.string.back_camera);
 		    }
-			this.preview.switchCamera();
+			this.preview.setCamera(cameraId);
 		}
     }
 

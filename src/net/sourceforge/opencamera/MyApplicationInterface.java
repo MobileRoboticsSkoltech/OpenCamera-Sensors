@@ -92,6 +92,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private ToastBoxer stopstart_video_toast = new ToastBoxer();
 	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
+	private int cameraId = 0;
 	private int zoom_factor = 0;
 	private float focus_distance = 0.0f;
 
@@ -103,6 +104,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		this.storageUtils = new StorageUtils(main_activity);
 
         if( savedInstanceState != null ) {
+    		cameraId = savedInstanceState.getInt("cameraId", 0);
+			if( MyDebug.LOG )
+				Log.d(TAG, "found cameraId: " + cameraId);
     		zoom_factor = savedInstanceState.getInt("zoom_factor", 0);
 			if( MyDebug.LOG )
 				Log.d(TAG, "found zoom_factor: " + zoom_factor);
@@ -118,6 +122,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 	void onSaveInstanceState(Bundle state) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSaveInstanceState");
+		if( MyDebug.LOG )
+			Log.d(TAG, "save cameraId: " + cameraId);
+    	state.putInt("cameraId", cameraId);
 		if( MyDebug.LOG )
 			Log.d(TAG, "save zoom_factor: " + zoom_factor);
     	state.putInt("zoom_factor", zoom_factor);
@@ -158,16 +165,21 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return storageUtils.getOutputMediaFile(type);
 	}
 
+	@Override
+	public int getCameraIdPref() {
+		return cameraId;
+	}
+	
     @Override
 	public String getFlashPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(PreferenceKeys.getFlashPreferenceKey(main_activity.getPreview().getCameraId()), "");
+		return sharedPreferences.getString(PreferenceKeys.getFlashPreferenceKey(cameraId), "");
     }
 
     @Override
 	public String getFocusPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(main_activity.getPreview().getCameraId()), "");
+		return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId), "");
     }
 
     @Override
@@ -223,7 +235,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public Pair<Integer, Integer> getCameraResolutionPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String resolution_value = sharedPreferences.getString(PreferenceKeys.getResolutionPreferenceKey(main_activity.getPreview().getCameraId()), "");
+		String resolution_value = sharedPreferences.getString(PreferenceKeys.getResolutionPreferenceKey(cameraId), "");
 		if( MyDebug.LOG )
 			Log.d(TAG, "resolution_value: " + resolution_value);
 		if( resolution_value.length() > 0 ) {
@@ -285,7 +297,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public String getVideoQualityPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(PreferenceKeys.getVideoQualityPreferenceKey(main_activity.getPreview().getCameraId()), "");
+		return sharedPreferences.getString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId), "");
 	}
 	
     @Override
@@ -297,7 +309,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public boolean getForce4KPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		if( main_activity.getPreview().getCameraId() == 0 && sharedPreferences.getBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K() ) {
+		if( cameraId == 0 && sharedPreferences.getBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K() ) {
 			return true;
 		}
 		return false;
@@ -869,11 +881,16 @@ public class MyApplicationInterface implements ApplicationInterface {
 		main_activity.setSeekbarZoom();
 	}
 
+	@Override
+	public void setCameraIdPref(int cameraId) {
+		this.cameraId = cameraId;
+	}
+
     @Override
     public void setFlashPref(String flash_value) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getFlashPreferenceKey(main_activity.getPreview().getCameraId()), flash_value);
+		editor.putString(PreferenceKeys.getFlashPreferenceKey(cameraId), flash_value);
 		editor.apply();
     }
 
@@ -881,7 +898,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public void setFocusPref(String focus_value) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getFocusPreferenceKey(main_activity.getPreview().getCameraId()), focus_value);
+		editor.putString(PreferenceKeys.getFocusPreferenceKey(cameraId), focus_value);
 		editor.apply();
 		// focus may be updated by preview (e.g., when switching to/from video mode)
     	final int visibility = main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
@@ -985,7 +1002,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getResolutionPreferenceKey(main_activity.getPreview().getCameraId()), resolution_value);
+		editor.putString(PreferenceKeys.getResolutionPreferenceKey(cameraId), resolution_value);
 		editor.apply();
     }
     
@@ -993,7 +1010,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public void setVideoQualityPref(String video_quality) {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(main_activity.getPreview().getCameraId()), video_quality);
+		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId), video_quality);
 		editor.apply();
     }
     

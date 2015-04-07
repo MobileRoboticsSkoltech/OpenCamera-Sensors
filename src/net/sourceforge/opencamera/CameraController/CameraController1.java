@@ -26,6 +26,7 @@ public class CameraController1 extends CameraController {
 	private String iso_key = null;
 
 	public CameraController1(int cameraId) throws CameraControllerException {
+		super(cameraId);
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController1: " + cameraId);
 		try {

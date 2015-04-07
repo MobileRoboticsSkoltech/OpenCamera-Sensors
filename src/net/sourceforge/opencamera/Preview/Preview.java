@@ -91,7 +91,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private double aspect_ratio = 0.0f;
 	private CameraControllerManager camera_controller_manager = null;
 	private CameraController camera_controller = null;
-	private int cameraId = 0;
 	private boolean is_video = false;
 	private MediaRecorder video_recorder = null;
 	private boolean video_start_time_set = false;
@@ -250,19 +249,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 
 	    scaleGestureDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
-
-        if( savedInstanceState != null ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "have savedInstanceState");
-    		cameraId = savedInstanceState.getInt("cameraId", 0);
-			if( MyDebug.LOG )
-				Log.d(TAG, "found cameraId: " + cameraId);
-    		if( cameraId < 0 || cameraId >= camera_controller_manager.getNumberOfCameras() ) {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "cameraID not valid for " + camera_controller_manager.getNumberOfCameras() + " cameras!");
-    			cameraId = 0;
-    		}
-        }
 
 		parent.addView(cameraSurface.getView());
 		if( canvasView != null ) {
@@ -739,12 +725,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			// not safe to call closeCamera, as any call to getParameters may cause a RuntimeException
     			// update: can no longer reproduce failures on Nexus 7?!
     			this.is_preview_started = false;
-    			camera_controller.release();
-    			camera_controller = null;
     			if( !quiet ) {
     	        	CamcorderProfile profile = getCamcorderProfile();
     				applicationInterface.onVideoRecordStopError(profile);
     			}
+    			camera_controller.release();
+    			camera_controller = null;
     			openCamera();
     		}
 		}
@@ -828,7 +814,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera()");
-			Log.d(TAG, "cameraId: " + cameraId);
 			debug_time = System.currentTimeMillis();
 		}
 		// need to init everything now, in case we don't open the camera (but these may already be initialised from an earlier call - e.g., if we are now switching to another camera)
@@ -898,6 +883,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}*/
 		try {
+			int cameraId = applicationInterface.getCameraIdPref();
+			if( cameraId < 0 || cameraId >= camera_controller_manager.getNumberOfCameras() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "invalid cameraId: " + cameraId);
+				cameraId = 0;
+				applicationInterface.setCameraIdPref(cameraId);
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "try to open camera: " + cameraId);
 			if( test_fail_open_camera ) {
@@ -1568,6 +1560,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initialiseVideoQuality() {
+		int cameraId = camera_controller.getCameraId();
 		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<Pair<Integer, Integer>>();
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
@@ -1639,7 +1632,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	public void initialiseVideoQualityFromProfiles(SparseArray<Pair<Integer, Integer>> profiles) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "initialiseVideoQuality()");
+			Log.d(TAG, "initialiseVideoQualityFromProfiles()");
         video_quality = new Vector<String>();
         boolean done_video_size[] = null;
         if( video_sizes != null ) {
@@ -1702,9 +1695,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	CamcorderProfile getCamcorderProfile(String quality) {
+	private CamcorderProfile getCamcorderProfile(String quality) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCamcorderProfile(): " + quality);
+		int cameraId = camera_controller.getCameraId();
 		CamcorderProfile camcorder_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH); // default
 		try {
 			String profile_string = quality;
@@ -1758,6 +1752,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// 4K UHD video is not yet supported by Android API (at least testing on Samsung S5 and Note 3, they do not return it via getSupportedVideoSizes(), nor via a CamcorderProfile (either QUALITY_HIGH, or anything else)
 		// but it does work if we explicitly set the resolution (at least tested on an S5)
 		CamcorderProfile profile = null;
+		int cameraId = camera_controller.getCameraId();
 		if( applicationInterface.getForce4KPref() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "force 4K UHD video");
@@ -1835,12 +1830,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	public String getCamcorderProfileDescriptionShort(String quality) {
+		if( camera_controller == null )
+			return "";
 		CamcorderProfile profile = getCamcorderProfile(quality);
 		String desc = profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getMPString(profile.videoFrameWidth, profile.videoFrameHeight);
 		return desc;
 	}
 
 	public String getCamcorderProfileDescription(String quality) {
+		if( camera_controller == null )
+			return "";
 		CamcorderProfile profile = getCamcorderProfile(quality);
 		String highest = "";
 		if( profile.quality == CamcorderProfile.QUALITY_HIGH ) {
@@ -2385,7 +2384,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return true;
 	}
 	
-	public int getNextCameraId() {
+	/*public int getNextCameraId() {
 		int n_cameras = camera_controller_manager.getNumberOfCameras();
 		if( n_cameras > 0 ) {
 			return (cameraId+1) % n_cameras;
@@ -2405,6 +2404,24 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			cameraId = (cameraId+1) % n_cameras;
 			this.openCamera();
 			
+			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
+			updateFocusForVideo(true);
+		}
+	}*/
+	
+	public void setCamera(int cameraId) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setCamera()");
+		if( cameraId < 0 || cameraId >= camera_controller_manager.getNumberOfCameras() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "invalid cameraId: " + cameraId);
+			cameraId = 0;
+		}
+		if( canSwitchCamera() ) {
+			closeCamera();
+			applicationInterface.setCameraIdPref(cameraId);
+			this.openCamera();
+
 			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
 			updateFocusForVideo(true);
 		}
@@ -3947,9 +3964,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
     public int getCameraId() {
-    	return this.cameraId;
+        if( camera_controller == null )
+            return 0;
+        return camera_controller.getCameraId();
     }
-    
+
     public String getCameraAPI() {
     	if( camera_controller == null )
     		return "None";
@@ -3980,9 +3999,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void onSaveInstanceState(Bundle state) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSaveInstanceState");
-		if( MyDebug.LOG )
-			Log.d(TAG, "save cameraId: " + cameraId);
-    	state.putInt("cameraId", cameraId);
 	}
 
     public void showToast(final ToastBoxer clear_toast, final int message_id) {
@@ -4231,7 +4247,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.faces_detected;
     }
     
-
 	public float getZoomRatio() {
 		int zoom_factor = camera_controller.getZoom();
 		float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;

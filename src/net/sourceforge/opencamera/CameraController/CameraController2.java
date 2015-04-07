@@ -332,6 +332,7 @@ public class CameraController2 extends CameraController {
 	private CaptureRequest push_set_ae_lock_id = null;
 
 	public CameraController2(Context context, int cameraId, ErrorCallback preview_error_cb) throws CameraControllerException {
+		super(cameraId);
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController2: " + cameraId);
 

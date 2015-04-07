@@ -22,6 +22,7 @@ public interface ApplicationInterface {
 	// for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
 	// if you just want a default or don't really care, see the comments for each method for a default or possible options
 	// if Preview doesn't support the requested setting, it will check this, and choose its own
+	int getCameraIdPref(); // camera to use, from 0 to getCameraControllerManager().getNumberOfCameras()
 	String getFlashPref(); // flash_off, flash_auto, flash_on, flash_torch, flash_red_eye
 	String getFocusPref(); // focus_mode_auto, focus_mode_infinity, focus_mode_macro, focus_mode_locked, focus_mode_fixed, focus_mode_manual2, focus_mode_edof, focus_mode_continuous_video
 	boolean isVideoPref(); // start up in video mode?
@@ -93,6 +94,7 @@ public interface ApplicationInterface {
 	void multitouchZoom(int new_zoom); // zoom has changed due to multitouch gesture on preview
 	// the set/clear*Pref() methods are called if Preview decides to override the requested pref (because Camera device doesn't support requested pref) (clear*Pref() is called if the feature isn't supported at all)
 	// the application can use this information to update its preferences
+	void setCameraIdPref(int cameraId);
 	void setFlashPref(String flash_value);
 	void setFocusPref(String focus_value);
 	void setVideoPref(boolean is_video);
