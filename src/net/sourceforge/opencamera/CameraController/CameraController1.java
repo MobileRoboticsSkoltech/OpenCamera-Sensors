@@ -13,6 +13,7 @@ import android.hardware.Camera;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -645,18 +646,31 @@ public class CameraController1 extends CameraController {
 		Camera.Parameters parameters = this.getParameters();
 		if( parameters.getFlashMode() == null )
 			return; // flash mode not supported
-		String flash_mode = convertFlashValueToMode(flash_value);
+		final String flash_mode = convertFlashValueToMode(flash_value);
     	if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
     		if( parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH) && !flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
-    			// workaround for bug on Nexus 5 where torch doesn't switch off until we set FLASH_MODE_OFF
+    			// workaround for bug on Nexus 5 and Nexus 6 where torch doesn't switch off until we set FLASH_MODE_OFF
     			if( MyDebug.LOG )
     				Log.d(TAG, "first turn torch off");
         		parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
             	setCameraParameters(parameters);
-        		parameters = this.getParameters();
+            	// need to set the correct flash mode after a delay
+            	Handler handler = new Handler();
+            	handler.postDelayed(new Runnable(){
+            		@Override
+            	    public void run(){
+            			if( MyDebug.LOG )
+            				Log.d(TAG, "now set actual flash mode after turning torch off");
+            			Camera.Parameters parameters = getParameters();
+                		parameters.setFlashMode(flash_mode);
+                    	setCameraParameters(parameters);
+            	   }
+            	}, 100);
     		}
-    		parameters.setFlashMode(flash_mode);
-        	setCameraParameters(parameters);
+    		else {
+        		parameters.setFlashMode(flash_mode);
+            	setCameraParameters(parameters);
+    		}
     	}
 	}
 	
