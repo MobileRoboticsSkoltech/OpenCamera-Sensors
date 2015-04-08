@@ -26,6 +26,7 @@
 
     <ZoomControls
         android:id="@+id/zoom"
+        android:contentDescription="@string/zoom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:alpha="0.5"
@@ -33,6 +34,7 @@
 
     <SeekBar
         android:id="@+id/zoom_seekbar"
+        android:contentDescription="@string/zoom"
         android:layout_width="150dp"
         android:layout_height="50dp"
         android:layout_marginLeft="10dp"
@@ -43,6 +45,7 @@
     
     <SeekBar
         android:id="@+id/focus_seekbar"
+        android:contentDescription="@string/focus_distance"
         android:layout_width="150dp"
         android:layout_height="50dp"
         android:layout_marginLeft="50dp"
@@ -163,6 +166,7 @@
 
     <SeekBar
         android:id="@+id/exposure_seekbar"
+        android:contentDescription="@string/exposure_compensation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -171,6 +175,7 @@
 
     <ZoomControls
         android:id="@+id/exposure_seekbar_zoom"
+        android:contentDescription="@string/exposure_compensation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -179,6 +184,7 @@
 
     <SeekBar
         android:id="@+id/iso_seekbar"
+        android:contentDescription="@string/iso"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -187,6 +193,7 @@
 
     <SeekBar
         android:id="@+id/exposure_time_seekbar"
+        android:contentDescription="@string/exposure"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
