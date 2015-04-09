@@ -1184,7 +1184,9 @@ public class MainActivity extends Activity {
 			bundle.putIntArray("preview_widths", widths);
 			bundle.putIntArray("preview_heights", heights);
 		}
-		
+		bundle.putInt("preview_width", preview.getCurrentPreviewSize().width);
+		bundle.putInt("preview_height", preview.getCurrentPreviewSize().height);
+
 		List<CameraController.Size> sizes = this.preview.getSupportedPictureSizes();
 		if( sizes != null ) {
 			int [] widths = new int[sizes.size()];
@@ -1197,6 +1199,10 @@ public class MainActivity extends Activity {
 			}
 			bundle.putIntArray("resolution_widths", widths);
 			bundle.putIntArray("resolution_heights", heights);
+		}
+		if( preview.getCurrentPictureSize() != null ) {
+			bundle.putInt("resolution_width", preview.getCurrentPictureSize().width);
+			bundle.putInt("resolution_height", preview.getCurrentPictureSize().height);
 		}
 		
 		List<String> video_quality = this.preview.getSupportedVideoQuality();
@@ -1212,6 +1218,14 @@ public class MainActivity extends Activity {
 			bundle.putStringArray("video_quality", video_quality_arr);
 			bundle.putStringArray("video_quality_string", video_quality_string_arr);
 		}
+		if( preview.getCurrentVideoQuality() != null ) {
+			bundle.putString("current_video_quality", preview.getCurrentVideoQuality());
+		}
+		CamcorderProfile camcorder_profile = preview.getCamcorderProfile();
+		bundle.putInt("video_frame_width", camcorder_profile.videoFrameWidth);
+		bundle.putInt("video_frame_height", camcorder_profile.videoFrameHeight);
+		bundle.putInt("video_bit_rate", camcorder_profile.videoBitRate);
+		bundle.putInt("video_frame_rate", camcorder_profile.videoFrameRate);
 
 		List<CameraController.Size> video_sizes = this.preview.getSupportedVideoSizes();
 		if( video_sizes != null ) {
@@ -2289,10 +2303,8 @@ public class MainActivity extends Activity {
 		}
 		else {
 			toast_string = getResources().getString(R.string.photo);
-			if( preview.getCurrentPictureSizeIndex() != -1 && preview.getSupportedPictureSizes() != null ) {
-				CameraController.Size current_size = preview.getSupportedPictureSizes().get(preview.getCurrentPictureSizeIndex());
-				toast_string += " " + current_size.width + "x" + current_size.height;
-			}
+			CameraController.Size current_size = preview.getCurrentPictureSize();
+			toast_string += " " + current_size.width + "x" + current_size.height;
 			if( preview.supportsFocus() && preview.getSupportedFocusValues().size() > 1 ) {
 				String focus_value = preview.getCurrentFocusValue();
 				if( focus_value != null && !focus_value.equals("focus_mode_auto") ) {

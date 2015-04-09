@@ -73,11 +73,15 @@ public class MyPreferenceFragment extends PreferenceFragment {
         	pg.removePreference(pref);
 		}
 
+		final int preview_width = bundle.getInt("preview_width");
+		final int preview_height = bundle.getInt("preview_height");
 		final int [] preview_widths = bundle.getIntArray("preview_widths");
 		final int [] preview_heights = bundle.getIntArray("preview_heights");
 		final int [] video_widths = bundle.getIntArray("video_widths");
 		final int [] video_heights = bundle.getIntArray("video_heights");
 
+		final int resolution_width = bundle.getInt("resolution_width");
+		final int resolution_height = bundle.getInt("resolution_height");
 		final int [] widths = bundle.getIntArray("resolution_widths");
 		final int [] heights = bundle.getIntArray("resolution_heights");
 		if( widths != null && heights != null ) {
@@ -142,6 +146,11 @@ public class MyPreferenceFragment extends PreferenceFragment {
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
         	pg.removePreference(pref);
 		}
+		final String current_video_quality = bundle.getString("current_video_quality");
+		final int video_frame_width = bundle.getInt("video_frame_width");
+		final int video_frame_height = bundle.getInt("video_frame_height");
+		final int video_bit_rate = bundle.getInt("video_bit_rate");
+		final int video_frame_rate = bundle.getInt("video_frame_rate");
 
 		final boolean supports_force_video_4k = bundle.getBoolean("supports_force_video_4k");
 		if( MyDebug.LOG )
@@ -367,6 +376,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
                 				about_string.append(preview_heights[i]);
                 			}
                         }
+                        about_string.append("\nPreview resolution: " + preview_width + "x" + preview_height);
                         if( widths != null && heights != null ) {
                             about_string.append("\nPhoto resolutions: ");
                 			for(int i=0;i<widths.length;i++) {
@@ -378,8 +388,9 @@ public class MyPreferenceFragment extends PreferenceFragment {
                 				about_string.append(heights[i]);
                 			}
                         }
+                        about_string.append("\nPhoto resolution: " + resolution_width + "x" + resolution_height);
                         if( video_quality != null ) {
-                            about_string.append("\nVideo quality: ");
+                            about_string.append("\nVideo qualities: ");
                 			for(int i=0;i<video_quality.length;i++) {
                 				if( i > 0 ) {
                     				about_string.append(", ");
@@ -398,6 +409,11 @@ public class MyPreferenceFragment extends PreferenceFragment {
                 				about_string.append(video_heights[i]);
                 			}
                         }
+        				about_string.append("\nVideo quality: " + current_video_quality);
+        				about_string.append("\nVideo frame width: " + video_frame_width);
+        				about_string.append("\nVideo frame height: " + video_frame_height);
+        				about_string.append("\nVideo bit rate: " + video_bit_rate);
+        				about_string.append("\nVideo frame rate: " + video_frame_rate);
                         about_string.append("\nAuto-stabilise?: ");
                         about_string.append(getString(supports_auto_stabilise ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nFace detection?: ");

@@ -3921,6 +3921,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.supported_preview_sizes;
     }
     
+    public CameraController.Size getCurrentPreviewSize() {
+    	return new CameraController.Size(preview_w, preview_h);
+    }
+
     public List<CameraController.Size> getSupportedPictureSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPictureSizes");
@@ -3933,6 +3937,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.current_size_index;
     }
     
+    public CameraController.Size getCurrentPictureSize() {
+    	if( current_size_index == -1 || sizes == null )
+    		return null;
+    	return sizes.get(current_size_index);
+    }
+
     public List<String> getSupportedVideoQuality() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedVideoQuality");
@@ -3943,6 +3953,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentVideoQualityIndex");
     	return this.current_video_quality;
+    }
+    
+    public String getCurrentVideoQuality() {
+    	if( current_video_quality == -1 )
+    		return null;
+    	return video_quality.get(current_video_quality);
     }
     
     public List<CameraController.Size> getSupportedVideoSizes() {
