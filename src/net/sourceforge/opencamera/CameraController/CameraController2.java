@@ -1512,6 +1512,9 @@ public class CameraController2 extends CameraController {
 		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO ) {
     		focus_value = "focus_mode_continuous_video";
     	}
+		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_OFF ) {
+    		focus_value = "focus_mode_manual2"; // n.b., could be infinity
+		}
     	return focus_value;
 	}
 	
