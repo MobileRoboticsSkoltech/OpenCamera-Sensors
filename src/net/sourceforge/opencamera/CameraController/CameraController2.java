@@ -1269,9 +1269,11 @@ public class CameraController2 extends CameraController {
 	            buffer.get(bytes);
 	            image.close();
 	            image = null;
-	            jpeg_cb.onPictureTaken(bytes);
+	            // need to set jpeg_cb etc to null before calling onPictureTaken, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+	            PictureCallback cb = jpeg_cb;
 	            jpeg_cb = null;
 	            take_picture_error_cb = null;
+	            cb.onPictureTaken(bytes);
 				if( MyDebug.LOG )
 					Log.d(TAG, "done onImageAvailable");
 			}
