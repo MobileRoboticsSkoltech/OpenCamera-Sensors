@@ -3412,6 +3412,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		CameraController.PictureCallback jpegPictureCallback = new CameraController.PictureCallback() {
 			public void onPictureTaken(byte[] data) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onPictureTaken");
     	    	// n.b., this is automatically run in a different thread
 				boolean success = applicationInterface.onPictureTaken(data);
 
@@ -3425,7 +3427,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	    	    	// (otherwise this can fail, at least on Nexus 7)
     		            startCameraPreview();
     	        		if( MyDebug.LOG )
-    	        			Log.d(TAG, "burst mode photos remaining: onPictureTaken started preview");
+    	        			Log.d(TAG, "burst mode photos remaining: onPictureTaken started preview: " + remaining_burst_photos);
     	        	}
     	        }
     	        else {
