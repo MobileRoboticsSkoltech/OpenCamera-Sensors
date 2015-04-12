@@ -13,7 +13,7 @@ import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
 import net.sourceforge.opencamera.Preview.CameraSurface.CameraSurface;
 import net.sourceforge.opencamera.Preview.CameraSurface.MySurfaceView;
 import net.sourceforge.opencamera.Preview.CameraSurface.MyTextureView;
-import net.sourceforge.opencamera.Widgets.TakePhoto;
+import net.sourceforge.opencamera.widgets.TakePhoto;
 
 import java.io.File;
 import java.io.IOException;

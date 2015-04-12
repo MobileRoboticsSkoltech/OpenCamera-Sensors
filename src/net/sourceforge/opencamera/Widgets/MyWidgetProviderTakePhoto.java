@@ -1,4 +1,4 @@
-package net.sourceforge.opencamera.Widgets;
+package net.sourceforge.opencamera.widgets;
 
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.R;
