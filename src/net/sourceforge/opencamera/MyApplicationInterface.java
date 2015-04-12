@@ -1412,7 +1412,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				int location_radius = location_size/10;
 				int indicator_x = location_x + location_size;
 				int indicator_y = location_y + location_radius/2 + 1;
-				p.setStyle(Paint.Style.FILL_AND_STROKE);
+				p.setStyle(Paint.Style.FILL);
 				p.setColor(this.getLocation().getAccuracy() < 25.01f ? Color.rgb(37, 155, 36) : Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
 				canvas.drawCircle(indicator_x, indicator_y, location_radius, p);
 			}
