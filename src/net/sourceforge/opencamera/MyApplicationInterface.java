@@ -65,6 +65,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private Paint p = new Paint();
 	private Rect text_bounds = new Rect();
 	private RectF face_rect = new RectF();
+	private RectF draw_rect = new RectF();
 	private int [] gui_location = new int[2];
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 
@@ -1239,9 +1240,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 				}
 				if( Math.abs(level_angle) <= close_angle ) {
 					color = Color.rgb(20, 231, 21); // Green A400
+					p.setUnderlineText(true);
 				}
 				String string = getContext().getResources().getString(R.string.angle) + ": " + decimalFormat.format(level_angle) + (char)0x00B0;
 				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
+				p.setUnderlineText(false);
 			}
 			if( draw_geo_direction ) {
 				int color = Color.WHITE;
@@ -1479,7 +1482,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		canvas.restore();
 		
 		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false) ) {
-			// n.b., must draw this without canvas rotation
+			// n.b., must draw this without the standard canvas rotation
 			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
 			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
 			double angle = - preview.getOrigLevelAngle();
@@ -1495,17 +1498,53 @@ public class MyApplicationInterface implements ApplicationInterface {
 				Log.d(TAG, "orig_level_angle: " + orig_level_angle);
 				Log.d(TAG, "angle: " + angle);
 			}*/
-			int off_x = (int) (radius * Math.cos( Math.toRadians(angle) ));
-			int off_y = (int) (radius * Math.sin( Math.toRadians(angle) ));
 			int cx = canvas.getWidth()/2;
 			int cy = canvas.getHeight()/2;
+			
+			boolean is_level = false;
 			if( Math.abs(level_angle) <= close_angle ) { // n.b., use level_angle, not angle or orig_level_angle
+				is_level = true;
+			}
+			
+			if( is_level ) {
+				radius = (int)(radius * 1.2);
+			}
+
+			canvas.save();
+			canvas.rotate((float)angle, cx, cy);
+
+			p.setStyle(Paint.Style.FILL);
+			float hthickness = (0.5f * scale + 0.5f); // convert dps to pixels
+			p.setColor(Color.BLACK);
+			p.setAlpha(64);
+			// can't use drawRoundRect(left, top, right, bottom, ...) as that requires API 21
+			draw_rect.set(cx - radius - hthickness, cy - 2*hthickness, cx + radius + hthickness, cy + 2*hthickness);
+			canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
+			if( is_level ) {
 				p.setColor(Color.rgb(20, 231, 21)); // Green A400
 			}
 			else {
 				p.setColor(Color.WHITE);
 			}
-			canvas.drawLine(cx - off_x, cy - off_y, cx + off_x, cy + off_y, p);
+			p.setAlpha(255);
+			draw_rect.set(cx - radius, cy - hthickness, cx + radius, cy + hthickness);
+			canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+
+			if( is_level ) {
+				// draw a second line
+
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				draw_rect.set(cx - radius - hthickness, cy - 7*hthickness, cx + radius + hthickness, cy - 3*hthickness);
+				canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
+
+				p.setColor(Color.rgb(20, 231, 21)); // Green A400
+				p.setAlpha(255);
+				draw_rect.set(cx - radius, cy - 6*hthickness, cx + radius, cy - 4*hthickness);
+				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+			}
+
+			canvas.restore();
 		}
 
 		if( preview.isFocusWaiting() || preview.isFocusRecentSuccess() || preview.isFocusRecentFailure() ) {
@@ -1576,7 +1615,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top, String ybounds_text) {
 		final float scale = getContext().getResources().getDisplayMetrics().density;
-		p.setStyle(Paint.Style.FILL);
+		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
 		paint.setAlpha(64);
 		int alt_height = 0;
