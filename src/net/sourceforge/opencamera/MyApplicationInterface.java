@@ -745,7 +745,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 		    	switchVideoButton.setVisibility(visibility);
-			    if( main_activity.getPreview().supportsExposures() )
+			    if( main_activity.supportsExposureButton() )
 			    	exposureButton.setVisibility(visibility);
 			    if( main_activity.getPreview().supportsExposureLock() )
 			    	exposureLockButton.setVisibility(visibility);
@@ -800,7 +800,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			    	switchCameraButton.setVisibility(visibility);
 			    if( !main_activity.getPreview().isVideo() )
 			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
-			    if( main_activity.getPreview().supportsExposures() && !main_activity.getPreview().isVideo() ) // still allow exposure when recording video
+			    if( main_activity.supportsExposureButton() && !main_activity.getPreview().isVideo() ) // still allow exposure when recording video
 			    	exposureButton.setVisibility(visibility);
 			    if( main_activity.getPreview().supportsExposureLock() && !main_activity.getPreview().isVideo() ) // still allow exposure lock when recording video
 			    	exposureLockButton.setVisibility(visibility);

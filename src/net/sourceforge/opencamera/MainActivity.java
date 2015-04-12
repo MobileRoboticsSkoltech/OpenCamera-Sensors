@@ -1937,6 +1937,16 @@ public class MainActivity extends Activity {
 	    	applicationInterface.onSaveInstanceState(state);
 	    }
 	}
+	
+	boolean supportsExposureButton() {
+		if( preview.getCameraController() == null )
+			return false;
+    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
+		boolean manual_iso = !iso_value.equals(preview.getCameraController().getDefaultISO());
+		boolean supports_exposure = preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
+		return supports_exposure;
+	}
 
     void cameraSetup() {
 		if( MyDebug.LOG )
@@ -2160,10 +2170,7 @@ public class MainActivity extends Activity {
 		}
 
 		View exposureButton = (View) findViewById(R.id.exposure);
-		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
-		boolean manual_iso = !iso_value.equals(preview.getCameraController().getDefaultISO());
-		boolean supports_exposure = preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
-	    exposureButton.setVisibility(supports_exposure && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
+	    exposureButton.setVisibility(supportsExposureButton() && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
 
 	    ImageButton exposureLockButton = (ImageButton) findViewById(R.id.exposure_lock);
 	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
