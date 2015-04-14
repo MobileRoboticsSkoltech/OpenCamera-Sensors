@@ -1513,6 +1513,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			canvas.save();
 			canvas.rotate((float)angle, cx, cy);
 
+			final int line_alpha = 96;
 			p.setStyle(Paint.Style.FILL);
 			float hthickness = (0.5f * scale + 0.5f); // convert dps to pixels
 			p.setColor(Color.BLACK);
@@ -1526,7 +1527,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			else {
 				p.setColor(Color.WHITE);
 			}
-			p.setAlpha(255);
+			p.setAlpha(line_alpha);
 			draw_rect.set(cx - radius, cy - hthickness, cx + radius, cy + hthickness);
 			canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 
@@ -1539,10 +1540,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 				canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
 
 				p.setColor(Color.rgb(20, 231, 21)); // Green A400
-				p.setAlpha(255);
+				p.setAlpha(line_alpha);
 				draw_rect.set(cx - radius, cy - 6*hthickness, cx + radius, cy - 4*hthickness);
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 			}
+			p.setAlpha(255);
 
 			canvas.restore();
 		}
