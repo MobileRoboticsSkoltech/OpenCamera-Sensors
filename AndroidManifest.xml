@@ -27,6 +27,7 @@
         android:theme="@style/AppTheme"
         android:largeHeap="true"
         >
+       	<!-- should not change the android:name, including moving to a subpackage - see http://android-developers.blogspot.co.uk/2011/06/things-that-cannot-change.html -->
         <activity
             android:name="net.sourceforge.opencamera.MainActivity"
             android:label="@string/app_name"
@@ -51,8 +52,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+       	<!-- should not change the android:name, including moving to a subpackage - see http://android-developers.blogspot.co.uk/2011/06/things-that-cannot-change.html -->
         <activity
-            android:name="net.sourceforge.opencamera.widgets.TakePhoto"
+            android:name="TakePhoto"
             android:label="@string/take_photo"
 	        android:icon="@drawable/ic_launcher_take_photo"
             android:screenOrientation="landscape"
@@ -61,10 +63,11 @@
 			android:excludeFromRecents="true"
             >
         </activity>
+       	<!-- should not change the android:name, including moving to a subpackage - see http://android-developers.blogspot.co.uk/2011/06/things-that-cannot-change.html -->
         <receiver
 		    android:icon="@drawable/ic_launcher"
 		    android:label="@string/app_name"
-		    android:name="net.sourceforge.opencamera.widgets.MyWidgetProvider" >
+		    android:name="MyWidgetProvider" >
 		    <intent-filter >
 		         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
 		    </intent-filter>
@@ -75,10 +78,11 @@
 		       android:name="android.appwidget.provider"
 		       android:resource="@xml/widget_info" />
 		</receiver> 
+       	<!-- should not change the android:name, including moving to a subpackage - see http://android-developers.blogspot.co.uk/2011/06/things-that-cannot-change.html -->
         <receiver
 		    android:icon="@drawable/ic_launcher_take_photo"
             android:label="@string/take_photo"
-		    android:name="net.sourceforge.opencamera.widgets.MyWidgetProviderTakePhoto" >
+		    android:name="MyWidgetProviderTakePhoto" >
 		    <intent-filter >
 		         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
 		    </intent-filter>

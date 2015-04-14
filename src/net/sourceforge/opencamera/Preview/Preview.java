@@ -2,6 +2,7 @@ package net.sourceforge.opencamera.Preview;
 
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.R;
+import net.sourceforge.opencamera.TakePhoto;
 import net.sourceforge.opencamera.ToastBoxer;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraController1;
@@ -13,7 +14,6 @@ import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
 import net.sourceforge.opencamera.Preview.CameraSurface.CameraSurface;
 import net.sourceforge.opencamera.Preview.CameraSurface.MySurfaceView;
 import net.sourceforge.opencamera.Preview.CameraSurface.MyTextureView;
-import net.sourceforge.opencamera.widgets.TakePhoto;
 
 import java.io.File;
 import java.io.IOException;

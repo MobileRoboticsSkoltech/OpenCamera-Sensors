@@ -1,6 +1,7 @@
-package net.sourceforge.opencamera.widgets;
+package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.R;
 
 import android.app.PendingIntent;
@@ -11,7 +12,7 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-public class MyWidgetProviderTakePhoto extends AppWidgetProvider {
+public class MyWidgetProvider extends AppWidgetProvider {
 	private static final String TAG = "MyWidgetProvider";
 	
 	// from http://developer.android.com/guide/topics/appwidgets/index.html
@@ -28,13 +29,33 @@ public class MyWidgetProviderTakePhoto extends AppWidgetProvider {
         	if( MyDebug.LOG )
         		Log.d(TAG, "appWidgetId: " + appWidgetId);
 
-            Intent intent = new Intent(context, TakePhoto.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+            PendingIntent pendingIntent = null;
+            // for now, always put up the keyguard if the device is PIN locked etc
+			/*SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+			if( sharedPreferences.getBoolean(MainActivity.getShowWhenLockedPreferenceKey(), true) ) {
+		    	if( MyDebug.LOG )
+		    		Log.d(TAG, "do show above lock screen");
+	            Intent intent = new Intent(context, MyWidgetProvider.class);
+	            intent.setAction("net.sourceforge.opencamera.LAUNCH_OPEN_CAMERA");
+	            pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+			}
+			else*/ {
+		    	/*if( MyDebug.LOG )
+		    		Log.d(TAG, "don't show above lock screen");*/
+	            Intent intent = new Intent(context, MainActivity.class);
+	            pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+			}
 
             // Get the layout for the App Widget and attach an on-click listener
             // to the button
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout_take_photo);
-            views.setOnClickPendingIntent(R.id.widget_take_photo, pendingIntent);
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
+            views.setOnClickPendingIntent(R.id.widget_launch_open_camera, pendingIntent);
+			/*if( sharedPreferences.getBoolean(MainActivity.getShowWhenLockedPreferenceKey(), true) ) {
+				views.setTextViewText(R.id.launch_open_camera, "Open Camera (unlocked)");
+			}
+			else {
+				views.setTextViewText(R.id.launch_open_camera, "Open Camera (locked)");
+			}*/
 
             // Tell the AppWidgetManager to perform an update on the current app widget
             appWidgetManager.updateAppWidget(appWidgetId, views);

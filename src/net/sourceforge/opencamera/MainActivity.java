@@ -5,7 +5,6 @@ import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import net.sourceforge.opencamera.UI.PopupView;
-import net.sourceforge.opencamera.widgets.TakePhoto;
 
 import java.io.File;
 import java.io.IOException;
