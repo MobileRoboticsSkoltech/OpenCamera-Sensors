@@ -925,7 +925,10 @@ public class MainActivity extends Activity {
 		    else {
 		    	preview.showToast(switch_camera_toast, R.string.back_camera);
 		    }
+		    View switchCameraButton = (View) findViewById(R.id.switch_camera);
+		    switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
 			this.preview.setCamera(cameraId);
+		    switchCameraButton.setEnabled(true);
 		}
     }
 
@@ -933,7 +936,10 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchVideo");
 		this.closePopup();
+	    View switchVideoButton = (View) findViewById(R.id.switch_video);
+	    switchVideoButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
 		this.preview.switchVideo(true, true);
+		switchVideoButton.setEnabled(true);
 
 		ImageButton imageButton = (ImageButton)findViewById(R.id.take_photo);
 		imageButton.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
