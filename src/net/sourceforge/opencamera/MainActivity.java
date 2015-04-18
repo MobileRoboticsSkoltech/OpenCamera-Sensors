@@ -268,7 +268,6 @@ public class MainActivity extends Activity {
 			Log.d(TAG, "initCamera2Support");
     	supports_camera2 = false;
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-        	// currently Camera2 only supported if all camera have FULL support
         	CameraControllerManager2 manager2 = new CameraControllerManager2(this);
         	supports_camera2 = true;
         	for(int i=0;i<manager2.getNumberOfCameras() && supports_camera2;i++) {
