@@ -1242,7 +1242,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 					color = Color.rgb(20, 231, 21); // Green A400
 					p.setUnderlineText(true);
 				}
-				String string = getContext().getResources().getString(R.string.angle) + ": " + decimalFormat.format(level_angle) + (char)0x00B0;
+				String number_string = decimalFormat.format(level_angle);
+				number_string = number_string.replaceAll( "^-(?=0(.0*)?$)", ""); // avoids displaying "-0.0", see http://stackoverflow.com/questions/11929096/negative-sign-in-case-of-zero-in-java
+				String string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
 				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
 				p.setUnderlineText(false);
 			}
