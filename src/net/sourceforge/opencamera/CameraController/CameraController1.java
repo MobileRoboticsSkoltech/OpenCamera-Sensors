@@ -1090,6 +1090,16 @@ public class CameraController1 extends CameraController {
 	
 	@Override
 	public String getParametersString() {
-		return this.getParameters().flatten();
+		String string = "";
+		try {
+			string = this.getParameters().flatten();
+		}
+        catch(Exception e) {
+        	// received a StringIndexOutOfBoundsException from beneath getParameters().flatten() on Google Play!
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "exception from getParameters().flatten()");
+        	e.printStackTrace();
+        }
+		return string;
 	}
 }
