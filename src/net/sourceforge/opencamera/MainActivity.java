@@ -1526,7 +1526,8 @@ public class MainActivity extends Activity {
     	long time_s = System.currentTimeMillis();
     	StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
 		Bitmap thumbnail = null;
-    	if( media != null ) {
+    	if( media != null && getContentResolver() != null ) {
+    		// check for getContentResolver() != null, as have had reported Google Play crashes
     		if( media.video ) {
     			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
     		}
