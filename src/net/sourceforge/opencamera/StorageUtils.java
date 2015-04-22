@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
@@ -319,6 +320,12 @@ public class StorageUtils {
 					Log.d(TAG, "found most recent uri for " + (video ? "video" : "images") + ": " + uri);
 				media = new Media(id, video, uri, date, orientation);
 			}
+		}
+		catch(SQLiteException e) {
+			// had this reported on Google Play from getContentResolver().query() call
+			if( MyDebug.LOG )
+				Log.e(TAG, "SQLiteException trying to find latest media");
+			e.printStackTrace();
 		}
 		finally {
 			if( cursor != null ) {
