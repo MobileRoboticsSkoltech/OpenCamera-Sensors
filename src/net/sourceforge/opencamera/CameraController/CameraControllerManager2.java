@@ -30,6 +30,11 @@ public class CameraControllerManager2 extends CameraControllerManager {
 		catch (CameraAccessException e) {
 			e.printStackTrace();
 		}
+		catch(AssertionError e) {
+			// had reported java.lang.AssertionError on Google Play, "Expected to get non-empty characteristics" from CameraManager.getOrCreateDeviceIdListLocked(CameraManager.java:465)
+			// yes, in theory we shouldn't catch AssertionError as it represents a programming error, however it's a programming error by Google (a condition they thought couldn't happen)
+			e.printStackTrace();
+		}
 		return 0;
 	}
 

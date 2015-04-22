@@ -270,6 +270,11 @@ public class MainActivity extends Activity {
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
         	CameraControllerManager2 manager2 = new CameraControllerManager2(this);
         	supports_camera2 = true;
+        	if( manager2.getNumberOfCameras() == 0 ) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "Camera2 reports 0 cameras");
+            	supports_camera2 = false;
+        	}
         	for(int i=0;i<manager2.getNumberOfCameras() && supports_camera2;i++) {
         		if( !manager2.allowCamera2Support(i) ) {
         			if( MyDebug.LOG )
