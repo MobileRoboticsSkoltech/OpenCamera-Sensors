@@ -1031,6 +1031,10 @@ public class CameraController1 extends CameraController {
 	}
 	
 	public void setDisplayOrientation(int degrees) {
+		if( camera == null ) {
+			// shouldn't be null if camera_controller is non-null, but have had reported crashes on Google Play?! Possibly release()ed in another thread?
+			return;
+		}
 	    int result = 0;
 	    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
 	        result = (camera_info.orientation + degrees) % 360;
