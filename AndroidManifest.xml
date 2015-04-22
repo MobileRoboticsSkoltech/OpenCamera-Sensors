@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.sourceforge.opencamera"
-    android:versionCode="28"
-    android:versionName="1.24"
+    android:versionCode="29"
+    android:versionName="1.25"
     android:installLocation="auto"
     >
 
