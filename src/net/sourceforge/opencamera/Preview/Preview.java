@@ -1698,6 +1698,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private CamcorderProfile getCamcorderProfile(String quality) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCamcorderProfile(): " + quality);
+		if( camera_controller == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
+			return CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH);
+		}
 		int cameraId = camera_controller.getCameraId();
 		CamcorderProfile camcorder_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH); // default
 		try {
@@ -1751,6 +1756,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public CamcorderProfile getCamcorderProfile() {
 		// 4K UHD video is not yet supported by Android API (at least testing on Samsung S5 and Note 3, they do not return it via getSupportedVideoSizes(), nor via a CamcorderProfile (either QUALITY_HIGH, or anything else)
 		// but it does work if we explicitly set the resolution (at least tested on an S5)
+		if( camera_controller == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
+			return CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH);
+		}
 		CamcorderProfile profile = null;
 		int cameraId = camera_controller.getCameraId();
 		if( applicationInterface.getForce4KPref() ) {

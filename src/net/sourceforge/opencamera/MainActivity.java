@@ -1210,7 +1210,7 @@ public class MainActivity extends Activity {
 		}
 		
 		List<String> video_quality = this.preview.getSupportedVideoQuality();
-		if( video_quality != null ) {
+		if( video_quality != null && this.preview.getCameraController() != null ) {
 			String [] video_quality_arr = new String[video_quality.size()];
 			String [] video_quality_string_arr = new String[video_quality.size()];
 			int i=0;
