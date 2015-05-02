@@ -644,7 +644,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			if( message_id != 0 )
 				main_activity.getPreview().showToast(null, message_id);
-			String debug_value = "error_" + what + "_" + extra;
+			// in versions 1.24 and 1.24, there was a bug where we had "info_" for onVideoError and "error_" for onVideoInfo!
+			// fixed in 1.25; also was correct for 1.23 and earlier
+			String debug_value = "info_" + what + "_" + extra;
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putString("last_video_error", debug_value);
@@ -675,7 +677,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			message_id = R.string.video_error_server_died;
 		}
 		main_activity.getPreview().showToast(null, message_id);
-		String debug_value = "info_" + what + "_" + extra;
+		// in versions 1.24 and 1.24, there was a bug where we had "info_" for onVideoError and "error_" for onVideoInfo!
+		// fixed in 1.25; also was correct for 1.23 and earlier
+		String debug_value = "error_" + what + "_" + extra;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString("last_video_error", debug_value);
