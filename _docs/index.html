@@ -537,7 +537,8 @@ is enabled.</p>
 <p><a name="faq"><b>Frequently Asked Questions</b></p>
 
 <p><b>How can I save to my external SD card</b> - See <a href="#save_location">Save location</a> under Settings/More
-camera controls.</p>
+camera controls. Note however that most devices don't support saving to SD card for 3rd party apps since Android 4.4
+due to changes by Google.</p>
 
 <p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - Unfortunately many devices with 4K support
 have for some reason not exposed this through the Android API to 3rd party camera apps. For some such devices, it
@@ -552,6 +553,10 @@ settings, and there's no way to determine this in advance.</p>
 <p><b>But my camera can do 60/120FPS, so why can't Open Camera?</b> - High frame rates often are achieved only by the
 "stock" camera app (or "mods" of it) because these are written for a specific device and don't have to go through
 the standard Android camera API.</p>
+
+<p><b>Why does the resolution of my photos not match the specified camera resolution?</b> - This happens if
+<a href="#auto_stabilise">auto-stabilise</a> is enabled. The image is rotated to be level, which means the
+resolution (and aspect-ratio) will change.</p>
 
 <p><b>Why can't I change the ISO?</b> - Even if your device supports ISO, this may not be made available through the
 standard Android API for 3rd party camera apps to use. For example,
