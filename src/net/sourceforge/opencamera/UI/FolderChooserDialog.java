@@ -78,7 +78,7 @@ public class FolderChooserDialog extends DialogFragment {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreateDialog");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-		String folder_name = sharedPreferences.getString("preference_save_location", "OpenCamera");
+		String folder_name = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
 		if( MyDebug.LOG )
 			Log.d(TAG, "folder_name: " + folder_name);
 		File new_folder = StorageUtils.getImageFolder(folder_name);
