@@ -18,7 +18,7 @@ public interface ApplicationInterface {
 	Context getContext(); // get the application context
 	boolean useCamera2(); // should Android 5's Camera 2 API be used?
 	Location getLocation(); // get current location - null if not available (or you don't care about geotagging)
-	File getOutputMediaFile(int type); // Create a File for saving an image or video (use MEDIA_TYPE_* constants)
+	File createOutputMediaFile(int type); // Create a File for saving an image or video (use MEDIA_TYPE_* constants)
 	// for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
 	// if you just want a default or don't really care, see the comments for each method for a default or possible options
 	// if Preview doesn't support the requested setting, it will check this, and choose its own

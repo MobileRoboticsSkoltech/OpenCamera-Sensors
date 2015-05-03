@@ -162,8 +162,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
-	public File getOutputMediaFile(int type) {
-		return storageUtils.getOutputMediaFile(type);
+	public File createOutputMediaFile(int type) {
+		return storageUtils.createOutputMediaFile(type);
 	}
 
 	@Override
@@ -516,7 +516,8 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
     public int getZoomPref() {
-		Log.d(TAG, "getZoomPref: " + zoom_factor);
+		if( MyDebug.LOG )
+			Log.d(TAG, "getZoomPref: " + zoom_factor);
     	return zoom_factor;
     }
 
@@ -1982,7 +1983,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     			}
 			}
 			else {
-    			picFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+    			picFile = createOutputMediaFile(MEDIA_TYPE_IMAGE);
     	        if( picFile == null ) {
     	            Log.e(TAG, "Couldn't create media image file; check storage permissions?");
     	            main_activity.getPreview().showToast(null, R.string.failed_to_save_image);

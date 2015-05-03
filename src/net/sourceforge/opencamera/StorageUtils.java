@@ -181,23 +181,16 @@ public class StorageUtils {
 		else {
 	        file = new File(getBaseFolder(), folder_name);
 		}
-		/*if( MyDebug.LOG ) {
-			Log.d(TAG, "folder_name: " + folder_name);
-			Log.d(TAG, "full path: " + file);
-		}*/
         return file;
     }
-    
+
     File getImageFolder() {
 		String folder_name = getSaveLocation();
 		return getImageFolder(folder_name);
     }
 
     @SuppressLint("SimpleDateFormat")
-	File getOutputMediaFile(int type) {
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
+	File createOutputMediaFile(int type) {
     	File mediaStorageDir = getImageFolder();
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
