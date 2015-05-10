@@ -33,13 +33,13 @@
     </string-array>
     <string-array name="focus_mode_entries">
         <item>Автофокус</item>
-        <item>Бесконеч. фокус</item>
-        <item>Макро фокус</item>
-        <item>запертый фокус</item>
-        <item>Ручной фокус</item>
-        <item>Фиксир. фокус</item>
-        <item>EDOF фокус</item>
-        <item>Непрер. фокус</item>
+        <item>Бесконечность</item>
+        <item>Макро</item>
+        <item>Запертый</item>
+        <item>Ручной</item>
+        <item>Фиксированный</item>
+        <item>EDOF</item>
+        <item>Непрерывный</item>
     </string-array>
     <string-array name="focus_mode_values">
         <item>focus_mode_auto</item>
@@ -132,7 +132,7 @@
         <item>300</item>
     </string-array>
     <string-array name="preference_preview_size_entries">
-        <item>Макс. размер предпросмотра</item>
+        <item>Максимальный</item>
         <item>Размер фото (WYSIWYG)</item>
     </string-array>
     <string-array name="preference_preview_size_values">
@@ -158,7 +158,7 @@
         <item>volume_really_nothing</item>
     </string-array>
     <string-array name="preference_rotate_preview_entries">
-        <item>"Не поворачивать"</item>
+        <item>Не поворачивать</item>
         <item>Повернуть на 180 градусов</item>
     </string-array>
     <string-array name="preference_rotate_preview_values">
@@ -344,7 +344,7 @@
         <item>3600</item>
     </string-array>
     <string-array name="preference_video_restart_entries">
-        <item>Не перезагружать</item>
+        <item>Не повторять</item>
         <item>Повторить 1 раз</item>
         <item>Повторить 2 раза</item>
         <item>Повторить 3 раза</item>
@@ -372,8 +372,8 @@
     <string-array name="preference_record_audio_src_entries">
         <item>Видеокамера</item>
         <item>Внешний микрофон (если имеется)</item>
-        <item>Default audio source</item>
-        <item>Optimised for voice</item>
+        <item>По умолчанию</item>
+        <item>Внутренний микрофон</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>
