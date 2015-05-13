@@ -3,12 +3,7 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Parametrlər</string>
     <string name="action_popup">Popup parametrləri</string>
-    <string name="intro_text">Şəkil çəkmək üçün fokusa və göy rəngli kamera düyməsinə toxunun.
-Daha çox kömək üçün, Parametrlərdə Onlayın köməyə toxunun.
-Open Camera tamamilə pulsuzdur.
-Əgər proqram xoşunuza gəlirsə, lütfən mənim proqramımı alaraq ianə vermək barədə düşünün :) (Parametrlərə və ya onlayn köməyə baxın).
-
-Məxfilik Siyasəti: Coğrafi yer bildirişi üçün icazə tələb olunur, lakin susmaya görə bu funksiya bağlıdır. Əgər işə salınarsa, sizin məkan məlumatlarınız saxlanılan fayllarda kodlaşacaq (və o ancaq bu məqsəd üçün istifadə olunur).</string>
+    <string name="intro_text">Şəkil çəkmək üçün fokusa və göy rəngli kamera düyməsinə toxunun. Daha çox kömək üçün, Parametrlərdə Onlayın köməyə toxunun. Open Camera tamamilə pulsuzdur. Əgər proqram xoşunuza gəlirsə, lütfən mənim proqramımı alaraq ianə vermək barədə düşünün :) (Parametrlərə və ya onlayn köməyə baxın).\n\nMəxfilik Siyasəti: Coğrafi yer bildirişi üçün icazə tələb olunur, lakin susmaya görə bu funksiya bağlıdır. Əgər işə salınarsa, sizin məkan məlumatlarınız saxlanılan fayllarda kodlaşacaq (və o ancaq bu məqsəd üçün istifadə olunur).</string>
     <string name="intro_ok">OK (Bu mesaj bir daha göstərilməyəcək)</string>
     <string name="answer_yes">Hə</string>
     <string name="answer_no">Yox</string>
@@ -53,11 +48,9 @@ Məxfilik Siyasəti: Coğrafi yer bildirişi üçün icazə tələb olunur, laki
     <string name="location_not_available">GPS yer məlumatları mövcud deyil</string>
     <string name="photo_deleted">Şəkil silindi</string>
     <string name="no_gallery_app">Qalereya proqramı mövcud deyil</string>
-    <string name="screen_is_locked">"Ekran kilidlənib
-Açmaq üçün ekranı sürüşdürün"</string>
+    <string name="screen_is_locked">"Ekran kilidlənib\nAçmaq üçün ekranı sürüşdürün"</string>
     <string name="unlocked">Kilid açıldı</string>
-    <string name="auto_stabilise_not_supported">"Təəssüf ki, bu cihazda
-avto-stabilləşdirmə dəstəklənmir"</string>
+    <string name="auto_stabilise_not_supported">"Təəssüf ki, bu cihazda\navto-stabilləşdirmə dəstəklənmir"</string>
     <string name="audio_disabled">Audio bağlıdır</string>
     <string name="max_duration">Maksimum müddət</string>
     <string name="color_effect">Rəng effekti</string>
