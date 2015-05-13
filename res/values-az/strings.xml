@@ -48,9 +48,9 @@
     <string name="location_not_available">GPS yer məlumatları mövcud deyil</string>
     <string name="photo_deleted">Şəkil silindi</string>
     <string name="no_gallery_app">Qalereya proqramı mövcud deyil</string>
-    <string name="screen_is_locked">"Ekran kilidlənib\nAçmaq üçün ekranı sürüşdürün"</string>
+    <string name="screen_is_locked">Ekran kilidlənib\nAçmaq üçün ekranı sürüşdürün</string>
     <string name="unlocked">Kilid açıldı</string>
-    <string name="auto_stabilise_not_supported">"Təəssüf ki, bu cihazda\navto-stabilləşdirmə dəstəklənmir"</string>
+    <string name="auto_stabilise_not_supported">Təəssüf ki, bu cihazda\navto-stabilləşdirmə dəstəklənmir</string>
     <string name="audio_disabled">Audio bağlıdır</string>
     <string name="max_duration">Maksimum müddət</string>
     <string name="color_effect">Rəng effekti</string>
