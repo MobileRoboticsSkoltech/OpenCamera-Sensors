@@ -3,7 +3,7 @@
 
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Impostazioni</string>
-    <string name="intro_text">Tocca lo schermo per mettere a fuoco e premi il pulsante blu a forma di fotocamera per scattare fotografie. Per aiuti aggiuntivi, premi Aiuto Online dalle Impostazioni. Open Camera è interamente software libero (Free e Open Source). Se questa app ti piace, considera che puoi anche dare una mano nello sviluppo effettuando una donazione :) (vedi il link nelle Impostazioni o nell\'Aiuto Online).\n\nNote per la privacy: I permessi dell\'applicazione per la Geolocalizzazione sono richiesti esclusivamente per il geotagging, disabilitato di predefinito. Quando invece sono abilitati, la tua posizione è codificata solo nelle foto e nei video salvati (ed è usata solo a questo scopo).\n\n(Questo messaggio non sarà mostrato nuovamente.)</string>
+    <string name="intro_text">Tocca lo schermo per mettere a fuoco e premi il pulsante blu a forma di fotocamera per scattare fotografie. Per aiuti aggiuntivi, premi Aiuto Online dalle Impostazioni. Open Camera è interamente software libero (Free e Open Source). Se questa app ti piace, considera che puoi anche dare una mano nello sviluppo effettuando una donazione :) (vedi il link nelle Impostazioni o nell\'Aiuto Online).\n\nNote per la privacy: I permessi dell\'applicazione per la Geolocalizzazione sono richiesti esclusivamente per il geotagging, disabilitato di predefinito. Quando invece sono abilitati, la tua posizione è codificata solo nelle foto e nei video salvati (ed è usata solo a questo scopo).</string>
     <string name="intro_ok">OK (Non mostrare più)</string>
     
     <string name="answer_yes">Sì</string>

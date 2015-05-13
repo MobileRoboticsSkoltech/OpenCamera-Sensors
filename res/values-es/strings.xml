@@ -3,7 +3,7 @@
 
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Ajustes</string>
-    <string name="intro_text">Toca para enfocar y pulsa el boton de la cámara azul para realizar la foto. Para más ayuda pulsa Ayuda Online desde los ajustes. Open Camera es completamente gratuito. Si te gusta esta app, considera comprar mi versión de pago :) (mira en Ajustes o en Ayuda Online).\n\nPolítica de privacidad: Se requiere el permiso de Localización para geotagging, pero esta deshabilitado por defecto. Si se habilita, tu localización será codificada en los archivos guardados (y solo se usara para este propósito).\n\n(Este mensaje no se mostrará otra vez.)</string>
+    <string name="intro_text">Toca para enfocar y pulsa el boton de la cámara azul para realizar la foto. Para más ayuda pulsa Ayuda Online desde los ajustes. Open Camera es completamente gratuito. Si te gusta esta app, considera comprar mi versión de pago :) (mira en Ajustes o en Ayuda Online).\n\nPolítica de privacidad: Se requiere el permiso de Localización para geotagging, pero esta deshabilitado por defecto. Si se habilita, tu localización será codificada en los archivos guardados (y solo se usara para este propósito).</string>
     <string name="intro_ok">OK (Este mensaje no se mostrara otra vez.)</string>
     
     <string name="answer_yes">Si</string>
