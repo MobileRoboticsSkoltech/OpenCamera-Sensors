@@ -33,8 +33,6 @@ import android.media.CamcorderProfile;
 import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -866,14 +864,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( sharedPreferences.getBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), true) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "play beep!");
-		    try {
-		        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-				Activity activity = (Activity)getContext();
-		        Ringtone r = RingtoneManager.getRingtone(activity.getApplicationContext(), notification);
-		        r.play();
-		    }
-		    catch(Exception e) {
-		    }		
+			long remaining_time = (main_activity.getPreview().getTimerEndTime() - System.currentTimeMillis() + 999)/1000;
+			if( MyDebug.LOG )
+				Log.d(TAG, "remaining_time: " + remaining_time);
+			if( remaining_time > 0 ) {
+				boolean is_last = remaining_time <= 1;
+				main_activity.playSound(is_last ? R.raw.beep_hi : R.raw.beep);
+			}
 		}
 	}
 
@@ -1273,7 +1270,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				long remaining_time = (preview.getTimerEndTime() - System.currentTimeMillis() + 999)/1000;
 				if( MyDebug.LOG )
 					Log.d(TAG, "remaining_time: " + remaining_time);
-				if( remaining_time >= 0 ) {
+				if( remaining_time > 0 ) {
 					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
 					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(229, 28, 35), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500

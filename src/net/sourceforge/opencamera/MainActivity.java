@@ -22,7 +22,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.media.CamcorderProfile;
+import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -45,6 +47,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
@@ -84,6 +87,9 @@ public class MainActivity extends Activity {
     private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<Integer, Bitmap>();
     private PopupView popup_view = null;
 
+    private SoundPool sound_pool = null;
+	private SparseIntArray sound_ids = null;
+	
 	private boolean ui_placement_right = true;
 
 	private ToastBoxer switch_camera_toast = new ToastBoxer();
@@ -527,6 +533,10 @@ public class MainActivity extends Activity {
         orientationEventListener.enable();
 
         applicationInterface.getLocationSupplier().setupLocationListener();
+        
+        initSound();
+    	loadSound(R.raw.beep);
+    	loadSound(R.raw.beep_hi);
 
 		layoutUI();
 
@@ -559,6 +569,7 @@ public class MainActivity extends Activity {
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
         applicationInterface.getLocationSupplier().freeLocationListeners();
+		releaseSound();
 		preview.onPause();
     }
 
@@ -1122,7 +1133,7 @@ public class MainActivity extends Activity {
 		popup_container.getViewTreeObserver().addOnGlobalLayoutListener( 
 			new OnGlobalLayoutListener() {
 				@SuppressWarnings("deprecation")
-			    @SuppressLint("NewApi")
+				@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 				@Override
 			    public void onGlobalLayout() {
 					if( MyDebug.LOG )
@@ -1686,6 +1697,31 @@ public class MainActivity extends Activity {
 		editor.apply();
     }
     
+    /*private void openFolderChooserDialog() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "openFolderChooserDialog");
+		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+		//Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+		//intent.addCategory(Intent.CATEGORY_OPENABLE);
+		startActivityForResult(intent, 42);
+    }*/
+    
+    /*@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        if( requestCode == 42 && resultCode == RESULT_OK && resultData != null ) {
+            Uri treeUri = resultData.getData();
+            ContentResolver contentResolver = this.getContentResolver();
+            Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri,
+                    DocumentsContract.getTreeDocumentId(treeUri));
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "returned docUri: " + docUri.toString());
+            Uri fileUri = DocumentsContract.createDocument(contentResolver, docUri, "image/jpeg", "test.jpg");   
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "returned fileUri: " + fileUri.toString());
+            //OutputStream out = contentResolver.openOutputStream(fileUri);
+        }
+    }*/
+
     private void openFolderChooserDialog() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "openFolderChooserDialog");
@@ -2368,6 +2404,60 @@ public class MainActivity extends Activity {
 		}
 		
 		preview.showToast(switch_video_toast, toast_string);
+	}
+
+	@SuppressWarnings("deprecation")
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void initSound() {
+		if( sound_pool == null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "create new sound_pool");
+	        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+				sound_pool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
+	        }
+	        else {
+				sound_pool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
+	        }
+			sound_ids = new SparseIntArray();
+		}
+	}
+	
+	private void releaseSound() {
+        if( sound_pool != null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "release sound_pool");
+            sound_pool.release();
+        	sound_pool = null;
+    		sound_ids = null;
+        }
+	}
+	
+	// must be called before playSound (allowing enough time to load the sound)
+	void loadSound(int resource_id) {
+		if( sound_pool != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "loading sound resource: " + resource_id);
+			int sound_id = sound_pool.load(this, resource_id, 1);
+			if( MyDebug.LOG )
+				Log.d(TAG, "    loaded sound: " + sound_id);
+			sound_ids.put(resource_id, sound_id);
+		}
+	}
+	
+	// must call loadSound first (allowing enough time to load the sound)
+	void playSound(int resource_id) {
+		if( sound_pool != null ) {
+			if( sound_ids.indexOfKey(resource_id) < 0 ) {
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "resource not loaded: " + resource_id);
+			}
+			else {
+				int sound_id = sound_ids.get(resource_id);
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "play sound: " + sound_id);
+				sound_pool.play(sound_id, 1.0f, 1.0f, 0, 0, 1);
+			}
+		}
 	}
 
     // for testing:
