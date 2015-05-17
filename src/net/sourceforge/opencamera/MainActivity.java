@@ -979,6 +979,9 @@ public class MainActivity extends Activity {
     	else if( flash_value != null && flash_value.equals("flash_on") ) {
     		popup.setImageResource(R.drawable.popup_flash_on);
     	}
+    	else if( flash_value != null && flash_value.equals("flash_red_eye") ) {
+    		popup.setImageResource(R.drawable.popup_flash_red_eye);
+    	}
     	else {
     		popup.setImageResource(R.drawable.popup);
     	}
