@@ -22,6 +22,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.CamcorderProfile;
 import android.media.SoundPool;
@@ -2413,7 +2414,14 @@ public class MainActivity extends Activity {
     		if( MyDebug.LOG )
     			Log.d(TAG, "create new sound_pool");
 	        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-				sound_pool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
+	        	AudioAttributes audio_attributes = new AudioAttributes.Builder()
+	        		.setLegacyStreamType(AudioManager.STREAM_SYSTEM)
+	        		.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+	        		.build();
+	        	sound_pool = new SoundPool.Builder()
+	        		.setMaxStreams(1)
+	        		.setAudioAttributes(audio_attributes)
+        			.build();
 	        }
 	        else {
 				sound_pool = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
