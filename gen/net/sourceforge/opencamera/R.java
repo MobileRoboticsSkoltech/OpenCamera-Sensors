@@ -428,13 +428,15 @@ public final class R {
         AppBaseTheme from BOTH res/values/styles.xml and
         res/values-v11/styles.xml on API 21+ devices.
     
- API 21 theme customizations can go here. 
          */
         public static final int AppBaseTheme=0x7f090000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f090001;
+        /**  standard material design backgroundTint is #ff5a595b, but we want transparent image buttons 
+         */
+        public static final int image_button=0x7f090002;
     }
     public static final class xml {
         public static final int preferences=0x7f040000;
