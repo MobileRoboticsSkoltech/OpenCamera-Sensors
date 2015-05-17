@@ -844,8 +844,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public void updateThumbnail(Bitmap thumbnail) {
-		thumbnail_anim = true;
-		thumbnail_anim_start_ms = System.currentTimeMillis();
+		if( getThumbnailAnimationPref() ) {
+			thumbnail_anim = true;
+			thumbnail_anim_start_ms = System.currentTimeMillis();
+		}
 		main_activity.updateThumbnail(thumbnail);
 
     	Bitmap old_thumbnail = this.last_thumbnail;
