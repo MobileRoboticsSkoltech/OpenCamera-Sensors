@@ -3599,7 +3599,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					set_flash_value_after_autofocus = "";
 					String old_flash_value = camera_controller.getFlashValue();
 	    			// getFlashValue() may return "" if flash not supported!
-	    			if( startup && old_flash_value.length() > 0 && !old_flash_value.equals("flash_off") ) {
+					if( startup && old_flash_value.length() > 0 && !old_flash_value.equals("flash_off") && !old_flash_value.equals("flash_torch") ) {
 	    				set_flash_value_after_autofocus = old_flash_value;
 	        			camera_controller.setFlashValue("flash_off");
 	    			}
