@@ -396,8 +396,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getBoolean(PreferenceKeys.getShowToastsPreferenceKey(), true);
     }
 
-    @Override
-    public boolean getThumbnailAnimationPref() {
+    private boolean getThumbnailAnimationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), true);
     }
@@ -460,8 +459,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getBoolean(PreferenceKeys.getRequireLocationPreferenceKey(), false);
     }
     
-    @Override
-    public boolean getGeodirectionPref() {
+    private boolean getGeodirectionPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getGPSDirectionPreferenceKey(), false);
     }
@@ -478,8 +476,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getString(PreferenceKeys.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
     }
 
-    @Override
-    public boolean getAutoStabilisePref() {
+    private boolean getAutoStabilisePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
 		if( auto_stabilise && main_activity.supportsAutoStabilise() )
@@ -487,20 +484,17 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return false;
     }
     
-    @Override
-    public String getStampPref() {
+    private String getStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_no");
     }
     
-    @Override
-    public String getTextStampPref() {
+    private String getTextStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getTextStampPreferenceKey(), "");
     }
     
-    @Override
-    public int getTextStampFontSizePref() {
+    private int getTextStampFontSizePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	int font_size = 12;
 		String value = sharedPreferences.getString(PreferenceKeys.getStampFontSizePreferenceKey(), "12");
@@ -848,8 +842,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		main_activity.clearSeekBar();
 	}
 
-	@Override
-	public void updateThumbnail(Bitmap thumbnail) {
+	private void updateThumbnail(Bitmap thumbnail) {
 		if( getThumbnailAnimationPref() ) {
 			thumbnail_anim = true;
 			thumbnail_anim_start_ms = System.currentTimeMillis();

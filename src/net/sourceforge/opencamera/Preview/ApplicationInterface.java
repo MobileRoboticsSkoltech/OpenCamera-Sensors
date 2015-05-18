@@ -3,7 +3,6 @@ package net.sourceforge.opencamera.Preview;
 import java.io.File;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.media.CamcorderProfile;
@@ -47,20 +46,14 @@ public interface ApplicationInterface {
 	String getLockOrientationPref(); // return "none" for default; use "portrait" or "landscape" to lock photos/videos to that orientation
 	boolean getPausePreviewPref(); // whether to pause the preview after taking a photo
 	boolean getShowToastsPref();
-	boolean getThumbnailAnimationPref(); // whether to display a thumbnail animation on preview after taking photo
 	boolean getShutterSoundPref(); // whether to play sound when taking photo
 	long getTimerPref(); // time in ms for timer (so 0 for off)
 	String getRepeatPref(); // return number of times to repeat photo in a row (as a string), so "1" for default; return "unlimited" for unlimited
 	long getRepeatIntervalPref(); // time in ms between repeat
 	boolean getGeotaggingPref(); // whether to geotag photos
 	boolean getRequireLocationPref(); // if getGeotaggingPref() returns true, and this method returns true, then phot/video will only be taken if location data is available
-	boolean getGeodirectionPref(); // whether to tag photos with direction
 	boolean getRecordAudioPref(); // whether to record audio when recording video
 	String getRecordAudioSourcePref(); // "audio_src_camcorder" is recommended, but other options are: "audio_src_mic", "audio_src_default", "audio_src_voice_communication"; see corresponding values in android.media.MediaRecorder.AudioSource
-	boolean getAutoStabilisePref(); // whether to apply auto-stabilise algorithm to photos
-	String getStampPref(); // "preference_stamp_no" for default, or "preference_stamp_yes" to stamp date/time and location (if geotagging) onto resultant photos
-	String getTextStampPref(); // optional text to stamp on resultant photos
-	int getTextStampFontSizePref(); // only relevant if stamping onto photos
 	int getZoomPref(); // index into Preview.getSupportedZoomRatios() array (each entry is the zoom factor, scaled by 100; array is sorted from min to max zoom)
 	// Camera2 only modes:
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
@@ -87,7 +80,6 @@ public interface ApplicationInterface {
 	void hasPausedPreview(boolean paused); // called when the preview is paused or unpaused (due to getPausePreviewPref())
 	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video), use to disable GUI elements during camera operation
 	void cameraClosed();
-	void updateThumbnail(Bitmap thumbnail); // n.b., thumbnail will be recycled after updateThumbnail() is called again with a different thumbnail
 	void timerBeep(long remaining_time); // n.b., called once per second on timer countdown - so application can beep, or do whatever it likes
 
 	// methods that request actions
