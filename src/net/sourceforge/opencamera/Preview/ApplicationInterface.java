@@ -87,7 +87,7 @@ public interface ApplicationInterface {
 	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video), use to disable GUI elements during camera operation
 	void cameraClosed();
 	void updateThumbnail(Bitmap thumbnail); // n.b., thumbnail will be recycled after updateThumbnail() is called again with a different thumbnail
-	void timerBeep(); // n.b., called once per second on timer countdown - so application can beep, or do whatever it likes
+	void timerBeep(long remaining_time); // n.b., called once per second on timer countdown - so application can beep, or do whatever it likes
 
 	// methods that request actions
 	void layoutUI(); // application should layout UI that's on top of the preview

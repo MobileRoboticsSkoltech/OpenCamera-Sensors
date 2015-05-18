@@ -2996,7 +2996,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	private void takePictureOnTimer(long timer_delay, boolean repeated) {
+	private void takePictureOnTimer(final long timer_delay, boolean repeated) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "takePictureOnTimer");
 			Log.d(TAG, "timer_delay: " + timer_delay);
@@ -3032,8 +3032,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
 
 		class BeepTimerTask extends TimerTask {
+			long remaining_time = timer_delay;
 			public void run() {
-				applicationInterface.timerBeep();
+				if( remaining_time > 0 ) { // check in case this isn't cancelled by time we take the photo
+					applicationInterface.timerBeep(remaining_time);
+				}
+				remaining_time -= 1000;
 			}
 		}
     	beepTimer.schedule(beepTimerTask = new BeepTimerTask(), 0, 1000);
