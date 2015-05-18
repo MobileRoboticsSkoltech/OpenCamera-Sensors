@@ -100,7 +100,11 @@ public class PreferenceKeys {
     public static String getPausePreviewPreferenceKey() {
     	return "preference_pause_preview";
     }
-    
+
+    public static String getShowToastsPreferenceKey() {
+    	return "preference_show_toasts";
+    }
+
     public static String getThumbnailAnimationPreferenceKey() {
     	return "preference_thumbnail_animation";
     }

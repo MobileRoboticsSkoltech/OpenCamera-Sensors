@@ -4042,6 +4042,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     public void showToast(final ToastBoxer clear_toast, final String message, final int offset_y_dp) {
+		if( !applicationInterface.getShowToastsPref() ) {
+			return;
+		}
+    	
 		class RotatedTextView extends View {
 			private String [] lines = null;
 			private Paint paint = new Paint();

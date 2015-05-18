@@ -153,6 +153,8 @@
     <string name="preference_grid_summary">Display one of various grids</string>
     <string name="preference_crop_guide">Show a crop guide</string>
     <string name="preference_crop_guide_summary">A crop guide displays a rectangle showing what the specified aspect ratio looks like - useful if you plan to crop the photo/video afterwards to a different aspect ratio. Requires WYSIWYG photo mode, or being in video mode.</string>
+    <string name="preference_show_toasts">Show \"toast\" messages</string>
+    <string name="preference_show_toasts_summary">Whether to display the popup \"toast\" messages</string>
     <string name="preference_thumbnail_animation">Show thumbnail animation</string>
     <string name="preference_thumbnail_animation_summary">Display moving thumbnail animation when taking a photo</string>
     <string name="preference_keep_display_on">Keep display on</string>

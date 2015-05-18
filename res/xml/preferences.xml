@@ -325,6 +325,13 @@
                 />
             
             <CheckBoxPreference
+                android:key="preference_show_toasts"
+                android:title="@string/preference_show_toasts"
+                android:summary="@string/preference_show_toasts_summary"
+                android:defaultValue="true"
+                />
+
+            <CheckBoxPreference
                 android:key="preference_thumbnail_animation"
                 android:title="@string/preference_thumbnail_animation"
                 android:summary="@string/preference_thumbnail_animation_summary"

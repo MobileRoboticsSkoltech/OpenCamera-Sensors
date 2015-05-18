@@ -389,7 +389,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), false);
     }
-    
+
+    @Override
+	public boolean getShowToastsPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getBoolean(PreferenceKeys.getShowToastsPreferenceKey(), true);
+    }
+
     @Override
     public boolean getThumbnailAnimationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
