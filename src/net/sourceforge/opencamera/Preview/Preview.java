@@ -2653,7 +2653,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void updateFocusForVideo(boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocusForVideo()");
-		if( this.supported_focus_values != null && camera_controller != null ) {
+		if( this.supported_focus_values != null && camera_controller != null && is_video ) { // originally we reset focus mode for photo mode too, but now we only do this for video mode (so if user wants to use continuous video mode for photo mode, that's fine, and we don't reset it)
 			boolean focus_is_video = focusIsVideo();
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "focus_is_video: " + focus_is_video + " , is_video: " + is_video);
