@@ -105,7 +105,7 @@ public class StorageUtils {
 	    		 				// whilst we don't yet correct for that bug, the more immediate problem is that it also messes up the DATE_TAKEN field in the media store, which messes up Gallery apps
 	    		 				// so for now, we correct it based on the DATE_ADDED value.
     		        	        String[] CONTENT_PROJECTION = { Images.Media.DATE_ADDED }; 
-    		        	        Cursor c = getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
+    		        	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
     		        	        if( c == null ) { 
     		    		 			if( MyDebug.LOG )
     		    		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
@@ -120,13 +120,33 @@ public class StorageUtils {
     		    		 				Log.e(TAG, "replace date_taken with date_added: " + date_added); 
 									ContentValues values = new ContentValues(); 
 									values.put(Images.Media.DATE_TAKEN, date_added*1000); 
-									getContentResolver().update(uri, values, null, null);
+									context.getContentResolver().update(uri, values, null, null);
     			        	        c.close(); 
     		        	        }
 	    		 			}*/
     		        	}
     		        	else if( is_new_video ) {
     		        		context.sendBroadcast(new Intent("android.hardware.action.NEW_VIDEO", uri));
+
+    		        		/*String[] CONTENT_PROJECTION = { Video.Media.DURATION }; 
+		        	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
+		        	        if( c == null ) { 
+		    		 			if( MyDebug.LOG )
+		    		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
+		        	        }
+		        	        else if( !c.moveToFirst() ) { 
+		    		 			if( MyDebug.LOG )
+		    		 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
+		        	        }
+		        	        else {
+			        	        long duration = c.getLong(c.getColumnIndex(Video.Media.DURATION)); 
+		    		 			if( MyDebug.LOG )
+		    		 				Log.e(TAG, "replace duration: " + duration); 
+								ContentValues values = new ContentValues(); 
+								values.put(Video.Media.DURATION, 1000); 
+								context.getContentResolver().update(uri, values, null, null);
+			        	        c.close(); 
+		        	        }*/
     		        	}
     		 			failed_to_scan = false;
     		 		}
