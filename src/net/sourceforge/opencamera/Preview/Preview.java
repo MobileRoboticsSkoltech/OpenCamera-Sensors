@@ -1409,22 +1409,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( supported_focus_values != null && supported_focus_values.size() > 1 ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "focus values: " + supported_focus_values);
-	
-				String focus_value = applicationInterface.getFocusPref();
-				if( focus_value.length() > 0 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found existing focus_value: " + focus_value);
-					if( !updateFocus(focus_value, false, false, true) ) { // don't need to save, as this is the value that's already saved
-						if( MyDebug.LOG )
-							Log.d(TAG, "focus value no longer supported!");
-						updateFocus(0, false, true, true);
-					}
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "found no existing focus_value");
-					updateFocus("focus_mode_auto", false, true, true);
-				}
+
+				setFocusPref();
 			}
 			else {
 				if( MyDebug.LOG )
@@ -1469,7 +1455,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "time after setting up camera parameters: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
-
+	
 	private void setPreviewSize() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewSize()");
@@ -2646,6 +2632,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return false;
 	}
 	
+	private void setFocusPref() {
+		String focus_value = applicationInterface.getFocusPref();
+		if( focus_value.length() > 0 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "found existing focus_value: " + focus_value);
+			if( !updateFocus(focus_value, false, false, true) ) { // don't need to save, as this is the value that's already saved
+				if( MyDebug.LOG )
+					Log.d(TAG, "focus value no longer supported!");
+				updateFocus(0, false, true, true);
+			}
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "found no existing focus_value");
+			updateFocus("focus_mode_auto", false, true, true);
+			//updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true, auto_focus);
+		}
+	}
+
 	public void updateFocusForVideo(boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocusForVideo()");
