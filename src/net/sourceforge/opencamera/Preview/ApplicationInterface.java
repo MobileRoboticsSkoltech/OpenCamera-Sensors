@@ -23,7 +23,7 @@ public interface ApplicationInterface {
 	// if Preview doesn't support the requested setting, it will check this, and choose its own
 	int getCameraIdPref(); // camera to use, from 0 to getCameraControllerManager().getNumberOfCameras()
 	String getFlashPref(); // flash_off, flash_auto, flash_on, flash_torch, flash_red_eye
-	String getFocusPref(); // focus_mode_auto, focus_mode_infinity, focus_mode_macro, focus_mode_locked, focus_mode_fixed, focus_mode_manual2, focus_mode_edof, focus_mode_continuous_video
+	String getFocusPref(boolean is_video); // focus_mode_auto, focus_mode_infinity, focus_mode_macro, focus_mode_locked, focus_mode_fixed, focus_mode_manual2, focus_mode_edof, focus_mode_continuous_video
 	boolean isVideoPref(); // start up in video mode?
 	String getSceneModePref(); // "auto" for default (strings correspond to Android's scene mode constants in android.hardware.Camera.Parameters)
 	String getColorEffectPref(); // "node" for default (strings correspond to Android's color effect constants in android.hardware.Camera.Parameters)
@@ -89,7 +89,7 @@ public interface ApplicationInterface {
 	// the application can use this information to update its preferences
 	void setCameraIdPref(int cameraId);
 	void setFlashPref(String flash_value);
-	void setFocusPref(String focus_value);
+	void setFocusPref(String focus_value, boolean is_video);
 	void setVideoPref(boolean is_video);
 	void setSceneModePref(String scene_mode);
 	void clearSceneModePref();

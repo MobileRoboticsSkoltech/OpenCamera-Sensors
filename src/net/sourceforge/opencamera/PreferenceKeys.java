@@ -17,8 +17,8 @@ public class PreferenceKeys {
     	return "flash_value_" + cameraId;
     }
 
-    public static String getFocusPreferenceKey(int cameraId) {
-    	return "focus_value_" + cameraId;
+    public static String getFocusPreferenceKey(int cameraId, boolean is_video) {
+    	return "focus_value_" + cameraId + "_" + is_video;
     }
 
     public static String getResolutionPreferenceKey(int cameraId) {

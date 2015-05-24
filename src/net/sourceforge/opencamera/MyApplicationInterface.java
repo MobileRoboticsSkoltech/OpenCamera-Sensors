@@ -176,9 +176,9 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
     @Override
-	public String getFocusPref() {
+	public String getFocusPref(boolean is_video) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId), "");
+		return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), "");
     }
 
     @Override
@@ -896,10 +896,10 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
     @Override
-    public void setFocusPref(String focus_value) {
+    public void setFocusPref(String focus_value, boolean is_video) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getFocusPreferenceKey(cameraId), focus_value);
+		editor.putString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), focus_value);
 		editor.apply();
 		// focus may be updated by preview (e.g., when switching to/from video mode)
     	final int visibility = main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;

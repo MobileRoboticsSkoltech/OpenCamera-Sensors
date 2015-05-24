@@ -1410,7 +1410,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "focus values: " + supported_focus_values);
 
-				setFocusPref();
+				setFocusPref(true);
 			}
 			else {
 				if( MyDebug.LOG )
@@ -2417,9 +2417,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			closeCamera();
 			applicationInterface.setCameraIdPref(cameraId);
 			this.openCamera();
-
-			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
-			updateFocusForVideo(true);
 		}
 	}
 	
@@ -2606,6 +2603,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		
 		if( is_video != old_is_video ) {
+			setFocusPref(false); // first restore the saved focus for the new photo/video mode; don't do autofocus, as it'll be cancelled when restarting preview
 			updateFocusForVideo(false); // don't do autofocus, as it'll be cancelled when restarting preview
 
 			if( save ) {
@@ -2632,22 +2630,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return false;
 	}
 	
-	private void setFocusPref() {
-		String focus_value = applicationInterface.getFocusPref();
+	private void setFocusPref(boolean auto_focus) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFocusPref()");
+		String focus_value = applicationInterface.getFocusPref(is_video);
 		if( focus_value.length() > 0 ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "found existing focus_value: " + focus_value);
-			if( !updateFocus(focus_value, false, false, true) ) { // don't need to save, as this is the value that's already saved
+			if( !updateFocus(focus_value, true, false, auto_focus) ) { // don't need to save, as this is the value that's already saved
 				if( MyDebug.LOG )
 					Log.d(TAG, "focus value no longer supported!");
-				updateFocus(0, false, true, true);
+				updateFocus(0, true, true, auto_focus);
 			}
 		}
 		else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "found no existing focus_value");
-			updateFocus("focus_mode_auto", false, true, true);
-			//updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true, auto_focus);
+			updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true, auto_focus);
 		}
 	}
 
@@ -2845,15 +2844,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "updateFocus(): " + new_focus_index + " current_focus_index: " + current_focus_index);
 		// updates the Focus button, and Focus camera mode
 		if( this.supported_focus_values != null && new_focus_index != current_focus_index ) {
-			boolean initial = current_focus_index==-1;
 			current_focus_index = new_focus_index;
 			if( MyDebug.LOG )
-				Log.d(TAG, "    current_focus_index is now " + current_focus_index + " (initial " + initial + ")");
+				Log.d(TAG, "    current_focus_index is now " + current_focus_index);
 
 			String focus_value = supported_focus_values.get(current_focus_index);
 			if( MyDebug.LOG )
 				Log.d(TAG, "    focus_value: " + focus_value);
-			if( !initial && !quiet ) {
+			if( !quiet ) {
 				String focus_entry = findFocusEntryForValue(focus_value);
 				if( focus_entry != null ) {
     				showToast(focus_toast, focus_entry);
@@ -2863,7 +2861,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	    	if( save ) {
 				// now save
-	    		applicationInterface.setFocusPref(focus_value);
+	    		applicationInterface.setFocusPref(focus_value, is_video);
 	    	}
 		}
 	}
