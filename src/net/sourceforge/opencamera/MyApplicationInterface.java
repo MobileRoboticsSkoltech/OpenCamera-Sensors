@@ -1081,6 +1081,104 @@ public class MyApplicationInterface implements ApplicationInterface {
 			canvas.drawLine(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f - crosshairs_radius, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f + crosshairs_radius, p);
 			canvas.drawLine(canvas.getWidth()/2.0f - crosshairs_radius, canvas.getHeight()/2.0f, canvas.getWidth()/2.0f + crosshairs_radius, canvas.getHeight()/2.0f, p);
 		}
+		if( camera_controller != null && ( preference_grid.equals("preference_grid_golden_spiral_right") || preference_grid.equals("preference_grid_golden_spiral_left") || preference_grid.equals("preference_grid_golden_spiral_upside_down_right") || preference_grid.equals("preference_grid_golden_spiral_upside_down_left") ) ) {
+			canvas.save();
+			if( preference_grid.equals("preference_grid_golden_spiral_left") ) {
+				canvas.scale(-1.0f, 1.0f, canvas.getWidth()*0.5f, canvas.getHeight()*0.5f);
+			}
+			else if( preference_grid.equals("preference_grid_golden_spiral_right") ) {
+				// no transformation needed
+			}
+			else if( preference_grid.equals("preference_grid_golden_spiral_upside_down_left") ) {
+				canvas.rotate(180.0f, canvas.getWidth()*0.5f, canvas.getHeight()*0.5f);
+			}
+			else if( preference_grid.equals("preference_grid_golden_spiral_upside_down_right") ) {
+				canvas.scale(1.0f, -1.0f, canvas.getWidth()*0.5f, canvas.getHeight()*0.5f);
+			}
+			p.setColor(Color.WHITE);
+			p.setStyle(Paint.Style.STROKE);
+			int fibb = 34;
+			int fibb_n = 21;
+			int left = 0, top = 0;
+			int full_width = canvas.getWidth();
+			int full_height = canvas.getHeight();
+			int width = (int)(full_width*((double)fibb_n)/(double)(fibb));
+			int height = full_height;
+			
+			for(int count=0;count<2;count++) {
+				canvas.save();
+				draw_rect.set(left, top, left+width, top+height);
+				canvas.clipRect(draw_rect);
+				canvas.drawRect(draw_rect, p);
+				draw_rect.set(left, top, left+2*width, top+2*height);
+				canvas.drawOval(draw_rect, p);
+				canvas.restore();
+				
+				int old_fibb = fibb;
+				fibb = fibb_n;
+				fibb_n = old_fibb - fibb;
+	
+				left += width;
+				full_width = full_width - width;
+				width = full_width;
+				height = (int)(height*((double)fibb_n)/(double)(fibb));
+
+				canvas.save();
+				draw_rect.set(left, top, left+width, top+height);
+				canvas.clipRect(draw_rect);
+				canvas.drawRect(draw_rect, p);
+				draw_rect.set(left-width, top, left+width, top+2*height);
+				canvas.drawOval(draw_rect, p);
+				canvas.restore();
+	
+				old_fibb = fibb;
+				fibb = fibb_n;
+				fibb_n = old_fibb - fibb;
+	
+				top += height;
+				full_height = full_height - height;
+				height = full_height;
+				width = (int)(width*((double)fibb_n)/(double)(fibb));
+				left += full_width - width;
+
+				canvas.save();
+				draw_rect.set(left, top, left+width, top+height);
+				canvas.clipRect(draw_rect);
+				canvas.drawRect(draw_rect, p);
+				draw_rect.set(left-width, top-height, left+width, top+height);
+				canvas.drawOval(draw_rect, p);
+				canvas.restore();
+	
+				old_fibb = fibb;
+				fibb = fibb_n;
+				fibb_n = old_fibb - fibb;
+	
+				full_width = full_width - width;
+				width = full_width;
+				left -= width;
+				height = (int)(height*((double)fibb_n)/(double)(fibb));
+				top += full_height - height;
+
+				canvas.save();
+				draw_rect.set(left, top, left+width, top+height);
+				canvas.clipRect(draw_rect);
+				canvas.drawRect(draw_rect, p);
+				draw_rect.set(left, top-height, left+2*width, top+height);
+				canvas.drawOval(draw_rect, p);
+				canvas.restore();
+
+				old_fibb = fibb;
+				fibb = fibb_n;
+				fibb_n = old_fibb - fibb;
+
+				full_height = full_height - height;
+				height = full_height;
+				top -= height;
+				width = (int)(width*((double)fibb_n)/(double)(fibb));
+			}
+			
+			canvas.restore();
+		}
 		if( preview.isVideo() || sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
 			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.getShowCropGuidePreferenceKey(), "crop_guide_none");
 			if( camera_controller != null && preview.getTargetRatio() > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {

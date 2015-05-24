@@ -169,11 +169,19 @@
         <item>Ninguno</item>
         <item>Cuadrícula 3x3</item>
         <item>Cuadrícula 4x2</item>
-	</string-array>
+        <item>Golden spiral (right)</item>
+        <item>Golden spiral (left)</item>
+        <item>Golden spiral (upside-down-right)</item>
+        <item>Golden spiral (upside-down-left)</item>
+    </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
         <item>preference_grid_3x3</item>
         <item>preference_grid_4x2</item>
+        <item>preference_grid_golden_spiral_right</item>
+        <item>preference_grid_golden_spiral_left</item>
+        <item>preference_grid_golden_spiral_upside_down_right</item>
+        <item>preference_grid_golden_spiral_upside_down_left</item>
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>Default</item>
