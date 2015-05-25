@@ -193,6 +193,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
 	private String set_flash_value_after_autofocus = "";
+	private boolean take_photo_after_autofocus = false;
 	private boolean successfully_focused = false;
 	private long successfully_focused_time = -1;
 
@@ -742,6 +743,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		take_photo_after_autofocus = false;
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
@@ -824,6 +826,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	preview_h = 0;
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		take_photo_after_autofocus = false;
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
@@ -3094,6 +3097,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "takePicture");
 		//this.thumbnail_anim = false;
         this.phase = PHASE_TAKING_PHOTO;
+		this.take_photo_after_autofocus = false;
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
@@ -3360,20 +3364,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		//else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
 		else if( focus_value != null && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) ) {
-    		focus_success = FOCUS_DONE; // clear focus rectangle for new refocus
-	        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
-				@Override
-				public void onAutoFocus(boolean success) {
+			synchronized(this) {
+				if( focus_success == FOCUS_WAITING ) {
+					// Needed to fix bug (on Nexus 6, old camera API): if flash was on, pointing at a dark scene, and we take photo when already autofocusing, the autofocus never returned so we got stuck!
+					// In general, probably a good idea to not redo a focus - just use the one that's already in progress
 					if( MyDebug.LOG )
-						Log.d(TAG, "autofocus complete: " + success);
-					ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
-					takePictureWhenFocused();
+						Log.d(TAG, "take photo after current focus");
+					take_photo_after_autofocus = true;
 				}
-	        };
-			if( MyDebug.LOG )
-				Log.d(TAG, "start autofocus to take picture");
-			camera_controller.autoFocus(autoFocusCallback);
-			count_cameraAutoFocus++;
+				else {
+					focus_success = FOCUS_DONE; // clear focus rectangle for new refocus
+			        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
+						@Override
+						public void onAutoFocus(boolean success) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "autofocus complete: " + success);
+							ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
+							takePictureWhenFocused();
+						}
+			        };
+					if( MyDebug.LOG )
+						Log.d(TAG, "start autofocus to take picture");
+					camera_controller.autoFocus(autoFocusCallback);
+					count_cameraAutoFocus++;
+				}
+			}
 		}
 		else {
 			takePictureWhenFocused();
@@ -3686,6 +3701,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// to cancelfocus when focus is finished
 			if( camera_controller != null ) {
 				camera_controller.cancelAutoFocus();
+			}
+		}
+		synchronized(this) {
+			if( take_photo_after_autofocus ) {
+				if( MyDebug.LOG ) 
+					Log.d(TAG, "take_photo_after_autofocus is set");
+				take_photo_after_autofocus = false;
+				takePictureWhenFocused();
 			}
 		}
     }
