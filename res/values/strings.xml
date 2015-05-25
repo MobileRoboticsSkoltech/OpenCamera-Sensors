@@ -143,6 +143,8 @@
     <string name="preference_show_angle_summary">Display the current device orientation angle on screen</string>
     <string name="preference_show_angle_line">Show angle line</string>
     <string name="preference_show_angle_line_summary">Display horizontal level line</string>
+    <string name="preference_angle_highlight_color">Angle highlight color</string>
+    <string name="preference_angle_highlight_color_summary">Highlight color for when camera is nearly level</string>
     <string name="preference_show_geo_direction">Show compass direction</string>
     <string name="preference_show_geo_direction_summary">Display the compass direction of the device on screen</string>
     <string name="preference_show_time">Show time</string>

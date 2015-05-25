@@ -1054,6 +1054,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		this.focus_distance = focus_distance;
 	}
 
+    private int getAngleHighlightColor() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String highlight_color = sharedPreferences.getString(PreferenceKeys.getShowAngleHighlightColorPreferenceKey(), "#14e715");
+		return Color.parseColor(highlight_color);
+    }
+
     @Override
     public void onDrawPreview(Canvas canvas) {
 		MainActivity main_activity = (MainActivity)this.getContext();
@@ -1349,7 +1355,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					p.setTextAlign(Paint.Align.CENTER);
 				}
 				if( Math.abs(level_angle) <= close_angle ) {
-					color = Color.rgb(20, 231, 21); // Green A400
+					color = getAngleHighlightColor();
 					p.setUnderlineText(true);
 				}
 				String number_string = decimalFormat.format(level_angle);
@@ -1634,7 +1640,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			draw_rect.set(cx - radius - hthickness, cy - 2*hthickness, cx + radius + hthickness, cy + 2*hthickness);
 			canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
 			if( is_level ) {
-				p.setColor(Color.rgb(20, 231, 21)); // Green A400
+				p.setColor(getAngleHighlightColor());
 			}
 			else {
 				p.setColor(Color.WHITE);
@@ -1651,7 +1657,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				draw_rect.set(cx - radius - hthickness, cy - 7*hthickness, cx + radius + hthickness, cy - 3*hthickness);
 				canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
 
-				p.setColor(Color.rgb(20, 231, 21)); // Green A400
+				p.setColor(getAngleHighlightColor());
 				p.setAlpha(line_alpha);
 				draw_rect.set(cx - radius, cy - 6*hthickness, cx + radius, cy - 4*hthickness);
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);

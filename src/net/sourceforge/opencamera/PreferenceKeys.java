@@ -164,6 +164,10 @@ public class PreferenceKeys {
     public static String getShowAngleLinePreferenceKey() {
     	return "preference_show_angle_line";
     }
+    
+    public static String getShowAngleHighlightColorPreferenceKey() {
+    	return "preference_angle_highlight_color";
+    }
 
     public static String getShowGeoDirectionPreferenceKey() {
     	return "preference_show_geo_direction";
