@@ -1006,6 +1006,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				set_flash_value_after_autofocus = old_flash_value;
 				camera_controller.setFlashValue("flash_off");
 			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "set_flash_value_after_autofocus is now: " + set_flash_value_after_autofocus);
 		}
 
 		// Must set preview size before starting camera preview
@@ -3364,6 +3366,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				public void onAutoFocus(boolean success) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "autofocus complete: " + success);
+					ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
 					takePictureWhenFocused();
 				}
 	        };
@@ -3610,6 +3613,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    				set_flash_value_after_autofocus = old_flash_value;
 	        			camera_controller.setFlashValue("flash_off");
 	    			}
+					if( MyDebug.LOG )
+						Log.d(TAG, "set_flash_value_after_autofocus is now: " + set_flash_value_after_autofocus);
 				}
     			CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
 					@Override
@@ -3647,6 +3652,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
     }
     
+    private void ensureFlashCorrect() {
+    	// ensures flash is in correct mode, in case where we had to turn flash temporarily off for startup autofocus 
+		if( set_flash_value_after_autofocus.length() > 0 && camera_controller != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set flash back to: " + set_flash_value_after_autofocus);
+			camera_controller.setFlashValue(set_flash_value_after_autofocus);
+			set_flash_value_after_autofocus = "";
+		}
+    }
+    
     private void autoFocusCompleted(boolean manual, boolean success, boolean cancelled) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "autoFocusCompleted");
@@ -3665,12 +3680,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			successfully_focused = true;
 			successfully_focused_time = focus_complete_time;
 		}
-		if( set_flash_value_after_autofocus.length() > 0 && camera_controller != null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "set flash back to: " + set_flash_value_after_autofocus);
-			camera_controller.setFlashValue(set_flash_value_after_autofocus);
-			set_flash_value_after_autofocus = "";
-		}
+		ensureFlashCorrect();
 		if( this.using_face_detection && !cancelled ) {
 			// On some devices such as mtk6589, face detection does not resume as written in documentation so we have
 			// to cancelfocus when focus is finished
