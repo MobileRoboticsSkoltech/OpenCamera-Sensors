@@ -178,6 +178,10 @@
     <string name="preference_require_location_summary">If location data is enabled, only take photo/video if location data is available</string>
     <string name="preference_stamp">Stamp photos</string>
     <string name="preference_stamp_summary">Stamp photos with date and time; and also GPS info if location/direction data is enabled</string>
+    <string name="preference_stamp_dateformat">Datestamp format</string>
+    <string name="preference_stamp_dateformat_summary">Specify the format of the datestamp (if enabled)</string>
+    <string name="preference_stamp_timeformat">Timestamp format</string>
+    <string name="preference_stamp_timeformat_summary">Specify the format of the timestamp (if enabled)</string>
     <string name="preference_textstamp">Custom text</string>
     <string name="preference_textstamp_summary">Stamp photos with a custom text</string>
     <string name="preference_stamp_fontsize">Font size</string>

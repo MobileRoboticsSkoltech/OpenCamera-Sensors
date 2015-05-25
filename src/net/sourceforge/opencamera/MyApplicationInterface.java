@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -14,6 +15,7 @@ import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
 import net.sourceforge.opencamera.Preview.Preview;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -487,6 +489,16 @@ public class MyApplicationInterface implements ApplicationInterface {
     private String getStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_no");
+    }
+    
+    private String getStampDateFormatPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getString(PreferenceKeys.getStampDateFormatPreferenceKey(), "preference_stamp_dateformat_default");
+    }
+    
+    private String getStampTimeFormatPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getString(PreferenceKeys.getStampTimeFormatPreferenceKey(), "preference_stamp_timeformat_default");
     }
     
     private String getTextStampPref() {
@@ -1760,8 +1772,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		canvas.drawText(text, location_x, location_y, paint);
 	}
 	
-    @Override
+    @SuppressLint("SimpleDateFormat")
     @SuppressWarnings("deprecation")
+    @Override
 	public boolean onPictureTaken(byte [] data) {
         System.gc();
 		if( MyDebug.LOG )
@@ -1974,8 +1987,43 @@ public class MyApplicationInterface implements ApplicationInterface {
         			if( MyDebug.LOG )
         				Log.d(TAG, "stamp date");
         			// doesn't respect user preferences such as 12/24 hour - see note about in draw() about DateFormat.getTimeInstance()
-        	        String time_stamp = DateFormat.getDateTimeInstance().format(new Date());
-    				drawTextWithBackground(canvas, p, time_stamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+        			Date current_date = new Date();
+        			String preference_stamp_dateformat = this.getStampDateFormatPref();
+        			String preference_stamp_timeformat = this.getStampTimeFormatPref();
+        			String date_stamp = "", time_stamp = "";
+        			if( !preference_stamp_dateformat.equals("preference_stamp_dateformat_none") ) {
+            			if( preference_stamp_dateformat.equals("preference_stamp_dateformat_yyyymmdd") )
+	        				date_stamp = new SimpleDateFormat("yyyy/MM/dd").format(current_date);
+            			else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_ddmmyyyy") )
+	        				date_stamp = new SimpleDateFormat("dd/MM/yyyy").format(current_date);
+            			else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_mmddyyyy") )
+	        				date_stamp = new SimpleDateFormat("MM/dd/yyyy").format(current_date);
+	        			else // default
+	        				date_stamp = DateFormat.getDateInstance().format(current_date);
+        			}
+        			if( !preference_stamp_timeformat.equals("preference_stamp_timeformat_none") ) {
+            			if( preference_stamp_timeformat.equals("preference_stamp_timeformat_12hour") )
+	        				time_stamp = new SimpleDateFormat("hh:mm:ss a").format(current_date);
+            			else if( preference_stamp_timeformat.equals("preference_stamp_timeformat_24hour") )
+            				time_stamp = new SimpleDateFormat("HH:mm:ss").format(current_date);
+	        			else // default
+	            	        time_stamp = DateFormat.getTimeInstance().format(current_date);
+        			}
+        			if( MyDebug.LOG ) {
+        				Log.d(TAG, "date_stamp: " + date_stamp);
+        				Log.d(TAG, "time_stamp: " + time_stamp);
+        			}
+        			if( date_stamp.length() > 0 || time_stamp.length() > 0 ) {
+        				String datetime_stamp = "";
+        				if( date_stamp.length() > 0 )
+        					datetime_stamp += date_stamp;
+        				if( time_stamp.length() > 0 ) {
+            				if( date_stamp.length() > 0 )
+            					datetime_stamp += " ";
+        					datetime_stamp += time_stamp;
+        				}
+	    				drawTextWithBackground(canvas, p, datetime_stamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+        			}
     				ypos -= diff_y;
     				String location_string = "";
     				boolean store_location = getGeotaggingPref();

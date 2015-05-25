@@ -85,6 +85,14 @@ public class PreferenceKeys {
     	return "preference_stamp";
     }
 
+    public static String getStampDateFormatPreferenceKey() {
+    	return "preference_stamp_dateformat";
+    }
+
+    public static String getStampTimeFormatPreferenceKey() {
+    	return "preference_stamp_timeformat";
+    }
+
     public static String getTextStampPreferenceKey() {
     	return "preference_textstamp";
     }
