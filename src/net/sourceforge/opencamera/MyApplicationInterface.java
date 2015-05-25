@@ -2339,7 +2339,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    			Log.e(TAG, "failed to create thumbnail bitmap");
 			}
 			else {
-				int thumbnail_rotation = 0;
 				// now get the rotation from the Exif data
 				try {
 					if( exif_orientation_s == null ) {
@@ -2372,27 +2371,24 @@ public class MyApplicationInterface implements ApplicationInterface {
 					}
 		    		if( MyDebug.LOG )
 		    			Log.d(TAG, "    exif orientation: " + exif_orientation);
-					thumbnail_rotation = (thumbnail_rotation + exif_orientation) % 360;
+
+					if( exif_orientation != 0 ) {
+						Matrix m = new Matrix();
+						m.setRotate(exif_orientation, thumbnail.getWidth() * 0.5f, thumbnail.getHeight() * 0.5f);
+						Bitmap rotated_thumbnail = Bitmap.createBitmap(thumbnail, 0, 0,thumbnail.getWidth(), thumbnail.getHeight(), m, true);
+						if( rotated_thumbnail != thumbnail ) {
+							thumbnail.recycle();
+							thumbnail = rotated_thumbnail;
+						}
+					}
 				}
 				catch(IOException exception) {
 					if( MyDebug.LOG )
 						Log.e(TAG, "exif orientation ioexception");
 					exception.printStackTrace();
 				}
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "    thumbnail orientation: " + thumbnail_rotation);
 
-				if( thumbnail_rotation != 0 ) {
-					Matrix m = new Matrix();
-					m.setRotate(thumbnail_rotation, thumbnail.getWidth() * 0.5f, thumbnail.getHeight() * 0.5f);
-					Bitmap rotated_thumbnail = Bitmap.createBitmap(thumbnail, 0, 0,thumbnail.getWidth(), thumbnail.getHeight(), m, true);
-					if( rotated_thumbnail != thumbnail ) {
-						thumbnail.recycle();
-						thumbnail = rotated_thumbnail;
-					}
-				}
-
-		    	updateThumbnail(thumbnail);
+				updateThumbnail(thumbnail);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 			}
