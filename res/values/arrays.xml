@@ -227,19 +227,9 @@
         <item>No stamp</item>
         <item>Stamp photos</item>
     </string-array>
-    <string-array name="preference_stamp_fontsize_values">
-        <item>6</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
-        <item>11</item>
-        <item>12</item>
-        <item>14</item>
-        <item>16</item>
-        <item>18</item>
-        <item>20</item>
-        <item>22</item>
-        <item>24</item>
+    <string-array name="preference_stamp_values">
+        <item>preference_stamp_no</item>
+        <item>preference_stamp_yes</item>
     </string-array>
     <string-array name="preference_stamp_fontsize_entries">
         <item>6</item>
@@ -255,9 +245,19 @@
         <item>22</item>
         <item>24</item>
     </string-array>
-    <string-array name="preference_stamp_values">
-        <item>preference_stamp_no</item>
-        <item>preference_stamp_yes</item>
+    <string-array name="preference_stamp_fontsize_values">
+        <item>6</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
+        <item>24</item>
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>Default</item>
