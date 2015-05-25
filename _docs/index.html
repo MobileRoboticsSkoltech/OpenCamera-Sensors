@@ -538,9 +538,15 @@ is enabled.</p>
 
 <p><a name="faq"><b>Frequently Asked Questions</b></p>
 
-<p><b>How can I save to my external SD card</b> - See <a href="#save_location">Save location</a> under Settings/More
+<p><b>How can I save to my external SD card?</b> - See <a href="#save_location">Save location</a> under Settings/More
 camera controls. Note however that most devices don't support saving to SD card for 3rd party apps since Android 4.4
 due to changes by Google.</p>
+
+<p><b>But I have Android 5 (Lollipop), wasn't this supposed to fix saving to SD cards?</b> - Android 5 Lollipop does
+<i>not</i> revert the restrictions introduced by Google in Android 4.4. It does introduce a new API for saving to SD
+cards and I am looking into this. Note that (a) this requires rewriting portions of the code, it isn't a simple
+fix, and (b) this new API is unfortunately not compatible with some of Google/Android's own APIs (e.g., for Exif
+reading/writing), so full support for SD cards doesn't seem possible until Google themselves fix this situation.</p>
 
 <p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - Unfortunately many devices with 4K support
 have for some reason not exposed this through the Android API to 3rd party camera apps. For some such devices, it
