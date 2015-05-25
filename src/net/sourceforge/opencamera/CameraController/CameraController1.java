@@ -653,6 +653,8 @@ public class CameraController1 extends CameraController {
 	
 	public void setFlashValue(String flash_value) {
 		Camera.Parameters parameters = this.getParameters();
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFlashValue: " + flash_value);
 		if( parameters.getFlashMode() == null )
 			return; // flash mode not supported
 		final String flash_mode = convertFlashValueToMode(flash_value);
