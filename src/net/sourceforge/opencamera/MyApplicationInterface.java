@@ -2340,53 +2340,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			else {
 				// now get the rotation from the Exif data
-				try {
-					if( exif_orientation_s == null ) {
-						// haven't already read the exif orientation
-	    	    		if( MyDebug.LOG )
-	    	    			Log.d(TAG, "    read exif orientation");
-	                	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
-		            	exif_orientation_s = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
-					}
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "    exif orientation string: " + exif_orientation_s);
-					int exif_orientation = 0;
-					// from http://jpegclub.org/exif_orientation.html
-					if( exif_orientation_s.equals("0") || exif_orientation_s.equals("1") ) {
-						// leave at 0
-					}
-					else if( exif_orientation_s.equals("3") ) {
-						exif_orientation = 180;
-					}
-					else if( exif_orientation_s.equals("6") ) {
-						exif_orientation = 90;
-					}
-					else if( exif_orientation_s.equals("8") ) {
-						exif_orientation = 270;
-					}
-					else {
-						// just leave at 0
-	    	    		if( MyDebug.LOG )
-	    	    			Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
-					}
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "    exif orientation: " + exif_orientation);
-
-					if( exif_orientation != 0 ) {
-						Matrix m = new Matrix();
-						m.setRotate(exif_orientation, thumbnail.getWidth() * 0.5f, thumbnail.getHeight() * 0.5f);
-						Bitmap rotated_thumbnail = Bitmap.createBitmap(thumbnail, 0, 0,thumbnail.getWidth(), thumbnail.getHeight(), m, true);
-						if( rotated_thumbnail != thumbnail ) {
-							thumbnail.recycle();
-							thumbnail = rotated_thumbnail;
-						}
-					}
-				}
-				catch(IOException exception) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "exif orientation ioexception");
-					exception.printStackTrace();
-				}
+				thumbnail = rotateForExif(thumbnail, exif_orientation_s, picFile.getAbsolutePath());
 
 				updateThumbnail(thumbnail);
 	    		if( MyDebug.LOG )
@@ -2405,6 +2359,57 @@ public class MyApplicationInterface implements ApplicationInterface {
 		
 		return success;
 	}
+    
+    private Bitmap rotateForExif(Bitmap bitmap, String exif_orientation_s, String path) {
+		try {
+			if( exif_orientation_s == null ) {
+				// haven't already read the exif orientation
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "    read exif orientation");
+            	ExifInterface exif = new ExifInterface(path);
+            	exif_orientation_s = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+			}
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "    exif orientation string: " + exif_orientation_s);
+			int exif_orientation = 0;
+			// from http://jpegclub.org/exif_orientation.html
+			if( exif_orientation_s.equals("0") || exif_orientation_s.equals("1") ) {
+				// leave at 0
+			}
+			else if( exif_orientation_s.equals("3") ) {
+				exif_orientation = 180;
+			}
+			else if( exif_orientation_s.equals("6") ) {
+				exif_orientation = 90;
+			}
+			else if( exif_orientation_s.equals("8") ) {
+				exif_orientation = 270;
+			}
+			else {
+				// just leave at 0
+	    		if( MyDebug.LOG )
+	    			Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
+			}
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "    exif orientation: " + exif_orientation);
+
+			if( exif_orientation != 0 ) {
+				Matrix m = new Matrix();
+				m.setRotate(exif_orientation, bitmap.getWidth() * 0.5f, bitmap.getHeight() * 0.5f);
+				Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap, 0, 0,bitmap.getWidth(), bitmap.getHeight(), m, true);
+				if( rotated_bitmap != bitmap ) {
+					bitmap.recycle();
+					bitmap = rotated_bitmap;
+				}
+			}
+		}
+		catch(IOException exception) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "exif orientation ioexception");
+			exception.printStackTrace();
+		}
+		return bitmap;
+    }
 
 	private void setGPSDirectionExif(ExifInterface exif) {
     	if( main_activity.getPreview().hasGeoDirection() && getGeodirectionPref() ) {
