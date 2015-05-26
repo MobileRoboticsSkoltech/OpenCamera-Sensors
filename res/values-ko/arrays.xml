@@ -187,12 +187,12 @@
         </string-array>
     <string-array name="preference_grid_entries">
         <item>없음</item>
-        <item>3x3 격자 표시 (삼등분 법칙)</item>
-        <item>4x2 격자</item>
-        <item>Golden spiral (right)</item>
-        <item>Golden spiral (left)</item>
-        <item>Golden spiral (upside-down-right)</item>
-        <item>Golden spiral (upside-down-left)</item>
+        <item>3x3</item>
+        <item>4x2</item>
+        <item>Golden (1)</item>
+        <item>Golden (2)</item>
+        <item>Golden (3)</item>
+        <item>Golden (4)</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>

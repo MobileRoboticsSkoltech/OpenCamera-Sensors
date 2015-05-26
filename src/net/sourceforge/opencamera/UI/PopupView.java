@@ -46,6 +46,7 @@ public class PopupView extends LinearLayout {
 	private int video_size_index = -1;
 	private int timer_index = -1;
 	private int burst_mode_index = -1;
+	private int grid_index = -1;
 
 	private Map<String, View> popup_buttons = new Hashtable<String, View>();
 
@@ -314,6 +315,45 @@ public class PopupView extends LinearLayout {
 	                	burst_mode_index++;
 	        			update();
 	    				return burst_mode_index;
+	        		}
+					return -1;
+				}
+    		});
+
+        	final String [] grid_values = getResources().getStringArray(R.array.preference_grid_values);
+        	String [] grid_entries = getResources().getStringArray(R.array.preference_grid_entries);
+    		String grid_value = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
+    		grid_index = Arrays.asList(grid_values).indexOf(grid_value);
+    		if( grid_index == -1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "can't find grid_value " + grid_value + " in grid_values!");
+				grid_index = 0;
+    		}
+    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.preference_grid), grid_index, new ArrayOptionsPopupListener() {
+    			private void update() {
+    				if( grid_index == -1 )
+    					return;
+    				String new_grid_value = grid_values[grid_index];
+    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString(PreferenceKeys.getShowGridPreferenceKey(), new_grid_value);
+					editor.apply();
+    			}
+				@Override
+				public int onClickPrev() {
+	        		if( grid_index != -1 && grid_index > 0 ) {
+	        			grid_index--;
+	        			update();
+	    				return grid_index;
+	        		}
+					return -1;
+				}
+				@Override
+				public int onClickNext() {
+	                if( grid_index != -1 && grid_index < grid_values.length-1 ) {
+	                	grid_index++;
+	        			update();
+	    				return grid_index;
 	        		}
 					return -1;
 				}
