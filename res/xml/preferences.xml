@@ -433,7 +433,16 @@
 	            android:defaultValue="12"
 	            />
 
-        </PreferenceScreen>
+            <ListPreference 
+                android:key="preference_stamp_font_color"
+                android:title="@string/preference_stamp_font_color"
+                android:summary="@string/preference_stamp_font_color_summary"
+                android:entries="@array/preference_angle_highlight_color_entries"
+                android:entryValues="@array/preference_angle_highlight_color_values"
+                android:defaultValue="#ffffff"
+                />
+
+	    </PreferenceScreen>
 
 	    <PreferenceScreen
 	        android:key="preference_screen_video_settings"

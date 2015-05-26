@@ -1056,8 +1056,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     private int getAngleHighlightColor() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String highlight_color = sharedPreferences.getString(PreferenceKeys.getShowAngleHighlightColorPreferenceKey(), "#14e715");
-		return Color.parseColor(highlight_color);
+		String color = sharedPreferences.getString(PreferenceKeys.getShowAngleHighlightColorPreferenceKey(), "#14e715");
+		return Color.parseColor(color);
+    }
+
+    private int getStampFontColor() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		String color = sharedPreferences.getString(PreferenceKeys.getStampFontColorPreferenceKey(), "#ffffff");
+		return Color.parseColor(color);
     }
 
     @Override
@@ -1989,6 +1995,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	        int diff_y = (int)((font_size+4) * scale + 0.5f); // convert pt to pixels
     	        int ypos = height - offset_y;
     	        p.setTextAlign(Align.RIGHT);
+    	        int color = getStampFontColor();
     	        if( dategeo_stamp ) {
         			if( MyDebug.LOG )
         				Log.d(TAG, "stamp date");
@@ -2028,7 +2035,7 @@ public class MyApplicationInterface implements ApplicationInterface {
             					datetime_stamp += " ";
         					datetime_stamp += time_stamp;
         				}
-	    				drawTextWithBackground(canvas, p, datetime_stamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+	    				drawTextWithBackground(canvas, p, datetime_stamp, color, Color.BLACK, width - offset_x, ypos);
         			}
     				ypos -= diff_y;
     				String location_string = "";
@@ -2054,14 +2061,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 			    	if( location_string.length() > 0 ) {
 	        			if( MyDebug.LOG )
 	        				Log.d(TAG, "stamp with location_string: " + location_string);
-	        			drawTextWithBackground(canvas, p, location_string, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+	        			drawTextWithBackground(canvas, p, location_string, color, Color.BLACK, width - offset_x, ypos);
 	    				ypos -= diff_y;
 			    	}
     	        }
     	        if( text_stamp ) {
         			if( MyDebug.LOG )
         				Log.d(TAG, "stamp text");
-        			drawTextWithBackground(canvas, p, preference_textstamp, Color.WHITE, Color.BLACK, width - offset_x, ypos);
+        			drawTextWithBackground(canvas, p, preference_textstamp, color, Color.BLACK, width - offset_x, ypos);
     				ypos -= diff_y;
     	        }
 			}
