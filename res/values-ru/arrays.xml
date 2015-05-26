@@ -188,6 +188,7 @@
     <string-array name="preference_grid_entries">
         <item>Нет</item>
         <item>3x3</item>
+        <item>Phi 3x3</item>
         <item>4x2</item>
         <item>Golden (1)</item>
         <item>Golden (2)</item>
@@ -197,6 +198,7 @@
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
         <item>preference_grid_3x3</item>
+        <item>preference_grid_phi_3x3</item>
         <item>preference_grid_4x2</item>
         <item>preference_grid_golden_spiral_right</item>
         <item>preference_grid_golden_spiral_left</item>
