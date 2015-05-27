@@ -206,10 +206,10 @@
         <item>Grille 3x3 ("règle des tiers")</item>
 		<item>Phi 3x3</item>
         <item>Grille 4x2 </item>
-        <item>Spirale d\'or (droite)</item>
-        <item>Spirale d\'or (gauche)</item>
-        <item>Spirale d\'or (inversée droite)</item>
-        <item>Spirale d\'or (inversée gauche)</item>
+        <item>D\'or (1)</item>
+        <item>D\'or (2)</item>
+        <item>D\'or (3)</item>
+        <item>D\'or (4)</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
