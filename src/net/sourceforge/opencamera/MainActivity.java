@@ -1126,7 +1126,7 @@ public class MainActivity extends Activity {
     	{
 			// prevent popup being transparent
 			popup_container.setBackgroundColor(Color.BLACK);
-			popup_container.setAlpha(0.95f);
+			popup_container.setAlpha(0.9f);
 		}
 
     	popup_view = new PopupView(this);
