@@ -206,20 +206,24 @@
         <item>Grille 3x3 ("règle des tiers")</item>
 		<item>Phi 3x3</item>
         <item>Grille 4x2 </item>
+        <item>Crosshair</item>
         <item>D\'or (1)</item>
         <item>D\'or (2)</item>
         <item>D\'or (3)</item>
         <item>D\'or (4)</item>
+        <item>Diagonals</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
         <item>preference_grid_3x3</item>
         <item>preference_grid_phi_3x3</item>
         <item>preference_grid_4x2</item>
+        <item>preference_grid_crosshair</item>
         <item>preference_grid_golden_spiral_right</item>
         <item>preference_grid_golden_spiral_left</item>
         <item>preference_grid_golden_spiral_upside_down_right</item>
         <item>preference_grid_golden_spiral_upside_down_left</item>
+        <item>preference_grid_diagonals</item>
     </string-array>
     <string-array name="preference_crop_guide_entries">
         <item>Aucun</item>

@@ -190,20 +190,24 @@
         <item>3x3</item>
         <item>Phi 3x3</item>
         <item>4x2</item>
+        <item>Crosshair</item>
         <item>Golden (1)</item>
         <item>Golden (2)</item>
         <item>Golden (3)</item>
         <item>Golden (4)</item>
+        <item>Diagonals</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
         <item>preference_grid_3x3</item>
         <item>preference_grid_phi_3x3</item>
         <item>preference_grid_4x2</item>
+        <item>preference_grid_crosshair</item>
         <item>preference_grid_golden_spiral_right</item>
         <item>preference_grid_golden_spiral_left</item>
         <item>preference_grid_golden_spiral_upside_down_right</item>
         <item>preference_grid_golden_spiral_upside_down_left</item>
+        <item>preference_grid_diagonals</item>
     </string-array>
     <string-array name="preference_crop_guide_entries">
         <item>Yox</item>
