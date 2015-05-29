@@ -1956,6 +1956,11 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "previewBuilder not present!");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "no camera");
+			return;
+		}
 
 		if( captureSession != null ) {
 			if( MyDebug.LOG )
