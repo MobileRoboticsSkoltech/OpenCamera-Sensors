@@ -1215,6 +1215,23 @@ public class MyApplicationInterface implements ApplicationInterface {
 			
 			canvas.restore();
 		}
+		else if( camera_controller != null && ( preference_grid.equals("preference_grid_golden_triangle_1") || preference_grid.equals("preference_grid_golden_triangle_2") ) ) {
+			p.setColor(Color.WHITE);
+			double theta = Math.atan2(canvas.getWidth(), canvas.getHeight());
+			double dist = canvas.getHeight() * Math.cos(theta);
+			float dist_x = (float)(dist * Math.sin(theta));
+			float dist_y = (float)(dist * Math.cos(theta));
+			if( preference_grid.equals("preference_grid_golden_triangle_1") ) {
+				canvas.drawLine(0.0f, canvas.getHeight()-1.0f, canvas.getWidth()-1.0f, 0.0f, p);
+				canvas.drawLine(0.0f, 0.0f, dist_x, canvas.getHeight()-dist_y, p);
+				canvas.drawLine(canvas.getWidth()-1.0f-dist_x, dist_y-1.0f, canvas.getWidth()-1.0f, canvas.getHeight()-1.0f, p);
+			}
+			else {
+				canvas.drawLine(0.0f, 0.0f, canvas.getWidth()-1.0f, canvas.getHeight()-1.0f, p);
+				canvas.drawLine(canvas.getWidth()-1.0f, 0.0f, canvas.getWidth()-1.0f-dist_x, canvas.getHeight()-dist_y, p);
+				canvas.drawLine(dist_x, dist_y-1.0f, 0.0f, canvas.getHeight()-1.0f, p);
+			}
+		}
 		else if( camera_controller != null && preference_grid.equals("preference_grid_diagonals") ) {
 			p.setColor(Color.WHITE);
 			canvas.drawLine(0.0f, 0.0f, canvas.getHeight()-1.0f, canvas.getHeight()-1.0f, p);
