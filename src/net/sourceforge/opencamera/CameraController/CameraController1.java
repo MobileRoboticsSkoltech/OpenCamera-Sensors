@@ -47,7 +47,18 @@ public class CameraController1 extends CameraController {
 				Log.e(TAG, "camera.open returned null");
 			throw new CameraControllerException();
 		}
-	    Camera.getCameraInfo(cameraId, camera_info);
+		try {
+			Camera.getCameraInfo(cameraId, camera_info);
+		}
+		catch(RuntimeException e) {
+			// Had reported RuntimeExceptions from Google Play
+			// also see http://stackoverflow.com/questions/22383708/java-lang-runtimeexception-fail-to-get-camera-info
+			if( MyDebug.LOG )
+				Log.e(TAG, "failed to get camera info");
+			e.printStackTrace();
+			this.release();
+			throw new CameraControllerException();
+		}
 	}
 	
 	public void release() {
