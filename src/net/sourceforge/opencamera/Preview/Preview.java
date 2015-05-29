@@ -1816,8 +1816,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	private static String getAspectRatio(int width, int height) {
 		int gcf = greatestCommonFactor(width, height);
-		width /= gcf;
-		height /= gcf;
+		if( gcf > 0 ) {
+			// had a Google Play crash due to gcf being 0!? Implies width must be zero
+			width /= gcf;
+			height /= gcf;
+		}
 		return width + ":" + height;
 	}
 	
