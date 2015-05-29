@@ -1249,8 +1249,17 @@ public class MyApplicationInterface implements ApplicationInterface {
 				p.setStyle(Paint.Style.STROKE);
 				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 				double crop_ratio = -1.0;
-				if( preference_crop_guide.equals("crop_guide_1.33") ) {
+				if( preference_crop_guide.equals("crop_guide_1") ) {
+					crop_ratio = 1.0;
+				}
+				else if( preference_crop_guide.equals("crop_guide_1.25") ) {
+					crop_ratio = 1.25;
+				}
+				else if( preference_crop_guide.equals("crop_guide_1.33") ) {
 					crop_ratio = 1.33333333;
+				}
+				else if( preference_crop_guide.equals("crop_guide_1.4") ) {
+					crop_ratio = 1.4;
 				}
 				else if( preference_crop_guide.equals("crop_guide_1.5") ) {
 					crop_ratio = 1.5;

@@ -215,7 +215,10 @@
     </string-array>
     <string-array name="preference_crop_guide_entries">
         <item>없음</item>
+        <item>1 (1:1)</item>
+        <item>1.25 (5:4)</item>
         <item>1.33 (4:3)</item>
+        <item>1.4 (7:4)</item>
         <item>1.5 (3:2)</item>
         <item>1.78 (16:9)</item>
         <item>1.85 (37:20)</item>
@@ -225,7 +228,10 @@
     </string-array>
     <string-array name="preference_crop_guide_values">
         <item>crop_guide_none</item>
+        <item>crop_guide_1</item>
+        <item>crop_guide_1.25</item>
         <item>crop_guide_1.33</item>
+        <item>crop_guide_1.4</item>
         <item>crop_guide_1.5</item>
         <item>crop_guide_1.78</item>
         <item>crop_guide_1.85</item>
