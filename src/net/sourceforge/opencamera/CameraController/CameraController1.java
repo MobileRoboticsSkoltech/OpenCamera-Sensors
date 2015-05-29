@@ -39,6 +39,14 @@ public class CameraController1 extends CameraController {
 			e.printStackTrace();
 			throw new CameraControllerException();
 		}
+		if( camera == null ) {
+			// Although the documentation says Camera.open() should throw a RuntimeException, it seems that it some cases it can return null
+			// I've seen this in some crashes reported in Google Play; also see:
+			// http://stackoverflow.com/questions/12054022/camera-open-returns-null			
+			if( MyDebug.LOG )
+				Log.e(TAG, "camera.open returned null");
+			throw new CameraControllerException();
+		}
 	    Camera.getCameraInfo(cameraId, camera_info);
 	}
 	
@@ -1042,10 +1050,6 @@ public class CameraController1 extends CameraController {
 	}
 	
 	public void setDisplayOrientation(int degrees) {
-		if( camera == null ) {
-			// shouldn't be null if camera_controller is non-null, but have had reported crashes on Google Play?! Possibly release()ed in another thread?
-			return;
-		}
 	    int result = 0;
 	    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
 	        result = (camera_info.orientation + degrees) % 360;
