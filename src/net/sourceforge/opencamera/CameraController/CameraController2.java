@@ -2562,27 +2562,29 @@ public class CameraController2 extends CameraController {
 			}
 			else if( state == STATE_WAITING_AUTOFOCUS ) {
 				// check for autofocus completing
-				int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
-				//Log.d(TAG, "onCaptureCompleted: af_state: " + af_state);
-				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ) {
-					if( MyDebug.LOG ) {
-						if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
-							Log.d(TAG, "onCaptureCompleted: autofocus success");
-						else
-							Log.d(TAG, "onCaptureCompleted: autofocus failed");
-					}
-					state = STATE_NORMAL;
-					// we need to cancel af trigger, otherwise sometimes things seem to get confused, with the autofocus thinking it's completed too early
-			    	/*previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-			    	capture();
-			    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);*/
+				if( result.get(CaptureResult.CONTROL_AF_STATE) != null ) { // have had Google Play crashes suggesting this can be null
+					int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+					//Log.d(TAG, "onCaptureCompleted: af_state: " + af_state);
+					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ) {
+						if( MyDebug.LOG ) {
+							if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
+								Log.d(TAG, "onCaptureCompleted: autofocus success");
+							else
+								Log.d(TAG, "onCaptureCompleted: autofocus failed");
+						}
+						state = STATE_NORMAL;
+						// we need to cancel af trigger, otherwise sometimes things seem to get confused, with the autofocus thinking it's completed too early
+				    	/*previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+				    	capture();
+				    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);*/
 
-					/*if( jpeg_cb != null ) {
-						runPrecapture();
-					}
-					else*/ if( autofocus_cb != null ) {
-						autofocus_cb.onAutoFocus(af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED);
-						autofocus_cb = null;
+						/*if( jpeg_cb != null ) {
+							runPrecapture();
+						}
+						else*/ if( autofocus_cb != null ) {
+							autofocus_cb.onAutoFocus(af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED);
+							autofocus_cb = null;
+						}
 					}
 				}
 			}
