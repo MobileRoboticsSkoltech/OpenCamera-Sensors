@@ -373,23 +373,25 @@ public class MainActivity extends Activity {
 	                return true;
 	    		}
 	    		else if( volume_keys.equals("volume_exposure") ) {
-	    			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
-	    			boolean manual_iso = !value.equals(preview.getCameraController().getDefaultISO());
-	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP ) {
-	    				if( manual_iso ) {
-	    					if( preview.supportsISORange() )
-		    					this.changeISO(1);
-	    				}
-	    				else
-	    					this.changeExposure(1);
-	    			}
-	    			else {
-	    				if( manual_iso ) {
-	    					if( preview.supportsISORange() )
-		    					this.changeISO(-1);
-	    				}
-	    				else
-	    					this.changeExposure(-1);
+	    			if( preview.getCameraController() != null ) {
+		    			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
+		    			boolean manual_iso = !value.equals(preview.getCameraController().getDefaultISO());
+		    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP ) {
+		    				if( manual_iso ) {
+		    					if( preview.supportsISORange() )
+			    					this.changeISO(1);
+		    				}
+		    				else
+		    					this.changeExposure(1);
+		    			}
+		    			else {
+		    				if( manual_iso ) {
+		    					if( preview.supportsISORange() )
+			    					this.changeISO(-1);
+		    				}
+		    				else
+		    					this.changeExposure(-1);
+		    			}
 	    			}
 	                return true;
 	    		}
