@@ -691,9 +691,11 @@ public class CameraController1 extends CameraController {
             	    public void run(){
             			if( MyDebug.LOG )
             				Log.d(TAG, "now set actual flash mode after turning torch off");
-            			Camera.Parameters parameters = getParameters();
-                		parameters.setFlashMode(flash_mode);
-                    	setCameraParameters(parameters);
+            			if( camera != null ) { // make sure camera wasn't released in the meantime (has a Google Play crash as a result of this)
+	            			Camera.Parameters parameters = getParameters();
+	                		parameters.setFlashMode(flash_mode);
+	                    	setCameraParameters(parameters);
+            			}
             	   }
             	}, 100);
     		}
