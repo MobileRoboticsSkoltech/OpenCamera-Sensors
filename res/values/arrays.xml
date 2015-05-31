@@ -475,4 +475,14 @@
         <item>audio_src_default</item>
         <item>audio_src_voice_communication</item>
     </string-array>
+    <string-array name="preference_record_audio_channels_entries">
+        <item>Default</item>
+        <item>Mono</item>
+        <item>Stereo (only supported on some devices)</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_values">
+        <item>audio_default</item>
+        <item>audio_mono</item>
+        <item>audio_stereo</item>
+    </string-array>
 </resources>

@@ -473,6 +473,12 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
     
     @Override
+    public String getRecordAudioChannelsPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getString(PreferenceKeys.getRecordAudioChannelsPreferenceKey(), "audio_default");
+    }
+    
+    @Override
     public String getRecordAudioSourcePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");

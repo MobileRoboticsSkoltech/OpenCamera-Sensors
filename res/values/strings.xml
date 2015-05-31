@@ -208,6 +208,8 @@
     <string name="preference_record_audio_summary">Record audio when recording video</string>
     <string name="preference_record_audio_src">Audio source</string>
     <string name="preference_record_audio_src_summary">Microphone to use for recording audio</string>
+    <string name="preference_record_audio_channels">Audio channels</string>
+    <string name="preference_record_audio_channels_summary">Specify mono or stereo for recording audio (stereo only supported on some devices).</string>
     <string name="preference_video_flash">Flash while recording video</string>
     <string name="preference_video_flash_summary">If enabled, flash will switch on/off when recording video (can be used to tell camera is still recording at a distance).</string>
     

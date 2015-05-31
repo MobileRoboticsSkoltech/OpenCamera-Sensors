@@ -237,6 +237,10 @@ public class PreferenceKeys {
     	return "preference_record_audio";
     }
 
+    public static String getRecordAudioChannelsPreferenceKey() {
+    	return "preference_record_audio_channels";
+    }
+
     public static String getRecordAudioSourcePreferenceKey() {
     	return "preference_record_audio_src";
     }

@@ -3234,6 +3234,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.d(TAG, "set video profile");
 				if( record_audio ) {
 					video_recorder.setProfile(profile);
+	        		String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
+	        		if( pref_audio_channels.equals("audio_mono") ) {
+	        			video_recorder.setAudioChannels(1);
+	        		}
+	        		else if( pref_audio_channels.equals("audio_stereo") ) {
+	        			video_recorder.setAudioChannels(2);
+	        		}
 				}
 				else {
 					// from http://stackoverflow.com/questions/5524672/is-it-possible-to-use-camcorderprofile-without-audio-source
