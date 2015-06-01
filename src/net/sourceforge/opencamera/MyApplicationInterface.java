@@ -185,6 +185,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public boolean isVideoPref() {
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.INTENT_ACTION_VIDEO_CAMERA .equals(action) ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "launching from video intent");
+    		return true;
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), false);
     }
