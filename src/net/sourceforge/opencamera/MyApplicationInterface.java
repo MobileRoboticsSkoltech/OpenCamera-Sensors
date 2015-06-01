@@ -1850,7 +1850,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		boolean image_capture_intent = false;
 	        Uri image_capture_intent_uri = null;
         String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) ) {
+        if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "from image capture intent");
 			image_capture_intent = true;
