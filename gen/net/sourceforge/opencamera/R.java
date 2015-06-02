@@ -111,8 +111,9 @@ public final class R {
         public static final int take_photo_selector=0x7f020020;
         public static final int take_video=0x7f020021;
         public static final int take_video_pressed=0x7f020022;
-        public static final int take_video_selector=0x7f020023;
-        public static final int trash=0x7f020024;
+        public static final int take_video_recording=0x7f020023;
+        public static final int take_video_selector=0x7f020024;
+        public static final int trash=0x7f020025;
     }
     public static final class id {
         public static final int action_settings=0x7f0b0019;

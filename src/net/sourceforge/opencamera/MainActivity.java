@@ -874,11 +874,18 @@ public class MainActivity extends Activity {
 			}
 		}
 
-		{
-			// set icon for taking photos vs videos
-			ImageButton view = (ImageButton)findViewById(R.id.take_photo);
-			if( preview != null ) {
-				view.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
+		setTakePhotoIcon();
+    }
+    
+    private void setTakePhotoIcon() {
+		// set icon for taking photos vs videos
+		ImageButton view = (ImageButton)findViewById(R.id.take_photo);
+		if( preview != null ) {
+			if( preview.isVideo() ) {
+				view.setImageResource(preview.isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector);
+			}
+			else {
+				view.setImageResource(R.drawable.take_photo_selector);
 			}
 		}
     }

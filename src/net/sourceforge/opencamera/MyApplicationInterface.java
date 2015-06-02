@@ -648,6 +648,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( sharedPreferences.getBoolean(PreferenceKeys.getLockVideoPreferenceKey(), false) ) {
 			main_activity.lockScreen();
 		}
+		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		view.setImageResource(R.drawable.take_video_recording);
 	}
 
 	@Override
@@ -660,6 +662,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			main_activity.getPreview().showToast(stopstart_video_toast, toast);
 		}
+		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		view.setImageResource(R.drawable.take_video_selector);
 	}
 
 	@Override
@@ -1465,7 +1469,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				if( remaining_time > 0 ) {
 					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
-					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(229, 28, 35), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500
+					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(244, 67, 54), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500
 				}
 			}
 			else if( preview.isVideoRecording() ) {
@@ -1484,7 +1488,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
     			p.setTextAlign(Paint.Align.CENTER);
 				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom or ISO label
-				int color = Color.rgb(229, 28, 35); // Red 500
+				int color = Color.rgb(244, 67, 54); // Red 500
             	if( main_activity.isScreenLocked() ) {
             		// writing in reverse order, bottom to top
             		drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.screen_lock_message_2), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
@@ -1581,7 +1585,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			canvas.drawRect(battery_x, battery_y, battery_x+battery_width, battery_y+battery_height, p);
-			p.setColor(battery_frac >= 0.3f ? Color.rgb(37, 155, 36) : Color.rgb(229, 28, 35)); // Green 500 or Red 500
+			p.setColor(battery_frac >= 0.3f ? Color.rgb(37, 155, 36) : Color.rgb(244, 67, 54)); // Green 500 or Red 500
 			p.setStyle(Paint.Style.FILL);
 			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
 		}
@@ -1750,7 +1754,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			if( preview.isFocusRecentSuccess() )
 				p.setColor(Color.rgb(20, 231, 21)); // Green A400
 			else if( preview.isFocusRecentFailure() )
-				p.setColor(Color.rgb(229, 28, 35)); // Red 500
+				p.setColor(Color.rgb(244, 67, 54)); // Red 500
 			else
 				p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
