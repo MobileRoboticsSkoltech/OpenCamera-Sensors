@@ -191,6 +191,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     			Log.d(TAG, "launching from video intent");
     		return true;
 		}
+        else if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) || MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA.equals(action) || MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE.equals(action) ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "launching from photo intent");
+    		return false;
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), false);
     }
