@@ -398,6 +398,12 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
     @Override
+    public boolean getTouchCapturePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getBoolean(PreferenceKeys.getTouchCapturePreferenceKey(), false);
+    }
+
+    @Override
     public boolean getPausePreviewPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), false);

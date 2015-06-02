@@ -124,6 +124,13 @@
 	        android:persistent="false">
 
 		    <CheckBoxPreference
+		        android:key="preference_touch_capture"
+		        android:title="@string/preference_touch_capture"
+		        android:summary="@string/preference_touch_capture_summary"
+		        android:defaultValue="false"
+		        />
+	
+	       	<CheckBoxPreference
 		        android:key="preference_pause_preview"
 		        android:title="@string/preference_pause_preview"
 		        android:summary="@string/preference_pause_preview_summary"

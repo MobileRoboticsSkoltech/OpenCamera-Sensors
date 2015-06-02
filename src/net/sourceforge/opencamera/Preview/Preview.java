@@ -128,6 +128,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<Integer> zoom_ratios = null;
 	private float minimum_focus_distance = 0.0f;
 	private boolean touch_was_multitouch = false;
+	private float touch_orig_x = 0.0f;
+	private float touch_orig_y = 0.0f;
 
 	private List<String> supported_flash_values = null; // our "values" format
 	private int current_flash_index = -1; // this is an index into the supported_flash_values array, or -1 if no flash modes available
@@ -382,15 +384,49 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( event.getAction() != MotionEvent.ACTION_UP ) {
 			if( event.getAction() == MotionEvent.ACTION_DOWN && event.getPointerCount() == 1 ) {
 				touch_was_multitouch = false;
+				if( event.getAction() == MotionEvent.ACTION_DOWN ) {
+					touch_orig_x = event.getX();
+					touch_orig_y = event.getY();
+				}
 			}
 			return true;
 		}
+		// now only have to handle MotionEvent.ACTION_UP from this point onwards
+
 		if( touch_was_multitouch ) {
 			return true;
 		}
 		if( !this.is_video && this.isTakingPhotoOrOnTimer() ) {
 			// if video, okay to refocus when recording
 			return true;
+		}
+		
+		// ignore swipes
+		{
+			float x = event.getX();
+			float y = event.getY();
+			float diff_x = x - touch_orig_x;
+			float diff_y = y - touch_orig_y;
+			float dist2 = diff_x*diff_x + diff_y*diff_y;
+			float scale = getResources().getDisplayMetrics().density;
+			float tol = 31 * scale + 0.5f; // convert dps to pixels (about 0.5cm)
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "touched from " + touch_orig_x + " , " + touch_orig_y + " to " + x + " , " + y);
+				Log.d(TAG, "dist: " + Math.sqrt(dist2));
+				Log.d(TAG, "tol: " + tol);
+			}
+			if( dist2 > tol*tol ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "touch was a swipe");
+				return true;
+			}
+		}
+		if( !this.is_video && applicationInterface.getTouchCapturePref() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "touch to capture");
+			// interpret as if user had clicked take photo/video button
+	    	this.takePicturePressed();
+	    	return true;
 		}
 
 		// note, we always try to force start the preview (in case is_preview_paused has become false)

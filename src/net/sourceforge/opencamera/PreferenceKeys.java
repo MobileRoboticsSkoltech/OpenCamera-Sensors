@@ -109,6 +109,10 @@ public class PreferenceKeys {
     	return "preference_ui_placement";
     }
     
+    public static String getTouchCapturePreferenceKey() {
+    	return "preference_touch_capture";
+    }
+
     public static String getPausePreviewPreferenceKey() {
     	return "preference_pause_preview";
     }
