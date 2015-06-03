@@ -2415,6 +2415,26 @@ public class MainActivity extends Activity {
 				toast_string += "\n" + entry;
 			}
 		}
+		String timer = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
+		if( !timer.equals("0") ) {
+			String [] entries_array = getResources().getStringArray(R.array.preference_timer_entries);
+			String [] values_array = getResources().getStringArray(R.array.preference_timer_values);
+			int index = Arrays.asList(values_array).indexOf(timer);
+			if( index != -1 ) { // just in case!
+				String entry = entries_array[index];
+				toast_string += "\n" + getResources().getString(R.string.preference_timer) + ": " + entry;
+			}
+		}
+		String repeat = applicationInterface.getRepeatPref();
+		if( !repeat.equals("1") ) {
+			String [] entries_array = getResources().getStringArray(R.array.preference_burst_mode_entries);
+			String [] values_array = getResources().getStringArray(R.array.preference_burst_mode_values);
+			int index = Arrays.asList(values_array).indexOf(repeat);
+			if( index != -1 ) { // just in case!
+				String entry = entries_array[index];
+				toast_string += "\n" + getResources().getString(R.string.preference_burst_mode) + ": " + entry;
+			}
+		}
 		
 		preview.showToast(switch_video_toast, toast_string);
 	}
