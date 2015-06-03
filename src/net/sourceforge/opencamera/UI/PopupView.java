@@ -146,7 +146,7 @@ public class PopupView extends LinearLayout {
     			String size_string = picture_size.width + " x " + picture_size.height + " " + Preview.getMPString(picture_size.width, picture_size.height);
     			picture_size_strings.add(size_string);
     		}
-    		addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), picture_size_index, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), picture_size_index, false, new ArrayOptionsPopupListener() {
 		    	final Handler handler = new Handler();
 				Runnable update_runnable = new Runnable() {
 					@Override
@@ -198,7 +198,7 @@ public class PopupView extends LinearLayout {
     			String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
     			video_size_strings.add(quality_string);
     		}
-    		addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), video_size_index, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), video_size_index, false, new ArrayOptionsPopupListener() {
 		    	final Handler handler = new Handler();
 				Runnable update_runnable = new Runnable() {
 					@Override
@@ -251,7 +251,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
 				timer_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), timer_index, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), timer_index, false, new ArrayOptionsPopupListener() {
     			private void update() {
     				if( timer_index == -1 )
     					return;
@@ -290,7 +290,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find burst_mode_value " + burst_mode_value + " in burst_mode_values!");
 				burst_mode_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(R.string.preference_burst_mode), burst_mode_index, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(R.string.preference_burst_mode), burst_mode_index, false, new ArrayOptionsPopupListener() {
     			private void update() {
     				if( burst_mode_index == -1 )
     					return;
@@ -329,7 +329,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find grid_value " + grid_value + " in grid_values!");
 				grid_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.preference_grid), grid_index, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.preference_grid), grid_index, true, new ArrayOptionsPopupListener() {
     			private void update() {
     				if( grid_index == -1 )
     					return;
@@ -341,8 +341,10 @@ public class PopupView extends LinearLayout {
     			}
 				@Override
 				public int onClickPrev() {
-	        		if( grid_index != -1 && grid_index > 0 ) {
+	        		if( grid_index != -1 ) {
 	        			grid_index--;
+	        			if( grid_index < 0 )
+	        				grid_index += grid_values.length;
 	        			update();
 	    				return grid_index;
 	        		}
@@ -350,8 +352,10 @@ public class PopupView extends LinearLayout {
 				}
 				@Override
 				public int onClickNext() {
-	                if( grid_index != -1 && grid_index < grid_values.length-1 ) {
+	                if( grid_index != -1 ) {
 	                	grid_index++;
+	                	if( grid_index >= grid_values.length )
+	                		grid_index -= grid_values.length;
 	        			update();
 	    				return grid_index;
 	        		}
@@ -600,7 +604,7 @@ public class PopupView extends LinearLayout {
 		public abstract int onClickNext();
     }
     
-    private void addArrayOptionsToPopup(final List<String> supported_options, final String title, final int current_index, final ArrayOptionsPopupListener listener) {
+    private void addArrayOptionsToPopup(final List<String> supported_options, final String title, final int current_index, final boolean cyclic, final ArrayOptionsPopupListener listener) {
 		if( supported_options != null && current_index != -1 ) {
     		TextView text_view = new TextView(this.getContext());
     		text_view.setText(title);
@@ -630,7 +634,7 @@ public class PopupView extends LinearLayout {
 			vg_params.width = (int) (60 * scale + 0.5f); // convert dps to pixels
 			vg_params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
 			prev_button.setLayoutParams(vg_params);
-			prev_button.setVisibility( (current_index > 0) ? View.VISIBLE : View.INVISIBLE);
+			prev_button.setVisibility( (cyclic || current_index > 0) ? View.VISIBLE : View.INVISIBLE);
 
         	ll2.addView(resolution_text_view);
 
@@ -643,7 +647,7 @@ public class PopupView extends LinearLayout {
 			vg_params.width = (int) (60 * scale + 0.5f); // convert dps to pixels
 			vg_params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
 			next_button.setLayoutParams(vg_params);
-			next_button.setVisibility( (current_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
+			next_button.setVisibility( (cyclic || current_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
 
 			prev_button.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -651,8 +655,8 @@ public class PopupView extends LinearLayout {
         			int new_index = listener.onClickPrev();
         			if( new_index != -1 ) {
         				resolution_text_view.setText(supported_options.get(new_index));
-	        			prev_button.setVisibility( (new_index > 0) ? View.VISIBLE : View.INVISIBLE);
-	        			next_button.setVisibility( (new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
+	        			prev_button.setVisibility( (cyclic || new_index > 0) ? View.VISIBLE : View.INVISIBLE);
+	        			next_button.setVisibility( (cyclic || new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}
 				}
 			});
@@ -662,8 +666,8 @@ public class PopupView extends LinearLayout {
         			int new_index = listener.onClickNext();
         			if( new_index != -1 ) {
         				resolution_text_view.setText(supported_options.get(new_index));
-	        			prev_button.setVisibility( (new_index > 0) ? View.VISIBLE : View.INVISIBLE);
-	        			next_button.setVisibility( (new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
+	        			prev_button.setVisibility( (cyclic || new_index > 0) ? View.VISIBLE : View.INVISIBLE);
+	        			next_button.setVisibility( (cyclic || new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}
 				}
 			});
