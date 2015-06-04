@@ -650,6 +650,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_recording);
+		view.setTag(R.drawable.take_video_recording); // for testing
 	}
 
 	@Override
@@ -664,6 +665,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_selector);
+		view.setTag(R.drawable.take_video_selector); // for testing
 	}
 
 	@Override

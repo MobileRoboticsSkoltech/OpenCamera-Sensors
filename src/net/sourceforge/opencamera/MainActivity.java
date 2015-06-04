@@ -881,12 +881,15 @@ public class MainActivity extends Activity {
 		// set icon for taking photos vs videos
 		ImageButton view = (ImageButton)findViewById(R.id.take_photo);
 		if( preview != null ) {
+			int resource = 0;
 			if( preview.isVideo() ) {
-				view.setImageResource(preview.isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector);
+				resource = preview.isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector;
 			}
 			else {
-				view.setImageResource(R.drawable.take_photo_selector);
+				resource = R.drawable.take_photo_selector;
 			}
+			view.setImageResource(resource);
+			view.setTag(resource); // for testing
 		}
     }
     
@@ -965,8 +968,7 @@ public class MainActivity extends Activity {
 		this.preview.switchVideo(true, true);
 		switchVideoButton.setEnabled(true);
 
-		ImageButton imageButton = (ImageButton)findViewById(R.id.take_photo);
-		imageButton.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
+		setTakePhotoIcon();
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast();
 		}
@@ -2239,8 +2241,7 @@ public class MainActivity extends Activity {
 
 		setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
 
-		ImageButton imageButton = (ImageButton)findViewById(R.id.take_photo);
-		imageButton.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
+		setTakePhotoIcon();
 
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast();
