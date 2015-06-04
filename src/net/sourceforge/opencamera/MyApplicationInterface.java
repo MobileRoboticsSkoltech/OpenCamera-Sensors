@@ -882,7 +882,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void cameraClosed() {
 		main_activity.clearSeekBar();
 	}
-
+	
 	private void updateThumbnail(Bitmap thumbnail) {
 		if( getThumbnailAnimationPref() ) {
 			thumbnail_anim = true;
@@ -2553,5 +2553,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	void clearLastImageName() {
 		last_image_name = null;
+	}
+	
+	// for testing
+
+	public boolean hasThumbnailAnimation() {
+		return this.thumbnail_anim;
 	}
 }

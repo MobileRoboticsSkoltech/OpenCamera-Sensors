@@ -2509,4 +2509,8 @@ public class MainActivity extends Activity {
     public void usedFolderPicker() {
     	updateFolderHistory();
     }
+    
+	public boolean hasThumbnailAnimation() {
+		return this.applicationInterface.hasThumbnailAnimation();
+	}
 }
