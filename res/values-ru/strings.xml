@@ -90,7 +90,7 @@
     <string name="preference_exposure">Компенсация экспозиции</string>
     <string name="preference_exposure_summary">Значение 0 для компенсации экспозиции по умолчанию</string>
     <string name="preference_lock_orientation">Блокировка ориентации фото/видео</string>
-    <string name="preference_lock_orientation_summary">Игнорирование системной ориентации экрана устройства.</string>
+    <string name="preference_lock_orientation_summary">Игнорирование системной ориентации экрана устройства</string>
     <string name="preference_face_detection">Распознавание лиц</string>
     <string name="preference_face_detection_summary">Распознавание лиц в объективе для фокусировки</string>
 
@@ -191,7 +191,7 @@
     <string name="preference_video_fps">Частота кадров видео (примерно)</string>
     <string name="preference_video_fps_summary">Кол-во кадров в секунду (FPS) в видео (примерное, и может привести к записи с ошибкой, если частота кадров не поддерживается)</string>
     <string name="preference_video_max_duration">Максимальная длительность видео</string>
-    <string name="preference_video_max_duration_summary">Видеозапись прекратится по истечении указанной продолжительности.</string>
+    <string name="preference_video_max_duration_summary">Видеозапись прекратится по истечении указанной продолжительности</string>
     <string name="preference_video_restart">Записать новое видео после достижения лимита</string>
     <string name="preference_video_restart_summary">При достижении лимита продолжительности, будет записано новое видео. (столько раз, сколько вы выбрали)</string>
     <string name="preference_record_audio">Запись звука</string>
@@ -199,7 +199,7 @@
     <string name="preference_record_audio_src">Источник звука</string>
     <string name="preference_record_audio_src_summary">Микрофон для записи звука</string>
     <string name="preference_video_flash">Вспышка во время записи видео</string>
-    <string name="preference_video_flash_summary">Если включено, вспышка будет включаться/выключаться при записи видео (можно использовать, чтобы выполнить запись на расстоянии).</string>
+    <string name="preference_video_flash_summary">Если включено, вспышка будет включаться/выключаться при записи видео (можно использовать, чтобы выполнить запись на расстоянии)</string>
     
     <string name="preference_category_online">Разное</string>
     <string name="preference_online_help">Онлайн помощь</string>

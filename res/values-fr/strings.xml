@@ -25,8 +25,8 @@
     <string name="not_supported">non supporté par votre appareil</string> <!--  intentionally starts lower case -->
     <string name="video_error_unknown">Erreur inconnue, la vidéo est arrêté</string>
     <string name="video_error_server_died">Erreur serveur, la vidéo est arrêté</string>
-    <string name="video_max_duration">La vidéo à atteint la durée max.</string>
-    <string name="video_max_filesize">La vidéo à atteint la taille max.</string>
+    <string name="video_max_duration">La vidéo à atteint la durée max</string>
+    <string name="video_max_filesize">La vidéo à atteint la taille max</string>
     <string name="exposure_compensation">Compensation d\'exposition</string>
     <string name="fps">IPS</string>
     <string name="focus_distance">Distance de focus</string>
@@ -88,9 +88,9 @@
     <string name="preference_iso">Choisissez l\'ISO</string>
     <string name="preference_iso_summary">Une valeur plus élevée signifie plus sensibles à la lumière (peut ne pas fonctionner sur certains appareils)</string>
     <string name="preference_exposure">Réglez la compensation d\'exposition</string>
-    <string name="preference_exposure_summary">Mettre à 0 pour la compensation de l\'exposition par défaut.</string>
+    <string name="preference_exposure_summary">Mettre à 0 pour la compensation de l\'exposition par défaut</string>
     <string name="preference_lock_orientation">Bloquer l\'orientation de la photo/vidéo</string>
-    <string name="preference_lock_orientation_summary">Si elle est définie, l\'orientation de l\'appareil sera ignorée, et l\'orientation de la photo / vidéo sera par rapport à l\'orientation spécifiée.</string>
+    <string name="preference_lock_orientation_summary">Si elle est définie, l\'orientation de l\'appareil sera ignorée, et l\'orientation de la photo / vidéo sera par rapport à l\'orientation spécifiée</string>
     <string name="preference_face_detection">Détection des visages</string>
     <string name="preference_face_detection_summary">Utiliser la détection des visages au lieu des zones de focus</string>
 
@@ -195,21 +195,21 @@
     <string name="preference_force_video_4k">Forcer le format vidéo 4K UHD (experimental)</string>
     <string name="preference_force_video_4k_summary">Active la résolution 3840x2160 pour l\'enregistrement vidéo sur l\'appareil photo arrière - cela ne fonctionnera que si votre appareil le prend en charge (et peut se bloquer le cas échéant!)</string>
     <string name="preference_video_stabilization">Activer la stabilisation vidéo</string>
-    <string name="preference_video_stabilization_summary">La stabilisation vidéo réduit les tremblements dûent aux mouvements de la caméra à la fois dans l\'aperçu et dans les vidéos enregistrées.</string>
+    <string name="preference_video_stabilization_summary">La stabilisation vidéo réduit les tremblements dûent aux mouvements de la caméra à la fois dans l\'aperçu et dans les vidéos enregistrées</string>
     <string name="preference_video_bitrate">Débit des vidéos (environ)</string>
     <string name="preference_video_bitrate_summary">Réglez le débit approximatif des vidéos (plus élevé signifie une meilleure qualité, mais prend plus d\'espace disque, et peut entraîner un échec de l\'enregistrement vidéo s\'il n\'est pas pris en charge)</string>
     <string name="preference_video_fps">Nombre d\'image de la vidéo (environ)</string>
     <string name="preference_video_fps_summary">Définir le nombre d\'image pas seconde (IPS) des vidéos (en fonction de votre appareil le nombre d\'IPS peut-être aproximatif et pourrait ne pas atteindre le maximum. Un mauvais réglage peut entrainer l\'échec de l\'enregistrement vidéo s\'il n\'est pas pris en charge)</string>
     <string name="preference_video_max_duration">Durée maximale de la vidéo</string>
-    <string name="preference_video_max_duration_summary">L\'enregistrement vidéo s\'arrêtera après la durée spécifiée.</string>
+    <string name="preference_video_max_duration_summary">L\'enregistrement vidéo s\'arrêtera après la durée spécifiée</string>
     <string name="preference_video_restart">Nombre de vidéo après la déurée maximale</string>
-    <string name="preference_video_restart_summary">Si la vidéo est stoppée après avoir atteint la durée maximum sélectionné (si activée), alors l\'enregistrement va reprendre autant de fois que le nombre spécifié dans le paramètre.</string>
+    <string name="preference_video_restart_summary">Si la vidéo est stoppée après avoir atteint la durée maximum sélectionné (si activée), alors l\'enregistrement va reprendre autant de fois que le nombre spécifié dans le paramètre</string>
     <string name="preference_record_audio">Enregistrement audio</string>
     <string name="preference_record_audio_summary">Enregistre aussi l\'audio lors de l\'enregistrement vidéo</string>
     <string name="preference_record_audio_src">Source audio</string>
     <string name="preference_record_audio_src_summary">Sélectionnez l\'entrée audio l\'enregistrement</string>
     <string name="preference_video_flash">Clignote pendant l\'enregistrement vidéo</string>
-    <string name="preference_video_flash_summary">Si activé, le flash se met en marche/arrêt lors de l\'enregistrement vidéo (peut être util pour indiquer que l\'appareil est en train d\'enregistrer à distance).</string>
+    <string name="preference_video_flash_summary">Si activé, le flash se met en marche/arrêt lors de l\'enregistrement vidéo (peut être util pour indiquer que l\'appareil est en train d\'enregistrer à distance)</string>
     
     <string name="preference_category_online">Divers</string>
     <string name="preference_online_help">Aide en ligne</string>

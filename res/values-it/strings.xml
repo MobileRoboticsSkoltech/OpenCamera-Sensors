@@ -75,11 +75,11 @@
     <string name="preference_iso">Imposta l\'ISO</string>
     <string name="preference_iso_summary">A un valore più alto corrisponde una maggiore sensibilità alla luce (potrebbe non funzionare su certi dispositivi)</string>
     <string name="preference_exposure">Imposta la compensazione d\'esposizione</string>
-    <string name="preference_exposure_summary">Imposta a 0 per la compensazione d\'esposizione predefinita.</string>
+    <string name="preference_exposure_summary">Imposta a 0 per la compensazione d\'esposizione predefinita</string>
     <string name="preference_lock_orientation">Blocco orientamento foto/video</string>
-    <string name="preference_lock_orientation_summary">Se impostato, l\'orientamento del dispositivo sarà ignorato e l\'orientamento delle foto e dei video sarà come quello della specifica rotazione.</string>
+    <string name="preference_lock_orientation_summary">Se impostato, l\'orientamento del dispositivo sarà ignorato e l\'orientamento delle foto e dei video sarà come quello della specifica rotazione</string>
     <string name="preference_face_detection">Riconoscimento volti</string>
-    <string name="preference_face_detection_summary">Usa il riconoscimento volti al posto dell\'area della messa a fuoco.</string>
+    <string name="preference_face_detection_summary">Usa il riconoscimento volti al posto dell\'area della messa a fuoco</string>
 
     <string name="preference_category_camera_controls">Controlli fotocamera</string>
     <string name="preference_timer">Timer</string>
@@ -147,21 +147,21 @@
     <string name="preference_force_video_4k">Forza video a 4K UHD (sperimentale)</string>
     <string name="preference_force_video_4k_summary">Abilita la risoluzione 3840x2160 per video dalla fotocamera posteriore - funziona solo se il tuo dispositivo lo supporta, ma in ogni caso potrebbe crashare o farti esplodere il gatto!</string>
     <string name="preference_video_stabilization">Abilita stabilizzazione video</string>
-    <string name="preference_video_stabilization_summary">La stabilizzazione video riduce i tremolii durante il movimento della videocamera sia per l\'anteprima che per i video registrati.</string>
+    <string name="preference_video_stabilization_summary">La stabilizzazione video riduce i tremolii durante il movimento della videocamera sia per l\'anteprima che per i video registrati</string>
     <string name="preference_video_bitrate">Video bitrate (circa)</string>
     <string name="preference_video_bitrate_summary">Imposta il bitrate appropriato per i video (più alto significa più qualità, ma conseguentemente più peso; inoltre la registrazione del video potrebbe fallire se un certo bitrate non è supportato dal dispositivo)</string>
     <string name="preference_video_fps">Video frame rate (circa)</string>
     <string name="preference_video_fps_summary">Imposta il frame rate (FPS) per i video (può essere approssimativo e non è garantito raggiungerlo, inoltre potrebbe causare degli errori se un certo frame rate non è supportato)</string>
     <string name="preference_video_max_duration">Durata massima dei video</string>
-    <string name="preference_video_max_duration_summary">La registrazione del video sarà interrotta ad una durata specifica.</string>
+    <string name="preference_video_max_duration_summary">La registrazione del video sarà interrotta ad una durata specifica</string>
     <string name="preference_video_restart">Ricomincia il video dopo una certa durata</string>
-    <string name="preference_video_restart_summary">Se il video è stato interrotto dopo aver superato la durata massima (se impostata), questa opzione farà ricominciare il video un certo numero di volte.</string><!-- @TODO MA IN CHE SENSO? COSA FA? -->
+    <string name="preference_video_restart_summary">Se il video è stato interrotto dopo aver superato la durata massima (se impostata), questa opzione farà ricominciare il video un certo numero di volte</string><!-- @TODO MA IN CHE SENSO? COSA FA? -->
     <string name="preference_record_audio">Registrazione audio</string>
     <string name="preference_record_audio_summary">Registra l\' audio quando si registra un video</string>
     <string name="preference_record_audio_src">Sorgente audio</string>
     <string name="preference_record_audio_src_summary">Il microfono da usare per la registrazione dell\'audio</string>
     <string name="preference_video_flash">Flash durante la registrazione video</string>
-    <string name="preference_video_flash_summary">Se abilitato, il flash sarà acceso/spento quando si registra il video (può essere usato per dire se la telecamera sta ancora registrando da distante).</string>
+    <string name="preference_video_flash_summary">Se abilitato, il flash sarà acceso/spento quando si registra il video (può essere usato per dire se la telecamera sta ancora registrando da distante)</string>
     
     <string name="preference_category_online">Varie</string>
     <string name="preference_online_help">Aiuto Online</string>

@@ -88,11 +88,11 @@
     <string name="preference_iso">Set the ISO</string>
     <string name="preference_iso_summary">A higher value means more sensitive to light (may not work on some devices)</string>
     <string name="preference_exposure">Set the exposure compensation</string>
-    <string name="preference_exposure_summary">Set to 0 for the default exposure compensation.</string>
+    <string name="preference_exposure_summary">Set to 0 for the default exposure compensation</string>
     <string name="preference_lock_orientation">Lock photo/video orientation</string>
-    <string name="preference_lock_orientation_summary">If set, the orientation of the device will be ignored, and the orientation of the photo/video will be with respect to the specified orientation.</string>
+    <string name="preference_lock_orientation_summary">If set, the orientation of the device will be ignored, and the orientation of the photo/video will be with respect to the specified orientation</string>
     <string name="preference_face_detection">Face detection</string>
-    <string name="preference_face_detection_summary">Use face detection instead of focus areas.</string>
+    <string name="preference_face_detection_summary">Use face detection instead of focus areas</string>
 
     <string name="preference_category_camera_controls">Camera Controls</string>
     <string name="preference_timer">Timer</string>
@@ -197,23 +197,23 @@
     <string name="preference_force_video_4k">Force 4K UHD video (experimental)</string>
     <string name="preference_force_video_4k_summary">Enable 3840x2160 resolution for video recording on back camera - this will only work if your device supports it, and may crash if not!</string>
     <string name="preference_video_stabilization">Enable video stabilization</string>
-    <string name="preference_video_stabilization_summary">Video stabilization reduces the shaking due to the motion of the camera in both the preview and in recorded videos.</string>
+    <string name="preference_video_stabilization_summary">Video stabilization reduces the shaking due to the motion of the camera in both the preview and in recorded videos</string>
     <string name="preference_video_bitrate">Video bitrate (approx)</string>
     <string name="preference_video_bitrate_summary">Set the approximate bitrate of videos (higher means better quality, but takes up more disk space; may cause video recording to fail if bitrate not supported)</string>
     <string name="preference_video_fps">Video frame rate (approx)</string>
     <string name="preference_video_fps_summary">Set the frame rate (FPS) of videos (may be approx, not guaranteed to be achieved, and may cause video recording to fail if frame rate not supported)</string>
     <string name="preference_video_max_duration">Maximum duration of video</string>
-    <string name="preference_video_max_duration_summary">The video recording will stop after the specified duration.</string>
+    <string name="preference_video_max_duration_summary">The video recording will stop after the specified duration</string>
     <string name="preference_video_restart">Restart video after max duration</string>
-    <string name="preference_video_restart_summary">If the video has stopped after hitting the maximum duration (if set), this option will make the video restart, up to the specified number of times.</string>
+    <string name="preference_video_restart_summary">If the video has stopped after hitting the maximum duration (if set), this option will make the video restart, up to the specified number of times</string>
     <string name="preference_record_audio">Record audio</string>
     <string name="preference_record_audio_summary">Record audio when recording video</string>
     <string name="preference_record_audio_src">Audio source</string>
     <string name="preference_record_audio_src_summary">Microphone to use for recording audio</string>
     <string name="preference_record_audio_channels">Audio channels</string>
-    <string name="preference_record_audio_channels_summary">Specify mono or stereo for recording audio (stereo only supported on some devices).</string>
+    <string name="preference_record_audio_channels_summary">Specify mono or stereo for recording audio (stereo only supported on some devices)</string>
     <string name="preference_video_flash">Flash while recording video</string>
-    <string name="preference_video_flash_summary">If enabled, flash will switch on/off when recording video (can be used to tell camera is still recording at a distance).</string>
+    <string name="preference_video_flash_summary">If enabled, flash will switch on/off when recording video (can be used to tell camera is still recording at a distance)</string>
     
     <string name="preference_category_online">Misc</string>
     <string name="preference_online_help">Online help</string>

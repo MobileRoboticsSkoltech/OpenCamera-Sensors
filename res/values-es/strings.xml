@@ -76,11 +76,11 @@
     <string name="preference_iso">Establecer ISO</string>
     <string name="preference_iso_summary">Mayor valor significa mayor sensibilidad a la luz (puede no funcionar en algunos dispositivos)</string>
     <string name="preference_exposure">Establece la compensación de la Exposición</string>
-    <string name="preference_exposure_summary">Establece a 0 para la compensación de la Exposición por defecto.</string>
+    <string name="preference_exposure_summary">Establece a 0 para la compensación de la Exposición por defecto</string>
     <string name="preference_lock_orientation">Bloquear orientación de foto/video</string>
-    <string name="preference_lock_orientation_summary">Si se activa la orientación del dispositivo será ignorada y la orientación del foto/video será siempre la establecida.</string>
+    <string name="preference_lock_orientation_summary">Si se activa la orientación del dispositivo será ignorada y la orientación del foto/video será siempre la establecida</string>
     <string name="preference_face_detection">Detección de cara</string>
-    <string name="preference_face_detection_summary">Utiliza la detección de cara en vez de el foco de areas.</string>
+    <string name="preference_face_detection_summary">Utiliza la detección de cara en vez de el foco de areas</string>
 
     <string name="preference_category_camera_controls">Control de Cámara</string>
     <string name="preference_timer">Timer</string>
@@ -142,23 +142,23 @@
     <string name="video_quality">Resolución de los Videos</string>
     <string name="video_quality_summary">Establece resolución de los videos</string>
     <string name="preference_force_video_4k">Forzar 4K UHD video (experimental)</string>
-    <string name="preference_force_video_4k_summary">Activa la resolución 3840x2160 para la grabación de videos en la cámara trasera - esto solo funcionara si tu dispositivo lo soporta.</string>
+    <string name="preference_force_video_4k_summary">Activa la resolución 3840x2160 para la grabación de videos en la cámara trasera - esto solo funcionara si tu dispositivo lo soporta</string>
     <string name="preference_video_stabilization">Activar Estabilización de Video</string>
-    <string name="preference_video_stabilization_summary">La estabilización de video reduce las vibraciones.</string>
+    <string name="preference_video_stabilization_summary">La estabilización de video reduce las vibraciones</string>
     <string name="preference_video_bitrate">Video bitrate (aproximado)</string>
     <string name="preference_video_bitrate_summary">Establece aproximadamente el bitrate de los videos (más alto significa mejor calidad, pero ocupa más espacio; a lo mejor causa que la grabación de video falle si el bitrate no es soportado)</string>
     <string name="preference_video_fps">Video frame rate (aproximado)</string>
     <string name="preference_video_fps_summary">Establece los Frame Rates (FPS) de los videos (puede que sea aproximado, no se garantiza que funcione y a lo mejor causa que la grabación de video falle si el frame rate no es soportado)</string>
     <string name="preference_video_max_duration">Duracion máxima del video</string>
-    <string name="preference_video_max_duration_summary">El video dejará de grabar después de la duración establecida.</string>
+    <string name="preference_video_max_duration_summary">El video dejará de grabar después de la duración establecida</string>
     <string name="preference_video_restart">Resetear Video después de la máxima duración</string>
-    <string name="preference_video_restart_summary">Si el video para después de llegar a la máxima duracion (si se ha establecido), esta opcion hará que el video se resetee el numero especificado de veces.</string>
+    <string name="preference_video_restart_summary">Si el video para después de llegar a la máxima duracion (si se ha establecido), esta opcion hará que el video se resetee el numero especificado de veces</string>
     <string name="preference_record_audio">Grabar Audio</string>
     <string name="preference_record_audio_summary">Grabar audio cuando graba video</string>
     <string name="preference_record_audio_src">Fuente de Audio</string>
     <string name="preference_record_audio_src_summary">Micrófono para grabar Audio</string>
     <string name="preference_video_flash">Flash mientras grabas un Video</string>
-    <string name="preference_video_flash_summary">Si se activa, el flash se cambiara a on/off cuando se grabe un video (se puede usar para decir que la cámara esta grabando a una distancia).</string>
+    <string name="preference_video_flash_summary">Si se activa, el flash se cambiara a on/off cuando se grabe un video (se puede usar para decir que la cámara esta grabando a una distancia)</string>
     
     <string name="preference_category_online">Misc</string>
     <string name="preference_online_help">Ayuda Online</string>

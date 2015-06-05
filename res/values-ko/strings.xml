@@ -152,7 +152,7 @@
     <string name="preference_grid">격자 표시</string>
     <string name="preference_grid_summary">격자를 표시합니다</string>
     <string name="preference_crop_guide">크롭 안내선 표시</string>
-    <string name="preference_crop_guide_summary">크롭 안내선은 특정한 종횡비가 어떤 식으로 보이는지를 사각형으로 보여줍니다 - 사진이나 동영상을 나중에 다른 종횡비로 잘라낼 예정이라면 활용할 수 있습니다. 동영상 촬영 모드 혹은 WYSIWYG 사진 모드가 필요합니다.</string>
+    <string name="preference_crop_guide_summary">크롭 안내선은 특정한 종횡비가 어떤 식으로 보이는지를 사각형으로 보여줍니다 - 사진이나 동영상을 나중에 다른 종횡비로 잘라낼 예정이라면 활용할 수 있습니다. 동영상 촬영 모드 혹은 WYSIWYG 사진 모드가 필요합니다</string>
     <string name="preference_thumbnail_animation">썸네일 애니메이션 표시</string>
     <string name="preference_thumbnail_animation_summary">사진을 촬영할 때 움직이는 썸네일 애니메이션을 표시합니다</string>
     <string name="preference_keep_display_on">화면 항상 켜기</string>
@@ -193,7 +193,7 @@
     <string name="preference_video_max_duration">동영상 최장 녹화 시간</string>
     <string name="preference_video_max_duration_summary">정해진 시간이 지나면 동영상 촬영을 멈추게 됩니다</string>
     <string name="preference_video_restart">최장 녹화 시간 이후 재시작</string>
-    <string name="preference_video_restart_summary">만약 (설정된 경우에) 최장 녹화 시간 이후 동영상 촬영이 중지되면, 이 옵션은 정해진 횟수만큼 동영상 녹화를 재개시킵니다.</string>
+    <string name="preference_video_restart_summary">만약 (설정된 경우에) 최장 녹화 시간 이후 동영상 촬영이 중지되면, 이 옵션은 정해진 횟수만큼 동영상 녹화를 재개시킵니다</string>
     <string name="preference_record_audio">오디오 녹음</string>
     <string name="preference_record_audio_summary">동영상 녹화시 오디오를 녹음합니다</string>
     <string name="preference_record_audio_src">오디오 음원</string>
