@@ -1027,7 +1027,8 @@ public class MainActivity extends Activity {
 		else if( preview.getCameraController() != null ) {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
-			if( !value.equals(preview.getCameraController().getDefaultISO()) ) {
+			if( preview.usingCamera2API() && !value.equals(preview.getCameraController().getDefaultISO()) ) {
+				// with Camera2 API, when using non-default ISO we instead show sliders for ISO range and exposure time
 				if( preview.supportsISORange()) {
 					iso_seek_bar.setVisibility(View.VISIBLE);
 					if( preview.supportsExposureTime() ) {
