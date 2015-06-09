@@ -39,6 +39,7 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -888,7 +889,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			thumbnail_anim = true;
 			thumbnail_anim_start_ms = System.currentTimeMillis();
 		}
-		main_activity.updateThumbnail(thumbnail);
+		main_activity.updateGalleryIcon(thumbnail);
 
     	Bitmap old_thumbnail = this.last_thumbnail;
     	this.last_thumbnail = thumbnail;
@@ -1097,7 +1098,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public void onDrawPreview(Canvas canvas) {
-		MainActivity main_activity = (MainActivity)this.getContext();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
@@ -2153,7 +2153,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 
 		String exif_orientation_s = null;
-		String picFileName = null;
 		File picFile = null;
         try {
 			OutputStream outputStream = null;
@@ -2214,6 +2213,10 @@ public class MyApplicationInterface implements ApplicationInterface {
         			main_activity.finish();
     			}
 			}
+			else if( storageUtils.isUsingSAF() ) {
+				Uri uriSAF = storageUtils.createOutputMediaFileSAF(MEDIA_TYPE_IMAGE);
+			    outputStream = main_activity.getContentResolver().openOutputStream(uriSAF);
+			}
 			else {
     			picFile = createOutputMediaFile(MEDIA_TYPE_IMAGE);
     	        if( picFile == null ) {
@@ -2221,9 +2224,8 @@ public class MyApplicationInterface implements ApplicationInterface {
     	            main_activity.getPreview().showToast(null, R.string.failed_to_save_image);
     	        }
     	        else {
-    	            picFileName = picFile.getAbsolutePath();
     	    		if( MyDebug.LOG )
-    	    			Log.d(TAG, "save to: " + picFileName);
+    	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
     	            outputStream = new FileOutputStream(picFile);
     	        }
 			}
@@ -2358,9 +2360,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 	            	}
 
 	            	// shouldn't currently have a picFile if image_capture_intent, but put this here in case we ever do want to try reading intent's file (if it exists)
-    	            if( !image_capture_intent ) {
+    	            if( !image_capture_intent && !storageUtils.isUsingSAF() ) {
     	            	broadcastFile(picFile, true, false);
-    	            	main_activity.test_last_saved_image = picFileName;
+    	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
     	            }
 	            }
 	            if( image_capture_intent ) {
@@ -2368,6 +2370,10 @@ public class MyApplicationInterface implements ApplicationInterface {
     	    			Log.d(TAG, "finish activity due to being called from intent");
 	            	main_activity.setResult(Activity.RESULT_OK);
 	            	main_activity.finish();
+	            }
+	            if( storageUtils.isUsingSAF() ) {
+	            	// most Gallery apps don't seem to recognise the uriSAF, so just clear the field
+	            	storageUtils.clearLastMediaScanned();
 	            }
 	        }
 		}
@@ -2384,7 +2390,7 @@ public class MyApplicationInterface implements ApplicationInterface {
             main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
         }
 
-		last_image_name = picFileName;
+		last_image_name = picFile != null ? picFile.getAbsolutePath() : null;
 
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
         if( success && picFile != null && main_activity.getPreview().getCameraController() != null ) {
@@ -2437,6 +2443,16 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 			}
+        }
+        else if( success && storageUtils.isUsingSAF() && main_activity.getPreview().getCameraController() != null ) {
+        	// need to run on a delay to get the new image - 300ms works for Nexus 6
+        	final Handler handler = new Handler();
+    		handler.postDelayed(new Runnable() {
+    			@Override
+    			public void run() {
+    	    		main_activity.updateGalleryIcon();
+    			}
+    		}, 500);
         }
 
         if( bitmap != null ) {
@@ -2547,14 +2563,54 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return false;
 	}
 	
-	String getLastImageName() {
-		return last_image_name;
+	void shareLastImage() {
+		Preview preview  = main_activity.getPreview();
+		if( preview.isPreviewPaused() ) {
+			if( last_image_name != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Share: " + last_image_name);
+				Intent intent = new Intent(Intent.ACTION_SEND);
+				intent.setType("image/jpeg");
+				intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + last_image_name));
+				main_activity.startActivity(Intent.createChooser(intent, "Photo"));
+			}
+			last_image_name = null;
+			preview.startCameraPreview();
+		}
 	}
 	
-	void clearLastImageName() {
-		last_image_name = null;
+	void trashLastImage() {
+		Preview preview  = main_activity.getPreview();
+		if( preview.isPreviewPaused() ) {
+			if( last_image_name != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Delete: " + last_image_name);
+				File file = new File(last_image_name);
+				if( !file.delete() ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "failed to delete " + last_image_name);
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "successfully deleted " + last_image_name);
+    	    	    preview.showToast(null, R.string.photo_deleted);
+					this.broadcastFile(file, false, false);
+				}
+			}
+			last_image_name = null;
+			preview.startCameraPreview();
+		}
+    	// Calling updateGalleryIcon() immediately has problem that it still returns the latest image that we've just deleted!
+    	// But works okay if we call after a delay. 100ms works fine on Nexus 7 and Galaxy Nexus, but set to 500 just to be safe.
+    	final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				main_activity.updateGalleryIcon();
+			}
+		}, 500);
 	}
-	
+
 	// for testing
 
 	public boolean hasThumbnailAnimation() {

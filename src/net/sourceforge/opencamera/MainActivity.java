@@ -1539,9 +1539,9 @@ public class MainActivity extends Activity {
 		gallery_bitmap = null;
     }
 
-    void updateThumbnail(Bitmap thumbnail) {
+    void updateGalleryIcon(Bitmap thumbnail) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "updateThumbnail");
+			Log.d(TAG, "updateGalleryIcon: " + thumbnail);
     	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
 		galleryButton.setImageBitmap(thumbnail);
 		gallery_bitmap = thumbnail;
@@ -1587,7 +1587,7 @@ public class MainActivity extends Activity {
     	if( thumbnail != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set gallery button to thumbnail");
-			updateThumbnail(thumbnail);
+			updateGalleryIcon(thumbnail);
     	}
     	else {
 			if( MyDebug.LOG )
@@ -1712,31 +1712,33 @@ public class MainActivity extends Activity {
         }
 		editor.apply();
     }
-    
-    /*private void openFolderChooserDialog() {
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    void openFolderChooserDialogSAF() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "openFolderChooserDialog");
+			Log.d(TAG, "openFolderChooserDialogSAF");
 		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
 		//Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
 		//intent.addCategory(Intent.CATEGORY_OPENABLE);
 		startActivityForResult(intent, 42);
-    }*/
-    
-    /*@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if( requestCode == 42 && resultCode == RESULT_OK && resultData != null ) {
             Uri treeUri = resultData.getData();
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "returned treeUri: " + treeUri);
             ContentResolver contentResolver = this.getContentResolver();
-            Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri,
-                    DocumentsContract.getTreeDocumentId(treeUri));
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "returned docUri: " + docUri.toString());
-            Uri fileUri = DocumentsContract.createDocument(contentResolver, docUri, "image/jpeg", "test.jpg");   
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "returned fileUri: " + fileUri.toString());
-            //OutputStream out = contentResolver.openOutputStream(fileUri);
+            contentResolver.takePersistableUriPermission(treeUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), treeUri.toString());
+			editor.apply();
         }
-    }*/
+    }
 
     private void openFolderChooserDialog() {
 		if( MyDebug.LOG )
@@ -1767,6 +1769,11 @@ public class MainActivity extends Activity {
     private void longClickedGallery() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "longClickedGallery");
+		if( applicationInterface.getStorageUtils().isUsingSAF() ) {
+			// SAF doesn't support history yet, so go straight to dialog
+			openFolderChooserDialogSAF();
+			return;
+		}
 		if( save_location_history.size() <= 1 ) {
 			// go straight to choose folder dialog
 			openFolderChooserDialog();
@@ -1877,51 +1884,13 @@ public class MainActivity extends Activity {
     public void clickedShare(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedShare");
-		if( preview.isPreviewPaused() ) {
-			if( applicationInterface.getLastImageName() != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "Share: " + applicationInterface.getLastImageName());
-				Intent intent = new Intent(Intent.ACTION_SEND);
-				intent.setType("image/jpeg");
-				intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + applicationInterface.getLastImageName()));
-				startActivity(Intent.createChooser(intent, "Photo"));
-			}
-			applicationInterface.clearLastImageName();
-			preview.startCameraPreview();
-		}
+		applicationInterface.shareLastImage();
     }
 
     public void clickedTrash(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTrash");
-		if( preview.isPreviewPaused() ) {
-			if( applicationInterface.getLastImageName() != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "Delete: " + applicationInterface.getLastImageName());
-				File file = new File(applicationInterface.getLastImageName());
-				if( !file.delete() ) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "failed to delete " + applicationInterface.getLastImageName());
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "successfully deleted " + applicationInterface.getLastImageName());
-    	    	    preview.showToast(null, R.string.photo_deleted);
-					applicationInterface.broadcastFile(file, false, false);
-				}
-			}
-			applicationInterface.clearLastImageName();
-			preview.startCameraPreview();
-		}
-    	// Calling updateGalleryIcon() immediately has problem that it still returns the latest image that we've just deleted!
-    	// But works okay if we call after a delay. 100ms works fine on Nexus 7 and Galaxy Nexus, but set to 500 just to be safe.
-    	final Handler handler = new Handler();
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-		    	updateGalleryIcon();
-			}
-		}, 500);
+		applicationInterface.trashLastImage();
     }
 
     private void takePicture() {

@@ -8,6 +8,7 @@ import java.util.Locale;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -16,8 +17,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
@@ -43,7 +46,7 @@ public class StorageUtils {
 	void clearLastMediaScanned() {
 		last_media_scanned = null;
 	}
-
+	
     void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFile");
@@ -178,6 +181,19 @@ public class StorageUtils {
     	}
 	}
 
+    boolean isUsingSAF() {
+    	// check Android version just to be safe
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+			if( sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false) ) {
+				return true;
+			}
+			//return true; // uncomment to test SAF always on
+        }
+        return false;
+    }
+
+    // only valid if !isUsingSAF()
     String getSaveLocation() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		String folder_name = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
@@ -204,16 +220,48 @@ public class StorageUtils {
         return file;
     }
 
+    // only valid if !isUsingSAF()
     File getImageFolder() {
 		String folder_name = getSaveLocation();
 		return getImageFolder(folder_name);
     }
+    
+    // only valid if isUsingSAF()
+    private Uri getTreeUriSAF() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		Uri treeUri = Uri.parse(sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), ""));
+		return treeUri;
+    }
 
+    private String createMediaFilename(int type, int count) {
+        String index = "";
+        if( count > 0 ) {
+            index = "_" + count; // try to find a unique filename
+        }
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		String mediaFilename = null;
+        if( type == ApplicationInterface.MEDIA_TYPE_IMAGE ) {
+    		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
+    		mediaFilename = prefix + timeStamp + index + ".jpg";
+        }
+        else if( type == ApplicationInterface.MEDIA_TYPE_VIDEO ) {
+    		String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
+    		mediaFilename = prefix + timeStamp + index + ".mp4";
+        }
+        else {
+        	// throw exception as this is a programming error
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "unknown type: " + type);
+        	throw new RuntimeException();
+        }
+        return mediaFilename;
+    }
+    
+    // only valid if !isUsingSAF()
     @SuppressLint("SimpleDateFormat")
 	File createOutputMediaFile(int type) {
     	File mediaStorageDir = getImageFolder();
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
 
         // Create the storage directory if it does not exist
         if( !mediaStorageDir.exists() ) {
@@ -226,34 +274,50 @@ public class StorageUtils {
         }
 
         // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-        String index = "";
         File mediaFile = null;
-        for(int count=1;count<=100;count++) {
-    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            if( type == ApplicationInterface.MEDIA_TYPE_IMAGE ) {
-        		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
-                mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                	prefix + timeStamp + index + ".jpg");
-            }
-            else if( type == ApplicationInterface.MEDIA_TYPE_VIDEO ) {
-        		String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
-                mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                		prefix + timeStamp + index + ".mp4");
-            }
-            else {
-                return null;
-            }
+        for(int count=0;count<100;count++) {
+        	String mediaFilename = createMediaFilename(type, count);
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
             if( !mediaFile.exists() ) {
             	break;
             }
-            index = "_" + count; // try to find a unique filename
         }
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "getOutputMediaFile returns: " + mediaFile);
 		}
         return mediaFile;
+    }
+
+    // only valid if isUsingSAF()
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    Uri createOutputMediaFileSAF(int type) {
+    	Uri treeUri = getTreeUriSAF();
+	    if( MyDebug.LOG )
+	    	Log.d(TAG, "treeUri: " + treeUri);
+        Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
+	    if( MyDebug.LOG )
+	    	Log.d(TAG, "docUri: " + docUri);
+	    String mimeType = "";
+        if( type == ApplicationInterface.MEDIA_TYPE_IMAGE ) {
+        	mimeType = "image/jpeg";
+        }
+        else if( type == ApplicationInterface.MEDIA_TYPE_VIDEO ) {
+        	mimeType = "video/mp4";
+        }
+        else {
+        	// throw exception as this is a programming error
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "unknown type: " + type);
+        	throw new RuntimeException();
+        }
+        String mediaFilename = createMediaFilename(type, 0);
+	    Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, mediaFilename);   
+	    if( MyDebug.LOG )
+	    	Log.d(TAG, "returned fileUri: " + fileUri);
+	    //OutputStream out = contentResolver.openOutputStream(fileUri);
+    	return fileUri;
+    	
     }
 
     class Media {
@@ -294,8 +358,8 @@ public class StorageUtils {
 					Log.d(TAG, "found: " + cursor.getCount());
 				// now sorted in order of date - scan to most recent one in the Open Camera save folder
 				boolean found = false;
-				File save_folder = getImageFolder();
-				String save_folder_string = save_folder.getAbsolutePath() + File.separator;
+				File save_folder = isUsingSAF() ? null : getImageFolder();
+				String save_folder_string = isUsingSAF() ? null : save_folder.getAbsolutePath() + File.separator;
 				if( MyDebug.LOG )
 					Log.d(TAG, "save_folder_string: " + save_folder_string);
 				do {
@@ -303,7 +367,8 @@ public class StorageUtils {
 					if( MyDebug.LOG )
 						Log.d(TAG, "path: " + path);
 					// path may be null on Android 4.4!: http://stackoverflow.com/questions/3401579/get-filename-and-path-from-uri-from-mediastore
-					if( path != null && path.contains(save_folder_string) ) {
+					// and if isUsingSAF(), it's not clear how we can get the real path, or otherwise tell if an item is a subset of the SAF treeUri
+					if( isUsingSAF() || (path != null && path.contains(save_folder_string) ) ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "found most recent in Open Camera folder");
 						// we filter files with dates in future, in case there exists an image in the folder with incorrect datestamp set to the future
@@ -379,6 +444,8 @@ public class StorageUtils {
 				media = video_media;
 			}
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "return latest media: " + media);
 		return media;
     }
 }

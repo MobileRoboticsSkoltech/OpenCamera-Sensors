@@ -261,9 +261,16 @@ public class MyPreferenceFragment extends PreferenceFragment {
                 public boolean onPreferenceClick(Preference arg0) {
             		if( MyDebug.LOG )
             			Log.d(TAG, "clicked save location");
-            		FolderChooserDialog fragment = new FolderChooserDialog();
-            		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
-                	return true;
+            		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+            		if( main_activity.getStorageUtils().isUsingSAF() ) {
+                		main_activity.openFolderChooserDialogSAF();
+            			return true;
+                    }
+            		else {
+                		FolderChooserDialog fragment = new FolderChooserDialog();
+                		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
+                    	return true;
+            		}
                 }
             });        	
         }
