@@ -1,9 +1,11 @@
 package net.sourceforge.opencamera;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -2154,6 +2156,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 		String exif_orientation_s = null;
 		File picFile = null;
+		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
         try {
 			OutputStream outputStream = null;
 			if( image_capture_intent ) {
@@ -2164,7 +2167,8 @@ public class MyApplicationInterface implements ApplicationInterface {
     			    // Save the bitmap to the specified URI (use a try/catch block)
         			if( MyDebug.LOG )
         				Log.d(TAG, "save to: " + image_capture_intent_uri);
-    			    outputStream = main_activity.getContentResolver().openOutputStream(image_capture_intent_uri);
+    			    //outputStream = main_activity.getContentResolver().openOutputStream(image_capture_intent_uri);
+        			saveUri = image_capture_intent_uri;
     			}
     			else
     			{
@@ -2214,8 +2218,8 @@ public class MyApplicationInterface implements ApplicationInterface {
     			}
 			}
 			else if( storageUtils.isUsingSAF() ) {
-				Uri uriSAF = storageUtils.createOutputMediaFileSAF(MEDIA_TYPE_IMAGE);
-			    outputStream = main_activity.getContentResolver().openOutputStream(uriSAF);
+				saveUri = storageUtils.createOutputMediaFileSAF(MEDIA_TYPE_IMAGE);
+			    //outputStream = main_activity.getContentResolver().openOutputStream(uriSAF);
 			}
 			else {
     			picFile = createOutputMediaFile(MEDIA_TYPE_IMAGE);
@@ -2230,6 +2234,15 @@ public class MyApplicationInterface implements ApplicationInterface {
     	        }
 			}
 			
+			if( saveUri != null && picFile == null ) {
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "saveUri: " + saveUri);
+				picFile = File.createTempFile("picFile", "jpg", main_activity.getCacheDir());
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
+	            outputStream = new FileOutputStream(picFile);
+			}
+			
 			if( outputStream != null ) {
 	            if( bitmap != null ) {
 	    			int image_quality = getImageQualityPref();
@@ -2242,7 +2255,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "onPictureTaken saved photo");
 
-				success = true;
+	    		if( saveUri == null ) { // if saveUri is non-null, then we haven't succeeded until we've copied to the saveUri
+	    			success = true;
+	    		}
 	            if( picFile != null ) {
 	            	if( bitmap != null ) {
 	            		// need to update EXIF data!
@@ -2359,8 +2374,7 @@ public class MyApplicationInterface implements ApplicationInterface {
         	    		}
 	            	}
 
-	            	// shouldn't currently have a picFile if image_capture_intent, but put this here in case we ever do want to try reading intent's file (if it exists)
-    	            if( !image_capture_intent && !storageUtils.isUsingSAF() ) {
+    	            if( saveUri == null ) {
     	            	broadcastFile(picFile, true, false);
     	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
     	            }
@@ -2374,6 +2388,22 @@ public class MyApplicationInterface implements ApplicationInterface {
 	            if( storageUtils.isUsingSAF() ) {
 	            	// most Gallery apps don't seem to recognise the uriSAF, so just clear the field
 	            	storageUtils.clearLastMediaScanned();
+	            }
+
+	            if( saveUri != null ) {
+    	    		if( MyDebug.LOG )
+    	    			Log.d(TAG, "now save to saveUri: " + saveUri);
+		            InputStream inputStream = new FileInputStream(picFile);
+	    		    OutputStream realOutputStream = main_activity.getContentResolver().openOutputStream(saveUri);
+	    		    // Transfer bytes from in to out
+	    		    byte [] buffer = new byte[1024];
+	    		    int len = 0;
+	    		    while( (len = inputStream.read(buffer)) > 0 ) {
+	    		    	realOutputStream.write(buffer, 0, len);
+	    		    }
+	    		    inputStream.close();
+	    		    realOutputStream.close();
+	    		    success = true;
 	            }
 	        }
 		}
@@ -2390,7 +2420,9 @@ public class MyApplicationInterface implements ApplicationInterface {
             main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
         }
 
-		last_image_name = picFile != null ? picFile.getAbsolutePath() : null;
+        if( saveUri == null ) {
+        	last_image_name = picFile != null ? picFile.getAbsolutePath() : null;
+        }
 
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
         if( success && picFile != null && main_activity.getPreview().getCameraController() != null ) {
@@ -2444,7 +2476,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 			}
         }
-        else if( success && storageUtils.isUsingSAF() && main_activity.getPreview().getCameraController() != null ) {
+        /*else if( success && storageUtils.isUsingSAF() && main_activity.getPreview().getCameraController() != null ) {
         	// need to run on a delay to get the new image - 300ms works for Nexus 6
         	final Handler handler = new Handler();
     		handler.postDelayed(new Runnable() {
@@ -2453,13 +2485,20 @@ public class MyApplicationInterface implements ApplicationInterface {
     	    		main_activity.updateGalleryIcon();
     			}
     		}, 500);
-        }
+        }*/
 
         if( bitmap != null ) {
 		    bitmap.recycle();
 		    bitmap = null;
         }
 
+        if( picFile != null && saveUri != null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "delete temp picFile: " + picFile);
+        	picFile.delete();
+        	picFile = null;
+        }
+        
         System.gc();
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken complete");

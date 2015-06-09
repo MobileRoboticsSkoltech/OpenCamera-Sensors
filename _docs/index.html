@@ -762,6 +762,9 @@ FIXED   Crash if pressing volume keys to change exposure when camera couldn't
 FIXED   Taking photo would sometimes hang if flash on, and taking a photo
         whilst already focusing.
 FIXED   "Show thumbnail animation" preference was ignored since v1.24.
+FIXED   Saving of Exif tags (including GPS compass direction) now handled
+        properly when Open Camera is called via another app to take a photo
+        (note that some 3rd party apps may still override the Exif tags).
 FIXED   Was sometimes displaying "0" for timer countdown and playing a beep
         when taking a photo on timer.
 FIXED   If a photo was taken before startup autofocus completed, flash was
