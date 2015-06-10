@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -291,33 +292,41 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    Uri createOutputMediaFileSAF(int type) {
-    	Uri treeUri = getTreeUriSAF();
-	    if( MyDebug.LOG )
-	    	Log.d(TAG, "treeUri: " + treeUri);
-        Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
-	    if( MyDebug.LOG )
-	    	Log.d(TAG, "docUri: " + docUri);
-	    String mimeType = "";
-        if( type == ApplicationInterface.MEDIA_TYPE_IMAGE ) {
-        	mimeType = "image/jpeg";
-        }
-        else if( type == ApplicationInterface.MEDIA_TYPE_VIDEO ) {
-        	mimeType = "video/mp4";
-        }
-        else {
-        	// throw exception as this is a programming error
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "unknown type: " + type);
-        	throw new RuntimeException();
-        }
-        String mediaFilename = createMediaFilename(type, 0);
-	    Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, mediaFilename);   
-	    if( MyDebug.LOG )
-	    	Log.d(TAG, "returned fileUri: " + fileUri);
-	    //OutputStream out = contentResolver.openOutputStream(fileUri);
-    	return fileUri;
-    	
+    Uri createOutputMediaFileSAF(int type) throws IOException {
+    	try {
+	    	Uri treeUri = getTreeUriSAF();
+		    if( MyDebug.LOG )
+		    	Log.d(TAG, "treeUri: " + treeUri);
+	        Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
+		    if( MyDebug.LOG )
+		    	Log.d(TAG, "docUri: " + docUri);
+		    String mimeType = "";
+	        if( type == ApplicationInterface.MEDIA_TYPE_IMAGE ) {
+	        	mimeType = "image/jpeg";
+	        }
+	        else if( type == ApplicationInterface.MEDIA_TYPE_VIDEO ) {
+	        	mimeType = "video/mp4";
+	        }
+	        else {
+	        	// throw exception as this is a programming error
+	    		if( MyDebug.LOG )
+	    			Log.e(TAG, "unknown type: " + type);
+	        	throw new RuntimeException();
+	        }
+	        String mediaFilename = createMediaFilename(type, 0);
+		    Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, mediaFilename);   
+		    if( MyDebug.LOG )
+		    	Log.d(TAG, "returned fileUri: " + fileUri);
+		    //OutputStream out = contentResolver.openOutputStream(fileUri);
+	    	return fileUri;
+    	}
+    	catch(IllegalArgumentException e) {
+    		// DocumentsContract.getTreeDocumentId throws this if URI is invalid
+		    if( MyDebug.LOG )
+		    	Log.e(TAG, "createOutputMediaFileSAF failed");
+		    e.printStackTrace();
+		    throw new IOException();
+    	}
     }
 
     class Media {
