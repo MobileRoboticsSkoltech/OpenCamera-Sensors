@@ -2476,16 +2476,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 			}
         }
-        /*else if( success && storageUtils.isUsingSAF() && main_activity.getPreview().getCameraController() != null ) {
-        	// need to run on a delay to get the new image - 300ms works for Nexus 6
-        	final Handler handler = new Handler();
-    		handler.postDelayed(new Runnable() {
-    			@Override
-    			public void run() {
-    	    		main_activity.updateGalleryIcon();
-    			}
-    		}, 500);
-        }*/
 
         if( bitmap != null ) {
 		    bitmap.recycle();
