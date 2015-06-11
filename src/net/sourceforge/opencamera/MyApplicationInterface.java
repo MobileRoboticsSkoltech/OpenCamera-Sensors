@@ -18,6 +18,7 @@ import net.sourceforge.opencamera.Preview.ApplicationInterface;
 import net.sourceforge.opencamera.Preview.Preview;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -43,6 +44,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Pair;
@@ -84,6 +86,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private Bitmap location_off_bitmap = null;
 	private Rect location_dest = new Rect();
 	
+	private boolean last_image_saf = false;
+	private Uri last_image_uri = null;
 	private String last_image_name = null;
 	
 	private Bitmap last_thumbnail = null; // thumbnail of last picture taken
@@ -2375,6 +2379,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	            	}
 
     	            if( saveUri == null ) {
+    	            	// don't need to broadcast when using SAF
     	            	broadcastFile(picFile, true, false);
     	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
     	            }
@@ -2404,6 +2409,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    		    inputStream.close();
 	    		    realOutputStream.close();
 	    		    success = true;
+	    		    // still need to announce, as we didn't do this via broadcastFile
+	    		    storageUtils.announceUri(saveUri, true, false);
 	            }
 	        }
 		}
@@ -2420,12 +2427,24 @@ public class MyApplicationInterface implements ApplicationInterface {
             main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
         }
 
-        if( saveUri == null ) {
-        	last_image_name = picFile != null ? picFile.getAbsolutePath() : null;
+        if( success && saveUri == null ) {
+        	last_image_saf = false;
+        	last_image_name = picFile.getAbsolutePath();
+        	last_image_uri = Uri.parse("file://" + last_image_name);
+        }
+        else if( storageUtils.isUsingSAF() ){
+        	last_image_saf = true;
+        	last_image_name = null;
+        	last_image_uri = saveUri;
+        }
+        else {
+        	last_image_saf = false;
+        	last_image_name = null;
+        	last_image_uri = null;
         }
 
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
-        if( success && picFile != null && main_activity.getPreview().getCameraController() != null ) {
+        if( success && main_activity.getPreview().getCameraController() != null ) {
         	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
         	long time_s = System.currentTimeMillis();
         	CameraController.Size size = main_activity.getPreview().getCameraController().getPictureSize();
@@ -2595,23 +2614,44 @@ public class MyApplicationInterface implements ApplicationInterface {
 	void shareLastImage() {
 		Preview preview  = main_activity.getPreview();
 		if( preview.isPreviewPaused() ) {
-			if( last_image_name != null ) {
+			if( last_image_uri != null ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "Share: " + last_image_name);
+					Log.d(TAG, "Share: " + last_image_uri);
 				Intent intent = new Intent(Intent.ACTION_SEND);
 				intent.setType("image/jpeg");
-				intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + last_image_name));
+				intent.putExtra(Intent.EXTRA_STREAM, last_image_uri);
 				main_activity.startActivity(Intent.createChooser(intent, "Photo"));
 			}
+			last_image_saf = false;
 			last_image_name = null;
+			last_image_uri = null;
 			preview.startCameraPreview();
 		}
 	}
 	
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	void trashLastImage() {
 		Preview preview  = main_activity.getPreview();
 		if( preview.isPreviewPaused() ) {
-			if( last_image_name != null ) {
+			if( last_image_saf && last_image_uri != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Delete: " + last_image_uri);
+	    	    File file = storageUtils.getFileFromDocumentUriSAF(last_image_uri); // need to get file before deleting it, as fileFromDocumentUriSAF may depend on the file still existing
+				if( !DocumentsContract.deleteDocument(main_activity.getContentResolver(), last_image_uri) ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "failed to delete " + last_image_uri);
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "successfully deleted " + last_image_uri);
+    	    	    preview.showToast(null, R.string.photo_deleted);
+                    if( file != null ) {
+                    	// SAF seems to broadcast for new files, but not when deleting them?!
+    					this.broadcastFile(file, false, false);
+                    }
+				}
+			}
+			else if( last_image_name != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "Delete: " + last_image_name);
 				File file = new File(last_image_name);
@@ -2626,7 +2666,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 					this.broadcastFile(file, false, false);
 				}
 			}
+			last_image_saf = false;
 			last_image_name = null;
+			last_image_uri = null;
 			preview.startCameraPreview();
 		}
     	// Calling updateGalleryIcon() immediately has problem that it still returns the latest image that we've just deleted!

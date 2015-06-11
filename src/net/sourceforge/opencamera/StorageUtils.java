@@ -47,10 +47,158 @@ public class StorageUtils {
 	void clearLastMediaScanned() {
 		last_media_scanned = null;
 	}
+
+	// This function should only be used as a last resort - we shouldn't generally assume that a Uri represents an actual File, and instead.
+	// However this is needed for a workaround to the fact that deleting a document file doesn't remove it from MediaStore.
+	// See:
+	// http://stackoverflow.com/questions/21605493/storage-access-framework-does-not-update-mediascanner-mtp
+	// http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework/
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	File getFileFromDocumentUriSAF(Uri uri) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getFileFromDocumentUriSAF: " + uri);
+	    File file = null;
+		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
+            final String id = DocumentsContract.getDocumentId(uri);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "id: " + id);
+            String [] split = id.split(":");
+            if( split.length >= 2 ) {
+                String type = split[0];
+    		    String path = split[1];
+        		if( MyDebug.LOG ) {
+        			Log.d(TAG, "type: " + type);
+        			Log.d(TAG, "path: " + path);
+        		}
+    		    File [] storagePoints = new File("/storage").listFiles();
+
+                if( "primary".equalsIgnoreCase(type) ) {
+        			final File externalStorage = Environment.getExternalStorageDirectory();
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "on primary externalStorage: " + externalStorage.getAbsolutePath());
+        			file = new File(externalStorage, path);
+                }
+		        for(int i=0;i<storagePoints.length && file==null;i++) {
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "test storage point: " + storagePoints[i].getAbsolutePath());
+		            File externalFile = new File(storagePoints[i], path);
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "test externalFile: " + externalFile.getAbsolutePath());
+		            if( externalFile.exists() ) {
+		            	file = externalFile;
+		            }
+		        }
+            }
+		}
+		if( MyDebug.LOG ) {
+			if( file != null )
+				Log.d(TAG, "file: " + file.getAbsolutePath());
+			else
+				Log.d(TAG, "failed to find file");
+		}
+		return file;
+	}
+	
+	/*void refreshMediaStore() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "refreshMediaStore");
+    	MediaScannerConnection.scanFile(context, new String[] { Environment.getExternalStorageDirectory().getAbsolutePath() }, null,
+    			new MediaScannerConnection.OnScanCompletedListener() {
+				public void onScanCompleted(String path, Uri uri) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "scanned: " + path + " uri: " + uri);
+				}
+    	});
+	}*/
+
+	void announceUri(Uri uri, boolean is_new_picture, boolean is_new_video) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "announceUri");
+    	if( is_new_picture ) {
+    		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcase the string for other apps
+    		context.sendBroadcast(new Intent( "android.hardware.action.NEW_PICTURE" , uri));
+    		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
+    		context.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
+
+ 			if( MyDebug.LOG ) // this code only used for debugging/logging
+ 			{
+    	        String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE, Images.Media.DATE_TAKEN, Images.Media.DATE_ADDED }; 
+    	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
+    	        if( c == null ) { 
+		 			if( MyDebug.LOG )
+		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
+    	        }
+    	        else if( !c.moveToFirst() ) { 
+		 			if( MyDebug.LOG )
+		 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
+    	        }
+    	        else {
+        	        String file_path = c.getString(c.getColumnIndex(Images.Media.DATA)); 
+        	        String file_name = c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME)); 
+        	        String mime_type = c.getString(c.getColumnIndex(Images.Media.MIME_TYPE)); 
+        	        long date_taken = c.getLong(c.getColumnIndex(Images.Media.DATE_TAKEN)); 
+        	        long date_added = c.getLong(c.getColumnIndex(Images.Media.DATE_ADDED)); 
+	 				Log.d(TAG, "file_path: " + file_path); 
+	 				Log.d(TAG, "file_name: " + file_name); 
+	 				Log.d(TAG, "mime_type: " + mime_type); 
+	 				Log.d(TAG, "date_taken: " + date_taken); 
+	 				Log.d(TAG, "date_added: " + date_added); 
+        	        c.close(); 
+    	        }
+    		}
+ 			/*{
+ 				// hack: problem on Camera2 API (at least on Nexus 6) that if geotagging is enabled, then the resultant image has incorrect Exif TAG_GPS_DATESTAMP (GPSDateStamp) set (tends to be around 2038 - possibly a driver bug of casting long to int?)
+ 				// whilst we don't yet correct for that bug, the more immediate problem is that it also messes up the DATE_TAKEN field in the media store, which messes up Gallery apps
+ 				// so for now, we correct it based on the DATE_ADDED value.
+    	        String[] CONTENT_PROJECTION = { Images.Media.DATE_ADDED }; 
+    	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
+    	        if( c == null ) { 
+		 			if( MyDebug.LOG )
+		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
+    	        }
+    	        else if( !c.moveToFirst() ) { 
+		 			if( MyDebug.LOG )
+		 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
+    	        }
+    	        else {
+        	        long date_added = c.getLong(c.getColumnIndex(Images.Media.DATE_ADDED)); 
+		 			if( MyDebug.LOG )
+		 				Log.e(TAG, "replace date_taken with date_added: " + date_added); 
+					ContentValues values = new ContentValues(); 
+					values.put(Images.Media.DATE_TAKEN, date_added*1000); 
+					context.getContentResolver().update(uri, values, null, null);
+        	        c.close(); 
+    	        }
+ 			}*/
+    	}
+    	else if( is_new_video ) {
+    		context.sendBroadcast(new Intent("android.hardware.action.NEW_VIDEO", uri));
+
+    		/*String[] CONTENT_PROJECTION = { Video.Media.DURATION }; 
+	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
+	        if( c == null ) { 
+	 			if( MyDebug.LOG )
+	 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
+	        }
+	        else if( !c.moveToFirst() ) { 
+	 			if( MyDebug.LOG )
+	 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
+	        }
+	        else {
+    	        long duration = c.getLong(c.getColumnIndex(Video.Media.DURATION)); 
+	 			if( MyDebug.LOG )
+	 				Log.e(TAG, "replace duration: " + duration); 
+				ContentValues values = new ContentValues(); 
+				values.put(Video.Media.DURATION, 1000); 
+				context.getContentResolver().update(uri, values, null, null);
+    	        c.close(); 
+	        }*/
+    	}
+	}
 	
     void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "broadcastFile");
+			Log.d(TAG, "broadcastFile: " + file.getAbsolutePath());
     	// note that the new method means that the new folder shows up as a file when connected to a PC via MTP (at least tested on Windows 8)
     	if( file.isDirectory() ) {
     		//this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(file)));
@@ -72,86 +220,7 @@ public class StorageUtils {
     		 				Log.d("ExternalStorage", "-> uri=" + uri);
     		 			}
     		 			last_media_scanned = uri;
-    		        	if( is_new_picture ) {
-    		        		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcase the string for other apps
-    		        		context.sendBroadcast(new Intent( "android.hardware.action.NEW_PICTURE" , uri));
-    		        		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
-    		        		context.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
-
-	    		 			if( MyDebug.LOG ) // this code only used for debugging/logging
-	    		 			{
-    		        	        String[] CONTENT_PROJECTION = { Images.Media.DATA, Images.Media.DISPLAY_NAME, Images.Media.MIME_TYPE, Images.Media.SIZE, Images.Media.DATE_TAKEN, Images.Media.DATE_ADDED }; 
-    		        	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
-    		        	        if( c == null ) { 
-    		    		 			if( MyDebug.LOG )
-    		    		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
-    		        	        }
-    		        	        else if( !c.moveToFirst() ) { 
-    		    		 			if( MyDebug.LOG )
-    		    		 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
-    		        	        }
-    		        	        else {
-    			        	        String file_path = c.getString(c.getColumnIndex(Images.Media.DATA)); 
-    			        	        String file_name = c.getString(c.getColumnIndex(Images.Media.DISPLAY_NAME)); 
-    			        	        String mime_type = c.getString(c.getColumnIndex(Images.Media.MIME_TYPE)); 
-    			        	        long date_taken = c.getLong(c.getColumnIndex(Images.Media.DATE_TAKEN)); 
-    			        	        long date_added = c.getLong(c.getColumnIndex(Images.Media.DATE_ADDED)); 
-		    		 				Log.d(TAG, "file_path: " + file_path); 
-		    		 				Log.d(TAG, "file_name: " + file_name); 
-		    		 				Log.d(TAG, "mime_type: " + mime_type); 
-		    		 				Log.d(TAG, "date_taken: " + date_taken); 
-		    		 				Log.d(TAG, "date_added: " + date_added); 
-    			        	        c.close(); 
-    		        	        }
-    		        		}
-	    		 			/*{
-	    		 				// hack: problem on Camera2 API (at least on Nexus 6) that if geotagging is enabled, then the resultant image has incorrect Exif TAG_GPS_DATESTAMP (GPSDateStamp) set (tends to be around 2038 - possibly a driver bug of casting long to int?)
-	    		 				// whilst we don't yet correct for that bug, the more immediate problem is that it also messes up the DATE_TAKEN field in the media store, which messes up Gallery apps
-	    		 				// so for now, we correct it based on the DATE_ADDED value.
-    		        	        String[] CONTENT_PROJECTION = { Images.Media.DATE_ADDED }; 
-    		        	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
-    		        	        if( c == null ) { 
-    		    		 			if( MyDebug.LOG )
-    		    		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
-    		        	        }
-    		        	        else if( !c.moveToFirst() ) { 
-    		    		 			if( MyDebug.LOG )
-    		    		 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
-    		        	        }
-    		        	        else {
-    			        	        long date_added = c.getLong(c.getColumnIndex(Images.Media.DATE_ADDED)); 
-    		    		 			if( MyDebug.LOG )
-    		    		 				Log.e(TAG, "replace date_taken with date_added: " + date_added); 
-									ContentValues values = new ContentValues(); 
-									values.put(Images.Media.DATE_TAKEN, date_added*1000); 
-									context.getContentResolver().update(uri, values, null, null);
-    			        	        c.close(); 
-    		        	        }
-	    		 			}*/
-    		        	}
-    		        	else if( is_new_video ) {
-    		        		context.sendBroadcast(new Intent("android.hardware.action.NEW_VIDEO", uri));
-
-    		        		/*String[] CONTENT_PROJECTION = { Video.Media.DURATION }; 
-		        	        Cursor c = context.getContentResolver().query(uri, CONTENT_PROJECTION, null, null, null); 
-		        	        if( c == null ) { 
-		    		 			if( MyDebug.LOG )
-		    		 				Log.e(TAG, "Couldn't resolve given uri [1]: " + uri); 
-		        	        }
-		        	        else if( !c.moveToFirst() ) { 
-		    		 			if( MyDebug.LOG )
-		    		 				Log.e(TAG, "Couldn't resolve given uri [2]: " + uri); 
-		        	        }
-		        	        else {
-			        	        long duration = c.getLong(c.getColumnIndex(Video.Media.DURATION)); 
-		    		 			if( MyDebug.LOG )
-		    		 				Log.e(TAG, "replace duration: " + duration); 
-								ContentValues values = new ContentValues(); 
-								values.put(Video.Media.DURATION, 1000); 
-								context.getContentResolver().update(uri, values, null, null);
-			        	        c.close(); 
-		        	        }*/
-    		        	}
+    		 			announceUri(uri, is_new_picture, is_new_video);
     		 			failed_to_scan = false;
     		 		}
     			}
