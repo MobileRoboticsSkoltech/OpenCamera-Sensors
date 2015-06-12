@@ -3180,9 +3180,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
     		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
-    		File videoFile = null;
+    		video_name = null; // just in case
     		try {
-    			videoFile = applicationInterface.createOutputVideoFile();
+    			File videoFile = applicationInterface.createOutputVideoFile();
+				video_name = videoFile.getAbsolutePath();
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "save to: " + video_name);
     		}
     		catch(IOException e) {
 	    		if( MyDebug.LOG )
@@ -3192,11 +3195,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				this.phase = PHASE_NORMAL;
 				applicationInterface.cameraInOperation(false);
     		}
-    		if( videoFile != null ) {
-				video_name = videoFile.getAbsolutePath();
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "save to: " + video_name);
-
+    		if( video_name != null ) {
 	        	CamcorderProfile profile = getCamcorderProfile();
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "current_video_quality: " + current_video_quality);
