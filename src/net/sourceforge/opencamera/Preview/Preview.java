@@ -45,9 +45,12 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -95,7 +98,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private MediaRecorder video_recorder = null;
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
-	private String video_name = null;
+	private boolean video_using_saf = false;
+	private Uri video_saf_uri = null;
+	private String video_filename = null;
 
 	private final int PHASE_NORMAL = 0;
 	private final int PHASE_TIMER = 1;
@@ -642,6 +647,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         cameraSurface.setTransform(matrix); 
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void stopVideo(boolean from_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopVideo()");
@@ -676,15 +682,26 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// stop() can throw a RuntimeException if stop is called too soon after start - this indicates the video file is corrupt, and should be deleted
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "runtime exception when stopping video");
-	    		if( video_name != null ) {
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "delete corrupt video: " + video_name);
-	    			File file = new File(video_name);
-	    			if( file != null ) {
-	    				file.delete();
+	    		if( video_using_saf ) {
+	    			if( video_saf_uri != null ) {
+			    		if( MyDebug.LOG )
+			    			Log.d(TAG, "delete corrupt video: " + video_saf_uri);
+	    				DocumentsContract.deleteDocument(getContext().getContentResolver(), video_saf_uri);
 	    			}
-	    			video_name = null;
 	    		}
+	    		else {
+		    		if( video_filename != null ) {
+			    		if( MyDebug.LOG )
+			    			Log.d(TAG, "delete corrupt video: " + video_filename);
+		    			File file = new File(video_filename);
+		    			if( file != null ) {
+		    				file.delete();
+		    			}
+		    		}
+	    		}
+	    		video_using_saf = false;
+	    		video_saf_uri = null;
+    			video_filename = null;
 	    		// if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
     			if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
     	        	CamcorderProfile profile = getCamcorderProfile();
@@ -699,14 +716,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		video_recorder.release(); 
     		video_recorder = null;
 			reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
-    		if( video_name != null ) {
-    			File file = new File(video_name);
-    			if( file != null ) {
-    				// need to scan when finished, so we update for the completed file
-    	            applicationInterface.broadcastFile(file, false, true);
-    			}
-    			video_name = null;
-    		}
+			if( video_using_saf ) {
+				// TODO
+			}
+			else {
+	    		if( video_filename != null ) {
+	    			File file = new File(video_filename);
+	    			if( file != null ) {
+	    				// need to scan when finished, so we update for the completed file
+	    	            applicationInterface.broadcastFile(file, false, true);
+	    			}
+	    		}
+			}
+    		video_using_saf = false;
+    		video_saf_uri = null;
+			video_filename = null;
 		}
 	}
 	
@@ -3180,12 +3204,30 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
     		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
-    		video_name = null; // just in case
+    		// initialise just in case:
+    		boolean created_video_file = false;
+    		video_using_saf = false;
+    		video_saf_uri = null;
+			video_filename = null;
+			ParcelFileDescriptor pfd_saf = null;
     		try {
-    			File videoFile = applicationInterface.createOutputVideoFile();
-				video_name = videoFile.getAbsolutePath();
+    			video_using_saf = applicationInterface.createOutputVideoUsingSAF();
 	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "save to: " + video_name);
+		            Log.e(TAG, "video_using_saf? " + video_using_saf);
+	    		if( video_using_saf ) {
+	    			video_saf_uri = applicationInterface.createOutputVideoFileSAF();
+	    			created_video_file = true;
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "save to: " + video_saf_uri);
+		    		pfd_saf = getContext().getContentResolver().openFileDescriptor(video_saf_uri, "rw");
+	    		}
+	    		else {
+	    			File videoFile = applicationInterface.createOutputVideoFile();
+					video_filename = videoFile.getAbsolutePath();
+					created_video_file = true;
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "save to: " + video_filename);
+	    		}
     		}
     		catch(IOException e) {
 	    		if( MyDebug.LOG )
@@ -3195,7 +3237,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				this.phase = PHASE_NORMAL;
 				applicationInterface.cameraInOperation(false);
     		}
-    		if( video_name != null ) {
+    		if( created_video_file ) {
 	        	CamcorderProfile profile = getCamcorderProfile();
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "current_video_quality: " + current_video_quality);
@@ -3300,7 +3342,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.d(TAG, "video codec: " + profile.videoCodec);
 	    		}
 
-	        	video_recorder.setOutputFile(video_name);
+	    		if( video_using_saf ) {
+	    			video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
+	    		}
+	    		else {
+	    			video_recorder.setOutputFile(video_filename);
+	    		}
 	        	try {
 	        		applicationInterface.cameraInOperation(true);
 	        		applicationInterface.startingVideo();
