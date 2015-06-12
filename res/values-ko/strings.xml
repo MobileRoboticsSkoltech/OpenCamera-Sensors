@@ -44,7 +44,6 @@
     <string name="failed_to_record_video">동영상 녹화 실패</string>
     <string name="started_recording_video">동영상 녹화 시작</string>
     <string name="sorry">죄송합니다</string>
-    <string name="failed_to_save_image">이미지 파일 저장 실패</string>
     <string name="failed_to_save_photo">사진 저장 실패</string>
     <string name="failed_to_auto_stabilise">자동 안정화 실패</string>
     <string name="failed_to_start_camera_preview">카메라 미리보기 시작 실패</string>

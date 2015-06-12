@@ -3180,14 +3180,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
     		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
-			File videoFile = applicationInterface.createOutputVideoFile();
-    		if( videoFile == null ) {
-	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
+    		File videoFile = null;
+    		try {
+    			videoFile = applicationInterface.createOutputVideoFile();
+    		}
+    		catch(IOException e) {
+	    		if( MyDebug.LOG )
+		            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
+				e.printStackTrace();
 	            applicationInterface.onFailedCreateVideoFileError();
 				this.phase = PHASE_NORMAL;
 				applicationInterface.cameraInOperation(false);
-			}
-			else {
+    		}
+    		if( videoFile != null ) {
 				video_name = videoFile.getAbsolutePath();
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + video_name);

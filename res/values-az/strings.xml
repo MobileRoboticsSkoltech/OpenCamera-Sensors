@@ -39,7 +39,6 @@
     <string name="failed_to_record_video">Videonu qeydə almaq mümkün olmadı</string>
     <string name="started_recording_video">Video qeydi başladı</string>
     <string name="sorry">Təəssüflər</string>
-    <string name="failed_to_save_image">Təsvir faylını saxlamaq mümkün olmadı</string>
     <string name="failed_to_save_photo">Şəkli saxlamaq mümkün olmadı</string>
     <string name="failed_to_auto_stabilise">Avtomatik stabilləşdirmə mümkün olmadı</string>
     <string name="failed_to_start_camera_preview">Ön baxışı işə salmaq mümkün olmadı</string>

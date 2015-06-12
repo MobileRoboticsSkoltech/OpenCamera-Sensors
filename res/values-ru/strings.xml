@@ -44,7 +44,6 @@
     <string name="failed_to_record_video">Не удалось записать видео</string>
     <string name="started_recording_video">Запись видео</string>
     <string name="sorry">К сожалению</string>
-    <string name="failed_to_save_image">Не удалось сохранить файл изображения</string>
     <string name="failed_to_save_photo">Не удалось сохранить фото</string>
     <string name="failed_to_auto_stabilise">Не удалось стабилизировать</string>
     <string name="failed_to_start_camera_preview">Не удалось запустить предпросмотр</string>

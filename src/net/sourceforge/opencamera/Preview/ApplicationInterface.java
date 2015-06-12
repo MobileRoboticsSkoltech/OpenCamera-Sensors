@@ -1,11 +1,13 @@
 package net.sourceforge.opencamera.Preview;
 
 import java.io.File;
+import java.io.IOException;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.media.CamcorderProfile;
+import android.net.Uri;
 import android.util.Pair;
 import android.view.MotionEvent;
 
@@ -14,7 +16,9 @@ public interface ApplicationInterface {
 	Context getContext(); // get the application context
 	boolean useCamera2(); // should Android 5's Camera 2 API be used?
 	Location getLocation(); // get current location - null if not available (or you don't care about geotagging)
-	File createOutputVideoFile();
+	boolean createOutputVideoUsingSAF(); // whether video files should be created using Android 5's Storage Access Framework
+	Uri createOutputVideoFileSAF() throws IOException; // will be called if createOutputVideoUsingSAF() returns true
+	File createOutputVideoFile() throws IOException; // will be called if createOutputVideoUsingSAF() returns false
 	// for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
 	// if you just want a default or don't really care, see the comments for each method for a default or possible options
 	// if Preview doesn't support the requested setting, it will check this, and choose its own

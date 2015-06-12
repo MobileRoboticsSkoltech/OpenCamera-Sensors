@@ -44,7 +44,6 @@
     <string name="failed_to_record_video">Failed to record video</string>
     <string name="started_recording_video">Started recording video</string>
     <string name="sorry">Sorry</string>
-    <string name="failed_to_save_image">Failed to save image file</string>
     <string name="failed_to_save_photo">Failed to save photo</string>
     <string name="failed_to_auto_stabilise">Failed to auto-stabilise</string>
     <string name="failed_to_start_camera_preview">Failed to start camera preview</string>

@@ -38,7 +38,6 @@
     <string name="failed_to_record_video">La registrazione del video è fallita</string>
     <string name="started_recording_video">La registrazione del video è iniziata</string>
     <string name="sorry">Invoco il tuo perdono</string>
-    <string name="failed_to_save_image">Il salvataggio del file dell\'immagine è fallito</string>
     <string name="failed_to_save_photo">Il salvataggio della foto è fallito</string>
     <string name="failed_to_auto_stabilise">L\'auto-stabilizzazione è fallita</string>
     <string name="failed_to_start_camera_preview">Fallita l\'inizializzazione della fotocamera</string>

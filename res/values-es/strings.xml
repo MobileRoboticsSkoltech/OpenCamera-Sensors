@@ -38,7 +38,6 @@
     <string name="failed_to_record_video">Fallo en la grabación del video</string>
     <string name="started_recording_video">Grabando</string>
     <string name="sorry">Lo sentimos</string>
-    <string name="failed_to_save_image">Fallo al guardar el archivo de imagen</string>
     <string name="failed_to_save_photo">Fallo al guardar la foto</string>
     <string name="failed_to_auto_stabilise">Fallo al auto-estabilizar</string>
     <string name="failed_to_start_camera_preview">Fallo al iniciar el preview de la cámara</string>

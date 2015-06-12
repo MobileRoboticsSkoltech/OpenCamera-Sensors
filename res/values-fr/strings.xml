@@ -44,7 +44,6 @@
     <string name="failed_to_record_video">Impossible d\'enregistrer la vidéo</string>
     <string name="started_recording_video">Enregistrement vidéo démarré</string>
     <string name="sorry">Désolé</string>
-    <string name="failed_to_save_image">Impossible d\'enregistrer le fichier image</string>
     <string name="failed_to_save_photo">Impossible d\'enregistrer la photo</string>
     <string name="failed_to_auto_stabilise">Impossible d\'utiliser l\'auto-stabilisateur</string>
     <string name="failed_to_start_camera_preview">Impossible de démarrer l\'apreçu</string>

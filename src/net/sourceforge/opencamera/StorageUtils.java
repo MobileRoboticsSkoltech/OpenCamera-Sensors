@@ -332,7 +332,7 @@ public class StorageUtils {
     
     // only valid if !isUsingSAF()
     @SuppressLint("SimpleDateFormat")
-	File createOutputMediaFile(int type) {
+	File createOutputMediaFile(int type) throws IOException {
     	File mediaStorageDir = getImageFolder();
 
         // Create the storage directory if it does not exist
@@ -340,7 +340,7 @@ public class StorageUtils {
             if( !mediaStorageDir.mkdirs() ) {
         		if( MyDebug.LOG )
         			Log.e(TAG, "failed to create directory");
-                return null;
+        		throw new IOException();
             }
             broadcastFile(mediaStorageDir, false, false);
         }
@@ -358,6 +358,8 @@ public class StorageUtils {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "getOutputMediaFile returns: " + mediaFile);
 		}
+		if( mediaFile == null )
+			throw new IOException();
         return mediaFile;
     }
 

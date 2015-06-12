@@ -41,7 +41,6 @@
     <string name="failed_to_record_video">录制视频失败</string>
     <string name="started_recording_video">已开始录制视频</string>
     <string name="sorry">对不起</string>
-    <string name="failed_to_save_image">保存图像文件失败</string>
     <string name="failed_to_save_photo">保存照片失败</string>
     <string name="failed_to_auto_stabilise">自动稳定失败</string>
     <string name="failed_to_start_camera_preview">启动相机预览失败</string>

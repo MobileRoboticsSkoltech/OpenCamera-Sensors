@@ -167,9 +167,19 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public Location getLocation() {
 		return locationSupplier.getLocation();
 	}
+	
+	@Override
+	public boolean createOutputVideoUsingSAF() {
+		return storageUtils.isUsingSAF();
+	}
 
 	@Override
-	public File createOutputVideoFile() {
+	public Uri createOutputVideoFileSAF() throws IOException {
+		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO);
+	}
+
+	@Override
+	public File createOutputVideoFile() throws IOException {
 		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO);
 	}
 
@@ -2227,15 +2237,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			else {
     			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE);
-    	        if( picFile == null ) {
-    	            Log.e(TAG, "Couldn't create media image file; check storage permissions?");
-    	            main_activity.getPreview().showToast(null, R.string.failed_to_save_image);
-    	        }
-    	        else {
-    	    		if( MyDebug.LOG )
-    	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
-    	            outputStream = new FileOutputStream(picFile);
-    	        }
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
+	            outputStream = new FileOutputStream(picFile);
 			}
 			
 			if( saveUri != null && picFile == null ) {
