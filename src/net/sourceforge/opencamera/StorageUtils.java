@@ -6,8 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import net.sourceforge.opencamera.Preview.ApplicationInterface;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ContentUris;
@@ -31,6 +29,10 @@ import android.util.Log;
 
 public class StorageUtils {
 	private static final String TAG = "StorageUtils";
+
+    public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final int MEDIA_TYPE_VIDEO = 2;
+
 	Context context = null;
     private Uri last_media_scanned = null;
 
@@ -311,11 +313,11 @@ public class StorageUtils {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		String mediaFilename = null;
-        if( type == ApplicationInterface.MEDIA_TYPE_IMAGE ) {
+        if( type == MEDIA_TYPE_IMAGE ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
     		mediaFilename = prefix + timeStamp + index + ".jpg";
         }
-        else if( type == ApplicationInterface.MEDIA_TYPE_VIDEO ) {
+        else if( type == MEDIA_TYPE_VIDEO ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
     		mediaFilename = prefix + timeStamp + index + ".mp4";
         }
@@ -370,10 +372,10 @@ public class StorageUtils {
 		    if( MyDebug.LOG )
 		    	Log.d(TAG, "docUri: " + docUri);
 		    String mimeType = "";
-	        if( type == ApplicationInterface.MEDIA_TYPE_IMAGE ) {
+	        if( type == MEDIA_TYPE_IMAGE ) {
 	        	mimeType = "image/jpeg";
 	        }
-	        else if( type == ApplicationInterface.MEDIA_TYPE_VIDEO ) {
+	        else if( type == MEDIA_TYPE_VIDEO ) {
 	        	mimeType = "video/mp4";
 	        }
 	        else {

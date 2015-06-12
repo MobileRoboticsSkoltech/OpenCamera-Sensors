@@ -169,8 +169,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
-	public File createOutputMediaFile(int type) {
-		return storageUtils.createOutputMediaFile(type);
+	public File createOutputVideoFile() {
+		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO);
 	}
 
 	@Override
@@ -2222,11 +2222,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     			}
 			}
 			else if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(MEDIA_TYPE_IMAGE);
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE);
 			    //outputStream = main_activity.getContentResolver().openOutputStream(uriSAF);
 			}
 			else {
-    			picFile = createOutputMediaFile(MEDIA_TYPE_IMAGE);
+    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE);
     	        if( picFile == null ) {
     	            Log.e(TAG, "Couldn't create media image file; check storage permissions?");
     	            main_activity.getPreview().showToast(null, R.string.failed_to_save_image);
