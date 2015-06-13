@@ -43,6 +43,7 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
@@ -587,62 +588,89 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return main_activity.is_test;
     }
 
-
 	@Override
-	public void broadcastFile(File file, boolean is_new_picture, boolean is_new_video) {
-		storageUtils.broadcastFile(file, is_new_picture, is_new_video);
-		if( is_new_video ) {
-			// create thumbnail
-        	long time_s = System.currentTimeMillis();
-    		Bitmap thumbnail = null;
-    	    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-			try {
-				retriever.setDataSource(file.getPath());
-				thumbnail = retriever.getFrameAtTime(-1);
-			}
-    	    catch(IllegalArgumentException ex) {
-    	    	// corrupt video file?
-    	    }
-    	    catch(RuntimeException ex) {
-    	    	// corrupt video file?
-    	    }
-    	    finally {
-    	    	try {
-    	    		retriever.release();
-    	    	}
-    	    	catch(RuntimeException ex) {
-    	    		// ignore
-    	    	}
-    	    }
-    	    if( thumbnail != null ) {
-    	    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
-    	    	int width = thumbnail.getWidth();
-    	    	int height = thumbnail.getHeight();
-				if( MyDebug.LOG )
-					Log.d(TAG, "    video thumbnail size " + width + " x " + height);
-    	    	if( width > galleryButton.getWidth() ) {
-    	    		float scale = (float) galleryButton.getWidth() / width;
-    	    		int new_width = Math.round(scale * width);
-    	    		int new_height = Math.round(scale * height);
-					if( MyDebug.LOG )
-						Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
-    	    		Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
-        		    // careful, as scaled_thumbnail is sometimes not a copy!
-        		    if( scaled_thumbnail != thumbnail ) {
-        		    	thumbnail.recycle();
-        		    	thumbnail = scaled_thumbnail;
-        		    }
-    	    	}
-    	    	final Bitmap thumbnail_f = thumbnail;
-    	    	main_activity.runOnUiThread(new Runnable() {
-					public void run() {
-    	    	    	updateThumbnail(thumbnail_f);
-					}
-				});
-    	    }
-			if( MyDebug.LOG )
-				Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
+	public void stoppedVideo(final boolean is_saf, final Uri saf_uri, final String filename) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "stoppedVideo");
+			Log.d(TAG, "is_saf " + is_saf);
+			Log.d(TAG, "saf_uri " + saf_uri);
+			Log.d(TAG, "filename " + filename);
 		}
+		if( is_saf ) {
+		    // still need to announce, as we didn't do this via broadcastFile
+		    storageUtils.announceUri(saf_uri, false, true);
+		}
+		else {
+			File file = new File(filename);
+			storageUtils.broadcastFile(file, false, true);
+		}
+
+		// create thumbnail
+    	long time_s = System.currentTimeMillis();
+		Bitmap thumbnail = null;
+	    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+		try {
+			if( is_saf ) {
+				ParcelFileDescriptor pfd_saf = getContext().getContentResolver().openFileDescriptor(saf_uri, "r");
+				retriever.setDataSource(pfd_saf.getFileDescriptor());
+			}
+			else {
+				File file = new File(filename);
+				retriever.setDataSource(file.getPath());
+			}
+			thumbnail = retriever.getFrameAtTime(-1);
+		}
+	    catch(FileNotFoundException e) {
+	    	// video file wasn't saved?
+			Log.d(TAG, "failed to find thumbnail");
+	    	e.printStackTrace();
+	    }
+	    catch(IllegalArgumentException e) {
+	    	// corrupt video file?
+			Log.d(TAG, "failed to find thumbnail");
+	    	e.printStackTrace();
+	    }
+	    catch(RuntimeException e) {
+	    	// corrupt video file?
+			Log.d(TAG, "failed to find thumbnail");
+	    	e.printStackTrace();
+	    }
+	    finally {
+	    	try {
+	    		retriever.release();
+	    	}
+	    	catch(RuntimeException ex) {
+	    		// ignore
+	    	}
+	    }
+	    if( thumbnail != null ) {
+	    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
+	    	int width = thumbnail.getWidth();
+	    	int height = thumbnail.getHeight();
+			if( MyDebug.LOG )
+				Log.d(TAG, "    video thumbnail size " + width + " x " + height);
+	    	if( width > galleryButton.getWidth() ) {
+	    		float scale = (float) galleryButton.getWidth() / width;
+	    		int new_width = Math.round(scale * width);
+	    		int new_height = Math.round(scale * height);
+				if( MyDebug.LOG )
+					Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
+	    		Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
+    		    // careful, as scaled_thumbnail is sometimes not a copy!
+    		    if( scaled_thumbnail != thumbnail ) {
+    		    	thumbnail.recycle();
+    		    	thumbnail = scaled_thumbnail;
+    		    }
+	    	}
+	    	final Bitmap thumbnail_f = thumbnail;
+	    	main_activity.runOnUiThread(new Runnable() {
+				public void run() {
+	    	    	updateThumbnail(thumbnail_f);
+				}
+			});
+	    }
+		if( MyDebug.LOG )
+			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 	}
 
 	@Override
@@ -2384,7 +2412,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     	            if( saveUri == null ) {
     	            	// don't need to broadcast when using SAF
-    	            	broadcastFile(picFile, true, false);
+    	            	storageUtils.broadcastFile(picFile, true, false);
     	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
     	            }
 	            }
@@ -2651,7 +2679,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	    	    preview.showToast(null, R.string.photo_deleted);
                     if( file != null ) {
                     	// SAF seems to broadcast for new files, but not when deleting them?!
-    					this.broadcastFile(file, false, false);
+    	            	storageUtils.broadcastFile(file, false, false);
                     }
 				}
 			}
@@ -2667,7 +2695,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					if( MyDebug.LOG )
 						Log.d(TAG, "successfully deleted " + last_image_name);
     	    	    preview.showToast(null, R.string.photo_deleted);
-					this.broadcastFile(file, false, false);
+	            	storageUtils.broadcastFile(file, false, false);
 				}
 			}
 			last_image_saf = false;

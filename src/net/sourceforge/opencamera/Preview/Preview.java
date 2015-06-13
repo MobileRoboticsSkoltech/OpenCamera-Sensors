@@ -716,17 +716,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		video_recorder.release(); 
     		video_recorder = null;
 			reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
-			if( video_using_saf ) {
-				// TODO
-			}
-			else {
-	    		if( video_filename != null ) {
-	    			File file = new File(video_filename);
-	    			if( file != null ) {
-	    				// need to scan when finished, so we update for the completed file
-	    	            applicationInterface.broadcastFile(file, false, true);
-	    			}
-	    		}
+			if( (video_using_saf ? video_saf_uri : video_filename) != null ) {
+				applicationInterface.stoppedVideo(video_using_saf, video_saf_uri, video_filename);
 			}
     		video_using_saf = false;
     		video_saf_uri = null;

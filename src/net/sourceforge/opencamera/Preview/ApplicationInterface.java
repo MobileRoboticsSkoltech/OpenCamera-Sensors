@@ -64,14 +64,12 @@ public interface ApplicationInterface {
 	// for testing purposes:
 	boolean isTestAlwaysFocus(); // if true, pretend autofocus always successful
 
-	// methods that transmit information/events (Application must take appropriate action)
-    void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video);
-	
 	// methods that transmit information/events (up to the Application whether to do anything or not)
     void cameraSetup(); // called when the camera is (re-)set up - should update UI elements/parameters that depend on camera settings
 	void touchEvent(MotionEvent event);
 	void startingVideo(); // called just before video recording starts
 	void stoppingVideo(); // called just before video recording stops
+	void stoppedVideo(final boolean is_saf, final Uri saf_uri, final String filename); // called after video recording stopped (unless file is corrupt or not created)
 	void onFailedStartPreview(); // called if failed to start camera preview
 	void onPhotoError(); // callback for failing to take a photo
 	void onVideoInfo(int what, int extra); // callback for info when recording video (see MediaRecorder.OnInfoListener)
