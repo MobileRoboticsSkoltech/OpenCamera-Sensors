@@ -11,6 +11,7 @@ import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.TypedArray;
@@ -19,6 +20,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -28,7 +30,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
 
-public class MyPreferenceFragment extends PreferenceFragment {
+public class MyPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "MyPreferenceFragment";
 	
 	@Override
@@ -273,6 +275,40 @@ public class MyPreferenceFragment extends PreferenceFragment {
             		}
                 }
             });        	
+        }
+
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+        	Preference pref = findPreference("preference_using_saf");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_camera_controls_more");
+        	pg.removePreference(pref);
+        }
+        else {
+            final Preference pref = findPreference("preference_using_saf");
+            pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference arg0) {
+                	if( pref.getKey().equals("preference_using_saf") ) {
+                		if( MyDebug.LOG )
+                			Log.d(TAG, "user clicked saf");
+            			if( sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false) ) {
+                    		if( MyDebug.LOG )
+                    			Log.d(TAG, "saf is now enabled");
+                    		// seems better to alway re-show the dialog when the user selects, to make it clear where files will be saved (as the SAF location in general will be different to the non-SAF one)
+                    		//String uri = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+                    		//if( uri.length() == 0 )
+                    		{
+                        		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                        		main_activity.openFolderChooserDialogSAF();
+                    		}
+            			}
+            			else {
+                    		if( MyDebug.LOG )
+                    			Log.d(TAG, "saf is now disabled");
+            			}
+                	}
+                	return false;
+                }
+            });
         }
 
         {
@@ -628,5 +664,26 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		}*/
 		getView().setBackgroundColor(backgroundColor);
 		array.recycle();
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+	}
+
+	public void onPause() {
+		super.onPause();
+	}
+
+	/* So that manual changes to the checkbox preferences, while the preferences are showing, show up;
+	 * in particular, needed for preference_using_saf, when the user cancels the SAF dialog (see
+	 * MainActivity.onActivityResult).
+	 */
+	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onSharedPreferenceChanged");
+	    Preference pref = findPreference(key);
+	    if( pref instanceof CheckBoxPreference ){
+	        CheckBoxPreference checkBoxPref = (CheckBoxPreference)pref;
+	        checkBoxPref.setChecked(prefs.getBoolean(key, true));
+	    }
 	}
 }

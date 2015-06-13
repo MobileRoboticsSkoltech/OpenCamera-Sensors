@@ -260,7 +260,6 @@ public class StorageUtils {
 			if( sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false) ) {
 				return true;
 			}
-			//return true; // uncomment to test SAF always on
         }
         return false;
     }

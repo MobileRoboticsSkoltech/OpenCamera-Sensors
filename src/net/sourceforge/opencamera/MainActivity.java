@@ -1725,6 +1725,8 @@ public class MainActivity extends Activity {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onActivityResult: " + requestCode);
         if( requestCode == 42 && resultCode == RESULT_OK && resultData != null ) {
             Uri treeUri = resultData.getData();
     		if( MyDebug.LOG )
@@ -1737,6 +1739,20 @@ public class MainActivity extends Activity {
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), treeUri.toString());
 			editor.apply();
+        }
+        else if( requestCode == 42 ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "SAF dialog cancelled");
+        	// cancelled - if the user had yet to set a save location, make sure we switch SAF back off
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    		String uri = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+    		if( uri.length() == 0 ) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "no SAF save location was set");
+    			SharedPreferences.Editor editor = sharedPreferences.edit();
+    			editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false);
+    			editor.apply();
+    		}
         }
     }
 

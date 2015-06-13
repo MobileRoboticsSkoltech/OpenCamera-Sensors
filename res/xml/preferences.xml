@@ -164,7 +164,15 @@
 	            android:defaultValue="OpenCamera"
 		        />
 	
-	        <EditTextPreference
+	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+		    <CheckBoxPreference
+		        android:key="preference_using_saf"
+		        android:title="@string/preference_using_saf"
+		        android:summary="@string/preference_using_saf_summary"
+		        android:defaultValue="false"
+		        />
+
+		    <EditTextPreference
 	            android:key="preference_save_photo_prefix"
 	            android:title="@string/preference_save_photo_prefix"
 	            android:summary="@string/preference_save_photo_prefix_summary"
@@ -173,7 +181,7 @@
 		        android:inputType="text"
 	            android:defaultValue="IMG_"
 		        />
-	
+
 	        <EditTextPreference
 	            android:key="preference_save_video_prefix"
 	            android:title="@string/preference_save_video_prefix"
