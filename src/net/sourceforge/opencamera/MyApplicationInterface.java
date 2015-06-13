@@ -2395,7 +2395,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	            	main_activity.finish();
 	            }
 	            if( storageUtils.isUsingSAF() ) {
-	            	// most Gallery apps don't seem to recognise the uriSAF, so just clear the field
+	            	// most Gallery apps don't seem to recognise the SAF-format Uri, so just clear the field
 	            	storageUtils.clearLastMediaScanned();
 	            }
 
