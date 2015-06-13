@@ -56,7 +56,7 @@
 <li>Auto-repeat mode, with configurable delay.</li>
 <li>Optimise GUI for left or right-handed users.</li>
 <li>Configurable volume keys.</li>
-<li>Choice of save folder (though note <a href="http://www.androidpolice.com/2014/02/17/external-blues-google-has-brought-big-changes-to-sd-cards-in-kitkat-and-even-samsung-may-be-implementing-them/">Google have blocked write access to external SD cards in Android 4.4</a>).</li>
+<li>Choice of save folder (including support for Lollipop's Storage Access Framework).</li>
 <li>Disable shutter sound.</li>
 <li>Overlay a choice of grids (including "rule of thirds") and crop guides.</li>
 <li>Optional GPS location tagging (geotagging) of photos and videos; for photos this includes compass direction (GPSImgDirection, GPSImgDirectionRef).</li>
@@ -207,9 +207,9 @@ See <a href="#settings">Settings</a> for more info on the other settings.</p>
 <p><b>Gallery</b> - Click to launch the Gallery app, to view the most recent
 photo/video (by default saved in the OpenCamera folder). If you get the message "No Gallery app available", then you should install
 a Gallery app (e.g., <a href="https://play.google.com/store/apps/details?id=com.moblynx.galleryics">Gallery ICS</a>).
-You can also "long press" on the Gallery icon - this will let you switch between the recent save locations, or take you straight to
-a file dialog to choose a save location if additional locations have yet been defined. See <a href="#save_location">Save location</a>
-under Settings/More camera controls for more details.</p>
+You can also "long press" on the Gallery icon - this will let you switch between the recent save locations (if not using Storage Access
+Framework), or take you straight to a file dialog to choose a save location if additional locations have yet been defined. See
+<a href="#save_location">Save location</a> under Settings/More camera controls for more details.</p>
 
 <p><img src="settings.png" width="32" height="32"><b>Settings</b> - Click to open the <a href="#settings">Settings</a>. (If your phone/tablet
 has a hardware menu button, pressing that should also open the settings.)</p>
@@ -310,17 +310,19 @@ focus (trigger an autofocus - or if in manual mode, change the focus distance in
 the exposure compensation (or if in manual ISO mode and using Camera2 API, change the ISO), switch
 auto-stabilise on/off, just change the device's volume as normal, or do nothing.</p>
 
-<p><a name="save_location"><b>Save location</b> - Select the folder to store the photos in. Click on a folder (or "Parent Folder") to
-navigate through the filesystem. Select "New Folder" to create a new folder in the currently displayed folder.
-Select "Use Folder" to choose the currently displayed folder. Note that on Android, there are some folders that
-cannot be written to - Open Camera will display a message if you try to use one of these folders. You can also use
-this option to save to an external SD card, though unfortunately the path varies depending on the device, so you'll
-have to look this up or find it out yourself - it's usually one of the folders inside /mnt/ (press "Parent Folder"
-until you're in "/", then select "mnt", then have a look inside one of the folders in there - note that confusingly
-it won't be "sdcard", but will be named something else, e.g., "extSdCard"). Also note that
-<a href="http://www.androidpolice.com/2014/02/17/external-blues-google-has-brought-big-changes-to-sd-cards-in-kitkat-and-even-samsung-may-be-implementing-them/">Google
-have blocked write access to external SD cards in Android 4.4</a>. Once you have specified a new save location, you
-can long press on the Gallery icon to quickly switch between recent save locations.
+<p><a name="save_location"><b>Save location</b> - Select the folder to store the photos in. Click on a folder
+(or "Parent Folder") to navigate through the filesystem. Select "New Folder" to create a new folder in the currently
+displayed folder. Select "Use Folder" to choose the currently displayed folder. Note that on Android, there are some
+folders that cannot be written to - Open Camera will display a message if you try to use one of these folders. Once
+you have specified a new save location, you can long press on the Gallery icon to quickly switch between recent save
+locations. Note that if "Use Storage Access Framework" is selected, this option will instead show up Android's standard
+file chooser - navigate to the desired folder, and click "SELECT". If you want to save to an SD card, see "How can I
+save to my external SD card?" under the <a href="#faq">FAQ</a>.</p>
+
+<p><b>Use Storage Access Framework</b> - If selected, Open Camera will instead use Android's
+<a href="https://developer.android.com/guide/topics/providers/document-provider.html">Storage Access Framework</a>. This
+has some advantages, such as using the standard Android file picker, and being the only way to save to SD cards on Android 5.
+(Requires Android 5.0 or higher.)</p>
 
 <!--Enter the folder to store the photos in. This can be either a relative path (e.g.,
 OpenCamera or even something like MyPics/Camera) in which case the folder will be located inside the "DCIM"
@@ -563,15 +565,32 @@ is enabled.</p>
 
 <p><a name="faq"><b>Frequently Asked Questions</b></p>
 
-<p><b>How can I save to my external SD card?</b> - See <a href="#save_location">Save location</a> under Settings/More
-camera controls. Note however that most devices don't support saving to SD card for 3rd party apps since Android 4.4
-due to changes by Google.</p>
+<p><b>How can I save to my external SD card?</b> - This depends on your Android version:<ul>
+<li><b>Android 4.3 or below</b> - Select <a href="#save_location">Save location</a> under Settings/"More
+camera controls", and navigate to a folder on your SD card. Unfortunately the path varies depending on
+the device, so you'll have to look this up or find it out yourself - it's usually one of the folders
+inside /mnt/ (press "Parent Folder" until you're in "/", then select "mnt", then have a look inside one
+of the folders in there - note that confusingly it won't be "sdcard", but will be named something else,
+e.g., "extSdCard").</li>
+<li><b>Android 4.4</b> - Unfortunately it is not possible for 3rd party apps to write to external SD cards.
+<b>This is not a bug or missing feature in Open Camera</b>, rather that 
+<a href="http://www.androidpolice.com/2014/02/17/external-blues-google-has-brought-big-changes-to-sd-cards-in-kitkat-and-even-samsung-may-be-implementing-them/">Google
+have blocked write access to external SD cards in Android 4.4</a>.</li>
+<li><b>Android 5.0 onwards</b> - The restrictions on SD cards introduced in Android 4.4 still apply, however
+instead you can enable "Settings/More camera controls/"Use Storage Access Framework", and this should allow you
+to save to external SD cards (note that this is currently untested - I only have devices without external SD
+cards, so please let me know if it does/doesn't work on your device!).</li>
+<li><b>Android 6.0</b> - On Android 6, you should be able to
+<a href="http://www.idigitaltimes.com/android-m-update-will-include-native-micro-sd-support-445463">select to use
+an SD card as internal storage</a>. If you want to instead use an SD card as "portable storage", you'll have to use
+the Storage Access Framework method as with Android 5.</li>.
+</ul></p>
 
-<p><b>But I have Android 5 (Lollipop), wasn't this supposed to fix saving to SD cards?</b> - Android 5 Lollipop does
+<!--<p><b>But I have Android 5 (Lollipop), wasn't this supposed to fix saving to SD cards?</b> - Android 5 Lollipop does
 <i>not</i> revert the restrictions introduced by Google in Android 4.4. It does introduce a new API for saving to SD
 cards and I am looking into this. Note that (a) this requires rewriting portions of the code, it isn't a simple
 fix, and (b) this new API is unfortunately not compatible with some of Google/Android's own APIs (e.g., for Exif
-reading/writing), so full support for SD cards doesn't seem possible until Google themselves fix this situation.</p>
+reading/writing), so full support for SD cards doesn't seem possible until Google themselves fix this situation.</p>-->
 
 <p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - Unfortunately many devices with 4K support
 have for some reason not exposed this through the Android API to 3rd party camera apps. For some such devices, it
