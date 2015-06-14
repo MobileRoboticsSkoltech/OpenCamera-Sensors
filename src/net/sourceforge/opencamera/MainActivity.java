@@ -1739,7 +1739,7 @@ public class MainActivity extends Activity {
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), treeUri.toString());
 			editor.apply();
-			String filename = applicationInterface.getStorageUtils().getFolderNameSAF();
+			String filename = applicationInterface.getStorageUtils().getImageFolderNameSAF();
 			if( filename != null ) {
 				preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + filename);
 			}
@@ -2258,7 +2258,14 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
 	public long freeMemory() { // return free memory in MB
     	try {
-    		File folder = applicationInterface.getStorageUtils().getImageFolder();
+    		File folder = null;
+    		if( applicationInterface.getStorageUtils().isUsingSAF() )
+    			folder = applicationInterface.getStorageUtils().getImageFolderSAF();
+    		else
+    			folder = applicationInterface.getStorageUtils().getImageFolder();
+    		if( folder == null ) {
+    			throw new IllegalArgumentException(); // so that we fall onto the backup
+    		}
 	        StatFs statFs = new StatFs(folder.getAbsolutePath());
 	        // cast to long to avoid overflow!
 	        long blocks = statFs.getAvailableBlocks();

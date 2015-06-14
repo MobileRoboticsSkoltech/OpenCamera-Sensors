@@ -244,9 +244,9 @@ public class StorageUtils {
     // only valid if isUsingSAF()
     // return a human readable name for the SAF save folder location
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	String getFolderNameSAF() {
+	String getImageFolderNameSAF() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "getFolderNameSAF");
+			Log.d(TAG, "getImageFolderNameSAF");
 	    String filename = null;
 		Uri uri = getTreeUriSAF();
 		if( MyDebug.LOG )
@@ -269,11 +269,48 @@ public class StorageUtils {
 		return filename;
 	}
 
+    // only valid if isUsingSAF()
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	File getFileFromDocumentIdSAF(String id) {
+	    File file = null;
+        String [] split = id.split(":");
+        if( split.length >= 2 ) {
+            String type = split[0];
+		    String path = split[1];
+		    File [] storagePoints = new File("/storage").listFiles();
+
+            if( "primary".equalsIgnoreCase(type) ) {
+    			final File externalStorage = Environment.getExternalStorageDirectory();
+    			file = new File(externalStorage, path);
+            }
+	        for(int i=0;i<storagePoints.length && file==null;i++) {
+	            File externalFile = new File(storagePoints[i], path);
+	            if( externalFile.exists() ) {
+	            	file = externalFile;
+	            }
+	        }
+		}
+		return file;
+	}
+
+    // only valid if isUsingSAF()
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	File getImageFolderSAF() {
+		Uri uri = getTreeUriSAF();
+		File file = null;
+		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
+            final String id = DocumentsContract.getTreeDocumentId(uri);
+    		file = getFileFromDocumentIdSAF(id);
+		}
+		return file;
+	}
+
 	// This function should only be used as a last resort - we shouldn't generally assume that a Uri represents an actual File, and instead.
 	// However this is needed for a workaround to the fact that deleting a document file doesn't remove it from MediaStore.
 	// See:
 	// http://stackoverflow.com/questions/21605493/storage-access-framework-does-not-update-mediascanner-mtp
 	// http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework/
+    // only valid if isUsingSAF()
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	File getFileFromDocumentUriSAF(Uri uri) {
 		if( MyDebug.LOG )
@@ -283,33 +320,7 @@ public class StorageUtils {
             final String id = DocumentsContract.getDocumentId(uri);
     		if( MyDebug.LOG )
     			Log.d(TAG, "id: " + id);
-            String [] split = id.split(":");
-            if( split.length >= 2 ) {
-                String type = split[0];
-    		    String path = split[1];
-        		if( MyDebug.LOG ) {
-        			Log.d(TAG, "type: " + type);
-        			Log.d(TAG, "path: " + path);
-        		}
-    		    File [] storagePoints = new File("/storage").listFiles();
-
-                if( "primary".equalsIgnoreCase(type) ) {
-        			final File externalStorage = Environment.getExternalStorageDirectory();
-        			if( MyDebug.LOG )
-        				Log.d(TAG, "on primary externalStorage: " + externalStorage.getAbsolutePath());
-        			file = new File(externalStorage, path);
-                }
-		        for(int i=0;i<storagePoints.length && file==null;i++) {
-        			if( MyDebug.LOG )
-        				Log.d(TAG, "test storage point: " + storagePoints[i].getAbsolutePath());
-		            File externalFile = new File(storagePoints[i], path);
-        			if( MyDebug.LOG )
-        				Log.d(TAG, "test externalFile: " + externalFile.getAbsolutePath());
-		            if( externalFile.exists() ) {
-		            	file = externalFile;
-		            }
-		        }
-            }
+    		file = getFileFromDocumentIdSAF(id);
 		}
 		if( MyDebug.LOG ) {
 			if( file != null )
