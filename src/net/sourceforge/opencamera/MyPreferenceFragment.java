@@ -29,6 +29,7 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Display;
+import android.widget.Toast;
 
 public class MyPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "MyPreferenceFragment";
@@ -298,6 +299,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                     		//if( uri.length() == 0 )
                     		{
                         		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+                    			Toast.makeText(main_activity, R.string.saf_select_save_location, Toast.LENGTH_SHORT).show();
                         		main_activity.openFolderChooserDialogSAF();
                     		}
             			}

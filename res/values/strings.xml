@@ -252,4 +252,7 @@
     <string name="enter_new_folder">Enter new folder name</string>
     <string name="failed_create_folder">Failed to create folder</string>
     <string name="folder_exists">Folder already exists</string>
+
+    <string name="saf_select_save_location">Select a save location</string>
+    <string name="saf_cancelled">Storage Access Framework cancelled</string>
 </resources>

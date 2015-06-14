@@ -298,13 +298,41 @@ public class StorageUtils {
     }
     
     // only valid if isUsingSAF()
-    private Uri getTreeUriSAF() {
+    Uri getTreeUriSAF() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		Uri treeUri = Uri.parse(sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), ""));
 		return treeUri;
     }
 
-    private String createMediaFilename(int type, int count) {
+    // only valid if isUsingSAF()
+    // return a human readable name for the SAF save folder location
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	String getFolderNameSAF() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getFolderNameSAF");
+	    String filename = null;
+		Uri uri = getTreeUriSAF();
+		if( MyDebug.LOG )
+			Log.d(TAG, "uri: " + uri);
+		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
+            final String id = DocumentsContract.getTreeDocumentId(uri);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "id: " + id);
+            String [] split = id.split(":");
+            if( split.length >= 2 ) {
+                String type = split[0];
+    		    String path = split[1];
+        		if( MyDebug.LOG ) {
+        			Log.d(TAG, "type: " + type);
+        			Log.d(TAG, "path: " + path);
+        		}
+        		filename = path;
+            }
+		}
+		return filename;
+	}
+
+	private String createMediaFilename(int type, int count) {
         String index = "";
         if( count > 0 ) {
             index = "_" + count; // try to find a unique filename

@@ -1739,6 +1739,10 @@ public class MainActivity extends Activity {
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), treeUri.toString());
 			editor.apply();
+			String filename = applicationInterface.getStorageUtils().getFolderNameSAF();
+			if( filename != null ) {
+				preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + filename);
+			}
         }
         else if( requestCode == 42 ) {
     		if( MyDebug.LOG )
@@ -1752,6 +1756,7 @@ public class MainActivity extends Activity {
     			SharedPreferences.Editor editor = sharedPreferences.edit();
     			editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false);
     			editor.apply();
+    			preview.showToast(null, R.string.saf_cancelled);
     		}
         }
     }

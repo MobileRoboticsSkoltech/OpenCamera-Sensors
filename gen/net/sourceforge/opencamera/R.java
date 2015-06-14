@@ -400,6 +400,8 @@ public final class R {
         public static final int preference_white_balance=0x7f08004b;
         public static final int preference_white_balance_summary=0x7f08004c;
         public static final int repeats_to_go=0x7f08000f;
+        public static final int saf_cancelled=0x7f0800f0;
+        public static final int saf_select_save_location=0x7f0800ef;
         public static final int scene_mode=0x7f080036;
         public static final int screen_is_locked=0x7f080030;
         public static final int screen_lock_message_1=0x7f080040;
