@@ -401,11 +401,13 @@ public class StorageUtils {
 	    			Log.e(TAG, "unknown type: " + type);
 	        	throw new RuntimeException();
 	        }
+	        // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
 	        String mediaFilename = createMediaFilename(type, 0);
 		    Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, mediaFilename);   
 		    if( MyDebug.LOG )
 		    	Log.d(TAG, "returned fileUri: " + fileUri);
-		    //OutputStream out = contentResolver.openOutputStream(fileUri);
+			if( fileUri == null )
+				throw new IOException();
 	    	return fileUri;
     	}
     	catch(IllegalArgumentException e) {
