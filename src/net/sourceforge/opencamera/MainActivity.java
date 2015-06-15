@@ -2258,11 +2258,7 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
 	public long freeMemory() { // return free memory in MB
     	try {
-    		File folder = null;
-    		if( applicationInterface.getStorageUtils().isUsingSAF() )
-    			folder = applicationInterface.getStorageUtils().getImageFolderSAF();
-    		else
-    			folder = applicationInterface.getStorageUtils().getImageFolder();
+    		File folder = applicationInterface.getStorageUtils().getImageFolder();
     		if( folder == null ) {
     			throw new IllegalArgumentException(); // so that we fall onto the backup
     		}

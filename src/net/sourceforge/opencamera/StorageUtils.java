@@ -228,12 +228,6 @@ public class StorageUtils {
         return file;
     }
 
-    // only valid if !isUsingSAF()
-    File getImageFolder() {
-		String folder_name = getSaveLocation();
-		return getImageFolder(folder_name);
-    }
-    
     // only valid if isUsingSAF()
     Uri getTreeUriSAF() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -277,6 +271,10 @@ public class StorageUtils {
         if( split.length >= 2 ) {
             String type = split[0];
 		    String path = split[1];
+    		if( MyDebug.LOG ) {
+    			Log.d(TAG, "type: " + type);
+    			Log.d(TAG, "path: " + path);
+    		}
 		    File [] storagePoints = new File("/storage").listFiles();
 
             if( "primary".equalsIgnoreCase(type) ) {
@@ -293,18 +291,30 @@ public class StorageUtils {
 		return file;
 	}
 
-    // only valid if isUsingSAF()
+    // valid if whether or not isUsingSAF()
+    // but note that if isUsingSAF(), this may return null - it can't be assumed that there is a File corresponding to the SAF Uri
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	File getImageFolderSAF() {
-		Uri uri = getTreeUriSAF();
+    File getImageFolder() {
 		File file = null;
-		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
-            final String id = DocumentsContract.getTreeDocumentId(uri);
-    		file = getFileFromDocumentIdSAF(id);
-		}
-		return file;
-	}
+    	if( isUsingSAF() ) {
+    		Uri uri = getTreeUriSAF();
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "uri: " + uri);
+    		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
+                final String id = DocumentsContract.getTreeDocumentId(uri);
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "id: " + id);
+        		file = getFileFromDocumentIdSAF(id);
+    		}
+    	}
+    	else {
+    		String folder_name = getSaveLocation();
+    		file = getImageFolder(folder_name);
+    	}
+    	return file;
+    }
 
+	// only valid if isUsingSAF()
 	// This function should only be used as a last resort - we shouldn't generally assume that a Uri represents an actual File, and instead.
 	// However this is needed for a workaround to the fact that deleting a document file doesn't remove it from MediaStore.
 	// See:
