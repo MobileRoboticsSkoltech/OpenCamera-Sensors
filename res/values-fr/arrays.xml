@@ -114,9 +114,14 @@
         <item>15s</item>
         <item>20s</item>
         <item>30s</item>
-        <item>60s</item>
+        <item>1m</item>
         <item>2m</item>
         <item>5m</item>
+        <item>10m</item>
+        <item>20m</item>
+		<item>30m</item>
+		<item>1h</item>
+		<item>2h</item>
     </string-array>
     <string-array name="preference_burst_interval_values">
         <item>0</item>
@@ -130,6 +135,11 @@
         <item>60</item>
         <item>120</item>
         <item>300</item>
+        <item>600</item>
+        <item>1200</item>
+        <item>1800</item>
+        <item>3600</item>
+        <item>7200</item>
     </string-array>
     <string-array name="preference_preview_size_entries">
         <item>Maximise la taille de l\'aperçu</item>

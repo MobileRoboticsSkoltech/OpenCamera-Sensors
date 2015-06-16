@@ -114,9 +114,14 @@
         <item>15 saniyə</item>
         <item>20 saniyə</item>
         <item>30 saniyə</item>
-        <item>60 saniyə</item>
+        <item>1 dəqiqə</item>
         <item>2 dəqiqə</item>
         <item>5 dəqiqə</item>
+        <item>10 dəqiqə</item>
+        <item>20 dəqiqə</item>
+		<item>30 dəqiqə</item>
+		<item>1 saat</item>
+		<item>2 saat</item>
     </string-array>
     <string-array name="preference_burst_interval_values">
         <item>0</item>
@@ -130,6 +135,11 @@
         <item>60</item>
         <item>120</item>
         <item>300</item>
+        <item>600</item>
+        <item>1200</item>
+        <item>1800</item>
+        <item>3600</item>
+        <item>7200</item>
     </string-array>
     <string-array name="preference_preview_size_entries">
         <item>Maksimum ön baxış ölçüsü</item>
