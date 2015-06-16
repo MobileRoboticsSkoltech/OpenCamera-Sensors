@@ -123,11 +123,13 @@
 	        android:title="@string/preference_screen_camera_controls_more"
 	        android:persistent="false">
 
-		    <CheckBoxPreference
+		    <ListPreference
 		        android:key="preference_touch_capture"
 		        android:title="@string/preference_touch_capture"
 		        android:summary="@string/preference_touch_capture_summary"
-		        android:defaultValue="false"
+	            android:entries="@array/preference_touch_capture_entries"
+	            android:entryValues="@array/preference_touch_capture_values"
+		        android:defaultValue="none"
 		        />
 	
 	       	<CheckBoxPreference

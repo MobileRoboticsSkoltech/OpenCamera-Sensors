@@ -418,7 +418,15 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public boolean getTouchCapturePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(PreferenceKeys.getTouchCapturePreferenceKey(), false);
+    	String value = sharedPreferences.getString(PreferenceKeys.getTouchCapturePreferenceKey(), "none");
+    	return value.equals("single");
+    }
+    
+    @Override
+	public boolean getDoubleTapCapturePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	String value = sharedPreferences.getString(PreferenceKeys.getTouchCapturePreferenceKey(), "none");
+    	return value.equals("double");
     }
 
     @Override

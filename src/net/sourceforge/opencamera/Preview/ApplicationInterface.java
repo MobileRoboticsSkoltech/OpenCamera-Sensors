@@ -46,6 +46,7 @@ public interface ApplicationInterface {
 	String getPreviewRotationPref(); // return "0" for default; use "180" to rotate the preview 180 degrees
 	String getLockOrientationPref(); // return "none" for default; use "portrait" or "landscape" to lock photos/videos to that orientation
     boolean getTouchCapturePref(); // whether to enable touch to capture
+    boolean getDoubleTapCapturePref(); // whether to enable double-tap to capture
 	boolean getPausePreviewPref(); // whether to pause the preview after taking a photo
 	boolean getShowToastsPref();
 	boolean getShutterSoundPref(); // whether to play sound when taking photo

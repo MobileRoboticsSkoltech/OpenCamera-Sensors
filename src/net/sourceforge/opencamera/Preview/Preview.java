@@ -55,6 +55,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.ScaleGestureDetector;
@@ -129,7 +130,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	private boolean has_zoom = false;
 	private int max_zoom_factor = 0;
-	private ScaleGestureDetector scaleGestureDetector;
+	private GestureDetector gestureDetector = null;
+	private ScaleGestureDetector scaleGestureDetector = null;
 	private List<Integer> zoom_ratios = null;
 	private float minimum_focus_distance = 0.0f;
 	private boolean touch_was_multitouch = false;
@@ -256,6 +258,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		camera_controller_manager = new CameraControllerManager1();
         }
 
+	    gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener());
+	    gestureDetector.setOnDoubleTapListener(new DoubleTapListener());
 	    scaleGestureDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
 
 		parent.addView(cameraSurface.getView());
@@ -369,6 +373,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	public boolean touchEvent(MotionEvent event) {
+        if( gestureDetector.onTouchEvent(event) ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "touch event handled by gestureDetector");
+        	return true;
+        }
         scaleGestureDetector.onTouchEvent(event);
         if( camera_controller == null ) {
     		if( MyDebug.LOG )
@@ -473,6 +482,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		}
     		return true;
     	}
+    }
+    
+	private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
+		@Override
+		public boolean onDoubleTap(MotionEvent e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "onDoubleTap()");
+			if( !is_video && applicationInterface.getDoubleTapCapturePref() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "double-tap to capture");
+				// interpret as if user had clicked take photo/video button (don't need to set focus/metering, as this was done in touchEvent() for the first touch of the double-tap)
+		    	takePicturePressed();
+			}
+			return true;
+		}
     }
     
     public void clearFocusAreas() {

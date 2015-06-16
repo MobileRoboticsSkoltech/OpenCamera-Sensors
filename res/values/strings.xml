@@ -104,7 +104,7 @@
     <string name="preference_burst_interval_summary">Delay (if any) between taking photos in burst mode</string>
     <string name="preference_screen_camera_controls_more">More camera controls…</string>
     <string name="preference_touch_capture">Touch to capture</string>
-    <string name="preference_touch_capture_summary">Take a photo just by touching the preview</string>
+    <string name="preference_touch_capture_summary">Take a photo just by touching or double-tapping the preview</string>
     <string name="preference_pause_preview">Pause after taking photo</string>
     <string name="preference_pause_preview_summary">Pause the screen after taking a photo, with the option to share or delete the photo</string>
     <string name="preference_shutter_sound">Shutter sound</string>

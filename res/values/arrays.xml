@@ -149,6 +149,16 @@
         <item>preference_preview_size_display</item>
         <item>preference_preview_size_wysiwyg</item>
     </string-array>
+    <string-array name="preference_touch_capture_entries">
+        <item>None</item>
+        <item>Single touch</item>
+        <item>Double tap</item>
+        </string-array>
+    <string-array name="preference_touch_capture_values">
+        <item>none</item>
+        <item>single</item>
+        <item>double</item>
+    </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Take photo (or start/stop video recording)</item>
         <item>Focus</item>
