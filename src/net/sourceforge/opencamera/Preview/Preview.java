@@ -426,13 +426,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				return true;
 			}
 		}
-		if( !this.is_video && applicationInterface.getTouchCapturePref() ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "touch to capture");
-			// interpret as if user had clicked take photo/video button
-	    	this.takePicturePressed();
-	    	return true;
-		}
 
 		// note, we always try to force start the preview (in case is_preview_paused has become false)
 		// except if recording video (firstly, the preview should be running; secondly, we don't want to reset the phase!)
@@ -458,6 +451,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	}
         }
         
+		if( !this.is_video && applicationInterface.getTouchCapturePref() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "touch to capture");
+			// interpret as if user had clicked take photo/video button, except that we set the focus/metering areas
+	    	this.takePicturePressed();
+	    	return true;
+		}
+
 		tryAutoFocus(false, true);
 		return true;
 	}
