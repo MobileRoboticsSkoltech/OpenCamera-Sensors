@@ -195,19 +195,35 @@
         <item>immersive_mode_gui</item>
         <item>immersive_mode_everything</item>
         </string-array>
+    <string-array name="preference_angle_highlight_color_entries">
+        <item>红色</item>
+        <item>绿色</item>
+        <item>蓝色</item>
+        <item>黄色</item>
+        <item>紫色</item>
+        <item>白色</item>
+    </string-array>
+    <string-array name="preference_angle_highlight_color_values">
+        <item>#f44336</item> <!-- Red 500 -->
+        <item>#14e715</item> <!-- Green A400 -->
+        <item>#2196f3</item> <!-- Blue 500 -->
+        <item>#ffeb3b</item> <!-- Yellow 500 -->
+        <item>#9c27b0</item> <!-- Purple 500 -->
+        <item>#ffffff</item> <!-- White -->
+    </string-array>
     <string-array name="preference_grid_entries">
         <item>无</item>
         <item>3x3</item>
         <item>Phi 3x3</item>
         <item>4x2</item>
-        <item>Crosshair</item>
-        <item>Golden (1)</item>
-        <item>Golden (2)</item>
-        <item>Golden (3)</item>
-        <item>Golden (4)</item>
-        <item>Triangle (1)</item>
-        <item>Triangle (2)</item>
-        <item>Diagonals</item>
+        <item>十字</item>
+        <item>黄金分割 (1)</item>
+        <item>黄金分割 (2)</item>
+        <item>黄金分割 (3)</item>
+        <item>黄金分割 (4)</item>
+        <item>三角形 (1)</item>
+        <item>三角形 (2)</item>
+        <item>对角线</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
@@ -256,6 +272,32 @@
     <string-array name="preference_stamp_values">
         <item>preference_stamp_no</item>
         <item>preference_stamp_yes</item>
+    </string-array>
+    <string-array name="preference_stamp_dateformat_entries">
+        <item>默认</item>
+        <item>yyyy/mm/dd</item>
+        <item>dd/mm/yyyy</item>
+        <item>mm/dd/yyyy</item>
+        <item>无</item>
+        </string-array>
+    <string-array name="preference_stamp_dateformat_values">
+        <item>preference_stamp_dateformat_default</item>
+        <item>preference_stamp_dateformat_yyyymmdd</item>
+        <item>preference_stamp_dateformat_ddmmyyyy</item>
+        <item>preference_stamp_dateformat_mmddyyyy</item>
+        <item>preference_stamp_dateformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_timeformat_entries">
+        <item>默认</item>
+        <item>12 小时</item>
+        <item>24 小时</item>
+        <item>无</item>
+    </string-array>
+    <string-array name="preference_stamp_timeformat_values">
+        <item>preference_stamp_timeformat_default</item>
+        <item>preference_stamp_timeformat_12hour</item>
+        <item>preference_stamp_timeformat_24hour</item>
+        <item>preference_stamp_timeformat_none</item>
     </string-array>
     <string-array name="preference_stamp_fontsize_entries">
         <item>6</item>
@@ -442,5 +484,15 @@
         <item>audio_src_mic</item>
         <item>audio_src_default</item>
         <item>audio_src_voice_communication</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_entries">
+        <item>默认</item>
+        <item>单声道</item>
+        <item>立体声 (仅部分设备支持)</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_values">
+        <item>audio_default</item>
+        <item>audio_mono</item>
+        <item>audio_stereo</item>
     </string-array>
 </resources>

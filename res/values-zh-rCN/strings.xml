@@ -19,7 +19,7 @@
     <string name="choose_another_folder">选择另一个文件夹</string>
     <string name="changed_save_location">已更改保存位置到:</string>
     <string name="stopped_recording_video">已停止录制视频</string>
-    <string name="repeats_to_go">repeats to go</string> <!--  intentionally starts lower case -->
+    <string name="repeats_to_go">重复做</string> <!--  intentionally starts lower case -->
     <string name="failed_to_reconnect_camera">连接到相机失败</string>
     <string name="video_may_be_corrupted">错误，视频文件可能已经损坏</string>
     <string name="not_supported">在你的设备上不被支持</string> <!--  intentionally starts lower case -->
@@ -28,6 +28,9 @@
     <string name="video_max_duration">视频达到最大时长</string>
     <string name="video_max_filesize">视频达到最大文件大小</string>
     <string name="exposure_compensation">曝光补偿</string>
+    <string name="fps">FPS</string>
+    <string name="focus_distance">对焦距离</string>
+    <string name="infinite">无限</string>
     <string name="front_camera">前置相机</string>
     <string name="back_camera">后置相机</string>
     <string name="photo">照片</string>
@@ -63,6 +66,7 @@
     <string name="failed_to_open_camera_1">打开相机失败。</string>
     <string name="failed_to_open_camera_2">相机可能正被</string>
     <string name="failed_to_open_camera_3">其它程序使用？</string>
+    <string name="iso">ISO</string>
     <string name="zoom">缩放</string>
     <string name="free_memory">可用内存</string>
     <string name="screen_lock_message_1">[锁定:</string>
@@ -130,12 +134,16 @@
     <string name="preference_show_zoom_controls_summary">显示缩放控件的 -/+ 按钮</string>
     <string name="preference_show_zoom_slider_controls">显示缩放滑块控件</string>
     <string name="preference_show_zoom_slider_controls_summary">显示缩放控件的滑块</string>
+    <string name="preference_show_iso">显示 ISO</string>
+    <string name="preference_show_iso_summary">显示当前 ISO 级别(需要 Camera2 API)</string>
     <string name="preference_free_memory">显示可用内存</string>
     <string name="preference_free_memory_summary">在屏幕上显示剩余的设备存储空间</string>
     <string name="preference_show_angle">显示角度</string>
     <string name="preference_show_angle_summary">在屏幕上显示当前的设备方向角</string>
     <string name="preference_show_angle_line">显示角度线</string>
     <string name="preference_show_angle_line_summary">显示水平线</string>
+    <string name="preference_angle_highlight_color">角度高亮颜色</string>
+    <string name="preference_angle_highlight_color_summary">当相机几乎是水平时的高亮颜色</string>
     <string name="preference_show_geo_direction">显示罗盘方向</string>
     <string name="preference_show_geo_direction_summary">在屏幕上显示该设备的罗盘方向</string>
     <string name="preference_show_time">显示时间</string>
@@ -146,6 +154,8 @@
     <string name="preference_grid_summary">显示各种网格中的一种</string>
     <string name="preference_crop_guide">显示裁剪指南</string>
     <string name="preference_crop_guide_summary">裁剪指南显示一个矩形显示指定的宽高比看起来像什么 - 如果你计划以后裁剪照片/视频为不同的分辨率，这有用。需要所见即所得照片模式，或处于视频模式中。</string>
+    <string name="preference_show_toasts">显示 \"toast\" 消息</string>
+    <string name="preference_show_toasts_summary">是否显示弹出的 \"toast\" 消息</string>
     <string name="preference_thumbnail_animation">显示缩略图动画</string>
     <string name="preference_thumbnail_animation_summary">当拍照时显示移动缩略图动画</string>
     <string name="preference_keep_display_on">保持屏幕常亮</string>
@@ -169,10 +179,16 @@
     <string name="preference_require_location_summary">如果启用位置数据，只拍照/录像如果位置数据可用。</string>
     <string name="preference_stamp">戳记照片</string>
     <string name="preference_stamp_summary">用日期和时间戳记照片；如果启用了位置/方向数据也戳记 GPS 信息</string>
+    <string name="preference_stamp_dateformat">日期戳记格式</string>
+    <string name="preference_stamp_dateformat_summary">规定日期戳记的格式（如果启用）</string>
+    <string name="preference_stamp_timeformat">时间戳记格式</string>
+    <string name="preference_stamp_timeformat_summary">规定时间戳记的格式（如果启用）</string>
     <string name="preference_textstamp">自定义文本</string>
     <string name="preference_textstamp_summary">用自定义文本戳记照片</string>
     <string name="preference_stamp_fontsize">字体大小</string>
-    <string name="preference_stamp_fontsize_summary">当在照片上戳记文本时使用的字体大小</string>
+    <string name="preference_stamp_fontsize_summary">在照片上戳记文本时使用的字体大小</string>
+    <string name="preference_stamp_font_color">字体颜色</string>
+    <string name="preference_stamp_font_color_summary">在照片上戳记文本时所用的字体颜色</string>
     <string name="video_quality">视频分辨率</string>
     <string name="video_quality_summary">设置视频分辨率</string>
     <string name="preference_force_video_4k">强制 4K UHD 视频 (实验)</string>
@@ -191,6 +207,8 @@
     <string name="preference_record_audio_summary">录像时录音</string>
     <string name="preference_record_audio_src">音频源</string>
     <string name="preference_record_audio_src_summary">麦克风用于录制音频</string>
+    <string name="preference_record_audio_channels">音频声道</string>
+    <string name="preference_record_audio_channels_summary">规定使用单声道或者立体声进行录音（仅部分设备支持立体声）。</string>
     <string name="preference_video_flash">录像时闪光</string>
     <string name="preference_video_flash_summary">如果启用，录像时闪光将开启/关闭 (在一段距离外可以用来告诉相机仍然在录制)。</string>
     
@@ -198,6 +216,8 @@
     <string name="preference_online_help">在线帮助</string>
     <string name="preference_donate">捐赠以支持开发</string>
     <string name="preference_donate_summary">如果您喜欢这个程序，请考虑捐助。您可以通过购买我的“捐助 app”来进行捐助 - 点击此选项将打开我的捐助 app 页面。谢谢！</string>
+    <string name="preference_use_camera2">使用 Camera2 API</string>
+    <string name="preference_use_camera2_summary">启用 Android 5 的 Camera2 API - 提供附加功能，但当前处于实验阶段 (会引起重启)</string>
     <string name="preference_about">关于</string>
     <string name="preference_about_summary">应用程序和调试信息</string>
     <string name="preference_reset">复位设置</string>

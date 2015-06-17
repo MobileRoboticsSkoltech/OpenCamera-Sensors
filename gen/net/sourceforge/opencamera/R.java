@@ -18,6 +18,7 @@ public final class R {
         public static final int preference_angle_highlight_color_entries=0x7f06001a;
         /**  White 
  White 
+ White 
          */
         public static final int preference_angle_highlight_color_values=0x7f06001b;
         public static final int preference_burst_interval_entries=0x7f06000c;
