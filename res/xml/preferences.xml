@@ -100,6 +100,13 @@
             android:defaultValue="true"
             />
 
+        <CheckBoxPreference
+            android:key="preference_timer_speak"
+            android:title="@string/preference_timer_speak"
+            android:summary="@string/preference_timer_speak_summary"
+            android:defaultValue="false"
+            />
+
         <ListPreference 
             android:key="preference_burst_mode"
             android:title="@string/preference_burst_mode"

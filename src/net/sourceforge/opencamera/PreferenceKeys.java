@@ -281,6 +281,10 @@ public class PreferenceKeys {
     	return "preference_timer_beep";
     }
     
+    public static String getTimerSpeakPreferenceKey() {
+    	return "preference_timer_speak";
+    }
+    
     public static String getBurstModePreferenceKey() {
     	return "preference_burst_mode";
     }

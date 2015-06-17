@@ -98,6 +98,8 @@
     <string name="preference_timer_summary">Set a timer for the camera</string>
     <string name="preference_timer_beep">Timer beep</string>
     <string name="preference_timer_beep_summary">Beep when timer is counting down or for burst mode delay</string>
+    <string name="preference_timer_speak">Voice timer countdown</string>
+    <string name="preference_timer_speak_summary">Speak the countdown for timer or burst mode delay (from 60 seconds)</string>
     <string name="preference_burst_mode">Burst mode</string>
     <string name="preference_burst_mode_summary">Take multiple photos in succession</string>
     <string name="preference_burst_interval">Burst mode interval</string>

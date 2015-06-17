@@ -47,6 +47,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.GestureDetector;
@@ -90,6 +91,9 @@ public class MainActivity extends Activity {
 
     private SoundPool sound_pool = null;
 	private SparseIntArray sound_ids = null;
+	
+	private TextToSpeech textToSpeech = null;
+	private boolean textToSpeechSuccess = false;
 	
 	private boolean ui_placement_right = true;
 
@@ -264,6 +268,24 @@ public class MainActivity extends Activity {
 
         preloadIcons(R.array.flash_icons);
         preloadIcons(R.array.focus_mode_icons);
+
+        textToSpeechSuccess = false;
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+			@Override
+			public void onInit(int status) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "TextToSpeech initialised");
+				if( status == TextToSpeech.SUCCESS ) {
+					textToSpeechSuccess = true;					
+					if( MyDebug.LOG )
+						Log.d(TAG, "TextToSpeech succeeded");
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "TextToSpeech failed");
+				}
+			}
+		});
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for Activity startup: " + (System.currentTimeMillis() - time_s));
@@ -2493,6 +2515,13 @@ public class MainActivity extends Activity {
 				sound_pool.play(sound_id, 1.0f, 1.0f, 0, 0, 1);
 			}
 		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	void speak(String text) {
+        if( textToSpeech != null && textToSpeechSuccess ) {
+        	textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+        }
 	}
 
     // for testing:

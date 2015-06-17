@@ -52,7 +52,7 @@
 <li>Support for flash, torch, focus modes, scene modes, color effects, white balance, ISO, exposure compensation, exposure lock, face detection.</li>
 <li>Video recording (with optional audio, and support for video stabilization).</li>
 <li>Ability to lock orientation to portrait or landscape for photo or video.</li>
-<li>Timer.</li>
+<li>Timer (with optional voice countdown).</li>
 <li>Auto-repeat mode, with configurable delay.</li>
 <li>Optimise GUI for left or right-handed users.</li>
 <li>Configurable volume keys.</li>
@@ -285,6 +285,9 @@ the white balance option will have no effect (since the face recognition will be
 cancel the timer.</p>
 
 <p><b>Timer beep</b> - Whether to beep when the timer is counting down, or for the burst mode delay (see below).</p>
+
+<p><b>Voice countdown</b> - Whether to give a voice countdown when the timer is counting down, or for the burst mode
+delay (see below).</p>
 
 <p><b>Burst mode</b> - Take a repeated set of photos when the take photo button is pressed. Press the take photo
 button again to cancel.</p>
@@ -818,6 +821,7 @@ ADDED   Option for mono or stereo audio when recording video (stereo only
 ADDED   Support for INTENT_ACTION_VIDEO_CAMERA intent (so Open Camera can now
         be launched in video using OK Google's "record a video").
 ADDED   Support for ACTION_IMAGE_CAPTURE_SECURE intent.
+ADDED   Optional voice countdown for timer.
 ADDED   Info toast now shows if timer and/or burst mode enabled.
 ADDED   More repeat mode intervals, now up to 2 hours.
 ADDED   New "Text style" option to render "stamp" text without a shadow

@@ -953,16 +953,23 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	@Override
 	public void timerBeep(long remaining_time) {
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "timerBeep()");
+			Log.d(TAG, "remaining_time: " + remaining_time);
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		if( sharedPreferences.getBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), true) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "play beep!");
-			if( MyDebug.LOG )
-				Log.d(TAG, "remaining_time: " + remaining_time);
 			boolean is_last = remaining_time <= 1000;
 			main_activity.playSound(is_last ? R.raw.beep_hi : R.raw.beep);
+		}
+		if( sharedPreferences.getBoolean(PreferenceKeys.getTimerSpeakPreferenceKey(), false) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "speak countdown!");
+			int remaining_time_s = (int)(remaining_time/1000);
+			if( remaining_time_s <= 60 )
+				main_activity.speak("" + remaining_time_s);
 		}
 	}
 
