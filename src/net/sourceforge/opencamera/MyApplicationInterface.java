@@ -1497,7 +1497,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				String number_string = decimalFormat.format(level_angle);
 				number_string = number_string.replaceAll( "^-(?=0(.0*)?$)", ""); // avoids displaying "-0.0", see http://stackoverflow.com/questions/11929096/negative-sign-in-case-of-zero-in-java
 				String string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text, true);
 				p.setUnderlineText(false);
 			}
 			if( draw_geo_direction ) {
@@ -1514,7 +1514,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					geo_angle += 360.0f;
 				}
 				String string = " " + getContext().getResources().getString(R.string.direction) + ": " + Math.round(geo_angle) + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, false, ybounds_text);
+				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, false, ybounds_text, true);
 			}
 			if( preview.isOnTimer() ) {
 				long remaining_time = (preview.getTimerEndTime() - System.currentTimeMillis() + 999)/1000;
@@ -1593,7 +1593,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				string += preview.getFrameDurationString(frame_duration);
 			}
 			if( string.length() > 0 ) {
-				drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text); // Yellow 500
+				drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text, true); // Yellow 500
 			}
 		}
 		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {
@@ -1604,7 +1604,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				int pixels_offset_y = text_y;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.CENTER);
-				drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
+				drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text, true);
 			}
 		}
 
@@ -1866,10 +1866,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top) {
-		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, align_top, null);
+		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, align_top, null, true);
 	}
 
-	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top, String ybounds_text) {
+	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top, String ybounds_text, boolean shadow) {
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
@@ -1909,7 +1909,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			text_bounds.top += location_y - padding;
 			text_bounds.bottom += location_y + padding;
 		}
-		canvas.drawRect(text_bounds, paint);
+		if( shadow ) {
+			canvas.drawRect(text_bounds, paint);
+		}
 		paint.setColor(foreground);
 		canvas.drawText(text, location_x, location_y, paint);
 	}
@@ -2126,6 +2128,15 @@ public class MyApplicationInterface implements ApplicationInterface {
     	        int ypos = height - offset_y;
     	        p.setTextAlign(Align.RIGHT);
     	        int color = getStampFontColor();
+    	        boolean draw_shadowed = false;
+    			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    			String pref_style = sharedPreferences.getString(PreferenceKeys.getStampStyleKey(), "preference_stamp_style_shadowed");
+    			if( pref_style.equals("preference_stamp_style_shadowed") ) {
+    				draw_shadowed = true;
+    			}
+    			else if( pref_style.equals("preference_stamp_style_plain") ) {
+    				draw_shadowed = false;
+    			}
     	        if( dategeo_stamp ) {
         			if( MyDebug.LOG )
         				Log.d(TAG, "stamp date");
@@ -2165,7 +2176,7 @@ public class MyApplicationInterface implements ApplicationInterface {
             					datetime_stamp += " ";
         					datetime_stamp += time_stamp;
         				}
-	    				drawTextWithBackground(canvas, p, datetime_stamp, color, Color.BLACK, width - offset_x, ypos);
+    					drawTextWithBackground(canvas, p, datetime_stamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
         			}
     				ypos -= diff_y;
     				String location_string = "";
@@ -2191,14 +2202,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 			    	if( location_string.length() > 0 ) {
 	        			if( MyDebug.LOG )
 	        				Log.d(TAG, "stamp with location_string: " + location_string);
-	        			drawTextWithBackground(canvas, p, location_string, color, Color.BLACK, width - offset_x, ypos);
+	        			drawTextWithBackground(canvas, p, location_string, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
 	    				ypos -= diff_y;
 			    	}
     	        }
     	        if( text_stamp ) {
         			if( MyDebug.LOG )
         				Log.d(TAG, "stamp text");
-        			drawTextWithBackground(canvas, p, preference_textstamp, color, Color.BLACK, width - offset_x, ypos);
+        			drawTextWithBackground(canvas, p, preference_textstamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
     				ypos -= diff_y;
     	        }
 			}

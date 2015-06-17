@@ -105,6 +105,10 @@ public class PreferenceKeys {
     	return "preference_stamp_font_color";
     }
 
+    public static String getStampStyleKey() {
+    	return "preference_stamp_style";
+    }
+
     public static String getUIPlacementPreferenceKey() {
     	return "preference_ui_placement";
     }

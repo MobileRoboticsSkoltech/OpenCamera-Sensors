@@ -35,10 +35,10 @@ public final class R {
         public static final int preference_lock_orientation_values=0x7f060007;
         public static final int preference_preview_size_entries=0x7f06000e;
         public static final int preference_preview_size_values=0x7f06000f;
-        public static final int preference_record_audio_channels_entries=0x7f060032;
-        public static final int preference_record_audio_channels_values=0x7f060033;
-        public static final int preference_record_audio_src_entries=0x7f060030;
-        public static final int preference_record_audio_src_values=0x7f060031;
+        public static final int preference_record_audio_channels_entries=0x7f060034;
+        public static final int preference_record_audio_channels_values=0x7f060035;
+        public static final int preference_record_audio_src_entries=0x7f060032;
+        public static final int preference_record_audio_src_values=0x7f060033;
         public static final int preference_rotate_preview_entries=0x7f060014;
         public static final int preference_rotate_preview_values=0x7f060015;
         public static final int preference_stamp_dateformat_entries=0x7f060022;
@@ -46,6 +46,8 @@ public final class R {
         public static final int preference_stamp_entries=0x7f060020;
         public static final int preference_stamp_fontsize_entries=0x7f060026;
         public static final int preference_stamp_fontsize_values=0x7f060027;
+        public static final int preference_stamp_style_entries=0x7f060028;
+        public static final int preference_stamp_style_values=0x7f060029;
         public static final int preference_stamp_timeformat_entries=0x7f060024;
         public static final int preference_stamp_timeformat_values=0x7f060025;
         public static final int preference_stamp_values=0x7f060021;
@@ -55,14 +57,14 @@ public final class R {
         public static final int preference_touch_capture_values=0x7f060011;
         public static final int preference_ui_placement_entries=0x7f060016;
         public static final int preference_ui_placement_values=0x7f060017;
-        public static final int preference_video_bitrate_entries=0x7f060028;
-        public static final int preference_video_bitrate_values=0x7f060029;
-        public static final int preference_video_fps_entries=0x7f06002a;
-        public static final int preference_video_fps_values=0x7f06002b;
-        public static final int preference_video_max_duration_entries=0x7f06002c;
-        public static final int preference_video_max_duration_values=0x7f06002d;
-        public static final int preference_video_restart_entries=0x7f06002e;
-        public static final int preference_video_restart_values=0x7f06002f;
+        public static final int preference_video_bitrate_entries=0x7f06002a;
+        public static final int preference_video_bitrate_values=0x7f06002b;
+        public static final int preference_video_fps_entries=0x7f06002c;
+        public static final int preference_video_fps_values=0x7f06002d;
+        public static final int preference_video_max_duration_entries=0x7f06002e;
+        public static final int preference_video_max_duration_values=0x7f06002f;
+        public static final int preference_video_restart_entries=0x7f060030;
+        public static final int preference_video_restart_values=0x7f060031;
         public static final int preference_volume_keys_entries=0x7f060012;
         public static final int preference_volume_keys_values=0x7f060013;
     }
@@ -159,10 +161,10 @@ public final class R {
         public static final int beep_hi=0x7f050001;
     }
     public static final class string {
-        public static final int about_available=0x7f0800da;
-        public static final int about_copy_to_clipboard=0x7f0800dc;
-        public static final int about_not_available=0x7f0800db;
-        public static final int about_ok=0x7f0800d9;
+        public static final int about_available=0x7f0800dc;
+        public static final int about_copy_to_clipboard=0x7f0800de;
+        public static final int about_not_available=0x7f0800dd;
+        public static final int about_ok=0x7f0800db;
         public static final int action_popup=0x7f080002;
         public static final int action_settings=0x7f080001;
         public static final int angle=0x7f080038;
@@ -174,8 +176,8 @@ public final class R {
         public static final int back_camera=0x7f08001c;
         public static final int cancelled_burst_mode=0x7f080022;
         public static final int cancelled_timer=0x7f080021;
-        public static final int cant_access_folder=0x7f0800eb;
-        public static final int cant_write_folder=0x7f0800ea;
+        public static final int cant_access_folder=0x7f0800ed;
+        public static final int cant_write_folder=0x7f0800ec;
         public static final int changed_save_location=0x7f08000d;
         public static final int choose_another_folder=0x7f08000c;
         /**  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
@@ -190,13 +192,13 @@ public final class R {
         public static final int clear_folder_history_question=0x7f08000b;
         public static final int color_effect=0x7f080035;
         public static final int direction=0x7f080039;
-        public static final int enter_new_folder=0x7f0800ec;
-        public static final int exposure=0x7f0800df;
+        public static final int enter_new_folder=0x7f0800ee;
+        public static final int exposure=0x7f0800e1;
         public static final int exposure_compensation=0x7f080017;
-        public static final int exposure_lock=0x7f0800e0;
+        public static final int exposure_lock=0x7f0800e2;
         public static final int exposure_locked=0x7f08001f;
         public static final int exposure_unlocked=0x7f080020;
-        public static final int failed_create_folder=0x7f0800ed;
+        public static final int failed_create_folder=0x7f0800ef;
         public static final int failed_to_auto_stabilise=0x7f080029;
         public static final int failed_to_open_camera_1=0x7f08003a;
         public static final int failed_to_open_camera_2=0x7f08003b;
@@ -216,14 +218,14 @@ public final class R {
         public static final int failed_to_stamp=0x7f080042;
         public static final int failed_to_start_camera_preview=0x7f08002a;
         public static final int failed_to_take_picture=0x7f08002c;
-        public static final int flash_mode=0x7f0800e2;
+        public static final int flash_mode=0x7f0800e4;
         public static final int focus_distance=0x7f080019;
-        public static final int focus_mode=0x7f0800e1;
-        public static final int folder_exists=0x7f0800ee;
+        public static final int focus_mode=0x7f0800e3;
+        public static final int folder_exists=0x7f0800f0;
         public static final int fps=0x7f080018;
         public static final int free_memory=0x7f08003f;
         public static final int front_camera=0x7f08001b;
-        public static final int gallery=0x7f0800de;
+        public static final int gallery=0x7f0800e0;
         public static final int infinite=0x7f08001a;
         public static final int intro_ok=0x7f080004;
         public static final int intro_text=0x7f080003;
@@ -231,7 +233,7 @@ public final class R {
         public static final int location_not_available=0x7f08002d;
         public static final int max_duration=0x7f080034;
         public static final int metres_abbreviation=0x7f080043;
-        public static final int new_folder=0x7f0800e9;
+        public static final int new_folder=0x7f0800eb;
         public static final int no_gallery_app=0x7f08002f;
         public static final int not_supported=0x7f080012;
         /**  whether a setting is turned on, e.g., "Auto-stabilise: On" 
@@ -243,11 +245,11 @@ public final class R {
          */
         public static final int off=0x7f080008;
         public static final int on=0x7f080007;
-        public static final int parent_folder=0x7f0800e7;
+        public static final int parent_folder=0x7f0800e9;
         public static final int photo=0x7f08001d;
         public static final int photo_deleted=0x7f08002e;
-        public static final int preference_about=0x7f0800d4;
-        public static final int preference_about_summary=0x7f0800d5;
+        public static final int preference_about=0x7f0800d6;
+        public static final int preference_about_summary=0x7f0800d7;
         public static final int preference_angle_highlight_color=0x7f08008a;
         public static final int preference_angle_highlight_color_summary=0x7f08008b;
         public static final int preference_auto_stabilise=0x7f080045;
@@ -264,21 +266,21 @@ public final class R {
          */
         public static final int preference_category_camera_effects=0x7f080044;
         public static final int preference_category_camera_quality=0x7f08009e;
-        public static final int preference_category_online=0x7f0800ce;
+        public static final int preference_category_online=0x7f0800d0;
         /**  @TODO PER FAVORE RIGUARDARE "livellate" PERCHÈ SECONDO ME NON HA SENSO! 
          */
         public static final int preference_color_effect=0x7f080047;
         public static final int preference_color_effect_summary=0x7f080048;
         public static final int preference_crop_guide=0x7f080094;
         public static final int preference_crop_guide_summary=0x7f080095;
-        public static final int preference_donate=0x7f0800d0;
-        public static final int preference_donate_summary=0x7f0800d1;
+        public static final int preference_donate=0x7f0800d2;
+        public static final int preference_donate_summary=0x7f0800d3;
         public static final int preference_exposure=0x7f08004f;
         public static final int preference_exposure_summary=0x7f080050;
         public static final int preference_face_detection=0x7f080053;
         public static final int preference_face_detection_summary=0x7f080054;
-        public static final int preference_force_video_4k=0x7f0800ba;
-        public static final int preference_force_video_4k_summary=0x7f0800bb;
+        public static final int preference_force_video_4k=0x7f0800bc;
+        public static final int preference_force_video_4k_summary=0x7f0800bd;
         public static final int preference_free_memory=0x7f080084;
         public static final int preference_free_memory_summary=0x7f080085;
         public static final int preference_gps_direction=0x7f0800a8;
@@ -299,7 +301,7 @@ public final class R {
         public static final int preference_lock_video_summary=0x7f080072;
         public static final int preference_max_brightness=0x7f08009c;
         public static final int preference_max_brightness_summary=0x7f08009d;
-        public static final int preference_online_help=0x7f0800cf;
+        public static final int preference_online_help=0x7f0800d1;
         public static final int preference_pause_preview=0x7f080061;
         public static final int preference_pause_preview_summary=0x7f080062;
         public static final int preference_preview_size=0x7f080076;
@@ -308,17 +310,17 @@ public final class R {
         public static final int preference_quality_summary=0x7f0800a5;
         /**  @TODO MA IN CHE SENSO? COSA FA? 
          */
-        public static final int preference_record_audio=0x7f0800c6;
-        public static final int preference_record_audio_channels=0x7f0800ca;
-        public static final int preference_record_audio_channels_summary=0x7f0800cb;
-        public static final int preference_record_audio_src=0x7f0800c8;
-        public static final int preference_record_audio_src_summary=0x7f0800c9;
-        public static final int preference_record_audio_summary=0x7f0800c7;
+        public static final int preference_record_audio=0x7f0800c8;
+        public static final int preference_record_audio_channels=0x7f0800cc;
+        public static final int preference_record_audio_channels_summary=0x7f0800cd;
+        public static final int preference_record_audio_src=0x7f0800ca;
+        public static final int preference_record_audio_src_summary=0x7f0800cb;
+        public static final int preference_record_audio_summary=0x7f0800c9;
         public static final int preference_require_location=0x7f0800aa;
         public static final int preference_require_location_summary=0x7f0800ab;
-        public static final int preference_reset=0x7f0800d6;
-        public static final int preference_reset_question=0x7f0800d8;
-        public static final int preference_reset_summary=0x7f0800d7;
+        public static final int preference_reset=0x7f0800d8;
+        public static final int preference_reset_question=0x7f0800da;
+        public static final int preference_reset_summary=0x7f0800d9;
         public static final int preference_resolution=0x7f0800a2;
         public static final int preference_resolution_summary=0x7f0800a3;
         public static final int preference_rotate_preview=0x7f080073;
@@ -367,6 +369,8 @@ public final class R {
         public static final int preference_stamp_font_color_summary=0x7f0800b7;
         public static final int preference_stamp_fontsize=0x7f0800b4;
         public static final int preference_stamp_fontsize_summary=0x7f0800b5;
+        public static final int preference_stamp_style=0x7f0800b8;
+        public static final int preference_stamp_style_summary=0x7f0800b9;
         public static final int preference_stamp_summary=0x7f0800ad;
         public static final int preference_stamp_timeformat=0x7f0800b0;
         public static final int preference_stamp_timeformat_summary=0x7f0800b1;
@@ -382,45 +386,45 @@ public final class R {
         public static final int preference_touch_capture_summary=0x7f080060;
         public static final int preference_ui_placement=0x7f080078;
         public static final int preference_ui_placement_summary=0x7f080079;
-        public static final int preference_use_camera2=0x7f0800d2;
-        public static final int preference_use_camera2_summary=0x7f0800d3;
+        public static final int preference_use_camera2=0x7f0800d4;
+        public static final int preference_use_camera2_summary=0x7f0800d5;
         public static final int preference_using_saf=0x7f080069;
         public static final int preference_using_saf_summary=0x7f08006a;
-        public static final int preference_video_bitrate=0x7f0800be;
-        public static final int preference_video_bitrate_summary=0x7f0800bf;
-        public static final int preference_video_flash=0x7f0800cc;
-        public static final int preference_video_flash_summary=0x7f0800cd;
-        public static final int preference_video_fps=0x7f0800c0;
-        public static final int preference_video_fps_summary=0x7f0800c1;
-        public static final int preference_video_max_duration=0x7f0800c2;
-        public static final int preference_video_max_duration_summary=0x7f0800c3;
-        public static final int preference_video_restart=0x7f0800c4;
-        public static final int preference_video_restart_summary=0x7f0800c5;
-        public static final int preference_video_stabilization=0x7f0800bc;
-        public static final int preference_video_stabilization_summary=0x7f0800bd;
+        public static final int preference_video_bitrate=0x7f0800c0;
+        public static final int preference_video_bitrate_summary=0x7f0800c1;
+        public static final int preference_video_flash=0x7f0800ce;
+        public static final int preference_video_flash_summary=0x7f0800cf;
+        public static final int preference_video_fps=0x7f0800c2;
+        public static final int preference_video_fps_summary=0x7f0800c3;
+        public static final int preference_video_max_duration=0x7f0800c4;
+        public static final int preference_video_max_duration_summary=0x7f0800c5;
+        public static final int preference_video_restart=0x7f0800c6;
+        public static final int preference_video_restart_summary=0x7f0800c7;
+        public static final int preference_video_stabilization=0x7f0800be;
+        public static final int preference_video_stabilization_summary=0x7f0800bf;
         public static final int preference_volume_keys=0x7f080065;
         public static final int preference_volume_keys_summary=0x7f080066;
         public static final int preference_white_balance=0x7f08004b;
         public static final int preference_white_balance_summary=0x7f08004c;
         public static final int repeats_to_go=0x7f08000f;
-        public static final int saf_cancelled=0x7f0800f0;
-        public static final int saf_select_save_location=0x7f0800ef;
+        public static final int saf_cancelled=0x7f0800f2;
+        public static final int saf_select_save_location=0x7f0800f1;
         public static final int scene_mode=0x7f080036;
         public static final int screen_is_locked=0x7f080030;
         public static final int screen_lock_message_1=0x7f080040;
         public static final int screen_lock_message_2=0x7f080041;
-        public static final int share=0x7f0800e6;
+        public static final int share=0x7f0800e8;
         public static final int sorry=0x7f080027;
         public static final int started_recording_video=0x7f080026;
         public static final int started_timer=0x7f080023;
         public static final int stopped_recording_video=0x7f08000e;
-        public static final int switch_camera=0x7f0800e3;
-        public static final int switch_video=0x7f0800e4;
-        public static final int take_photo=0x7f0800dd;
+        public static final int switch_camera=0x7f0800e5;
+        public static final int switch_video=0x7f0800e6;
+        public static final int take_photo=0x7f0800df;
         public static final int taking_photo=0x7f08002b;
-        public static final int trash=0x7f0800e5;
+        public static final int trash=0x7f0800e7;
         public static final int unlocked=0x7f080031;
-        public static final int use_folder=0x7f0800e8;
+        public static final int use_folder=0x7f0800ea;
         public static final int video=0x7f08001e;
         public static final int video_error_server_died=0x7f080014;
         /**   intentionally starts lower case 
@@ -434,8 +438,8 @@ public final class R {
         public static final int video_max_duration=0x7f080015;
         public static final int video_max_filesize=0x7f080016;
         public static final int video_may_be_corrupted=0x7f080011;
-        public static final int video_quality=0x7f0800b8;
-        public static final int video_quality_summary=0x7f0800b9;
+        public static final int video_quality=0x7f0800ba;
+        public static final int video_quality_summary=0x7f0800bb;
         public static final int white_balance=0x7f080037;
         public static final int zoom=0x7f08003e;
     }
