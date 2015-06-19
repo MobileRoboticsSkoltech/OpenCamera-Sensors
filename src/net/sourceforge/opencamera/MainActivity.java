@@ -345,7 +345,14 @@ public class MainActivity extends Activity {
 			entry.getValue().recycle();
 		}
 		preloaded_bitmap_resources.clear();
-		super.onDestroy();
+	    if( textToSpeech != null ) {
+	    	// http://stackoverflow.com/questions/4242401/tts-error-leaked-serviceconnection-android-speech-tts-texttospeech-solved
+	        Log.d(TAG, "free textToSpeech");
+	    	textToSpeech.stop();
+	    	textToSpeech.shutdown();
+	    	textToSpeech = null;
+	    }
+	    super.onDestroy();
 	}
 	
 	@Override
