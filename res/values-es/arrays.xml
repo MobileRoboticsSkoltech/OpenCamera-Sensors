@@ -149,6 +149,16 @@
         <item>preference_preview_size_display</item>
         <item>preference_preview_size_wysiwyg</item>
     </string-array>
+    <string-array name="preference_touch_capture_entries">
+        <item>Ninguno</item>
+        <item>Una pulsación</item>
+        <item>Doble pulsación</item>
+        </string-array>
+    <string-array name="preference_touch_capture_values">
+        <item>none</item>
+        <item>single</item>
+        <item>double</item>
+    </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Tomar Foto (o Comenzar/Detener Grabacion Video)</item>
         <item>Enfoque</item>
@@ -167,6 +177,14 @@
         <item>volume_nothing</item><!-- actually means change device volume! -->
         <item>volume_really_nothing</item>
     </string-array>
+    <string-array name="preference_rotate_preview_entries">
+        <item>No rotar</item>
+        <item>Rotar 180 grados</item>
+        </string-array>
+    <string-array name="preference_rotate_preview_values">
+        <item>0</item>
+        <item>180</item>
+    </string-array>
     <string-array name="preference_ui_placement_entries">
         <item>Interfaz usuario Zurdo</item>
         <item>Interfaz usuario Diestro</item>
@@ -175,19 +193,47 @@
         <item>ui_left</item>
         <item>ui_right</item>
     </string-array>
+    <string-array name="preference_immersive_mode_entries">
+        <item>Apagado</item>
+        <item>Sólo ocultar botones de navegación</item>
+        <item>Ocultar Interfaz</item>
+        <item>Ocultar todo</item>
+    </string-array>
+    <string-array name="preference_immersive_mode_values">
+        <item>immersive_mode_off</item>
+        <item>immersive_mode_low_profile</item>
+        <item>immersive_mode_gui</item>
+        <item>immersive_mode_everything</item>
+        </string-array>
+    <string-array name="preference_angle_highlight_color_entries">
+        <item>Rojo</item>
+        <item>Verde</item>
+        <item>Azul</item>
+        <item>Amarillo</item>
+        <item>Morado</item>
+        <item>Blanco</item>
+    </string-array>
+    <string-array name="preference_angle_highlight_color_values">
+        <item>#f44336</item> <!-- Red 500 -->
+        <item>#14e715</item> <!-- Green A400 -->
+        <item>#2196f3</item> <!-- Blue 500 -->
+        <item>#ffeb3b</item> <!-- Yellow 500 -->
+        <item>#9c27b0</item> <!-- Purple 500 -->
+        <item>#ffffff</item> <!-- White -->
+    </string-array>
     <string-array name="preference_grid_entries">
         <item>Ninguno</item>
         <item>3x3</item>
         <item>Phi 3x3</item>
         <item>4x2</item>
         <item>Crosshair</item>
-        <item>Golden (1)</item>
-        <item>Golden (2)</item>
-        <item>Golden (3)</item>
-        <item>Golden (4)</item>
-        <item>Triangle (1)</item>
-        <item>Triangle (2)</item>
-        <item>Diagonals</item>
+        <item>Dorado (1)</item>
+        <item>Dorado (2)</item>
+        <item>Dorado (3)</item>
+        <item>Dorado (4)</item>
+        <item>Triangulo (1)</item>
+        <item>Triangulo (2)</item>
+        <item>Diagonal</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
@@ -202,6 +248,112 @@
         <item>preference_grid_golden_triangle_1</item>
         <item>preference_grid_golden_triangle_2</item>
         <item>preference_grid_diagonals</item>
+    </string-array>
+    <string-array name="preference_crop_guide_entries">
+        <item>Ninguno</item>
+        <item>1 (1:1)</item>
+        <item>1.25 (5:4)</item>
+        <item>1.33 (4:3)</item>
+        <item>1.4 (7:4)</item>
+        <item>1.5 (3:2)</item>
+        <item>1.78 (16:9)</item>
+        <item>1.85 (37:20)</item>
+        <item>2.33 (21:9)</item>
+        <item>2.35 (47:20)</item>
+        <item>2.4 (12:5)</item>
+    </string-array>
+    <string-array name="preference_crop_guide_values">
+        <item>crop_guide_none</item>
+        <item>crop_guide_1</item>
+        <item>crop_guide_1.25</item>
+        <item>crop_guide_1.33</item>
+        <item>crop_guide_1.4</item>
+        <item>crop_guide_1.5</item>
+        <item>crop_guide_1.78</item>
+        <item>crop_guide_1.85</item>
+        <item>crop_guide_2.33</item>
+        <item>crop_guide_2.35</item>
+        <item>crop_guide_2.4</item>
+    </string-array>
+    <string-array name="preference_stamp_entries">
+        <item>Sin estampa</item>
+        <item>Estampar fotos</item>
+    </string-array>
+    <string-array name="preference_stamp_values">
+        <item>preference_stamp_no</item>
+        <item>preference_stamp_yes</item>
+    </string-array>
+    <string-array name="preference_stamp_dateformat_entries">
+        <item>Predefinido</item>
+        <item>yyyy/mm/dd</item>
+        <item>dd/mm/yyyy</item>
+        <item>mm/dd/yyyy</item>
+        <item>None</item>
+        </string-array>
+    <string-array name="preference_stamp_dateformat_values">
+        <item>preference_stamp_dateformat_default</item>
+        <item>preference_stamp_dateformat_yyyymmdd</item>
+        <item>preference_stamp_dateformat_ddmmyyyy</item>
+        <item>preference_stamp_dateformat_mmddyyyy</item>
+        <item>preference_stamp_dateformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_timeformat_entries">
+        <item>Predefinido</item>
+        <item>12 hour</item>
+        <item>24 hour</item>
+        <item>Ninguno</item>
+    </string-array>
+    <string-array name="preference_stamp_timeformat_values">
+        <item>preference_stamp_timeformat_default</item>
+        <item>preference_stamp_timeformat_12hour</item>
+        <item>preference_stamp_timeformat_24hour</item>
+        <item>preference_stamp_timeformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_gpsformat_entries">
+        <item>Predefinido</item>
+        <item>Grados/minutos/segundos</item>
+        <item>Ninguno</item>
+    </string-array>
+    <string-array name="preference_stamp_gpsformat_values">
+        <item>preference_stamp_gpsformat_default</item>
+        <item>preference_stamp_gpsformat_dms</item>
+        <item>preference_stamp_gpsformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_fontsize_entries">
+        <item>6</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
+        <item>24</item>
+    </string-array>
+    <string-array name="preference_stamp_fontsize_values">
+        <item>6</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
+        <item>24</item>
+    </string-array>
+    <string-array name="preference_stamp_style_entries">
+        <item>Texto sombreado</item>
+        <item>Texto plano</item>
+    </string-array>
+    <string-array name="preference_stamp_style_values">
+        <item>preference_stamp_style_shadowed</item>
+        <item>preference_stamp_style_plain</item>
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>Default</item>
@@ -350,15 +502,25 @@
         <item>10</item>
     </string-array>
     <string-array name="preference_record_audio_src_entries">
-        <item>Camcorder</item>
+        <item>Videocámara</item>
         <item>Micrófono Externo(si existe)</item>
-        <item>Default audio source</item>
-        <item>Optimised for voice</item>
+        <item>Entrada de Audio predefinida</item>
+        <item>Optimizada para voz</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>
         <item>audio_src_mic</item>
         <item>audio_src_default</item>
         <item>audio_src_voice_communication</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_entries">
+        <item>Predefinido</item>
+        <item>Mono</item>
+        <item>Estereo (sólo soportado en algunos dispositivos)</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_values">
+        <item>audio_default</item>
+        <item>audio_mono</item>
+        <item>audio_stereo</item>
     </string-array>
 </resources>

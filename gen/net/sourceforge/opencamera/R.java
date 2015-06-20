@@ -20,6 +20,7 @@ public final class R {
  White 
  White 
  White 
+ White 
          */
         public static final int preference_angle_highlight_color_values=0x7f06001b;
         public static final int preference_burst_interval_entries=0x7f06000c;
@@ -266,6 +267,7 @@ public final class R {
         public static final int preference_burst_mode_summary=0x7f08005d;
         public static final int preference_category_camera_controls=0x7f080055;
         /**  symbol short for metres 
+ symbol short for metres 
  symbol short for metres 
  symbol short for metres 
  symbol short for metres 
