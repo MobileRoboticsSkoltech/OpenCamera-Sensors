@@ -120,10 +120,10 @@
     <string name="preference_save_photo_prefix_summary">Prefijo utilizado para el nombre de las fotos</string>
     <string name="preference_save_video_prefix">Guardar prefijo vídeo</string>
     <string name="preference_save_video_prefix_summary">Prefijo utilizado para el nombre de los vídeos</string>
-    <string name="preference_show_when_locked">Mostrar cámara con bloqueo</string>
-    <string name="preference_show_when_locked_summary">Si se activa, Open Camera se mostrara por encima de cualquier bloqueo de pantalla, tendras que desbloquear para poder usarla</string>
+    <string name="preference_show_when_locked">Mostrar camara cuando se bloquee el terminal</string>
+    <string name="preference_show_when_locked_summary">Si se activa, Open Camera mostrara la camara (aunque tendrás que desbloquear para acceder a los ajustes, galería etc...)</string>
     <string name="preference_lock_video">Bloquear pantalla cuando se grabe vídeo</string>
-    <string name="preference_lock_video_summary">Cuando se grabe vídeo se bloqueara la Interfaz para prevenir parar la grabación. Desliza para desbloquear. Hay que tener en cuenta que la grabación de vídeo siempre se detendrá si la app se mueve a segundo plano.</string>
+    <string name="preference_lock_video_summary">Cuando se grabe vídeo se bloqueará la Interfaz para prevenir el finalizado de la grabación. Desliza para desbloquear. Nota: el vídeo siempre finalizará si la app pasa a segundo plano o la pantalla se apaga.</string>
     <string name="preference_rotate_preview">Preview de la rotación</string>
     <string name="preference_rotate_preview_summary">Opción para rotar la preview (no afectará las fotos o vídeos resultantes)</string>
     <string name="preference_screen_gui">Interfaz de Pantalla…</string>
@@ -257,6 +257,7 @@
     <string name="enter_new_folder">Introduce un nombre a tu nueva carpeta</string>
     <string name="failed_create_folder">Fallo al crear la carpeta</string>
     <string name="folder_exists">La carpeta ya existe</string>
+
 
     <string name="saf_select_save_location">Selecciona el lugar de guardado</string>
     <string name="saf_cancelled">Framework de Almacenamiento de Acceso cancelado</string>   
