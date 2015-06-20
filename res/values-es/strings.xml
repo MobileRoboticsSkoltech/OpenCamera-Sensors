@@ -121,7 +121,7 @@
     <string name="preference_save_video_prefix">Guardar prefijo vídeo</string>
     <string name="preference_save_video_prefix_summary">Prefijo utilizado para el nombre de los vídeos</string>
     <string name="preference_show_when_locked">Mostrar camara cuando se bloquee el terminal</string>
-    <string name="preference_show_when_locked_summary">Si se activa, Open Camera mostrara la camara (aunque tendrás que desbloquear para acceder a los ajustes, galería etc...)</string>
+    <string name="preference_show_when_locked_summary">Si se activa, Open Camera mostrara la camara (aunque tendrás que desbloquear para acceder a los ajustes, galería etc…)</string>
     <string name="preference_lock_video">Bloquear pantalla cuando se grabe vídeo</string>
     <string name="preference_lock_video_summary">Cuando se grabe vídeo se bloqueará la Interfaz para prevenir el finalizado de la grabación. Desliza para desbloquear. Nota: el vídeo siempre finalizará si la app pasa a segundo plano o la pantalla se apaga.</string>
     <string name="preference_rotate_preview">Preview de la rotación</string>
