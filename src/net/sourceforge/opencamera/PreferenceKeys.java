@@ -93,6 +93,10 @@ public class PreferenceKeys {
     	return "preference_stamp_timeformat";
     }
 
+    public static String getStampGPSFormatPreferenceKey() {
+    	return "preference_stamp_gpsformat";
+    }
+
     public static String getTextStampPreferenceKey() {
     	return "preference_textstamp";
     }

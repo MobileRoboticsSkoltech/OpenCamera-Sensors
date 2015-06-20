@@ -189,6 +189,8 @@
     <string name="preference_stamp_dateformat_summary">Specify the format of the datestamp (if enabled)</string>
     <string name="preference_stamp_timeformat">Timestamp format</string>
     <string name="preference_stamp_timeformat_summary">Specify the format of the timestamp (if enabled)</string>
+    <string name="preference_stamp_gpsformat">GPS stamp format</string>
+    <string name="preference_stamp_gpsformat_summary">Specify the format of the GPS stamp (if enabled)</string>
     <string name="preference_textstamp">Custom text</string>
     <string name="preference_textstamp_summary">Stamp photos with a custom text</string>
     <string name="preference_stamp_fontsize">Font size</string>

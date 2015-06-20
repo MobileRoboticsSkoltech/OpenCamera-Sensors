@@ -550,6 +550,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getString(PreferenceKeys.getStampTimeFormatPreferenceKey(), "preference_stamp_timeformat_default");
     }
     
+    private String getStampGPSFormatPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getString(PreferenceKeys.getStampGPSFormatPreferenceKey(), "preference_stamp_gpsformat_default");
+    }
+    
     private String getTextStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getTextStampPreferenceKey(), "");
@@ -1922,8 +1927,29 @@ public class MyApplicationInterface implements ApplicationInterface {
 		paint.setColor(foreground);
 		canvas.drawText(text, location_x, location_y, paint);
 	}
-	
-    @SuppressLint("SimpleDateFormat")
+
+	private String locationToDMS(double coord) {
+		String sign = (coord < 0.0) ? "-" : "";
+		coord = Math.abs(coord);
+	    int intPart = (int)coord;
+	    String degrees = String.valueOf(intPart);
+	    double mod = coord - intPart;
+
+	    coord = mod * 60;
+	    intPart = (int)coord;
+	    mod = coord - intPart;
+
+	    String minutes = String.valueOf(intPart);
+
+	    coord = mod * 60;
+	    intPart = (int)coord;
+
+	    String seconds = String.valueOf(intPart);
+
+	    return sign + degrees + "°" + minutes + "'" + seconds + "\"";
+	}
+
+	@SuppressLint("SimpleDateFormat")
     @SuppressWarnings("deprecation")
     @Override
 	public boolean onPictureTaken(byte [] data) {
@@ -2186,30 +2212,36 @@ public class MyApplicationInterface implements ApplicationInterface {
     					drawTextWithBackground(canvas, p, datetime_stamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
         			}
     				ypos -= diff_y;
-    				String location_string = "";
+        			String preference_stamp_gpsformat = this.getStampGPSFormatPref();
+    				String gps_stamp = "";
     				boolean store_location = getGeotaggingPref();
-    				if( store_location && getLocation() != null ) {
-    					Location location = getLocation();
-    					location_string += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
-    					if( location.hasAltitude() ) {
-	    					location_string += ", " + decimalFormat.format(location.getAltitude()) + getContext().getResources().getString(R.string.metres_abbreviation);
-    					}
-    				}
-			    	if( main_activity.getPreview().hasGeoDirection() && getGeodirectionPref() ) {
-						float geo_angle = (float)Math.toDegrees(main_activity.getPreview().getGeoDirection());
-						if( geo_angle < 0.0f ) {
-							geo_angle += 360.0f;
-						}
+        			if( !preference_stamp_gpsformat.equals("preference_stamp_gpsformat_none") ) {
+	    				if( store_location && getLocation() != null ) {
+	    					Location location = getLocation();
+	            			if( preference_stamp_gpsformat.equals("preference_stamp_gpsformat_dms") )
+	            				gps_stamp += locationToDMS(location.getLatitude()) + ", " + locationToDMS(location.getLongitude());
+            				else
+            					gps_stamp += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
+	    					if( location.hasAltitude() ) {
+	    						gps_stamp += ", " + decimalFormat.format(location.getAltitude()) + getContext().getResources().getString(R.string.metres_abbreviation);
+	    					}
+	    				}
+				    	if( main_activity.getPreview().hasGeoDirection() && getGeodirectionPref() ) {
+							float geo_angle = (float)Math.toDegrees(main_activity.getPreview().getGeoDirection());
+							if( geo_angle < 0.0f ) {
+								geo_angle += 360.0f;
+							}
+		        			if( MyDebug.LOG )
+		        				Log.d(TAG, "geo_angle: " + geo_angle);
+	    			    	if( gps_stamp.length() > 0 )
+	    			    		gps_stamp += ", ";
+	    			    	gps_stamp += "" + Math.round(geo_angle) + (char)0x00B0;
+				    	}
+        			}
+			    	if( gps_stamp.length() > 0 ) {
 	        			if( MyDebug.LOG )
-	        				Log.d(TAG, "geo_angle: " + geo_angle);
-    			    	if( location_string.length() > 0 )
-    			    		location_string += ", ";
-						location_string += "" + Math.round(geo_angle) + (char)0x00B0;
-			    	}
-			    	if( location_string.length() > 0 ) {
-	        			if( MyDebug.LOG )
-	        				Log.d(TAG, "stamp with location_string: " + location_string);
-	        			drawTextWithBackground(canvas, p, location_string, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
+	        				Log.d(TAG, "stamp with location_string: " + gps_stamp);
+	        			drawTextWithBackground(canvas, p, gps_stamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
 	    				ypos -= diff_y;
 			    	}
     	        }
