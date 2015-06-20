@@ -1928,27 +1928,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		canvas.drawText(text, location_x, location_y, paint);
 	}
 
-	private String locationToDMS(double coord) {
-		String sign = (coord < 0.0) ? "-" : "";
-		coord = Math.abs(coord);
-	    int intPart = (int)coord;
-	    String degrees = String.valueOf(intPart);
-	    double mod = coord - intPart;
-
-	    coord = mod * 60;
-	    intPart = (int)coord;
-	    mod = coord - intPart;
-
-	    String minutes = String.valueOf(intPart);
-
-	    coord = mod * 60;
-	    intPart = (int)coord;
-
-	    String seconds = String.valueOf(intPart);
-
-	    return sign + degrees + "°" + minutes + "'" + seconds + "\"";
-	}
-
 	@SuppressLint("SimpleDateFormat")
     @SuppressWarnings("deprecation")
     @Override
@@ -2219,7 +2198,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    				if( store_location && getLocation() != null ) {
 	    					Location location = getLocation();
 	            			if( preference_stamp_gpsformat.equals("preference_stamp_gpsformat_dms") )
-	            				gps_stamp += locationToDMS(location.getLatitude()) + ", " + locationToDMS(location.getLongitude());
+	            				gps_stamp += LocationSupplier.locationToDMS(location.getLatitude()) + ", " + LocationSupplier.locationToDMS(location.getLongitude());
             				else
             					gps_stamp += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
 	    					if( location.hasAltitude() ) {

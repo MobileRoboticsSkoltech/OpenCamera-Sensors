@@ -147,4 +147,25 @@ public class LocationSupplier {
 		}
 		return true;
 	}
+
+	public static String locationToDMS(double coord) {
+		String sign = (coord < 0.0) ? "-" : "";
+		coord = Math.abs(coord);
+	    int intPart = (int)coord;
+	    String degrees = String.valueOf(intPart);
+	    double mod = coord - intPart;
+
+	    coord = mod * 60;
+	    intPart = (int)coord;
+	    mod = coord - intPart;
+
+	    String minutes = String.valueOf(intPart);
+
+	    coord = mod * 60;
+	    intPart = (int)coord;
+
+	    String seconds = String.valueOf(intPart);
+
+	    return sign + degrees + "°" + minutes + "'" + seconds + "\"";
+	}
 }
