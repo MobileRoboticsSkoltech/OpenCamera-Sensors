@@ -150,22 +150,29 @@ public class LocationSupplier {
 
 	public static String locationToDMS(double coord) {
 		String sign = (coord < 0.0) ? "-" : "";
+		boolean is_zero = true;
 		coord = Math.abs(coord);
 	    int intPart = (int)coord;
+	    is_zero = is_zero && (intPart==0);
 	    String degrees = String.valueOf(intPart);
 	    double mod = coord - intPart;
 
 	    coord = mod * 60;
 	    intPart = (int)coord;
+	    is_zero = is_zero && (intPart==0);
 	    mod = coord - intPart;
-
 	    String minutes = String.valueOf(intPart);
 
 	    coord = mod * 60;
 	    intPart = (int)coord;
-
+	    is_zero = is_zero && (intPart==0);
 	    String seconds = String.valueOf(intPart);
 
+	    if( is_zero ) {
+	    	// so we don't show -ve for coord that is -ve but smaller than 1"
+	    	sign = "";
+	    }
+	    
 	    return sign + degrees + "°" + minutes + "'" + seconds + "\"";
 	}
 }
