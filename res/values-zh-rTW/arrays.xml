@@ -309,6 +309,16 @@
         <item>preference_stamp_timeformat_24hour</item>
         <item>preference_stamp_timeformat_none</item>
     </string-array>
+    <string-array name="preference_stamp_gpsformat_entries">
+        <item>預設</item>
+        <item>度/分/秒</item>
+        <item>無</item>
+    </string-array>
+    <string-array name="preference_stamp_gpsformat_values">
+        <item>preference_stamp_gpsformat_default</item>
+        <item>preference_stamp_gpsformat_dms</item>
+        <item>preference_stamp_gpsformat_none</item>
+    </string-array>
     <string-array name="preference_stamp_fontsize_entries">
         <item>6</item>
         <item>8</item>
@@ -336,6 +346,14 @@
         <item>20</item>
         <item>22</item>
         <item>24</item>
+    </string-array>
+    <string-array name="preference_stamp_style_entries">
+        <item>Shadowed text</item>
+        <item>Plain text</item>
+    </string-array>
+    <string-array name="preference_stamp_style_values">
+        <item>preference_stamp_style_shadowed</item>
+        <item>preference_stamp_style_plain</item>
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>預設</item>
