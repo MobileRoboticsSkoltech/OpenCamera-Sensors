@@ -21,6 +21,7 @@ public final class R {
  White 
  White 
  White 
+ White 
          */
         public static final int preference_angle_highlight_color_values=0x7f06001b;
         public static final int preference_burst_interval_entries=0x7f06000c;
@@ -191,6 +192,7 @@ public final class R {
  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
+ whether a setting is turned off, e.g., "Auto-stabilise: Off" 
          */
         public static final int choose_save_location=0x7f080009;
         public static final int clear_folder_history=0x7f08000a;
@@ -214,6 +216,7 @@ public final class R {
   intentionally starts lower case 
   intentionally starts lower case 
  @TODO PER FAVORE VERIFICARE QUESTA TRADUZIONE! 
+  intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 
          */
@@ -249,6 +252,7 @@ public final class R {
  whether a setting is turned on, e.g., "Auto-stabilise: On" 
  whether a setting is turned on, e.g., "Auto-stabilise: On" 
  whether a setting is turned on, e.g., "Auto-stabilise: On" 
+ whether a setting is turned on, e.g., "Auto-stabilise: On" 
          */
         public static final int off=0x7f080008;
         public static final int on=0x7f080007;
@@ -267,6 +271,7 @@ public final class R {
         public static final int preference_burst_mode_summary=0x7f08005d;
         public static final int preference_category_camera_controls=0x7f080055;
         /**  symbol short for metres 
+ symbol short for metres 
  symbol short for metres 
  symbol short for metres 
  symbol short for metres 
@@ -441,6 +446,7 @@ public final class R {
         public static final int video=0x7f08001e;
         public static final int video_error_server_died=0x7f080014;
         /**   intentionally starts lower case 
+  intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 
