@@ -70,7 +70,7 @@
         <item>15s</item>
         <item>20s</item>
         <item>30s</item>
-        <item>60s</item>
+        <item>1m</item>
         <item>2m</item>
         <item>5m</item>
     </string-array>
