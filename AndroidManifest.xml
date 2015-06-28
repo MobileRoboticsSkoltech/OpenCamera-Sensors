@@ -59,7 +59,11 @@
                 <action android:name="android.media.action.VIDEO_CAMERA" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            </activity>
+			<intent-filter>
+				<action android:name="android.media.action.VIDEO_CAPTURE"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+        </activity>
        	<!-- should not change the android:name, including moving to a subpackage - see http://android-developers.blogspot.co.uk/2011/06/things-that-cannot-change.html -->
         <activity
             android:name="TakePhoto"

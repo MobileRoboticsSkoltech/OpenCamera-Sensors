@@ -170,18 +170,57 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 	
 	@Override
-	public boolean createOutputVideoUsingSAF() {
-		return storageUtils.isUsingSAF();
-	}
-
-	@Override
-	public Uri createOutputVideoFileSAF() throws IOException {
-		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO);
+	public int createOutputVideoMethod() {
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "from video capture intent");
+	        Bundle myExtras = main_activity.getIntent().getExtras();
+	        if (myExtras != null) {
+	        	Uri intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
+	        	if( intent_uri != null ) {
+	    			if( MyDebug.LOG )
+	    				Log.d(TAG, "save to: " + intent_uri);
+	        		return VIDEOMETHOD_URI;
+	        	}
+	        }
+        	// if no EXTRA_OUTPUT, we should save to standard location, and will pass back the Uri of that location
+			if( MyDebug.LOG )
+				Log.d(TAG, "intent uri not specified");
+			// note that SAF URIs don't seem to work for calling applications (tested with Grabilla and "Photo Grabber Image From Video" (FreezeFrame)), so we use standard folder with non-SAF method
+			return VIDEOMETHOD_FILE;
+        }
+        boolean using_saf = storageUtils.isUsingSAF();
+		return using_saf ? VIDEOMETHOD_SAF : VIDEOMETHOD_FILE;
 	}
 
 	@Override
 	public File createOutputVideoFile() throws IOException {
 		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO);
+	}
+
+	@Override
+	public Uri createOutputVideoSAF() throws IOException {
+		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO);
+	}
+
+	@Override
+	public Uri createOutputVideoUri() throws IOException {
+        String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "from video capture intent");
+	        Bundle myExtras = main_activity.getIntent().getExtras();
+	        if (myExtras != null) {
+	        	Uri intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
+	        	if( intent_uri != null ) {
+	    			if( MyDebug.LOG )
+	    				Log.d(TAG, "save to: " + intent_uri);
+	    			return intent_uri;
+	        	}
+	        }
+        }
+        throw new RuntimeException(); // programming error if we arrived here
 	}
 
 	@Override
@@ -204,7 +243,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public boolean isVideoPref() {
         String action = main_activity.getIntent().getAction();
-        if( MediaStore.INTENT_ACTION_VIDEO_CAMERA .equals(action) ) {
+        if( MediaStore.INTENT_ACTION_VIDEO_CAMERA.equals(action) || MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "launching from video intent");
     		return true;
@@ -602,88 +641,123 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
 	@Override
-	public void stoppedVideo(final boolean is_saf, final Uri saf_uri, final String filename) {
+	public void stoppedVideo(final int video_method, final Uri uri, final String filename) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "stoppedVideo");
-			Log.d(TAG, "is_saf " + is_saf);
-			Log.d(TAG, "saf_uri " + saf_uri);
+			Log.d(TAG, "video_method " + video_method);
+			Log.d(TAG, "uri " + uri);
 			Log.d(TAG, "filename " + filename);
 		}
-		if( is_saf ) {
-		    // still need to announce, as we didn't do this via broadcastFile
-		    storageUtils.announceUri(saf_uri, false, true);
+		boolean done = false;
+		if( video_method == VIDEOMETHOD_FILE ) {
+			if( filename != null ) {
+				File file = new File(filename);
+				storageUtils.broadcastFile(file, false, true);
+				done = true;
+			}
 		}
 		else {
-			File file = new File(filename);
-			storageUtils.broadcastFile(file, false, true);
-		}
-
-		// create thumbnail
-    	long time_s = System.currentTimeMillis();
-		Bitmap thumbnail = null;
-	    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-		try {
-			if( is_saf ) {
-				ParcelFileDescriptor pfd_saf = getContext().getContentResolver().openFileDescriptor(saf_uri, "r");
-				retriever.setDataSource(pfd_saf.getFileDescriptor());
+			if( uri != null ) {
+			    // still need to announce, as we didn't do this via broadcastFile
+			    storageUtils.announceUri(uri, false, true);
+			    done = true;
 			}
-			else {
-				File file = new File(filename);
-				retriever.setDataSource(file.getPath());
-			}
-			thumbnail = retriever.getFrameAtTime(-1);
 		}
-	    catch(FileNotFoundException e) {
-	    	// video file wasn't saved?
-			Log.d(TAG, "failed to find thumbnail");
-	    	e.printStackTrace();
-	    }
-	    catch(IllegalArgumentException e) {
-	    	// corrupt video file?
-			Log.d(TAG, "failed to find thumbnail");
-	    	e.printStackTrace();
-	    }
-	    catch(RuntimeException e) {
-	    	// corrupt video file?
-			Log.d(TAG, "failed to find thumbnail");
-	    	e.printStackTrace();
-	    }
-	    finally {
-	    	try {
-	    		retriever.release();
-	    	}
-	    	catch(RuntimeException ex) {
-	    		// ignore
-	    	}
-	    }
-	    if( thumbnail != null ) {
-	    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
-	    	int width = thumbnail.getWidth();
-	    	int height = thumbnail.getHeight();
-			if( MyDebug.LOG )
-				Log.d(TAG, "    video thumbnail size " + width + " x " + height);
-	    	if( width > galleryButton.getWidth() ) {
-	    		float scale = (float) galleryButton.getWidth() / width;
-	    		int new_width = Math.round(scale * width);
-	    		int new_height = Math.round(scale * height);
-				if( MyDebug.LOG )
-					Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
-	    		Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
-    		    // careful, as scaled_thumbnail is sometimes not a copy!
-    		    if( scaled_thumbnail != thumbnail ) {
-    		    	thumbnail.recycle();
-    		    	thumbnail = scaled_thumbnail;
-    		    }
-	    	}
-	    	final Bitmap thumbnail_f = thumbnail;
-	    	main_activity.runOnUiThread(new Runnable() {
-				public void run() {
-	    	    	updateThumbnail(thumbnail_f);
-				}
-			});
-	    }
 		if( MyDebug.LOG )
-			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "done? " + done);
+
+		String action = main_activity.getIntent().getAction();
+        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+    		if( done && video_method == VIDEOMETHOD_FILE ) {
+    			// do nothing here - we end the activity from storageUtils.broadcastFile after the file has been scanned, as it seems caller apps seem to prefer the content:// Uri rather than one based on a File
+    		}
+    		else {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "from video capture intent");
+    			Intent output = null;
+    			if( done ) {
+    				// may need to pass back the Uri we saved to, if the calling application didn't specify a Uri
+    				// set note above for VIDEOMETHOD_FILE
+    				// n.b., currently this code is not used, as we always switch to VIDEOMETHOD_FILE if the calling application didn't specify a Uri, but I've left this here for possible future behaviour
+    				if( video_method == VIDEOMETHOD_SAF ) {
+    					output = new Intent();
+    					output.setData(uri);
+    					if( MyDebug.LOG )
+    						Log.d(TAG, "pass back output uri [saf]: " + output.getData());
+    				}
+    			}
+            	main_activity.setResult(done ? Activity.RESULT_OK : Activity.RESULT_CANCELED, output);
+            	main_activity.finish();
+    		}
+        }
+        else if( done ) {
+			// create thumbnail
+	    	long time_s = System.currentTimeMillis();
+			Bitmap thumbnail = null;
+		    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+			try {
+				if( video_method == VIDEOMETHOD_FILE ) {
+					File file = new File(filename);
+					retriever.setDataSource(file.getPath());
+				}
+				else {
+					ParcelFileDescriptor pfd_saf = getContext().getContentResolver().openFileDescriptor(uri, "r");
+					retriever.setDataSource(pfd_saf.getFileDescriptor());
+				}
+				thumbnail = retriever.getFrameAtTime(-1);
+			}
+		    catch(FileNotFoundException e) {
+		    	// video file wasn't saved?
+				Log.d(TAG, "failed to find thumbnail");
+		    	e.printStackTrace();
+		    }
+		    catch(IllegalArgumentException e) {
+		    	// corrupt video file?
+				Log.d(TAG, "failed to find thumbnail");
+		    	e.printStackTrace();
+		    }
+		    catch(RuntimeException e) {
+		    	// corrupt video file?
+				Log.d(TAG, "failed to find thumbnail");
+		    	e.printStackTrace();
+		    }
+		    finally {
+		    	try {
+		    		retriever.release();
+		    	}
+		    	catch(RuntimeException ex) {
+		    		// ignore
+		    	}
+		    }
+		    if( thumbnail != null ) {
+		    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
+		    	int width = thumbnail.getWidth();
+		    	int height = thumbnail.getHeight();
+				if( MyDebug.LOG )
+					Log.d(TAG, "    video thumbnail size " + width + " x " + height);
+		    	if( width > galleryButton.getWidth() ) {
+		    		float scale = (float) galleryButton.getWidth() / width;
+		    		int new_width = Math.round(scale * width);
+		    		int new_height = Math.round(scale * height);
+					if( MyDebug.LOG )
+						Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
+		    		Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
+	    		    // careful, as scaled_thumbnail is sometimes not a copy!
+	    		    if( scaled_thumbnail != thumbnail ) {
+	    		    	thumbnail.recycle();
+	    		    	thumbnail = scaled_thumbnail;
+	    		    }
+		    	}
+		    	final Bitmap thumbnail_f = thumbnail;
+		    	main_activity.runOnUiThread(new Runnable() {
+					public void run() {
+		    	    	updateThumbnail(thumbnail_f);
+					}
+				});
+		    }
+			if( MyDebug.LOG )
+				Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
+		}
 	}
 
 	@Override

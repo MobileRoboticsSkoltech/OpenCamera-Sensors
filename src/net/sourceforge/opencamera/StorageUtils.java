@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -161,6 +162,18 @@ public class StorageUtils {
     		 			last_media_scanned = uri;
     		 			announceUri(uri, is_new_picture, is_new_video);
     		 			failed_to_scan = false;
+
+    	    			// it seems caller apps seem to prefer the content:// Uri rather than one based on a File
+    		 			Activity activity = (Activity)context;
+    		 			String action = activity.getIntent().getAction();
+    		 	        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+    		    			if( MyDebug.LOG )
+    		    				Log.d(TAG, "from video capture intent");
+	    		 			Intent output = new Intent();
+	    		 			output.setData(uri);
+	    		 			activity.setResult(Activity.RESULT_OK, output);
+	    		 			activity.finish();
+    		 	        }
     		 		}
     			}
     		);
@@ -271,10 +284,10 @@ public class StorageUtils {
         if( split.length >= 2 ) {
             String type = split[0];
 		    String path = split[1];
-    		if( MyDebug.LOG ) {
+    		/*if( MyDebug.LOG ) {
     			Log.d(TAG, "type: " + type);
     			Log.d(TAG, "path: " + path);
-    		}
+    		}*/
 		    File [] storagePoints = new File("/storage").listFiles();
 
             if( "primary".equalsIgnoreCase(type) ) {
@@ -298,12 +311,12 @@ public class StorageUtils {
 		File file = null;
     	if( isUsingSAF() ) {
     		Uri uri = getTreeUriSAF();
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "uri: " + uri);
+    		/*if( MyDebug.LOG )
+    			Log.d(TAG, "uri: " + uri);*/
     		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
                 final String id = DocumentsContract.getTreeDocumentId(uri);
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "id: " + id);
+        		/*if( MyDebug.LOG )
+        			Log.d(TAG, "id: " + id);*/
         		file = getFileFromDocumentIdSAF(id);
     		}
     	}

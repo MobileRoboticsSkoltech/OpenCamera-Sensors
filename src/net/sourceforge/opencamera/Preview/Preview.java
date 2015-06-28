@@ -99,9 +99,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private MediaRecorder video_recorder = null;
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
-	private boolean video_using_saf = false;
-	private Uri video_saf_uri = null;
-	private String video_filename = null;
+	private int video_method = ApplicationInterface.VIDEOMETHOD_FILE;
+	private Uri video_uri = null; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
+	private String video_filename = null; // for VIDEOMETHOD_FILE
 
 	private final int PHASE_NORMAL = 0;
 	private final int PHASE_TIMER = 1;
@@ -707,14 +707,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// stop() can throw a RuntimeException if stop is called too soon after start - this indicates the video file is corrupt, and should be deleted
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "runtime exception when stopping video");
-	    		if( video_using_saf ) {
-	    			if( video_saf_uri != null ) {
+	    		if( video_method == ApplicationInterface.VIDEOMETHOD_SAF ) {
+	    			if( video_uri != null ) {
 			    		if( MyDebug.LOG )
-			    			Log.d(TAG, "delete corrupt video: " + video_saf_uri);
-	    				DocumentsContract.deleteDocument(getContext().getContentResolver(), video_saf_uri);
+			    			Log.d(TAG, "delete corrupt video: " + video_uri);
+	    				DocumentsContract.deleteDocument(getContext().getContentResolver(), video_uri);
 	    			}
 	    		}
-	    		else {
+	    		else if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
 		    		if( video_filename != null ) {
 			    		if( MyDebug.LOG )
 			    			Log.d(TAG, "delete corrupt video: " + video_filename);
@@ -724,8 +724,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    			}
 		    		}
 	    		}
-	    		video_using_saf = false;
-	    		video_saf_uri = null;
+	    		else {
+	    			// don't delete if a plain Uri
+	    		}
+	    		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
+	    		video_uri = null;
     			video_filename = null;
 	    		// if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
     			if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
@@ -741,11 +744,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		video_recorder.release(); 
     		video_recorder = null;
 			reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
-			if( (video_using_saf ? video_saf_uri : video_filename) != null ) {
-				applicationInterface.stoppedVideo(video_using_saf, video_saf_uri, video_filename);
-			}
-    		video_using_saf = false;
-    		video_saf_uri = null;
+			applicationInterface.stoppedVideo(video_method, video_uri, video_filename);
+    		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
+    		video_uri = null;
 			video_filename = null;
 		}
 	}
@@ -3222,27 +3223,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
     		// initialise just in case:
     		boolean created_video_file = false;
-    		video_using_saf = false;
-    		video_saf_uri = null;
+    		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
+    		video_uri = null;
 			video_filename = null;
 			ParcelFileDescriptor pfd_saf = null;
     		try {
-    			video_using_saf = applicationInterface.createOutputVideoUsingSAF();
+    			video_method = applicationInterface.createOutputVideoMethod();
 	    		if( MyDebug.LOG )
-		            Log.e(TAG, "video_using_saf? " + video_using_saf);
-	    		if( video_using_saf ) {
-	    			video_saf_uri = applicationInterface.createOutputVideoFileSAF();
-	    			created_video_file = true;
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "save to: " + video_saf_uri);
-		    		pfd_saf = getContext().getContentResolver().openFileDescriptor(video_saf_uri, "rw");
-	    		}
-	    		else {
+		            Log.e(TAG, "video_method? " + video_method);
+	    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
 	    			File videoFile = applicationInterface.createOutputVideoFile();
 					video_filename = videoFile.getAbsolutePath();
 					created_video_file = true;
 		    		if( MyDebug.LOG )
 		    			Log.d(TAG, "save to: " + video_filename);
+	    		}
+	    		else {
+		    		if( video_method == ApplicationInterface.VIDEOMETHOD_SAF ) {
+		    			video_uri = applicationInterface.createOutputVideoSAF();
+		    		}
+		    		else {
+		    			video_uri = applicationInterface.createOutputVideoUri();
+		    		}
+	    			created_video_file = true;
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "save to: " + video_uri);
+		    		pfd_saf = getContext().getContentResolver().openFileDescriptor(video_uri, "rw");
 	    		}
     		}
     		catch(IOException e) {
@@ -3358,11 +3364,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.d(TAG, "video codec: " + profile.videoCodec);
 	    		}
 
-	    		if( video_using_saf ) {
-	    			video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
+	    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+	    			video_recorder.setOutputFile(video_filename);
 	    		}
 	    		else {
-	    			video_recorder.setOutputFile(video_filename);
+	    			video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
 	    		}
 	        	try {
 	        		applicationInterface.cameraInOperation(true);

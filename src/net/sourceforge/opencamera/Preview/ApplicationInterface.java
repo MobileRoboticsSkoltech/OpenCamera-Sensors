@@ -12,13 +12,18 @@ import android.util.Pair;
 import android.view.MotionEvent;
 
 public interface ApplicationInterface {
+	final int VIDEOMETHOD_FILE = 0; // video will be saved to a file
+	final int VIDEOMETHOD_SAF = 1; // video will be saved using Android 5's Storage Access Framework
+	final int VIDEOMETHOD_URI = 2; // video will be written to the supplied Uri
+	
 	// methods that request information
 	Context getContext(); // get the application context
 	boolean useCamera2(); // should Android 5's Camera 2 API be used?
 	Location getLocation(); // get current location - null if not available (or you don't care about geotagging)
-	boolean createOutputVideoUsingSAF(); // whether video files should be created using Android 5's Storage Access Framework
-	Uri createOutputVideoFileSAF() throws IOException; // will be called if createOutputVideoUsingSAF() returns true
-	File createOutputVideoFile() throws IOException; // will be called if createOutputVideoUsingSAF() returns false
+	int createOutputVideoMethod(); // return a VIDEOMETHOD_* value to specify how to create a video file
+	File createOutputVideoFile() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_FILE
+	Uri createOutputVideoSAF() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_SAF
+	Uri createOutputVideoUri() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_URI
 	// for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
 	// if you just want a default or don't really care, see the comments for each method for a default or possible options
 	// if Preview doesn't support the requested setting, it will check this, and choose its own
@@ -70,7 +75,7 @@ public interface ApplicationInterface {
 	void touchEvent(MotionEvent event);
 	void startingVideo(); // called just before video recording starts
 	void stoppingVideo(); // called just before video recording stops
-	void stoppedVideo(final boolean is_saf, final Uri saf_uri, final String filename); // called after video recording stopped (unless file is corrupt or not created)
+	void stoppedVideo(final int video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created)
 	void onFailedStartPreview(); // called if failed to start camera preview
 	void onPhotoError(); // callback for failing to take a photo
 	void onVideoInfo(int what, int extra); // callback for info when recording video (see MediaRecorder.OnInfoListener)
