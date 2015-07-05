@@ -872,6 +872,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			error_message = getContext().getResources().getString(R.string.failed_to_record_video);
 		}
 		main_activity.getPreview().showToast(null, error_message);
+		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		view.setImageResource(R.drawable.take_video_selector);
+		view.setTag(R.drawable.take_video_selector); // for testing
 	}
 
 	@Override

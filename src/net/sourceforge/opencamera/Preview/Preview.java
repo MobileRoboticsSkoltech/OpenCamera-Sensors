@@ -228,6 +228,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public int count_cameraAutoFocus = 0;
 	public int count_cameraTakePicture = 0;
 	public boolean test_fail_open_camera = false;
+	public boolean test_video_failure = false;
 
 	public Preview(ApplicationInterface applicationInterface, Bundle savedInstanceState, ViewGroup parent) {
 		if( MyDebug.LOG ) {
@@ -3386,6 +3387,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	            	video_recorder.start();
 					if( MyDebug.LOG )
 						Log.d(TAG, "video recorder started");
+					if( test_video_failure ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "test_video_failure is true");
+						throw new RuntimeException();
+					}
 	            	video_start_time = System.currentTimeMillis();
 	            	video_start_time_set = true;
     				//showToast(stopstart_video_toast, R.string.started_recording_video);
