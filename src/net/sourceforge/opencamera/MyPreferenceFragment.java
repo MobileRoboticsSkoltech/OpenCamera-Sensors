@@ -548,9 +548,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 			about_string.append("\nISO key: " + iso_key);
                 		}
 
+                		about_string.append("\nUsing SAF?: " + sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false));
                 		String save_location = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
                 		about_string.append("\nSave Location: " + save_location);
-
+                		String save_location_saf = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+                		about_string.append("\nSave Location SAF: " + save_location_saf);
+                		
                 		about_string.append("\nParameters: ");
                 		String parameters_string = bundle.getString("parameters_string");
                 		if( parameters_string != null ) {
