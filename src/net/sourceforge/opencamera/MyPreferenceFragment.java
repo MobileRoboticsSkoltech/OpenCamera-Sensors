@@ -403,7 +403,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append("\nCamera API: ");
                         about_string.append(camera_api);
                         {
-                        	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MyPreferenceFragment.this.getActivity());
                         	String last_video_error = sharedPreferences.getString("last_video_error", "");
                         	if( last_video_error != null && last_video_error.length() > 0 ) {
                                 about_string.append("\nLast video error: ");
@@ -461,6 +460,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         				about_string.append("\nVideo frame rate: " + video_frame_rate);
                         about_string.append("\nAuto-stabilise?: ");
                         about_string.append(getString(supports_auto_stabilise ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nAuto-stabilise enabled?: " + sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false));
                         about_string.append("\nFace detection?: ");
                         about_string.append(getString(supports_face_detection ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nVideo stabilization?: ");
@@ -548,7 +548,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 			about_string.append("\nISO key: " + iso_key);
                 		}
 
-                		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MyPreferenceFragment.this.getActivity());
                 		String save_location = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
                 		about_string.append("\nSave Location: " + save_location);
 
