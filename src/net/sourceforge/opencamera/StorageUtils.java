@@ -155,13 +155,13 @@ public class StorageUtils {
         	MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath() }, null,
         			new MediaScannerConnection.OnScanCompletedListener() {
 					public void onScanCompleted(String path, Uri uri) {
+    		 			failed_to_scan = false;
     		 			if( MyDebug.LOG ) {
     		 				Log.d("ExternalStorage", "Scanned " + path + ":");
     		 				Log.d("ExternalStorage", "-> uri=" + uri);
     		 			}
     		 			last_media_scanned = uri;
     		 			announceUri(uri, is_new_picture, is_new_video);
-    		 			failed_to_scan = false;
 
     	    			// it seems caller apps seem to prefer the content:// Uri rather than one based on a File
     		 			Activity activity = (Activity)context;
