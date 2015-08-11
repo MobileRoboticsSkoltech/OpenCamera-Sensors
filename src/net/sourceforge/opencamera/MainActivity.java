@@ -375,9 +375,22 @@ public class MainActivity extends Activity {
 		switch( keyCode ) {
         case KeyEvent.KEYCODE_VOLUME_UP:
         case KeyEvent.KEYCODE_VOLUME_DOWN:
+        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+        case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+        case KeyEvent.KEYCODE_MEDIA_STOP:
 	        {
 	    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 	    		String volume_keys = sharedPreferences.getString(PreferenceKeys.getVolumeKeysPreferenceKey(), "volume_take_photo");
+
+	    		if((keyCode==KeyEvent.KEYCODE_MEDIA_PREVIOUS
+	        		||keyCode==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+	        		||keyCode==KeyEvent.KEYCODE_MEDIA_STOP)
+	        		&&!(volume_keys.equals("volume_take_photo"))) {
+	        		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+	        		if(audioManager==null) break;
+	        		if(!audioManager.isWiredHeadsetOn()) break;
+	        	}
+	    		
 	    		if( volume_keys.equals("volume_take_photo") ) {
 	            	takePicture();
 	                return true;
