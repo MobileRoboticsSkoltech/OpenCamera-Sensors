@@ -104,7 +104,7 @@
     <string name="preference_burst_mode_summary">Mehrere Fotos in Folge nacheinander aufnehmen</string>
     <string name="preference_burst_interval">Serienbild-Intervall</string>
     <string name="preference_burst_interval_summary">Verzögerung zwischen den Fotoaufnahmen</string>
-    <string name="preference_screen_camera_controls_more">Mehr Kamera-Einstellungen...</string>
+    <string name="preference_screen_camera_controls_more">Mehr Kamera-Einstellungen…</string>
     <string name="preference_touch_capture">Aufnahme bei Berührung</string>
     <string name="preference_touch_capture_summary">Fotoaufnahme durch Berührung oder Doppelklick der Vorschau starten</string>
     <string name="preference_pause_preview">Pause nach der Fotoaufnahme</string>
@@ -127,7 +127,7 @@
     <string name="preference_lock_video_summary">Wenn aktiviert, wird bei Videoaufnahmen die Oberfläche gesperrt, um versehentliches Stoppen zu verhindern. Zum Entsperren einfach wischen.</string>
     <string name="preference_rotate_preview">Vorschau drehen</string>
     <string name="preference_rotate_preview_summary">Vorschaubild drehen (hat keinen Einfluss auf die Aufnahme)</string>
-    <string name="preference_screen_gui">Benutzeroberfläche...</string>
+    <string name="preference_screen_gui">Benutzeroberfläche…</string>
     <string name="preference_preview_size">Vorschaugröße</string>
     <string name="preference_preview_size_summary">Größe der Vorschauanzeige festlegen</string>
     <string name="preference_ui_placement">Ausrichtung der Oberfläche</string>
@@ -170,9 +170,9 @@
     <string name="preference_max_brightness_summary">Wenn aktiviert, wird der Bildschirm auf die höchste Helligkeit eingestellt.</string>
 
     <string name="preference_category_camera_quality">Foto- und Video-Einstellungen</string>
-    <string name="preference_screen_photo_settings">Foto-Einstellungen...</string>
-    <string name="preference_screen_video_settings">Video-Einstellungen...</string>
-    <string name="preference_screen_location_settings">Standort-Einstellungen...</string>
+    <string name="preference_screen_photo_settings">Foto-Einstellungen…</string>
+    <string name="preference_screen_video_settings">Video-Einstellungen…</string>
+    <string name="preference_screen_location_settings">Standort-Einstellungen…</string>
     <string name="preference_resolution">Kamera-Auflösung</string>
     <string name="preference_resolution_summary">Einstellung der Auflösung der Fotoaufnahmen</string>
     <string name="preference_quality">Bildqualität</string>
