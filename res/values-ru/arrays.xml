@@ -149,6 +149,16 @@
         <item>preference_preview_size_display</item>
         <item>preference_preview_size_wysiwyg</item>
     </string-array>
+    <string-array name="preference_touch_capture_entries">
+        <item>Нет</item>
+        <item>Одно касание</item>
+        <item>Двойное касание</item>
+        </string-array>
+    <string-array name="preference_touch_capture_values">
+        <item>none</item>
+        <item>single</item>
+        <item>double</item>
+    </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Сделать фото (или запустить/остановить запись видео)</item>
         <item>Фокус</item>
@@ -157,7 +167,7 @@
         <item>Авто стабилизация вкл/выкл</item>
         <item>Изменить громкость</item>
         <item>Ничего</item>
-    </string-array>
+        </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
         <item>volume_focus</item>
@@ -170,7 +180,7 @@
     <string-array name="preference_rotate_preview_entries">
         <item>Не поворачивать</item>
         <item>Повернуть на 180 градусов</item>
-    </string-array>
+        </string-array>
     <string-array name="preference_rotate_preview_values">
         <item>0</item>
         <item>180</item>
@@ -200,14 +210,14 @@
         <item>3x3</item>
         <item>Phi 3x3</item>
         <item>4x2</item>
-        <item>Crosshair</item>
-        <item>Golden (1)</item>
-        <item>Golden (2)</item>
-        <item>Golden (3)</item>
-        <item>Golden (4)</item>
-        <item>Triangle (1)</item>
-        <item>Triangle (2)</item>
-        <item>Diagonals</item>
+        <item>Перекрестие</item>
+        <item>Золотое сечение (1)</item>
+        <item>Золотое сечение (2)</item>
+        <item>Золотое сечение (3)</item>
+        <item>Золотое сечение (4)</item>
+        <item>Треугольник (1)</item>
+        <item>Треугольник (2)</item>
+        <item>Диагонали</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
@@ -256,6 +266,45 @@
     <string-array name="preference_stamp_values">
         <item>preference_stamp_no</item>
         <item>preference_stamp_yes</item>
+    </string-array>
+    <string-array name="preference_stamp_dateformat_entries">
+        <item>По умолчанию</item>
+        <item>гггг/мм/дд</item>
+        <item>дд/мм/гггг</item>
+        <item>мм/дд/гггг</item>
+        <item>Нет</item>
+        </string-array>
+    <string-array name="preference_stamp_dateformat_values">
+        <item>preference_stamp_dateformat_default</item>
+        <item>preference_stamp_dateformat_yyyymmdd</item>
+        <item>preference_stamp_dateformat_ddmmyyyy</item>
+        <item>preference_stamp_dateformat_mmddyyyy</item>
+        <item>preference_stamp_dateformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_timeformat_entries">
+        <item>По умолчанию</item>
+        <item>12 часов</item>
+        <item>24 часа</item>
+        <item>Нет</item>
+    </string-array>
+    <string-array name="preference_stamp_timeformat_values">
+        <item>preference_stamp_timeformat_default</item>
+        <item>preference_stamp_timeformat_12hour</item>
+        <item>preference_stamp_timeformat_24hour</item>
+        <item>preference_stamp_timeformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_gpsformat_entries">
+        <item>По умолчанию</item>
+        <item>Градусы/минуты/секунды</item>
+        <item>Нет</item>
+    </string-array>
+    <string-array name="preference_stamp_style_entries">
+        <item>Текст с тенью</item>
+        <item>Обычный текст</item>
+    </string-array>
+    <string-array name="preference_stamp_style_values">
+        <item>preference_stamp_style_shadowed</item>
+        <item>preference_stamp_style_plain</item>
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>По умолчанию</item>
@@ -414,5 +463,15 @@
         <item>audio_src_mic</item>
         <item>audio_src_default</item>
         <item>audio_src_voice_communication</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_entries">
+        <item>По умолчанию</item>
+        <item>Моно</item>
+        <item>Стерео (не для всех устройств)</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_values">
+        <item>audio_default</item>
+        <item>audio_mono</item>
+        <item>audio_stereo</item>
     </string-array>
 </resources>

@@ -98,11 +98,15 @@
     <string name="preference_timer_summary">Установка таймера для камеры</string>
     <string name="preference_timer_beep">Звук таймера</string>
     <string name="preference_timer_beep_summary">Подавать звуковой сигнал, когда таймер закончит отсчет</string>
+    <string name="preference_timer_speak">Озвучка таймера</string>
+    <string name="preference_timer_speak_summary">Озвучивать обратный отсчет для таймера или пакетного режима (от 60 секунд)</string>
     <string name="preference_burst_mode">Пакетный режим</string>
     <string name="preference_burst_mode_summary">Съёмка нескольких фото подряд</string>
     <string name="preference_burst_interval">Интервал в пакетном режиме</string>
     <string name="preference_burst_interval_summary">Задержка между снятием фото</string>
     <string name="preference_screen_camera_controls_more">Дополнительные настройки</string>
+    <string name="preference_touch_capture">Касание для съемки</string>
+    <string name="preference_touch_capture_summary">Делать снимок по одинарному или двойному касанию области просмотра</string>
     <string name="preference_pause_preview">Пауза после съёмки</string>
     <string name="preference_pause_preview_summary">Пауза после снятия фото, с возможностью поделиться или удалить фотографию</string>
     <string name="preference_shutter_sound">Звук затвора</string>
@@ -111,6 +115,8 @@
     <string name="preference_volume_keys_summary">Задать поведение при нажатии клавиш громкости</string>
     <string name="preference_save_location">Папка сохранения</string>
     <string name="preference_save_location_summary">Имя папки для сохранения фото и видео (также может быть полный путь)</string>
+    <string name="preference_using_saf">Использовать Storage Access Framework</string>
+    <string name="preference_using_saf_summary">Для Android 5 использовать  Storage Access Framework для сохранения фото и видео</string>
     <string name="preference_save_photo_prefix">Префикс для фото</string>
     <string name="preference_save_photo_prefix_summary">Префикс имен файлов для сохраняемых фото</string>
     <string name="preference_save_video_prefix">Префикс для видео</string>
@@ -142,6 +148,8 @@
     <string name="preference_show_angle_summary">Отображение уровня наклона</string>
     <string name="preference_show_angle_line">Показать линию уровня</string>
     <string name="preference_show_angle_line_summary">Отображение горизонтальной линии уровня</string>
+    <string name="preference_angle_highlight_color">Цвет линии уровня</string>
+    <string name="preference_angle_highlight_color_summary">Цвет линии уровня, близкого к горизонтальному</string>
     <string name="preference_show_geo_direction">Показать направление компаса</string>
     <string name="preference_show_geo_direction_summary">Отображение направления компаса на экране</string>
     <string name="preference_show_time">Показать время</string>
@@ -152,6 +160,8 @@
     <string name="preference_grid_summary">Отображение одной из различных сеток</string>
     <string name="preference_crop_guide">Руководство по обрезке</string>
     <string name="preference_crop_guide_summary">Отображение прямоугольника, показывающего соотношение сторон - полезно, если вы планируете, обрезать фото/видео. Требуется WYSIWYG режим фотосъемки или режим видео.</string>
+    <string name="preference_show_toasts">Всплывающие сообщения</string>
+    <string name="preference_show_toasts_summary">Показывать всплыващие уведомления при работе</string>
     <string name="preference_thumbnail_animation">Показать эскиз анимации</string>
     <string name="preference_thumbnail_animation_summary">Отображение перемещение эскиза анимации при съемке фотографии</string>
     <string name="preference_keep_display_on">Не выключать дисплей</string>
@@ -175,10 +185,20 @@
     <string name="preference_require_location_summary">Если данные о местоположении включены, вы сможете снять фото/видео только, если они доступны</string>
     <string name="preference_stamp">Отметки</string>
     <string name="preference_stamp_summary">Сохранение вместе с фотографией таких данных как: дата/время/местоположение</string>
+    <string name="preference_stamp_dateformat">Формат даты</string>
+    <string name="preference_stamp_dateformat_summary">Определение формата даты (если включено)</string>
+    <string name="preference_stamp_timeformat">Формат времени</string>
+    <string name="preference_stamp_timeformat_summary">Определение формата времени (если включено)</string>
+    <string name="preference_stamp_gpsformat">Формат GPS</string>
+    <string name="preference_stamp_gpsformat_summary">Определение формата отметки GPS (если включено)</string>
     <string name="preference_textstamp">Подписывание фото</string>
     <string name="preference_textstamp_summary">Добавление текста на фотографию</string>
     <string name="preference_stamp_fontsize">Размер шрифта</string>
     <string name="preference_stamp_fontsize_summary">Размер шрифта для добавляемого на фотографию текста</string>
+    <string name="preference_stamp_font_color">Цвет</string>
+    <string name="preference_stamp_font_color_summary">Цвет для добавляемого на фотографию текста</string>
+    <string name="preference_stamp_style">Стиль</string>
+    <string name="preference_stamp_style_summary">Стиль для добавляемого на фотографию текста</string>
     <string name="video_quality">Разрешение видео</string>
     <string name="video_quality_summary">Выбор разрешения видео</string>
     <string name="preference_force_video_4k">Качество видео 4K UHD (экспериментально)</string>
@@ -197,6 +217,8 @@
     <string name="preference_record_audio_summary">Запись звука при записи видео</string>
     <string name="preference_record_audio_src">Источник звука</string>
     <string name="preference_record_audio_src_summary">Микрофон для записи звука</string>
+    <string name="preference_record_audio_channels">Число каналов</string>
+    <string name="preference_record_audio_channels_summary">Настройка моно или стереозвука (стерео доступно не для всех устройств)</string>
     <string name="preference_video_flash">Вспышка во время записи видео</string>
     <string name="preference_video_flash_summary">Если включено, вспышка будет включаться/выключаться при записи видео (можно использовать, чтобы выполнить запись на расстоянии)</string>
     
@@ -236,4 +258,7 @@
     <string name="enter_new_folder">Введите имя новой папки</string>
     <string name="failed_create_folder">Не удалось создать папку</string>
     <string name="folder_exists">Папка уже существует</string>
+
+    <string name="saf_select_save_location">Выберите место для сохранения</string>
+    <string name="saf_cancelled">Storage Access Framework отменен</string>
 </resources>
