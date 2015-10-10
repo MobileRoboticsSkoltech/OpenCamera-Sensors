@@ -106,7 +106,7 @@
     <string name="preference_burst_interval_summary">Délai (le cas échéant) entre la prise de photos en mode rafale</string>
     <string name="preference_screen_camera_controls_more">Plus de commandes…</string>
     <string name="preference_touch_capture">Touchez pour capturer</string>
-    <string name="preference_touch_capture_summary">Prendre une photo en touchant 1 ou 2 fois l'aperçu</string>
+    <string name="preference_touch_capture_summary">Prendre une photo en touchant 1 ou 2 fois l\'aperçu</string>
     <string name="preference_pause_preview">Mettre en pause après la prise de photo</string>
     <string name="preference_pause_preview_summary">Mettre en pause l\'écran après avoir pris une photo, avec la possibilité de partager ou supprimer la photo</string>
     <string name="preference_shutter_sound">Son de l\'obturateur</string>
@@ -114,7 +114,7 @@
     <string name="preference_volume_keys">Touches de volumes</string>
     <string name="preference_volume_keys_summary">Définit un comportement pour quand touches de volume sont pressées</string>
     <string name="preference_using_saf">Utilisation du stockage Access Framework</string>
-    <string name="preference_using_saf_summary">Utilise le Storage Access Framework d'Android 5 pour sauvegarder les photos et vidéos</string>
+    <string name="preference_using_saf_summary">Utilise le Storage Access Framework d\'Android 5 pour sauvegarder les photos et vidéos</string>
     <string name="preference_save_location">Dossier de stockage</string>
     <string name="preference_save_location_summary">Dossier où sont stocké les fichiers photo/vidéo</string>
     <string name="preference_save_photo_prefix">Préfixe du nom de photo</string>
@@ -218,7 +218,7 @@
     <string name="preference_record_audio_src">Source audio</string>
     <string name="preference_record_audio_src_summary">Sélectionnez l\'entrée audio l\'enregistrement</string>
     <string name="preference_record_audio_channels">Format audio</string>
-    <string name="preference_record_audio_channels_summary">Spécifiez mono ou stéréo pour l'enregistrement audio (la stéréo uniquement pris en charge sur certains appareils)</string>
+    <string name="preference_record_audio_channels_summary">Spécifiez mono ou stéréo pour l\'enregistrement audio (la stéréo uniquement pris en charge sur certains appareils)</string>
     <string name="preference_video_flash">Clignote pendant l\'enregistrement vidéo</string>
     <string name="preference_video_flash_summary">Si activé, le flash se met en marche/arrêt lors de l\'enregistrement vidéo (peut être util pour indiquer que l\'appareil est en train d\'enregistrer à distance)</string>
     
