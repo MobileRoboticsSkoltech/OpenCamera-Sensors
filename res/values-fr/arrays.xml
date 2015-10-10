@@ -62,7 +62,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>0</item>
+        <item>Désactivé</item>
         <item>1s</item>
         <item>2s</item>
         <item>5s</item>
@@ -142,12 +142,22 @@
         <item>7200</item>
     </string-array>
     <string-array name="preference_preview_size_entries">
-        <item>Maximise la taille de l\'aperçu</item>
+        <item>Taille de l\'aperçu la plus grande</item>
         <item>Correspondre à la taille de la photo (WYSIWYG)</item>
     </string-array>
     <string-array name="preference_preview_size_values">
         <item>preference_preview_size_display</item>
         <item>preference_preview_size_wysiwyg</item>
+    </string-array>
+    <string-array name="preference_touch_capture_entries">
+        <item>Aucun</item>
+        <item>Appuie simple</item>
+        <item>Tapez 2 fois</item>
+        </string-array>
+    <string-array name="preference_touch_capture_values">
+        <item>none</item>
+        <item>single</item>
+        <item>double</item>
     </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Prendre une photo (ou démarrer/arrêter l\'enregistrement vidéo)</item>
@@ -299,6 +309,16 @@
         <item>preference_stamp_timeformat_24hour</item>
         <item>preference_stamp_timeformat_none</item>
     </string-array>
+    <string-array name="preference_stamp_gpsformat_entries">
+        <item>Par défaut</item>
+        <item>Degré/minute/second</item>
+        <item>Aucun</item>
+    </string-array>
+    <string-array name="preference_stamp_gpsformat_values">
+        <item>preference_stamp_gpsformat_default</item>
+        <item>preference_stamp_gpsformat_dms</item>
+        <item>preference_stamp_gpsformat_none</item>
+    </string-array>
     <string-array name="preference_stamp_fontsize_entries">
         <item>6</item>
         <item>8</item>
@@ -326,6 +346,14 @@
         <item>20</item>
         <item>22</item>
         <item>24</item>
+    </string-array>
+    <string-array name="preference_stamp_style_entries">
+        <item>Texte ombré</item>
+        <item>Texte brut</item>
+    </string-array>
+    <string-array name="preference_stamp_style_values">
+        <item>preference_stamp_style_shadowed</item>
+        <item>preference_stamp_style_plain</item>
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>Par défaut</item>
@@ -484,5 +512,15 @@
         <item>audio_src_mic</item>
         <item>audio_src_default</item>
         <item>audio_src_voice_communication</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_entries">
+        <item>Par défaut</item>
+        <item>Mono</item>
+        <item>Stéréo (sur certain appareil uniquement)</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_values">
+        <item>audio_default</item>
+        <item>audio_mono</item>
+        <item>audio_stereo</item>
     </string-array>
 </resources>

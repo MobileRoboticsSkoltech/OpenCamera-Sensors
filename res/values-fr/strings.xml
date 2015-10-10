@@ -97,18 +97,24 @@
     <string name="preference_timer">Retardateur</string>
     <string name="preference_timer_summary">Réglez le retardateur pour la caméra</string>
     <string name="preference_timer_beep">Retardateur sonore</string>
-    <string name="preference_timer_beep_summary">Emet des beep pour le retardateur ou le délai du mode rafale</string>
+    <string name="preference_timer_beep_summary">Emet des beep pour le retardateur ou le délai du mode rafale (à partir de 60s)</string>
+    <string name="preference_timer_speak">Retardateur à voix</string>
+    <string name="preference_timer_speak_summary">DécompteSpeak the countdown pour le retardateur ou le délai du mode rafale (à partir de 60s)</string>
     <string name="preference_burst_mode">Mode rafale</string>
     <string name="preference_burst_mode_summary">Prendre plusieurs photos les unes à la suite des autres</string>
     <string name="preference_burst_interval">Interval du mode rafale</string>
     <string name="preference_burst_interval_summary">Délai (le cas échéant) entre la prise de photos en mode rafale</string>
     <string name="preference_screen_camera_controls_more">Plus de commandes…</string>
+    <string name="preference_touch_capture">Touchez pour capturer</string>
+    <string name="preference_touch_capture_summary">Prendre une photo en touchant 1 ou 2 fois l'aperçu</string>
     <string name="preference_pause_preview">Mettre en pause après la prise de photo</string>
     <string name="preference_pause_preview_summary">Mettre en pause l\'écran après avoir pris une photo, avec la possibilité de partager ou supprimer la photo</string>
     <string name="preference_shutter_sound">Son de l\'obturateur</string>
     <string name="preference_shutter_sound_summary">Jouer un son lorsque vous prenez une photo (nécessite Android 4.2 ou supérieur pour désactiver)</string>
     <string name="preference_volume_keys">Touches de volumes</string>
     <string name="preference_volume_keys_summary">Définit un comportement pour quand touches de volume sont pressées</string>
+    <string name="preference_using_saf">Utilisation du stockage Access Framework</string>
+    <string name="preference_using_saf_summary">Utilise le Storage Access Framework d'Android 5 pour sauvegarder les photos et vidéos</string>
     <string name="preference_save_location">Dossier de stockage</string>
     <string name="preference_save_location_summary">Dossier où sont stocké les fichiers photo/vidéo</string>
     <string name="preference_save_photo_prefix">Préfixe du nom de photo</string>
@@ -183,12 +189,16 @@
     <string name="preference_stamp_dateformat_summary">Spécifie le format de la date (si activé)</string>
     <string name="preference_stamp_timeformat">Format de l\'heure</string>
     <string name="preference_stamp_timeformat_summary">Spécifie le format de l\'heure(si activé)</string>
+    <string name="preference_stamp_gpsformat">Format GPS</string>
+    <string name="preference_stamp_gpsformat_summary">Specifie le format du GPS (si activé)</string>
     <string name="preference_textstamp">Texte personnalisé</string>
     <string name="preference_textstamp_summary">Incruste un texte personalisé sur la photo</string>
     <string name="preference_stamp_fontsize">Taille de la police</string>
     <string name="preference_stamp_fontsize_summary">Taille de la police à utiliser lors de l\'incrustation du texte sur les photos</string>
     <string name="preference_stamp_font_color">Couleur de la police</string>
     <string name="preference_stamp_font_color_summary">Couleur de la police utilisée pour l\'incrustation du texte sur les photos</string>
+    <string name="preference_stamp_style">Format du texte</string>
+    <string name="preference_stamp_style_summary">Format du texte utilisé pour l\'incrustation du texte sur les photos</string>
     <string name="video_quality">Résolution vidéo</string>
     <string name="video_quality_summary">Réglez la résolution des vidéos</string>
     <string name="preference_force_video_4k">Forcer le format vidéo 4K UHD (experimental)</string>
@@ -207,6 +217,8 @@
     <string name="preference_record_audio_summary">Enregistre aussi l\'audio lors de l\'enregistrement vidéo</string>
     <string name="preference_record_audio_src">Source audio</string>
     <string name="preference_record_audio_src_summary">Sélectionnez l\'entrée audio l\'enregistrement</string>
+    <string name="preference_record_audio_channels">Format audio</string>
+    <string name="preference_record_audio_channels_summary">Spécifiez mono ou stéréo pour l'enregistrement audio (la stéréo uniquement pris en charge sur certains appareils)</string>
     <string name="preference_video_flash">Clignote pendant l\'enregistrement vidéo</string>
     <string name="preference_video_flash_summary">Si activé, le flash se met en marche/arrêt lors de l\'enregistrement vidéo (peut être util pour indiquer que l\'appareil est en train d\'enregistrer à distance)</string>
     
@@ -246,4 +258,7 @@
     <string name="enter_new_folder">Nommer le nouveau dossier</string>
     <string name="failed_create_folder">Impossible de créer le dossier</string>
     <string name="folder_exists">Dossier déjà existant</string>
+
+    <string name="saf_select_save_location">Sélectionnez un emplacement de sauvegarde</string>
+    <string name="saf_cancelled">Storage Access Framework annulé</string>
 </resources>
