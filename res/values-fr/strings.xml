@@ -97,7 +97,7 @@
     <string name="preference_timer">Retardateur</string>
     <string name="preference_timer_summary">Réglez le retardateur pour la caméra</string>
     <string name="preference_timer_beep">Retardateur sonore</string>
-    <string name="preference_timer_beep_summary">Emet des beep pour le retardateur ou le délai du mode rafale (à partir de 60s)</string>
+    <string name="preference_timer_beep_summary">Emet des beep pour le retardateur ou le délai du mode rafale</string>
     <string name="preference_timer_speak">Retardateur à voix</string>
     <string name="preference_timer_speak_summary">DécompteSpeak the countdown pour le retardateur ou le délai du mode rafale (à partir de 60s)</string>
     <string name="preference_burst_mode">Mode rafale</string>
