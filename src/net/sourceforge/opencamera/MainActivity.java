@@ -390,7 +390,12 @@ public class MainActivity extends Activity {
 		    				this.changeFocusDistance(1);
 	    			}
 	    			else {
-	    				preview.requestAutoFocus();
+	    				// important not to repeatedly request focus, even though preview.requestAutoFocus() will cancel, as causes problem if key is held down (e.g., flash gets stuck on)
+	    				if( !preview.isFocusWaiting() ) {
+		    				if( MyDebug.LOG )
+		    					Log.d(TAG, "request focus due to volume key");
+		    				preview.requestAutoFocus();
+	    				}
 	    			}
 					return true;
 	    		}
@@ -463,7 +468,12 @@ public class MainActivity extends Activity {
 			}
 		case KeyEvent.KEYCODE_FOCUS:
 			{
-				preview.requestAutoFocus();
+				// important not to repeatedly request focus, even though preview.requestAutoFocus() will cancel - causes problem with hardware camera key where a half-press means to focus
+				if( !preview.isFocusWaiting() ) {
+    				if( MyDebug.LOG )
+    					Log.d(TAG, "request focus due to focus key");
+    				preview.requestAutoFocus();
+				}
 	            return true;
 			}
 		case KeyEvent.KEYCODE_ZOOM_IN:
