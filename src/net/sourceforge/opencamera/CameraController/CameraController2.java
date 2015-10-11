@@ -2848,7 +2848,7 @@ public class CameraController2 extends CameraController {
 				camera_settings.setAEMode(previewBuilder, false); // not sure if needed, but the AE mode is set again in Camera2Basic
 				// n.b., if capture/setRepeatingRequest throw exception, we don't call the take_picture_error_cb.onError() callback, as the photo should have been taken by this point
 				try {
-		            if( !camera_settings.ae_lock && camera_settings.flash_value.equals("flash_on") ) {
+		            /*if( !camera_settings.ae_lock && camera_settings.flash_value.equals("flash_on") ) {
 						// hack - needed to fix bug on Nexus 6 where auto-exposure sometimes locks when taking a photo of bright scene with flash on!
 		            	// this doesn't completely resolve the issue, but seems to make it far less common; also when it does happen, taking another photo usually fixes it
 		            	previewBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
@@ -2856,7 +2856,7 @@ public class CameraController2 extends CameraController {
 		            	push_set_ae_lock_id = previewBuilder.build();
 		            	capture(push_set_ae_lock_id);
 		            }
-		            else {
+		            else*/ {
 		            	capture();
 		            }
 				}
