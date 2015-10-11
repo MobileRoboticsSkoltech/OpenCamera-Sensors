@@ -667,8 +667,11 @@ public class CameraController2 extends CameraController {
 		for(android.util.Size camera_size : camera_preview_sizes) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
-			if( camera_size.getWidth() > display_size.x || camera_size.getHeight() > display_size.y )
-				continue; // Nexus 6 returns these, even though not supported?! (get green corruption lines if we allow these)
+			if( camera_size.getWidth() > display_size.x || camera_size.getHeight() > display_size.y ) {
+				// Nexus 6 returns these, even though not supported?! (get green corruption lines if we allow these)
+				// Google Camera filters anything larger than height 1080, with a todo saying to use device's measurements
+				continue;
+			}
 			camera_features.preview_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 		
