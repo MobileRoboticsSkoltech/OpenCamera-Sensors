@@ -343,6 +343,8 @@ public class CameraController2 extends CameraController {
 		thread.start(); 
 		handler = new Handler(thread.getLooper());
 
+		final CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
+
 		class MyStateCallback extends CameraDevice.StateCallback {
 			boolean callback_done = false;
 			boolean first_callback = true; // Google Camera says we may get multiple callbacks, but only the first indicates the status of the camera opening operation
@@ -353,10 +355,24 @@ public class CameraController2 extends CameraController {
 				if( first_callback ) {
 					first_callback = false;
 
-					CameraController2.this.camera = cam;
+				    try {
+				    	// we should be able to get characteristics at any time, but Google Camera only does so when camera opened - so do so similarly to be safe
+						characteristics = manager.getCameraCharacteristics(cameraIdS);
 
-					// note, this won't start the preview yet, but we create the previewBuilder in order to start setting camera parameters
-					createPreviewRequest();
+						CameraController2.this.camera = cam;
+
+						// note, this won't start the preview yet, but we create the previewBuilder in order to start setting camera parameters
+						createPreviewRequest();
+					}
+				    catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to get camera characteristics");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+						// don't throw CameraControllerException here - instead error is handled by setting callback_done to callback_done, and the fact that camera will still be null
+					}
 
 					callback_done = true;
 				}
@@ -416,11 +432,9 @@ public class CameraController2 extends CameraController {
 		};
 		MyStateCallback myStateCallback = new MyStateCallback();
 
-		CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 		try {
 			this.cameraIdS = manager.getCameraIdList()[cameraId];
 			manager.openCamera(cameraIdS, myStateCallback, handler);
-		    characteristics = manager.getCameraCharacteristics(cameraIdS);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
