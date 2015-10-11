@@ -2603,6 +2603,7 @@ public class CameraController2 extends CameraController {
 
 	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 		private long last_af_state_frame_number = 0;
+		private int last_af_state = -1;
 
 		public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long frameNumber) {
 			if( request.getTag() == RequestTag.CAPTURE ) {
@@ -2639,14 +2640,9 @@ public class CameraController2 extends CameraController {
 				return;
 			}
 			last_af_state_frame_number = result.getFrameNumber();
-			/*int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
-			if( af_state != CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "CONTROL_AF_STATE = " + af_state);
-			}*/
+			int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			/*if( MyDebug.LOG ) {
 				if( autofocus_cb == null ) {
-					int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
 						Log.d(TAG, "processAF: autofocus success but no callback set");
 					else if( af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED )
@@ -2656,10 +2652,9 @@ public class CameraController2 extends CameraController {
 			if( state == STATE_NORMAL ) {
 				// do nothing
 			}
-			else if( state == STATE_WAITING_AUTOFOCUS ) {
+			else if( state == STATE_WAITING_AUTOFOCUS && af_state != last_af_state ) {
 				// check for autofocus completing
-				int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
-				//Log.d(TAG, "onCaptureCompleted: af_state: " + af_state);
+				// need to check that af_state != last_af_state, otherwise
 				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ||
 						af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED
 						) {
@@ -2669,6 +2664,7 @@ public class CameraController2 extends CameraController {
 							Log.d(TAG, "onCaptureCompleted: autofocus success");
 						else
 							Log.d(TAG, "onCaptureCompleted: autofocus failed");
+						Log.d(TAG, "af_state: " + af_state);
 					}
 					state = STATE_NORMAL;
 					// we need to cancel af trigger, otherwise sometimes things seem to get confused, with the autofocus thinking it's completed too early
@@ -2685,6 +2681,12 @@ public class CameraController2 extends CameraController {
 					}
 				}
 			}
+
+			if( af_state != last_af_state ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "CONTROL_AF_STATE changed from " + last_af_state + " to " + af_state);
+			}
+			last_af_state = af_state;
 		}
 		
 		private void processCompleted(CaptureRequest request, CaptureResult result) {
@@ -2877,7 +2879,7 @@ public class CameraController2 extends CameraController {
 					}
 					e.printStackTrace();
 					preview_error_cb.onError();
-				} 
+				}
 			}
 		}
 	};
