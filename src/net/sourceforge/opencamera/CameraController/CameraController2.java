@@ -345,16 +345,21 @@ public class CameraController2 extends CameraController {
 
 		class MyStateCallback extends CameraDevice.StateCallback {
 			boolean callback_done = false;
+			boolean first_callback = true; // Google Camera says we may get multiple callbacks, but only the first indicates the status of the camera opening operation
 			@Override
 			public void onOpened(CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera opened");
-				CameraController2.this.camera = cam;
+				if( first_callback ) {
+					first_callback = false;
 
-				// note, this won't start the preview yet, but we create the previewBuilder in order to start setting camera parameters
-				createPreviewRequest();
+					CameraController2.this.camera = cam;
 
-				callback_done = true;
+					// note, this won't start the preview yet, but we create the previewBuilder in order to start setting camera parameters
+					createPreviewRequest();
+
+					callback_done = true;
+				}
 			}
 
 			@Override
@@ -362,20 +367,27 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera closed");
 				// caller should ensure camera variables are set to null
+				if( first_callback ) {
+					first_callback = false;
+				}
 			}
 
 			@Override
 			public void onDisconnected(CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera disconnected");
-				// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
-				CameraController2.this.camera = null;
-				if( MyDebug.LOG )
-					Log.d(TAG, "onDisconnected: camera is now set to null");
-				cam.close();
-				if( MyDebug.LOG )
-					Log.d(TAG, "onDisconnected: camera is now closed");
-				callback_done = true;
+				if( first_callback ) {
+					first_callback = false;
+					// must call close() if disconnected before camera was opened
+					// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
+					CameraController2.this.camera = null;
+					if( MyDebug.LOG )
+						Log.d(TAG, "onDisconnected: camera is now set to null");
+					cam.close();
+					if( MyDebug.LOG )
+						Log.d(TAG, "onDisconnected: camera is now closed");
+					callback_done = true;
+				}
 			}
 
 			@Override
@@ -384,6 +396,13 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "camera error: " + error);
 					Log.d(TAG, "received camera: " + cam);
 					Log.d(TAG, "actual camera: " + CameraController2.this.camera);
+				}
+				if( first_callback ) {
+					first_callback = false;
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "error occurred after camera was opened");
 				}
 				// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
 				CameraController2.this.camera = null;
