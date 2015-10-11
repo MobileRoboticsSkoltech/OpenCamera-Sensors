@@ -424,8 +424,26 @@ public class CameraController2 extends CameraController {
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
-				Log.e(TAG, "failed to open camera");
+				Log.e(TAG, "failed to open camera: CameraAccessException");
 				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
+		catch(UnsupportedOperationException e) {
+			// Google Camera catches UnsupportedOperationException
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to open camera: UnsupportedOperationException");
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
+		catch(SecurityException e) {
+			// Google Camera catches SecurityException
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to open camera: SecurityException");
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
