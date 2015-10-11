@@ -2287,7 +2287,10 @@ public class CameraController2 extends CameraController {
 		state = STATE_WAITING_AUTOFOCUS;
 		this.autofocus_cb = cb;
 		// Camera2Basic sets a repeating request rather than capture, for doing autofocus (and if we do a capture(), sometimes have problem that autofocus never returns)
+		// Google Camera does a capture, and then does a repeating request after setting back to idle
 		try {
+			capture();
+	    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 			setRepeatingRequest();
 		}
 		catch(CameraAccessException e) {
