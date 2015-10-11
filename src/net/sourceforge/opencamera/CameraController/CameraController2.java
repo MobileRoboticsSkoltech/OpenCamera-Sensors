@@ -86,6 +86,10 @@ public class CameraController2 extends CameraController {
 	private boolean capture_result_has_frame_duration = false;
 	private long capture_result_frame_duration = 0;
 	
+	private static enum RequestTag {
+		CAPTURE
+	}
+	
 	private class CameraSettings {
 		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
 		private int rotation = 0;
@@ -2349,10 +2353,11 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
 			}
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			stillBuilder.setTag(RequestTag.CAPTURE);
 			camera_settings.setupBuilder(stillBuilder, true);
 			stillBuilder.addTarget(imageReader.getSurface());
 
-			CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
+			/*CameraCaptureSession.CaptureCallback stillCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
 				public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long frameNumber) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "still onCaptureStarted");
@@ -2402,9 +2407,10 @@ public class CameraController2 extends CameraController {
 						preview_error_cb.onError();
 					} 
 				}
-			};
+			};*/
 			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
-			captureSession.capture(stillBuilder.build(), stillCaptureCallback, null);
+			//captureSession.capture(stillBuilder.build(), stillCaptureCallback, null);
+			captureSession.capture(stillBuilder.build(), previewCaptureCallback, null);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -2590,6 +2596,15 @@ public class CameraController2 extends CameraController {
 
 	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 		private long last_af_state_frame_number = 0;
+
+		public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long frameNumber) {
+			if( request.getTag() == RequestTag.CAPTURE ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onCaptureStarted: capture");
+				if( sounds_enabled )
+					media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+			}
+		}
 
 		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
 			processAF(request, partialResult);
@@ -2812,6 +2827,49 @@ public class CameraController2 extends CameraController {
 						Log.e(TAG, "message: " + e.getMessage());
 					}
 					e.printStackTrace();
+				} 
+			}
+			
+			if( request.getTag() == RequestTag.CAPTURE ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "capture request completed");
+				// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
+				// need to cancel the autofocus, and restart the preview after taking the photo
+				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+				camera_settings.setAEMode(previewBuilder, false); // not sure if needed, but the AE mode is set again in Camera2Basic
+				// n.b., if capture/setRepeatingRequest throw exception, we don't call the take_picture_error_cb.onError() callback, as the photo should have been taken by this point
+				try {
+		            if( !camera_settings.ae_lock && camera_settings.flash_value.equals("flash_on") ) {
+						// hack - needed to fix bug on Nexus 6 where auto-exposure sometimes locks when taking a photo of bright scene with flash on!
+		            	// this doesn't completely resolve the issue, but seems to make it far less common; also when it does happen, taking another photo usually fixes it
+		            	previewBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
+		            	push_set_ae_lock = true;
+		            	push_set_ae_lock_id = previewBuilder.build();
+		            	capture(push_set_ae_lock_id);
+		            }
+		            else {
+		            	capture();
+		            }
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to cancel autofocus after taking photo");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+				}
+				try {
+					setRepeatingRequest();
+				}
+				catch(CameraAccessException e) {
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "failed to start preview after taking photo");
+						Log.e(TAG, "reason: " + e.getReason());
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+					preview_error_cb.onError();
 				} 
 			}
 		}
