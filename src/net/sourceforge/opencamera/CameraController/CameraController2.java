@@ -1960,7 +1960,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "no camera or capture session");
 			return;
 		}
-		captureSession.setRepeatingRequest(request, previewCaptureCallback, null);
+		captureSession.setRepeatingRequest(request, previewCaptureCallback, handler);
 	}
 
 	private void capture() throws CameraAccessException {
@@ -1975,7 +1975,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "no camera or capture session");
 			return;
 		}
-		captureSession.capture(request, previewCaptureCallback, null);
+		captureSession.capture(request, previewCaptureCallback, handler);
 	}
 	
 	private void createPreviewRequest() {
@@ -2417,7 +2417,7 @@ public class CameraController2 extends CameraController {
 			};*/
 			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
 			//captureSession.capture(stillBuilder.build(), stillCaptureCallback, null);
-			captureSession.capture(stillBuilder.build(), previewCaptureCallback, null);
+			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
