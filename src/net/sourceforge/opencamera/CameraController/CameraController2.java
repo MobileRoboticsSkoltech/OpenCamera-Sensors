@@ -72,8 +72,8 @@ public class CameraController2 extends CameraController {
 	
 	private static final int STATE_NORMAL = 0;
 	private static final int STATE_WAITING_AUTOFOCUS = 1;
-	private static final int STATE_WAITING_PRECAPTURE_START = 2;
-	private static final int STATE_WAITING_PRECAPTURE_DONE = 3;
+	//private static final int STATE_WAITING_PRECAPTURE_START = 2;
+	//private static final int STATE_WAITING_PRECAPTURE_DONE = 3;
 	private int state = STATE_NORMAL;
 	
 	private MediaActionSound media_action_sound = new MediaActionSound();
@@ -2368,17 +2368,14 @@ public class CameraController2 extends CameraController {
 		}
 	}
 
-	private void runPrecapture() {
+	/*private void runPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "runPrecapture");
-		/*takePictureAfterPrecapture();
-		if( true )
-			return;*/
 		// first run precapture sequence
 		// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
-    	/*previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-    	state = STATE_WAITING_PRECAPTURE_START;
-    	capture();*/
+    	//previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+    	//state = STATE_WAITING_PRECAPTURE_START;
+    	//capture();
 		try {
 			CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 			camera_settings.setupBuilder(precaptureBuilder, false);
@@ -2401,7 +2398,7 @@ public class CameraController2 extends CameraController {
 				return;
 			}
 		}
-	}
+	}*/
 	
 	@Override
 	public void takePicture(final PictureCallback raw, final PictureCallback jpeg, final ErrorCallback error) {
@@ -2415,12 +2412,13 @@ public class CameraController2 extends CameraController {
 		}
 		this.jpeg_cb = jpeg;
 		this.take_picture_error_cb = error;
-		if( camera_settings.has_iso ) {
+		takePictureAfterPrecapture(); // take photo without precapture - Google Camera with Camera 2 API doesn't do precapture either
+		/*if( camera_settings.has_iso ) {
 			takePictureAfterPrecapture();
 		}
 		else {
 			runPrecapture();
-		}
+		}*/
 
 		/*camera_settings.setupBuilder(previewBuilder, false);
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
@@ -2593,7 +2591,7 @@ public class CameraController2 extends CameraController {
 					}
 				}
 			}
-			else if( state == STATE_WAITING_PRECAPTURE_START ) {
+			/*else if( state == STATE_WAITING_PRECAPTURE_START ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "waiting for precapture start...");
 				// CONTROL_AE_STATE can be null on some devices
@@ -2627,7 +2625,7 @@ public class CameraController2 extends CameraController {
 					state = STATE_NORMAL;
 					takePictureAfterPrecapture();
 				}
-			}
+			}*/
 			
 			if( is_total ) {
 				if( result.get(CaptureResult.SENSOR_SENSITIVITY) != null ) {
