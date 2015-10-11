@@ -2536,18 +2536,19 @@ public class CameraController2 extends CameraController {
 
 	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() { 
 		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
-			process(request, partialResult, false);
+			processAF(request, partialResult);
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
 		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-			process(request, result, true);
+			processAF(request, result);
+			processCompleted(request, result);
 			super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
-		private void process(CaptureRequest request, CaptureResult result, boolean is_total) {
+		private void processAF(CaptureRequest request, CaptureResult result) {
 			/*if( MyDebug.LOG )
-				Log.d(TAG, "preview onCaptureCompleted, state: " + state);*/
+			Log.d(TAG, "preview processAF, state: " + state);*/
 			/*int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			if( af_state != CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN ) {
 				if( MyDebug.LOG )
@@ -2557,9 +2558,9 @@ public class CameraController2 extends CameraController {
 				if( autofocus_cb == null ) {
 					int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
-						Log.d(TAG, "onCaptureCompleted: autofocus success but no callback set");
+						Log.d(TAG, "processAF: autofocus success but no callback set");
 					else if( af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED )
-						Log.d(TAG, "onCaptureCompleted: autofocus failed but no callback set");
+						Log.d(TAG, "processAF: autofocus failed but no callback set");
 				}
 			}*/
 			if( state == STATE_NORMAL ) {
@@ -2582,7 +2583,7 @@ public class CameraController2 extends CameraController {
 				    	/*previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 				    	capture();
 				    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);*/
-
+	
 						/*if( jpeg_cb != null ) {
 							runPrecapture();
 						}
@@ -2593,7 +2594,10 @@ public class CameraController2 extends CameraController {
 					}
 				}
 			}
-			/*else if( state == STATE_WAITING_PRECAPTURE_START ) {
+		}
+		
+		private void processCompleted(CaptureRequest request, CaptureResult result) {
+			/*if( state == STATE_WAITING_PRECAPTURE_START ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "waiting for precapture start...");
 				// CONTROL_AE_STATE can be null on some devices
@@ -2629,63 +2633,61 @@ public class CameraController2 extends CameraController {
 				}
 			}*/
 			
-			if( is_total ) {
-				if( result.get(CaptureResult.SENSOR_SENSITIVITY) != null ) {
-					capture_result_has_iso = true;
-					capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
-					/*if( MyDebug.LOG )
-						Log.d(TAG, "capture_result_iso: " + capture_result_iso);*/
-					if( camera_settings.has_iso && camera_settings.iso != capture_result_iso ) {
-						// ugly hack: problem that when we start recording video (video_recorder.start() call), this often causes the ISO setting to reset to the wrong value!
-						// seems to happen more often with shorter exposure time
-						// seems to happen on other camera apps with Camera2 API too
-						// this workaround still means a brief flash with incorrect ISO, but is best we can do for now!
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "ISO " + capture_result_iso + " different to requested ISO " + camera_settings.iso);
-							Log.d(TAG, "    requested ISO was: " + request.get(CaptureRequest.SENSOR_SENSITIVITY));
-							Log.d(TAG, "    requested AE mode was: " + request.get(CaptureRequest.CONTROL_AE_MODE));
-						}
-						try {
-							setRepeatingRequest();
-						}
-						catch(CameraAccessException e) {
-							if( MyDebug.LOG ) {
-								Log.e(TAG, "failed to set repeating request after ISO hack");
-								Log.e(TAG, "reason: " + e.getReason());
-								Log.e(TAG, "message: " + e.getMessage());
-							}
-							e.printStackTrace();
-						} 
+			if( result.get(CaptureResult.SENSOR_SENSITIVITY) != null ) {
+				capture_result_has_iso = true;
+				capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "capture_result_iso: " + capture_result_iso);*/
+				if( camera_settings.has_iso && camera_settings.iso != capture_result_iso ) {
+					// ugly hack: problem that when we start recording video (video_recorder.start() call), this often causes the ISO setting to reset to the wrong value!
+					// seems to happen more often with shorter exposure time
+					// seems to happen on other camera apps with Camera2 API too
+					// this workaround still means a brief flash with incorrect ISO, but is best we can do for now!
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "ISO " + capture_result_iso + " different to requested ISO " + camera_settings.iso);
+						Log.d(TAG, "    requested ISO was: " + request.get(CaptureRequest.SENSOR_SENSITIVITY));
+						Log.d(TAG, "    requested AE mode was: " + request.get(CaptureRequest.CONTROL_AE_MODE));
 					}
+					try {
+						setRepeatingRequest();
+					}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to set repeating request after ISO hack");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+					} 
 				}
-				else {
-					capture_result_has_iso = false;
-				}
+			}
+			else {
+				capture_result_has_iso = false;
+			}
+			if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {
+				capture_result_has_exposure_time = true;
+				capture_result_exposure_time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+			}
+			else {
+				capture_result_has_exposure_time = false;
+			}
+			if( result.get(CaptureResult.SENSOR_FRAME_DURATION) != null ) {
+				capture_result_has_frame_duration = true;
+				capture_result_frame_duration = result.get(CaptureResult.SENSOR_FRAME_DURATION);
+			}
+			else {
+				capture_result_has_frame_duration = false;
+			}
+			/*if( MyDebug.LOG ) {
 				if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {
-					capture_result_has_exposure_time = true;
-					capture_result_exposure_time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
-				}
-				else {
-					capture_result_has_exposure_time = false;
+					long capture_result_exposure_time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+					Log.d(TAG, "capture_result_exposure_time: " + capture_result_exposure_time);
 				}
 				if( result.get(CaptureResult.SENSOR_FRAME_DURATION) != null ) {
-					capture_result_has_frame_duration = true;
-					capture_result_frame_duration = result.get(CaptureResult.SENSOR_FRAME_DURATION);
+					long capture_result_frame_duration = result.get(CaptureResult.SENSOR_FRAME_DURATION);
+					Log.d(TAG, "capture_result_frame_duration: " + capture_result_frame_duration);
 				}
-				else {
-					capture_result_has_frame_duration = false;
-				}
-				/*if( MyDebug.LOG ) {
-					if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {
-						long capture_result_exposure_time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
-						Log.d(TAG, "capture_result_exposure_time: " + capture_result_exposure_time);
-					}
-					if( result.get(CaptureResult.SENSOR_FRAME_DURATION) != null ) {
-						long capture_result_frame_duration = result.get(CaptureResult.SENSOR_FRAME_DURATION);
-						Log.d(TAG, "capture_result_frame_duration: " + capture_result_frame_duration);
-					}
-				}*/
-			}
+			}*/
 
 			if( face_detection_listener != null && previewBuilder != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL ) {
 				Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
@@ -2699,7 +2701,7 @@ public class CameraController2 extends CameraController {
 				}
 			}
 			
-			if( is_total && push_repeating_request_when_torch_off && push_repeating_request_when_torch_off_id == request ) {
+			if( push_repeating_request_when_torch_off && push_repeating_request_when_torch_off_id == request ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "received push_repeating_request_when_torch_off");
 				Integer flash_state = result.get(CaptureResult.FLASH_STATE);
@@ -2725,7 +2727,7 @@ public class CameraController2 extends CameraController {
 					} 
 				}
 			}
-			if( is_total && push_set_ae_lock && push_set_ae_lock_id == request ) {
+			if( push_set_ae_lock && push_set_ae_lock_id == request ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "received push_set_ae_lock");
 				push_set_ae_lock = false;
