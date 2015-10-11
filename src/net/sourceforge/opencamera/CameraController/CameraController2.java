@@ -2584,9 +2584,12 @@ public class CameraController2 extends CameraController {
 				// check for autofocus completing
 				int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 				//Log.d(TAG, "onCaptureCompleted: af_state: " + af_state);
-				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ) {
+				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ||
+						af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED
+						) {
+					boolean focus_success = af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED;
 					if( MyDebug.LOG ) {
-						if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
+						if( focus_success )
 							Log.d(TAG, "onCaptureCompleted: autofocus success");
 						else
 							Log.d(TAG, "onCaptureCompleted: autofocus failed");
@@ -2601,7 +2604,7 @@ public class CameraController2 extends CameraController {
 						runPrecapture();
 					}
 					else*/ if( autofocus_cb != null ) {
-						autofocus_cb.onAutoFocus(af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED);
+						autofocus_cb.onAutoFocus(focus_success);
 						autofocus_cb = null;
 					}
 				}
