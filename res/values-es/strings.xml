@@ -258,7 +258,6 @@
     <string name="failed_create_folder">Fallo al crear la carpeta</string>
     <string name="folder_exists">La carpeta ya existe</string>
 
-
     <string name="saf_select_save_location">Selecciona el lugar de guardado</string>
     <string name="saf_cancelled">Framework de Almacenamiento de Acceso cancelado</string>   
 </resources>
