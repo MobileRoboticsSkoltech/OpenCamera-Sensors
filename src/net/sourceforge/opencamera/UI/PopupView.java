@@ -455,6 +455,7 @@ public class PopupView extends LinearLayout {
         		}
         		else {
         			Button button = new Button(this.getContext());
+        			button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
         			view = button;
         			ll2.addView(view);
 
@@ -613,7 +614,13 @@ public class PopupView extends LinearLayout {
     		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
         	this.addView(text_view);
 
-        	LinearLayout ll2 = new LinearLayout(this.getContext());
+			/*final Button prev_button = new Button(this.getContext());
+			//prev_button.setBackgroundResource(R.drawable.exposure);
+			prev_button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
+			prev_button.setText("<");
+			this.addView(prev_button);*/
+
+			LinearLayout ll2 = new LinearLayout(this.getContext());
             ll2.setOrientation(LinearLayout.HORIZONTAL);
             
 			final TextView resolution_text_view = new TextView(this.getContext());
@@ -625,6 +632,7 @@ public class PopupView extends LinearLayout {
 
 			final float scale = getResources().getDisplayMetrics().density;
 			final Button prev_button = new Button(this.getContext());
+			prev_button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
 			ll2.addView(prev_button);
 			prev_button.setText("<");
 			prev_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
@@ -639,6 +647,7 @@ public class PopupView extends LinearLayout {
         	ll2.addView(resolution_text_view);
 
 			final Button next_button = new Button(this.getContext());
+			next_button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
 			ll2.addView(next_button);
 			next_button.setText(">");
 			next_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
