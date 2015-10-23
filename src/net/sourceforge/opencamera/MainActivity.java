@@ -369,13 +369,14 @@ public class MainActivity extends Activity {
 		editor.apply();
 	}
 
+	@SuppressWarnings("deprecation")
 	public boolean onKeyDown(int keyCode, KeyEvent event) { 
 		if( MyDebug.LOG )
 			Log.d(TAG, "onKeyDown: " + keyCode);
 		switch( keyCode ) {
         case KeyEvent.KEYCODE_VOLUME_UP:
         case KeyEvent.KEYCODE_VOLUME_DOWN:
-        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+        case KeyEvent.KEYCODE_MEDIA_PREVIOUS: // media codes are for "selfie sticks" buttons
         case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
         case KeyEvent.KEYCODE_MEDIA_STOP:
 	        {
@@ -388,7 +389,7 @@ public class MainActivity extends Activity {
 	        		&&!(volume_keys.equals("volume_take_photo"))) {
 	        		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
 	        		if(audioManager==null) break;
-	        		if(!audioManager.isWiredHeadsetOn()) break;
+	        		if(!audioManager.isWiredHeadsetOn()) break; // isWiredHeadsetOn() is deprecated, but comment says "Use only to check is a headset is connected or not."
 	        	}
 	    		
 	    		if( volume_keys.equals("volume_take_photo") ) {
