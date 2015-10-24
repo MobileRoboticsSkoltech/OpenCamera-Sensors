@@ -27,9 +27,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -51,6 +53,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -3305,6 +3308,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				});
 	        	camera_controller.initVideoRecorderPrePrepare(video_recorder);
 				boolean record_audio = applicationInterface.getRecordAudioPref();
+				if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
+					// needed for Android 6, in case users deny storage permission, otherwise we'll crash
+					// see https://developer.android.com/training/permissions/requesting.html
+					// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+					if( MyDebug.LOG )
+						Log.e(TAG, "don't have RECORD_AUDIO permission");
+					showToast(null, R.string.permission_record_audio_not_available);
+					record_audio = false;
+				}
 				if( record_audio ) {
 	        		String pref_audio_src = applicationInterface.getRecordAudioSourcePref();
 		    		if( MyDebug.LOG )

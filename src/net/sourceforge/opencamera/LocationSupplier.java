@@ -1,13 +1,16 @@
 package net.sourceforge.opencamera;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 public class LocationSupplier {
@@ -94,6 +97,15 @@ public class LocationSupplier {
 		// we only set it up if store_location is true, to avoid unnecessarily wasting battery
 		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
 		if( store_location && locationListeners == null ) {
+			if( ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+				ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+				// needed for Android 6, in case users deny location permission, otherwise we get java.lang.SecurityException from locationManager.requestLocationUpdates()
+				// see https://developer.android.com/training/permissions/requesting.html
+				// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+				if( MyDebug.LOG )
+					Log.e(TAG, "don't have ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permissions");
+				return;
+			}
 			locationListeners = new MyLocationListener[2];
 			locationListeners[0] = new MyLocationListener();
 			locationListeners[1] = new MyLocationListener();

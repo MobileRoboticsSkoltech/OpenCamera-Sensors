@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -13,6 +14,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.media.MediaScannerConnection;
@@ -26,6 +28,7 @@ import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.provider.MediaStore.Video.VideoColumns;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 public class StorageUtils {
@@ -472,6 +475,14 @@ public class StorageUtils {
     private Media getLatestMedia(boolean video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getLatestMedia: " + (video ? "video" : "images"));
+		if( ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+			// needed for Android 6, in case users deny storage permission, otherwise we get java.lang.SecurityException from ContentResolver.query()
+			// see https://developer.android.com/training/permissions/requesting.html
+			// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+			if( MyDebug.LOG )
+				Log.e(TAG, "don't have READ_EXTERNAL_STORAGE permission");
+			return null;
+		}
     	Media media = null;
 		Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 		//Uri query = baseUri.buildUpon().appendQueryParameter("limit", "1").build();

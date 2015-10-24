@@ -793,6 +793,10 @@ available from
 Version 1.27 (Work in progress)
 
 FIXED   Crash on Android 6 when accessing popup menu.
+FIXED   Crashes on Android 6 if users have denied permissions (currently Open
+        Camera won't request permissions at runtime, and please don't expect
+        well-defined behaviour if you've blocked a permission, this is a quick
+        fix to prevent crashes).
 FIXED   Problems when holding down volume/focus/camera key to focus.
 FIXED   Camera2 API photos sometimes taken before focused; autofocus square
         sometimes turned green immediately before focus actually succeeded.

@@ -261,4 +261,7 @@
 
     <string name="saf_select_save_location">Select a save location</string>
     <string name="saf_cancelled">Storage Access Framework cancelled</string>
+    
+    <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
+    <string name="permission_record_audio_not_available">Microphone permission is not available</string>
 </resources>
