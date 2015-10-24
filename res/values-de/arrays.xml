@@ -357,29 +357,29 @@
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>Standard</item>
-        <item>100Kbit/s</item>
-        <item>200Kbit/s</item>
-        <item>500Kbit/s</item>
-        <item>1Mbit/s</item>
-        <item>2Mbit/s</item>
-        <item>3Mbit/s</item>
-        <item>4Mbit/s</item>
-        <item>5Mbit/s</item>
-        <item>6Mbit/s</item>
-        <item>7Mbit/s</item>
-        <item>8Mbit/s</item>
-        <item>9Mbit/s</item>
-        <item>10Mbit/s</item>
-        <item>15Mbit/s</item>
-        <item>20Mbit/s</item>
-        <item>30Mbit/s</item>
-        <item>40Mbit/s</item>
-        <item>50Mbit/s</item>
-        <item>60Mbit/s</item>
-        <item>70Mbit/s</item>
-        <item>80Mbit/s</item>
-        <item>90Mbit/s</item>
-        <item>100Mbit/s</item>
+        <item>100kbps</item>
+        <item>200kbps</item>
+        <item>500kbps</item>
+        <item>1Mbps</item>
+        <item>2Mbps</item>
+        <item>3Mbps</item>
+        <item>4Mbps</item>
+        <item>5Mbps</item>
+        <item>6Mbps</item>
+        <item>7Mbps</item>
+        <item>8Mbps</item>
+        <item>9Mbps</item>
+        <item>10Mbps</item>
+        <item>15Mbps</item>
+        <item>20Mbps</item>
+        <item>30Mbps</item>
+        <item>40Mbps</item>
+        <item>50Mbps</item>
+        <item>60Mbps</item>
+        <item>70Mbps</item>
+        <item>80Mbps</item>
+        <item>90Mbps</item>
+        <item>100Mbps</item>
     </string-array>
     <string-array name="preference_video_bitrate_values">
         <item>default</item>
