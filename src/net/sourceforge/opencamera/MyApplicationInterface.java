@@ -787,6 +787,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public void stoppingVideo() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "stoppingVideo()");
 		main_activity.unlockScreen();
 		if( main_activity.getPreview().isVideoRecording() ) {
 			String toast = getContext().getResources().getString(R.string.stopped_recording_video);

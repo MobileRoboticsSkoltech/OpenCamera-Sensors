@@ -931,14 +931,20 @@ public class MainActivity extends Activity {
     }
     
     private void setTakePhotoIcon() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setTakePhotoIcon()");
 		// set icon for taking photos vs videos
 		ImageButton view = (ImageButton)findViewById(R.id.take_photo);
 		if( preview != null ) {
 			int resource = 0;
 			if( preview.isVideo() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set icon to video");
 				resource = preview.isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector;
 			}
 			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set icon to photo");
 				resource = R.drawable.take_photo_selector;
 			}
 			view.setImageResource(resource);
