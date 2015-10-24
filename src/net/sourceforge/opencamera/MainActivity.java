@@ -1784,10 +1784,12 @@ public class MainActivity extends Activity {
             Uri treeUri = resultData.getData();
     		if( MyDebug.LOG )
     			Log.d(TAG, "returned treeUri: " + treeUri);
-            ContentResolver contentResolver = this.getContentResolver();
-            contentResolver.takePersistableUriPermission(treeUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    		// from https://developer.android.com/guide/topics/providers/document-provider.html#permissions :
+    		final int takeFlags = resultData.getFlags()
+    	            & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+    	            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+	    	// Check for the freshest data.
+	    	getContentResolver().takePersistableUriPermission(treeUri, takeFlags);
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), treeUri.toString());
