@@ -680,6 +680,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public void stopVideo(boolean from_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stopVideo()");
+		if( video_recorder == null ) {
+			// no need to do anything if not recording
+			// (important to exit, otherwise we'll momentarily switch the take photo icon to video mode in MyApplicationInterface.stoppingVideo() when opening the settings in landscape mode
+			if( MyDebug.LOG )
+				Log.d(TAG, "video wasn't recording anyway");
+			return;
+		}
 		applicationInterface.stoppingVideo();
 		if( restartVideoTimerTask != null ) {
 			restartVideoTimerTask.cancel();
