@@ -65,6 +65,7 @@
         <item>Désactivé</item>
         <item>1s</item>
         <item>2s</item>
+        <item>3s</item>
         <item>5s</item>
         <item>10s</item>
         <item>15s</item>
@@ -78,6 +79,7 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>
@@ -109,6 +111,7 @@
         <item>Pas de délai</item>
         <item>1s</item>
         <item>2s</item>
+        <item>3s</item>
         <item>5s</item>
         <item>10s</item>
         <item>15s</item>
@@ -127,6 +130,7 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>

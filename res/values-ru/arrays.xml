@@ -65,6 +65,7 @@
         <item>Нет</item>
         <item>1 секунда</item>
         <item>2 секунды</item>
+        <item>3 секунды</item>
         <item>5 секунд</item>
         <item>10 секунд</item>
         <item>15 секунд</item>
@@ -78,6 +79,7 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>
@@ -109,6 +111,7 @@
         <item>Без задержки</item>
         <item>1 секунда</item>
         <item>2 секунды</item>
+        <item>3 секунды</item>
         <item>5 секунд</item>
         <item>10 секунд</item>
         <item>15 секунд</item>
@@ -127,6 +130,7 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>

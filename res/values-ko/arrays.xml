@@ -65,6 +65,7 @@
         <item>타이머 없음</item>
         <item>1초</item>
         <item>2초</item>
+        <item>3초</item>
         <item>5초</item>
         <item>10초</item>
         <item>15초</item>
@@ -78,6 +79,7 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>
@@ -109,6 +111,7 @@
         <item>지연 없음</item>
         <item>1초</item>
         <item>2초</item>
+        <item>3초</item>
         <item>5초</item>
         <item>10초</item>
         <item>15초</item>
@@ -127,6 +130,7 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>

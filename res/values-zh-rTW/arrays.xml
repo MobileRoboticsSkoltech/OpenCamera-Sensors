@@ -65,6 +65,7 @@
         <item>無定時器</item>
         <item>1秒</item>
         <item>2秒</item>
+        <item>3秒</item>
         <item>5秒</item>
         <item>10秒</item>
         <item>15秒</item>
@@ -78,6 +79,7 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>
@@ -109,6 +111,7 @@
         <item>無延遲</item>
         <item>1秒</item>
         <item>2秒</item>
+        <item>3秒</item>
         <item>5秒</item>
         <item>10秒</item>
         <item>15秒</item>
@@ -127,6 +130,7 @@
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
         <item>5</item>
         <item>10</item>
         <item>15</item>
