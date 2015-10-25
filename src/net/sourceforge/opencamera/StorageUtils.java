@@ -160,8 +160,8 @@ public class StorageUtils {
 					public void onScanCompleted(String path, Uri uri) {
     		 			failed_to_scan = false;
     		 			if( MyDebug.LOG ) {
-    		 				Log.d("ExternalStorage", "Scanned " + path + ":");
-    		 				Log.d("ExternalStorage", "-> uri=" + uri);
+    		 				Log.d(TAG, "Scanned " + path + ":");
+    		 				Log.d(TAG, "-> uri=" + uri);
     		 			}
     		 			last_media_scanned = uri;
     		 			announceUri(uri, is_new_picture, is_new_video);
