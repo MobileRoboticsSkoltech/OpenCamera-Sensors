@@ -88,8 +88,9 @@ public class LocationSupplier {
 			this.test_has_received_location = false;
 	    }
 	}
-	
-	void setupLocationListener() {
+
+	// returns false if location permission not available for either coarse or fine
+	boolean setupLocationListener() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setupLocationListener");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -97,14 +98,17 @@ public class LocationSupplier {
 		// we only set it up if store_location is true, to avoid unnecessarily wasting battery
 		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
 		if( store_location && locationListeners == null ) {
-			if( ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+			if( ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
 				ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
 				// needed for Android 6, in case users deny location permission, otherwise we get java.lang.SecurityException from locationManager.requestLocationUpdates()
 				// see https://developer.android.com/training/permissions/requesting.html
 				// currently we don't bother requesting the permission, as still using targetSdkVersion 22
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.e(TAG, "don't have ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permissions");
-				return;
+					Log.e(TAG, "ACCESS_COARSE_LOCATION returns " + ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION));
+					Log.e(TAG, "ACCESS_FINE_LOCATION returns " + ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION));
+				}
+				return false;
 			}
 			locationListeners = new MyLocationListener[2];
 			locationListeners[0] = new MyLocationListener();
@@ -112,16 +116,34 @@ public class LocationSupplier {
 			
 			// location listeners should be stored in order best to worst
 			// also see https://sourceforge.net/p/opencamera/tickets/1/ - need to check provider is available
+			// now also need to check for permissions - need to support devices that might have one but not both of fine and coarse permissions supplied
 			if( locationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER) ) {
-				locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListeners[1]);
+				if( ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+					locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListeners[1]);
+				}
+				else {
+					Log.e(TAG, "don't have ACCESS_COARSE_LOCATION permission");
+				}
+			}
+			else {
+				Log.e(TAG, "don't have a NETWORK_PROVIDER");
 			}
 			if( locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER) ) {
-				locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListeners[0]);
+				if( ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+					locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListeners[0]);
+				}
+				else {
+					Log.e(TAG, "don't have ACCESS_FINE_LOCATION permission");
+				}
+			}
+			else {
+				Log.e(TAG, "don't have a GPS_PROVIDER");
 			}
 		}
 		else if( !store_location ) {
 			freeLocationListeners();
 		}
+		return true;
 	}
 	
 	void freeLocationListeners() {

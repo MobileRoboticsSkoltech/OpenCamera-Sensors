@@ -264,4 +264,5 @@
     
     <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
     <string name="permission_record_audio_not_available">Microphone permission is not available</string>
+    <string name="permission_location_not_available">Location permission is not available</string>
 </resources>

@@ -588,8 +588,7 @@ public class MainActivity extends Activity {
         mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
 
-        applicationInterface.getLocationSupplier().setupLocationListener();
-        
+        initLocation();
         initSound();
     	loadSound(R.raw.beep);
     	loadSound(R.raw.beep_hi);
@@ -1387,7 +1386,7 @@ public class MainActivity extends Activity {
 		}
 
 		layoutUI(); // needed in case we've changed left/right handed UI
-		applicationInterface.getLocationSupplier().setupLocationListener(); // in case we've enabled GPS
+		initLocation(); // in case we've enabled GPS
 		if( toast_message != null )
 			block_startup_toast = true;
 		if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
@@ -2495,6 +2494,21 @@ public class MainActivity extends Activity {
 		preview.showToast(switch_video_toast, toast_string);
 	}
 
+	private void initLocation() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initLocation");
+        if( !applicationInterface.getLocationSupplier().setupLocationListener() ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "location permission not available, so switch location off");
+    		preview.showToast(null, R.string.permission_location_not_available);
+    		// now switch off so we don't keep showing this message
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
+			editor.apply();
+        }
+	}
+	
 	@SuppressWarnings("deprecation")
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initSound() {

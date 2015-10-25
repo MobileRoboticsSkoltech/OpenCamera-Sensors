@@ -261,6 +261,7 @@ public final class R {
         public static final int off=0x7f080008;
         public static final int on=0x7f080007;
         public static final int parent_folder=0x7f0800ed;
+        public static final int permission_location_not_available=0x7f0800f8;
         /**  the permission names such as Microphone should match what Android calls them in the App permission settings 
          */
         public static final int permission_record_audio_not_available=0x7f0800f7;
