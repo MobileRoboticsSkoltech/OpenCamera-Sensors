@@ -2312,7 +2312,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 		}
 
-		String exif_orientation_s = null;
+		int exif_orientation_s = ExifInterface.ORIENTATION_UNDEFINED;
 		File picFile = null;
 		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
         try {
@@ -2440,7 +2440,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	            	String exif_iso = exif.getAttribute(ExifInterface.TAG_ISO);
     	            	String exif_make = exif.getAttribute(ExifInterface.TAG_MAKE);
     	            	String exif_model = exif.getAttribute(ExifInterface.TAG_MODEL);
-    	            	String exif_orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+    	            	int exif_orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
     	            	exif_orientation_s = exif_orientation; // store for later use (for the thumbnail, to save rereading it)
     	            	String exif_white_balance = exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE);
 
@@ -2486,8 +2486,8 @@ public class MyApplicationInterface implements ApplicationInterface {
         	            	exif_new.setAttribute(ExifInterface.TAG_MAKE, exif_make);
         	            if( exif_model != null )
         	            	exif_new.setAttribute(ExifInterface.TAG_MODEL, exif_model);
-        	            if( exif_orientation != null )
-        	            	exif_new.setAttribute(ExifInterface.TAG_ORIENTATION, exif_orientation);
+        	            if( exif_orientation != ExifInterface.ORIENTATION_UNDEFINED )
+        	            	exif_new.setAttribute(ExifInterface.TAG_ORIENTATION, "" + exif_orientation);
         	            if( exif_white_balance != null )
         	            	exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
         	            setGPSDirectionExif(exif_new);
@@ -2663,40 +2663,45 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return success;
 	}
     
-    private Bitmap rotateForExif(Bitmap bitmap, String exif_orientation_s, String path) {
+    private Bitmap rotateForExif(Bitmap bitmap, int exif_orientation_s, String path) {
 		try {
-			if( exif_orientation_s == null ) {
-				// haven't already read the exif orientation
+			if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED ) {
+				// haven't already read the exif orientation (or it didn't exist?)
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "    read exif orientation");
             	ExifInterface exif = new ExifInterface(path);
-            	exif_orientation_s = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            	exif_orientation_s = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 			}
     		if( MyDebug.LOG )
     			Log.d(TAG, "    exif orientation string: " + exif_orientation_s);
+    		boolean needs_tf = false;
 			int exif_orientation = 0;
 			// from http://jpegclub.org/exif_orientation.html
-			if( exif_orientation_s.equals("0") || exif_orientation_s.equals("1") ) {
-				// leave at 0
+			// and http://stackoverflow.com/questions/20478765/how-to-get-the-correct-orientation-of-the-image-selected-from-the-default-image
+			if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED || exif_orientation_s == ExifInterface.ORIENTATION_NORMAL ) {
+				// leave unchanged
 			}
-			else if( exif_orientation_s.equals("3") ) {
+			else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_180 ) {
+				needs_tf = true;
 				exif_orientation = 180;
 			}
-			else if( exif_orientation_s.equals("6") ) {
+			else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_90 ) {
+				needs_tf = true;
 				exif_orientation = 90;
 			}
-			else if( exif_orientation_s.equals("8") ) {
+			else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_270 ) {
+				needs_tf = true;
 				exif_orientation = 270;
 			}
 			else {
-				// just leave at 0
+				// just leave unchanged for now
 	    		if( MyDebug.LOG )
 	    			Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
 			}
     		if( MyDebug.LOG )
     			Log.d(TAG, "    exif orientation: " + exif_orientation);
 
-			if( exif_orientation != 0 ) {
+			if( needs_tf ) {
 				Matrix m = new Matrix();
 				m.setRotate(exif_orientation, bitmap.getWidth() * 0.5f, bitmap.getHeight() * 0.5f);
 				Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap, 0, 0,bitmap.getWidth(), bitmap.getHeight(), m, true);
