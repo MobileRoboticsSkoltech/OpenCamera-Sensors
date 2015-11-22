@@ -1614,20 +1614,20 @@ public class MyApplicationInterface implements ApplicationInterface {
 				if( remaining_time > 0 ) {
 					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
-					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(244, 67, 54), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500
+	            	String time_s = "";
+	            	if( remaining_time < 60 ) {
+	            		// simpler to just show seconds when less than a minute
+	            		time_s = "" + remaining_time;
+	            	}
+	            	else {
+		            	time_s = getTimeStringFromSeconds(remaining_time);
+	            	}
+					drawTextWithBackground(canvas, p, time_s, Color.rgb(244, 67, 54), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500
 				}
 			}
 			else if( preview.isVideoRecording() ) {
             	long video_time = preview.getVideoTime();
-            	//int ms = (int)(video_time % 1000);
-            	video_time /= 1000;
-            	int secs = (int)(video_time % 60);
-            	video_time /= 60;
-            	int mins = (int)(video_time % 60);
-            	video_time /= 60;
-            	long hours = video_time;
-            	//String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs) + ":" + String.format("%03d", ms);
-            	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
+            	String time_s = getTimeStringFromSeconds(video_time/1000);
             	/*if( MyDebug.LOG )
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
     			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
@@ -1950,6 +1950,17 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			p.setStyle(Paint.Style.FILL); // reset
 		}
+    }
+    
+    private String getTimeStringFromSeconds(long time) {
+    	int secs = (int)(time % 60);
+    	time /= 60;
+    	int mins = (int)(time % 60);
+    	time /= 60;
+    	long hours = time;
+    	//String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs) + ":" + String.format("%03d", ms);
+    	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
+    	return time_s;
     }
 
 	private void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
