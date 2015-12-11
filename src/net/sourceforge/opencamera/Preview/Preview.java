@@ -777,7 +777,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			Log.d(TAG, "remaining_restart_video is: " + remaining_restart_video);
 			if( remaining_restart_video > 0 ) {
 				if( is_video ) {
+					String toast = remaining_restart_video + " " + getContext().getResources().getString(R.string.repeats_to_go);
 					takePicture();
+					showToast(null, toast); // show the toast afterwards, as we're hogging the UI thread here, and media recorder takes time to start up
 					// must decrement after calling takePicture(), so that takePicture() doesn't reset the value of remaining_restart_video
 					remaining_restart_video--;
 				}
@@ -3175,8 +3177,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void onVideoInfo(int what, int extra) {
-		applicationInterface.onVideoInfo(what, extra);
-
 		/*if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && remaining_restart_video > 0 ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "restart due to max filesize reached");
@@ -3197,11 +3197,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else*/ if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
 			stopVideo(false);
 		}
+		applicationInterface.onVideoInfo(what, extra); // call this last, so that toasts show up properly (as we're hogging the UI thread here, and mediarecorder takes time to stop)
 	}
 	
 	private void onVideoError(int what, int extra) {
-		applicationInterface.onVideoError(what, extra);
 		stopVideo(false);
+		applicationInterface.onVideoError(what, extra); // call this last, so that toasts show up properly (as we're hogging the UI thread here, and mediarecorder takes time to stop)
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -4337,12 +4338,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// This method is better, as otherwise a previous toast (with different or no clear_toast) never seems to clear if we repeatedly issue new toasts - this doesn't happen if we reuse existing toasts if possible
 				// However should only do this if the previous toast was the most recent toast (to avoid messing up ordering)
 				Toast toast = null;
-				if( clear_toast != null && clear_toast.toast != null && clear_toast.toast == last_toast )
+				if( clear_toast != null && clear_toast.toast != null && clear_toast.toast == last_toast ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "reuse last toast: " + last_toast);
 					toast = clear_toast.toast;
+				}
 				else {
-					if( clear_toast != null && clear_toast.toast != null )
+					if( clear_toast != null && clear_toast.toast != null ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "cancel last toast: " + clear_toast.toast);
 						clear_toast.toast.cancel();
+					}
 					toast = new Toast(activity);
+					if( MyDebug.LOG )
+						Log.d(TAG, "created new toast: " + toast);
 					if( clear_toast != null )
 						clear_toast.toast = toast;
 				}

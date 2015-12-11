@@ -98,8 +98,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private RectF thumbnail_anim_dst_rect = new RectF();
 	private Matrix thumbnail_anim_matrix = new Matrix();
 
-	private ToastBoxer stopstart_video_toast = new ToastBoxer();
-	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
 	private int zoom_factor = 0;
@@ -790,13 +788,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stoppingVideo()");
 		main_activity.unlockScreen();
-		if( main_activity.getPreview().isVideoRecording() ) {
-			String toast = getContext().getResources().getString(R.string.stopped_recording_video);
-			if( main_activity.getPreview().getRemainingRestartVideo() > 0 ) {
-				toast += " (" + main_activity.getPreview().getRemainingRestartVideo() + " " + getContext().getResources().getString(R.string.repeats_to_go) + ")";
-			}
-			main_activity.getPreview().showToast(stopstart_video_toast, toast);
-		}
 		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_selector);
 		view.setTag(R.drawable.take_video_selector); // for testing
