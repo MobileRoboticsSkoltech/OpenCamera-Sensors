@@ -2436,6 +2436,10 @@ public class MainActivity extends Activity {
 				}
 			}
 		}
+		if( applicationInterface.getFaceDetectionPref() ) {
+			// important so that the user realises why touching for focus/metering areas won't work - easy to forget that face detection has been turned on!
+			toast_string += "\n" + getResources().getString(R.string.preference_face_detection);
+		}
 		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), camera_controller.getDefaultISO());
 		if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
 			toast_string += "\nISO: " + iso_value;
