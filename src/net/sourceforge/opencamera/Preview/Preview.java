@@ -3176,10 +3176,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	private void onVideoInfo(int what, int extra) {
 		applicationInterface.onVideoInfo(what, extra);
+
+		/*if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && remaining_restart_video > 0 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "restart due to max filesize reached");
+			Activity activity = (Activity)Preview.this.getContext();
+			activity.runOnUiThread(new Runnable() {
+				public void run() {
+					// we run on main thread to avoid problem of camera closing at the same time
+					// but still need to check that the camera hasn't closed
+					if( camera_controller != null )
+						restartVideo();
+					else {
+						if( MyDebug.LOG )
+							Log.d(TAG, "don't restart video, as already cancelled");
+					}
+				}
+			});
+		}
+		else*/ if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+			stopVideo(false);
+		}
 	}
 	
 	private void onVideoError(int what, int extra) {
 		applicationInterface.onVideoError(what, extra);
+		stopVideo(false);
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -3383,6 +3405,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.d(TAG, "video bitrate: " + profile.videoBitRate);
 	    			Log.d(TAG, "video codec: " + profile.videoCodec);
 	    		}
+	    		//video_recorder.setMaxFileSize(15*1024*1024); // test
 
 	    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
 	    			video_recorder.setOutputFile(video_filename);
@@ -3416,13 +3439,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     				//showToast(stopstart_video_toast, R.string.started_recording_video);
     				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
 
-    				// handle restart timer
+	            	// handle restarts (for whatever reason - max duration, or filesize)
+					if( remaining_restart_video == 0 ) {
+						remaining_restart_video = applicationInterface.getVideoRestartTimesPref();
+					}
+
+					// handle restart timer
     				long video_max_duration = applicationInterface.getVideoMaxDurationPref();
 
     				if( video_max_duration > 0 ) {
-    					if( remaining_restart_video == 0 ) {
-    						remaining_restart_video = applicationInterface.getVideoRestartTimesPref();
-    					}
     					class RestartVideoTimerTask extends TimerTask {
         					public void run() {
         			    		if( MyDebug.LOG )

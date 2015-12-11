@@ -825,7 +825,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putString("last_video_error", debug_value);
 			editor.apply();
-			main_activity.getPreview().stopVideo(false);
 		}
 	}
 
@@ -858,7 +857,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString("last_video_error", debug_value);
 		editor.apply();
-		main_activity.getPreview().stopVideo(false);
 	}
 	
 	@Override
