@@ -12,7 +12,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 public class MyWidgetProviderTakePhoto extends AppWidgetProvider {
-	private static final String TAG = "MyWidgetProvider";
+	private static final String TAG = "MyWidgetProviderTakePhoto";
 	
 	// from http://developer.android.com/guide/topics/appwidgets/index.html
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
