@@ -5,6 +5,9 @@ import net.sourceforge.opencamera.MyDebug;
 import android.hardware.Camera;
 import android.util.Log;
 
+/** Provides support using Android's original camera API
+ *  android.hardware.Camera.
+ */
 @SuppressWarnings("deprecation")
 public class CameraControllerManager1 extends CameraControllerManager {
 	private static final String TAG = "CameraControllerManager1";

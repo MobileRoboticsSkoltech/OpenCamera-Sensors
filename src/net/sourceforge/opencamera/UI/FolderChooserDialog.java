@@ -31,6 +31,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+/** Dialog to pick a folder. Also allows creating new folders. Used when not
+ *  using the Storage Access Framework.
+ */
 public class FolderChooserDialog extends DialogFragment {
 	private static final String TAG = "FolderChooserFragment";
 

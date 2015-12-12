@@ -11,6 +11,11 @@ import android.net.Uri;
 import android.util.Pair;
 import android.view.MotionEvent;
 
+/** Provides communication between the Preview and the rest of the application
+ *  - so in theory one can drop the Preview/ (and CameraController/) classes
+ *  into a new application, by providing an appropriate implementation of this
+ *  ApplicationInterface.
+ */
 public interface ApplicationInterface {
 	final int VIDEOMETHOD_FILE = 0; // video will be saved to a file
 	final int VIDEOMETHOD_SAF = 1; // video will be saved using Android 5's Storage Access Framework

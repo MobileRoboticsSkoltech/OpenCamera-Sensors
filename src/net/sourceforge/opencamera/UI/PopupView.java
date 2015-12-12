@@ -39,6 +39,9 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
 
+/** This defines the UI for the "popup" button, that provides quick access to a
+ *  range of options.
+ */
 public class PopupView extends LinearLayout {
 	private static final String TAG = "PopupView";
 

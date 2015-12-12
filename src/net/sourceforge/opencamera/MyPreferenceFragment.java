@@ -31,6 +31,13 @@ import android.util.Log;
 import android.view.Display;
 import android.widget.Toast;
 
+/** Fragment to handle the Settings UI. Note that originally this was a
+ *  PreferenceActivity rather than a PreferenceFragment which required all
+ *  communication to be via the bundle (since this replaced the MainActivity,
+ *  meaning we couldn't access data from that class. This no longer applies due
+ *  to now using a PreferenceFragment, but I've still kept with transferring
+ *  information via the bundle (for the most part, at least).
+ */
 public class MyPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "MyPreferenceFragment";
 	

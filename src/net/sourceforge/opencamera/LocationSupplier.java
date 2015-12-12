@@ -13,6 +13,8 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+/** Handles listening for GPS location (both coarse and fine).
+ */
 public class LocationSupplier {
 	private static final String TAG = "LocationSupplier";
 

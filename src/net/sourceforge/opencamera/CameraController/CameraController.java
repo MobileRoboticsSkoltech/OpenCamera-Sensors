@@ -11,6 +11,16 @@ import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+/** CameraController is an abstract class that wraps up the access/control to
+ *  the Android camera, so that the rest of the application doesn't have to
+ *  deal directly with the Android camera API. It also allows us to support
+ *  more than one camera API through the same API (this is used to support both
+ *  the original camera API, and Android 5's Camera2 API).
+ *  The class is fairly low level wrapper about the APIs - there is some
+ *  additional logical/workarounds where such things are API-specific, but
+ *  otherwise the calling application still controls the behaviour of the
+ *  camera.
+ */
 public abstract class CameraController {
 	private static final String TAG = "CameraController";
 	int cameraId = 0;

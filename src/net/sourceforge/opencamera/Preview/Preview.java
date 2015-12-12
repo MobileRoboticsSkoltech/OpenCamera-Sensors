@@ -71,6 +71,14 @@ import android.view.WindowManager;
 import android.view.View.MeasureSpec;
 import android.widget.Toast;
 
+/** This class was originally named due to encapsulating the camera preview,
+ *  but in practice it's grown to more than this, and includes most of the
+ *  operation of the camera. It exists at a higher level than CameraController
+ *  (i.e., this isn't merely a low level wrapper to the camera API, but
+ *  supports much of the Open Camera logic and functionality). Communication to
+ *  the rest of the application is available through ApplicationInterface.
+ *  We could probably do with decoupling this class into separate components!
+ */
 public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
 	private static final String TAG = "Preview";
 
@@ -253,7 +261,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
         if( using_texture_view ) {
     		this.cameraSurface = new MyTextureView(getContext(), savedInstanceState, this);
-    		// a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CanvasView
+    		// a TextureView can't be used both as a camera preview, and used for drawing on, so we use a separate CanvasView
     		this.canvasView = new CanvasView(getContext(), savedInstanceState, this);
     		camera_controller_manager = new CameraControllerManager2(getContext());
         }

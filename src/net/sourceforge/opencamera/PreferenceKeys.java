@@ -1,5 +1,7 @@
 package net.sourceforge.opencamera;
 
+/** Stores all of the string keys used for SharedPreferences.
+ */
 public class PreferenceKeys {
     // must be static, to safely call from other Activities
 	

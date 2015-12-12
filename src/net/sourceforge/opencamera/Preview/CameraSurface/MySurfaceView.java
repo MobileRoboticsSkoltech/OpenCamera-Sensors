@@ -17,6 +17,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
+/** Provides support for the surface used for the preview, using a SurfaceView.
+ */
 public class MySurfaceView extends SurfaceView implements CameraSurface {
 	private static final String TAG = "MySurfaceView";
 

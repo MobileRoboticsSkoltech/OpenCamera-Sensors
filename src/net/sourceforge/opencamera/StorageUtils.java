@@ -31,6 +31,9 @@ import android.provider.MediaStore.Video.VideoColumns;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+/** Provides access to the filesystem. Supports both standard and Storage
+ *  Access Framework.
+ */
 public class StorageUtils {
 	private static final String TAG = "StorageUtils";
 

@@ -15,6 +15,8 @@ import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
 
+/** Provides support for the surface used for the preview, using a TextureView.
+ */
 public class MyTextureView extends TextureView implements CameraSurface {
 	private static final String TAG = "MyTextureView";
 

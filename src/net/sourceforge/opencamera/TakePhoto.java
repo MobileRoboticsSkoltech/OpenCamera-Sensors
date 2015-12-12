@@ -8,6 +8,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+/** Entry Activity for the "take photo" widget (see MyWidgetProviderTakePhoto).
+ *  This redirects to MainActivity, but uses an intent extra/bundle to pass the
+ *  "take photo" request.
+ */
 public class TakePhoto extends Activity {
 	private static final String TAG = "TakePhoto";
 	public static final String TAKE_PHOTO = "net.sourceforge.opencamera.TAKE_PHOTO";

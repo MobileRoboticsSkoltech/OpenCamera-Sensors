@@ -55,6 +55,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 
+/** Our implementation of ApplicationInterface, see there for details.
+ */
 public class MyApplicationInterface implements ApplicationInterface {
 	private static final String TAG = "MyApplicationInterface";
 	

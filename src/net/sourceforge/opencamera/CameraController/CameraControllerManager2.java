@@ -11,6 +11,9 @@ import android.hardware.camera2.CameraMetadata;
 import android.os.Build;
 import android.util.Log;
 
+/** Provides support using Android 5's Camera 2 API
+ *  android.hardware.camera2.*.
+ */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class CameraControllerManager2 extends CameraControllerManager {
 	private static final String TAG = "CameraControllerManager2";

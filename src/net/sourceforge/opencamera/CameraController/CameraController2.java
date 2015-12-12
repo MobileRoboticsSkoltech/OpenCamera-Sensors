@@ -40,6 +40,9 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+/** Provides support using Android 5's Camera 2 API
+ *  android.hardware.camera2.*.
+ */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class CameraController2 extends CameraController {
 	private static final String TAG = "CameraController2";

@@ -70,6 +70,8 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
 
+/** The main Activity for Open Camera.
+ */
 public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 	private SensorManager mSensorManager = null;

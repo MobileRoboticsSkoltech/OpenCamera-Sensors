@@ -17,6 +17,9 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+/** Provides support using Android's original camera API
+ *  android.hardware.Camera.
+ */
 @SuppressWarnings("deprecation")
 public class CameraController1 extends CameraController {
 	private static final String TAG = "CameraController1";
