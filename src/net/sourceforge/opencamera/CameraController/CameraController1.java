@@ -70,6 +70,20 @@ public class CameraController1 extends CameraController {
 	    	parameters.set("cam_mode", 1);
 	    	setCameraParameters(parameters);
 		}*/
+		
+		camera.setErrorCallback(new Camera.ErrorCallback() {
+			@Override
+			public void onError(int error, Camera camera) {
+				// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
+				Log.e(TAG, "camera onError: " + error);
+				if( error == android.hardware.Camera.CAMERA_ERROR_SERVER_DIED ) {
+					Log.e(TAG, "    CAMERA_ERROR_SERVER_DIED");
+				}
+				else if( error == android.hardware.Camera.CAMERA_ERROR_UNKNOWN  ) {
+					Log.e(TAG, "    CAMERA_ERROR_UNKNOWN ");
+				}
+			}
+		});
 	}
 	
 	public void release() {
