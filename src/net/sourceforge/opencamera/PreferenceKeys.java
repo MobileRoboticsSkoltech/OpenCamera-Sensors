@@ -63,6 +63,10 @@ public class PreferenceKeys {
     	return "preference_volume_keys";
     }
     
+    public static String getAudioNoiseControlPreferenceKey() {
+    	return "preference_audio_noise_control";
+    }
+    
     public static String getQualityPreferenceKey() {
     	return "preference_quality";
     }

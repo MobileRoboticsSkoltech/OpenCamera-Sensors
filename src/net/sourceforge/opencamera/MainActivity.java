@@ -72,7 +72,7 @@ import android.widget.ZoomControls;
 
 /** The main Activity for Open Camera.
  */
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements AudioListener.AudioListenerCallback {
 	private static final String TAG = "MainActivity";
 	private SensorManager mSensorManager = null;
 	private Sensor mSensorAccelerometer = null;
@@ -96,6 +96,8 @@ public class MainActivity extends Activity {
 	
 	private TextToSpeech textToSpeech = null;
 	private boolean textToSpeechSuccess = false;
+	
+	private AudioListener audio_listener = null;
 	
 	private boolean ui_placement_right = true;
 
@@ -288,7 +290,7 @@ public class MainActivity extends Activity {
 				}
 			}
 		});
-
+        
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for Activity startup: " + (System.currentTimeMillis() - time_s));
 	}
@@ -371,6 +373,46 @@ public class MainActivity extends Activity {
 		editor.apply();
 	}
 
+	public void onAudio(int level) {
+		if( level > 150 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "loud noise!: " + level);
+			// need to run on UI thread so that this function returns quickly (otherwise we'll have lag in processing the audio)
+			// but also need to check we're not currently taking a photo or on timer, so we don't repeatedly queue up takePicture() calls, or cancel a timer
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			boolean want_audio_listener = sharedPreferences.getBoolean(PreferenceKeys.getAudioNoiseControlPreferenceKey(), false);
+			if( !want_audio_listener ) {
+				// just in case this is a callback from an AudioListener before it's been freed (e.g., if there's a loud noise when exiting settings after turning the option off
+				if( MyDebug.LOG )
+					Log.d(TAG, "ignore loud noise due to audio listener option turned off");
+			}
+			else if( popupIsOpen() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "ignore loud noise due to popup open");
+			}
+			else if( camera_in_background ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "ignore loud noise due to camera in background");
+			}
+			else if( preview.isTakingPhotoOrOnTimer() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "ignore loud noise due to already taking photo or on timer");
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "schedule take picture due to loud noise");
+				//takePicture();
+				this.runOnUiThread(new Runnable() {
+					public void run() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "now taking picture due to loud noise");
+						takePicture();
+					}
+				});
+			}
+		}
+	}
+	
 	@SuppressWarnings("deprecation")
 	public boolean onKeyDown(int keyCode, KeyEvent event) { 
 		if( MyDebug.LOG )
@@ -590,6 +632,7 @@ public class MainActivity extends Activity {
         mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
 
+        initAudioListener();
         initLocation();
         initSound();
     	loadSound(R.raw.beep);
@@ -625,6 +668,7 @@ public class MainActivity extends Activity {
         mSensorManager.unregisterListener(accelerometerListener);
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
+        freeAudioListener(false);
         applicationInterface.getLocationSupplier().freeLocationListeners();
 		releaseSound();
 		preview.onPause();
@@ -1388,7 +1432,8 @@ public class MainActivity extends Activity {
 		}
 
 		layoutUI(); // needed in case we've changed left/right handed UI
-		initLocation(); // in case we've enabled GPS
+        initAudioListener(); // in case enabled or disabled audio listener
+		initLocation(); // in case we've enabled or disabled GPS
 		if( toast_message != null )
 			block_startup_toast = true;
 		if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
@@ -2500,6 +2545,38 @@ public class MainActivity extends Activity {
 		preview.showToast(switch_video_toast, toast_string);
 	}
 
+	void initAudioListener() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initAudioListener");
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean want_audio_listener = sharedPreferences.getBoolean(PreferenceKeys.getAudioNoiseControlPreferenceKey(), false);
+		if( audio_listener == null && want_audio_listener ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "create new AudioListener");
+			audio_listener = new AudioListener(this);
+		}
+		else if( audio_listener != null && !want_audio_listener ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "free existing AudioListener");
+			freeAudioListener(true);
+		}
+	}
+	
+	void freeAudioListener(boolean wait_until_done) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "freeAudioListener");
+        if( audio_listener != null ) {
+        	audio_listener.release();
+        	if( wait_until_done ) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "wait until audio listener is freed");
+        		while( audio_listener.hasAudioRecorder() ) {
+        		}
+        	}
+        	audio_listener = null;
+        }
+	}
+	
 	private void initLocation() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initLocation");

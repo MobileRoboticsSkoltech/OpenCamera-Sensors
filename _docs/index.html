@@ -56,6 +56,7 @@
 <li>Auto-repeat mode, with configurable delay.</li>
 <li>Optimise GUI for left or right-handed users.</li>
 <li>Configurable volume keys.</li>
+<li>Option to take photo remotely by making a noise (e.g., voice, whistle).</li>
 <li>Choice of save folder (including support for Lollipop's Storage Access Framework).</li>
 <li>Disable shutter sound.</li>
 <li>Overlay a choice of grids (including "rule of thirds") and crop guides.</li>
@@ -316,6 +317,13 @@ delay (see below).</p>
 focus (trigger an autofocus - or if in manual mode, change the focus distance in/out), zoom in/out, change
 the exposure compensation (or if in manual ISO mode and using Camera2 API, change the ISO), switch
 auto-stabilise on/off, just change the device's volume as normal, or do nothing.</p>
+
+<p><b>Audio control</b> - If enabled, a photo will be taken (or video recording will start, depending on the mode)
+when a noise is detected. So you can remotely take a photo by saying "cheese" or whatever you prefer. Note that it
+is recommended to only enable this when needed (due to risk of photos being taken unexpectedly, as well as possible
+increased battery use). Note that this can't be used to stop video recording (this is not desirable, as any noise that
+you're recording would undesirably stop the video recording). If you want to have some remote control on video recording,
+see the "Max duration of video" option.</p>
 
 <p><a name="save_location"><b>Save location</b> - Select the folder to store the photos in. Click on a folder
 (or "Parent Folder") to navigate through the filesystem. Select "New Folder" to create a new folder in the currently
@@ -799,6 +807,7 @@ FIXED   Toast for hitting max filesize on video recording wasn't shown for very
         long.
 FIXED   Was incorrectly showing "n repeats to go" toast even if it wasn't going
         to repeat (e.g., due to user stopping video recording).
+ADDED   New option to take photo/record video by making a noise.
 UPDATED Display countdown timer as hours:minutes:seconds when 60 seconds or
         more.
 UPDATED No longer show pointless toast for stopping video recording.

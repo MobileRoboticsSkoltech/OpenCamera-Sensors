@@ -758,6 +758,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			if( MyDebug.LOG )
 				Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 		}
+        
+        main_activity.initAudioListener(); // restart audio listener after video stopped
 	}
 
 	@Override
@@ -780,6 +782,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( sharedPreferences.getBoolean(PreferenceKeys.getLockVideoPreferenceKey(), false) ) {
 			main_activity.lockScreen();
 		}
+		main_activity.freeAudioListener(true); // important otherwise MediaRecorder will fail to start() if we have an audiolistener!
 		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_recording);
 		view.setTag(R.drawable.take_video_recording); // for testing
