@@ -2774,7 +2774,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	public String getErrorFeatures(CamcorderProfile profile) {
 		boolean was_4k = false, was_bitrate = false, was_fps = false;
-		if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 ) {
+		if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 && applicationInterface.getForce4KPref() ) {
 			was_4k = true;
 		}
 		String bitrate_value = applicationInterface.getVideoBitratePref();
