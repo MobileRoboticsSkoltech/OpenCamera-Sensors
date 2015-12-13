@@ -209,6 +209,7 @@ public class LocationSupplier {
 	    	sign = "";
 	    }
 	    
-	    return sign + degrees + "°" + minutes + "'" + seconds + "\"";
+	    // use unicode rather than degrees symbol, due to Android Studio warning - see https://sourceforge.net/p/opencamera/tickets/107/
+	    return sign + degrees + "\u00b0" + minutes + "'" + seconds + "\"";
 	}
 }
