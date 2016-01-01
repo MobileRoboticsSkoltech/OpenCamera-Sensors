@@ -2383,18 +2383,21 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     		// this can happen if folder doesn't exist, or don't have read access
     		// if the save folder is a subfolder of DCIM, we can just use that instead
         	try {
-        		String folder_name = applicationInterface.getStorageUtils().getSaveLocation();
-        		if( !folder_name.startsWith("/") ) {
-        			File folder = StorageUtils.getBaseFolder();
-        	        StatFs statFs = new StatFs(folder.getAbsolutePath());
-        	        // cast to long to avoid overflow!
-        	        long blocks = statFs.getAvailableBlocks();
-        	        long size = statFs.getBlockSize();
-        	        long free  = (blocks*size) / 1048576;
-        			/*if( MyDebug.LOG ) {
-        				Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
-        			}*/
-        	        return free;
+        		if( !applicationInterface.getStorageUtils().isUsingSAF() ) {
+        			// StorageUtils.getSaveLocation() only valid if !isUsingSAF()
+            		String folder_name = applicationInterface.getStorageUtils().getSaveLocation();
+            		if( !folder_name.startsWith("/") ) {
+            			File folder = StorageUtils.getBaseFolder();
+            	        StatFs statFs = new StatFs(folder.getAbsolutePath());
+            	        // cast to long to avoid overflow!
+            	        long blocks = statFs.getAvailableBlocks();
+            	        long size = statFs.getBlockSize();
+            	        long free  = (blocks*size) / 1048576;
+            			/*if( MyDebug.LOG ) {
+            				Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
+            			}*/
+            	        return free;
+            		}
         		}
         	}
         	catch(IllegalArgumentException e2) {

@@ -1806,12 +1806,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 				p.setTextAlign(Paint.Align.RIGHT);
 			}
 			long time_now = System.currentTimeMillis();
-			if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
+			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 1000 ) {
 				long free_mb = main_activity.freeMemory();
 				if( free_mb >= 0 ) {
 					free_memory_gb = free_mb/1024.0f;
-					last_free_memory_time = time_now;
 				}
+				last_free_memory_time = time_now; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
 			}
 			if( free_memory_gb >= 0.0f ) {
 				drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, location_x, location_y, true);
