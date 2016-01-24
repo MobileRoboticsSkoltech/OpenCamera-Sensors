@@ -527,4 +527,20 @@
         <item>audio_mono</item>
         <item>audio_stereo</item>
     </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_entries">
+        <item>+3 (high sensitivity)</item>
+        <item>+2</item>
+        <item>+1</item>
+        <item>0 (default)</item>
+        <item>-1</item>
+        <item>-2 (low sensitivity)</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_values">
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+        <item>-2</item>
+    </string-array>
 </resources>

@@ -98,6 +98,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private boolean textToSpeechSuccess = false;
 	
 	private AudioListener audio_listener = null;
+	private int audio_noise_sensitivity = -1;
 	
 	private boolean ui_placement_right = true;
 
@@ -391,15 +392,17 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		int diff = level - last_level;
 		
-		final int noise_sensitivity = 100;
-		if( diff > noise_sensitivity ) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "noise_sensitivity: " + audio_noise_sensitivity);
+
+		if( diff > audio_noise_sensitivity ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "got louder!: " + last_level + " to " + level + " , diff: " + diff);
 			time_quiet_loud = System.currentTimeMillis();
 			if( MyDebug.LOG )
 				Log.d(TAG, "    time: " + time_quiet_loud);
 		}
-		else if( diff < -noise_sensitivity && time_quiet_loud != -1 ) {
+		else if( diff < -audio_noise_sensitivity && time_quiet_loud != -1 ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "got quieter!: " + last_level + " to " + level + " , diff: " + diff);
 			long time_now = System.currentTimeMillis();
@@ -2611,11 +2614,38 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "create new AudioListener");
 			audio_listener = new AudioListener(this);
+
 		}
 		else if( audio_listener != null && !want_audio_listener ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "free existing AudioListener");
 			freeAudioListener(true);
+		}
+		
+		if( audio_listener != null ) {
+			String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.getAudioNoiseControlSensitivityPreferenceKey(), "0");
+			if( sensitivity_pref.equals("3") ) {
+				audio_noise_sensitivity = 50;
+			}
+			else if( sensitivity_pref.equals("2") ) {
+				audio_noise_sensitivity = 75;
+			}
+			else if( sensitivity_pref.equals("1") ) {
+				audio_noise_sensitivity = 125;
+			}
+			else if( sensitivity_pref.equals("-1") ) {
+				audio_noise_sensitivity = 150;
+			}
+			else if( sensitivity_pref.equals("-2") ) {
+				audio_noise_sensitivity = 200;
+			}
+			else {
+				// default
+				audio_noise_sensitivity = 100;
+			}
+		}
+		else {
+			audio_noise_sensitivity = -1;
 		}
 	}
 	

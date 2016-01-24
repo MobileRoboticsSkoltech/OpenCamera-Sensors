@@ -170,6 +170,15 @@
 	            android:defaultValue="false"
 	            />
 
+		    <ListPreference 
+	            android:key="preference_audio_noise_control_sensitivity"
+	            android:title="@string/preference_audio_noise_control_sensitivity"
+	            android:summary="@string/preference_audio_noise_control_sensitivity_summary"
+	            android:entries="@array/preference_audio_noise_control_sensitivity_entries"
+	            android:entryValues="@array/preference_audio_noise_control_sensitivity_values"
+	            android:defaultValue="0"
+	            />
+	        
 			<Preference
 	            android:key="preference_save_location"
 	            android:title="@string/preference_save_location"

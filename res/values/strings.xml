@@ -115,6 +115,8 @@
     <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
     <string name="preference_audio_noise_control">Audio control</string>
     <string name="preference_audio_noise_control_summary">Take photo or record video when a noise is detected (warning, may use more battery life, only enable if required)</string>
+    <string name="preference_audio_noise_control_sensitivity">Audio control sensitivity</string>
+    <string name="preference_audio_noise_control_sensitivity_summary">Noise level sensitivity for audio control</string>
     <string name="preference_save_location">Save location</string>
     <string name="preference_save_location_summary">Folder to save the photo/video files in</string>
     <string name="preference_using_saf">Use Storage Access Framework</string>
