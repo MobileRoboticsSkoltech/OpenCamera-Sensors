@@ -1855,11 +1855,16 @@ public class MyApplicationInterface implements ApplicationInterface {
 			final int line_alpha = 96;
 			p.setStyle(Paint.Style.FILL);
 			float hthickness = (0.5f * scale + 0.5f); // convert dps to pixels
+			// draw outline
 			p.setColor(Color.BLACK);
 			p.setAlpha(64);
 			// can't use drawRoundRect(left, top, right, bottom, ...) as that requires API 21
 			draw_rect.set(cx - radius - hthickness, cy - 2*hthickness, cx + radius + hthickness, cy + 2*hthickness);
 			canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
+			// draw the vertical crossbar
+			draw_rect.set(cx - 2*hthickness, cy - radius/2 - hthickness, cx + 2*hthickness, cy + radius/2 + hthickness);
+			canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+			// draw inner portion
 			if( is_level ) {
 				p.setColor(getAngleHighlightColor());
 			}
@@ -1868,6 +1873,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			p.setAlpha(line_alpha);
 			draw_rect.set(cx - radius, cy - hthickness, cx + radius, cy + hthickness);
+			canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+			
+			// draw the vertical crossbar
+			draw_rect.set(cx - hthickness, cy - radius/2, cx + hthickness, cy + radius/2);
 			canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 
 			if( is_level ) {
