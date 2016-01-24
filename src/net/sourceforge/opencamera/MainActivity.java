@@ -1039,17 +1039,21 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		ImageButton view = (ImageButton)findViewById(R.id.take_photo);
 		if( preview != null ) {
 			int resource = 0;
+			int content_description = 0;
 			if( preview.isVideo() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set icon to video");
 				resource = preview.isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector;
+				content_description = preview.isVideoRecording() ? R.string.stop_video : R.string.start_video;
 			}
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set icon to photo");
 				resource = R.drawable.take_photo_selector;
+				content_description = R.string.take_photo;
 			}
 			view.setImageResource(resource);
+			view.setContentDescription( getResources().getString(content_description) );
 			view.setTag(resource); // for testing
 		}
     }

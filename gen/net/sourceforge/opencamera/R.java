@@ -448,8 +448,10 @@ public final class R {
         public static final int screen_lock_message_2=0x7f080041;
         public static final int share=0x7f0800f0;
         public static final int sorry=0x7f080027;
+        public static final int start_video=0x7f0800fd;
         public static final int started_recording_video=0x7f080026;
         public static final int started_timer=0x7f080023;
+        public static final int stop_video=0x7f0800fe;
         public static final int stopped_recording_video=0x7f08000e;
         public static final int switch_camera=0x7f0800ed;
         public static final int switch_video=0x7f0800ee;

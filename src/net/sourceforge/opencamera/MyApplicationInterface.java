@@ -785,6 +785,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		main_activity.freeAudioListener(true); // important otherwise MediaRecorder will fail to start() if we have an audiolistener!
 		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_recording);
+		view.setContentDescription( getContext().getResources().getString(R.string.stop_video) );
 		view.setTag(R.drawable.take_video_recording); // for testing
 	}
 
@@ -795,6 +796,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		main_activity.unlockScreen();
 		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_selector);
+		view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
 		view.setTag(R.drawable.take_video_selector); // for testing
 	}
 
@@ -870,6 +872,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		main_activity.getPreview().showToast(null, error_message);
 		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_selector);
+		view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
 		view.setTag(R.drawable.take_video_selector); // for testing
 	}
 
