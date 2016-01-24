@@ -2601,6 +2601,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				toast_string += "\n" + getResources().getString(R.string.preference_burst_mode) + ": " + entry;
 			}
 		}
+		if( audio_listener != null ) {
+			toast_string += "\n" + getResources().getString(R.string.preference_audio_noise_control);
+		}
 		
 		preview.showToast(switch_video_toast, toast_string);
 	}
