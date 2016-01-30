@@ -110,6 +110,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private MediaRecorder video_recorder = null;
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
+	private long video_accumulated_time = 0;
+	private final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
 	private int video_method = ApplicationInterface.VIDEOMETHOD_FILE;
 	private Uri video_uri = null; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
 	private String video_filename = null; // for VIDEOMETHOD_FILE
@@ -774,22 +776,56 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return applicationInterface.getContext();
 	}
 
-	private void restartVideo() {
+	/** Restart video - either due to hitting maximum filesize, or maximum duration.
+	 */
+	private void restartVideo(boolean due_to_max_filesize) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "restartVideo()");
 		if( video_recorder != null ) {
-    		stopVideo(true);
+			if( due_to_max_filesize ) {
+				long last_time = System.currentTimeMillis() - video_start_time;
+				video_accumulated_time += last_time;
+	    		if( MyDebug.LOG ) {
+        			Log.d(TAG, "last_time: " + last_time);
+        			Log.d(TAG, "video_accumulated_time is now: " + video_accumulated_time);
+	    		}
+			}
+			else {
+				video_accumulated_time = 0;
+			}
+    		stopVideo(true); // this will also stop the timertask
 
 			// handle restart
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "remaining_restart_video is: " + remaining_restart_video);
-			if( remaining_restart_video > 0 ) {
+    		if( MyDebug.LOG ) {
+    			if( due_to_max_filesize )
+        			Log.d(TAG, "restarting due to maximum filesize");
+    			else
+    				Log.d(TAG, "remaining_restart_video is: " + remaining_restart_video);
+    		}
+			if( due_to_max_filesize ) {
+				long video_max_duration = applicationInterface.getVideoMaxDurationPref();
+				if( video_max_duration > 0 ) {
+					video_max_duration -= video_accumulated_time;
+					if( video_max_duration < min_safe_restart_video_time ) {
+						// if there's less than 1s to go, ignore it - don't want to risk the resultant video being corrupt or throwing error, due to stopping too soon
+						// so instead just pretend we hit the max duration instead
+			    		if( MyDebug.LOG )
+		        			Log.d(TAG, "hit max filesize, but max time duration is also set, with remaining time less than 1s: " + video_max_duration);
+			    		due_to_max_filesize = false;
+					}
+				}
+			}
+			if( due_to_max_filesize || remaining_restart_video > 0 ) {
 				if( is_video ) {
-					String toast = remaining_restart_video + " " + getContext().getResources().getString(R.string.repeats_to_go);
-					takePicture();
-					showToast(null, toast); // show the toast afterwards, as we're hogging the UI thread here, and media recorder takes time to start up
-					// must decrement after calling takePicture(), so that takePicture() doesn't reset the value of remaining_restart_video
-					remaining_restart_video--;
+					String toast = null;
+					if( !due_to_max_filesize )
+						toast = remaining_restart_video + " " + getContext().getResources().getString(R.string.repeats_to_go);
+					takePicture(due_to_max_filesize);
+					if( !due_to_max_filesize ) {
+						showToast(null, toast); // show the toast afterwards, as we're hogging the UI thread here, and media recorder takes time to start up
+						// must decrement after calling takePicture(), so that takePicture() doesn't reset the value of remaining_restart_video
+						remaining_restart_video--;
+					}
 				}
 				else {
 					remaining_restart_video = 0;
@@ -1137,7 +1173,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				public void run() {
 					if( MyDebug.LOG )
 						Log.d(TAG, "do automatic take picture");
-					takePicture();
+					takePicture(false);
 				}
 			}, 500);
 		}
@@ -3098,7 +3134,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		
 		if( timer_delay == 0 ) {
-			takePicture();
+			takePicture(false);
 		}
 		else {
 			takePictureOnTimer(timer_delay, false);
@@ -3123,7 +3159,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						// we run on main thread to avoid problem of camera closing at the same time
 						// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
 						if( camera_controller != null && takePictureTimerTask != null )
-							takePicture();
+							takePicture(false);
 						else {
 							if( MyDebug.LOG )
 								Log.d(TAG, "takePictureTimerTask: don't take picture, as already cancelled");
@@ -3185,7 +3221,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void onVideoInfo(int what, int extra) {
-		/*if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && remaining_restart_video > 0 ) {
+		final boolean restart_on_max_filesize = true;
+		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && restart_on_max_filesize ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "restart due to max filesize reached");
 			Activity activity = (Activity)Preview.this.getContext();
@@ -3194,7 +3231,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					// we run on main thread to avoid problem of camera closing at the same time
 					// but still need to check that the camera hasn't closed
 					if( camera_controller != null )
-						restartVideo();
+						restartVideo(true);
 					else {
 						if( MyDebug.LOG )
 							Log.d(TAG, "don't restart video, as already cancelled");
@@ -3202,7 +3239,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 			});
 		}
-		else*/ if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+		else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
 			stopVideo(false);
 		}
 		applicationInterface.onVideoInfo(what, extra); // call this last, so that toasts show up properly (as we're hogging the UI thread here, and mediarecorder takes time to stop)
@@ -3214,7 +3251,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void takePicture() {
+	private void takePicture(boolean max_filesize_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
 		//this.thumbnail_anim = false;
@@ -3448,26 +3485,44 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     				//showToast(stopstart_video_toast, R.string.started_recording_video);
     				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
 
-	            	// handle restarts (for whatever reason - max duration, or filesize)
-					if( remaining_restart_video == 0 ) {
+	            	// handle restarts
+					if( remaining_restart_video == 0 && !max_filesize_restart ) {
 						remaining_restart_video = applicationInterface.getVideoRestartTimesPref();
+			    		if( MyDebug.LOG )
+			    			Log.d(TAG, "initialised remaining_restart_video to: " + remaining_restart_video);
 					}
 
 					// handle restart timer
     				long video_max_duration = applicationInterface.getVideoMaxDurationPref();
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "video_max_duration: " + video_max_duration);
+    				if( max_filesize_restart ) {
+    					if( video_max_duration > 0 ) {
+	    					video_max_duration -= video_accumulated_time;
+	    					// this should be greater or equal to min_safe_restart_video_time, as too short remaining time should have been caught in restartVideo()
+	    					if( video_max_duration < min_safe_restart_video_time ) {
+	    			    		if( MyDebug.LOG )
+	    			    			Log.e(TAG, "trying to restart video with too short a time: " + video_max_duration);
+	    			    		video_max_duration = min_safe_restart_video_time;
+	    					}
+    					}
+    				}
+    				else {
+        				video_accumulated_time = 0;
+    				}
 
     				if( video_max_duration > 0 ) {
     					class RestartVideoTimerTask extends TimerTask {
         					public void run() {
         			    		if( MyDebug.LOG )
-        			    			Log.e(TAG, "stop video on timer");
+        			    			Log.d(TAG, "stop video on timer");
         						Activity activity = (Activity)Preview.this.getContext();
         						activity.runOnUiThread(new Runnable() {
         							public void run() {
         								// we run on main thread to avoid problem of camera closing at the same time
         								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
         								if( camera_controller != null && restartVideoTimerTask != null )
-        									restartVideo();
+        									restartVideo(false);
         								else {
         									if( MyDebug.LOG )
         										Log.d(TAG, "restartVideoTimerTask: don't restart video, as already cancelled");
@@ -4414,7 +4469,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	public long getVideoTime() {
-		return System.currentTimeMillis() - video_start_time;
+		return System.currentTimeMillis() - video_start_time + video_accumulated_time;
 	}
 	
     public boolean isTakingPhoto() {
