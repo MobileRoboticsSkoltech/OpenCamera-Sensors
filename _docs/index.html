@@ -522,6 +522,23 @@ will stop after the specified time (unless already stopped earlier).</p>
 the video automatically stop and restart the specified number of times. So this can be used to take a video for a long
 period, broken up into multiple video files. If a max duration has not been set, then this option has no effect.</p>
 
+<p><b>Maximum file size of video</b> - This allows to set a maximum file size for videos. Note that almost all Android devices
+set a maximum file size (typically around 2GB or 4GB), and there is no way Open Camera can work around such a limitation (and
+using exFAT doesn't get round it). But this option allows you to set a smaller value. Note that the value is approximate - typically
+the resultant videos may be slightly smaller. Note that if you using this option together
+with "Max duration of video", then - if "Restart on maximum file size" is enabled - hitting the maximum file size will cause a
+restart that doesn't reset the max duration timer, nor does it count as one of the number of restarts. E.g., if you requested a
+maximum duration of 30m, with 1 restart, but the video hits the maximum file size after 20m, rather than getting two times 30m
+videos, you'd get four videos, of lengths 20m, 10m, 20m, 10m (i.e., the 30m videos are split at the maximum file sizes). If
+"Restart on maximum file size" is disabled, then hitting the maximum file size will always cause the video to end without
+restarting, even if you've set "Restart video after max duration".</p>
+
+<p><b>Restart on maximum file size</b> - Whether to automatically restart if the maximum file size is met. As noted above, almost all
+Android devices have a maximum file size for videos, even if you don't explicitly set one. So it's advisable to keep this option to true,
+so that Open Camera will restart as soon as possible if you're recording video, and hit this limit. Note that there will still be a loss
+of a few seconds while the video stops and restarts - but this at least is better than stopping altogether (and is especially useful if
+you want to leave Open Camera recording without you keeping watch).</p>
+
 <p><b>Record audio</b> - Whether to record audio when recording a video.</p>
 
 <p><b>Audio source</b> - Select the audio source for recording video. The effect of this depends on your device -
