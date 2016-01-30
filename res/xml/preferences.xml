@@ -576,6 +576,13 @@
                 />
 
 	        <CheckBoxPreference
+	            android:key="preference_video_restart_max_filesize"
+	            android:title="@string/preference_video_restart_max_filesize"
+	            android:summary="@string/preference_video_restart_max_filesize_summary"
+	            android:defaultValue="true"
+	            />
+
+	        <CheckBoxPreference
 	            android:key="preference_record_audio"
 	            android:title="@string/preference_record_audio"
 	            android:summary="@string/preference_record_audio_summary"

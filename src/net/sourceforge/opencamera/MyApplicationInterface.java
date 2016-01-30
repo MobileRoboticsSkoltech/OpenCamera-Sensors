@@ -448,6 +448,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
     @Override
+	public boolean getVideoRestartMaxFileSizePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getBoolean(PreferenceKeys.getVideoRestartMaxFileSizePreferenceKey(), true);
+	}
+
+    @Override
     public boolean getVideoFlashPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), false);

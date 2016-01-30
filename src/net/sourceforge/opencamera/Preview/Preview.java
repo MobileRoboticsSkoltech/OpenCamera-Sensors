@@ -3221,7 +3221,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void onVideoInfo(int what, int extra) {
-		final boolean restart_on_max_filesize = true;
+		boolean restart_on_max_filesize = applicationInterface.getVideoRestartMaxFileSizePref();
 		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && restart_on_max_filesize ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "restart due to max filesize reached");
