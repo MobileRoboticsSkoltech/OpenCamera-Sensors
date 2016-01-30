@@ -543,4 +543,20 @@
         <item>-1</item>
         <item>-2</item>
     </string-array>
+    <string-array name="preference_video_max_filesize_entries">
+        <item>Device default</item>
+        <item>100MB</item>
+        <item>200MB</item>
+        <item>300MB</item>
+        <item>500MB</item>
+        <item>1GB</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_values">
+        <item>0</item>
+        <item>104857600</item>
+        <item>209715200</item>
+        <item>314572800</item>
+        <item>524288000</item>
+        <item>1073741824</item>
+    </string-array>
 </resources>

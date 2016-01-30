@@ -217,6 +217,8 @@
     <string name="preference_video_max_duration_summary">The video recording will stop after the specified duration</string>
     <string name="preference_video_restart">Restart video after max duration</string>
     <string name="preference_video_restart_summary">If the video has stopped after hitting the maximum duration (if set), this option will make the video restart, up to the specified number of times</string>
+    <string name="preference_video_max_filesize">Maximum filesize of video</string>
+    <string name="preference_video_max_filesize_summary">The video recording will restart when the (approximate) maximum filesize is reached. Note that almost all Android devices have a maximum filesize for videos (typically around 2GB or 4GB), but this option allows setting a specific value.</string>
     <string name="preference_record_audio">Record audio</string>
     <string name="preference_record_audio_summary">Record audio when recording video</string>
     <string name="preference_record_audio_src">Audio source</string>
@@ -272,4 +274,7 @@
 
     <string name="start_video">Start recording video</string>
     <string name="stop_video">Stop recording video</string>
+
+    <string name="max_filesize">Max filesize</string>
+    <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
 </resources>

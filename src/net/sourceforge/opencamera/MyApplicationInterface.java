@@ -412,7 +412,7 @@ public class MyApplicationInterface implements ApplicationInterface {
         }
 		return video_max_duration;
     }
-    
+
     @Override
     public int getVideoRestartTimesPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -430,6 +430,23 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return remaining_restart_video;
     }
     
+    @Override
+	public long getVideoMaxFileSizePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		String video_max_filesize_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "0");
+		long video_max_filesize = 0;
+		try {
+			video_max_filesize = Integer.parseInt(video_max_filesize_value);
+		}
+        catch(NumberFormatException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "failed to parse preference_video_max_filesize value: " + video_max_filesize_value);
+    		e.printStackTrace();
+    		video_max_filesize = 0;
+        }
+		return video_max_filesize;
+	}
+
     @Override
     public boolean getVideoFlashPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());

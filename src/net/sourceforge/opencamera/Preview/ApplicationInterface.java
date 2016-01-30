@@ -51,6 +51,7 @@ public interface ApplicationInterface {
 	String getVideoFPSPref(); // return "default" to let Preview choose
 	long getVideoMaxDurationPref(); // time in ms after which to automatically stop video recording (return 0 for off)
 	int getVideoRestartTimesPref(); // number of times to restart video recording after hitting max duration (return 0 for never auto-restarting)
+	long getVideoMaxFileSizePref(); // maximum filesize in bytes for video (return 0 for device default)
 	boolean getVideoFlashPref(); // option to switch flash on/off while recording video (should be false in most cases!)
 	String getPreviewSizePref(); // "preference_preview_size_wysiwyg" is recommended (preview matches aspect ratio of photo resolution as close as possible), but can also be "preference_preview_size_display" to maximise the preview size
 	String getPreviewRotationPref(); // return "0" for default; use "180" to rotate the preview 180 degrees

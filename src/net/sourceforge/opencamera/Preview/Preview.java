@@ -3452,6 +3452,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.d(TAG, "video codec: " + profile.videoCodec);
 	    		}
 	    		//video_recorder.setMaxFileSize(15*1024*1024); // test
+				long video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
+				if( video_max_filesize > 0 ) {
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "set max file size of: " + video_max_filesize);
+		    		video_recorder.setMaxFileSize(video_max_filesize);
+				}
 
 	    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
 	    			video_recorder.setOutputFile(video_filename);

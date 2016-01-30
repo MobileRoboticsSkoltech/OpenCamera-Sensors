@@ -255,6 +255,10 @@ public class PreferenceKeys {
     	return "preference_video_restart";
     }
     
+    public static String getVideoMaxFileSizePreferenceKey() {
+    	return "preference_video_max_filesize";
+    }
+    
     public static String getVideoFlashPreferenceKey() {
     	return "preference_video_flash";
     }

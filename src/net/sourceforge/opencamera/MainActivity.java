@@ -2514,20 +2514,25 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			else
 				bitrate_string = profile.videoBitRate + "bps";
 
-			String timer_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
 			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
 			boolean record_audio = sharedPreferences.getBoolean(PreferenceKeys.getRecordAudioPreferenceKey(), true);
 			if( !record_audio ) {
 				toast_string += "\n" + getResources().getString(R.string.audio_disabled);
 			}
-			if( timer_value.length() > 0 && !timer_value.equals("0") ) {
+			String max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
+			if( max_duration_value.length() > 0 && !max_duration_value.equals("0") ) {
 				String [] entries_array = getResources().getStringArray(R.array.preference_video_max_duration_entries);
 				String [] values_array = getResources().getStringArray(R.array.preference_video_max_duration_values);
-				int index = Arrays.asList(values_array).indexOf(timer_value);
+				int index = Arrays.asList(values_array).indexOf(max_duration_value);
 				if( index != -1 ) { // just in case!
 					String entry = entries_array[index];
 					toast_string += "\n" + getResources().getString(R.string.max_duration) +": " + entry;
 				}
+			}
+			long max_filesize = applicationInterface.getVideoMaxFileSizePref();
+			if( max_filesize != 0 ) {
+				long max_filesize_mb = max_filesize/(1024*1024);
+				toast_string += "\n" + getResources().getString(R.string.max_filesize) +": " + max_filesize_mb + getResources().getString(R.string.mb_abbreviation);
 			}
 			if( sharedPreferences.getBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), false) && preview.supportsFlash() ) {
 				toast_string += "\n" + getResources().getString(R.string.preference_video_flash);
