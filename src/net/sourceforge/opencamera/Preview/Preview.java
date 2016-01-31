@@ -4478,6 +4478,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return System.currentTimeMillis() - video_start_time + video_accumulated_time;
 	}
 	
+	public long getVideoAccumulatedTime() {
+		return video_accumulated_time;
+	}
+	
     public boolean isTakingPhoto() {
     	return this.phase == PHASE_TAKING_PHOTO;
     }
