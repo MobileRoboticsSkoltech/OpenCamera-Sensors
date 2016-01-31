@@ -361,17 +361,6 @@ default will show above the lock screen - i.e., if locked, you won't have to ent
 device still needs to be unlocked in order to go to the Settings or Gallery. If you would prefer Open Camera to always
 be unavailable when your device is locked, you can disable this option.</p>
 
-<p><b>Lock screen when recording video</b> - if enabled, the GUI will be locked when recording video (i.e., the GUI
-won't respond to touch presses). You can use this to prevent accidental presses that might change settings or stop
-recording. To unlock the GUI, swipe the screen (in any direction). Note that this won't prevent the video being
-stopped if you press your device's Home, Recent Apps or Power button (it is not possible for apps to override the
-behaviour of these buttons).</p>
-
-<p><b>Rotate preview</b> - this option rotates the on-screen preview by 180 degrees. Most users won't ever need this,
-but this option can be useful if you are using Open Camera with equipment which inverts the image. Note that this
-doesn't rotate the resultant photos/videos - you'll still have to rotate those yourself afterwards - but this will
-correct the preview so that you can still see what you are shooting properly.</p>
-
 <p><b>On screen GUI...</b> - Select to access the following controls:</p>
 
 <p><b>Preview size</b> - By default, Open Camera matches the aspect ratio of the preview (the image that is
@@ -451,6 +440,11 @@ to a particular aspect ratio. For photos, the crop-guide requires "Preview size"
 <p><b>Keep display on</b> - Whether to force keeping the screen display on, while the main Open Camera UI is active.</p>
 
 <p><b>Force maximum brightness</b> - Whether to force the screen display to maximum brightness.</p>
+
+<p><b>Rotate preview</b> - this option rotates the on-screen preview by 180 degrees. Most users won't ever need this,
+but this option can be useful if you are using Open Camera with equipment which inverts the image. Note that this
+doesn't rotate the resultant photos/videos - you'll still have to rotate those yourself afterwards - but this will
+correct the preview so that you can still see what you are shooting properly.</p>
 
 <p><b>Photo and Video Settings:</b></p>
 
@@ -549,6 +543,12 @@ device specific.</p>
 <p><b>Audio channels</b> - If recording audio with video, this option allows you to specify mono or stereo recording.
 Note that most devices do not support stereo recording. Even for devices that do support this, you may need to modify
 the "Audio source" option to another value for this to work.</p>
+
+<p><b>Lock screen when recording video</b> - if enabled, the GUI will be locked when recording video (i.e., the GUI
+won't respond to touch presses). You can use this to prevent accidental presses that might change settings or stop
+recording. To unlock the GUI, swipe the screen (in any direction). Note that this won't prevent the video being
+stopped if you press your device's Home, Recent Apps or Power button (it is not possible for apps to override the
+behaviour of these buttons).</p>
 
 <p><b>Flash while recording video</b> - If enabled, the camera flash will flash every second while recording video. This
 isn't something most people will need, but it can be useful if the phone is being operated remotely, as a signal that the
@@ -843,6 +843,8 @@ UPDATED Display countdown timer as hours:minutes:seconds when 60 seconds or
 UPDATED No longer show pointless toast for stopping video recording.
 UPDATED Display if face detection is turned on in info toast.
 UPDATED Level line now has a crossbar to indicate the vertical angle better.
+UPDATED Reorganised the Settings ("Lock screen when recording video" moved to
+        "Video settings", "Rotate preview" moved to "On screen GUI").
 
 Version 1.27 (2015/10/25)
 
