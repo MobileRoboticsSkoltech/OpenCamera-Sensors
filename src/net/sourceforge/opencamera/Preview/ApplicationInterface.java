@@ -62,6 +62,7 @@ public interface ApplicationInterface {
 	boolean getPausePreviewPref(); // whether to pause the preview after taking a photo
 	boolean getShowToastsPref();
 	boolean getShutterSoundPref(); // whether to play sound when taking photo
+	boolean getStartupFocusPref(); // whether to do autofocus on startup
 	long getTimerPref(); // time in ms for timer (so 0 for off)
 	String getRepeatPref(); // return number of times to repeat photo in a row (as a string), so "1" for default; return "unlimited" for unlimited
 	long getRepeatIntervalPref(); // time in ms between repeat

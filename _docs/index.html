@@ -361,6 +361,9 @@ default will show above the lock screen - i.e., if locked, you won't have to ent
 device still needs to be unlocked in order to go to the Settings or Gallery. If you would prefer Open Camera to always
 be unavailable when your device is locked, you can disable this option.</p>
 
+<p><b>Perform auto-focus on startup</b> - Whether Open Camera should auto-focus when starting the camera. Some devices
+have a bug where the flash turns on when this happens, so a workaround is to disable this option.</p>
+
 <p><b>On screen GUI...</b> - Select to access the following controls:</p>
 
 <p><b>Preview size</b> - By default, Open Camera matches the aspect ratio of the preview (the image that is
@@ -839,6 +842,8 @@ FIXED   Corrected content description of take photo icon for when switched to
         video mode (for accessibility).
 ADDED   New option to take photo/record video by making a noise.
 ADDED   Option to control maximum filesize of videos.
+ADDED   New option to disable performing auto-focus on startup (disable this if
+        you have the bug where flash turns on on startup).
 UPDATED Video now automatically restarts (rather than stopping) if the device's
         maximum filesize (typically ~2GB), or the user specified limit, is hit.
         (Option also added to not restart, if you prefer.)

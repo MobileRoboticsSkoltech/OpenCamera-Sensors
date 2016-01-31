@@ -1114,6 +1114,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
+		boolean do_startup_focus = !take_photo && applicationInterface.getStartupFocusPref();
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "take_photo? " + take_photo);
+			Log.d(TAG, "do_startup_focus? " + do_startup_focus);
+		}
 		if( this.is_video ) {
 			// make sure we're into continuous video mode for reopening
 			// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
@@ -1133,7 +1138,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.switchVideo(false, false);
 		}
 
-		if( !take_photo && using_android_l ) {
+		if( do_startup_focus && using_android_l ) {
 			// need to switch flash off for autofocus - and for Android L, need to do this before starting preview (otherwise it won't work in time); for old camera API, need to do this after starting preview!
 			set_flash_value_after_autofocus = "";
 			String old_flash_value = camera_controller.getFlashValue();
@@ -1180,7 +1185,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		applicationInterface.cameraSetup(); // must call this after the above take_photo code in case it switches from video to photo mode
 
-	    if( !take_photo ) {
+	    if( do_startup_focus ) {
 	    	final Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
 				@Override

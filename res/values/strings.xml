@@ -127,6 +127,8 @@
     <string name="preference_save_video_prefix_summary">The prefix to use for the save filenames for videos</string>
     <string name="preference_show_when_locked">Show camera when locked</string>
     <string name="preference_show_when_locked_summary">If enabled, Open Camera will still show above any lockscreen (you\'ll still have to unlock to access Settings, Gallery etc)</string>
+    <string name="preference_startup_focus">Perform auto-focus on startup</string>
+    <string name="preference_startup_focus_summary">Whether to auto-focus when Open Camera is started. If you have the problem of flash turning on when starting, disable this option</string>
     <string name="preference_lock_video">Lock screen when recording video</string>
     <string name="preference_lock_video_summary">When recording video, the GUI will be locked to prevent accidentally stopping recording. Swipe the screen to unlock. Note that video recording will always stop if the app goes into background or the screen is blanked.</string>
     <string name="preference_rotate_preview">Rotate preview</string>

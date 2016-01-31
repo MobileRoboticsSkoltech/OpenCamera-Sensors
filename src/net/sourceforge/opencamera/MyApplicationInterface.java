@@ -515,6 +515,12 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
     @Override
+	public boolean getStartupFocusPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getBoolean(PreferenceKeys.getStartupFocusPreferenceKey(), true);
+    }
+
+    @Override
     public long getTimerPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");

@@ -224,6 +224,13 @@
                 android:defaultValue="true"
                 />
 
+	       <CheckBoxPreference
+                android:key="preference_startup_focus"
+                android:title="@string/preference_startup_focus"
+                android:summary="@string/preference_startup_focus_summary"
+                android:defaultValue="true"
+                />
+
             </PreferenceScreen>
 
 	    <PreferenceScreen
