@@ -681,8 +681,18 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		else {
 			if( uri != null ) {
-			    // still need to announce, as we didn't do this via broadcastFile
-			    storageUtils.announceUri(uri, false, true);
+				// see note in onPictureTaken() for where we call broadcastFile for SAF photos
+	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(uri);
+				if( MyDebug.LOG )
+					Log.d(TAG, "real_file: " + real_file);
+                if( real_file != null ) {
+	            	storageUtils.broadcastFile(real_file, false, true);
+	            	main_activity.test_last_saved_image = real_file.getAbsolutePath();
+                }
+                else {
+                	// announce the SAF Uri
+	    		    storageUtils.announceUri(uri, false, true);
+                }
 			    done = true;
 			}
 		}
@@ -2567,7 +2577,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	            	}
 
     	            if( saveUri == null ) {
-    	            	// don't need to broadcast when using SAF
+    	            	// broadcast for SAF is done later, when we've actually written out the file
     	            	storageUtils.broadcastFile(picFile, true, false);
     	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
     	            }
@@ -2597,8 +2607,26 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    		    inputStream.close();
 	    		    realOutputStream.close();
 	    		    success = true;
-	    		    // still need to announce, as we didn't do this via broadcastFile
-	    		    storageUtils.announceUri(saveUri, true, false);
+	    		    /* We still need to broadcastFile for SAF for two reasons:
+	    		    	1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
+	    		           Whilst in theory we could do this directly, it seems external apps that use such broadcasts typically
+	    		           won't know what to do with a SAF based Uri (e.g, Owncloud crashes!) so better to broadcast the Uri
+	    		           corresponding to the real file, if it exists.
+	    		        2. Whilst the new file seems to be known by external apps such as Gallery without having to call media
+	    		           scanner, I've had reports this doesn't happen when saving to external SD cards. So better to explicitly
+	    		           scan.
+	    		    */
+		    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri);
+					if( MyDebug.LOG )
+						Log.d(TAG, "real_file: " + real_file);
+                    if( real_file != null ) {
+    	            	storageUtils.broadcastFile(real_file, true, false);
+    	            	main_activity.test_last_saved_image = real_file.getAbsolutePath();
+                    }
+                    else {
+                    	// announce the SAF Uri
+    	    		    storageUtils.announceUri(saveUri, true, false);
+                    }
 	            }
 	        }
 		}
@@ -2839,7 +2867,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 						Log.d(TAG, "successfully deleted " + last_image_uri);
     	    	    preview.showToast(null, R.string.photo_deleted);
                     if( file != null ) {
-                    	// SAF seems to broadcast for new files, but not when deleting them?!
+                    	// SAF doesn't broadcast when deleting them
     	            	storageUtils.broadcastFile(file, false, false);
                     }
 				}

@@ -821,6 +821,10 @@ available from
 <textarea readonly style="width:100%; height:50%; white-space: pre; word-wrap: normal; overflow-x: scroll">
 Version 1.28 (Work in progress)
 
+FIXED   Broadcast File-based Uri when using Storage Access Framework, instead
+        of SAF Uri (this fixes Owncloud crashing for auto-upload photos/videos
+        option; this might also fix problems with photos/videos not showing up
+        on SD card until after a reboot?)
 FIXED   If using Storage Access Framework, and save location was on external SD
         card, the on-screen free memory would show internal storage. (Note that
         with this fix, it may be that the free memory is not shown for external
