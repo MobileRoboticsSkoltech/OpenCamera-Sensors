@@ -39,6 +39,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -1719,7 +1720,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	long time_s = System.currentTimeMillis();
     	StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
 		Bitmap thumbnail = null;
-    	if( media != null && getContentResolver() != null ) {
+		KeyguardManager keyguard_manager = (KeyguardManager)this.getSystemService(Context.KEYGUARD_SERVICE);
+		boolean is_locked = keyguard_manager != null && keyguard_manager.inKeyguardRestrictedInputMode();
+		if( MyDebug.LOG )
+			Log.d(TAG, "is_locked?: " + is_locked);
+    	if( media != null && getContentResolver() != null && !is_locked ) {
     		// check for getContentResolver() != null, as have had reported Google Play crashes
     		if( media.video ) {
     			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
