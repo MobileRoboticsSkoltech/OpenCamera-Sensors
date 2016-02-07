@@ -139,6 +139,17 @@
         android:onClick="clickedSwitchCamera"
         />
 
+    <ImageButton
+        android:id="@+id/speech_recognizer"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/speech_recognizer"
+        android:src="@drawable/ic_mic_white_48dp"
+        android:onClick="clickedSpeechRecognizer"
+        />
+
     <!-- should be at left-most -->
     <ImageButton
         android:id="@+id/trash"

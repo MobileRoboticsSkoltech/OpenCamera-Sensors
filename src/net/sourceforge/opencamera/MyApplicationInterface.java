@@ -798,7 +798,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 		}
         
-        main_activity.initAudioListener(); // restart audio listener after video stopped
+        main_activity.startAudioListeners(); // restart audio listeners after video stopped
 	}
 
 	@Override
@@ -821,7 +821,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( sharedPreferences.getBoolean(PreferenceKeys.getLockVideoPreferenceKey(), false) ) {
 			main_activity.lockScreen();
 		}
-		main_activity.freeAudioListener(true); // important otherwise MediaRecorder will fail to start() if we have an audiolistener!
+		main_activity.stopAudioListeners(); // important otherwise MediaRecorder will fail to start() if we have an audiolistener! Also don't want to have the speech recognizer going off
 		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_recording);
 		view.setContentDescription( getContext().getResources().getString(R.string.stop_video) );
@@ -955,6 +955,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
 			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
+			    View speechRecognizerButton = (View) main_activity.findViewById(R.id.speech_recognizer);
 			    View popupButton = (View) main_activity.findViewById(R.id.popup);
 			    View galleryButton = (View) main_activity.findViewById(R.id.gallery);
 			    View settingsButton = (View) main_activity.findViewById(R.id.settings);
@@ -967,6 +968,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			    	exposureButton.setVisibility(visibility);
 			    if( main_activity.getPreview().supportsExposureLock() )
 			    	exposureLockButton.setVisibility(visibility);
+			    if( main_activity.hasSpeechRecognizer() )
+				    speechRecognizerButton.setVisibility(visibility);
 		    	popupButton.setVisibility(visibility);
 			    galleryButton.setVisibility(visibility);
 			    settingsButton.setVisibility(visibility);
@@ -1013,6 +1016,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
 			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
+			    View speechRecognizerButton = (View) main_activity.findViewById(R.id.speech_recognizer);
 			    View popupButton = (View) main_activity.findViewById(R.id.popup);
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
@@ -1022,6 +1026,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			    	exposureButton.setVisibility(visibility);
 			    if( main_activity.getPreview().supportsExposureLock() && !main_activity.getPreview().isVideo() ) // still allow exposure lock when recording video
 			    	exposureLockButton.setVisibility(visibility);
+			    if( main_activity.hasSpeechRecognizer() )
+				    speechRecognizerButton.setVisibility(visibility);
 			    if( !show ) {
 			    	main_activity.closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
 			    }

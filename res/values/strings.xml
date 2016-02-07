@@ -113,8 +113,8 @@
     <string name="preference_shutter_sound_summary">Play a sound when taking a photo (requires Android 4.2 or greater to disable)</string>
     <string name="preference_volume_keys">Volume keys</string>
     <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
-    <string name="preference_audio_noise_control">Audio control</string>
-    <string name="preference_audio_noise_control_summary">Take photo or record video when a noise is detected (warning, may use more battery life, only enable if required)</string>
+    <string name="preference_audio_control">Audio control options</string>
+    <string name="preference_audio_control_summary">Take photo or record video when a noise is detected, or on a voice command</string>
     <string name="preference_audio_noise_control_sensitivity">Audio control sensitivity</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Noise level sensitivity for audio control</string>
     <string name="preference_save_location">Save location</string>
@@ -281,4 +281,6 @@
 
     <string name="max_filesize">Max file size</string>
     <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
+    
+    <string name="speech_recognizer">Start speech recognition</string>
 </resources>

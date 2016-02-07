@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import android.graphics.Bitmap;
@@ -48,6 +49,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -100,6 +104,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	
 	private AudioListener audio_listener = null;
 	private int audio_noise_sensitivity = -1;
+	
+	private SpeechRecognizer speechRecognizer = null;
+	private boolean speechRecognizerIsStarted = false;
 	
 	private boolean ui_placement_right = true;
 
@@ -210,6 +217,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		
 	    View switchCameraButton = (View) findViewById(R.id.switch_camera);
 	    switchCameraButton.setVisibility(preview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
+	    View speechRecognizerButton = (View) findViewById(R.id.speech_recognizer);
+	    speechRecognizerButton.setVisibility(View.GONE); // disabled by default, until the speech recognizer is created
 
 	    orientationEventListener = new OrientationEventListener(this) {
 			@Override
@@ -292,7 +301,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				}
 			}
 		});
-        
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for Activity startup: " + (System.currentTimeMillis() - time_s));
 	}
@@ -432,7 +441,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			// but also need to check we're not currently taking a photo or on timer, so we don't repeatedly queue up takePicture() calls, or cancel a timer
 			long time_now = System.currentTimeMillis();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			boolean want_audio_listener = sharedPreferences.getBoolean(PreferenceKeys.getAudioNoiseControlPreferenceKey(), false);
+			boolean want_audio_listener = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("noise");
 			if( time_last_audio_trigger_photo != -1 && time_now - time_last_audio_trigger_photo < 5000 ) {
 				// avoid risk of repeatedly being triggered - as well as problem of being triggered again by the camera's own "beep"!
 				if( MyDebug.LOG )
@@ -443,31 +452,44 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				if( MyDebug.LOG )
 					Log.d(TAG, "ignore loud noise due to audio listener option turned off");
 			}
-			else if( popupIsOpen() ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "ignore loud noise due to popup open");
-			}
-			else if( camera_in_background ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "ignore loud noise due to camera in background");
-			}
-			else if( preview.isTakingPhotoOrOnTimer() ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "ignore loud noise due to already taking photo or on timer");
-			}
 			else {
 				if( MyDebug.LOG )
-					Log.d(TAG, "schedule take picture due to loud noise");
+					Log.d(TAG, "audio trigger from loud noise");
 				time_last_audio_trigger_photo = time_now;
-				//takePicture();
-				this.runOnUiThread(new Runnable() {
-					public void run() {
-						if( MyDebug.LOG )
-							Log.d(TAG, "now taking picture due to loud noise");
-						takePicture();
-					}
-				});
+				audioTrigger();
 			}
+		}
+	}
+	
+	/* Audio trigger - either loud sound, or speech recognition.
+	 * This performs some additional checks before taking a photo.
+	 */
+	private void audioTrigger() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "ignore audio trigger due to popup open");
+		if( popupIsOpen() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "ignore audio trigger due to popup open");
+		}
+		else if( camera_in_background ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "ignore audio trigger due to camera in background");
+		}
+		else if( preview.isTakingPhotoOrOnTimer() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "ignore audio trigger due to already taking photo or on timer");
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "schedule take picture due to loud noise");
+			//takePicture();
+			this.runOnUiThread(new Runnable() {
+				public void run() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "taking picture due to audio trigger");
+					takePicture();
+				}
+			});
 		}
 	}
 	
@@ -691,6 +713,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         orientationEventListener.enable();
 
         initAudioListener();
+        initSpeechRecognizer();
         initLocation();
         initSound();
     	loadSound(R.raw.beep);
@@ -727,6 +750,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
         freeAudioListener(false);
+        freeSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
 		releaseSound();
 		preview.onPause();
@@ -861,11 +885,22 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 	
+			view = findViewById(R.id.speech_recognizer);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, 0);
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.switch_camera);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
 			view = findViewById(R.id.trash);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.switch_camera);
+			layoutParams.addRule(left_of, R.id.speech_recognizer);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -1103,6 +1138,39 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "clickedTakePhoto");
     	this.takePicture();
     }
+    
+    public void clickedSpeechRecognizer(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedSpeechRecognizer");
+		this.closePopup();
+        if( speechRecognizer != null ) {
+        	if( speechRecognizerIsStarted ) {
+            	speechRecognizer.stopListening();
+            	speechRecognizerStopped();
+        	}
+        	else {
+            	Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            	speechRecognizer.startListening(intent);
+            	speechRecognizerStarted();
+        	}
+        }
+    }
+    
+    private void speechRecognizerStarted() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "speechRecognizerStarted");
+		ImageButton view = (ImageButton)findViewById(R.id.speech_recognizer);
+		view.setImageResource(R.drawable.ic_mic_red_48dp);
+		speechRecognizerIsStarted = true;
+    }
+
+    private void speechRecognizerStopped() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "speechRecognizerStopped");
+		ImageButton view = (ImageButton)findViewById(R.id.speech_recognizer);
+		view.setImageResource(R.drawable.ic_mic_white_48dp);
+		speechRecognizerIsStarted = false;
+    }
 
     public void clickedSwitchCamera(View view) {
 		if( MyDebug.LOG )
@@ -1298,6 +1366,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		clearSeekBar();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
+        if( speechRecognizer != null ) {
+        	speechRecognizer.stopListening();
+        	speechRecognizerStopped();
+        }
 
     	final long time_s = System.currentTimeMillis();
 
@@ -1352,6 +1424,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		closePopup();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
 		preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
+        if( speechRecognizer != null ) {
+        	speechRecognizer.stopListening();
+        	speechRecognizerStopped();
+        }
 		
 		Bundle bundle = new Bundle();
 		bundle.putInt("cameraId", this.preview.getCameraId());
@@ -1495,6 +1571,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		layoutUI(); // needed in case we've changed left/right handed UI
         initAudioListener(); // in case enabled or disabled audio listener
+        initSpeechRecognizer(); // in case enabled or disabled speech recognizer
 		initLocation(); // in case we've enabled or disabled GPS
 		if( toast_message != null )
 			block_startup_toast = true;
@@ -2615,18 +2692,18 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				toast_string += "\n" + getResources().getString(R.string.preference_burst_mode) + ": " + entry;
 			}
 		}
-		if( audio_listener != null ) {
+		/*if( audio_listener != null ) {
 			toast_string += "\n" + getResources().getString(R.string.preference_audio_noise_control);
-		}
+		}*/
 		
 		preview.showToast(switch_video_toast, toast_string);
 	}
 
-	void initAudioListener() {
+	private void initAudioListener() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initAudioListener");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean want_audio_listener = sharedPreferences.getBoolean(PreferenceKeys.getAudioNoiseControlPreferenceKey(), false);
+		boolean want_audio_listener = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("noise");
 		if( audio_listener == null && want_audio_listener ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "create new AudioListener");
@@ -2666,7 +2743,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 	}
 	
-	void freeAudioListener(boolean wait_until_done) {
+	private void freeAudioListener(boolean wait_until_done) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "freeAudioListener");
         if( audio_listener != null ) {
@@ -2678,6 +2755,148 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         		}
         	}
         	audio_listener = null;
+        }
+	}
+	
+	private void initSpeechRecognizer() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "initSpeechRecognizer");
+		// in theory we could create the speech recognizer always (hopefully it shouldn't use battery when not listening?), though to be safe, we only do this when the option is enabled (e.g., just in case this doesn't work on some devices!)
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean want_speech_recognizer = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("voice");
+		if( speechRecognizer == null && want_speech_recognizer ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "create new speechRecognizer");
+	        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+	        if( speechRecognizer != null ) {
+	        	speechRecognizerIsStarted = false;
+	        	speechRecognizer.setRecognitionListener(new RecognitionListener() {
+					@Override
+					public void onBeginningOfSpeech() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "RecognitionListener: onBeginningOfSpeech");
+					}
+
+					@Override
+					public void onBufferReceived(byte[] buffer) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "RecognitionListener: onBufferReceived");
+					}
+
+					@Override
+					public void onEndOfSpeech() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "RecognitionListener: onEndOfSpeech");
+			        	speechRecognizerStopped();
+					}
+
+					@Override
+					public void onError(int error) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "RecognitionListener: onError: " + error);
+						if( error != SpeechRecognizer.ERROR_NO_MATCH ) {
+							// we sometime receive ERROR_NO_MATCH straight after listening starts
+							// it seems that the end is signalled either by ERROR_SPEECH_TIMEOUT or onEndOfSpeech()
+				        	speechRecognizerStopped();
+						}
+					}
+
+					@Override
+					public void onEvent(int eventType, Bundle params) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "RecognitionListener: onEvent");
+					}
+
+					@Override
+					public void onPartialResults(Bundle partialResults) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "RecognitionListener: onPartialResults");
+					}
+
+					@Override
+					public void onReadyForSpeech(Bundle params) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "RecognitionListener: onReadyForSpeech");
+					}
+
+					public void onResults(Bundle results) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "RecognitionListener: onResults");
+			        	speechRecognizerStopped();
+						ArrayList<String> list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+						float [] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
+						boolean found = false;
+						final String trigger = "cheese";
+						//String debug_toast = "";
+						for(int i=0;i<list.size();i++) {
+							String text = list.get(i);
+							if( MyDebug.LOG )
+								Log.d(TAG, "text: " + text + " score: " + scores[i]);
+							/*if( i > 0 )
+								debug_toast += "\n";
+							debug_toast += text + " : " + scores[i];*/
+							if( text.toLowerCase(Locale.US).contains(trigger) ) {
+								found = true;
+							}
+						}
+						//preview.showToast(null, debug_toast); // debug only!
+						if( found ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "audio trigger from speech recognition");
+							audioTrigger();
+						}
+						else if( list.size() > 0 ) {
+							String toast = list.get(0) + "?";
+							if( MyDebug.LOG )
+								Log.d(TAG, "unrecognised: " + toast);
+							preview.showToast(null, toast);
+						}
+					}
+
+					@Override
+					public void onRmsChanged(float rmsdB) {
+					}
+	        	});
+				if( !applicationInterface.inImmersiveMode() ) {
+		    	    View speechRecognizerButton = (View) findViewById(R.id.speech_recognizer);
+		    	    speechRecognizerButton.setVisibility(View.VISIBLE);
+				}
+	        }
+		}
+		else if( speechRecognizer != null && !want_speech_recognizer ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "free existing SpeechRecognizer");
+			freeSpeechRecognizer();
+		}
+	}
+	
+	private void freeSpeechRecognizer() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "freeSpeechRecognizer");
+		if( speechRecognizer != null ) {
+        	speechRecognizerStopped();
+    	    View speechRecognizerButton = (View) findViewById(R.id.speech_recognizer);
+    	    speechRecognizerButton.setVisibility(View.GONE);
+			speechRecognizer.destroy();
+			speechRecognizer = null;
+		}
+	}
+	
+	boolean hasSpeechRecognizer() {
+		return speechRecognizer != null;
+	}
+	
+	void startAudioListeners() {
+		initAudioListener();
+		// no need to restart speech recognizer, as we didn't free it in stopAudioListeners(), and it's controlled by a user button
+	}
+	
+	void stopAudioListeners() {
+		freeAudioListener(true);
+        if( speechRecognizer != null ) {
+        	// no need to free the speech recognizer, just stop it
+        	speechRecognizer.stopListening();
+        	speechRecognizerStopped();
         }
 	}
 	

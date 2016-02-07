@@ -527,6 +527,16 @@
         <item>audio_mono</item>
         <item>audio_stereo</item>
     </string-array>
+    <string-array name="preference_audio_control_entries">
+        <item>None</item>
+        <item>Loud noise</item>
+        <item>Voice command: \"cheese\"</item>
+    </string-array>
+    <string-array name="preference_audio_control_values">
+        <item>none</item>
+        <item>noise</item>
+        <item>voice</item>
+    </string-array>
     <string-array name="preference_audio_noise_control_sensitivity_entries">
         <item>+3 (high sensitivity)</item>
         <item>+2</item>
