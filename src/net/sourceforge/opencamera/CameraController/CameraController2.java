@@ -2438,6 +2438,48 @@ public class CameraController2 extends CameraController {
 		}
 	}
 
+	/*private void takePictureBurstHdr() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePictureBurstHdr");
+		if( camera == null || captureSession == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "no camera or capture session");
+		}
+		try {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "imageReader: " + imageReader.toString());
+				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
+			}
+
+			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			stillBuilder.setTag(RequestTag.CAPTURE);
+			camera_settings.setupBuilder(stillBuilder, true);
+        	Surface surface = getPreviewSurface();
+        	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
+			stillBuilder.addTarget(imageReader.getSurface());
+
+			List<CaptureRequest> requests = new ArrayList<CaptureRequest>();
+			requests.add( stillBuilder.build() );
+
+			captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
+			captureSession.captureBurst(requests, previewCaptureCallback, handler);
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to take picture burst");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+			jpeg_cb = null;
+			if( take_picture_error_cb != null ) {
+				take_picture_error_cb.onError();
+				take_picture_error_cb = null;
+				return;
+			}
+		}
+	}*/
+
 	/*private void runPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "runPrecapture");

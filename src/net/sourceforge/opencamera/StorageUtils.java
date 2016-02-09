@@ -142,7 +142,7 @@ public class StorageUtils {
     	}
 	}
 	
-    void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video) {
+    public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFile: " + file.getAbsolutePath());
     	// note that the new method means that the new folder shows up as a file when connected to a PC via MTP (at least tested on Windows 8)
