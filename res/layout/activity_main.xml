@@ -140,14 +140,14 @@
         />
 
     <ImageButton
-        android:id="@+id/speech_recognizer"
+        android:id="@+id/audio_control"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:padding="10dp"
         android:scaleType="fitCenter"
-        android:contentDescription="@string/speech_recognizer"
+        android:contentDescription="@string/audio_control"
         android:src="@drawable/ic_mic_white_48dp"
-        android:onClick="clickedSpeechRecognizer"
+        android:onClick="clickedAudioControl"
         />
 
     <!-- should be at left-most -->

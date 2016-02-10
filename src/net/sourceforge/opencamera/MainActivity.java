@@ -104,7 +104,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	
 	private AudioListener audio_listener = null;
 	private int audio_noise_sensitivity = -1;
-	
 	private SpeechRecognizer speechRecognizer = null;
 	private boolean speechRecognizerIsStarted = false;
 	
@@ -217,7 +216,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		
 	    View switchCameraButton = (View) findViewById(R.id.switch_camera);
 	    switchCameraButton.setVisibility(preview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
-	    View speechRecognizerButton = (View) findViewById(R.id.speech_recognizer);
+	    View speechRecognizerButton = (View) findViewById(R.id.audio_control);
 	    speechRecognizerButton.setVisibility(View.GONE); // disabled by default, until the speech recognizer is created
 
 	    orientationEventListener = new OrientationEventListener(this) {
@@ -712,7 +711,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
 
-        initAudioListener();
         initSpeechRecognizer();
         initLocation();
         initSound();
@@ -885,7 +883,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 	
-			view = findViewById(R.id.speech_recognizer);
+			view = findViewById(R.id.audio_control);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, 0);
@@ -900,7 +898,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.speech_recognizer);
+			layoutParams.addRule(left_of, R.id.audio_control);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -1139,11 +1137,19 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	this.takePicture();
     }
     
-    public void clickedSpeechRecognizer(View view) {
+    public void clickedAudioControl(View view) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "clickedSpeechRecognizer");
+			Log.d(TAG, "clickedAudioControl");
+		// check hasAudioControl just in case!
+		if( !hasAudioControl() ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "clickedAudioControl, but hasAudioControl returns false!");
+			return;
+		}
 		this.closePopup();
-        if( speechRecognizer != null ) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String audio_control = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none");
+        if( audio_control.equals("voice") && speechRecognizer != null ) {
         	if( speechRecognizerIsStarted ) {
             	speechRecognizer.stopListening();
             	speechRecognizerStopped();
@@ -1154,12 +1160,20 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
             	speechRecognizerStarted();
         	}
         }
+        else if( audio_control.equals("noise") ){
+        	if( audio_listener != null ) {
+        		freeAudioListener(false);
+        	}
+        	else {
+        		startAudioListener();
+        	}
+        }
     }
     
     private void speechRecognizerStarted() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "speechRecognizerStarted");
-		ImageButton view = (ImageButton)findViewById(R.id.speech_recognizer);
+		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
 		view.setImageResource(R.drawable.ic_mic_red_48dp);
 		speechRecognizerIsStarted = true;
     }
@@ -1167,7 +1181,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     private void speechRecognizerStopped() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "speechRecognizerStopped");
-		ImageButton view = (ImageButton)findViewById(R.id.speech_recognizer);
+		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
 		view.setImageResource(R.drawable.ic_mic_white_48dp);
 		speechRecognizerIsStarted = false;
     }
@@ -1366,10 +1380,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		clearSeekBar();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
-        if( speechRecognizer != null ) {
-        	speechRecognizer.stopListening();
-        	speechRecognizerStopped();
-        }
+		stopAudioListeners();
 
     	final long time_s = System.currentTimeMillis();
 
@@ -1424,10 +1435,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		closePopup();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
 		preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
-        if( speechRecognizer != null ) {
-        	speechRecognizer.stopListening();
-        	speechRecognizerStopped();
-        }
+		stopAudioListeners();
 		
 		Bundle bundle = new Bundle();
 		bundle.putInt("cameraId", this.preview.getCameraId());
@@ -1570,8 +1578,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 
 		layoutUI(); // needed in case we've changed left/right handed UI
-        initAudioListener(); // in case enabled or disabled audio listener
-        initSpeechRecognizer(); // in case enabled or disabled speech recognizer
+        initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
 		initLocation(); // in case we've enabled or disabled GPS
 		if( toast_message != null )
 			block_startup_toast = true;
@@ -2699,50 +2706,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		preview.showToast(switch_video_toast, toast_string);
 	}
 
-	private void initAudioListener() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "initAudioListener");
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean want_audio_listener = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("noise");
-		if( audio_listener == null && want_audio_listener ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "create new AudioListener");
-			audio_listener = new AudioListener(this);
-
-		}
-		else if( audio_listener != null && !want_audio_listener ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "free existing AudioListener");
-			freeAudioListener(true);
-		}
-		
-		if( audio_listener != null ) {
-			String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.getAudioNoiseControlSensitivityPreferenceKey(), "0");
-			if( sensitivity_pref.equals("3") ) {
-				audio_noise_sensitivity = 50;
-			}
-			else if( sensitivity_pref.equals("2") ) {
-				audio_noise_sensitivity = 75;
-			}
-			else if( sensitivity_pref.equals("1") ) {
-				audio_noise_sensitivity = 125;
-			}
-			else if( sensitivity_pref.equals("-1") ) {
-				audio_noise_sensitivity = 150;
-			}
-			else if( sensitivity_pref.equals("-2") ) {
-				audio_noise_sensitivity = 200;
-			}
-			else {
-				// default
-				audio_noise_sensitivity = 100;
-			}
-		}
-		else {
-			audio_noise_sensitivity = -1;
-		}
-	}
-	
 	private void freeAudioListener(boolean wait_until_done) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "freeAudioListener");
@@ -2756,6 +2719,37 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         	}
         	audio_listener = null;
         }
+		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
+		view.setImageResource(R.drawable.ic_mic_white_48dp);
+	}
+	
+	private void startAudioListener() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startAudioListener");
+		audio_listener = new AudioListener(this);
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.getAudioNoiseControlSensitivityPreferenceKey(), "0");
+		if( sensitivity_pref.equals("3") ) {
+			audio_noise_sensitivity = 50;
+		}
+		else if( sensitivity_pref.equals("2") ) {
+			audio_noise_sensitivity = 75;
+		}
+		else if( sensitivity_pref.equals("1") ) {
+			audio_noise_sensitivity = 125;
+		}
+		else if( sensitivity_pref.equals("-1") ) {
+			audio_noise_sensitivity = 150;
+		}
+		else if( sensitivity_pref.equals("-2") ) {
+			audio_noise_sensitivity = 200;
+		}
+		else {
+			// default
+			audio_noise_sensitivity = 100;
+		}
+		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
+		view.setImageResource(R.drawable.ic_mic_red_48dp);
 	}
 	
 	private void initSpeechRecognizer() {
@@ -2858,7 +2852,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					}
 	        	});
 				if( !applicationInterface.inImmersiveMode() ) {
-		    	    View speechRecognizerButton = (View) findViewById(R.id.speech_recognizer);
+		    	    View speechRecognizerButton = (View) findViewById(R.id.audio_control);
 		    	    speechRecognizerButton.setVisibility(View.VISIBLE);
 				}
 	        }
@@ -2875,21 +2869,29 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "freeSpeechRecognizer");
 		if( speechRecognizer != null ) {
         	speechRecognizerStopped();
-    	    View speechRecognizerButton = (View) findViewById(R.id.speech_recognizer);
+    	    View speechRecognizerButton = (View) findViewById(R.id.audio_control);
     	    speechRecognizerButton.setVisibility(View.GONE);
 			speechRecognizer.destroy();
 			speechRecognizer = null;
 		}
 	}
 	
-	boolean hasSpeechRecognizer() {
-		return speechRecognizer != null;
+	boolean hasAudioControl() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String audio_control = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none");
+		if( audio_control.equals("voice") ) {
+			return speechRecognizer != null;
+		}
+		else if( audio_control.equals("noise") ) {
+			return true;
+		}
+		return false;
 	}
 	
-	void startAudioListeners() {
+	/*void startAudioListeners() {
 		initAudioListener();
 		// no need to restart speech recognizer, as we didn't free it in stopAudioListeners(), and it's controlled by a user button
-	}
+	}*/
 	
 	void stopAudioListeners() {
 		freeAudioListener(true);

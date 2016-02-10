@@ -136,6 +136,7 @@ public final class R {
     }
     public static final class id {
         public static final int action_settings=0x7f0b001a;
+        public static final int audio_control=0x7f0b000d;
         public static final int exposure=0x7f0b000a;
         public static final int exposure_lock=0x7f0b0009;
         public static final int exposure_seekbar=0x7f0b0010;
@@ -153,7 +154,6 @@ public final class R {
         public static final int preview=0x7f0b0000;
         public static final int settings=0x7f0b0006;
         public static final int share=0x7f0b000f;
-        public static final int speech_recognizer=0x7f0b000d;
         public static final int switch_camera=0x7f0b000c;
         public static final int switch_video=0x7f0b000b;
         public static final int take_photo=0x7f0b0001;
@@ -186,6 +186,9 @@ public final class R {
         public static final int answer_no=0x7f080006;
         public static final int answer_yes=0x7f080005;
         public static final int app_name=0x7f080000;
+        /**  symbol short for megabytes 
+         */
+        public static final int audio_control=0x7f080107;
         public static final int audio_disabled=0x7f080033;
         public static final int auto_stabilise_not_supported=0x7f080032;
         public static final int back_camera=0x7f08001c;
@@ -463,9 +466,6 @@ public final class R {
         public static final int screen_lock_message_2=0x7f080041;
         public static final int share=0x7f0800f6;
         public static final int sorry=0x7f080027;
-        /**  symbol short for megabytes 
-         */
-        public static final int speech_recognizer=0x7f080107;
         public static final int start_video=0x7f080103;
         public static final int started_recording_video=0x7f080026;
         public static final int started_timer=0x7f080023;
