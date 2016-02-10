@@ -316,14 +316,16 @@ focus (trigger an autofocus - or if in manual mode, change the focus distance in
 the exposure compensation (or if in manual ISO mode and using Camera2 API, change the ISO), switch
 auto-stabilise on/off, just change the device's volume as normal, or do nothing.</p>
 
-<p><b>Audio control</b> - If enabled, a photo will be taken (or video recording will start, depending on the mode)
-when a noise is detected. So you can remotely take a photo by saying "cheese" or whatever you prefer. Note that it
-is recommended to only enable this when needed (due to risk of photos being taken unexpectedly, as well as possible
-increased battery use). Note that this can't be used to stop video recording (this is not desirable, as any noise that
-you're recording would undesirably stop the video recording). If you want to have some remote control on video recording,
+<p><b>Audio control options</b> - If enabled, this allows taking a photo (or starting video recording, depending on the mode)
+by making a noise. An on-screen microphone button <img src="ic_mic_white_48dp.png" width="32" height="32"> will appear, to
+start/stop listening. The "loud noise" option will listen for any noise (so you can remotely take a photo by saying "cheese",
+whistling, or whatever you prefer). Note that leaving the listening turned on may use additional battery. The "voice command" option
+listens specifically for saying "cheese" - so this has the advantage that it's less likely to be triggered unintentionally, but
+the downside is that in voice command mode, listening is limited to only a few seconds (this is a restriction of speech recognition
+in Android apps). Note that this can't be used to stop video recording - if you want to have some remote control on video recording,
 see the "Max duration of video" option.</p>
 
-<p><b>Audio control sensitivity</b> - This controls how sensitive Open Camera is to noises, if "Audio control" is enabled.
+<p><b>Audio control sensitivity</b> - This controls how sensitive Open Camera is to noises, if "Audio control" is set to "Loud noise".
 If you find it's taking photos too often unintentionally, or isn't responding to your sounds, try adjusting this option.</p>
 
 <p><a name="save_location"><b>Save location</b> - Select the folder to store the photos in. Click on a folder
