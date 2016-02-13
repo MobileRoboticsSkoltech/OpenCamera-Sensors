@@ -67,9 +67,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private LocationSupplier locationSupplier = null;
 	private StorageUtils storageUtils = null;
 
-    private boolean immersive_mode = false;
-    private boolean show_gui = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
-    
 	private Paint p = new Paint();
 	private Rect text_bounds = new Rect();
 	private RectF face_rect = new RectF();
@@ -936,105 +933,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		main_activity.getPreview().showToast(null, R.string.failed_to_save_video);
 	}
 
-    void setImmersiveMode(final boolean immersive_mode) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setImmersiveMode: " + immersive_mode);
-    	this.immersive_mode = immersive_mode;
-		main_activity.runOnUiThread(new Runnable() {
-			public void run() {
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-				// if going into immersive mode, the we should set GONE the ones that are set GONE in showGUI(false)
-		    	//final int visibility_gone = immersive_mode ? View.GONE : View.VISIBLE;
-		    	final int visibility = immersive_mode ? View.GONE : View.VISIBLE;
-				if( MyDebug.LOG )
-					Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
-		    	// n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
-			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
-			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
-			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
-			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
-			    View audioControlButton = (View) main_activity.findViewById(R.id.audio_control);
-			    View popupButton = (View) main_activity.findViewById(R.id.popup);
-			    View galleryButton = (View) main_activity.findViewById(R.id.gallery);
-			    View settingsButton = (View) main_activity.findViewById(R.id.settings);
-			    View zoomControls = (View) main_activity.findViewById(R.id.zoom);
-			    View zoomSeekBar = (View) main_activity.findViewById(R.id.zoom_seekbar);
-			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
-			    	switchCameraButton.setVisibility(visibility);
-		    	switchVideoButton.setVisibility(visibility);
-			    if( main_activity.supportsExposureButton() )
-			    	exposureButton.setVisibility(visibility);
-			    if( main_activity.getPreview().supportsExposureLock() )
-			    	exposureLockButton.setVisibility(visibility);
-			    if( main_activity.hasAudioControl() )
-			    	audioControlButton.setVisibility(visibility);
-		    	popupButton.setVisibility(visibility);
-			    galleryButton.setVisibility(visibility);
-			    settingsButton.setVisibility(visibility);
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "has_zoom: " + main_activity.getPreview().supportsZoom());
-				}
-				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), false) ) {
-					zoomControls.setVisibility(visibility);
-				}
-				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomSliderControlsPreferenceKey(), true) ) {
-					zoomSeekBar.setVisibility(visibility);
-				}
-        		String pref_immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-        		if( pref_immersive_mode.equals("immersive_mode_everything") ) {
-    			    View takePhotoButton = (View) main_activity.findViewById(R.id.take_photo);
-    			    takePhotoButton.setVisibility(visibility);
-        		}
-				if( !immersive_mode ) {
-					// make sure the GUI is set up as expected
-					showGUI(show_gui);
-				}
-			}
-		});
-    }
-    
-    boolean inImmersiveMode() {
-    	return immersive_mode;
-    }
-
-    private void showGUI(final boolean show) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "showGUI: " + show);
-		this.show_gui = show;
-		if( inImmersiveMode() )
-			return;
-		if( show && main_activity.usingKitKatImmersiveMode() ) {
-			// call to reset the timer
-			main_activity.initImmersiveMode();
-		}
-		main_activity.runOnUiThread(new Runnable() {
-			public void run() {
-		    	final int visibility = show ? View.VISIBLE : View.GONE;
-			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
-			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
-			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
-			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
-			    View audioControlButton = (View) main_activity.findViewById(R.id.audio_control);
-			    View popupButton = (View) main_activity.findViewById(R.id.popup);
-			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
-			    	switchCameraButton.setVisibility(visibility);
-			    if( !main_activity.getPreview().isVideo() )
-			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
-			    if( main_activity.supportsExposureButton() && !main_activity.getPreview().isVideo() ) // still allow exposure when recording video
-			    	exposureButton.setVisibility(visibility);
-			    if( main_activity.getPreview().supportsExposureLock() && !main_activity.getPreview().isVideo() ) // still allow exposure lock when recording video
-			    	exposureLockButton.setVisibility(visibility);
-			    if( main_activity.hasAudioControl() )
-			    	audioControlButton.setVisibility(visibility);
-			    if( !show ) {
-			    	main_activity.closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
-			    }
-			    if( !main_activity.getPreview().isVideo() || !main_activity.getPreview().supportsFlash() )
-			    	popupButton.setVisibility(visibility); // still allow popup in order to change flash mode when recording video
-			}
-		});
-    }
-
     @Override
 	public void hasPausedPreview(boolean paused) {
 	    View shareButton = (View) main_activity.findViewById(R.id.share);
@@ -1052,7 +950,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
     @Override
     public void cameraInOperation(boolean in_operation) {
-    	showGUI(!in_operation);
+    	main_activity.getMainUI().showGUI(!in_operation);
     }
 
 	@Override
@@ -1290,7 +1188,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		boolean has_geo_direction = preview.hasGeoDirection();
 		double geo_direction = preview.getGeoDirection();
 		boolean ui_placement_right = main_activity.getMainUI().getUIPlacementRight();
-		if( inImmersiveMode() ) {
+		if( main_activity.getMainUI().inImmersiveMode() ) {
 			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
 			if( immersive_mode.equals("immersive_mode_everything") ) {
 				// exit, to ensure we don't display anything!

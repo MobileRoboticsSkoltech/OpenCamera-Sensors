@@ -4,6 +4,7 @@ import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
+import net.sourceforge.opencamera.UI.MainUI;
 import net.sourceforge.opencamera.UI.PopupView;
 
 import java.io.File;
@@ -61,7 +62,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -70,7 +70,6 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ZoomControls;
@@ -82,9 +81,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private SensorManager mSensorManager = null;
 	private Sensor mSensorAccelerometer = null;
 	private Sensor mSensorMagnetic = null;
+	private MainUI mainUI = null;
 	private MyApplicationInterface applicationInterface = null;
 	private Preview preview = null;
-	private int current_orientation = 0;
+	//private int current_orientation = 0;
 	private OrientationEventListener orientationEventListener = null;
 	private boolean supports_auto_stabilise = false;
 	private boolean supports_force_video_4k = false;
@@ -107,7 +107,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private SpeechRecognizer speechRecognizer = null;
 	private boolean speechRecognizerIsStarted = false;
 	
-	private boolean ui_placement_right = true;
+	//private boolean ui_placement_right = true;
 
 	private ToastBoxer switch_camera_toast = new ToastBoxer();
 	private ToastBoxer switch_video_toast = new ToastBoxer();
@@ -168,6 +168,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_force_video_4k? " + supports_force_video_4k);
 
+		mainUI = new MainUI(this);
 		applicationInterface = new MyApplicationInterface(this, savedInstanceState);
 
 		initCamera2Support();
@@ -223,7 +224,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    orientationEventListener = new OrientationEventListener(this) {
 			@Override
 			public void onOrientationChanged(int orientation) {
-				MainActivity.this.onOrientationChanged(orientation);
+				MainActivity.this.mainUI.onOrientationChanged(orientation);
 			}
         };
 
@@ -256,7 +257,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
                     // The system bars are visible. Make any desired
                     // adjustments to your UI, such as showing the action bar or
                     // other navigational controls.
-            		applicationInterface.setImmersiveMode(false);
+            		mainUI.setImmersiveMode(false);
                 	setImmersiveTimer();
                 }
                 else {
@@ -265,7 +266,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
                     // The system bars are NOT visible. Make any desired
                     // adjustments to your UI, such as hiding the action bar or
                     // other navigational controls.
-                	applicationInterface.setImmersiveMode(true);
+            		mainUI.setImmersiveMode(true);
                 }
             }
         });
@@ -718,7 +719,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	loadSound(R.raw.beep);
     	loadSound(R.raw.beep_hi);
 
-		layoutUI();
+		mainUI.layoutUI();
 
 		updateGalleryIcon(); // update in case images deleted whilst idle
 
@@ -755,373 +756,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		preview.onPause();
     }
 
-    void layoutUI() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "layoutUI");
-		//this.preview.updateUIPlacement();
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
-    	// we cache the preference_ui_placement to save having to check it in the draw() method
-		this.ui_placement_right = ui_placement.equals("ui_right");
-		if( MyDebug.LOG )
-			Log.d(TAG, "ui_placement: " + ui_placement);
-		// new code for orientation fixed to landscape	
-		// the display orientation should be locked to landscape, but how many degrees is that?
-	    int rotation = this.getWindowManager().getDefaultDisplay().getRotation();
-	    int degrees = 0;
-	    switch (rotation) {
-	    	case Surface.ROTATION_0: degrees = 0; break;
-	        case Surface.ROTATION_90: degrees = 90; break;
-	        case Surface.ROTATION_180: degrees = 180; break;
-	        case Surface.ROTATION_270: degrees = 270; break;
-	    }
-	    // getRotation is anti-clockwise, but current_orientation is clockwise, so we add rather than subtract
-	    // relative_orientation is clockwise from landscape-left
-    	//int relative_orientation = (current_orientation + 360 - degrees) % 360;
-    	int relative_orientation = (current_orientation + degrees) % 360;
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "    current_orientation = " + current_orientation);
-			Log.d(TAG, "    degrees = " + degrees);
-			Log.d(TAG, "    relative_orientation = " + relative_orientation);
-		}
-		int ui_rotation = (360 - relative_orientation) % 360;
-		preview.setUIRotation(ui_rotation);
-		int align_left = RelativeLayout.ALIGN_LEFT;
-		int align_right = RelativeLayout.ALIGN_RIGHT;
-		int align_top = RelativeLayout.ALIGN_TOP;
-		int align_bottom = RelativeLayout.ALIGN_BOTTOM;
-		int left_of = RelativeLayout.LEFT_OF;
-		int right_of = RelativeLayout.RIGHT_OF;
-		int above = RelativeLayout.ABOVE;
-		int below = RelativeLayout.BELOW;
-		int align_parent_left = RelativeLayout.ALIGN_PARENT_LEFT;
-		int align_parent_right = RelativeLayout.ALIGN_PARENT_RIGHT;
-		int align_parent_top = RelativeLayout.ALIGN_PARENT_TOP;
-		int align_parent_bottom = RelativeLayout.ALIGN_PARENT_BOTTOM;
-		if( !ui_placement_right ) {
-			align_top = RelativeLayout.ALIGN_BOTTOM;
-			align_bottom = RelativeLayout.ALIGN_TOP;
-			above = RelativeLayout.BELOW;
-			below = RelativeLayout.ABOVE;
-			align_parent_top = RelativeLayout.ALIGN_PARENT_BOTTOM;
-			align_parent_bottom = RelativeLayout.ALIGN_PARENT_TOP;
-		}
-		{
-			// we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
-			View view = findViewById(R.id.gui_anchor);
-			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, 0);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.settings);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.gui_anchor);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.gallery);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.settings);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.popup);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.gallery);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.exposure_lock);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.popup);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.exposure);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.exposure_lock);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.switch_video);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.exposure);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.switch_camera);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, 0);
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.switch_video);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.audio_control);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, 0);
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.switch_camera);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.trash);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.audio_control);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.share);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.trash);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.take_photo);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
-			view = findViewById(R.id.zoom);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_top, 0);
-			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(180.0f); // should always match the zoom_seekbar, so that zoom in and out are in the same directions
-	
-			view = findViewById(R.id.zoom_seekbar);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_left, 0);
-			layoutParams.addRule(align_right, R.id.zoom);
-			layoutParams.addRule(above, R.id.zoom);
-			layoutParams.addRule(below, 0);
-			view.setLayoutParams(layoutParams);
-
-			view = findViewById(R.id.focus_seekbar);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_left, R.id.preview);
-			layoutParams.addRule(align_right, 0);
-			layoutParams.addRule(left_of, R.id.zoom_seekbar);
-			layoutParams.addRule(right_of, 0);
-			layoutParams.addRule(align_top, 0);
-			layoutParams.addRule(align_bottom, R.id.zoom_seekbar);
-			view.setLayoutParams(layoutParams);
-		}
-
-		{
-			// set seekbar info
-			int width_dp = 0;
-			if( ui_rotation == 0 || ui_rotation == 180 ) {
-				width_dp = 300;
-			}
-			else {
-				width_dp = 200;
-			}
-			int height_dp = 50;
-			final float scale = getResources().getDisplayMetrics().density;
-			int width_pixels = (int) (width_dp * scale + 0.5f); // convert dps to pixels
-			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
-
-			View view = findViewById(R.id.exposure_seekbar);
-			view.setRotation(ui_rotation);
-			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			lp.width = width_pixels;
-			lp.height = height_pixels;
-			view.setLayoutParams(lp);
-
-			view = findViewById(R.id.exposure_seekbar_zoom);
-			view.setRotation(ui_rotation);
-			view.setAlpha(0.5f);
-
-			// n.b., using left_of etc doesn't work properly when using rotation (as the amount of space reserved is based on the UI elements before being rotated)
-			if( ui_rotation == 0 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(height_pixels);
-			}
-			else if( ui_rotation == 90 ) {
-				view.setTranslationX(-height_pixels);
-				view.setTranslationY(0);
-			}
-			else if( ui_rotation == 180 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(-height_pixels);
-			}
-			else if( ui_rotation == 270 ) {
-				view.setTranslationX(height_pixels);
-				view.setTranslationY(0);
-			}
-
-			view = findViewById(R.id.iso_seekbar);
-			view.setRotation(ui_rotation);
-			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			lp.width = width_pixels;
-			lp.height = height_pixels;
-			view.setLayoutParams(lp);
-
-			view = findViewById(R.id.exposure_time_seekbar);
-			view.setRotation(ui_rotation);
-			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			lp.width = width_pixels;
-			lp.height = height_pixels;
-			view.setLayoutParams(lp);
-			if( ui_rotation == 0 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(height_pixels);
-			}
-			else if( ui_rotation == 90 ) {
-				view.setTranslationX(-height_pixels);
-				view.setTranslationY(0);
-			}
-			else if( ui_rotation == 180 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(-height_pixels);
-			}
-			else if( ui_rotation == 270 ) {
-				view.setTranslationX(height_pixels);
-				view.setTranslationY(0);
-			}
-
-		}
-
-		{
-			View view = findViewById(R.id.popup_container);
-			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			//layoutParams.addRule(left_of, R.id.popup);
-			layoutParams.addRule(align_right, R.id.popup);
-			layoutParams.addRule(below, R.id.popup);
-			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
-			layoutParams.addRule(above, 0);
-			layoutParams.addRule(align_parent_top, 0);
-			view.setLayoutParams(layoutParams);
-
-			view.setRotation(ui_rotation);
-			// reset:
-			view.setTranslationX(0.0f);
-			view.setTranslationY(0.0f);
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "popup view width: " + view.getWidth());
-				Log.d(TAG, "popup view height: " + view.getHeight());
-			}
-			if( ui_rotation == 0 || ui_rotation == 180 ) {
-				view.setPivotX(view.getWidth()/2.0f);
-				view.setPivotY(view.getHeight()/2.0f);
-			}
-			else {
-				view.setPivotX(view.getWidth());
-				view.setPivotY(ui_placement_right ? 0.0f : view.getHeight());
-				if( ui_placement_right ) {
-					if( ui_rotation == 90 )
-						view.setTranslationY( view.getWidth() );
-					else if( ui_rotation == 270 )
-						view.setTranslationX( - view.getHeight() );
-				}
-				else {
-					if( ui_rotation == 90 )
-						view.setTranslationX( - view.getHeight() );
-					else if( ui_rotation == 270 )
-						view.setTranslationY( - view.getWidth() );
-				}
-			}
-		}
-
-		setTakePhotoIcon();
-    }
-    
-    private void setTakePhotoIcon() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setTakePhotoIcon()");
-		// set icon for taking photos vs videos
-		ImageButton view = (ImageButton)findViewById(R.id.take_photo);
-		if( preview != null ) {
-			int resource = 0;
-			int content_description = 0;
-			if( preview.isVideo() ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "set icon to video");
-				resource = preview.isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector;
-				content_description = preview.isVideoRecording() ? R.string.stop_video : R.string.start_video;
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "set icon to photo");
-				resource = R.drawable.take_photo_selector;
-				content_description = R.string.take_photo;
-			}
-			view.setImageResource(resource);
-			view.setContentDescription( getResources().getString(content_description) );
-			view.setTag(resource); // for testing
-		}
-    }
-    
-    boolean getUIPlacementRight() {
-    	return this.ui_placement_right;
-    }
-
-    private void onOrientationChanged(int orientation) {
-		/*if( MyDebug.LOG ) {
-			Log.d(TAG, "onOrientationChanged()");
-			Log.d(TAG, "orientation: " + orientation);
-			Log.d(TAG, "current_orientation: " + current_orientation);
-		}*/
-		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
-			return;
-		int diff = Math.abs(orientation - current_orientation);
-		if( diff > 180 )
-			diff = 360 - diff;
-		// only change orientation when sufficiently changed
-		if( diff > 60 ) {
-		    orientation = (orientation + 45) / 90 * 90;
-		    orientation = orientation % 360;
-		    if( orientation != current_orientation ) {
-			    this.current_orientation = orientation;
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "current_orientation is now: " + current_orientation);
-				}
-				layoutUI();
-		    }
-		}
-	}
-    
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
 		if( MyDebug.LOG )
@@ -1176,18 +810,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     private void speechRecognizerStarted() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "speechRecognizerStarted");
-		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
-		view.setImageResource(R.drawable.ic_mic_red_48dp);
-		view.setContentDescription( getResources().getString(R.string.audio_control_stop) );
+		mainUI.audioControlStarted();
 		speechRecognizerIsStarted = true;
     }
-
+    
     private void speechRecognizerStopped() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "speechRecognizerStopped");
-		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
-		view.setImageResource(R.drawable.ic_mic_white_48dp);
-		view.setContentDescription( getResources().getString(R.string.audio_control_start) );
+		mainUI.audioControlStopped();
 		speechRecognizerIsStarted = false;
     }
 
@@ -1221,7 +851,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		this.preview.switchVideo(true, true);
 		switchVideoButton.setEnabled(true);
 
-		setTakePhotoIcon();
+		mainUI.setTakePhotoIcon();
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast();
 		}
@@ -1410,7 +1040,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						Log.d(TAG, "onGlobalLayout()");
 					if( MyDebug.LOG )
 						Log.d(TAG, "time after global layout: " + (System.currentTimeMillis() - time_s));
-		    		layoutUI();
+					mainUI.layoutUI();
 					if( MyDebug.LOG )
 						Log.d(TAG, "time after layoutUI: " + (System.currentTimeMillis() - time_s));
 		    		// stop listening - only want to call this once!
@@ -1582,7 +1212,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 		}
 
-		layoutUI(); // needed in case we've changed left/right handed UI
+		mainUI.layoutUI(); // needed in case we've changed left/right handed UI
         initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
 		initLocation(); // in case we've enabled or disabled GPS
 		if( toast_message != null )
@@ -1634,7 +1264,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         super.onBackPressed();        
     }
     
-    boolean usingKitKatImmersiveMode() {
+    public boolean usingKitKatImmersiveMode() {
     	// whether we are using a Kit Kat style immersive mode (either hiding GUI, or everything)
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1664,7 +1294,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	}, 5000);
     }
 
-    void initImmersiveMode() {
+    public void initImmersiveMode() {
         if( !usingKitKatImmersiveMode() ) {
 			setImmersiveMode(true);
 		}
@@ -2252,7 +1882,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    }
 	}
 	
-	boolean supportsExposureButton() {
+	public boolean supportsExposureButton() {
 		if( preview.getCameraController() == null )
 			return false;
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -2305,7 +1935,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				    		zoomOut();
 				        }
 				    });
-					if( !applicationInterface.inImmersiveMode() ) {
+					if( !mainUI.inImmersiveMode() ) {
 						zoomControls.setVisibility(View.VISIBLE);
 					}
 				}
@@ -2334,7 +1964,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				});
 
 				if( sharedPreferences.getBoolean(PreferenceKeys.getShowZoomSliderControlsPreferenceKey(), true) ) {
-					if( !applicationInterface.inImmersiveMode() ) {
+					if( !mainUI.inImmersiveMode() ) {
 						zoomSeekBar.setVisibility(View.VISIBLE);
 					}
 				}
@@ -2484,17 +2114,17 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 
 		View exposureButton = (View) findViewById(R.id.exposure);
-	    exposureButton.setVisibility(supportsExposureButton() && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
+	    exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
 
 	    ImageButton exposureLockButton = (ImageButton) findViewById(R.id.exposure_lock);
-	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !applicationInterface.inImmersiveMode() ? View.VISIBLE : View.GONE);
+	    exposureLockButton.setVisibility(preview.supportsExposureLock() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
 	    if( preview.supportsExposureLock() ) {
 			exposureLockButton.setImageResource(preview.isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
 	    }
 
 		setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
 
-		setTakePhotoIcon();
+		mainUI.setTakePhotoIcon();
 
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast();
@@ -2572,6 +2202,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
     public Preview getPreview() {
     	return this.preview;
+    }
+    
+    MainUI getMainUI() {
+    	return this.mainUI;
     }
     
     public LocationSupplier getLocationSupplier() {
@@ -2724,9 +2358,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         	}
         	audio_listener = null;
         }
-		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
-		view.setImageResource(R.drawable.ic_mic_white_48dp);
-		view.setContentDescription( getResources().getString(R.string.audio_control_start) );
+        mainUI.audioControlStopped();
 	}
 	
 	private void startAudioListener() {
@@ -2754,9 +2386,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			// default
 			audio_noise_sensitivity = 100;
 		}
-		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
-		view.setImageResource(R.drawable.ic_mic_red_48dp);
-		view.setContentDescription( getResources().getString(R.string.audio_control_stop) );
+        mainUI.audioControlStarted();
 	}
 	
 	private void initSpeechRecognizer() {
@@ -2858,7 +2488,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					public void onRmsChanged(float rmsdB) {
 					}
 	        	});
-				if( !applicationInterface.inImmersiveMode() ) {
+				if( !mainUI.inImmersiveMode() ) {
 		    	    View speechRecognizerButton = (View) findViewById(R.id.audio_control);
 		    	    speechRecognizerButton.setVisibility(View.VISIBLE);
 				}
@@ -2883,7 +2513,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 	}
 	
-	boolean hasAudioControl() {
+	public boolean hasAudioControl() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String audio_control = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none");
 		if( audio_control.equals("voice") ) {
