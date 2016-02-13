@@ -803,7 +803,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public void touchEvent(MotionEvent event) {
-		main_activity.clearSeekBar();
+		main_activity.getMainUI().clearSeekBar();
 		main_activity.closePopup();
 		if( main_activity.usingKitKatImmersiveMode() ) {
 			main_activity.setImmersiveMode(false);
@@ -955,7 +955,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public void cameraClosed() {
-		main_activity.clearSeekBar();
+		main_activity.getMainUI().clearSeekBar();
 	}
 	
 	private void updateThumbnail(Bitmap thumbnail) {
@@ -1002,7 +1002,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	@Override
 	public void multitouchZoom(int new_zoom) {
-		main_activity.setSeekbarZoom();
+		main_activity.getMainUI().setSeekbarZoom();
 	}
 
 	@Override

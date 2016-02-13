@@ -212,7 +212,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "no support for magnetic sensor");
 		}
 
-		clearSeekBar();
+		mainUI.clearSeekBar();
 		
         preview = new Preview(applicationInterface, savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
 		
@@ -629,55 +629,26 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         return super.onKeyDown(keyCode, event); 
     }
 	
-	void setSeekbarZoom() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setSeekbarZoom");
-	    SeekBar zoomSeekBar = (SeekBar) findViewById(R.id.zoom_seekbar);
-		zoomSeekBar.setProgress(preview.getMaxZoom()-preview.getCameraController().getZoom());
-		if( MyDebug.LOG )
-			Log.d(TAG, "progress is now: " + zoomSeekBar.getProgress());
-	}
-	
 	public void zoomIn() {
-	    changeSeekbar(R.id.zoom_seekbar, -1);
+		mainUI.changeSeekbar(R.id.zoom_seekbar, -1);
 	}
 	
 	public void zoomOut() {
-	    changeSeekbar(R.id.zoom_seekbar, 1);
+		mainUI.changeSeekbar(R.id.zoom_seekbar, 1);
 	}
 	
 	public void changeExposure(int change) {
-	    changeSeekbar(R.id.exposure_seekbar, change);
+		mainUI.changeSeekbar(R.id.exposure_seekbar, change);
 	}
 
 	public void changeISO(int change) {
-	    changeSeekbar(R.id.iso_seekbar, change);
+		mainUI.changeSeekbar(R.id.iso_seekbar, change);
 	}
 	
 	void changeFocusDistance(int change) {
-	    changeSeekbar(R.id.focus_seekbar, change);
+		mainUI.changeSeekbar(R.id.focus_seekbar, change);
 	}
 	
-	private void changeSeekbar(int seekBarId, int change) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "changeSeekbar: " + change);
-		SeekBar seekBar = (SeekBar)findViewById(seekBarId);
-	    int value = seekBar.getProgress();
-	    int new_value = value + change;
-	    if( new_value < 0 )
-	    	new_value = 0;
-	    else if( new_value > seekBar.getMax() )
-	    	new_value = seekBar.getMax();
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "value: " + value);
-			Log.d(TAG, "new_value: " + new_value);
-			Log.d(TAG, "max: " + seekBar.getMax());
-		}
-	    if( new_value != value ) {
-		    seekBar.setProgress(new_value);
-	    }
-	}
-
 	private SensorEventListener accelerometerListener = new SensorEventListener() {
 		@Override
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -882,17 +853,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	}
     }
 
-    public void clearSeekBar() {
-		View view = findViewById(R.id.exposure_seekbar);
-		view.setVisibility(View.GONE);
-		view = findViewById(R.id.iso_seekbar);
-		view.setVisibility(View.GONE);
-		view = findViewById(R.id.exposure_time_seekbar);
-		view.setVisibility(View.GONE);
-		view = findViewById(R.id.exposure_seekbar_zoom);
-		view.setVisibility(View.GONE);
-    }
-    
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void clickedExposure(View view) {
 		if( MyDebug.LOG )
@@ -984,7 +944,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "open popup");
 
-		clearSeekBar();
+		mainUI.clearSeekBar();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
 		stopAudioListeners();
 

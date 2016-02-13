@@ -525,7 +525,7 @@ public class MainUI {
 		int exposure_time_visibility = iso_seek_bar.getVisibility();
 		boolean is_open = exposure_visibility == View.VISIBLE || iso_visibility == View.VISIBLE || exposure_time_visibility == View.VISIBLE;
 		if( is_open ) {
-			main_activity.clearSeekBar();
+			clearSeekBar();
 		}
 		else if( main_activity.getPreview().getCameraController() != null ) {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
@@ -548,4 +548,45 @@ public class MainUI {
 			}
 		}
     }
+
+	public void setSeekbarZoom() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setSeekbarZoom");
+	    SeekBar zoomSeekBar = (SeekBar) main_activity.findViewById(R.id.zoom_seekbar);
+		zoomSeekBar.setProgress(main_activity.getPreview().getMaxZoom()-main_activity.getPreview().getCameraController().getZoom());
+		if( MyDebug.LOG )
+			Log.d(TAG, "progress is now: " + zoomSeekBar.getProgress());
+	}
+	
+	public void changeSeekbar(int seekBarId, int change) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "changeSeekbar: " + change);
+		SeekBar seekBar = (SeekBar)main_activity.findViewById(seekBarId);
+	    int value = seekBar.getProgress();
+	    int new_value = value + change;
+	    if( new_value < 0 )
+	    	new_value = 0;
+	    else if( new_value > seekBar.getMax() )
+	    	new_value = seekBar.getMax();
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "value: " + value);
+			Log.d(TAG, "new_value: " + new_value);
+			Log.d(TAG, "max: " + seekBar.getMax());
+		}
+	    if( new_value != value ) {
+		    seekBar.setProgress(new_value);
+	    }
+	}
+
+    public void clearSeekBar() {
+		View view = main_activity.findViewById(R.id.exposure_seekbar);
+		view.setVisibility(View.GONE);
+		view = main_activity.findViewById(R.id.iso_seekbar);
+		view.setVisibility(View.GONE);
+		view = main_activity.findViewById(R.id.exposure_time_seekbar);
+		view.setVisibility(View.GONE);
+		view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
+		view.setVisibility(View.GONE);
+    }
+    
 }
