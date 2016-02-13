@@ -190,6 +190,7 @@ public final class R {
          */
         public static final int audio_control=0x7f080107;
         public static final int audio_disabled=0x7f080033;
+        public static final int audio_listener_started=0x7f080109;
         public static final int auto_stabilise_not_supported=0x7f080032;
         public static final int back_camera=0x7f08001c;
         public static final int cancelled_burst_mode=0x7f080022;
@@ -466,6 +467,7 @@ public final class R {
         public static final int screen_lock_message_2=0x7f080041;
         public static final int share=0x7f0800f6;
         public static final int sorry=0x7f080027;
+        public static final int speech_recognizer_started=0x7f080108;
         public static final int start_video=0x7f080103;
         public static final int started_recording_video=0x7f080026;
         public static final int started_timer=0x7f080023;

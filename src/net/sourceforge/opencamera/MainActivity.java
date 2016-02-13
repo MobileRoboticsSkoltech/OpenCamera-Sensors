@@ -114,6 +114,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     private ToastBoxer screen_locked_toast = new ToastBoxer();
     private ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
 	private ToastBoxer exposure_lock_toast = new ToastBoxer();
+	private ToastBoxer audio_control_toast = new ToastBoxer();
 	private boolean block_startup_toast = false;
     
 	// for testing:
@@ -1155,6 +1156,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
             	speechRecognizerStopped();
         	}
         	else {
+		    	preview.showToast(audio_control_toast, R.string.speech_recognizer_started);
             	Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             	speechRecognizer.startListening(intent);
             	speechRecognizerStarted();
@@ -1165,6 +1167,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         		freeAudioListener(false);
         	}
         	else {
+		    	preview.showToast(audio_control_toast, R.string.audio_listener_started);
         		startAudioListener();
         	}
         }
@@ -2843,7 +2846,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 							String toast = list.get(0) + "?";
 							if( MyDebug.LOG )
 								Log.d(TAG, "unrecognised: " + toast);
-							preview.showToast(null, toast);
+							preview.showToast(audio_control_toast, toast);
 						}
 					}
 
