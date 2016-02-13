@@ -1099,7 +1099,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public void layoutUI() {
-		main_activity.layoutUI();
+		main_activity.getMainUI().layoutUI();
 	}
 	
 	@Override
@@ -1289,7 +1289,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		double level_angle = preview.getLevelAngle();
 		boolean has_geo_direction = preview.hasGeoDirection();
 		double geo_direction = preview.getGeoDirection();
-		boolean ui_placement_right = main_activity.getUIPlacementRight();
+		boolean ui_placement_right = main_activity.getMainUI().getUIPlacementRight();
 		if( inImmersiveMode() ) {
 			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
 			if( immersive_mode.equals("immersive_mode_everything") ) {

@@ -1,0 +1,399 @@
+package net.sourceforge.opencamera.UI;
+
+import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyDebug;
+import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.R;
+
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.OrientationEventListener;
+import android.view.Surface;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
+
+/** This contains functionality related to the main UI.
+ */
+public class MainUI {
+	private static final String TAG = "MainUI";
+
+	private MainActivity main_activity = null;
+
+	private int current_orientation = 0;
+	private boolean ui_placement_right = true;
+
+	public MainUI(MainActivity main_activity) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "MainUI");
+		this.main_activity = main_activity;
+	}
+
+    public void layoutUI() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "layoutUI");
+		//this.preview.updateUIPlacement();
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
+    	// we cache the preference_ui_placement to save having to check it in the draw() method
+		this.ui_placement_right = ui_placement.equals("ui_right");
+		if( MyDebug.LOG )
+			Log.d(TAG, "ui_placement: " + ui_placement);
+		// new code for orientation fixed to landscape	
+		// the display orientation should be locked to landscape, but how many degrees is that?
+	    int rotation = main_activity.getWindowManager().getDefaultDisplay().getRotation();
+	    int degrees = 0;
+	    switch (rotation) {
+	    	case Surface.ROTATION_0: degrees = 0; break;
+	        case Surface.ROTATION_90: degrees = 90; break;
+	        case Surface.ROTATION_180: degrees = 180; break;
+	        case Surface.ROTATION_270: degrees = 270; break;
+	    }
+	    // getRotation is anti-clockwise, but current_orientation is clockwise, so we add rather than subtract
+	    // relative_orientation is clockwise from landscape-left
+    	//int relative_orientation = (current_orientation + 360 - degrees) % 360;
+    	int relative_orientation = (current_orientation + degrees) % 360;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "    current_orientation = " + current_orientation);
+			Log.d(TAG, "    degrees = " + degrees);
+			Log.d(TAG, "    relative_orientation = " + relative_orientation);
+		}
+		int ui_rotation = (360 - relative_orientation) % 360;
+		main_activity.getPreview().setUIRotation(ui_rotation);
+		int align_left = RelativeLayout.ALIGN_LEFT;
+		int align_right = RelativeLayout.ALIGN_RIGHT;
+		int align_top = RelativeLayout.ALIGN_TOP;
+		int align_bottom = RelativeLayout.ALIGN_BOTTOM;
+		int left_of = RelativeLayout.LEFT_OF;
+		int right_of = RelativeLayout.RIGHT_OF;
+		int above = RelativeLayout.ABOVE;
+		int below = RelativeLayout.BELOW;
+		int align_parent_left = RelativeLayout.ALIGN_PARENT_LEFT;
+		int align_parent_right = RelativeLayout.ALIGN_PARENT_RIGHT;
+		int align_parent_top = RelativeLayout.ALIGN_PARENT_TOP;
+		int align_parent_bottom = RelativeLayout.ALIGN_PARENT_BOTTOM;
+		if( !ui_placement_right ) {
+			align_top = RelativeLayout.ALIGN_BOTTOM;
+			align_bottom = RelativeLayout.ALIGN_TOP;
+			above = RelativeLayout.BELOW;
+			below = RelativeLayout.ABOVE;
+			align_parent_top = RelativeLayout.ALIGN_PARENT_BOTTOM;
+			align_parent_bottom = RelativeLayout.ALIGN_PARENT_TOP;
+		}
+		{
+			// we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
+			View view = main_activity.findViewById(R.id.gui_anchor);
+			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, 0);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.settings);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.gui_anchor);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.gallery);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.settings);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.popup);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.gallery);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.exposure_lock);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.popup);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.exposure);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.exposure_lock);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.switch_video);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.exposure);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.switch_camera);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, 0);
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.switch_video);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.audio_control);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, 0);
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.switch_camera);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.trash);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.audio_control);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.share);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_bottom, 0);
+			layoutParams.addRule(left_of, R.id.trash);
+			layoutParams.addRule(right_of, 0);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.take_photo);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(ui_rotation);
+	
+			view = main_activity.findViewById(R.id.zoom);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+			layoutParams.addRule(align_parent_top, 0);
+			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+			view.setLayoutParams(layoutParams);
+			view.setRotation(180.0f); // should always match the zoom_seekbar, so that zoom in and out are in the same directions
+	
+			view = main_activity.findViewById(R.id.zoom_seekbar);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_left, 0);
+			layoutParams.addRule(align_right, R.id.zoom);
+			layoutParams.addRule(above, R.id.zoom);
+			layoutParams.addRule(below, 0);
+			view.setLayoutParams(layoutParams);
+
+			view = main_activity.findViewById(R.id.focus_seekbar);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_left, R.id.preview);
+			layoutParams.addRule(align_right, 0);
+			layoutParams.addRule(left_of, R.id.zoom_seekbar);
+			layoutParams.addRule(right_of, 0);
+			layoutParams.addRule(align_top, 0);
+			layoutParams.addRule(align_bottom, R.id.zoom_seekbar);
+			view.setLayoutParams(layoutParams);
+		}
+
+		{
+			// set seekbar info
+			int width_dp = 0;
+			if( ui_rotation == 0 || ui_rotation == 180 ) {
+				width_dp = 300;
+			}
+			else {
+				width_dp = 200;
+			}
+			int height_dp = 50;
+			final float scale = main_activity.getResources().getDisplayMetrics().density;
+			int width_pixels = (int) (width_dp * scale + 0.5f); // convert dps to pixels
+			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
+
+			View view = main_activity.findViewById(R.id.exposure_seekbar);
+			view.setRotation(ui_rotation);
+			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+
+			view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
+			view.setRotation(ui_rotation);
+			view.setAlpha(0.5f);
+
+			// n.b., using left_of etc doesn't work properly when using rotation (as the amount of space reserved is based on the UI elements before being rotated)
+			if( ui_rotation == 0 ) {
+				view.setTranslationX(0);
+				view.setTranslationY(height_pixels);
+			}
+			else if( ui_rotation == 90 ) {
+				view.setTranslationX(-height_pixels);
+				view.setTranslationY(0);
+			}
+			else if( ui_rotation == 180 ) {
+				view.setTranslationX(0);
+				view.setTranslationY(-height_pixels);
+			}
+			else if( ui_rotation == 270 ) {
+				view.setTranslationX(height_pixels);
+				view.setTranslationY(0);
+			}
+
+			view = main_activity.findViewById(R.id.iso_seekbar);
+			view.setRotation(ui_rotation);
+			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+
+			view = main_activity.findViewById(R.id.exposure_time_seekbar);
+			view.setRotation(ui_rotation);
+			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+			if( ui_rotation == 0 ) {
+				view.setTranslationX(0);
+				view.setTranslationY(height_pixels);
+			}
+			else if( ui_rotation == 90 ) {
+				view.setTranslationX(-height_pixels);
+				view.setTranslationY(0);
+			}
+			else if( ui_rotation == 180 ) {
+				view.setTranslationX(0);
+				view.setTranslationY(-height_pixels);
+			}
+			else if( ui_rotation == 270 ) {
+				view.setTranslationX(height_pixels);
+				view.setTranslationY(0);
+			}
+
+		}
+
+		{
+			View view = main_activity.findViewById(R.id.popup_container);
+			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			//layoutParams.addRule(left_of, R.id.popup);
+			layoutParams.addRule(align_right, R.id.popup);
+			layoutParams.addRule(below, R.id.popup);
+			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+			layoutParams.addRule(above, 0);
+			layoutParams.addRule(align_parent_top, 0);
+			view.setLayoutParams(layoutParams);
+
+			view.setRotation(ui_rotation);
+			// reset:
+			view.setTranslationX(0.0f);
+			view.setTranslationY(0.0f);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "popup view width: " + view.getWidth());
+				Log.d(TAG, "popup view height: " + view.getHeight());
+			}
+			if( ui_rotation == 0 || ui_rotation == 180 ) {
+				view.setPivotX(view.getWidth()/2.0f);
+				view.setPivotY(view.getHeight()/2.0f);
+			}
+			else {
+				view.setPivotX(view.getWidth());
+				view.setPivotY(ui_placement_right ? 0.0f : view.getHeight());
+				if( ui_placement_right ) {
+					if( ui_rotation == 90 )
+						view.setTranslationY( view.getWidth() );
+					else if( ui_rotation == 270 )
+						view.setTranslationX( - view.getHeight() );
+				}
+				else {
+					if( ui_rotation == 90 )
+						view.setTranslationX( - view.getHeight() );
+					else if( ui_rotation == 270 )
+						view.setTranslationY( - view.getWidth() );
+				}
+			}
+		}
+
+		setTakePhotoIcon();
+    }
+    
+    public void setTakePhotoIcon() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setTakePhotoIcon()");
+		// set icon for taking photos vs videos
+		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		if( main_activity.getPreview() != null ) {
+			int resource = 0;
+			int content_description = 0;
+			if( main_activity.getPreview().isVideo() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set icon to video");
+				resource = main_activity.getPreview().isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector;
+				content_description = main_activity.getPreview().isVideoRecording() ? R.string.stop_video : R.string.start_video;
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set icon to photo");
+				resource = R.drawable.take_photo_selector;
+				content_description = R.string.take_photo;
+			}
+			view.setImageResource(resource);
+			view.setContentDescription( main_activity.getResources().getString(content_description) );
+			view.setTag(resource); // for testing
+		}
+    }
+
+    public boolean getUIPlacementRight() {
+    	return this.ui_placement_right;
+    }
+
+    public void onOrientationChanged(int orientation) {
+		/*if( MyDebug.LOG ) {
+			Log.d(TAG, "onOrientationChanged()");
+			Log.d(TAG, "orientation: " + orientation);
+			Log.d(TAG, "current_orientation: " + current_orientation);
+		}*/
+		if( orientation == OrientationEventListener.ORIENTATION_UNKNOWN )
+			return;
+		int diff = Math.abs(orientation - current_orientation);
+		if( diff > 180 )
+			diff = 360 - diff;
+		// only change orientation when sufficiently changed
+		if( diff > 60 ) {
+		    orientation = (orientation + 45) / 90 * 90;
+		    orientation = orientation % 360;
+		    if( orientation != current_orientation ) {
+			    this.current_orientation = orientation;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "current_orientation is now: " + current_orientation);
+				}
+				layoutUI();
+		    }
+		}
+	}
+}
