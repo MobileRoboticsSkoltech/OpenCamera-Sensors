@@ -5,7 +5,6 @@ import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import net.sourceforge.opencamera.UI.MainUI;
-import net.sourceforge.opencamera.UI.PopupView;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,10 +64,7 @@ import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -94,7 +90,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     private GestureDetector gestureDetector;
     private boolean screen_is_locked = false;
     private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<Integer, Bitmap>();
-    private PopupView popup_view = null;
 
     private SoundPool sound_pool = null;
 	private SparseIntArray sound_ids = null;
@@ -127,13 +122,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "onCreate");
+			debug_time = System.currentTimeMillis();
 		}
-    	long time_s = System.currentTimeMillis();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after setting default preference values: " + (System.currentTimeMillis() - debug_time));
 
 		if( getIntent() != null && getIntent().getExtras() != null ) {
 			is_test = getIntent().getExtras().getBoolean("test_project");
@@ -170,10 +168,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		mainUI = new MainUI(this);
 		applicationInterface = new MyApplicationInterface(this, savedInstanceState);
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after creating application interface: " + (System.currentTimeMillis() - debug_time));
 
 		initCamera2Support();
 
         setWindowFlagsForCamera();
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after setting window flags: " + (System.currentTimeMillis() - debug_time));
 
         // read save locations
         save_location_history.clear();
@@ -188,9 +190,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         		save_location_history.add(string);
         	}
         }
-        // also update, just in case a new folder has been set; this is also necessary to update the gallery icon
-		updateFolderHistory();
+        // also update, just in case a new folder has been set
+		updateFolderHistory(false); // update_icon can be false, as updateGalleryIcon() is called later in onResume()
 		//updateFolderHistory("/sdcard/Pictures/OpenCameraTest");
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after updating folder history: " + (System.currentTimeMillis() - debug_time));
 
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		if( mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null ) {
@@ -202,6 +206,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "no support for accelerometer");
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after creating accelerometer sensor: " + (System.currentTimeMillis() - debug_time));
+
 		if( mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "found magnetic sensor");
@@ -211,15 +218,21 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "no support for magnetic sensor");
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after creating magnetic sensor: " + (System.currentTimeMillis() - debug_time));
 
 		mainUI.clearSeekBar();
 		
         preview = new Preview(applicationInterface, savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after creating preview: " + (System.currentTimeMillis() - debug_time));
 		
 	    View switchCameraButton = (View) findViewById(R.id.switch_camera);
 	    switchCameraButton.setVisibility(preview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
 	    View speechRecognizerButton = (View) findViewById(R.id.audio_control);
 	    speechRecognizerButton.setVisibility(View.GONE); // disabled by default, until the speech recognizer is created
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after setting button visibility: " + (System.currentTimeMillis() - debug_time));
 
 	    orientationEventListener = new OrientationEventListener(this) {
 			@Override
@@ -227,6 +240,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				MainActivity.this.mainUI.onOrientationChanged(orientation);
 			}
         };
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after setting orientation event listener: " + (System.currentTimeMillis() - debug_time));
 
         View galleryButton = (View)findViewById(R.id.gallery);
         galleryButton.setOnLongClickListener(new View.OnLongClickListener() {
@@ -237,8 +252,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				return true;
 			}
         });
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after setting gallery long click listener: " + (System.currentTimeMillis() - debug_time));
         
         gestureDetector = new GestureDetector(this, new MyGestureDetector());
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after creating gesture detector: " + (System.currentTimeMillis() - debug_time));
         
         View decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener
@@ -270,6 +289,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
                 }
             }
         });
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after setting immersive mode listener: " + (System.currentTimeMillis() - debug_time));
 
 		boolean has_done_first_time = sharedPreferences.contains(PreferenceKeys.getFirstTimePreferenceKey());
         if( !has_done_first_time && !is_test ) {
@@ -284,6 +305,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
         preloadIcons(R.array.flash_icons);
         preloadIcons(R.array.focus_mode_icons);
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCreate: time after preloading icons: " + (System.currentTimeMillis() - debug_time));
 
         textToSpeechSuccess = false;
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
@@ -304,7 +327,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		});
 
 		if( MyDebug.LOG )
-			Log.d(TAG, "time for Activity startup: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -333,7 +356,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 	
 	private void preloadIcons(int icons_id) {
-    	long time_s = System.currentTimeMillis();
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "preloadIcons: " + icons_id);
+			debug_time = System.currentTimeMillis();
+		}
     	String [] icons = getResources().getStringArray(icons_id);
     	for(int i=0;i<icons.length;i++) {
     		int resource = getResources().getIdentifier(icons[i], null, this.getApplicationContext().getPackageName());
@@ -343,7 +370,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     		this.preloaded_bitmap_resources.put(resource, bm);
     	}
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "time for preloadIcons: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "preloadIcons: total time for preloadIcons: " + (System.currentTimeMillis() - debug_time));
 			Log.d(TAG, "size of preloaded_bitmap_resources: " + preloaded_bitmap_resources.size());
 		}
 	}
@@ -673,8 +700,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	@Override
     protected void onResume() {
-		if( MyDebug.LOG )
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "onResume");
+			debug_time = System.currentTimeMillis();
+		}
         super.onResume();
 
         // Set black window background; also needed if we hide the virtual buttons in immersive mode
@@ -697,6 +727,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		preview.onResume();
 
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "onResume: total time to resume: " + (System.currentTimeMillis() - debug_time));
+		}
     }
 	
 	@Override
@@ -829,30 +862,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
     }
 
-    public void setPopupIcon() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setPopupIcon");
-		ImageButton popup = (ImageButton)findViewById(R.id.popup);
-		String flash_value = preview.getCurrentFlashValue();
-		if( MyDebug.LOG )
-			Log.d(TAG, "flash_value: " + flash_value);
-		if( flash_value != null && flash_value.equals("flash_torch") ) {
-    		popup.setImageResource(R.drawable.popup_flash_torch);
-    	}
-		else if( flash_value != null && flash_value.equals("flash_auto") ) {
-    		popup.setImageResource(R.drawable.popup_flash_auto);
-    	}
-    	else if( flash_value != null && flash_value.equals("flash_on") ) {
-    		popup.setImageResource(R.drawable.popup_flash_on);
-    	}
-    	else if( flash_value != null && flash_value.equals("flash_red_eye") ) {
-    		popup.setImageResource(R.drawable.popup_flash_red_eye);
-    	}
-    	else {
-    		popup.setImageResource(R.drawable.popup);
-    	}
-    }
-
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void clickedExposure(View view) {
 		if( MyDebug.LOG )
@@ -899,29 +908,18 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     }
 
     public boolean popupIsOpen() {
-		if( popup_view != null ) {
-			return true;
-		}
-		return false;
+    	return mainUI.popupIsOpen();
     }
-
+	
     // for testing
     public View getPopupButton(String key) {
-    	return popup_view.getPopupButton(key);
-    }
-
-    public void closePopup() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "close popup");
-		if( popupIsOpen() ) {
-			ViewGroup popup_container = (ViewGroup)findViewById(R.id.popup_container);
-			popup_container.removeAllViews();
-			popup_view.close();
-			popup_view = null;
-			initImmersiveMode(); // to reset the timer when closing the popup
-		}
+    	return mainUI.getPopupButton(key);
     }
     
+    public void closePopup() {
+    	mainUI.closePopup();
+    }
+
     public Bitmap getPreloadedBitmap(int resource) {
 		Bitmap bm = this.preloaded_bitmap_resources.get(resource);
 		return bm;
@@ -930,69 +928,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public void clickedPopupSettings(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedPopupSettings");
-		final ViewGroup popup_container = (ViewGroup)findViewById(R.id.popup_container);
-		if( popupIsOpen() ) {
-			closePopup();
-			return;
-		}
-		if( preview.getCameraController() == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "camera not opened!");
-			return;
-		}
-
-		if( MyDebug.LOG )
-			Log.d(TAG, "open popup");
-
-		mainUI.clearSeekBar();
-		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
-		stopAudioListeners();
-
-    	final long time_s = System.currentTimeMillis();
-
-    	{
-			// prevent popup being transparent
-			popup_container.setBackgroundColor(Color.BLACK);
-			popup_container.setAlpha(0.9f);
-		}
-
-    	popup_view = new PopupView(this);
-		popup_container.addView(popup_view);
-		
-        // need to call layoutUI to make sure the new popup is oriented correctly
-		// but need to do after the layout has been done, so we have a valid width/height to use
-		popup_container.getViewTreeObserver().addOnGlobalLayoutListener( 
-			new OnGlobalLayoutListener() {
-				@SuppressWarnings("deprecation")
-				@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-				@Override
-			    public void onGlobalLayout() {
-					if( MyDebug.LOG )
-						Log.d(TAG, "onGlobalLayout()");
-					if( MyDebug.LOG )
-						Log.d(TAG, "time after global layout: " + (System.currentTimeMillis() - time_s));
-					mainUI.layoutUI();
-					if( MyDebug.LOG )
-						Log.d(TAG, "time after layoutUI: " + (System.currentTimeMillis() - time_s));
-		    		// stop listening - only want to call this once!
-		            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-		            	popup_container.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-		            } else {
-		            	popup_container.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-		            }
-
-		    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-		    		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
-		    		boolean ui_placement_right = ui_placement.equals("ui_right");
-		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, ui_placement_right ? 0.0f : 1.0f);
-		    		animation.setDuration(100);
-		    		popup_container.setAnimation(animation);
-		        }
-			}
-		);
-
-		if( MyDebug.LOG )
-			Log.d(TAG, "time to create popup: " + (System.currentTimeMillis() - time_s));
+		mainUI.togglePopupSettings();
     }
     
     private void openSettings() {
@@ -1124,7 +1060,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved_focus_value: " + saved_focus_value);
     	
-		updateFolderHistory();
+		updateFolderHistory(true);
 
 		// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
 		// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
@@ -1365,9 +1301,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     }
 
     public void updateGalleryIcon() {
-		if( MyDebug.LOG )
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateGalleryIcon");
-    	long time_s = System.currentTimeMillis();
+			debug_time = System.currentTimeMillis();
+		}
     	StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
 		Bitmap thumbnail = null;
 		KeyguardManager keyguard_manager = (KeyguardManager)this.getSystemService(Context.KEYGUARD_SERVICE);
@@ -1416,7 +1354,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			updateGalleryIconToBlank();
     	}
 		if( MyDebug.LOG )
-			Log.d(TAG, "time to update gallery icon: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "updateGalleryIcon: total time to update gallery icon: " + (System.currentTimeMillis() - debug_time));
     }
 
     public void clickedGallery(View view) {
@@ -1482,10 +1420,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
     }
 
-    private void updateFolderHistory() {
+    /* update_icon should be true, unless it's known we'll call updateGalleryIcon afterwards anyway.
+     */
+    private void updateFolderHistory(boolean update_icon) {
 		String folder_name = applicationInterface.getStorageUtils().getSaveLocation();
 		updateFolderHistory(folder_name);
-		updateGalleryIcon(); // if the folder has changed, need to update the gallery icon
+		if( update_icon ) {
+			updateGalleryIcon(); // if the folder has changed, need to update the gallery icon
+		}
     }
     
     private void updateFolderHistory(String folder_name) {
@@ -1516,7 +1458,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearFolderHistory");
 		save_location_history.clear();
-		updateFolderHistory(); // to re-add the current choice, and save
+		updateFolderHistory(true); // to re-add the current choice, and save
     }
     
     private void writeSaveLocations() {
@@ -1601,7 +1543,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				if( !orig_save_location.equals(new_save_location) ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "changed save_folder to: " + applicationInterface.getStorageUtils().getSaveLocation());
-					updateFolderHistory();
+					updateFolderHistory(true);
 					preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + applicationInterface.getStorageUtils().getSaveLocation());
 				}
 				super.onDismiss(dialog);
@@ -1694,7 +1636,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						SharedPreferences.Editor editor = sharedPreferences.edit();
 						editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), save_folder);
 						editor.apply();
-						updateFolderHistory(); // to move new selection to most recent
+						updateFolderHistory(true); // to move new selection to most recent
 					}
 					setWindowFlagsForCamera();
 					showPreview(true);
@@ -2053,7 +1995,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			exposureLockButton.setImageResource(preview.isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
 	    }
 
-		setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
+		mainUI.setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
 
 		mainUI.setTakePhotoIcon();
 
@@ -2135,7 +2077,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	return this.preview;
     }
     
-    MainUI getMainUI() {
+    public MainUI getMainUI() {
     	return this.mainUI;
     }
     
@@ -2461,7 +2403,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		// no need to restart speech recognizer, as we didn't free it in stopAudioListeners(), and it's controlled by a user button
 	}*/
 	
-	void stopAudioListeners() {
+	public void stopAudioListeners() {
 		freeAudioListener(true);
         if( speechRecognizer != null ) {
         	// no need to free the speech recognizer, just stop it
@@ -2616,7 +2558,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 	
     public void usedFolderPicker() {
-    	updateFolderHistory();
+    	updateFolderHistory(true);
     }
     
 	public boolean hasThumbnailAnimation() {

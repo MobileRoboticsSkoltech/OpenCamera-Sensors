@@ -5,12 +5,19 @@ import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 
+import android.annotation.TargetApi;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -23,7 +30,9 @@ public class MainUI {
 
 	private MainActivity main_activity = null;
 
-	private int current_orientation = 0;
+    private PopupView popup_view = null;
+
+    private int current_orientation = 0;
 	private boolean ui_placement_right = true;
 
 	private boolean immersive_mode = false;
@@ -493,7 +502,7 @@ public class MainUI {
 			    if( main_activity.hasAudioControl() )
 			    	audioControlButton.setVisibility(visibility);
 			    if( !show ) {
-			    	main_activity.closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
+			    	closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
 			    }
 			    if( !main_activity.getPreview().isVideo() || !main_activity.getPreview().supportsFlash() )
 			    	popupButton.setVisibility(visibility); // still allow popup in order to change flash mode when recording video
@@ -516,7 +525,7 @@ public class MainUI {
     public void toggleExposureUI() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "toggleExposureUI");
-		main_activity.closePopup();
+		closePopup();
 		SeekBar exposure_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_seekbar));
 		int exposure_visibility = exposure_seek_bar.getVisibility();
 		SeekBar iso_seek_bar = ((SeekBar)main_activity.findViewById(R.id.iso_seekbar));
@@ -589,4 +598,117 @@ public class MainUI {
 		view.setVisibility(View.GONE);
     }
     
+    public void setPopupIcon() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPopupIcon");
+		ImageButton popup = (ImageButton)main_activity.findViewById(R.id.popup);
+		String flash_value = main_activity.getPreview().getCurrentFlashValue();
+		if( MyDebug.LOG )
+			Log.d(TAG, "flash_value: " + flash_value);
+		if( flash_value != null && flash_value.equals("flash_torch") ) {
+    		popup.setImageResource(R.drawable.popup_flash_torch);
+    	}
+		else if( flash_value != null && flash_value.equals("flash_auto") ) {
+    		popup.setImageResource(R.drawable.popup_flash_auto);
+    	}
+    	else if( flash_value != null && flash_value.equals("flash_on") ) {
+    		popup.setImageResource(R.drawable.popup_flash_on);
+    	}
+    	else if( flash_value != null && flash_value.equals("flash_red_eye") ) {
+    		popup.setImageResource(R.drawable.popup_flash_red_eye);
+    	}
+    	else {
+    		popup.setImageResource(R.drawable.popup);
+    	}
+    }
+
+    public void closePopup() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "close popup");
+		if( popupIsOpen() ) {
+			ViewGroup popup_container = (ViewGroup)main_activity.findViewById(R.id.popup_container);
+			popup_container.removeAllViews();
+			popup_view.close();
+			popup_view = null;
+			main_activity.initImmersiveMode(); // to reset the timer when closing the popup
+		}
+    }
+
+    public boolean popupIsOpen() {
+		if( popup_view != null ) {
+			return true;
+		}
+		return false;
+    }
+
+    public void togglePopupSettings() {
+		final ViewGroup popup_container = (ViewGroup)main_activity.findViewById(R.id.popup_container);
+		if( popupIsOpen() ) {
+			closePopup();
+			return;
+		}
+		if( main_activity.getPreview().getCameraController() == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not opened!");
+			return;
+		}
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "open popup");
+
+		clearSeekBar();
+		main_activity.getPreview().cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
+		main_activity.stopAudioListeners();
+
+    	final long time_s = System.currentTimeMillis();
+
+    	{
+			// prevent popup being transparent
+			popup_container.setBackgroundColor(Color.BLACK);
+			popup_container.setAlpha(0.9f);
+		}
+
+    	popup_view = new PopupView(main_activity);
+		popup_container.addView(popup_view);
+		
+        // need to call layoutUI to make sure the new popup is oriented correctly
+		// but need to do after the layout has been done, so we have a valid width/height to use
+		popup_container.getViewTreeObserver().addOnGlobalLayoutListener( 
+			new OnGlobalLayoutListener() {
+				@SuppressWarnings("deprecation")
+				@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+				@Override
+			    public void onGlobalLayout() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "onGlobalLayout()");
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after global layout: " + (System.currentTimeMillis() - time_s));
+					layoutUI();
+					if( MyDebug.LOG )
+						Log.d(TAG, "time after layoutUI: " + (System.currentTimeMillis() - time_s));
+		    		// stop listening - only want to call this once!
+		            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+		            	popup_container.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+		            } else {
+		            	popup_container.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+		            }
+
+		    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		    		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
+		    		boolean ui_placement_right = ui_placement.equals("ui_right");
+		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, ui_placement_right ? 0.0f : 1.0f);
+		    		animation.setDuration(100);
+		    		popup_container.setAnimation(animation);
+		        }
+			}
+		);
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "time to create popup: " + (System.currentTimeMillis() - time_s));
+    }
+
+    // for testing
+    public View getPopupButton(String key) {
+    	return popup_view.getPopupButton(key);
+    }
 }
