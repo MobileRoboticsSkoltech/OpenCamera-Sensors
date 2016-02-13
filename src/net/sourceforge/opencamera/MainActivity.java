@@ -1766,8 +1766,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 
     void cameraSetup() {
-		if( MyDebug.LOG )
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "cameraSetup");
+			debug_time = System.currentTimeMillis();
+		}
 		if( this.supportsForceVideo4K() && preview.usingCamera2API() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "using Camera2 API, so can disable the force 4K option");
@@ -1782,6 +1785,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				}
 			}
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraSetup: time after handling Force 4K option: " + (System.currentTimeMillis() - debug_time));
 
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		{
@@ -1849,6 +1854,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				zoomControls.setVisibility(View.GONE);
 				zoomSeekBar.setVisibility(View.GONE);
 			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "cameraSetup: time after setting up zoom: " + (System.currentTimeMillis() - debug_time));
 		}
 		{
 			if( MyDebug.LOG )
@@ -1876,6 +1883,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    	final int visibility = preview.getCurrentFocusValue() != null && this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
 		    focusSeekBar.setVisibility(visibility);
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraSetup: time after setting up manual focus: " + (System.currentTimeMillis() - debug_time));
 		{
 			if( preview.supportsISORange()) {
 				if( MyDebug.LOG )
@@ -1946,6 +1955,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				}
 			}
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraSetup: time after setting up iso: " + (System.currentTimeMillis() - debug_time));
 		{
 			if( preview.supportsExposures() ) {
 				if( MyDebug.LOG )
@@ -1985,6 +1996,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			    });
 			}
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraSetup: time after setting up exposure: " + (System.currentTimeMillis() - debug_time));
 
 		View exposureButton = (View) findViewById(R.id.exposure);
 	    exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
@@ -1994,14 +2007,22 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    if( preview.supportsExposureLock() ) {
 			exposureLockButton.setImageResource(preview.isExposureLocked() ? R.drawable.exposure_locked : R.drawable.exposure_unlocked);
 	    }
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraSetup: time after setting exposure lock button: " + (System.currentTimeMillis() - debug_time));
 
 		mainUI.setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraSetup: time after setting popup icon: " + (System.currentTimeMillis() - debug_time));
 
 		mainUI.setTakePhotoIcon();
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraSetup: time after setting take photo icon: " + (System.currentTimeMillis() - debug_time));
 
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast();
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraSetup: total time for cameraSetup: " + (System.currentTimeMillis() - debug_time));
     }
     
     public boolean supportsAutoStabilise() {

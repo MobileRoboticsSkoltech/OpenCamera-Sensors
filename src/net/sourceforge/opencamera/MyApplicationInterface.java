@@ -103,11 +103,18 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private float focus_distance = 0.0f;
 
 	MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
-		if( MyDebug.LOG )
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "MyApplicationInterface");
+			debug_time = System.currentTimeMillis();
+		}
 		this.main_activity = main_activity;
 		this.locationSupplier = new LocationSupplier(main_activity);
+		if( MyDebug.LOG )
+			Log.d(TAG, "MyApplicationInterface: time after creating location supplier: " + (System.currentTimeMillis() - debug_time));
 		this.storageUtils = new StorageUtils(main_activity);
+		if( MyDebug.LOG )
+			Log.d(TAG, "MyApplicationInterface: time after creating storage utils: " + (System.currentTimeMillis() - debug_time));
 
         if( savedInstanceState != null ) {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
@@ -123,6 +130,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth);
     	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth_off);
+		if( MyDebug.LOG )
+			Log.d(TAG, "MyApplicationInterface: total time to create MyApplicationInterface: " + (System.currentTimeMillis() - debug_time));
 	}
 	
 	void onSaveInstanceState(Bundle state) {
