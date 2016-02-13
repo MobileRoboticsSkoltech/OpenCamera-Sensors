@@ -1027,8 +1027,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				cameraId = 0;
 				applicationInterface.setCameraIdPref(cameraId);
 			}
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "try to open camera: " + cameraId);
+				Log.d(TAG, "openCamera: time before opening camera: " + (System.currentTimeMillis() - debug_time));
+			}
 			if( test_fail_open_camera ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "test failing to open camera");
@@ -1055,7 +1057,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			camera_controller = null;
 		}
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "time after opening camera: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "openCamera: time after opening camera: " + (System.currentTimeMillis() - debug_time));
 		}
 		boolean take_photo = false;
 		if( camera_controller != null ) {
@@ -1081,23 +1083,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 	        }.enable();
 			if( MyDebug.LOG ) {
-				//Log.d(TAG, "time after setting orientation: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "openCamera: time after setting orientation: " + (System.currentTimeMillis() - debug_time));
 			}
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call setPreviewDisplay");
 			cameraSurface.setPreviewDisplay(camera_controller);
 			if( MyDebug.LOG ) {
-				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "openCamera: time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
 
 		    setupCamera(take_photo);
 		}
 
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "total time: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "openCamera: total time to open camera: " + (System.currentTimeMillis() - debug_time));
 		}
-
 	}
 	
 	/* Should only be called after camera first opened, or after preview is paused.
@@ -1105,10 +1106,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void setupCamera(boolean take_photo) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setupCamera()");
-		/*long debug_time = 0;
+		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			debug_time = System.currentTimeMillis();
-		}*/
+		}
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
@@ -1155,16 +1156,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
 		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCamera: time after setting preview size: " + (System.currentTimeMillis() - debug_time));
+		}
 		// Must call startCameraPreview after checking if face detection is present - probably best to call it after setting all parameters that we want
 		startCameraPreview();
 		if( MyDebug.LOG ) {
-			//Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "setupCamera: time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 		}
 
 		// must be done after setting parameters, as this function may set parameters
 		// also needs to be done after starting preview for some devices (e.g., Nexus 7)
 		if( this.has_zoom && applicationInterface.getZoomPref() != 0 ) {
 			zoomTo(applicationInterface.getZoomPref());
+		    if( MyDebug.LOG ) {
+				Log.d(TAG, "setupCamera: total time after zoomTo: " + (System.currentTimeMillis() - debug_time));
+			}
 		}
 		
 	    if( take_photo ) {
@@ -1184,6 +1191,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
 		applicationInterface.cameraSetup(); // must call this after the above take_photo code in case it switches from video to photo mode
+	    if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCamera: total time after cameraSetup: " + (System.currentTimeMillis() - debug_time));
+		}
 
 	    if( do_startup_focus ) {
 	    	final Handler handler = new Handler();
@@ -1196,6 +1206,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 			}, 500);
 	    }
+
+	    if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCamera: total time after setupCamera: " + (System.currentTimeMillis() - debug_time));
+		}
 	}
 
 	private void setupCameraParameters() {
@@ -1229,6 +1243,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				applicationInterface.clearSceneModePref();
 			}
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after setting scene mode: " + (System.currentTimeMillis() - debug_time));
+		}
 		
 		{
 			// grab all read-only info from parameters
@@ -1261,6 +1278,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.video_sizes = camera_features.video_sizes;
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after getting read only info: " + (System.currentTimeMillis() - debug_time));
+		}
 		
 		{
 			if( MyDebug.LOG )
@@ -1288,6 +1308,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				camera_controller.setFaceDetectionListener(new MyFaceDetectionListener());
 			}
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after setting face detection: " + (System.currentTimeMillis() - debug_time));
+		}
 		
 		{
 			if( MyDebug.LOG )
@@ -1300,6 +1323,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "supports_video_stabilization?: " + supports_video_stabilization);
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after video stabilization: " + (System.currentTimeMillis() - debug_time));
 		}
 
 		{
@@ -1320,6 +1346,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				applicationInterface.clearColorEffectPref();
 			}
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after color effect: " + (System.currentTimeMillis() - debug_time));
+		}
 
 		{
 			if( MyDebug.LOG )
@@ -1338,6 +1367,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
 				applicationInterface.clearWhiteBalancePref();
 			}
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after white balance: " + (System.currentTimeMillis() - debug_time));
 		}
 		
 		boolean has_manual_iso = false;
@@ -1383,6 +1415,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				applicationInterface.clearISOPref();
 			}
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after manual iso: " + (System.currentTimeMillis() - debug_time));
+		}
 
 		{
 			if( MyDebug.LOG ) {
@@ -1419,6 +1454,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
 				applicationInterface.clearExposureCompensationPref();
 			}
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after exposures: " + (System.currentTimeMillis() - debug_time));
 		}
 
 		{
@@ -1471,6 +1509,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			// size set later in setPreviewSize()
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after picture sizes: " + (System.currentTimeMillis() - debug_time));
+		}
 
 		{
 			if( MyDebug.LOG )
@@ -1480,10 +1521,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "image quality: " + image_quality);
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after jpe quality: " + (System.currentTimeMillis() - debug_time));
+		}
 
 		// get available sizes
 		initialiseVideoSizes();
 		initialiseVideoQuality();
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after video sizes: " + (System.currentTimeMillis() - debug_time));
+		}
 
 		current_video_quality = -1;
 		String video_quality_value_s = applicationInterface.getVideoQualityPref();
@@ -1513,6 +1560,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( current_video_quality != -1 ) {
     		// now save, so it's available for PreferenceActivity
 			applicationInterface.setVideoQualityPref(video_quality.get(current_video_quality));
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after handling video quality: " + (System.currentTimeMillis() - debug_time));
 		}
 
 		{
@@ -1544,6 +1594,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "flash not supported");
 				supported_flash_values = null;
 			}
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after setting up flash: " + (System.currentTimeMillis() - debug_time));
 		}
 
 		{
@@ -1586,6 +1639,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// now save
 			applicationInterface.setFocusDistancePref(focus_distance_value);
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCameraParameters: time after setting up focus: " + (System.currentTimeMillis() - debug_time));
+		}
 
 		{
 			if( MyDebug.LOG )
@@ -1596,7 +1652,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "time after setting up camera parameters: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "setupCameraParameters: total time for setting up camera parameters: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
 	
@@ -3988,7 +4044,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		}
 			this.is_preview_started = true;
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "startCameraPreview: time after starting camera preview: " + (System.currentTimeMillis() - debug_time));
 			}
 			if( this.using_face_detection ) {
 				if( MyDebug.LOG )
@@ -3998,6 +4054,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 		this.setPreviewPaused(false);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "startCameraPreview: total time for startCameraPreview: " + (System.currentTimeMillis() - debug_time));
+		}
     }
 
     private void setPreviewPaused(boolean paused) {
