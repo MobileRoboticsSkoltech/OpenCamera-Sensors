@@ -639,28 +639,29 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 	
 	public void zoomIn() {
-	    changeSeekbar((SeekBar) findViewById(R.id.zoom_seekbar), -1);
+	    changeSeekbar(R.id.zoom_seekbar, -1);
 	}
 	
 	public void zoomOut() {
-	    changeSeekbar((SeekBar) findViewById(R.id.zoom_seekbar), 1);
+	    changeSeekbar(R.id.zoom_seekbar, 1);
 	}
 	
 	public void changeExposure(int change) {
-	    changeSeekbar((SeekBar) findViewById(R.id.exposure_seekbar), change);
+	    changeSeekbar(R.id.exposure_seekbar, change);
 	}
 
 	public void changeISO(int change) {
-	    changeSeekbar((SeekBar) findViewById(R.id.iso_seekbar), change);
+	    changeSeekbar(R.id.iso_seekbar, change);
 	}
 	
 	void changeFocusDistance(int change) {
-	    changeSeekbar((SeekBar) findViewById(R.id.focus_seekbar), change);
+	    changeSeekbar(R.id.focus_seekbar, change);
 	}
 	
-	private void changeSeekbar(SeekBar seekBar, int change) {
+	private void changeSeekbar(int seekBarId, int change) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "changeSeekbar: " + change);
+		SeekBar seekBar = (SeekBar)findViewById(seekBarId);
 	    int value = seekBar.getProgress();
 	    int new_value = value + change;
 	    if( new_value < 0 )
