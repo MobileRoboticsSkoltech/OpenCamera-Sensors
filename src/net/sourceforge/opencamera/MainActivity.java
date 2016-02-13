@@ -28,6 +28,7 @@ import android.media.AudioManager;
 import android.media.CamcorderProfile;
 import android.media.SoundPool;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1311,53 +1312,73 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "updateGalleryIcon");
 			debug_time = System.currentTimeMillis();
 		}
-    	StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
-		Bitmap thumbnail = null;
-		KeyguardManager keyguard_manager = (KeyguardManager)this.getSystemService(Context.KEYGUARD_SERVICE);
-		boolean is_locked = keyguard_manager != null && keyguard_manager.inKeyguardRestrictedInputMode();
-		if( MyDebug.LOG )
-			Log.d(TAG, "is_locked?: " + is_locked);
-    	if( media != null && getContentResolver() != null && !is_locked ) {
-    		// check for getContentResolver() != null, as have had reported Google Play crashes
-    		if( media.video ) {
-    			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
-    		}
-    		else {
-    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
-    		}
-    		if( thumbnail != null ) {
-	    		if( media.orientation != 0 ) {
-	    			if( MyDebug.LOG )
-	    				Log.d(TAG, "thumbnail size is " + thumbnail.getWidth() + " x " + thumbnail.getHeight());
-	    			Matrix matrix = new Matrix();
-	    			matrix.setRotate(media.orientation, thumbnail.getWidth() * 0.5f, thumbnail.getHeight() * 0.5f);
-	    			try {
-	    				Bitmap rotated_thumbnail = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(), thumbnail.getHeight(), matrix, true);
-	        		    // careful, as rotated_thumbnail is sometimes not a copy!
-	        		    if( rotated_thumbnail != thumbnail ) {
-	        		    	thumbnail.recycle();
-	        		    	thumbnail = rotated_thumbnail;
-	        		    }
-	    			}
-	    			catch(Throwable t) {
-		    			if( MyDebug.LOG )
-		    				Log.d(TAG, "failed to rotate thumbnail");
-	    			}
-	    		}
-    		}
-    	}
-    	// since we're now setting the thumbnail to the latest media on disk, we need to make sure clicking the Gallery goes to this
-    	applicationInterface.getStorageUtils().clearLastMediaScanned();
-    	if( thumbnail != null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "set gallery button to thumbnail");
-			updateGalleryIcon(thumbnail);
-    	}
-    	else {
-			if( MyDebug.LOG )
-				Log.d(TAG, "set gallery button to blank");
-			updateGalleryIconToBlank();
-    	}
+
+		new AsyncTask<Void, Void, Bitmap>() {
+			private String TAG = "MainActivity/updateGalleryIcon()/AsyncTask";
+
+			/** The system calls this to perform work in a worker thread and
+		      * delivers it the parameters given to AsyncTask.execute() */
+		    protected Bitmap doInBackground(Void... params) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "doInBackground");
+				StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
+				Bitmap thumbnail = null;
+				KeyguardManager keyguard_manager = (KeyguardManager)MainActivity.this.getSystemService(Context.KEYGUARD_SERVICE);
+				boolean is_locked = keyguard_manager != null && keyguard_manager.inKeyguardRestrictedInputMode();
+				if( MyDebug.LOG )
+					Log.d(TAG, "is_locked?: " + is_locked);
+		    	if( media != null && getContentResolver() != null && !is_locked ) {
+		    		// check for getContentResolver() != null, as have had reported Google Play crashes
+		    		if( media.video ) {
+		    			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
+		    		}
+		    		else {
+		    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+		    		}
+		    		if( thumbnail != null ) {
+			    		if( media.orientation != 0 ) {
+			    			if( MyDebug.LOG )
+			    				Log.d(TAG, "thumbnail size is " + thumbnail.getWidth() + " x " + thumbnail.getHeight());
+			    			Matrix matrix = new Matrix();
+			    			matrix.setRotate(media.orientation, thumbnail.getWidth() * 0.5f, thumbnail.getHeight() * 0.5f);
+			    			try {
+			    				Bitmap rotated_thumbnail = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(), thumbnail.getHeight(), matrix, true);
+			        		    // careful, as rotated_thumbnail is sometimes not a copy!
+			        		    if( rotated_thumbnail != thumbnail ) {
+			        		    	thumbnail.recycle();
+			        		    	thumbnail = rotated_thumbnail;
+			        		    }
+			    			}
+			    			catch(Throwable t) {
+				    			if( MyDebug.LOG )
+				    				Log.d(TAG, "failed to rotate thumbnail");
+			    			}
+			    		}
+		    		}
+		    	}
+		    	return thumbnail;
+		    }
+
+		    /** The system calls this to perform work in the UI thread and delivers
+		      * the result from doInBackground() */
+		    protected void onPostExecute(Bitmap thumbnail) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onPostExecute");
+		    	// since we're now setting the thumbnail to the latest media on disk, we need to make sure clicking the Gallery goes to this
+		    	applicationInterface.getStorageUtils().clearLastMediaScanned();
+		    	if( thumbnail != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "set gallery button to thumbnail");
+					updateGalleryIcon(thumbnail);
+		    	}
+		    	else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "set gallery button to blank");
+					updateGalleryIconToBlank();
+		    	}
+		    }
+		}.execute();
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateGalleryIcon: total time to update gallery icon: " + (System.currentTimeMillis() - debug_time));
     }
