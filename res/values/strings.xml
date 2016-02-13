@@ -282,7 +282,8 @@
     <string name="max_filesize">Max file size</string>
     <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
     
-    <string name="audio_control">Start audio listening</string>
+    <string name="audio_control_start">Start audio listening</string>
+    <string name="audio_control_stop">Stop audio listening</string>
     <string name="speech_recognizer_started">Say \"cheese\"</string>
     <string name="audio_listener_started">Make a loud noise</string>
 </resources>

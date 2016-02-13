@@ -145,7 +145,7 @@
         android:layout_height="50dp"
         android:padding="10dp"
         android:scaleType="fitCenter"
-        android:contentDescription="@string/audio_control"
+        android:contentDescription="@string/audio_control_start"
         android:src="@drawable/ic_mic_white_48dp"
         android:onClick="clickedAudioControl"
         />

@@ -1178,6 +1178,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "speechRecognizerStarted");
 		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
 		view.setImageResource(R.drawable.ic_mic_red_48dp);
+		view.setContentDescription( getResources().getString(R.string.audio_control_stop) );
 		speechRecognizerIsStarted = true;
     }
 
@@ -1186,6 +1187,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "speechRecognizerStopped");
 		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
 		view.setImageResource(R.drawable.ic_mic_white_48dp);
+		view.setContentDescription( getResources().getString(R.string.audio_control_start) );
 		speechRecognizerIsStarted = false;
     }
 
@@ -2724,6 +2726,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         }
 		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
 		view.setImageResource(R.drawable.ic_mic_white_48dp);
+		view.setContentDescription( getResources().getString(R.string.audio_control_start) );
 	}
 	
 	private void startAudioListener() {
@@ -2753,6 +2756,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		ImageButton view = (ImageButton)findViewById(R.id.audio_control);
 		view.setImageResource(R.drawable.ic_mic_red_48dp);
+		view.setContentDescription( getResources().getString(R.string.audio_control_stop) );
 	}
 	
 	private void initSpeechRecognizer() {
