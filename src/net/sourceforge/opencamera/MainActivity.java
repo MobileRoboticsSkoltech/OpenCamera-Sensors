@@ -881,7 +881,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	}
     }
 
-    void clearSeekBar() {
+    public void clearSeekBar() {
 		View view = findViewById(R.id.exposure_seekbar);
 		view.setVisibility(View.GONE);
 		view = findViewById(R.id.iso_seekbar);
@@ -896,37 +896,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public void clickedExposure(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposure");
-		this.closePopup();
-		SeekBar exposure_seek_bar = ((SeekBar)findViewById(R.id.exposure_seekbar));
-		int exposure_visibility = exposure_seek_bar.getVisibility();
-		SeekBar iso_seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
-		int iso_visibility = iso_seek_bar.getVisibility();
-		SeekBar exposure_time_seek_bar = ((SeekBar)findViewById(R.id.exposure_time_seekbar));
-		int exposure_time_visibility = iso_seek_bar.getVisibility();
-		boolean is_open = exposure_visibility == View.VISIBLE || iso_visibility == View.VISIBLE || exposure_time_visibility == View.VISIBLE;
-		if( is_open ) {
-			clearSeekBar();
-		}
-		else if( preview.getCameraController() != null ) {
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
-			if( preview.usingCamera2API() && !value.equals(preview.getCameraController().getDefaultISO()) ) {
-				// with Camera2 API, when using non-default ISO we instead show sliders for ISO range and exposure time
-				if( preview.supportsISORange()) {
-					iso_seek_bar.setVisibility(View.VISIBLE);
-					if( preview.supportsExposureTime() ) {
-						exposure_time_seek_bar.setVisibility(View.VISIBLE);
-					}
-				}
-			}
-			else {
-				if( preview.supportsExposures() ) {
-					exposure_seek_bar.setVisibility(View.VISIBLE);
-					ZoomControls seek_bar_zoom = (ZoomControls)findViewById(R.id.exposure_seekbar_zoom);
-					seek_bar_zoom.setVisibility(View.VISIBLE);
-				}
-			}
-		}
+		mainUI.toggleExposureUI();
     }
     
     private static double seekbarScaling(double frac) {

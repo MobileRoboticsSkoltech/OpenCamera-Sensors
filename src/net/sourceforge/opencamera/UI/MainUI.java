@@ -13,6 +13,8 @@ import android.view.Surface;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.ZoomControls;
 
 /** This contains functionality related to the main UI.
  */
@@ -509,5 +511,41 @@ public class MainUI {
 		ImageButton view = (ImageButton)main_activity.findViewById(R.id.audio_control);
 		view.setImageResource(R.drawable.ic_mic_white_48dp);
 		view.setContentDescription( main_activity.getResources().getString(R.string.audio_control_start) );
+    }
+
+    public void toggleExposureUI() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "toggleExposureUI");
+		main_activity.closePopup();
+		SeekBar exposure_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_seekbar));
+		int exposure_visibility = exposure_seek_bar.getVisibility();
+		SeekBar iso_seek_bar = ((SeekBar)main_activity.findViewById(R.id.iso_seekbar));
+		int iso_visibility = iso_seek_bar.getVisibility();
+		SeekBar exposure_time_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar));
+		int exposure_time_visibility = iso_seek_bar.getVisibility();
+		boolean is_open = exposure_visibility == View.VISIBLE || iso_visibility == View.VISIBLE || exposure_time_visibility == View.VISIBLE;
+		if( is_open ) {
+			main_activity.clearSeekBar();
+		}
+		else if( main_activity.getPreview().getCameraController() != null ) {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
+			if( main_activity.getPreview().usingCamera2API() && !value.equals(main_activity.getPreview().getCameraController().getDefaultISO()) ) {
+				// with Camera2 API, when using non-default ISO we instead show sliders for ISO range and exposure time
+				if( main_activity.getPreview().supportsISORange()) {
+					iso_seek_bar.setVisibility(View.VISIBLE);
+					if( main_activity.getPreview().supportsExposureTime() ) {
+						exposure_time_seek_bar.setVisibility(View.VISIBLE);
+					}
+				}
+			}
+			else {
+				if( main_activity.getPreview().supportsExposures() ) {
+					exposure_seek_bar.setVisibility(View.VISIBLE);
+					ZoomControls seek_bar_zoom = (ZoomControls)main_activity.findViewById(R.id.exposure_seekbar_zoom);
+					seek_bar_zoom.setVisibility(View.VISIBLE);
+				}
+			}
+		}
     }
 }
