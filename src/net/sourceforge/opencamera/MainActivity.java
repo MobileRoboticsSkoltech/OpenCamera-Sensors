@@ -309,22 +309,27 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onCreate: time after preloading icons: " + (System.currentTimeMillis() - debug_time));
 
         textToSpeechSuccess = false;
-        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-			@Override
-			public void onInit(int status) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "TextToSpeech initialised");
-				if( status == TextToSpeech.SUCCESS ) {
-					textToSpeechSuccess = true;					
-					if( MyDebug.LOG )
-						Log.d(TAG, "TextToSpeech succeeded");
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "TextToSpeech failed");
-				}
-			}
-		});
+        // run in separate thread so as to not delay startup time
+        new Thread(new Runnable() {
+            public void run() {
+                textToSpeech = new TextToSpeech(MainActivity.this, new TextToSpeech.OnInitListener() {
+        			@Override
+        			public void onInit(int status) {
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "TextToSpeech initialised");
+        				if( status == TextToSpeech.SUCCESS ) {
+        					textToSpeechSuccess = true;					
+        					if( MyDebug.LOG )
+        						Log.d(TAG, "TextToSpeech succeeded");
+        				}
+        				else {
+        					if( MyDebug.LOG )
+        						Log.d(TAG, "TextToSpeech failed");
+        				}
+        			}
+        		});
+            }
+        }).start();
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
