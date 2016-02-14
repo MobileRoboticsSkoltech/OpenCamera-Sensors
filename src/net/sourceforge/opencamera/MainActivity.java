@@ -81,7 +81,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private MainUI mainUI = null;
 	private MyApplicationInterface applicationInterface = null;
 	private Preview preview = null;
-	//private int current_orientation = 0;
 	private OrientationEventListener orientationEventListener = null;
 	private boolean supports_auto_stabilise = false;
 	private boolean supports_force_video_4k = false;
