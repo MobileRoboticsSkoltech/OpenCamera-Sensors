@@ -153,6 +153,16 @@
         <item>preference_preview_size_display</item>
         <item>preference_preview_size_wysiwyg</item>
     </string-array>
+    <string-array name="preference_touch_capture_entries">
+        <item>无</item>
+        <item>单击</item>
+        <item>双击</item>
+        </string-array>
+    <string-array name="preference_touch_capture_values">
+        <item>none</item>
+        <item>single</item>
+        <item>double</item>
+    </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>对焦 (或开始/停止录像)</item>
         <item>对焦</item>
@@ -303,6 +313,16 @@
         <item>preference_stamp_timeformat_24hour</item>
         <item>preference_stamp_timeformat_none</item>
     </string-array>
+    <string-array name="preference_stamp_gpsformat_entries">
+        <item>默认</item>
+        <item>度/分/秒</item>
+        <item>无</item>
+    </string-array>
+    <string-array name="preference_stamp_gpsformat_values">
+        <item>preference_stamp_gpsformat_default</item>
+        <item>preference_stamp_gpsformat_dms</item>
+        <item>preference_stamp_gpsformat_none</item>
+    </string-array>
     <string-array name="preference_stamp_fontsize_entries">
         <item>6</item>
         <item>8</item>
@@ -330,6 +350,14 @@
         <item>20</item>
         <item>22</item>
         <item>24</item>
+    </string-array>
+    <string-array name="preference_stamp_style_entries">
+        <item>阴影文本</item>
+        <item>纯文本</item>
+    </string-array>
+    <string-array name="preference_stamp_style_values">
+        <item>preference_stamp_style_shadowed</item>
+        <item>preference_stamp_style_plain</item>
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>默认</item>
@@ -498,5 +526,37 @@
         <item>audio_default</item>
         <item>audio_mono</item>
         <item>audio_stereo</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_entries">
+        <item>+3 (高灵敏度)</item>
+        <item>+2</item>
+        <item>+1</item>
+        <item>0 (默认)</item>
+        <item>-1</item>
+        <item>-2 (低灵敏度)</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_values">
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+        <item>-2</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_entries">
+        <item>设备默认值</item>
+        <item>100MB</item>
+        <item>200MB</item>
+        <item>300MB</item>
+        <item>500MB</item>
+        <item>1GB</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_values">
+        <item>0</item>
+        <item>104857600</item>
+        <item>209715200</item>
+        <item>314572800</item>
+        <item>524288000</item>
+        <item>1073741824</item>
     </string-array>
 </resources>
