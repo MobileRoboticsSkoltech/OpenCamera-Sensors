@@ -113,8 +113,6 @@
     <string name="preference_shutter_sound_summary">拍照时播放声音(需要 Android 4.2 或更高才能禁用)</string>
     <string name="preference_volume_keys">音量键</string>
     <string name="preference_volume_keys_summary">设置音量键按下时的行为</string>
-    <string name="preference_audio_noise_control">音频控制</string>
-    <string name="preference_audio_noise_control_summary">当侦测到声音时拍照或录像（警告：可能消耗更多的电量，仅在有必要时启用）</string>
     <string name="preference_audio_noise_control_sensitivity">音频控制灵敏度</string>
     <string name="preference_audio_noise_control_sensitivity_summary">音频控制噪声等级灵敏度</string>
 
