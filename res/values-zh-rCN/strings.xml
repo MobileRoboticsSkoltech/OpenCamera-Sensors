@@ -126,6 +126,8 @@
     <string name="preference_save_video_prefix_summary">用于保存视频文件名的前缀</string>
     <string name="preference_show_when_locked">锁定时显示相机</string>
     <string name="preference_show_when_locked_summary">如果开启，Open Camera 将仍然在任何锁屏之上显示 (你仍然必须解锁来访问设置，图库等)</string>
+    <string name="preference_startup_focus">启动时执行自动对焦</string>
+    <string name="preference_startup_focus_summary">Open Camera 启动时是否执行自动对焦。如果启动时开启闪光灯有问题，禁用此选项</string>
     <string name="preference_lock_video">录像时锁定屏幕</string>
     <string name="preference_lock_video_summary">当录制视频时，图形用户界面将被锁定以防止意外的停止录像。滑动屏幕以解锁。注意，如果程序转到后台或屏幕是空白，视频录制总是会停止。</string>
     <string name="preference_rotate_preview">旋转预览</string>
@@ -198,9 +200,10 @@
     <string name="preference_textstamp_summary">用自定义文本戳记照片</string>
     <string name="preference_stamp_fontsize">字体大小</string>
     <string name="preference_stamp_fontsize_summary">在照片上戳记文本时使用的字体大小</string>
-
     <string name="preference_stamp_font_color">字体颜色</string>
     <string name="preference_stamp_font_color_summary">在照片上戳记文本时所用的字体颜色</string>
+    <string name="preference_stamp_style">文本样式</string>
+    <string name="preference_stamp_style_summary">在照片上戳记文本时所用的样式</string>
     <string name="video_quality">视频分辨率</string>
     <string name="video_quality_summary">设置视频分辨率</string>
     <string name="preference_force_video_4k">强制 4K UHD 视频 (实验)</string>
@@ -267,14 +270,14 @@
 
     <string name="saf_select_save_location">选择一个保存位置</string>
     <string name="saf_cancelled">存储访问架构取消</string>
-    <string name="permission_location_not_available">位置权限不可用</string>
+
+    <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
     <string name="permission_record_audio_not_available">麦克风权限不可用</string>
-    <string name="preference_stamp_style">文本样式</string>
-    <string name="preference_stamp_style_summary">在照片上戳记文本时所用的样式</string>
+    <string name="permission_location_not_available">位置权限不可用</string>
+
     <string name="start_video">开始录像</string>
     <string name="stop_video">停止录像</string>
+
     <string name="max_filesize">最大文件尺寸</string>
-    <string name="mb_abbreviation">MB</string>
-    <string name="preference_startup_focus">启动时执行自动对焦</string>
-    <string name="preference_startup_focus_summary">Open Camera 启动时是否执行自动对焦。如果启动时开启闪光灯有问题，禁用此选项</string>
+    <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
 </resources>
