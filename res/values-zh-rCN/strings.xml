@@ -113,9 +113,10 @@
     <string name="preference_shutter_sound_summary">拍照时播放声音(需要 Android 4.2 或更高才能禁用)</string>
     <string name="preference_volume_keys">音量键</string>
     <string name="preference_volume_keys_summary">设置音量键按下时的行为</string>
+    <string name="preference_audio_control">音频控制选项</string>
+    <string name="preference_audio_control_summary">当检测到声音，或者在收到语音命令(\"cheese\")时拍照或录像。当启用时，使用屏幕上的话筒按钮来启动和停止监听。</string> <!-- symbol short for megabytes -->
     <string name="preference_audio_noise_control_sensitivity">音频控制灵敏度</string>
     <string name="preference_audio_noise_control_sensitivity_summary">音频控制噪声等级灵敏度</string>
-
     <string name="preference_save_location">保存位置</string>
     <string name="preference_save_location_summary">用来保存照片/视频文件的文件夹</string>
     <string name="preference_using_saf">使用存储访问架构</string>
@@ -280,4 +281,9 @@
 
     <string name="max_filesize">最大文件尺寸</string>
     <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
+
+    <string name="audio_control_start">开始音频监听</string>
+    <string name="audio_control_stop">停止音频监听</string>
+    <string name="speech_recognizer_started">说 \"cheese\"</string>
+    <string name="audio_listener_started">发出大的声音</string>
 </resources>
