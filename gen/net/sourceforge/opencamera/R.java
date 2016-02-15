@@ -190,6 +190,7 @@ public final class R {
         public static final int answer_yes=0x7f080005;
         public static final int app_name=0x7f080000;
         /**  symbol short for megabytes 
+ symbol short for megabytes 
          */
         public static final int audio_control_start=0x7f080107;
         public static final int audio_control_stop=0x7f080108;
@@ -305,6 +306,8 @@ public final class R {
         public static final int preference_angle_highlight_color_summary=0x7f080093;
         public static final int preference_audio_control=0x7f080069;
         public static final int preference_audio_control_summary=0x7f08006a;
+        /**  symbol short for megabytes 
+         */
         public static final int preference_audio_noise_control_sensitivity=0x7f08006b;
         public static final int preference_audio_noise_control_sensitivity_summary=0x7f08006c;
         public static final int preference_auto_stabilise=0x7f080045;
