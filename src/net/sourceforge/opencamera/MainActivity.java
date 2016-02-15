@@ -802,6 +802,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         	else {
 		    	preview.showToast(audio_control_toast, R.string.speech_recognizer_started);
             	Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            	intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en_US"); // since we listen for "cheese", ensure this works even for devices with different language settings
             	speechRecognizer.startListening(intent);
             	speechRecognizerStarted();
         	}
