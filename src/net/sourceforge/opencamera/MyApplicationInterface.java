@@ -672,6 +672,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public boolean isTestAlwaysFocus() {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "isTestAlwaysFocus: " + main_activity.is_test);
+		}
     	return main_activity.is_test;
     }
 
