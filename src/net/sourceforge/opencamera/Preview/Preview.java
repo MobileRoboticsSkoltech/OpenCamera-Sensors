@@ -3200,6 +3200,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else {
 			takePictureOnTimer(timer_delay, false);
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicturePressed exit");
 	}
 	
 	private void takePictureOnTimer(final long timer_delay, boolean repeated) {
@@ -3658,7 +3660,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "focus_value is " + focus_value);
 
-		if( !using_android_l && this.successfully_focused && System.currentTimeMillis() < this.successfully_focused_time + 5000 ) {
+		if( !using_android_l && this.recentlyFocused() ) {
 			// Android L API seems to have poor results with flash if we don't lock focus for taking a photo (photos can come out too bright or too dark), so we always force a focus
 			if( MyDebug.LOG )
 				Log.d(TAG, "recently focused successfully, so no need to refocus");
@@ -3695,6 +3697,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else {
 			takePictureWhenFocused();
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicture exit");
 	}
 	
 	private void failedToStartVideoRecorder(CamcorderProfile profile) {
@@ -3836,7 +3840,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		count_cameraTakePicture++;
     	}
 		if( MyDebug.LOG )
-			Log.d(TAG, "takePicture exit");
+			Log.d(TAG, "takePictureWhenFocused exit");
     }
 
 	/*void clickedShare() {
@@ -4013,6 +4017,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				takePictureWhenFocused();
 			}
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "autoFocusCompleted exit");
     }
     
     public void startCameraPreview() {
@@ -4631,7 +4637,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public boolean isFocusRecentFailure() {
     	return focus_success == FOCUS_FAILED;
     }
-    
+
+    /** Whether we can skip the autofocus before taking a photo.
+     */
+    private boolean recentlyFocused() {
+    	return this.successfully_focused && System.currentTimeMillis() < this.successfully_focused_time + 5000;
+    }
+
     public CameraController.Face [] getFacesDetected() {
     	return this.faces_detected;
     }
