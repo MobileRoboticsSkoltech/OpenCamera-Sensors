@@ -3115,6 +3115,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
+	/** User has clicked the "take picture" button (or equivalent GUI operation).
+	 */
 	public void takePicturePressed() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicturePressed");
@@ -3313,7 +3315,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		applicationInterface.onVideoError(what, extra); // call this last, so that toasts show up properly (as we're hogging the UI thread here, and mediarecorder takes time to stop)
 	}
 	
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	/** Initiate "take picture" command. In video mode this means starting video command. In photo mode this may involve first
+	 * autofocusing.
+	 */
 	private void takePicture(boolean max_filesize_restart) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
@@ -3362,296 +3366,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( is_video ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "start video recording");
-    		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
-    		// initialise just in case:
-    		boolean created_video_file = false;
-    		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
-    		video_uri = null;
-			video_filename = null;
-			ParcelFileDescriptor pfd_saf = null;
-    		try {
-    			video_method = applicationInterface.createOutputVideoMethod();
-	    		if( MyDebug.LOG )
-		            Log.e(TAG, "video_method? " + video_method);
-	    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
-	    			File videoFile = applicationInterface.createOutputVideoFile();
-					video_filename = videoFile.getAbsolutePath();
-					created_video_file = true;
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "save to: " + video_filename);
-	    		}
-	    		else {
-		    		if( video_method == ApplicationInterface.VIDEOMETHOD_SAF ) {
-		    			video_uri = applicationInterface.createOutputVideoSAF();
-		    		}
-		    		else {
-		    			video_uri = applicationInterface.createOutputVideoUri();
-		    		}
-	    			created_video_file = true;
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "save to: " + video_uri);
-		    		pfd_saf = getContext().getContentResolver().openFileDescriptor(video_uri, "rw");
-	    		}
-    		}
-    		catch(IOException e) {
-	    		if( MyDebug.LOG )
-		            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
-				e.printStackTrace();
-	            applicationInterface.onFailedCreateVideoFileError();
-				this.phase = PHASE_NORMAL;
-				applicationInterface.cameraInOperation(false);
-    		}
-    		if( created_video_file ) {
-	        	CamcorderProfile profile = getCamcorderProfile();
-	    		if( MyDebug.LOG ) {
-	    			Log.d(TAG, "current_video_quality: " + current_video_quality);
-	    			if( current_video_quality != -1 )
-	    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality));
-	    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
-	    			Log.d(TAG, "bit rate " + profile.videoBitRate);
-	    		}
-
-	    		video_recorder = new MediaRecorder();
-	    		this.camera_controller.unlock();
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "set video listeners");
-	        	video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
-					@Override
-					public void onInfo(MediaRecorder mr, int what, int extra) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "MediaRecorder info: " + what + " extra: " + extra);
-						final int final_what = what;
-						final int final_extra = extra;
-						Activity activity = (Activity)Preview.this.getContext();
-						activity.runOnUiThread(new Runnable() {
-							public void run() {
-								// we run on main thread to avoid problem of camera closing at the same time
-								onVideoInfo(final_what, final_extra);
-							}
-						});
-					}
-				});
-	        	video_recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
-					public void onError(MediaRecorder mr, int what, int extra) {
-						final int final_what = what;
-						final int final_extra = extra;
-						Activity activity = (Activity)Preview.this.getContext();
-						activity.runOnUiThread(new Runnable() {
-							public void run() {
-								// we run on main thread to avoid problem of camera closing at the same time
-								onVideoError(final_what, final_extra);
-							}
-						});
-					}
-				});
-	        	camera_controller.initVideoRecorderPrePrepare(video_recorder);
-				boolean record_audio = applicationInterface.getRecordAudioPref();
-				if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
-					// needed for Android 6, in case users deny storage permission, otherwise we'll crash
-					// see https://developer.android.com/training/permissions/requesting.html
-					// currently we don't bother requesting the permission, as still using targetSdkVersion 22
-					if( MyDebug.LOG )
-						Log.e(TAG, "don't have RECORD_AUDIO permission");
-					showToast(null, R.string.permission_record_audio_not_available);
-					record_audio = false;
-				}
-				if( record_audio ) {
-	        		String pref_audio_src = applicationInterface.getRecordAudioSourcePref();
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "pref_audio_src: " + pref_audio_src);
-	        		int audio_source = MediaRecorder.AudioSource.CAMCORDER;
-	        		if( pref_audio_src.equals("audio_src_mic") ) {
-		        		audio_source = MediaRecorder.AudioSource.MIC;
-	        		}
-	        		else if( pref_audio_src.equals("audio_src_default") ) {
-		        		audio_source = MediaRecorder.AudioSource.DEFAULT;
-	        		}
-	        		else if( pref_audio_src.equals("audio_src_voice_communication") ) {
-		        		audio_source = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
-	        		}
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "audio_source: " + audio_source);
-					video_recorder.setAudioSource(audio_source);
-				}
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "set video source");
-				video_recorder.setVideoSource(using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA);
-
-				if( store_location && applicationInterface.getLocation() != null ) {
-					Location location = applicationInterface.getLocation();
-		    		if( MyDebug.LOG ) {
-		    			Log.d(TAG, "set video location: lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
-		    		}
-					video_recorder.setLocation((float)location.getLatitude(), (float)location.getLongitude());
-				}
-
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "set video profile");
-				if( record_audio ) {
-					video_recorder.setProfile(profile);
-	        		String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
-	        		if( pref_audio_channels.equals("audio_mono") ) {
-	        			video_recorder.setAudioChannels(1);
-	        		}
-	        		else if( pref_audio_channels.equals("audio_stereo") ) {
-	        			video_recorder.setAudioChannels(2);
-	        		}
-				}
-				else {
-					// from http://stackoverflow.com/questions/5524672/is-it-possible-to-use-camcorderprofile-without-audio-source
-					video_recorder.setOutputFormat(profile.fileFormat);
-					video_recorder.setVideoFrameRate(profile.videoFrameRate);
-					video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-					video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
-					video_recorder.setVideoEncoder(profile.videoCodec);
-				}
-	    		if( MyDebug.LOG ) {
-	    			Log.d(TAG, "video fileformat: " + profile.fileFormat);
-	    			Log.d(TAG, "video framerate: " + profile.videoFrameRate);
-	    			Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
-	    			Log.d(TAG, "video bitrate: " + profile.videoBitRate);
-	    			Log.d(TAG, "video codec: " + profile.videoCodec);
-	    		}
-	    		//video_recorder.setMaxFileSize(15*1024*1024); // test
-				long video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
-				if( video_max_filesize > 0 ) {
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "set max file size of: " + video_max_filesize);
-		    		video_recorder.setMaxFileSize(video_max_filesize);
-				}
-
-	    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
-	    			video_recorder.setOutputFile(video_filename);
-	    		}
-	    		else {
-	    			video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
-	    		}
-	        	try {
-	        		applicationInterface.cameraInOperation(true);
-	        		applicationInterface.startingVideo();
-	        		/*if( true ) // test
-	        			throw new IOException();*/
-	    			cameraSurface.setVideoRecorder(video_recorder);
-		        	video_recorder.setOrientationHint(getImageVideoRotation());
-					if( MyDebug.LOG )
-						Log.d(TAG, "about to prepare video recorder");
-					video_recorder.prepare();
-		        	camera_controller.initVideoRecorderPostPrepare(video_recorder);
-					if( MyDebug.LOG )
-						Log.d(TAG, "about to start video recorder");
-	            	video_recorder.start();
-					if( MyDebug.LOG )
-						Log.d(TAG, "video recorder started");
-					if( test_video_failure ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "test_video_failure is true");
-						throw new RuntimeException();
-					}
-	            	video_start_time = System.currentTimeMillis();
-	            	video_start_time_set = true;
-    				//showToast(stopstart_video_toast, R.string.started_recording_video);
-    				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
-
-	            	// handle restarts
-					if( remaining_restart_video == 0 && !max_filesize_restart ) {
-						remaining_restart_video = applicationInterface.getVideoRestartTimesPref();
-			    		if( MyDebug.LOG )
-			    			Log.d(TAG, "initialised remaining_restart_video to: " + remaining_restart_video);
-					}
-
-					// handle restart timer
-    				long video_max_duration = applicationInterface.getVideoMaxDurationPref();
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "video_max_duration: " + video_max_duration);
-    				if( max_filesize_restart ) {
-    					if( video_max_duration > 0 ) {
-	    					video_max_duration -= video_accumulated_time;
-	    					// this should be greater or equal to min_safe_restart_video_time, as too short remaining time should have been caught in restartVideo()
-	    					if( video_max_duration < min_safe_restart_video_time ) {
-	    			    		if( MyDebug.LOG )
-	    			    			Log.e(TAG, "trying to restart video with too short a time: " + video_max_duration);
-	    			    		video_max_duration = min_safe_restart_video_time;
-	    					}
-    					}
-    				}
-    				else {
-        				video_accumulated_time = 0;
-    				}
-
-    				if( video_max_duration > 0 ) {
-    					class RestartVideoTimerTask extends TimerTask {
-        					public void run() {
-        			    		if( MyDebug.LOG )
-        			    			Log.d(TAG, "stop video on timer");
-        						Activity activity = (Activity)Preview.this.getContext();
-        						activity.runOnUiThread(new Runnable() {
-        							public void run() {
-        								// we run on main thread to avoid problem of camera closing at the same time
-        								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
-        								if( camera_controller != null && restartVideoTimerTask != null )
-        									restartVideo(false);
-        								else {
-        									if( MyDebug.LOG )
-        										Log.d(TAG, "restartVideoTimerTask: don't restart video, as already cancelled");
-        								}
-        							}
-        						});
-        					}
-        				}
-        		    	restartVideoTimer.schedule(restartVideoTimerTask = new RestartVideoTimerTask(), video_max_duration);
-    				}
-
-    				if( applicationInterface.getVideoFlashPref() && supportsFlash() ) {
-    					class FlashVideoTimerTask extends TimerTask {
-        					public void run() {
-        			    		if( MyDebug.LOG )
-        			    			Log.e(TAG, "FlashVideoTimerTask");
-        						Activity activity = (Activity)Preview.this.getContext();
-        						activity.runOnUiThread(new Runnable() {
-        							public void run() {
-        								// we run on main thread to avoid problem of camera closing at the same time
-        								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
-        								if( camera_controller != null && flashVideoTimerTask != null )
-        									flashVideo();
-        								else {
-        									if( MyDebug.LOG )
-        										Log.d(TAG, "flashVideoTimerTask: don't flash video, as already cancelled");
-        								}
-        							}
-        						});
-        					}
-    					}
-        		    	flashVideoTimer.schedule(flashVideoTimerTask = new FlashVideoTimerTask(), 0, 1000);
-    				}
-				}
-	        	catch(IOException e) {
-		    		if( MyDebug.LOG )
-		    			Log.e(TAG, "failed to save video");
-					e.printStackTrace();
-		    	    applicationInterface.onFailedCreateVideoFileError();
-		    		video_recorder.reset();
-		    		video_recorder.release(); 
-		    		video_recorder = null;
-					this.phase = PHASE_NORMAL;
-					applicationInterface.cameraInOperation(false);
-					this.reconnectCamera(true);
-				}
-	        	catch(RuntimeException e) {
-	        		// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
-		    		if( MyDebug.LOG )
-		    			Log.e(TAG, "runtime exception starting video recorder");
-					e.printStackTrace();
-					failedToStartVideoRecorder(profile);
-				}
-	        	catch(CameraControllerException e) {
-		    		if( MyDebug.LOG )
-		    			Log.e(TAG, "camera exception starting video recorder");
-					e.printStackTrace();
-					failedToStartVideoRecorder(profile);
-				}
-			}
+    		startVideoRecording(max_filesize_restart);
         	return;
 		}
 
@@ -3699,6 +3414,303 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
+	}
+	
+	/** Start video recording.
+	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void startVideoRecording(boolean max_filesize_restart) {
+		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
+		// initialise just in case:
+		boolean created_video_file = false;
+		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
+		video_uri = null;
+		video_filename = null;
+		ParcelFileDescriptor pfd_saf = null;
+		try {
+			video_method = applicationInterface.createOutputVideoMethod();
+    		if( MyDebug.LOG )
+	            Log.e(TAG, "video_method? " + video_method);
+    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+    			File videoFile = applicationInterface.createOutputVideoFile();
+				video_filename = videoFile.getAbsolutePath();
+				created_video_file = true;
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "save to: " + video_filename);
+    		}
+    		else {
+	    		if( video_method == ApplicationInterface.VIDEOMETHOD_SAF ) {
+	    			video_uri = applicationInterface.createOutputVideoSAF();
+	    		}
+	    		else {
+	    			video_uri = applicationInterface.createOutputVideoUri();
+	    		}
+    			created_video_file = true;
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "save to: " + video_uri);
+	    		pfd_saf = getContext().getContentResolver().openFileDescriptor(video_uri, "rw");
+    		}
+		}
+		catch(IOException e) {
+    		if( MyDebug.LOG )
+	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
+			e.printStackTrace();
+            applicationInterface.onFailedCreateVideoFileError();
+			this.phase = PHASE_NORMAL;
+			applicationInterface.cameraInOperation(false);
+		}
+		if( created_video_file ) {
+        	CamcorderProfile profile = getCamcorderProfile();
+    		if( MyDebug.LOG ) {
+    			Log.d(TAG, "current_video_quality: " + current_video_quality);
+    			if( current_video_quality != -1 )
+    				Log.d(TAG, "current_video_quality value: " + video_quality.get(current_video_quality));
+    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+    			Log.d(TAG, "bit rate " + profile.videoBitRate);
+    		}
+
+    		video_recorder = new MediaRecorder();
+    		this.camera_controller.unlock();
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "set video listeners");
+        	video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+				@Override
+				public void onInfo(MediaRecorder mr, int what, int extra) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "MediaRecorder info: " + what + " extra: " + extra);
+					final int final_what = what;
+					final int final_extra = extra;
+					Activity activity = (Activity)Preview.this.getContext();
+					activity.runOnUiThread(new Runnable() {
+						public void run() {
+							// we run on main thread to avoid problem of camera closing at the same time
+							onVideoInfo(final_what, final_extra);
+						}
+					});
+				}
+			});
+        	video_recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+				public void onError(MediaRecorder mr, int what, int extra) {
+					final int final_what = what;
+					final int final_extra = extra;
+					Activity activity = (Activity)Preview.this.getContext();
+					activity.runOnUiThread(new Runnable() {
+						public void run() {
+							// we run on main thread to avoid problem of camera closing at the same time
+							onVideoError(final_what, final_extra);
+						}
+					});
+				}
+			});
+        	camera_controller.initVideoRecorderPrePrepare(video_recorder);
+			boolean record_audio = applicationInterface.getRecordAudioPref();
+			if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
+				// needed for Android 6, in case users deny storage permission, otherwise we'll crash
+				// see https://developer.android.com/training/permissions/requesting.html
+				// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+				if( MyDebug.LOG )
+					Log.e(TAG, "don't have RECORD_AUDIO permission");
+				showToast(null, R.string.permission_record_audio_not_available);
+				record_audio = false;
+			}
+			if( record_audio ) {
+        		String pref_audio_src = applicationInterface.getRecordAudioSourcePref();
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "pref_audio_src: " + pref_audio_src);
+        		int audio_source = MediaRecorder.AudioSource.CAMCORDER;
+        		if( pref_audio_src.equals("audio_src_mic") ) {
+	        		audio_source = MediaRecorder.AudioSource.MIC;
+        		}
+        		else if( pref_audio_src.equals("audio_src_default") ) {
+	        		audio_source = MediaRecorder.AudioSource.DEFAULT;
+        		}
+        		else if( pref_audio_src.equals("audio_src_voice_communication") ) {
+	        		audio_source = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+        		}
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "audio_source: " + audio_source);
+				video_recorder.setAudioSource(audio_source);
+			}
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "set video source");
+			video_recorder.setVideoSource(using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA);
+
+    		boolean store_location = applicationInterface.getGeotaggingPref();
+			if( store_location && applicationInterface.getLocation() != null ) {
+				Location location = applicationInterface.getLocation();
+	    		if( MyDebug.LOG ) {
+	    			Log.d(TAG, "set video location: lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
+	    		}
+				video_recorder.setLocation((float)location.getLatitude(), (float)location.getLongitude());
+			}
+
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "set video profile");
+			if( record_audio ) {
+				video_recorder.setProfile(profile);
+        		String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
+        		if( pref_audio_channels.equals("audio_mono") ) {
+        			video_recorder.setAudioChannels(1);
+        		}
+        		else if( pref_audio_channels.equals("audio_stereo") ) {
+        			video_recorder.setAudioChannels(2);
+        		}
+			}
+			else {
+				// from http://stackoverflow.com/questions/5524672/is-it-possible-to-use-camcorderprofile-without-audio-source
+				video_recorder.setOutputFormat(profile.fileFormat);
+				video_recorder.setVideoFrameRate(profile.videoFrameRate);
+				video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+				video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
+				video_recorder.setVideoEncoder(profile.videoCodec);
+			}
+    		if( MyDebug.LOG ) {
+    			Log.d(TAG, "video fileformat: " + profile.fileFormat);
+    			Log.d(TAG, "video framerate: " + profile.videoFrameRate);
+    			Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+    			Log.d(TAG, "video bitrate: " + profile.videoBitRate);
+    			Log.d(TAG, "video codec: " + profile.videoCodec);
+    		}
+    		//video_recorder.setMaxFileSize(15*1024*1024); // test
+			long video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
+			if( video_max_filesize > 0 ) {
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "set max file size of: " + video_max_filesize);
+	    		video_recorder.setMaxFileSize(video_max_filesize);
+			}
+
+    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+    			video_recorder.setOutputFile(video_filename);
+    		}
+    		else {
+    			video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
+    		}
+        	try {
+        		applicationInterface.cameraInOperation(true);
+        		applicationInterface.startingVideo();
+        		/*if( true ) // test
+        			throw new IOException();*/
+    			cameraSurface.setVideoRecorder(video_recorder);
+	        	video_recorder.setOrientationHint(getImageVideoRotation());
+				if( MyDebug.LOG )
+					Log.d(TAG, "about to prepare video recorder");
+				video_recorder.prepare();
+	        	camera_controller.initVideoRecorderPostPrepare(video_recorder);
+				if( MyDebug.LOG )
+					Log.d(TAG, "about to start video recorder");
+            	video_recorder.start();
+				if( MyDebug.LOG )
+					Log.d(TAG, "video recorder started");
+				if( test_video_failure ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "test_video_failure is true");
+					throw new RuntimeException();
+				}
+            	video_start_time = System.currentTimeMillis();
+            	video_start_time_set = true;
+				//showToast(stopstart_video_toast, R.string.started_recording_video);
+				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
+
+            	// handle restarts
+				if( remaining_restart_video == 0 && !max_filesize_restart ) {
+					remaining_restart_video = applicationInterface.getVideoRestartTimesPref();
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "initialised remaining_restart_video to: " + remaining_restart_video);
+				}
+
+				// handle restart timer
+				long video_max_duration = applicationInterface.getVideoMaxDurationPref();
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "video_max_duration: " + video_max_duration);
+				if( max_filesize_restart ) {
+					if( video_max_duration > 0 ) {
+    					video_max_duration -= video_accumulated_time;
+    					// this should be greater or equal to min_safe_restart_video_time, as too short remaining time should have been caught in restartVideo()
+    					if( video_max_duration < min_safe_restart_video_time ) {
+    			    		if( MyDebug.LOG )
+    			    			Log.e(TAG, "trying to restart video with too short a time: " + video_max_duration);
+    			    		video_max_duration = min_safe_restart_video_time;
+    					}
+					}
+				}
+				else {
+    				video_accumulated_time = 0;
+				}
+
+				if( video_max_duration > 0 ) {
+					class RestartVideoTimerTask extends TimerTask {
+    					public void run() {
+    			    		if( MyDebug.LOG )
+    			    			Log.d(TAG, "stop video on timer");
+    						Activity activity = (Activity)Preview.this.getContext();
+    						activity.runOnUiThread(new Runnable() {
+    							public void run() {
+    								// we run on main thread to avoid problem of camera closing at the same time
+    								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
+    								if( camera_controller != null && restartVideoTimerTask != null )
+    									restartVideo(false);
+    								else {
+    									if( MyDebug.LOG )
+    										Log.d(TAG, "restartVideoTimerTask: don't restart video, as already cancelled");
+    								}
+    							}
+    						});
+    					}
+    				}
+    		    	restartVideoTimer.schedule(restartVideoTimerTask = new RestartVideoTimerTask(), video_max_duration);
+				}
+
+				if( applicationInterface.getVideoFlashPref() && supportsFlash() ) {
+					class FlashVideoTimerTask extends TimerTask {
+    					public void run() {
+    			    		if( MyDebug.LOG )
+    			    			Log.e(TAG, "FlashVideoTimerTask");
+    						Activity activity = (Activity)Preview.this.getContext();
+    						activity.runOnUiThread(new Runnable() {
+    							public void run() {
+    								// we run on main thread to avoid problem of camera closing at the same time
+    								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
+    								if( camera_controller != null && flashVideoTimerTask != null )
+    									flashVideo();
+    								else {
+    									if( MyDebug.LOG )
+    										Log.d(TAG, "flashVideoTimerTask: don't flash video, as already cancelled");
+    								}
+    							}
+    						});
+    					}
+					}
+    		    	flashVideoTimer.schedule(flashVideoTimerTask = new FlashVideoTimerTask(), 0, 1000);
+				}
+			}
+        	catch(IOException e) {
+	    		if( MyDebug.LOG )
+	    			Log.e(TAG, "failed to save video");
+				e.printStackTrace();
+	    	    applicationInterface.onFailedCreateVideoFileError();
+	    		video_recorder.reset();
+	    		video_recorder.release(); 
+	    		video_recorder = null;
+				this.phase = PHASE_NORMAL;
+				applicationInterface.cameraInOperation(false);
+				this.reconnectCamera(true);
+			}
+        	catch(RuntimeException e) {
+        		// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
+	    		if( MyDebug.LOG )
+	    			Log.e(TAG, "runtime exception starting video recorder");
+				e.printStackTrace();
+				failedToStartVideoRecorder(profile);
+			}
+        	catch(CameraControllerException e) {
+	    		if( MyDebug.LOG )
+	    			Log.e(TAG, "camera exception starting video recorder");
+				e.printStackTrace();
+				failedToStartVideoRecorder(profile);
+			}
+		}
 	}
 	
 	private void failedToStartVideoRecorder(CamcorderProfile profile) {
