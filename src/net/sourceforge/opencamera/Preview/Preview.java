@@ -3343,8 +3343,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		}
 
-		updateParametersFromLocation();
-
 		boolean store_location = applicationInterface.getGeotaggingPref();
 		if( store_location ) {
 			boolean require_location = applicationInterface.getRequireLocationPref();
@@ -3758,6 +3756,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// they said this happened in every focus mode, including locked - so possible that on some devices, cancelAutoFocus() actually pulls the camera out of focus, or reverts to preview focus?
 			cancelAutoFocus();
 		}
+		updateParametersFromLocation(); // do this now, not before, so we don't set location parameters during focus (sometimes get RuntimeException)
+
 		focus_success = FOCUS_DONE; // clear focus rectangle if not already done
 		successfully_focused = false; // so next photo taken will require an autofocus
 		if( MyDebug.LOG )
@@ -4525,7 +4525,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return this.ui_rotation;
 	}
 
+	/** If geotagging is enabled, pass the location info to the camera controller (for photos).
+	 */
     private void updateParametersFromLocation() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateParametersFromLocation");
     	if( camera_controller != null ) {
     		boolean store_location = applicationInterface.getGeotaggingPref();
     		if( store_location && applicationInterface.getLocation() != null ) {
