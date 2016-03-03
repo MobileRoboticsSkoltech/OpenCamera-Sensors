@@ -171,7 +171,7 @@
         <item>Switch auto-stabilise on/off</item>
         <item>Change device volume</item>
         <item>Do nothing</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
         <item>volume_focus</item>
@@ -293,7 +293,7 @@
         <item>dd/mm/yyyy</item>
         <item>mm/dd/yyyy</item>
         <item>None</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_stamp_dateformat_values">
         <item>preference_stamp_dateformat_default</item>
         <item>preference_stamp_dateformat_yyyymmdd</item>
