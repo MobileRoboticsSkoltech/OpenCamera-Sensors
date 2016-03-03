@@ -4,7 +4,7 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Налады</string>
     <string name="action_popup">Налады ўсплываючых</string>
-    <string name="intro_text">Дакраніцеся, каб сфакусавацца, і націсніце сінюю кнопку камеры, каб зрабіць фотаздымкі. Для дадатковай дапамогі, націсніце онлайн дапамогу ў наладах. Дадатак з/'яўляецца цалкам бясплатным. Калі вам падабаецца гэты дадатак, калі ласка, падумайце аб ахвяраванні :)\n\nПалітыка прыватнасці: дазвол патрабуецца для геатэгаў, але прадвызначана гэта  адключана. Калі опцыя ўключана, вашае месцазнаходжанне кадуецца ў захаваных файлах (і гэта выкарыстоўваецца толькі для гэтай мэты).</string>
+    <string name="intro_text">Дакраніцеся, каб сфакусавацца, і націсніце сінюю кнопку камеры, каб зрабіць фотаздымкі. Для дадатковай дапамогі, націсніце онлайн дапамогу ў наладах. Дадатак з\'яўляецца цалкам бясплатным. Калі вам падабаецца гэты дадатак, калі ласка, падумайце аб ахвяраванні :)\n\nПалітыка прыватнасці: дазвол патрабуецца для геатэгаў, але прадвызначана гэта  адключана. Калі опцыя ўключана, вашае месцазнаходжанне кадуецца ў захаваных файлах (і гэта выкарыстоўваецца толькі для гэтай мэты).</string>
     <string name="intro_ok">Добра (Гэта паведамленне не будзе паказана зноў)</string>
 
     <string name="answer_yes">Так</string>
@@ -104,7 +104,7 @@
     <string name="preference_burst_mode_summary">Зрабіць некалькі фотаздымкаў запар</string>
     <string name="preference_burst_interval">Інтэрвал пры пакетнай здымцы</string>
     <string name="preference_burst_interval_summary">Затрымка (калі такія маюцца) паміж фотаздымкамі ў пакетным рэжыме здымкі</string>
-    <string name="preference_screen_camera_controls_more">Больш налад камеры ...</string>
+    <string name="preference_screen_camera_controls_more">Больш налад камеры…</string>
     <string name="preference_touch_capture">Націсніце, каб захапіць</string>
     <string name="preference_touch_capture_summary">Фатаграфаваць дакранаючыся або двойчы націснуўшы прагляд</string>
     <string name="preference_pause_preview">Паўза пасля фатаграфавання</string>
@@ -127,7 +127,7 @@
     <string name="preference_lock_video_summary">Падчас запісу відэа, графічны інтэрфейс будзе заблакаваны , каб выпадкова не прыпыніць запіс. Правядзіце па экране, каб разблакаваць. Звярніце ўвагу, што запіс відэа заўсёды можна спыніць, калі дадатак пераходзіць у фонавы рэжым або экран гасіцца.</string>
     <string name="preference_rotate_preview">Паварочваць пры папярэднім праглядзе</string>
     <string name="preference_rotate_preview_summary">Опцыя паварочвання пры папярэднім праглядзе (не ўплывае на вынік фота / відэа)</string>
-    <string name="preference_screen_gui">Графічны інтэрфейс  ...</string>
+    <string name="preference_screen_gui">Графічны інтэрфейс…</string>
     <string name="preference_preview_size">Памер папярэдняга прагляду</string>
     <string name="preference_preview_size_summary">Як абраць памер папярэдняга прагляду</string>
     <string name="preference_ui_placement">Інтэрфейс</string>
@@ -170,9 +170,9 @@
     <string name="preference_max_brightness_summary">Гэта дае максімальную яркасць, а не прадвызначаны прыладай</string>
 
     <string name="preference_category_camera_quality">Фота і відэа налады</string>
-    <string name="preference_screen_photo_settings">Налады фота ...</string>
-    <string name="preference_screen_video_settings">Налады відэа ...</string>
-    <string name="preference_screen_location_settings">Налады месцазнаходжання ...</string>
+    <string name="preference_screen_photo_settings">Налады фота…</string>
+    <string name="preference_screen_video_settings">Налады відэа…</string>
+    <string name="preference_screen_location_settings">Налады месцазнаходжання…</string>
     <string name="preference_resolution">Раздзяляльная здольнасць камеры</string>
     <string name="preference_resolution_summary">Прызначыць раздзяляльную здольнасць фотаздымкаў, зробленых з дапамогай камеры</string>
     <string name="preference_quality">Якасць малюнка</string>
