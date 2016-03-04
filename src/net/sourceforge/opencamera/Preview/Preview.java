@@ -872,8 +872,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void closeCamera() {
+		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "closeCamera()");
+			debug_time = System.currentTimeMillis();
 		}
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
@@ -897,10 +899,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// need to check for camera being non-null again - if an error occurred stopping the video, we will have closed the camera, and may not be able to reopen
 			if( camera_controller != null ) {
 				//camera.setPreviewCallback(null);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "closeCamera: about to pause preview: " + (System.currentTimeMillis() - debug_time));
+				}
 				pausePreview();
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "closeCamera: about to release camera controller: " + (System.currentTimeMillis() - debug_time));
+				}
 				camera_controller.release();
 				camera_controller = null;
 			}
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "closeCamera: total time: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
 	
@@ -923,8 +934,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	public void pausePreview() {
-		if( MyDebug.LOG )
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "pausePreview()");
+			debug_time = System.currentTimeMillis();
+		}
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
@@ -938,10 +952,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.updateFocusForVideo(false);
 		}
 		this.setPreviewPaused(false);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "pausePreview: about to stop preview: " + (System.currentTimeMillis() - debug_time));
+		}
 		camera_controller.stopPreview();
 		this.phase = PHASE_NORMAL;
 		this.is_preview_started = false;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "pausePreview: about to call cameraInOperation: " + (System.currentTimeMillis() - debug_time));
+		}
 		applicationInterface.cameraInOperation(false);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "pausePreview: total time: " + (System.currentTimeMillis() - debug_time));
+		}
 	}
 	
 	//private int debug_count_opencamera = 0; // see usage below

@@ -752,8 +752,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
     @Override
     protected void onPause() {
-		if( MyDebug.LOG )
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "onPause");
+			debug_time = System.currentTimeMillis();
+		}
         super.onPause();
 		closePopup();
         mSensorManager.unregisterListener(accelerometerListener);
@@ -764,6 +767,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         applicationInterface.getLocationSupplier().freeLocationListeners();
 		releaseSound();
 		preview.onPause();
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "onPause: total time to pause: " + (System.currentTimeMillis() - debug_time));
+		}
     }
 
     @Override
