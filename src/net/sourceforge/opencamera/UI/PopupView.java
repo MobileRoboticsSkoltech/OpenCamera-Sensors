@@ -149,7 +149,7 @@ public class PopupView extends LinearLayout {
     			String size_string = picture_size.width + " x " + picture_size.height + " " + Preview.getMPString(picture_size.width, picture_size.height);
     			picture_size_strings.add(size_string);
     		}
-    		addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), picture_size_index, false, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), false, picture_size_index, false, new ArrayOptionsPopupListener() {
 		    	final Handler handler = new Handler();
 				Runnable update_runnable = new Runnable() {
 					@Override
@@ -201,7 +201,7 @@ public class PopupView extends LinearLayout {
     			String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
     			video_size_strings.add(quality_string);
     		}
-    		addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), video_size_index, false, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), false, video_size_index, false, new ArrayOptionsPopupListener() {
 		    	final Handler handler = new Handler();
 				Runnable update_runnable = new Runnable() {
 					@Override
@@ -254,7 +254,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
 				timer_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), timer_index, false, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), true, timer_index, false, new ArrayOptionsPopupListener() {
     			private void update() {
     				if( timer_index == -1 )
     					return;
@@ -293,7 +293,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find burst_mode_value " + burst_mode_value + " in burst_mode_values!");
 				burst_mode_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(R.string.preference_burst_mode), burst_mode_index, false, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(R.string.preference_burst_mode), true, burst_mode_index, false, new ArrayOptionsPopupListener() {
     			private void update() {
     				if( burst_mode_index == -1 )
     					return;
@@ -332,7 +332,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find grid_value " + grid_value + " in grid_values!");
 				grid_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.preference_grid), grid_index, true, new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.preference_grid), true, grid_index, true, new ArrayOptionsPopupListener() {
     			private void update() {
     				if( grid_index == -1 )
     					return;
@@ -608,14 +608,16 @@ public class PopupView extends LinearLayout {
 		public abstract int onClickNext();
     }
     
-    private void addArrayOptionsToPopup(final List<String> supported_options, final String title, final int current_index, final boolean cyclic, final ArrayOptionsPopupListener listener) {
+    private void addArrayOptionsToPopup(final List<String> supported_options, final String title, final boolean title_in_options, final int current_index, final boolean cyclic, final ArrayOptionsPopupListener listener) {
 		if( supported_options != null && current_index != -1 ) {
-    		TextView text_view = new TextView(this.getContext());
-    		text_view.setText(title);
-    		text_view.setTextColor(Color.WHITE);
-    		text_view.setGravity(Gravity.CENTER);
-    		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
-        	this.addView(text_view);
+			if( !title_in_options ) {
+	    		TextView text_view = new TextView(this.getContext());
+	    		text_view.setText(title);
+	    		text_view.setTextColor(Color.WHITE);
+	    		text_view.setGravity(Gravity.CENTER);
+	    		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
+	        	this.addView(text_view);
+			}
 
 			/*final Button prev_button = new Button(this.getContext());
 			//prev_button.setBackgroundResource(R.drawable.exposure);
@@ -627,7 +629,10 @@ public class PopupView extends LinearLayout {
             ll2.setOrientation(LinearLayout.HORIZONTAL);
             
 			final TextView resolution_text_view = new TextView(this.getContext());
-			resolution_text_view.setText(supported_options.get(current_index));
+			if( title_in_options )
+				resolution_text_view.setText(title + ": " + supported_options.get(current_index));
+			else
+				resolution_text_view.setText(supported_options.get(current_index));
 			resolution_text_view.setTextColor(Color.WHITE);
 			resolution_text_view.setGravity(Gravity.CENTER);
 			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -666,7 +671,10 @@ public class PopupView extends LinearLayout {
 				public void onClick(View v) {
         			int new_index = listener.onClickPrev();
         			if( new_index != -1 ) {
-        				resolution_text_view.setText(supported_options.get(new_index));
+        				if( title_in_options )
+        					resolution_text_view.setText(title + ": " + supported_options.get(new_index));
+        				else
+        					resolution_text_view.setText(supported_options.get(current_index));
 	        			prev_button.setVisibility( (cyclic || new_index > 0) ? View.VISIBLE : View.INVISIBLE);
 	        			next_button.setVisibility( (cyclic || new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}
@@ -677,7 +685,10 @@ public class PopupView extends LinearLayout {
 				public void onClick(View v) {
         			int new_index = listener.onClickNext();
         			if( new_index != -1 ) {
-        				resolution_text_view.setText(supported_options.get(new_index));
+        				if( title_in_options )
+        					resolution_text_view.setText(title + ": " + supported_options.get(new_index));
+        				else
+        					resolution_text_view.setText(supported_options.get(current_index));
 	        			prev_button.setVisibility( (cyclic || new_index > 0) ? View.VISIBLE : View.INVISIBLE);
 	        			next_button.setVisibility( (cyclic || new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}
