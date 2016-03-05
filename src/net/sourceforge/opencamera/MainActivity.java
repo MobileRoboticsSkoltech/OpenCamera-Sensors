@@ -758,7 +758,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			debug_time = System.currentTimeMillis();
 		}
         super.onPause();
-		closePopup();
+        mainUI.destroyPopup();
         mSensorManager.unregisterListener(accelerometerListener);
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
@@ -1105,6 +1105,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			preview.pausePreview();
 			preview.setupCamera(false);
 		}
+        mainUI.destroyPopup(); // as changing settings may change available camera parameters
 		block_startup_toast = false;
 		if( toast_message != null && toast_message.length() > 0 )
 			preview.showToast(null, toast_message);

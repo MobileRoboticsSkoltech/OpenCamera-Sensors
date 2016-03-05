@@ -30,6 +30,7 @@ public class MainUI {
 
 	private MainActivity main_activity = null;
 
+	private boolean popup_view_is_open = false;
     private PopupView popup_view = null;
 
     private int current_orientation = 0;
@@ -45,8 +46,11 @@ public class MainUI {
 	}
 
     public void layoutUI() {
-		if( MyDebug.LOG )
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "layoutUI");
+			debug_time = System.currentTimeMillis();
+		}
 		//this.preview.updateUIPlacement();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
@@ -354,6 +358,10 @@ public class MainUI {
 		}
 
 		setTakePhotoIcon();
+
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "layoutUI: total time: " + (System.currentTimeMillis() - debug_time));
+		}
     }
     
     public void setTakePhotoIcon() {
@@ -629,16 +637,20 @@ public class MainUI {
 			ViewGroup popup_container = (ViewGroup)main_activity.findViewById(R.id.popup_container);
 			popup_container.removeAllViews();
 			popup_view.close();
-			popup_view = null;
+			popup_view_is_open = false;
 			main_activity.initImmersiveMode(); // to reset the timer when closing the popup
 		}
     }
 
     public boolean popupIsOpen() {
-		if( popup_view != null ) {
-			return true;
+    	return popup_view_is_open;
+    }
+    
+    public void destroyPopup() {
+		if( popupIsOpen() ) {
+			closePopup();
 		}
-		return false;
+		popup_view = null;
     }
 
     public void togglePopupSettings() {
@@ -668,11 +680,22 @@ public class MainUI {
 			popup_container.setAlpha(0.9f);
 		}
 
-    	popup_view = new PopupView(main_activity);
+    	if( popup_view == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "create new popup_view");
+    		popup_view = new PopupView(main_activity);
+    	}
+    	else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "use cached popup_view");
+    	}
 		popup_container.addView(popup_view);
+		popup_view_is_open = true;
 		
         // need to call layoutUI to make sure the new popup is oriented correctly
 		// but need to do after the layout has been done, so we have a valid width/height to use
+		// n.b., even though we only need the portion of layoutUI for the popup container, there
+		// doesn't seem to be any performance benefit in only calling that part
 		popup_container.getViewTreeObserver().addOnGlobalLayoutListener( 
 			new OnGlobalLayoutListener() {
 				@SuppressWarnings("deprecation")
