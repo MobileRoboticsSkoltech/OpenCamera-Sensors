@@ -870,7 +870,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		mainUI.setTakePhotoIcon();
 		if( !block_startup_toast ) {
-			this.showPhotoVideoToast();
+			this.showPhotoVideoToast(true);
 		}
     }
 
@@ -2051,7 +2051,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "cameraSetup: time after setting take photo icon: " + (System.currentTimeMillis() - debug_time));
 
 		if( !block_startup_toast ) {
-			this.showPhotoVideoToast();
+			this.showPhotoVideoToast(false);
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: total time for cameraSetup: " + (System.currentTimeMillis() - debug_time));
@@ -2150,7 +2150,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	return changed_auto_stabilise_toast;
     }
 
-	private void showPhotoVideoToast() {
+	private void showPhotoVideoToast(boolean switch_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "showPhotoVideoToast");
 		CameraController camera_controller = preview.getCameraController();
@@ -2158,6 +2158,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			return;
 		String toast_string = "";
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean simple = true;
 		if( preview.isVideo() ) {
 			CamcorderProfile profile = preview.getCamcorderProfile();
 			String bitrate_string = "";
@@ -2172,6 +2173,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			boolean record_audio = sharedPreferences.getBoolean(PreferenceKeys.getRecordAudioPreferenceKey(), true);
 			if( !record_audio ) {
 				toast_string += "\n" + getResources().getString(R.string.audio_disabled);
+				simple = false;
 			}
 			String max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
 			if( max_duration_value.length() > 0 && !max_duration_value.equals("0") ) {
@@ -2181,15 +2183,18 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				if( index != -1 ) { // just in case!
 					String entry = entries_array[index];
 					toast_string += "\n" + getResources().getString(R.string.max_duration) +": " + entry;
+					simple = false;
 				}
 			}
 			long max_filesize = applicationInterface.getVideoMaxFileSizePref();
 			if( max_filesize != 0 ) {
 				long max_filesize_mb = max_filesize/(1024*1024);
 				toast_string += "\n" + getResources().getString(R.string.max_filesize) +": " + max_filesize_mb + getResources().getString(R.string.mb_abbreviation);
+				simple = false;
 			}
 			if( sharedPreferences.getBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), false) && preview.supportsFlash() ) {
 				toast_string += "\n" + getResources().getString(R.string.preference_video_flash);
+				simple = false;
 			}
 		}
 		else {
@@ -2209,6 +2214,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( applicationInterface.getFaceDetectionPref() ) {
 			// important so that the user realises why touching for focus/metering areas won't work - easy to forget that face detection has been turned on!
 			toast_string += "\n" + getResources().getString(R.string.preference_face_detection);
+			simple = false;
 		}
 		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), camera_controller.getDefaultISO());
 		if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
@@ -2217,22 +2223,27 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				long exposure_time_value = sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), camera_controller.getDefaultExposureTime());
 				toast_string += " " + preview.getExposureTimeString(exposure_time_value);
 			}
+			simple = false;
 		}
 		int current_exposure = camera_controller.getExposureCompensation();
 		if( current_exposure != 0 ) {
 			toast_string += "\n" + preview.getExposureCompensationString(current_exposure);
+			simple = false;
 		}
 		String scene_mode = camera_controller.getSceneMode();
     	if( scene_mode != null && !scene_mode.equals(camera_controller.getDefaultSceneMode()) ) {
     		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + scene_mode;
+			simple = false;
     	}
 		String white_balance = camera_controller.getWhiteBalance();
     	if( white_balance != null && !white_balance.equals(camera_controller.getDefaultWhiteBalance()) ) {
     		toast_string += "\n" + getResources().getString(R.string.white_balance) + ": " + white_balance;
+			simple = false;
     	}
 		String color_effect = camera_controller.getColorEffect();
     	if( color_effect != null && !color_effect.equals(camera_controller.getDefaultColorEffect()) ) {
     		toast_string += "\n" + getResources().getString(R.string.color_effect) + ": " + color_effect;
+			simple = false;
     	}
 		String lock_orientation = sharedPreferences.getString(PreferenceKeys.getLockOrientationPreferenceKey(), "none");
 		if( !lock_orientation.equals("none") ) {
@@ -2242,6 +2253,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( index != -1 ) { // just in case!
 				String entry = entries_array[index];
 				toast_string += "\n" + entry;
+				simple = false;
 			}
 		}
 		String timer = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
@@ -2252,6 +2264,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( index != -1 ) { // just in case!
 				String entry = entries_array[index];
 				toast_string += "\n" + getResources().getString(R.string.preference_timer) + ": " + entry;
+				simple = false;
 			}
 		}
 		String repeat = applicationInterface.getRepeatPref();
@@ -2262,13 +2275,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( index != -1 ) { // just in case!
 				String entry = entries_array[index];
 				toast_string += "\n" + getResources().getString(R.string.preference_burst_mode) + ": " + entry;
+				simple = false;
 			}
 		}
 		/*if( audio_listener != null ) {
 			toast_string += "\n" + getResources().getString(R.string.preference_audio_noise_control);
 		}*/
-		
-		preview.showToast(switch_video_toast, toast_string);
+
+		if( !simple || switch_video )
+			preview.showToast(switch_video_toast, toast_string);
 	}
 
 	private void freeAudioListener(boolean wait_until_done) {
