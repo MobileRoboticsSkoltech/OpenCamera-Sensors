@@ -1854,7 +1854,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 
 		if( preview.isFocusWaiting() || preview.isFocusRecentSuccess() || preview.isFocusRecentFailure() ) {
-			int size = (int) (50 * scale + 0.5f); // convert dps to pixels
+			int size = (int) (40 * scale + 0.5f); // convert dps to pixels
 			if( preview.isFocusRecentSuccess() )
 				p.setColor(Color.rgb(20, 231, 21)); // Green A400
 			else if( preview.isFocusRecentFailure() )
@@ -1873,7 +1873,17 @@ public class MyApplicationInterface implements ApplicationInterface {
 				pos_x = canvas.getWidth() / 2;
 				pos_y = canvas.getHeight() / 2;
 			}
-			canvas.drawRect(pos_x - size, pos_y - size, pos_x + size, pos_y + size, p);
+			float frac = 0.5f;
+			// horizontal strokes
+			canvas.drawLine(pos_x - size, pos_y - size, pos_x - frac*size, pos_y - size, p);
+			canvas.drawLine(pos_x + frac*size, pos_y - size, pos_x + size, pos_y - size, p);
+			canvas.drawLine(pos_x - size, pos_y + size, pos_x - frac*size, pos_y + size, p);
+			canvas.drawLine(pos_x + frac*size, pos_y + size, pos_x + size, pos_y + size, p);
+			// vertical strokes
+			canvas.drawLine(pos_x - size, pos_y - size, pos_x - size, pos_y - frac*size, p);
+			canvas.drawLine(pos_x - size, pos_y + frac*size, pos_x - size, pos_y + size, p);
+			canvas.drawLine(pos_x + size, pos_y - size, pos_x + size, pos_y - frac*size, p);
+			canvas.drawLine(pos_x + size, pos_y + frac*size, pos_x + size, pos_y + size, p);
 			p.setStyle(Paint.Style.FILL); // reset
 		}
 		if( preview.getFacesDetected() != null ) {
