@@ -55,6 +55,8 @@ public class PopupView extends LinearLayout {
 
 	public PopupView(Context context) {
 		super(context);
+		if( MyDebug.LOG )
+			Log.d(TAG, "new PopupView: " + this);
 
 		this.setOrientation(LinearLayout.VERTICAL);
 
@@ -506,8 +508,11 @@ public class PopupView extends LinearLayout {
 					}
     			});
     			this.popup_buttons.put(test_key + "_" + supported_option, view);
-    			if( MyDebug.LOG )
+    			if( MyDebug.LOG ) {
     				Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.currentTimeMillis() - time_s));
+    				Log.d(TAG, "added to popup_buttons: " + test_key + "_" + supported_option + " view: " + view);
+    				Log.d(TAG, "popup_buttons is now: " + popup_buttons);
+    			}
     		}
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 3: " + (System.currentTimeMillis() - time_s));
@@ -699,14 +704,13 @@ public class PopupView extends LinearLayout {
     	}
     }
 
-    public void close() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "close");
-		popup_buttons.clear();
-    }
-
     // for testing
     public View getPopupButton(String key) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "getPopupButton(" + key + "): " + popup_buttons.get(key));
+			Log.d(TAG, "this: " + this);
+			Log.d(TAG, "popup_buttons: " + popup_buttons);
+		}
     	return popup_buttons.get(key);
     }
 }

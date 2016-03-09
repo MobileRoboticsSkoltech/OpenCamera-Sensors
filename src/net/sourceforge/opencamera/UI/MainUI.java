@@ -636,7 +636,6 @@ public class MainUI {
 		if( popupIsOpen() ) {
 			ViewGroup popup_container = (ViewGroup)main_activity.findViewById(R.id.popup_container);
 			popup_container.removeAllViews();
-			popup_view.close();
 			popup_view_is_open = false;
 			main_activity.initImmersiveMode(); // to reset the timer when closing the popup
 		}
