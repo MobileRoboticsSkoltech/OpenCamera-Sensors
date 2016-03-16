@@ -501,19 +501,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		return true;
     	}
     }
+	
+	public boolean onDoubleTap() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDoubleTap()");
+		if( !is_video && applicationInterface.getDoubleTapCapturePref() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "double-tap to capture");
+			// interpret as if user had clicked take photo/video button (don't need to set focus/metering, as this was done in touchEvent() for the first touch of the double-tap)
+	    	takePicturePressed();
+		}
+		return true;
+	}
     
 	private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "onDoubleTap()");
-			if( !is_video && applicationInterface.getDoubleTapCapturePref() ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "double-tap to capture");
-				// interpret as if user had clicked take photo/video button (don't need to set focus/metering, as this was done in touchEvent() for the first touch of the double-tap)
-		    	takePicturePressed();
-			}
-			return true;
+			return Preview.this.onDoubleTap();
 		}
     }
     
