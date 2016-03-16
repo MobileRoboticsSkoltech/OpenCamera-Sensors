@@ -387,6 +387,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	public boolean touchEvent(MotionEvent event) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "touch event at : " + event.getX() + " , " + event.getY() + " at time " + event.getEventTime());
         if( gestureDetector.onTouchEvent(event) ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "touch event handled by gestureDetector");
@@ -415,6 +417,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( event.getAction() == MotionEvent.ACTION_DOWN ) {
 					touch_orig_x = event.getX();
 					touch_orig_y = event.getY();
+		    		if( MyDebug.LOG )
+		    			Log.d(TAG, "touch down at " + touch_orig_x + " , " + touch_orig_y);
 				}
 			}
 			return true;

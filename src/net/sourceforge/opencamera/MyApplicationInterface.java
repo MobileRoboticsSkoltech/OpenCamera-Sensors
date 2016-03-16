@@ -972,7 +972,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 	
 	private void updateThumbnail(Bitmap thumbnail) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateThumbnail");
 		if( getThumbnailAnimationPref() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "thumbnail_anim started");
 			thumbnail_anim = true;
 			thumbnail_anim_start_ms = System.currentTimeMillis();
 		}
@@ -1432,6 +1436,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
 			final long duration = 500;
 			if( time > duration ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "thumbnail_anim finished");
 				this.thumbnail_anim = false;
 			}
 			else {
