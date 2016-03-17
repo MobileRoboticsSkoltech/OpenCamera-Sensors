@@ -44,6 +44,8 @@ import android.widget.ImageView.ScaleType;
  */
 public class PopupView extends LinearLayout {
 	private static final String TAG = "PopupView";
+	public static final float ALPHA_BUTTON_SELECTED = 1.0f;
+	public static final float ALPHA_BUTTON = 0.6f;
 
 	private int picture_size_index = -1;
 	private int video_size_index = -1;
@@ -491,11 +493,11 @@ public class PopupView extends LinearLayout {
 
     			view.setContentDescription(string);
     			if( supported_option.equals(current_value) ) {
-    				view.setAlpha(1.0f);
+    				view.setAlpha(ALPHA_BUTTON_SELECTED);
     				current_view = view;
     			}
     			else {
-    				view.setAlpha(0.6f);
+    				view.setAlpha(ALPHA_BUTTON);
     			}
     			if( MyDebug.LOG )
     				Log.d(TAG, "addButtonOptionsToPopup time 2.3: " + (System.currentTimeMillis() - time_s));

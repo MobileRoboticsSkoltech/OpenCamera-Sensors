@@ -637,6 +637,12 @@ public class MainUI {
 			ViewGroup popup_container = (ViewGroup)main_activity.findViewById(R.id.popup_container);
 			popup_container.removeAllViews();
 			popup_view_is_open = false;
+			/* Not destroying the popup doesn't really gain any performance.
+			 * Also there are still outstanding bugs to fix if we wanted to do this:
+			 *   - Not resetting the popup menu when switching between photo and video mode. See test testVideoPopup().
+			 *   - When changing options like flash/focus, the new option isn't selected when reopening the popup menu. See test testPopup().
+			 */
+			destroyPopup();
 			main_activity.initImmersiveMode(); // to reset the timer when closing the popup
 		}
     }
