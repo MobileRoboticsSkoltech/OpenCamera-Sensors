@@ -2566,11 +2566,16 @@ public class MyApplicationInterface implements ApplicationInterface {
 					if( MyDebug.LOG )
 						Log.d(TAG, "real_file: " + real_file);
                     if( real_file != null ) {
+    					if( MyDebug.LOG )
+    						Log.d(TAG, "broadcast file");
     	            	storageUtils.broadcastFile(real_file, true, false);
     	            	main_activity.test_last_saved_image = real_file.getAbsolutePath();
                     }
-                    else {
+                    else if( !image_capture_intent ) {
+    					if( MyDebug.LOG )
+    						Log.d(TAG, "announce SAF uri");
                     	// announce the SAF Uri
+                    	// (shouldn't do this for a capture intent - e.g., causes crash when calling from Google Keep)
     	    		    storageUtils.announceUri(saveUri, true, false);
                     }
 	            }
