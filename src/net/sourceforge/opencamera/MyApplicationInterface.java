@@ -408,7 +408,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		String video_max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
 		long video_max_duration = 0;
 		try {
-			video_max_duration = Integer.parseInt(video_max_duration_value) * 1000;
+			video_max_duration = (long)Integer.parseInt(video_max_duration_value) * 1000;
 		}
         catch(NumberFormatException e) {
     		if( MyDebug.LOG )
@@ -532,7 +532,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
 		long timer_delay = 0;
 		try {
-			timer_delay = Integer.parseInt(timer_value) * 1000;
+			timer_delay = (long)Integer.parseInt(timer_value) * 1000;
 		}
         catch(NumberFormatException e) {
     		if( MyDebug.LOG )
@@ -555,7 +555,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		String timer_value = sharedPreferences.getString(PreferenceKeys.getBurstIntervalPreferenceKey(), "0");
 		long timer_delay = 0;
 		try {
-			timer_delay = Integer.parseInt(timer_value) * 1000;
+			timer_delay = (long)Integer.parseInt(timer_value) * 1000;
 		}
         catch(NumberFormatException e) {
     		if( MyDebug.LOG )
@@ -855,7 +855,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					Log.d(TAG, "max duration reached");
 				message_id = R.string.video_max_duration;
 			}
-			else if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "max filesize reached");
 				message_id = R.string.video_max_filesize;
@@ -1417,14 +1417,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 					if( crop_ratio > preview.getTargetRatio() ) {
 						// crop ratio is wider, so we have to crop top/bottom
 						double new_hheight = ((double)canvas.getWidth()) / (2.0f*crop_ratio);
-						top = (int)(canvas.getHeight()/2 - new_hheight);
-						bottom = (int)(canvas.getHeight()/2 + new_hheight);
+						top = (int)(canvas.getHeight()/2 - (int)new_hheight);
+						bottom = (int)(canvas.getHeight()/2 + (int)new_hheight);
 					}
 					else {
 						// crop ratio is taller, so we have to crop left/right
 						double new_hwidth = (((double)canvas.getHeight()) * crop_ratio) / 2.0f;
-						left = (int)(canvas.getWidth()/2 - new_hwidth);
-						right = (int)(canvas.getWidth()/2 + new_hwidth);
+						left = (int)(canvas.getWidth()/2 - (int)new_hwidth);
+						right = (int)(canvas.getWidth()/2 + (int)new_hwidth);
 					}
 					canvas.drawRect(left, top, right, bottom, p);
 				}
@@ -1474,15 +1474,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 				//thumbnail_anim_matrix.reset();
 				if( ui_rotation == 90 || ui_rotation == 270 ) {
 					float ratio = ((float)last_thumbnail.getWidth())/(float)last_thumbnail.getHeight();
-					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, last_thumbnail.getWidth()/2, last_thumbnail.getHeight()/2);
+					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
 				}
-				thumbnail_anim_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2, last_thumbnail.getHeight()/2);
+				thumbnail_anim_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
 				canvas.drawBitmap(last_thumbnail, thumbnail_anim_matrix, p);
 			}
 		}
 		
 		canvas.save();
-		canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
+		canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
 
 		int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
 		// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
@@ -1610,9 +1610,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.CENTER);
 			int pixels_offset = (int) (20 * scale + 0.5f); // convert dps to pixels
-			canvas.drawText(getContext().getResources().getString(R.string.failed_to_open_camera_1), canvas.getWidth() / 2, canvas.getHeight() / 2, p);
-			canvas.drawText(getContext().getResources().getString(R.string.failed_to_open_camera_2), canvas.getWidth() / 2, canvas.getHeight() / 2 + pixels_offset, p);
-			canvas.drawText(getContext().getResources().getString(R.string.failed_to_open_camera_3), canvas.getWidth() / 2, canvas.getHeight() / 2 + 2*pixels_offset, p);
+			canvas.drawText(getContext().getResources().getString(R.string.failed_to_open_camera_1), canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f, p);
+			canvas.drawText(getContext().getResources().getString(R.string.failed_to_open_camera_2), canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f + pixels_offset, p);
+			canvas.drawText(getContext().getResources().getString(R.string.failed_to_open_camera_3), canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f + 2*pixels_offset, p);
 			//canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, p);
 			//canvas.drawRGB(255, 0, 0);
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
@@ -1795,6 +1795,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    	case Surface.ROTATION_270:
 	    		angle += 90.0;
 	    		break;
+    		default:
+    			break;
 		    }
 			/*if( MyDebug.LOG ) {
 				Log.d(TAG, "orig_level_angle: " + orig_level_angle);
@@ -1893,10 +1895,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 			canvas.drawLine(pos_x + size, pos_y + frac*size, pos_x + size, pos_y + size, p);
 			p.setStyle(Paint.Style.FILL); // reset
 		}
-		if( preview.getFacesDetected() != null ) {
+		CameraController.Face [] faces_detected = preview.getFacesDetected();
+		if( faces_detected != null ) {
 			p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 			p.setStyle(Paint.Style.STROKE);
-			for(CameraController.Face face : preview.getFacesDetected()) {
+			for(CameraController.Face face : faces_detected) {
 				// Android doc recommends filtering out faces with score less than 50 (same for both Camera and Camera2 APIs)
 				if( face.score >= 50 ) {
 					face_rect.set(face.rect);
@@ -2355,10 +2358,16 @@ public class MyApplicationInterface implements ApplicationInterface {
 		        		}
     				}
         			if( MyDebug.LOG ) {
-        				Log.d(TAG, "returned bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
-        				Log.d(TAG, "returned bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
+        				if( bitmap != null ) {
+	        				Log.d(TAG, "returned bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
+	        				Log.d(TAG, "returned bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
+        				}
+        				else {
+	        				Log.e(TAG, "no bitmap created");
+        				}
         			}
-        			main_activity.setResult(Activity.RESULT_OK, new Intent("inline-data").putExtra("data", bitmap));
+        			if( bitmap != null )
+        				main_activity.setResult(Activity.RESULT_OK, new Intent("inline-data").putExtra("data", bitmap));
         			main_activity.finish();
     			}
 			}
@@ -2570,13 +2579,13 @@ public class MyApplicationInterface implements ApplicationInterface {
         catch(FileNotFoundException e) {
     		if( MyDebug.LOG )
     			Log.e(TAG, "File not found: " + e.getMessage());
-            e.getStackTrace();
+            e.printStackTrace();
             main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
         }
         catch(IOException e) {
     		if( MyDebug.LOG )
     			Log.e(TAG, "I/O error writing file: " + e.getMessage());
-            e.getStackTrace();
+            e.printStackTrace();
             main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
         }
 
@@ -2657,7 +2666,10 @@ public class MyApplicationInterface implements ApplicationInterface {
         if( picFile != null && saveUri != null ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "delete temp picFile: " + picFile);
-        	picFile.delete();
+        	if( !picFile.delete() ) {
+        		if( MyDebug.LOG )
+        			Log.e(TAG, "failed to delete temp picFile: " + picFile);
+        	}
         	picFile = null;
         }
         

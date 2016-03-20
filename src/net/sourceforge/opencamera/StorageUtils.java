@@ -300,7 +300,7 @@ public class StorageUtils {
     			final File externalStorage = Environment.getExternalStorageDirectory();
     			file = new File(externalStorage, path);
             }
-	        for(int i=0;i<storagePoints.length && file==null;i++) {
+	        for(int i=0;storagePoints != null && i<storagePoints.length && file==null;i++) {
 	            File externalFile = new File(storagePoints[i], path);
 	            if( externalFile.exists() ) {
 	            	file = externalFile;
@@ -459,7 +459,7 @@ public class StorageUtils {
     	}
     }
 
-    class Media {
+    static class Media {
     	long id;
     	boolean video;
     	Uri uri;

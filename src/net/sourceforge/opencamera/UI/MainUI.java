@@ -67,6 +67,8 @@ public class MainUI {
 	        case Surface.ROTATION_90: degrees = 90; break;
 	        case Surface.ROTATION_180: degrees = 180; break;
 	        case Surface.ROTATION_270: degrees = 270; break;
+    		default:
+    			break;
 	    }
 	    // getRotation is anti-clockwise, but current_orientation is clockwise, so we add rather than subtract
 	    // relative_orientation is clockwise from landscape-left

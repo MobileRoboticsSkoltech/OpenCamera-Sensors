@@ -40,7 +40,7 @@ public class LocationSupplier {
 		return null;
 	}
 	
-	private class MyLocationListener implements LocationListener {
+	private static class MyLocationListener implements LocationListener {
 		private Location location = null;
 		public boolean test_has_received_location = false;
 		
@@ -77,6 +77,8 @@ public class LocationSupplier {
 					this.test_has_received_location = false;
 	         		break;
 	         	}
+	         	default:
+	         		break;
 	         }
 	    }
 

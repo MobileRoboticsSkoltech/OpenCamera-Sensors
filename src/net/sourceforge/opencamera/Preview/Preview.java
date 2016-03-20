@@ -17,6 +17,7 @@ import net.sourceforge.opencamera.Preview.CameraSurface.MyTextureView;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -111,15 +112,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
 	private long video_accumulated_time = 0;
-	private final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
+	private static final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
 	private int video_method = ApplicationInterface.VIDEOMETHOD_FILE;
 	private Uri video_uri = null; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
 	private String video_filename = null; // for VIDEOMETHOD_FILE
 
-	private final int PHASE_NORMAL = 0;
-	private final int PHASE_TIMER = 1;
-	private final int PHASE_TAKING_PHOTO = 2;
-	private final int PHASE_PREVIEW_PAUSED = 3; // the paused state after taking a photo
+	private static final int PHASE_NORMAL = 0;
+	private static final int PHASE_TIMER = 1;
+	private static final int PHASE_TAKING_PHOTO = 2;
+	private static final int PHASE_PREVIEW_PAUSED = 3; // the paused state after taking a photo
 	private int phase = PHASE_NORMAL;
 	private Timer takePictureTimer = new Timer();
 	private TimerTask takePictureTimerTask = null;
@@ -225,7 +226,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private long last_battery_time = 0;*/
 
 	// accelerometer and geomagnetic sensor info
-	private final float sensor_alpha = 0.8f; // for filter
+	private static final float sensor_alpha = 0.8f; // for filter
     private boolean has_gravity = false;
     private float [] gravity = new float[3];
     private boolean has_geomagnetic = false;
@@ -751,7 +752,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			    			Log.d(TAG, "delete corrupt video: " + video_filename);
 		    			File file = new File(video_filename);
 		    			if( file != null ) {
-		    				file.delete();
+		    				if( !file.delete() ) {
+					    		if( MyDebug.LOG )
+					    			Log.e(TAG, "failed to delete corrupt video: " + video_filename);
+		    				}
 		    			}
 		    		}
 	    		}
@@ -1746,15 +1750,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		this.setAspectRatio( ((double)best_size.width) / (double)best_size.height );
         }
 	}
+	
+	// Android docs and FindBugs recommend that Comparators also be Serializable
+	private static class SortVideoSizesComparator implements Comparator<CameraController.Size>, Serializable {
+		private static final long serialVersionUID = 5802214721033718212L;
+
+		@Override
+		public int compare(final CameraController.Size a, final CameraController.Size b) {
+			return b.width * b.height - a.width * a.height;
+		}
+	}
 
 	private void sortVideoSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "sortVideoSizes()");
-		Collections.sort(this.video_sizes, new Comparator<CameraController.Size>() {
-			public int compare(final CameraController.Size a, final CameraController.Size b) {
-				return b.width * b.height - a.width * a.height;
-			}
-		});
+		Collections.sort(this.video_sizes, new SortVideoSizesComparator());
 	}
 	
 	// for testing
@@ -2276,6 +2286,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    	case Surface.ROTATION_90: rotation = Surface.ROTATION_270; break;
 		    	case Surface.ROTATION_180: rotation = Surface.ROTATION_0; break;
 		    	case Surface.ROTATION_270: rotation = Surface.ROTATION_90; break;
+	    		default:
+	    			break;
 		    }
 		}
 
@@ -2304,6 +2316,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		        case Surface.ROTATION_90: degrees = 90; break;
 		        case Surface.ROTATION_180: degrees = 180; break;
 		        case Surface.ROTATION_270: degrees = 270; break;
+	    		default:
+	    			break;
 		    }
 			if( MyDebug.LOG )
 				Log.d(TAG, "    degrees = " + degrees);
@@ -4452,8 +4466,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 
 			@Override 
-			protected void onDraw(Canvas canvas) { 
-				final float scale = getResources().getDisplayMetrics().density;
+			protected void onDraw(Canvas canvas) {
+				final float scale = Preview.this.getResources().getDisplayMetrics().density;
 				paint.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				paint.setShadowLayer(1, 0, 1, Color.BLACK);
 				//paint.getTextBounds(text, 0, text.length(), bounds);
@@ -4483,7 +4497,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				final int padding = (int) (14 * scale + 0.5f); // convert dps to pixels
 				final int offset_y = (int) (offset_y_dp * scale + 0.5f); // convert dps to pixels
 				canvas.save();
-				canvas.rotate(ui_rotation, canvas.getWidth()/2, canvas.getHeight()/2);
+				canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
 
 				rect.left = canvas.getWidth()/2 - bounds.width()/2 + bounds.left - padding;
 				rect.top = canvas.getHeight()/2 + bounds.top - padding + offset_y;
@@ -4694,6 +4708,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     public CameraController.Face [] getFacesDetected() {
+    	// FindBugs warns about returning the array directly, but in fact we need to return direct access rather than copying, so that the on-screen display of faces rectangles updates
     	return this.faces_detected;
     }
     

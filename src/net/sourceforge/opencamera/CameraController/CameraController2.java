@@ -1331,7 +1331,6 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "read " + bytes.length + " bytes");
 	            buffer.get(bytes);
 	            image.close();
-	            image = null;
 	            // need to set jpeg_cb etc to null before calling onPictureTaken, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
 	            PictureCallback cb = jpeg_cb;
 	            jpeg_cb = null;
@@ -2354,6 +2353,7 @@ public class CameraController2 extends CameraController {
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no camera or capture session");
+			return;
 		}
 		try {
 			if( MyDebug.LOG ) {
@@ -2444,6 +2444,7 @@ public class CameraController2 extends CameraController {
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no camera or capture session");
+			return;
 		}
 		try {
 			if( MyDebug.LOG ) {

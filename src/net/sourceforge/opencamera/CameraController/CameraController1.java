@@ -71,19 +71,21 @@ public class CameraController1 extends CameraController {
 	    	setCameraParameters(parameters);
 		}*/
 		
-		camera.setErrorCallback(new Camera.ErrorCallback() {
-			@Override
-			public void onError(int error, Camera camera) {
-				// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
-				Log.e(TAG, "camera onError: " + error);
-				if( error == android.hardware.Camera.CAMERA_ERROR_SERVER_DIED ) {
-					Log.e(TAG, "    CAMERA_ERROR_SERVER_DIED");
-				}
-				else if( error == android.hardware.Camera.CAMERA_ERROR_UNKNOWN  ) {
-					Log.e(TAG, "    CAMERA_ERROR_UNKNOWN ");
-				}
+		camera.setErrorCallback(new CameraErrorCallback());
+	}
+	
+	private static class CameraErrorCallback implements Camera.ErrorCallback {
+		@Override
+		public void onError(int error, Camera camera) {
+			// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
+			Log.e(TAG, "camera onError: " + error);
+			if( error == android.hardware.Camera.CAMERA_ERROR_SERVER_DIED ) {
+				Log.e(TAG, "    CAMERA_ERROR_SERVER_DIED");
 			}
-		});
+			else if( error == android.hardware.Camera.CAMERA_ERROR_UNKNOWN  ) {
+				Log.e(TAG, "    CAMERA_ERROR_UNKNOWN ");
+			}
+		}
 	}
 	
 	public void release() {
@@ -1054,14 +1056,17 @@ public class CameraController1 extends CameraController {
 		}
 	}
 	
+	private static class TakePictureShutterCallback implements Camera.ShutterCallback {
+		// don't do anything here, but we need to implement the callback to get the shutter sound (at least on Galaxy Nexus and Nexus 7)
+		@Override
+        public void onShutter() {
+			if( MyDebug.LOG )
+				Log.d(TAG, "shutterCallback.onShutter()");
+        }
+	}
+	
 	public void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error) {
-    	Camera.ShutterCallback shutter = new Camera.ShutterCallback() {
-    		// don't do anything here, but we need to implement the callback to get the shutter sound (at least on Galaxy Nexus and Nexus 7)
-            public void onShutter() {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "shutterCallback.onShutter()");
-            }
-        };
+    	Camera.ShutterCallback shutter = new TakePictureShutterCallback();
         Camera.PictureCallback camera_raw = raw == null ? null : new Camera.PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
     	    	// n.b., this is automatically run in a different thread

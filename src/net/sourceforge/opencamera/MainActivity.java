@@ -1416,7 +1416,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						Log.d(TAG, "uri no longer exists (1): " + uri);
 					uri = null;
 				}
-				pfd.close();
+				else {
+					pfd.close();
+				}
 			}
 			catch(IOException e) {
 				if( MyDebug.LOG )

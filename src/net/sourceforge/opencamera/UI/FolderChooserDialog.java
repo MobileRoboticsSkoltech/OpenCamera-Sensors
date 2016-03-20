@@ -9,8 +9,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -57,17 +57,39 @@ public class FolderChooserDialog extends DialogFragment {
 			return file.getName();
 		}
 		
-        @SuppressLint("DefaultLocale")
 		@Override
         public int compareTo(FileWrapper o) {
-        	if( this.is_parent )
+        	if( this.is_parent && o.isParent() )
+        		return 0;
+        	else if( this.is_parent )
         		return -1;
         	else if( o.isParent() )
         		return 1;
-	        return this.file.getName().toLowerCase().compareTo(o.getFile().getName().toLowerCase()); 
-        } 
+	        return this.file.getName().toLowerCase(Locale.US).compareTo(o.getFile().getName().toLowerCase(Locale.US)); 
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+        	// important to override equals(), since we're overriding compareTo()
+			if( !(o instanceof FileWrapper) )
+				return false;
+			FileWrapper that = (FileWrapper)o;
+        	if( this.is_parent && that.isParent() )
+        		return true;
+        	else if( this.is_parent != that.isParent() )
+        		return false;
+	        return this.file.getName().toLowerCase(Locale.US).equals(that.getFile().getName().toLowerCase(Locale.US)); 
+        }
 
-        File getFile() {
+		@Override
+		public int hashCode() {
+			// must override this, as we override equals()
+			if( this.is_parent )
+				return 31;
+			return this.file.getName().toLowerCase(Locale.US).hashCode();
+		}
+
+		File getFile() {
 			return file;
 		}
         
@@ -241,6 +263,21 @@ public class FolderChooserDialog extends DialogFragment {
 		return false;
     }
     
+    private static class NewFolderInputFilter implements InputFilter {
+		// whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
+		String disallowed = "|\\?*<\":>";
+		
+		@Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) { 
+            for(int i=start;i<end;i++) { 
+            	if( disallowed.indexOf( source.charAt(i) ) != -1 ) {
+                    return ""; 
+            	}
+            }
+            return null;
+        }
+    }
+    
 	private void newFolder() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "newFolder");
@@ -249,18 +286,7 @@ public class FolderChooserDialog extends DialogFragment {
 		if( canWrite() ) {
 			final EditText edit_text = new EditText(getActivity());  
 			edit_text.setSingleLine();
-        	InputFilter filter = new InputFilter() { 
-        		// whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
-        		String disallowed = "|\\?*<\":>";
-                public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) { 
-                    for(int i=start;i<end;i++) { 
-                    	if( disallowed.indexOf( source.charAt(i) ) != -1 ) {
-                            return ""; 
-                    	}
-                    } 
-                    return null; 
-                }
-        	}; 
+        	InputFilter filter = new NewFolderInputFilter();
         	edit_text.setFilters(new InputFilter[]{filter});         	
 
 			Dialog dialog = new AlertDialog.Builder(getActivity())

@@ -62,9 +62,23 @@ public abstract class CameraController {
 			this.width = width;
 			this.height = height;
 		}
-		
-		public boolean equals(Size that) {
+
+		@Override
+		public boolean equals(Object o) {
+			if( !(o instanceof Size) )
+				return false;
+			Size that = (Size)o;
 			return this.width == that.width && this.height == that.height;
+		}
+		
+		@Override
+		public int hashCode() {
+			// must override this, as we override equals()
+			// can't use:
+			//return Objects.hash(width, height);
+			// as this requires API level 19
+			// so use this from http://stackoverflow.com/questions/11742593/what-is-the-hashcode-for-a-custom-class-having-just-two-int-properties
+			return width*31 + height;
 		}
 	}
 	
@@ -104,7 +118,7 @@ public abstract class CameraController {
 		}
 	}
 	
-	public class SupportedValues {
+	public static class SupportedValues {
 		public List<String> values = null;
 		public String selected_value = null;
 		SupportedValues(List<String> values, String selected_value) {
