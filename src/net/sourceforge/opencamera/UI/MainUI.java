@@ -642,7 +642,11 @@ public class MainUI {
 			/* Not destroying the popup doesn't really gain any performance.
 			 * Also there are still outstanding bugs to fix if we wanted to do this:
 			 *   - Not resetting the popup menu when switching between photo and video mode. See test testVideoPopup().
-			 *   - When changing options like flash/focus, the new option isn't selected when reopening the popup menu. See test testPopup().
+			 *   - When changing options like flash/focus, the new option isn't selected when reopening the popup menu. See test
+			 *     testPopup().
+			 *   - Changing settings potentially means we have to recreate the popup, so the natural place to do this is in
+			 *     MainActivity.updateForSettings(), but doing so makes the popup close when checking photo or video resolutions!
+			 *     See test testSwitchResolution().
 			 */
 			destroyPopup();
 			main_activity.initImmersiveMode(); // to reset the timer when closing the popup
