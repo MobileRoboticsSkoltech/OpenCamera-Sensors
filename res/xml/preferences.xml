@@ -663,7 +663,7 @@
         <Preference
 		    android:key="preference_online_help"  
 		    android:title="@string/preference_online_help"
-            android:summary="@string/preference_online_help"  
+            android:summary="@string/preference_online_help_summary"  
 		    />  
 
         <Preference
