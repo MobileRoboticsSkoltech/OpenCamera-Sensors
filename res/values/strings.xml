@@ -236,7 +236,7 @@
     <string name="preference_online_help">Online help</string>
     <string name="preference_online_help_summary">Launch the Open Camera website in your browser</string>
     <string name="preference_donate">Donate to support development</string>
-    <string name="preference_donate_summary">If you like this app, please consider making a donation. You can do this by purchasing my "donation app" - click this option will open up the page for my donation app. Thanks!</string>
+    <string name="preference_donate_summary">If you like this app, please consider making a donation to support development. You can do this by purchasing my "donation app" - click this option to open up the page for my donation app. Thanks!</string>
     <string name="preference_use_camera2">Use Camera2 API</string>
     <string name="preference_use_camera2_summary">Enables Android 5\'s Camera2 API - offers extra features, but currently experimental (will cause a restart)</string>
     <string name="preference_about">About</string>
