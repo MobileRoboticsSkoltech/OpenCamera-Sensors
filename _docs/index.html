@@ -882,6 +882,9 @@ FIXED   Broadcast File-based Uri when using Storage Access Framework, instead
         of SAF Uri (this fixes Owncloud crashing for auto-upload photos/videos
         option; this might also fix problems with photos/videos not showing up
         on SD card until after a reboot?)
+FIXED   Unable to get location from network providers on some pre-Android 6
+        devices (e.g., Galaxy Nexus, Nexus 7) since v1.27 due to Android OS
+        bug, have worked around this.
 FIXED   If using Storage Access Framework, and save location was on external SD
         card, the on-screen free memory would show internal storage. (Note that
         with this fix, it may be that the free memory is not shown for external

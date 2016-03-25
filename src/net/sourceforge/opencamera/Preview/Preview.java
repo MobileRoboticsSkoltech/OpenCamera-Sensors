@@ -3549,10 +3549,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			});
         	camera_controller.initVideoRecorderPrePrepare(video_recorder);
 			boolean record_audio = applicationInterface.getRecordAudioPref();
-			if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
 				// needed for Android 6, in case users deny storage permission, otherwise we'll crash
 				// see https://developer.android.com/training/permissions/requesting.html
 				// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+				// we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
 				if( MyDebug.LOG )
 					Log.e(TAG, "don't have RECORD_AUDIO permission");
 				showToast(null, R.string.permission_record_audio_not_available);

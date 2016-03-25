@@ -8,6 +8,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
@@ -102,11 +103,21 @@ public class LocationSupplier {
 		// we only set it up if store_location is true, to avoid unnecessarily wasting battery
 		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
 		if( store_location && locationListeners == null ) {
-			if( ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-				ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
-				// needed for Android 6, in case users deny location permission, otherwise we get java.lang.SecurityException from locationManager.requestLocationUpdates()
-				// see https://developer.android.com/training/permissions/requesting.html
-				// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+			// Needed for Android 6, in case users deny location permission, otherwise we get java.lang.SecurityException from locationManager.requestLocationUpdates()
+			// see https://developer.android.com/training/permissions/requesting.html .
+			// Currently we don't bother requesting the permission, as still using targetSdkVersion 22.
+			// Note, ContextCompat.checkSelfPermission is meant to handle being called on any Android version, i.e., pre
+			// Android Marshmallow it should return true as permissions are set an installation, and can't be switched off by
+			// the user. However on Galaxy Nexus Android 4.3 and Nexus 7 (2013) Android 5.1.1, ACCESS_COARSE_LOCATION returns
+			// PERMISSION_DENIED! So we keep the checks to Android Marshmallow or later (where we need them), and avoid
+			// checking behaviour for earlier devices.
+			boolean has_coarse_location_permission = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+			boolean has_fine_location_permission = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "has_coarse_location_permission? " + has_coarse_location_permission);
+				Log.d(TAG, "has_fine_location_permission? " + has_fine_location_permission);
+			}
+			if( !has_coarse_location_permission && !has_fine_location_permission ) {
 				if( MyDebug.LOG ) {
 					Log.e(TAG, "don't have ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permissions");
 					Log.e(TAG, "ACCESS_COARSE_LOCATION returns " + ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION));
@@ -122,26 +133,38 @@ public class LocationSupplier {
 			// also see https://sourceforge.net/p/opencamera/tickets/1/ - need to check provider is available
 			// now also need to check for permissions - need to support devices that might have one but not both of fine and coarse permissions supplied
 			if( locationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER) ) {
-				if( ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+				if( has_coarse_location_permission ) {
 					locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, locationListeners[1]);
+					if( MyDebug.LOG )
+						Log.d(TAG, "created coarse (network) location listener");
 				}
 				else {
-					Log.e(TAG, "don't have ACCESS_COARSE_LOCATION permission");
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "don't have ACCESS_COARSE_LOCATION permission");
+						Log.e(TAG, "ACCESS_COARSE_LOCATION returns " + ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION));
+					}
 				}
 			}
 			else {
-				Log.e(TAG, "don't have a NETWORK_PROVIDER");
+				if( MyDebug.LOG )
+					Log.e(TAG, "don't have a NETWORK_PROVIDER");
 			}
 			if( locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER) ) {
-				if( ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+				if( has_fine_location_permission ) {
 					locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListeners[0]);
+					if( MyDebug.LOG )
+						Log.d(TAG, "created fine (gps) location listener");
 				}
 				else {
-					Log.e(TAG, "don't have ACCESS_FINE_LOCATION permission");
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "don't have ACCESS_FINE_LOCATION permission");
+						Log.e(TAG, "ACCESS_FINE_LOCATION returns " + ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION));
+					}
 				}
 			}
 			else {
-				Log.e(TAG, "don't have a GPS_PROVIDER");
+				if( MyDebug.LOG )
+					Log.e(TAG, "don't have a GPS_PROVIDER");
 			}
 		}
 		else if( !store_location ) {

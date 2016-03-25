@@ -478,10 +478,11 @@ public class StorageUtils {
     private Media getLatestMedia(boolean video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getLatestMedia: " + (video ? "video" : "images"));
-		if( ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
 			// needed for Android 6, in case users deny storage permission, otherwise we get java.lang.SecurityException from ContentResolver.query()
 			// see https://developer.android.com/training/permissions/requesting.html
 			// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+			// we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
 			if( MyDebug.LOG )
 				Log.e(TAG, "don't have READ_EXTERNAL_STORAGE permission");
 			return null;
