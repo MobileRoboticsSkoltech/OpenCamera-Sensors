@@ -178,7 +178,7 @@
     <string name="preference_resolution">Rozlišení fotoaparátu</string>
     <string name="preference_resolution_summary">Nastavení rozlišení fotografií pořízených fotoaparátem</string>
     <string name="preference_quality">Obrazová kvalita</string>
-    <string name="preference_quality_summary">Nastavte obrazovou kvalitu uložených fotografií (doporučená hodnota je 90%)</string>
+    <string name="preference_quality_summary">Nastavte obrazovou kvalitu uložených fotografií (doporučená hodnota je 90%%)</string>
     <string name="preference_location">Uchovávat polohu (Geotagging)</string>
     <string name="preference_location_summary">Uložit GPS polohu ve fotografiích/videích</string>
     <string name="preference_gps_direction">Uchovávat směr kompasu</string>
