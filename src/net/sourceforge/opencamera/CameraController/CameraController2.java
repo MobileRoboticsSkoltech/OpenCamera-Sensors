@@ -2687,7 +2687,7 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "preview processAF, state: " + state);*/
 			if( result.getFrameNumber() < last_af_state_frame_number ) {
 				/*if( MyDebug.LOG )
-					Log.d(TAG, "processAF discared outdated frame " + result.getFrameNumber() + " vs " + last_af_state_frame_number);*/
+					Log.d(TAG, "processAF discarded outdated frame " + result.getFrameNumber() + " vs " + last_af_state_frame_number);*/
 				return;
 			}
 			if( result.get(CaptureResult.CONTROL_AF_STATE) == null) {
