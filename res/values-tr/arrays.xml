@@ -29,6 +29,7 @@
         <item>drawable/focus_mode_manual</item>
         <item>drawable/focus_mode_fixed</item>
         <item>drawable/focus_mode_edof</item>
+        <item>drawable/focus_mode_continuous_picture</item>
         <item>drawable/focus_mode_continuous_video</item>
     </string-array>
     <string-array name="focus_mode_entries">
@@ -40,6 +41,7 @@
         <item>Karışık Odakla</item>
         <item>EDOF Odak</item>
         <item>Devamlı Odakla</item>
+        <item>Devamlı Odakla</item>
     </string-array>
     <string-array name="focus_mode_values">
         <item>focus_mode_auto</item>
@@ -49,6 +51,7 @@
         <item>focus_mode_manual2</item>
         <item>focus_mode_fixed</item>
         <item>focus_mode_edof</item>
+        <item>focus_mode_continuous_picture</item>
         <item>focus_mode_continuous_video</item>
     </string-array>
     <string-array name="preference_lock_orientation_entries">

@@ -566,6 +566,11 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, " supports focus_mode_edof");
 			}
+			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE) ) {
+				output_modes.add("focus_mode_continuous_picture");
+				if( MyDebug.LOG )
+					Log.d(TAG, " supports focus_mode_continuous_picture");
+			}
 			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO) ) {
 				output_modes.add("focus_mode_continuous_video");
 				if( MyDebug.LOG )
@@ -1533,6 +1538,9 @@ public class CameraController2 extends CameraController {
     	else if( focus_value.equals("focus_mode_edof") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_EDOF;
     	}
+    	else if( focus_value.equals("focus_mode_continuous_picture") ) {
+    		focus_mode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
+    	}
     	else if( focus_value.equals("focus_mode_continuous_video") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
     	}
@@ -1570,6 +1578,9 @@ public class CameraController2 extends CameraController {
     	}
 		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_EDOF ) {
     		focus_value = "focus_mode_edof";
+    	}
+		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
+    		focus_value = "focus_mode_continuous_picture";
     	}
 		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO ) {
     		focus_value = "focus_mode_continuous_video";
