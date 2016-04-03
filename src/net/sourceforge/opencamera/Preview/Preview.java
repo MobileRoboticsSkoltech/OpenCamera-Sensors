@@ -2860,6 +2860,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( is_video != old_is_video ) {
 			setFocusPref(false); // first restore the saved focus for the new photo/video mode; don't do autofocus, as it'll be cancelled when restarting preview
 			updateFocusForVideo(false); // don't do autofocus, as it'll be cancelled when restarting preview
+			/*if( !is_video ) {
+				// changing from video to photo mode
+				setFocusPref(false); // first restore the saved focus for the new photo/video mode; don't do autofocus, as it'll be cancelled when restarting preview
+			}*/
 
 			if( save ) {
 				// now save
@@ -2875,6 +2879,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// always start the camera preview, even if it was previously paused (also needed to update preview fps)
 		        this.startCameraPreview();
 			}
+
+			/*if( is_video ) {
+				// changing from photo to video mode
+				setFocusPref(false);
+				updateFocusForVideo(false);
+			}*/
 		}
 	}
 	
@@ -3456,7 +3466,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "focus_value is " + focus_value);
 
-		if( !using_android_l && this.recentlyFocused() ) {
+		if( focus_value != null && ( focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") ) ) {
+			// we call via autoFocus(), to avoid risk of taking photo while the continuous focus is focusing - risk of blurred photo, also sometimes get bug in such situations where we end of repeatedly focusing
+	        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
+				@Override
+				public void onAutoFocus(boolean success) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "continuous mode autofocus complete: " + success);
+					takePictureWhenFocused();
+				}
+	        };
+			camera_controller.autoFocus(autoFocusCallback);
+		}
+		else if( !using_android_l && this.recentlyFocused() ) {
 			// Android L API seems to have poor results with flash if we don't lock focus for taking a photo (photos can come out too bright or too dark), so we always force a focus
 			if( MyDebug.LOG )
 				Log.d(TAG, "recently focused successfully, so no need to refocus");
@@ -3828,7 +3850,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		}
 
-		String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
+		final String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "focus_value is " + focus_value);
 			Log.d(TAG, "focus_success is " + focus_success);
@@ -3891,6 +3913,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	        			Log.d(TAG, "onPictureTaken started preview");
     				}
     	        }
+    			if( camera_controller != null && focus_value != null && ( focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") ) ) {
+	        		if( MyDebug.LOG )
+	        			Log.d(TAG, "cancelAutoFocus to restart continuous focusing");
+    				camera_controller.cancelAutoFocus(); // needed to restart continuous focusing
+    			}
 
     			if( MyDebug.LOG )
     				Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
