@@ -10,6 +10,7 @@ import java.util.Vector;
 import android.annotation.TargetApi;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.hardware.Camera.AutoFocusMoveCallback;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.os.Build;
@@ -1067,6 +1068,33 @@ public class CameraController1 extends CameraController {
 		}
 	}
 	
+	@Override
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+	public void setContinuousFocusMoveCallback(final ContinuousFocusMoveCallback cb) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setContinuousFocusMoveCallback");
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
+			// setAutoFocusMoveCallback() requires JELLY_BEAN
+			if( cb != null ) {
+				camera.setAutoFocusMoveCallback(new AutoFocusMoveCallback() {
+					@Override
+					public void onAutoFocusMoving(boolean start, Camera camera) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "onAutoFocusMoving: " + start);
+						cb.onContinuousFocusMove(start);
+					}
+				});
+			}
+			else {
+				camera.setAutoFocusMoveCallback(null);
+			}
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "setContinuousFocusMoveCallback requires Android JELLY_BEAN or higher");
+		}
+	}
+
 	private static class TakePictureShutterCallback implements Camera.ShutterCallback {
 		// don't do anything here, but we need to implement the callback to get the shutter sound (at least on Galaxy Nexus and Nexus 7)
 		@Override

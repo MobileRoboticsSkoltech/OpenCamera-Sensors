@@ -158,6 +158,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<String> supported_focus_values = null; // our "values" format
 	private int current_focus_index = -1; // this is an index into the supported_focus_values array, or -1 if no focus modes available
 	private int max_num_focus_areas = 0;
+	private boolean continuous_focus_move_is_started = false;
 	
 	private boolean is_exposure_lock_supported = false;
 	private boolean is_exposure_locked = false;
@@ -898,6 +899,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
 		// n.b., don't reset has_set_location, as we can remember the location when switching camera
+		if( continuous_focus_move_is_started ) {
+			continuous_focus_move_is_started = false;
+			applicationInterface.onContinuousFocusMove(false);
+		}
 		applicationInterface.cameraClosed();
 		cancelTimer();
 		if( camera_controller != null ) {
@@ -3140,9 +3145,40 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		cancelAutoFocus();
         camera_controller.setFocusValue(focus_value);
+		setupContinuousFocusMove();
 		clearFocusAreas();
 		if( auto_focus && !focus_value.equals("focus_mode_locked") ) {
 			tryAutoFocus(false, false);
+		}
+	}
+	
+	private void setupContinuousFocusMove() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setupContinuousFocusMove()" );
+		if( continuous_focus_move_is_started ) {
+			continuous_focus_move_is_started = false;
+			applicationInterface.onContinuousFocusMove(false);
+		}
+		String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "focus_value is " + focus_value);
+		if( camera_controller != null && focus_value != null && focus_value.equals("focus_mode_continuous_picture") && !this.is_video ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set continuous picture focus move callback");
+			camera_controller.setContinuousFocusMoveCallback(new CameraController.ContinuousFocusMoveCallback() {
+				@Override
+				public void onContinuousFocusMove(boolean start) {
+					if( start != continuous_focus_move_is_started ) { // filter out repeated calls with same start value
+						continuous_focus_move_is_started = start;
+						applicationInterface.onContinuousFocusMove(start);
+					}
+				}
+			});
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "remove continuous picture focus move callback");
+			camera_controller.setContinuousFocusMoveCallback(null);
 		}
 	}
 
@@ -4120,6 +4156,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 		this.setPreviewPaused(false);
+		this.setupContinuousFocusMove();
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "startCameraPreview: total time for startCameraPreview: " + (System.currentTimeMillis() - debug_time));
 		}

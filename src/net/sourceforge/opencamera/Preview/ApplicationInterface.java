@@ -127,4 +127,5 @@ public interface ApplicationInterface {
 	// callbacks
 	void onDrawPreview(Canvas canvas);
 	boolean onPictureTaken(byte [] data);
+	void onContinuousFocusMove(boolean start); // called when focusing starts/stop in continuous picture mode (in photo mode only)
 }

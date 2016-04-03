@@ -97,6 +97,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private RectF thumbnail_anim_dst_rect = new RectF();
 	private Matrix thumbnail_anim_matrix = new Matrix();
 
+	private boolean continuous_focus_moving = false;
+	private long continuous_focus_moving_ms = 0;
+
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
 	private int zoom_factor = 0;
@@ -811,6 +814,22 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void cameraSetup() {
 		main_activity.cameraSetup();
+
+		continuous_focus_moving = false;
+		continuous_focus_moving_ms = 0;
+	}
+
+	@Override
+	public void onContinuousFocusMove(boolean start) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onContinuousFocusMove: " + start);
+		if( start ) {
+			if( !continuous_focus_moving ) { // don't restart the animation if already in motion
+				continuous_focus_moving = true;
+				continuous_focus_moving_ms = System.currentTimeMillis();
+			}
+		}
+		// if we receive start==false, we don't stop the animation - let it continue
 	}
 
 	@Override
@@ -969,6 +988,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void cameraClosed() {
 		main_activity.getMainUI().clearSeekBar();
 		main_activity.getMainUI().destroyPopup(); // need to close popup - and when camera reopened, it may have different settings
+		continuous_focus_moving = false;
+		continuous_focus_moving_ms = 0;
 	}
 	
 	private void updateThumbnail(Bitmap thumbnail) {
@@ -1862,6 +1883,37 @@ public class MyApplicationInterface implements ApplicationInterface {
 			canvas.restore();
 		}
 
+		if( camera_controller != null && continuous_focus_moving ) {
+			long dt = System.currentTimeMillis() - continuous_focus_moving_ms;
+			final long length = 1000;
+			if( dt <= length ) {
+				float frac = ((float)dt) / (float)length;
+				float pos_x = canvas.getWidth()/2.0f;
+				float pos_y = canvas.getHeight()/2.0f;
+				float min_radius = (float) (40 * scale + 0.5f); // convert dps to pixels
+				float max_radius = (float) (60 * scale + 0.5f); // convert dps to pixels
+				float radius = 0.0f;
+				if( frac < 0.5f ) {
+					float alpha = frac*2.0f;
+					radius = (1.0f-alpha) * min_radius + alpha * max_radius;
+				}
+				else {
+					float alpha = (frac-0.5f)*2.0f;
+					radius = (1.0f-alpha) * max_radius + alpha * min_radius;
+				}
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "dt: " + dt);
+					Log.d(TAG, "radius: " + radius);
+				}*/
+				p.setStyle(Paint.Style.STROKE);
+				canvas.drawCircle(pos_x, pos_y, radius, p);
+				p.setStyle(Paint.Style.FILL); // reset
+			}
+			else {
+				continuous_focus_moving = false;
+			}
+		}
+
 		if( preview.isFocusWaiting() || preview.isFocusRecentSuccess() || preview.isFocusRecentFailure() ) {
 			int size = (int) (40 * scale + 0.5f); // convert dps to pixels
 			if( preview.isFocusRecentSuccess() )
@@ -1895,6 +1947,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			canvas.drawLine(pos_x + size, pos_y + frac*size, pos_x + size, pos_y + size, p);
 			p.setStyle(Paint.Style.FILL); // reset
 		}
+
 		CameraController.Face [] faces_detected = preview.getFacesDetected();
 		if( faces_detected != null ) {
 			p.setColor(Color.rgb(255, 235, 59)); // Yellow 500

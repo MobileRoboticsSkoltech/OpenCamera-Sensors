@@ -104,6 +104,10 @@ public abstract class CameraController {
 		public abstract void onAutoFocus(boolean success);
 	}
 	
+	public static interface ContinuousFocusMoveCallback {
+		public abstract void onContinuousFocusMove(boolean start);
+	}
+	
 	public static interface ErrorCallback {
 		public abstract void onError();
 	}
@@ -206,6 +210,7 @@ public abstract class CameraController {
 	public abstract void setFaceDetectionListener(final CameraController.FaceDetectionListener listener);
 	public abstract void autoFocus(final CameraController.AutoFocusCallback cb);
 	public abstract void cancelAutoFocus();
+	public abstract void setContinuousFocusMoveCallback(ContinuousFocusMoveCallback cb);
 	public abstract void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error);
 	public abstract void setDisplayOrientation(int degrees);
 	public abstract int getDisplayOrientation();

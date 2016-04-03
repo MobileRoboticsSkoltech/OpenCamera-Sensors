@@ -2357,6 +2357,13 @@ public class CameraController2 extends CameraController {
 			e.printStackTrace();
 		} 
 	}
+	
+	@Override
+	public void setContinuousFocusMoveCallback(ContinuousFocusMoveCallback cb) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setContinuousFocusMoveCallback");
+		// not yet supported for Camera2
+	}
 
 	private void takePictureAfterPrecapture() {
 		if( MyDebug.LOG )
