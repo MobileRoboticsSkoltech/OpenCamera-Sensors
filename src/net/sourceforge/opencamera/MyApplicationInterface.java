@@ -135,8 +135,14 @@ public class MyApplicationInterface implements ApplicationInterface {
     	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth_off);
 		if( MyDebug.LOG )
 			Log.d(TAG, "MyApplicationInterface: total time to create MyApplicationInterface: " + (System.currentTimeMillis() - debug_time));
+		
+        p.setAntiAlias(true);
+        p.setStrokeCap(Paint.Cap.ROUND);
+		final float scale = getContext().getResources().getDisplayMetrics().density;
+		final float stroke_width = (float) (0.5f * scale + 0.5f); // convert dps to pixels
+		p.setStrokeWidth(stroke_width);
 	}
-	
+
 	void onSaveInstanceState(Bundle state) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSaveInstanceState");
