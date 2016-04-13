@@ -1178,7 +1178,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "saved_is_video: " + saved_is_video);
 		}
 		if( saved_is_video != this.is_video ) {
-			this.switchVideo(false, false);
+			this.switchVideo(true);
 		}
 
 		if( do_startup_focus && using_android_l ) {
@@ -1218,7 +1218,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		
 	    if( take_photo ) {
 			if( this.is_video ) {
-				this.switchVideo(true, true);
+				this.switchVideo(false); // set during_startup to false, as we now need to reset the preview
 			}
 			// take photo after a delay - otherwise we sometimes get a black image?!
 	    	final Handler handler = new Handler();
@@ -2826,7 +2826,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);
 	}
 	
-	public void switchVideo(boolean save, boolean update_preview_size) {
+	public void switchVideo(boolean during_startup) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
 		if( camera_controller == null ) {
@@ -2865,19 +2865,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				setFocusPref(false); // first restore the saved focus for the new photo/video mode; don't do autofocus, as it'll be cancelled when restarting preview
 			}*/
 
-			if( save ) {
+			if( !during_startup ) {
 				// now save
 				applicationInterface.setVideoPref(is_video);
 	    	}
 			
-			if( update_preview_size ) {
-				if( this.is_preview_started ) {
-					camera_controller.stopPreview();
-					this.is_preview_started = false;
+			if( !during_startup ) {
+				String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
+				if( MyDebug.LOG )
+					Log.d(TAG, "focus_value is " + focus_value);
+				if( !is_video && focus_value != null && focus_value.equals("focus_mode_continuous_picture") ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "restart camera due to returning to continuous picture mode from video mode");
+					// workaround for bug on Nexus 6 at least where switching to video and back to photo mode causes continuous picture mode to stop
+					this.onPause();
+					this.onResume();
 				}
-				setPreviewSize();
-				// always start the camera preview, even if it was previously paused (also needed to update preview fps)
-		        this.startCameraPreview();
+				else {
+					if( this.is_preview_started ) {
+						camera_controller.stopPreview();
+						this.is_preview_started = false;
+					}
+					setPreviewSize();
+					// always start the camera preview, even if it was previously paused (also needed to update preview fps)
+			        this.startCameraPreview();
+				}
 			}
 
 			/*if( is_video ) {

@@ -865,7 +865,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		this.closePopup();
 	    View switchVideoButton = (View) findViewById(R.id.switch_video);
 	    switchVideoButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
-		this.preview.switchVideo(true, true);
+		this.preview.switchVideo(false);
 		switchVideoButton.setEnabled(true);
 
 		mainUI.setTakePhotoIcon();
