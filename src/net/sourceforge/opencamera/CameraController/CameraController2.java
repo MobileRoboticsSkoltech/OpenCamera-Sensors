@@ -78,6 +78,8 @@ public class CameraController2 extends CameraController {
 	//private static final int STATE_WAITING_PRECAPTURE_START = 2;
 	//private static final int STATE_WAITING_PRECAPTURE_DONE = 3;
 	private int state = STATE_NORMAL;
+
+	private ContinuousFocusMoveCallback continuous_focus_move_callback = null;
 	
 	private MediaActionSound media_action_sound = new MediaActionSound();
 	private boolean sounds_enabled = true;
@@ -2362,7 +2364,7 @@ public class CameraController2 extends CameraController {
 	public void setContinuousFocusMoveCallback(ContinuousFocusMoveCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setContinuousFocusMoveCallback");
-		// not yet supported for Camera2
+		this.continuous_focus_move_callback = cb;
 	}
 
 	private void takePictureAfterPrecapture() {
@@ -2743,6 +2745,21 @@ public class CameraController2 extends CameraController {
 						autofocus_cb.onAutoFocus(focus_success);
 						autofocus_cb = null;
 					}
+				}
+			}
+
+			if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "continuous focusing started");
+				if( continuous_focus_move_callback != null ) {
+					continuous_focus_move_callback.onContinuousFocusMove(true);
+				}
+			}
+			else if( last_af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "continuous focusing stopped");
+				if( continuous_focus_move_callback != null ) {
+					continuous_focus_move_callback.onContinuousFocusMove(false);
 				}
 			}
 
