@@ -1182,7 +1182,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.switchVideo(true);
 		}
 
-		if( do_startup_focus && using_android_l ) {
+		if( do_startup_focus && using_android_l && camera_controller.supportsAutoFocus() ) {
 			// need to switch flash off for autofocus - and for Android L, need to do this before starting preview (otherwise it won't work in time); for old camera API, need to do this after starting preview!
 			set_flash_value_after_autofocus = "";
 			String old_flash_value = camera_controller.getFlashValue();
