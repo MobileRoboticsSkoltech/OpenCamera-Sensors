@@ -242,6 +242,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public int count_cameraStartPreview = 0;
 	public int count_cameraAutoFocus = 0;
 	public int count_cameraTakePicture = 0;
+	public int count_cameraContinuousFocusMoving = 0;
 	public boolean test_fail_open_camera = false;
 	public boolean test_video_failure = false;
 
@@ -3192,6 +3193,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				public void onContinuousFocusMove(boolean start) {
 					if( start != continuous_focus_move_is_started ) { // filter out repeated calls with same start value
 						continuous_focus_move_is_started = start;
+						count_cameraContinuousFocusMoving++;
 						applicationInterface.onContinuousFocusMove(start);
 					}
 				}
