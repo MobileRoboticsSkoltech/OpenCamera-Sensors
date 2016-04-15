@@ -4091,7 +4091,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			camera_controller.autoFocus(autoFocusCallback);
     			count_cameraAutoFocus++;
 				if( MyDebug.LOG )
-					Log.d(TAG, "autofocus started");
+					Log.d(TAG, "autofocus started, count now: " + count_cameraAutoFocus);
 	        }
 	        else if( has_focus_area ) {
 	        	// do this so we get the focus box, for focus modes that support focus area, but don't support autofocus
