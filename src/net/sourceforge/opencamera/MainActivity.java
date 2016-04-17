@@ -2205,7 +2205,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			toast_string += " " + current_size.width + "x" + current_size.height;
 			if( preview.supportsFocus() && preview.getSupportedFocusValues().size() > 1 ) {
 				String focus_value = preview.getCurrentFocusValue();
-				if( focus_value != null && !focus_value.equals("focus_mode_auto") ) {
+				if( focus_value != null && !focus_value.equals("focus_mode_auto") && !focus_value.equals("focus_mode_continuous_picture") ) {
 					String focus_entry = preview.findFocusEntryForValue(focus_value);
 					if( focus_entry != null ) {
 						toast_string += "\n" + focus_entry;
