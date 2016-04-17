@@ -80,7 +80,18 @@ public class PopupView extends LinearLayout {
     		// don't add any more options
     	}
     	else {
-        	List<String> supported_focus_values = preview.getSupportedFocusValues();
+        	// make a copy of getSupportedFocusValues() so we can modify it
+    		List<String> supported_focus_values = preview.getSupportedFocusValues();
+    		if( supported_focus_values != null ) {
+            	supported_focus_values = new ArrayList<String>(supported_focus_values);
+            	// only show appropriate continuous focus mode
+            	if( preview.isVideo() ) {
+            		supported_focus_values.remove("focus_mode_continuous_picture");
+            	}
+            	else {
+            		supported_focus_values.remove("focus_mode_continuous_video");
+            	}
+    		}
         	addButtonOptionsToPopup(supported_focus_values, R.array.focus_mode_icons, R.array.focus_mode_values, getResources().getString(R.string.focus_mode), preview.getCurrentFocusValue(), "TEST_FOCUS", new ButtonOptionsPopupListener() {
     			@Override
     			public void onClick(String option) {
