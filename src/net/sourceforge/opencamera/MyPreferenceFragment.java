@@ -31,6 +31,8 @@ import android.util.Log;
 import android.view.Display;
 import android.widget.Toast;
 
+import java.util.Locale;
+
 /** Fragment to handle the Settings UI. Note that originally this was a
  *  PreferenceActivity rather than a PreferenceFragment which required all
  *  communication to be via the bundle (since this replaced the MainActivity,
@@ -389,6 +391,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(Build.HARDWARE);
                         about_string.append("\nDevice variant: ");
                         about_string.append(Build.DEVICE);
+                        about_string.append("\nLanguage: ");
+                        about_string.append(Locale.getDefault().getLanguage());
                         {
                     		ActivityManager activityManager = (ActivityManager) getActivity().getSystemService(Activity.ACTIVITY_SERVICE);
                             about_string.append("\nStandard max heap? (MB): ");
