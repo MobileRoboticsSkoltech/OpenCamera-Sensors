@@ -20,13 +20,13 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.preference.TwoStatePreference;
 import android.util.Log;
 import android.view.Display;
 import android.widget.Toast;
@@ -688,7 +688,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		super.onPause();
 	}
 
-	/* So that manual changes to the checkbox preferences, while the preferences are showing, show up;
+	/* So that manual changes to the checkbox/switch preferences, while the preferences are showing, show up;
 	 * in particular, needed for preference_using_saf, when the user cancels the SAF dialog (see
 	 * MainActivity.onActivityResult).
 	 */
@@ -696,9 +696,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSharedPreferenceChanged");
 	    Preference pref = findPreference(key);
-	    if( pref instanceof CheckBoxPreference ){
-	        CheckBoxPreference checkBoxPref = (CheckBoxPreference)pref;
-	        checkBoxPref.setChecked(prefs.getBoolean(key, true));
+	    if( pref instanceof TwoStatePreference ){
+	    	TwoStatePreference twoStatePref = (TwoStatePreference)pref;
+	    	twoStatePref.setChecked(prefs.getBoolean(key, true));
 	    }
 	}
 }
