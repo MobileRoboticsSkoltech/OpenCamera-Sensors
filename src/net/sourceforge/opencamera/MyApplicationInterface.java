@@ -97,6 +97,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private RectF thumbnail_anim_dst_rect = new RectF();
 	private Matrix thumbnail_anim_matrix = new Matrix();
 
+    private boolean taking_picture = false;
+    
 	private boolean continuous_focus_moving = false;
 	private long continuous_focus_moving_ms = 0;
 
@@ -521,6 +523,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     private boolean getThumbnailAnimationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), true);
+    }
+    
+    private boolean getTakePhotoBorderPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getBoolean(PreferenceKeys.getTakePhotoBorderPreferenceKey(), true);
     }
     
     @Override
@@ -987,6 +994,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
     @Override
     public void cameraInOperation(boolean in_operation) {
+    	if( in_operation && !main_activity.getPreview().isVideo() ) {
+    		taking_picture = true;
+    	}
+    	else {
+    		taking_picture = false;
+    	}
     	main_activity.getMainUI().showGUI(!in_operation);
     }
 
@@ -1241,6 +1254,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 		String preference_grid = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
+		if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
+			p.setColor(Color.WHITE);
+			p.setStyle(Paint.Style.STROKE);
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+			p.setStyle(Paint.Style.FILL); // reset
+		}
 		if( camera_controller != null && preference_grid.equals("preference_grid_3x3") ) {
 			p.setColor(Color.WHITE);
 			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
@@ -1368,6 +1387,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			
 			canvas.restore();
+			p.setStyle(Paint.Style.FILL); // reset
 		}
 		else if( camera_controller != null && ( preference_grid.equals("preference_grid_golden_triangle_1") || preference_grid.equals("preference_grid_golden_triangle_2") ) ) {
 			p.setColor(Color.WHITE);
@@ -1455,6 +1475,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					}
 					canvas.drawRect(left, top, right, bottom, p);
 				}
+				p.setStyle(Paint.Style.FILL); // reset
 			}
 		}
 
@@ -1885,6 +1906,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 			}
 			p.setAlpha(255);
+			p.setStyle(Paint.Style.FILL); // reset
 
 			canvas.restore();
 		}

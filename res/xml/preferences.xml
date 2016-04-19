@@ -380,6 +380,13 @@
                 android:defaultValue="true"
                 />
 
+            <CheckBoxPreference
+                android:key="preference_take_photo_border"
+                android:title="@string/preference_take_photo_border"
+                android:summary="@string/preference_take_photo_border_summary"
+                android:defaultValue="true"
+                />
+
 			<SwitchPreference
                 android:key="preference_keep_display_on"
                 android:title="@string/preference_keep_display_on"

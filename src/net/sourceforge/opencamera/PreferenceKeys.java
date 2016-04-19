@@ -143,6 +143,10 @@ public class PreferenceKeys {
     	return "preference_thumbnail_animation";
     }
 
+    public static String getTakePhotoBorderPreferenceKey() {
+    	return "preference_take_photo_border";
+    }
+
     public static String getShowWhenLockedPreferenceKey() {
     	return "preference_show_when_locked";
     }

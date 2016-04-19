@@ -170,6 +170,8 @@
     <string name="preference_show_toasts_summary">Whether to display the popup \"toast\" messages</string>
     <string name="preference_thumbnail_animation">Show thumbnail animation</string>
     <string name="preference_thumbnail_animation_summary">Display moving thumbnail animation when taking a photo</string>
+    <string name="preference_take_photo_border">Show border when taking photo</string>
+    <string name="preference_take_photo_border_summary">Display a border on the display to indicate taking a photo</string>
     <string name="preference_keep_display_on">Keep display on</string>
     <string name="preference_keep_display_on_summary">If enabled, the screen won\'t switch off while the main Open Camera UI is active</string>
     <string name="preference_max_brightness">Force maximum brightness</string>
