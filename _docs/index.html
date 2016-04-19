@@ -533,12 +533,14 @@ options "Stamp photos" or "Custom text".</p>
 <p><b>Video resolution</b> - Select the resolution of videos taken by the camera.</p>
 
 <p><b>Force 4K UHD video (experimental)</b> - Enable recording in 4K UHD (3840x2160) on the back camera (if ticked, this overrides the setting in
-"Video resolution"). This is provided for some phones that don't "officially" expose their 4K resolution through the standard Android
-camera API (so it doesn't appear in the "Video resolution"), but in some cases they will still record at 4K if this option is ticked.
+"Video resolution"). This is provided for some phones that don't properly expose their 4K video resolution to 3rd party camera apps
+(and so 4K resolution doesn't show in the Video resolution option above).
+It turns out that some such devices can be made to record in 4K resolution if it's requested, but on other devices this won't work.
 If you enable this on a device that doesn't support it, you may either get an error
 message when you try to record, or it may succeed but create a video where the resolution isn't 4K, or may even result in a crash! So
 please test this out first. I've tested this successfully on a Samsung Galaxy S5 and Note 3, but even there it only works on some
-variants of those devices. (If this option doesn't show up at all, it's either because your device already lists 4K in the Video
+variants of those devices. If this doesn't work, it isn't a bug in Open Camera, it's because your device doesn't support 4K recording
+for third party camera apps. (If this option doesn't show up at all, it's either because your device already lists 4K in the Video
 resolutions options above, or because Open Camera thinks this is a device that probably doesn't support 4K video.)</p>
 
 <p><b>Enable video stabilization</b> - Video stabilization reduces the shaking due to the motion of the camera in
@@ -693,10 +695,9 @@ option is on. It's off by default, but you may have accidentally switched it on.
 and untick Auto-stabilise.</p>
 
 <p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - Unfortunately many devices with 4K support
-have for some reason not exposed this through the Android API to 3rd party camera apps. For some such devices, it
-turns out that 3rd party camera apps can request recording in 3840x2160, but this isn't guaranteed to work, hence it's
-marked experimental. If this doesn't work, it's not a bug in Open Camera, it's something that's just not possible through
-3rd party apps on some devices. If you want a device with proper support for 4K video recording, get the Nexus 6.</p>
+have for some reason not exposed this through the Android API to 3rd party camera apps. If the "Force 4K" option
+doesn't work, it's not a bug in Open Camera, it's something that's just not possible through
+3rd party apps on some devices. If you want a device with proper support for 4K video recording, get a Nexus 6.</p>
 
 <p><b>Why doesn't the FPS/bitrate setting for video work?</b> - These settings only give "recommendations" to the
 camera, and there is no guarantee that they will be met. Some devices might not even allow recording at some
