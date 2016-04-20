@@ -3475,7 +3475,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	return;
 		}
 
-		takePhoto();
+		takePhoto(false);
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
 	}
@@ -3788,9 +3788,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		this.reconnectCamera(true);
 	}
 
-	/** Take photo.
+	/** Take photo. The caller should aready have set the phase to PHASE_TAKING_PHOTO.
 	 */
-	private void takePhoto() {
+	private void takePhoto(boolean skip_autofocus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhoto");
 		applicationInterface.cameraInOperation(true);
@@ -3800,6 +3800,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		if( focus_value != null && ( focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") ) ) {
 			// we call via autoFocus(), to avoid risk of taking photo while the continuous focus is focusing - risk of blurred photo, also sometimes get bug in such situations where we end of repeatedly focusing
+			// this is the case even if skip_autofocus is true (as we still can't guarantee that continuous focusing might be occurring)
 	        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
 				@Override
 				public void onAutoFocus(boolean success) {
@@ -3810,7 +3811,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        };
 			camera_controller.autoFocus(autoFocusCallback);
 		}
-		else if( !using_android_l && this.recentlyFocused() ) {
+		else if( (!using_android_l && this.recentlyFocused()) || skip_autofocus ) {
 			// Android L API seems to have poor results with flash if we don't lock focus for taking a photo (photos can come out too bright or too dark), so we always force a focus
 			if( MyDebug.LOG )
 				Log.d(TAG, "recently focused successfully, so no need to refocus");
@@ -3851,6 +3852,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	/** Take photo, assumes any autofocus has already been taken care of, and that applicationInterface.cameraInOperation(true) has
 	 *  already been called.
+	 *  Note that even if a caller wants to take a photo without focusing, you probably want to call takePhoto() with skip_autofocus
+	 *  set to true (so that things work okay in continuous picture focus mode).
 	 */
 	private void takePhotoWhenFocused() {
 		// should be called when auto-focused
@@ -3952,11 +3955,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     	    		long timer_delay = applicationInterface.getRepeatIntervalPref();
     	    		if( timer_delay == 0 ) {
-    	    			// we go straight to taking a photo rather than refocusing, for speed
-    	    			// need to manually set the phase and rehide the GUI
+    	    			// we set skip_autofocus to go straight to taking a photo rather than refocusing, for speed
+    	    			// need to manually set the phase
     	    	        phase = PHASE_TAKING_PHOTO;
-    	        		applicationInterface.cameraInOperation(true);
-    	        		takePhotoWhenFocused();
+    	        		takePhoto(true);
     	    		}
     	    		else {
     	    			takePictureOnTimer(timer_delay, true);
