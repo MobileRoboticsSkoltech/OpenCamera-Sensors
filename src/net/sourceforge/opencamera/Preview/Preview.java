@@ -3475,60 +3475,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	return;
 		}
 
-		applicationInterface.cameraInOperation(true);
-		String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
-		if( MyDebug.LOG )
-			Log.d(TAG, "focus_value is " + focus_value);
-
-		if( focus_value != null && ( focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") ) ) {
-			// we call via autoFocus(), to avoid risk of taking photo while the continuous focus is focusing - risk of blurred photo, also sometimes get bug in such situations where we end of repeatedly focusing
-	        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
-				@Override
-				public void onAutoFocus(boolean success) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "continuous mode autofocus complete: " + success);
-					takePictureWhenFocused();
-				}
-	        };
-			camera_controller.autoFocus(autoFocusCallback);
-		}
-		else if( !using_android_l && this.recentlyFocused() ) {
-			// Android L API seems to have poor results with flash if we don't lock focus for taking a photo (photos can come out too bright or too dark), so we always force a focus
-			if( MyDebug.LOG )
-				Log.d(TAG, "recently focused successfully, so no need to refocus");
-			takePictureWhenFocused();
-		}
-		//else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
-		else if( focus_value != null && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) ) {
-			synchronized(this) {
-				if( focus_success == FOCUS_WAITING ) {
-					// Needed to fix bug (on Nexus 6, old camera API): if flash was on, pointing at a dark scene, and we take photo when already autofocusing, the autofocus never returned so we got stuck!
-					// In general, probably a good idea to not redo a focus - just use the one that's already in progress
-					if( MyDebug.LOG )
-						Log.d(TAG, "take photo after current focus");
-					take_photo_after_autofocus = true;
-				}
-				else {
-					focus_success = FOCUS_DONE; // clear focus rectangle for new refocus
-			        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
-						@Override
-						public void onAutoFocus(boolean success) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "autofocus complete: " + success);
-							ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
-							takePictureWhenFocused();
-						}
-			        };
-					if( MyDebug.LOG )
-						Log.d(TAG, "start autofocus to take picture");
-					camera_controller.autoFocus(autoFocusCallback);
-					count_cameraAutoFocus++;
-				}
-			}
-		}
-		else {
-			takePictureWhenFocused();
-		}
+		takePhoto();
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture exit");
 	}
@@ -3841,7 +3788,71 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		this.reconnectCamera(true);
 	}
 
-	private void takePictureWhenFocused() {
+	/** Take photo.
+	 */
+	private void takePhoto() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePhoto");
+		applicationInterface.cameraInOperation(true);
+		String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "focus_value is " + focus_value);
+
+		if( focus_value != null && ( focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") ) ) {
+			// we call via autoFocus(), to avoid risk of taking photo while the continuous focus is focusing - risk of blurred photo, also sometimes get bug in such situations where we end of repeatedly focusing
+	        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
+				@Override
+				public void onAutoFocus(boolean success) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "continuous mode autofocus complete: " + success);
+					takePhotoWhenFocused();
+				}
+	        };
+			camera_controller.autoFocus(autoFocusCallback);
+		}
+		else if( !using_android_l && this.recentlyFocused() ) {
+			// Android L API seems to have poor results with flash if we don't lock focus for taking a photo (photos can come out too bright or too dark), so we always force a focus
+			if( MyDebug.LOG )
+				Log.d(TAG, "recently focused successfully, so no need to refocus");
+			takePhotoWhenFocused();
+		}
+		//else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
+		else if( focus_value != null && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) ) {
+			synchronized(this) {
+				if( focus_success == FOCUS_WAITING ) {
+					// Needed to fix bug (on Nexus 6, old camera API): if flash was on, pointing at a dark scene, and we take photo when already autofocusing, the autofocus never returned so we got stuck!
+					// In general, probably a good idea to not redo a focus - just use the one that's already in progress
+					if( MyDebug.LOG )
+						Log.d(TAG, "take photo after current focus");
+					take_photo_after_autofocus = true;
+				}
+				else {
+					focus_success = FOCUS_DONE; // clear focus rectangle for new refocus
+			        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
+						@Override
+						public void onAutoFocus(boolean success) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "autofocus complete: " + success);
+							ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
+							takePhotoWhenFocused();
+						}
+			        };
+					if( MyDebug.LOG )
+						Log.d(TAG, "start autofocus to take picture");
+					camera_controller.autoFocus(autoFocusCallback);
+					count_cameraAutoFocus++;
+				}
+			}
+		}
+		else {
+			takePhotoWhenFocused();
+		}
+	}
+	
+	/** Take photo, assumes any autofocus has already been taken care of, and that applicationInterface.cameraInOperation(true) has
+	 *  already been called.
+	 */
+	private void takePhotoWhenFocused() {
 		// should be called when auto-focused
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureWhenFocused");
@@ -3945,7 +3956,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	    			// need to manually set the phase and rehide the GUI
     	    	        phase = PHASE_TAKING_PHOTO;
     	        		applicationInterface.cameraInOperation(true);
-    	            	takePictureWhenFocused();
+    	        		takePhotoWhenFocused();
     	    		}
     	    		else {
     	    			takePictureOnTimer(timer_delay, true);
@@ -4151,7 +4162,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG ) 
 					Log.d(TAG, "take_photo_after_autofocus is set");
 				take_photo_after_autofocus = false;
-				takePictureWhenFocused();
+				takePhotoWhenFocused();
 			}
 		}
 		if( MyDebug.LOG )
