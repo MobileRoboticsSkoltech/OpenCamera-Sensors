@@ -1736,7 +1736,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		screen_is_locked = false;
     }
     
-    boolean isScreenLocked() {
+    public boolean isScreenLocked() {
     	return screen_is_locked;
     }
 
