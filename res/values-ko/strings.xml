@@ -224,7 +224,6 @@
     <string name="focus_mode">초점 모드</string>
     <string name="flash_mode">플래시 모드</string>
     <string name="switch_camera">카메라 전환</string>
-    <string name="switch_video">동영상 전환</string>
     <string name="trash">마지막 사진 삭제</string>
     <string name="share">사진 공유</string>
 

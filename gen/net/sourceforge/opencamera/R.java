@@ -194,16 +194,16 @@ public final class R {
         /**  symbol short for megabytes 
  symbol short for megabytes 
          */
-        public static final int audio_control_start=0x7f08010a;
-        public static final int audio_control_stop=0x7f08010b;
+        public static final int audio_control_start=0x7f08010b;
+        public static final int audio_control_stop=0x7f08010c;
         public static final int audio_disabled=0x7f080033;
-        public static final int audio_listener_started=0x7f08010d;
+        public static final int audio_listener_started=0x7f08010e;
         public static final int auto_stabilise_not_supported=0x7f080032;
         public static final int back_camera=0x7f08001c;
         public static final int cancelled_burst_mode=0x7f080022;
         public static final int cancelled_timer=0x7f080021;
-        public static final int cant_access_folder=0x7f0800fe;
-        public static final int cant_write_folder=0x7f0800fd;
+        public static final int cant_access_folder=0x7f0800ff;
+        public static final int cant_write_folder=0x7f0800fe;
         public static final int changed_save_location=0x7f08000d;
         public static final int choose_another_folder=0x7f08000c;
         /**  whether a setting is turned off, e.g., "Auto-stabilise: Off" 
@@ -224,13 +224,13 @@ public final class R {
         public static final int clear_folder_history_question=0x7f08000b;
         public static final int color_effect=0x7f080035;
         public static final int direction=0x7f080039;
-        public static final int enter_new_folder=0x7f0800ff;
+        public static final int enter_new_folder=0x7f080100;
         public static final int exposure=0x7f0800f2;
         public static final int exposure_compensation=0x7f080017;
         public static final int exposure_lock=0x7f0800f3;
         public static final int exposure_locked=0x7f08001f;
         public static final int exposure_unlocked=0x7f080020;
-        public static final int failed_create_folder=0x7f080100;
+        public static final int failed_create_folder=0x7f080101;
         public static final int failed_to_auto_stabilise=0x7f080029;
         public static final int failed_to_open_camera_1=0x7f08003a;
         public static final int failed_to_open_camera_2=0x7f08003b;
@@ -259,7 +259,7 @@ public final class R {
         public static final int flash_mode=0x7f0800f5;
         public static final int focus_distance=0x7f080019;
         public static final int focus_mode=0x7f0800f4;
-        public static final int folder_exists=0x7f080101;
+        public static final int folder_exists=0x7f080102;
         public static final int fps=0x7f080018;
         public static final int free_memory=0x7f08003f;
         public static final int front_camera=0x7f08001b;
@@ -270,10 +270,10 @@ public final class R {
         public static final int iso=0x7f08003d;
         public static final int location_not_available=0x7f08002d;
         public static final int max_duration=0x7f080034;
-        public static final int max_filesize=0x7f080108;
-        public static final int mb_abbreviation=0x7f080109;
+        public static final int max_filesize=0x7f080109;
+        public static final int mb_abbreviation=0x7f08010a;
         public static final int metres_abbreviation=0x7f080043;
-        public static final int new_folder=0x7f0800fc;
+        public static final int new_folder=0x7f0800fd;
         public static final int no_gallery_app=0x7f08002f;
         public static final int not_supported=0x7f080012;
         /**  whether a setting is turned on, e.g., "Auto-stabilise: On" 
@@ -291,8 +291,8 @@ public final class R {
          */
         public static final int off=0x7f080008;
         public static final int on=0x7f080007;
-        public static final int parent_folder=0x7f0800fa;
-        public static final int permission_location_not_available=0x7f080105;
+        public static final int parent_folder=0x7f0800fb;
+        public static final int permission_location_not_available=0x7f080106;
         /**  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
@@ -300,7 +300,7 @@ public final class R {
  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
          */
-        public static final int permission_record_audio_not_available=0x7f080104;
+        public static final int permission_record_audio_not_available=0x7f080105;
         public static final int photo=0x7f08001d;
         public static final int photo_deleted=0x7f08002e;
         public static final int preference_about=0x7f0800e7;
@@ -488,27 +488,28 @@ public final class R {
         public static final int preference_white_balance=0x7f08004b;
         public static final int preference_white_balance_summary=0x7f08004c;
         public static final int repeats_to_go=0x7f08000f;
-        public static final int saf_cancelled=0x7f080103;
-        public static final int saf_select_save_location=0x7f080102;
+        public static final int saf_cancelled=0x7f080104;
+        public static final int saf_select_save_location=0x7f080103;
         public static final int scene_mode=0x7f080036;
         public static final int screen_is_locked=0x7f080030;
         public static final int screen_lock_message_1=0x7f080040;
         public static final int screen_lock_message_2=0x7f080041;
-        public static final int share=0x7f0800f9;
+        public static final int share=0x7f0800fa;
         public static final int sorry=0x7f080027;
-        public static final int speech_recognizer_started=0x7f08010c;
-        public static final int start_video=0x7f080106;
+        public static final int speech_recognizer_started=0x7f08010d;
+        public static final int start_video=0x7f080107;
         public static final int started_recording_video=0x7f080026;
         public static final int started_timer=0x7f080023;
-        public static final int stop_video=0x7f080107;
+        public static final int stop_video=0x7f080108;
         public static final int stopped_recording_video=0x7f08000e;
         public static final int switch_camera=0x7f0800f6;
-        public static final int switch_video=0x7f0800f7;
+        public static final int switch_to_photo=0x7f0800f8;
+        public static final int switch_to_video=0x7f0800f7;
         public static final int take_photo=0x7f0800f0;
         public static final int taking_photo=0x7f08002b;
-        public static final int trash=0x7f0800f8;
+        public static final int trash=0x7f0800f9;
         public static final int unlocked=0x7f080031;
-        public static final int use_folder=0x7f0800fb;
+        public static final int use_folder=0x7f0800fc;
         public static final int video=0x7f08001e;
         public static final int video_error_server_died=0x7f080014;
         /**   intentionally starts lower case 

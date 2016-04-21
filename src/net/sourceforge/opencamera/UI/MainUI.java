@@ -370,25 +370,32 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setTakePhotoIcon()");
 		// set icon for taking photos vs videos
-		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		// also handles content descriptions for the take photo button and switch video button
 		if( main_activity.getPreview() != null ) {
+			ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 			int resource = 0;
 			int content_description = 0;
+			int switch_video_content_description = 0;
 			if( main_activity.getPreview().isVideo() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set icon to video");
 				resource = main_activity.getPreview().isVideoRecording() ? R.drawable.take_video_recording : R.drawable.take_video_selector;
 				content_description = main_activity.getPreview().isVideoRecording() ? R.string.stop_video : R.string.start_video;
+				switch_video_content_description = R.string.switch_to_photo;
 			}
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set icon to photo");
 				resource = R.drawable.take_photo_selector;
 				content_description = R.string.take_photo;
+				switch_video_content_description = R.string.switch_to_video;
 			}
 			view.setImageResource(resource);
 			view.setContentDescription( main_activity.getResources().getString(content_description) );
 			view.setTag(resource); // for testing
+
+			view = (ImageButton)main_activity.findViewById(R.id.switch_video);
+			view.setContentDescription( main_activity.getResources().getString(switch_video_content_description) );
 		}
     }
 

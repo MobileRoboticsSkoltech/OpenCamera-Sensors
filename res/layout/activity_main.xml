@@ -123,7 +123,7 @@
         android:layout_height="50dp"
         android:padding="10dp"
         android:scaleType="fitCenter"
-        android:contentDescription="@string/switch_video"
+        android:contentDescription="@string/switch_to_video"
         android:src="@drawable/switch_video"
         android:onClick="clickedSwitchVideo"
         />

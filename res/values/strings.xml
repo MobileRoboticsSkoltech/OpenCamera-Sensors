@@ -259,7 +259,8 @@
     <string name="focus_mode">Focus Mode</string>
     <string name="flash_mode">Flash Mode</string>
     <string name="switch_camera">Switch Camera</string>
-    <string name="switch_video">Switch Video</string>
+    <string name="switch_to_video">Switch to video mode</string>
+    <string name="switch_to_photo">Switch to photo mode</string>
     <string name="trash">Delete Last Picture</string>
     <string name="share">Share Photo</string>
     
