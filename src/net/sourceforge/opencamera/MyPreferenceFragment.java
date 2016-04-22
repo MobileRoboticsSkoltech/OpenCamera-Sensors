@@ -375,9 +375,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 						}
                         about_string.append("Open Camera v");
                         about_string.append(version);
-                        about_string.append("\nVersion Code: ");
+                        about_string.append("\nCode: ");
                         about_string.append(version_code);
-                        about_string.append("\n(c) 2013-2015 Mark Harman");
+                        about_string.append("\n(c) 2013-2016 Mark Harman");
                         about_string.append("\nReleased under the GPL v3 or later");
                         about_string.append("\nPackage: ");
                         about_string.append(MyPreferenceFragment.this.getActivity().getPackageName());
@@ -395,9 +395,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(Locale.getDefault().getLanguage());
                         {
                     		ActivityManager activityManager = (ActivityManager) getActivity().getSystemService(Activity.ACTIVITY_SERVICE);
-                            about_string.append("\nStandard max heap? (MB): ");
+                            about_string.append("\nStandard max heap?: ");
                             about_string.append(activityManager.getMemoryClass());
-                            about_string.append("\nLarge max heap? (MB): ");
+                            about_string.append("\nLarge max heap?: ");
                             about_string.append(activityManager.getLargeMemoryClass());
                         }
                         {
