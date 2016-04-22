@@ -42,6 +42,7 @@ public class DrawPreview {
 	private RectF draw_rect = new RectF();
 	private int [] gui_location = new int[2];
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+	private float stroke_width = 0.0f;
 
 	private float free_memory_gb = -1.0f;
 	private long last_free_memory_time = 0;
@@ -74,7 +75,7 @@ public class DrawPreview {
 		p.setAntiAlias(true);
         p.setStrokeCap(Paint.Cap.ROUND);
 		final float scale = getContext().getResources().getDisplayMetrics().density;
-		final float stroke_width = (float) (0.5f * scale + 0.5f); // convert dps to pixels
+		this.stroke_width = (float) (0.5f * scale + 0.5f); // convert dps to pixels
 		p.setStrokeWidth(stroke_width);
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth);
@@ -178,8 +179,11 @@ public class DrawPreview {
 		if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
+			float this_stroke_width = (float) (5.0f * scale + 0.5f); // convert dps to pixels
+			p.setStrokeWidth(this_stroke_width);
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 			p.setStyle(Paint.Style.FILL); // reset
+			p.setStrokeWidth(stroke_width); // reset
 		}
 		if( camera_controller != null && preference_grid.equals("preference_grid_3x3") ) {
 			p.setColor(Color.WHITE);
