@@ -255,7 +255,6 @@
     <string name="exposure_lock">曝光锁定</string>
     <string name="focus_mode">聚焦模式</string>
     <string name="flash_mode">闪光模式</string>
-    <string name="switch_camera">切换相机</string>
     <string name="trash">删除上一张照片</string>
     <string name="share">共享照片</string>
     

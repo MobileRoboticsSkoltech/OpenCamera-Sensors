@@ -837,15 +837,30 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		mainUI.audioControlStopped();
 		speechRecognizerIsStarted = false;
     }
+    
+    /* Returns the cameraId that the "Switch camera" button will switch to.
+     */
+    public int getNextCameraId() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getNextCameraId");
+		int cameraId = preview.getCameraId();
+		if( MyDebug.LOG )
+			Log.d(TAG, "current cameraId: " + cameraId);
+		if( this.preview.canSwitchCamera() ) {
+			int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
+			cameraId = (cameraId+1) % n_cameras;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "next cameraId: " + cameraId);
+		return cameraId;
+    }
 
     public void clickedSwitchCamera(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchCamera");
 		this.closePopup();
 		if( this.preview.canSwitchCamera() ) {
-			int cameraId = preview.getCameraId();
-			int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
-			cameraId = (cameraId+1) % n_cameras;
+			int cameraId = getNextCameraId();
 		    if( preview.getCameraControllerManager().isFrontFacing( cameraId ) ) {
 		    	preview.showToast(switch_camera_toast, R.string.front_camera);
 		    }
@@ -856,6 +871,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		    switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
 			this.preview.setCamera(cameraId);
 		    switchCameraButton.setEnabled(true);
+			mainUI.setSwitchCameraContentDescription();
 		}
     }
 
@@ -2049,6 +2065,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "cameraSetup: time after setting popup icon: " + (System.currentTimeMillis() - debug_time));
 
 		mainUI.setTakePhotoIcon();
+		mainUI.setSwitchCameraContentDescription();
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: time after setting take photo icon: " + (System.currentTimeMillis() - debug_time));
 

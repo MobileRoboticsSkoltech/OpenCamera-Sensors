@@ -248,7 +248,6 @@
     <string name="exposure_lock">露出を固定する</string>
     <string name="focus_mode">フォーカス切替</string>
     <string name="flash_mode">フラッシュ切替</string>
-    <string name="switch_camera">カメラに切替</string>
     <string name="trash">さっきの写真を削除する</string>
     <string name="share">この写真を共有する</string>
     

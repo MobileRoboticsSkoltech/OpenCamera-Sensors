@@ -245,7 +245,6 @@
     <string name="exposure_lock">Блокировка экспозиции</string>
     <string name="focus_mode">Фокус</string>
     <string name="flash_mode">Вспышка</string>
-    <string name="switch_camera">Переключение камеры</string>
     <string name="trash">Удалить последний снимок</string>
     <string name="share">Поделиться</string>
     

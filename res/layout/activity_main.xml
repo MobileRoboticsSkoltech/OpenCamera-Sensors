@@ -134,7 +134,7 @@
         android:layout_height="50dp"
         android:padding="10dp"
         android:scaleType="fitCenter"
-        android:contentDescription="@string/switch_camera"
+        android:contentDescription="@string/switch_to_front_camera"
         android:src="@drawable/switch_camera"
         android:onClick="clickedSwitchCamera"
         />

@@ -360,17 +360,19 @@ public class MainUI {
 		}
 
 		setTakePhotoIcon();
+		// no need to call setSwitchCameraContentDescription()
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "layoutUI: total time: " + (System.currentTimeMillis() - debug_time));
 		}
     }
-    
+
+    /** Set icon for taking photos vs videos.
+	 *  Also handles content descriptions for the take photo button and switch video button.
+     */
     public void setTakePhotoIcon() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setTakePhotoIcon()");
-		// set icon for taking photos vs videos
-		// also handles content descriptions for the take photo button and switch video button
 		if( main_activity.getPreview() != null ) {
 			ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 			int resource = 0;
@@ -396,6 +398,27 @@ public class MainUI {
 
 			view = (ImageButton)main_activity.findViewById(R.id.switch_video);
 			view.setContentDescription( main_activity.getResources().getString(switch_video_content_description) );
+		}
+    }
+
+    /** Set content description for switch camera button.
+     */
+    public void setSwitchCameraContentDescription() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setSwitchCameraContentDescription()");
+		if( main_activity.getPreview() != null && main_activity.getPreview().canSwitchCamera() ) {
+			ImageButton view = (ImageButton)main_activity.findViewById(R.id.switch_camera);
+			int content_description = 0;
+			int cameraId = main_activity.getNextCameraId();
+		    if( main_activity.getPreview().getCameraControllerManager().isFrontFacing( cameraId ) ) {
+				content_description = R.string.switch_to_front_camera;
+		    }
+		    else {
+				content_description = R.string.switch_to_back_camera;
+		    }
+			if( MyDebug.LOG )
+				Log.d(TAG, "content_description: " + main_activity.getResources().getString(content_description));
+			view.setContentDescription( main_activity.getResources().getString(content_description) );
 		}
     }
 

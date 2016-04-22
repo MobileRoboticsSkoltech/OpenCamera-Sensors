@@ -245,7 +245,6 @@
     <string name="exposure_lock">Exposition bloquée</string>
     <string name="focus_mode">Mode focus</string>
     <string name="flash_mode">Mode flash</string>
-    <string name="switch_camera">Changer la caméra</string>
     <string name="trash">Effacer la dernière photo</string>
     <string name="share">Partager la photo</string>
     
