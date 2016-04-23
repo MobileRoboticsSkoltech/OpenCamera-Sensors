@@ -55,6 +55,30 @@ public class CameraControllerManager2 extends CameraControllerManager {
 		return false;
 	}
 
+	/* Returns true if the device supports the required hardware level, or better.
+	 * From http://msdx.github.io/androiddoc/docs//reference/android/hardware/camera2/CameraCharacteristics.html#INFO_SUPPORTED_HARDWARE_LEVEL
+	 * From Android N, higher levels than "FULL" are possible, that will have higher integer values.
+	 * Also see https://sourceforge.net/p/opencamera/tickets/141/ .
+	 */
+	private boolean isHardwareLevelSupported(CameraCharacteristics c, int requiredLevel) {
+		int deviceLevel = c.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+		if( MyDebug.LOG ) {
+			if( deviceLevel == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY )
+				Log.d(TAG, "Camera has LEGACY Camera2 support");
+			else if( deviceLevel == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED )
+				Log.d(TAG, "Camera has LIMITED Camera2 support");
+			else if( deviceLevel == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_FULL )
+				Log.d(TAG, "Camera has FULL Camera2 support");
+			else
+				Log.d(TAG, "Camera has unknown Camera2 support: " + deviceLevel);
+		}
+		if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+			return requiredLevel == deviceLevel;
+		}
+		// deviceLevel is not LEGACY, can use numerical sort
+		return requiredLevel <= deviceLevel;
+	}
+
 	/* Rather than allowing Camera2 API on all Android 5+ devices, we restrict it to cases where all cameras have at least LIMITED support.
 	 * (E.g., Nexus 6 has FULL support on back camera, LIMITED support on front camera.)
 	 * For now, devices with only LEGACY support should still with the old API.
@@ -64,18 +88,8 @@ public class CameraControllerManager2 extends CameraControllerManager {
 		try {
 			String cameraIdS = manager.getCameraIdList()[cameraId];
 			CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
-			int support = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-			if( MyDebug.LOG ) {
-				if( support == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY )
-					Log.d(TAG, "Camera " + cameraId + " has LEGACY Camera2 support");
-				else if( support == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED )
-					Log.d(TAG, "Camera " + cameraId + " has LIMITED Camera2 support");
-				else if( support == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_FULL )
-					Log.d(TAG, "Camera " + cameraId + " has FULL Camera2 support");
-				else
-					Log.d(TAG, "Camera " + cameraId + " has unknown Camera2 support?!");
-			}
-			return support == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED || support == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_FULL;
+			boolean supported = isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
+			return supported;
 		}
 		catch (CameraAccessException e) {
 			e.printStackTrace();
