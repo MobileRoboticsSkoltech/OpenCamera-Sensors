@@ -446,6 +446,20 @@ public class PopupView extends LinearLayout {
     			if( MyDebug.LOG )
     				Log.d(TAG, "addButtonOptionsToPopup time 2.1: " + (System.currentTimeMillis() - time_s));
 
+        		String button_string = "";
+    			// hack for ISO mode ISO_HJR (e.g., on Samsung S5)
+    			// also some devices report e.g. "ISO100" etc
+    			if( string.equalsIgnoreCase("ISO") && supported_option.length() >= 4 && supported_option.substring(0, 4).equalsIgnoreCase("ISO_") ) {
+        			button_string = string + "\n" + supported_option.substring(4);
+    			}
+    			else if( string.equalsIgnoreCase("ISO") && supported_option.length() >= 3 && supported_option.substring(0, 3).equalsIgnoreCase("ISO") ) {
+    				button_string = string + "\n" + supported_option.substring(3);
+    			}
+    			else {
+    				button_string = string + "\n" + supported_option;
+    			}
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "button_string: " + button_string);
         		View view = null;
         		if( resource != -1 ) {
         			ImageButton image_button = new ImageButton(this.getContext());
@@ -477,17 +491,7 @@ public class PopupView extends LinearLayout {
         			view = button;
         			ll2.addView(view);
 
-        			// hack for ISO mode ISO_HJR (e.g., on Samsung S5)
-        			// also some devices report e.g. "ISO100" etc
-        			if( string.equalsIgnoreCase("ISO") && supported_option.length() >= 4 && supported_option.substring(0, 4).equalsIgnoreCase("ISO_") ) {
-            			button.setText(string + "\n" + supported_option.substring(4));
-        			}
-        			else if( string.equalsIgnoreCase("ISO") && supported_option.length() >= 3 && supported_option.substring(0, 3).equalsIgnoreCase("ISO") ) {
-            			button.setText(string + "\n" + supported_option.substring(3));
-        			}
-        			else {
-            			button.setText(string + "\n" + supported_option);
-        			}
+        			button.setText(button_string);
         			button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
         			button.setTextColor(Color.WHITE);
         			// need 0 padding so we have enough room to display text for ISO buttons, when there are 6 ISO settings
@@ -502,7 +506,7 @@ public class PopupView extends LinearLayout {
     			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
     			view.setLayoutParams(params);
 
-    			view.setContentDescription(string);
+    			view.setContentDescription(button_string);
     			if( supported_option.equals(current_value) ) {
     				view.setAlpha(ALPHA_BUTTON_SELECTED);
     				current_view = view;
