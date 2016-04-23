@@ -868,7 +868,26 @@ public class DrawPreview {
 		}
 
 		if( preview.isFocusWaiting() || preview.isFocusRecentSuccess() || preview.isFocusRecentFailure() ) {
-			int size = (int) (40 * scale + 0.5f); // convert dps to pixels
+			long time_since_focus_started = preview.timeSinceStartedAutoFocus();
+			float min_radius = (float) (40 * scale + 0.5f); // convert dps to pixels
+			float max_radius = (float) (45 * scale + 0.5f); // convert dps to pixels
+			float radius = min_radius;
+			if( time_since_focus_started > 0 ) {
+				final long length = 500;
+				float frac = ((float)time_since_focus_started) / (float)length;
+				if( frac > 1.0f )
+					frac = 1.0f;
+				if( frac < 0.5f ) {
+					float alpha = frac*2.0f;
+					radius = (1.0f-alpha) * min_radius + alpha * max_radius;
+				}
+				else {
+					float alpha = (frac-0.5f)*2.0f;
+					radius = (1.0f-alpha) * max_radius + alpha * min_radius;
+				}
+			}
+			int size = (int)radius;
+
 			if( preview.isFocusRecentSuccess() )
 				p.setColor(Color.rgb(20, 231, 21)); // Green A400
 			else if( preview.isFocusRecentFailure() )

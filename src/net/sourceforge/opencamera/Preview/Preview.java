@@ -211,6 +211,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int focus_screen_x = 0;
 	private int focus_screen_y = 0;
 	private long focus_complete_time = -1;
+	private long focus_started_time = -1;
 	private int focus_success = FOCUS_DONE;
 	private static final int FOCUS_WAITING = 0;
 	private static final int FOCUS_SUCCESS = 1;
@@ -895,6 +896,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		focus_started_time = -1;
 		take_photo_after_autofocus = false;
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
@@ -1003,6 +1005,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	preview_h = 0;
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
+		focus_started_time = -1;
 		take_photo_after_autofocus = false;
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
@@ -4103,6 +4106,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    		this.successfully_focused = false;
     			camera_controller.autoFocus(autoFocusCallback);
     			count_cameraAutoFocus++;
+    			this.focus_started_time = System.currentTimeMillis();
 				if( MyDebug.LOG )
 					Log.d(TAG, "autofocus started, count now: " + count_cameraAutoFocus);
 	        }
@@ -4110,6 +4114,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        	// do this so we get the focus box, for focus modes that support focus area, but don't support autofocus
 				focus_success = FOCUS_SUCCESS;
 				focus_complete_time = System.currentTimeMillis();
+				// n.b., don't set focus_started_time as that may be used for application to show autofocus animation
 	        }
 		}
     }
@@ -4787,6 +4792,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     
     public boolean isFocusRecentSuccess() {
     	return focus_success == FOCUS_SUCCESS;
+    }
+    
+    public long timeSinceStartedAutoFocus() {
+    	if( focus_started_time != -1 )
+    		return System.currentTimeMillis() - focus_started_time;
+    	return 0;
     }
     
     public boolean isFocusRecentFailure() {
