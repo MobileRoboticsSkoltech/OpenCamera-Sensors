@@ -78,6 +78,7 @@ public class CameraController2 extends CameraController {
 	//private static final int STATE_WAITING_PRECAPTURE_START = 2;
 	//private static final int STATE_WAITING_PRECAPTURE_DONE = 3;
 	private int state = STATE_NORMAL;
+	private boolean ready_for_capture = false;
 
 	private ContinuousFocusMoveCallback continuous_focus_move_callback = null;
 	
@@ -147,12 +148,6 @@ public class CameraController2 extends CameraController {
 			setAERegions(builder);
 			setFaceDetectMode(builder);
 			setVideoStabilization(builder);
-			/*builder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
-			builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO);
-			builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF);
-			builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, 33333333l);
-			builder.set(CaptureRequest.SENSOR_SENSITIVITY, 40);
-			builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 33333333l);*/
 
 			if( is_still ) {
 				if( location != null ) {
@@ -168,10 +163,10 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "setSceneMode");
 				Log.d(TAG, "builder: " + builder);
 			}
-			if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null && scene_mode == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
+			/*if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null && scene_mode == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
 				// can leave off
 			}
-			else if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || builder.get(CaptureRequest.CONTROL_SCENE_MODE) != scene_mode ) {
+			else*/ if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || builder.get(CaptureRequest.CONTROL_SCENE_MODE) != scene_mode ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setting scene mode: " + scene_mode);
 				if( scene_mode == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
@@ -187,10 +182,10 @@ public class CameraController2 extends CameraController {
 		}
 
 		private boolean setColorEffect(CaptureRequest.Builder builder) {
-			if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null && color_effect == CameraMetadata.CONTROL_EFFECT_MODE_OFF ) {
+			/*if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null && color_effect == CameraMetadata.CONTROL_EFFECT_MODE_OFF ) {
 				// can leave off
 			}
-			else if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null || builder.get(CaptureRequest.CONTROL_EFFECT_MODE) != color_effect ) {
+			else*/ if( builder.get(CaptureRequest.CONTROL_EFFECT_MODE) == null || builder.get(CaptureRequest.CONTROL_EFFECT_MODE) != color_effect ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setting color effect: " + color_effect);
 				builder.set(CaptureRequest.CONTROL_EFFECT_MODE, color_effect);
@@ -200,10 +195,10 @@ public class CameraController2 extends CameraController {
 		}
 
 		private boolean setWhiteBalance(CaptureRequest.Builder builder) {
-			if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null && white_balance == CameraMetadata.CONTROL_AWB_MODE_AUTO ) {
+			/*if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null && white_balance == CameraMetadata.CONTROL_AWB_MODE_AUTO ) {
 				// can leave off
 			}
-			else if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null || builder.get(CaptureRequest.CONTROL_AWB_MODE) != white_balance ) {
+			else*/ if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null || builder.get(CaptureRequest.CONTROL_AWB_MODE) != white_balance ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setting white balance: " + white_balance);
 				builder.set(CaptureRequest.CONTROL_AWB_MODE, white_balance);
@@ -2383,6 +2378,8 @@ public class CameraController2 extends CameraController {
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			camera_settings.setupBuilder(stillBuilder, true);
+			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
         	Surface surface = getPreviewSurface();
         	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
 			stillBuilder.addTarget(imageReader.getSurface());
@@ -2501,7 +2498,7 @@ public class CameraController2 extends CameraController {
 		}
 	}*/
 
-	/*private void runPrecapture() {
+	private void runPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "runPrecapture");
 		// first run precapture sequence
@@ -2510,12 +2507,43 @@ public class CameraController2 extends CameraController {
     	//state = STATE_WAITING_PRECAPTURE_START;
     	//capture();
 		try {
-			CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 			camera_settings.setupBuilder(precaptureBuilder, false);
 			precaptureBuilder.addTarget(getPreviewSurface());
 			precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-	    	state = STATE_WAITING_PRECAPTURE_START;
-			captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, null);
+	    	//state = STATE_WAITING_PRECAPTURE_START;
+			//captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, null);
+			CameraCaptureSession.CaptureCallback preCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+				public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult result) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "precapture: onCaptureProgressed");
+					Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
+					if( MyDebug.LOG ) {
+						if( ae_state != null )
+							Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
+						else
+							Log.d(TAG, "CONTROL_AE_STATE is null");
+					}
+					super.onCaptureProgressed(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
+				}
+
+				public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "precapture: onCaptureCompleted");
+					Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
+					if( MyDebug.LOG ) {
+						if( ae_state != null )
+							Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
+						else
+							Log.d(TAG, "CONTROL_AE_STATE is null");
+					}
+					precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+					takePictureAfterPrecapture();
+
+					super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe
+				}
+			};
+			captureSession.capture(precaptureBuilder.build(), preCaptureCallback, handler);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -2531,7 +2559,7 @@ public class CameraController2 extends CameraController {
 				return;
 			}
 		}
-	}*/
+	}
 	
 	@Override
 	public void takePicture(final PictureCallback raw, final PictureCallback jpeg, final ErrorCallback error) {
@@ -2545,13 +2573,17 @@ public class CameraController2 extends CameraController {
 		}
 		this.jpeg_cb = jpeg;
 		this.take_picture_error_cb = error;
-		takePictureAfterPrecapture(); // take photo without precapture - Google Camera with Camera 2 API doesn't do precapture either
-		/*if( camera_settings.has_iso ) {
+		if( !ready_for_capture ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "takePicture: not ready for capture!");
+			//throw new RuntimeException(); // debugging
+		}
+		if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") ) {
 			takePictureAfterPrecapture();
 		}
 		else {
 			runPrecapture();
-		}*/
+		}
 
 		/*camera_settings.setupBuilder(previewBuilder, false);
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
@@ -2806,7 +2838,14 @@ public class CameraController2 extends CameraController {
 					takePictureAfterPrecapture();
 				}
 			}*/
-			
+			int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+			if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED ) {
+				ready_for_capture = false;
+			}
+			else if( !ready_for_capture ) {
+				ready_for_capture = true;
+			}
+
 			if( result.get(CaptureResult.SENSOR_SENSITIVITY) != null ) {
 				capture_result_has_iso = true;
 				capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
