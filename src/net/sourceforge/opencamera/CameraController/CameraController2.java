@@ -75,8 +75,8 @@ public class CameraController2 extends CameraController {
 	
 	private static final int STATE_NORMAL = 0;
 	private static final int STATE_WAITING_AUTOFOCUS = 1;
-	//private static final int STATE_WAITING_PRECAPTURE_START = 2;
-	//private static final int STATE_WAITING_PRECAPTURE_DONE = 3;
+	private static final int STATE_WAITING_PRECAPTURE_START = 2;
+	private static final int STATE_WAITING_PRECAPTURE_DONE = 3;
 	private int state = STATE_NORMAL;
 	private boolean ready_for_capture = false;
 
@@ -2502,48 +2502,25 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "runPrecapture");
 		// first run precapture sequence
-		// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
-    	//previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-    	//state = STATE_WAITING_PRECAPTURE_START;
-    	//capture();
 		try {
+			// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
 			final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-			camera_settings.setupBuilder(precaptureBuilder, false);
+
+			camera_settings.setupBuilder(precaptureBuilder, false); // TODO: should is_still be true here?
+			precaptureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+			precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
+
 			precaptureBuilder.addTarget(getPreviewSurface());
+
+	    	state = STATE_WAITING_PRECAPTURE_START;
+
+	    	// first set precapture to idle - this is needed, otherwise we hang in state STATE_WAITING_PRECAPTURE_START, because precapture already occurred whilst autofocusing, and if doesn't occur again unless we first set the precapture trigger to idle
+			captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
+			captureSession.setRepeatingRequest(precaptureBuilder.build(), previewCaptureCallback, handler);
+
+			// now set precapture
 			precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-	    	//state = STATE_WAITING_PRECAPTURE_START;
-			//captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, null);
-			CameraCaptureSession.CaptureCallback preCaptureCallback = new CameraCaptureSession.CaptureCallback() {
-				public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult result) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "precapture: onCaptureProgressed");
-					Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
-					if( MyDebug.LOG ) {
-						if( ae_state != null )
-							Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
-						else
-							Log.d(TAG, "CONTROL_AE_STATE is null");
-					}
-					super.onCaptureProgressed(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
-				}
-
-				public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "precapture: onCaptureCompleted");
-					Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
-					if( MyDebug.LOG ) {
-						if( ae_state != null )
-							Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
-						else
-							Log.d(TAG, "CONTROL_AE_STATE is null");
-					}
-					precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
-					takePictureAfterPrecapture();
-
-					super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe
-				}
-			};
-			captureSession.capture(precaptureBuilder.build(), preCaptureCallback, handler);
+			captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -2700,7 +2677,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
-		private long last_af_state_frame_number = 0;
+		private long last_process_frame_number = 0;
 		private int last_af_state = -1;
 
 		public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long frameNumber) {
@@ -2713,22 +2690,24 @@ public class CameraController2 extends CameraController {
 		}
 
 		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
-			processAF(request, partialResult);
+			process(request, partialResult);
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
 		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-			processAF(request, result);
+			process(request, result);
 			processCompleted(request, result);
 			super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
-		private void processAF(CaptureRequest request, CaptureResult result) {
+		/** Processes either a partial or total result.
+		 */
+		private void process(CaptureRequest request, CaptureResult result) {
 			/*if( MyDebug.LOG )
-			Log.d(TAG, "preview processAF, state: " + state);*/
-			if( result.getFrameNumber() < last_af_state_frame_number ) {
+			Log.d(TAG, "process, state: " + state);*/
+			if( result.getFrameNumber() < last_process_frame_number ) {
 				/*if( MyDebug.LOG )
-					Log.d(TAG, "processAF discarded outdated frame " + result.getFrameNumber() + " vs " + last_af_state_frame_number);*/
+					Log.d(TAG, "processAF discarded outdated frame " + result.getFrameNumber() + " vs " + last_process_frame_number);*/
 				return;
 			}
 			if( result.get(CaptureResult.CONTROL_AF_STATE) == null) {
@@ -2737,7 +2716,7 @@ public class CameraController2 extends CameraController {
 				// Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
 				return;
 			}
-			last_af_state_frame_number = result.getFrameNumber();
+			last_process_frame_number = result.getFrameNumber();
 			int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			/*if( MyDebug.LOG ) {
 				if( autofocus_cb == null ) {
@@ -2746,6 +2725,13 @@ public class CameraController2 extends CameraController {
 					else if( af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED )
 						Log.d(TAG, "processAF: autofocus failed but no callback set");
 				}
+			}*/
+			/*if( MyDebug.LOG ) {
+				Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
+				if( ae_state != null )
+					Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
+				else
+					Log.d(TAG, "CONTROL_AE_STATE is null");
 			}*/
 			if( state == STATE_NORMAL ) {
 				// do nothing
@@ -2779,6 +2765,43 @@ public class CameraController2 extends CameraController {
 					}
 				}
 			}
+			else if( state == STATE_WAITING_PRECAPTURE_START ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "waiting for precapture start...");
+				// CONTROL_AE_STATE can be null on some devices
+				Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
+				if( MyDebug.LOG ) {
+					if( ae_state != null )
+						Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
+					else
+						Log.d(TAG, "CONTROL_AE_STATE is null");
+				}
+				if( ae_state == null || ae_state == CaptureResult.CONTROL_AE_STATE_PRECAPTURE /*|| ae_state == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED*/ ) {
+					// we have to wait for CONTROL_AE_STATE_PRECAPTURE; if we allow CONTROL_AE_STATE_FLASH_REQUIRED, then on Nexus 6 at least we get poor quality results with flash:
+					// varying levels of brightness, sometimes too bright or too dark, sometimes with blue tinge, sometimes even with green corruption
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "precapture started");
+					}
+					state = STATE_WAITING_PRECAPTURE_DONE;
+				}
+			}
+			else if( state == STATE_WAITING_PRECAPTURE_DONE ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "waiting for precapture done...");
+				// CONTROL_AE_STATE can be null on some devices
+				Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
+				if( ae_state == null || ae_state != CaptureResult.CONTROL_AE_STATE_PRECAPTURE ) {
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "precapture completed");
+						if( ae_state != null )
+							Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
+						else
+							Log.d(TAG, "CONTROL_AE_STATE is null");
+					}
+					state = STATE_NORMAL;
+					takePictureAfterPrecapture();
+				}
+			}
 
 			if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
 				if( MyDebug.LOG )
@@ -2802,42 +2825,9 @@ public class CameraController2 extends CameraController {
 			last_af_state = af_state;
 		}
 		
+		/** Processes a total result.
+		 */
 		private void processCompleted(CaptureRequest request, CaptureResult result) {
-			/*if( state == STATE_WAITING_PRECAPTURE_START ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "waiting for precapture start...");
-				// CONTROL_AE_STATE can be null on some devices
-				Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
-				if( MyDebug.LOG ) {
-					if( ae_state != null )
-						Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
-					else
-						Log.d(TAG, "CONTROL_AE_STATE is null");
-				}
-				if( ae_state == null || ae_state == CaptureResult.CONTROL_AE_STATE_PRECAPTURE || ae_state == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED ) {
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "precapture started");
-					}
-					state = STATE_WAITING_PRECAPTURE_DONE;
-				}
-			}
-			else if( state == STATE_WAITING_PRECAPTURE_DONE ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "waiting for precapture done...");
-				// CONTROL_AE_STATE can be null on some devices
-				Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
-				if( ae_state == null || ae_state != CaptureResult.CONTROL_AE_STATE_PRECAPTURE ) {
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "precapture completed");
-						if( ae_state != null )
-							Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
-						else
-							Log.d(TAG, "CONTROL_AE_STATE is null");
-					}
-					state = STATE_NORMAL;
-					takePictureAfterPrecapture();
-				}
-			}*/
 			int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED ) {
 				ready_for_capture = false;
