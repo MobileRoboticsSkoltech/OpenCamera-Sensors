@@ -220,6 +220,7 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
 				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
 				// set flash via CaptureRequest.FLASH
+				// note we only set it when is_still, otherwise the flash seems to turn on and off bizarrely when not taking a photo!
 		    	if( flash_value.equals("flash_off") ) {
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 		    	}
