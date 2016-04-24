@@ -219,9 +219,10 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
 				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+				// for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
+				builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 				// set flash via CaptureRequest.FLASH
-				// note we only set it when is_still, otherwise the flash seems to turn on and off bizarrely when not taking a photo!
-		    	if( flash_value.equals("flash_off") ) {
+		    	/*if( flash_value.equals("flash_off") ) {
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 		    	}
 		    	else if( flash_value.equals("flash_auto") ) {
@@ -235,7 +236,7 @@ public class CameraController2 extends CameraController {
 		    	}
 		    	else if( flash_value.equals("flash_red_eye") ) {
 					builder.set(CaptureRequest.FLASH_MODE, is_still ? CameraMetadata.FLASH_MODE_SINGLE : CameraMetadata.FLASH_MODE_OFF);
-		    	}
+		    	}*/
 			}
 			else {
 				if( MyDebug.LOG ) {
@@ -2507,7 +2508,7 @@ public class CameraController2 extends CameraController {
 			// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
 			final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 
-			camera_settings.setupBuilder(precaptureBuilder, false); // TODO: should is_still be true here?
+			camera_settings.setupBuilder(precaptureBuilder, false);
 			precaptureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 			precaptureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
 
@@ -2556,6 +2557,8 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "takePicture: not ready for capture!");
 			//throw new RuntimeException(); // debugging
 		}
+		// Don't need precapture if flash off
+		// And currently has_iso manual mode doesn't support flash - but just in case that's changed later, we still probably don't want to be doing a precapture...
 		if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") ) {
 			takePictureAfterPrecapture();
 		}

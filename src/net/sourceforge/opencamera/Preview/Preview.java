@@ -1418,6 +1418,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "setupCameraParameters: time after white balance: " + (System.currentTimeMillis() - debug_time));
 		}
 		
+		// must be done before setting flash modes, as we may remove flash modes if in manual mode
 		boolean has_manual_iso = false;
 		{
 			if( MyDebug.LOG )
@@ -1453,6 +1454,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					else {
 						// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
 						applicationInterface.clearExposureTimePref();
+					}
+					
+					if( this.using_android_l && supported_flash_values != null ) {
+						// flash modes not supported when using Android L's
+						// (it's unclear flash is useful - ideally we'd at least offer torch, but ISO seems to reset to 100 when flash/torch is on!)
+						supported_flash_values = null;
+						if( MyDebug.LOG )
+							Log.d(TAG, "flash not supported in Camera2 manual mode");
 					}
 				}
 			}
