@@ -3814,8 +3814,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        };
 			camera_controller.autoFocus(autoFocusCallback);
 		}
-		else if( (!using_android_l && this.recentlyFocused()) || skip_autofocus ) {
-			// Android L API seems to have poor results with flash if we don't lock focus for taking a photo (photos can come out too bright or too dark), so we always force a focus
+		else if( this.recentlyFocused() || skip_autofocus ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "recently focused successfully, so no need to refocus");
 			takePhotoWhenFocused();
