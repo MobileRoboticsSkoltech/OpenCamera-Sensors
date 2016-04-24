@@ -2825,6 +2825,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// but we need to do this, to get good light for Nexus 5 or 6
 			// we could hardcode behaviour like we do for video, but this is the same way that Google Camera chooses preview fps for photos
 			// or I could hardcode behaviour for Galaxy Nexus, but since it's an old device (and an obscure bug anyway - most users don't really need continuous focus in photo mode), better to live with the bug rather than complicating the code
+			// Update for v1.29: this doesn't seem to happen on Galaxy Nexus with continuous picture focus mode, which is what we now use
 			selected_fps = chooseBestPreviewFps(fps_ranges);
 		}
         camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);

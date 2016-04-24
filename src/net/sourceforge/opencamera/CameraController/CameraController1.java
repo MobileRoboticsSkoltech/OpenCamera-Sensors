@@ -790,6 +790,7 @@ public class CameraController1 extends CameraController {
 		// so we should be very careful about enabling this code again!
 		// Update for v1.23: the bug with Galaxy Nexus has come back (see comments in Preview.setPreviewFps()) and is now unavoidable,
 		// but I've still kept this check here - if nothing else, because it apparently caused video recording problems on other devices too.
+		// Update for v1.29: this doesn't seem to happen on Galaxy Nexus with continuous picture focus mode, which is what we now use; but again, still keepin the check here due to possible problems on other devices
 		String focus_mode = parameters.getFocusMode();
 		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
         if( focus_mode != null && !focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
