@@ -2694,11 +2694,15 @@ public class CameraController2 extends CameraController {
 		}
 
 		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "onCaptureProgressed");*/
 			process(request, partialResult);
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
 		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "onCaptureCompleted");*/
 			process(request, result);
 			processCompleted(request, result);
 			super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
@@ -2715,8 +2719,20 @@ public class CameraController2 extends CameraController {
 				return;
 			}
 			last_process_frame_number = result.getFrameNumber();
+
 			// use Integer instead of int, so can compare to null: Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
 			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+			if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ) {
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "not ready for capture: " + af_state);*/
+				ready_for_capture = false;
+			}
+			else if( !ready_for_capture ) {
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "ready for capture: " + af_state);*/
+				ready_for_capture = true;
+			}
+
 			/*if( MyDebug.LOG ) {
 				if( autofocus_cb == null ) {
 					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
@@ -2737,7 +2753,7 @@ public class CameraController2 extends CameraController {
 			}
 			else if( state == STATE_WAITING_AUTOFOCUS && af_state != null && af_state != last_af_state ) {
 				// check for autofocus completing
-				// need to check that af_state != last_af_state, otherwise
+				// need to check that af_state != last_af_state
 				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ||
 						af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED
 						) {
@@ -2827,13 +2843,8 @@ public class CameraController2 extends CameraController {
 		/** Processes a total result.
 		 */
 		private void processCompleted(CaptureRequest request, CaptureResult result) {
-			int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
-			if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED ) {
-				ready_for_capture = false;
-			}
-			else if( !ready_for_capture ) {
-				ready_for_capture = true;
-			}
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "processCompleted");*/
 
 			if( result.get(CaptureResult.SENSOR_SENSITIVITY) != null ) {
 				capture_result_has_iso = true;
