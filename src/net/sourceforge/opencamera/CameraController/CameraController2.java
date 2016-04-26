@@ -2714,14 +2714,9 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "processAF discarded outdated frame " + result.getFrameNumber() + " vs " + last_process_frame_number);*/
 				return;
 			}
-			if( result.get(CaptureResult.CONTROL_AF_STATE) == null) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "processAF discared as no af state info");
-				// Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
-				return;
-			}
 			last_process_frame_number = result.getFrameNumber();
-			int af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+			// use Integer instead of int, so can compare to null: Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
+			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			/*if( MyDebug.LOG ) {
 				if( autofocus_cb == null ) {
 					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
@@ -2740,7 +2735,7 @@ public class CameraController2 extends CameraController {
 			if( state == STATE_NORMAL ) {
 				// do nothing
 			}
-			else if( state == STATE_WAITING_AUTOFOCUS && af_state != last_af_state ) {
+			else if( state == STATE_WAITING_AUTOFOCUS && af_state != null && af_state != last_af_state ) {
 				// check for autofocus completing
 				// need to check that af_state != last_af_state, otherwise
 				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ||
