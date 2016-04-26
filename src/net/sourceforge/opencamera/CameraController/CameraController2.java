@@ -336,8 +336,8 @@ public class CameraController2 extends CameraController {
 	private CameraSettings camera_settings = new CameraSettings();
 	private boolean push_repeating_request_when_torch_off = false;
 	private CaptureRequest push_repeating_request_when_torch_off_id = null;
-	private boolean push_set_ae_lock = false;
-	private CaptureRequest push_set_ae_lock_id = null;
+	/*private boolean push_set_ae_lock = false;
+	private CaptureRequest push_set_ae_lock_id = null;*/
 
 	public CameraController2(Context context, int cameraId, ErrorCallback preview_error_cb) throws CameraControllerException {
 		super(cameraId);
@@ -2929,9 +2929,11 @@ public class CameraController2 extends CameraController {
 					} 
 				}
 			}
-			if( push_set_ae_lock && push_set_ae_lock_id == request ) {
+			/*if( push_set_ae_lock && push_set_ae_lock_id == request ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "received push_set_ae_lock");
+				// hack - needed to fix bug on Nexus 6 where auto-exposure sometimes locks when taking a photo of bright scene with flash on!
+            	// this doesn't completely resolve the issue, but seems to make it far less common; also when it does happen, taking another photo usually fixes it
 				push_set_ae_lock = false;
 				push_set_ae_lock_id = null;
 				camera_settings.setAutoExposureLock(previewBuilder);
@@ -2946,7 +2948,7 @@ public class CameraController2 extends CameraController {
 					}
 					e.printStackTrace();
 				} 
-			}
+			}*/
 			
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if( MyDebug.LOG )
@@ -2957,17 +2959,7 @@ public class CameraController2 extends CameraController {
 				camera_settings.setAEMode(previewBuilder, false); // not sure if needed, but the AE mode is set again in Camera2Basic
 				// n.b., if capture/setRepeatingRequest throw exception, we don't call the take_picture_error_cb.onError() callback, as the photo should have been taken by this point
 				try {
-		            /*if( !camera_settings.ae_lock && camera_settings.flash_value.equals("flash_on") ) {
-						// hack - needed to fix bug on Nexus 6 where auto-exposure sometimes locks when taking a photo of bright scene with flash on!
-		            	// this doesn't completely resolve the issue, but seems to make it far less common; also when it does happen, taking another photo usually fixes it
-		            	previewBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
-		            	push_set_ae_lock = true;
-		            	push_set_ae_lock_id = previewBuilder.build();
-		            	capture(push_set_ae_lock_id);
-		            }
-		            else*/ {
-		            	capture();
-		            }
+	            	capture();
 				}
 				catch(CameraAccessException e) {
 					if( MyDebug.LOG ) {
