@@ -2316,7 +2316,7 @@ public class CameraController2 extends CameraController {
 			autofocus_cb.onAutoFocus(false);
 			autofocus_cb = null;
 		} 
-		previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+		previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
 	}
 
 	@Override
@@ -2969,6 +2969,7 @@ public class CameraController2 extends CameraController {
 					}
 					e.printStackTrace();
 				}
+				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
 				try {
 					setRepeatingRequest();
 				}
