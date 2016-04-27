@@ -2270,7 +2270,6 @@ public class CameraController2 extends CameraController {
 			this.autofocus_cb = cb;
 			return;
 		}*/
-    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
 		if( MyDebug.LOG ) {
 			{
 				MeteringRectangle [] areas = previewBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
@@ -2285,23 +2284,12 @@ public class CameraController2 extends CameraController {
 				}
 			}
 		}
-    	/*if( focus_areas != null ) {
-        	previewBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, focus_areas);
-    	}
-    	if( metering_areas != null ) {
-        	previewBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, metering_areas);
-    	}*/
-    	//previewBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-    	/*previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, 0.0f);
-		if( MyDebug.LOG ) {
-			Float focus_distance = previewBuilder.get(CaptureRequest.LENS_FOCUS_DISTANCE);
-			Log.d(TAG, "focus_distance: " + focus_distance);
-		}*/
 		state = STATE_WAITING_AUTOFOCUS;
 		this.autofocus_cb = cb;
 		// Camera2Basic sets a repeating request rather than capture, for doing autofocus (and if we do a capture(), sometimes have problem that autofocus never returns)
 		// Google Camera does a capture, and then does a repeating request after setting back to idle
 		try {
+	    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
 			capture();
 	    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 			setRepeatingRequest();
