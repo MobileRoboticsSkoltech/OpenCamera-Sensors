@@ -2270,15 +2270,16 @@ public class CameraController2 extends CameraController {
 			this.autofocus_cb = cb;
 			return;
 		}*/
+		CaptureRequest.Builder afBuilder = previewBuilder;
 		if( MyDebug.LOG ) {
 			{
-				MeteringRectangle [] areas = previewBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
+				MeteringRectangle [] areas = afBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
 				for(int i=0;areas != null && i<areas.length;i++) {
 					Log.d(TAG, i + " focus area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
 				}
 			}
 			{
-				MeteringRectangle [] areas = previewBuilder.get(CaptureRequest.CONTROL_AE_REGIONS);
+				MeteringRectangle [] areas = afBuilder.get(CaptureRequest.CONTROL_AE_REGIONS);
 				for(int i=0;areas != null && i<areas.length;i++) {
 					Log.d(TAG, i + " metering area: " + areas[i].getX() + " , " + areas[i].getY() + " : " + areas[i].getWidth() + " x " + areas[i].getHeight() + " weight " + areas[i].getMeteringWeight());
 				}
@@ -2289,10 +2290,10 @@ public class CameraController2 extends CameraController {
 		// Camera2Basic sets a repeating request rather than capture, for doing autofocus (and if we do a capture(), sometimes have problem that autofocus never returns)
 		// Google Camera sets to idle with a repeating request, then sets af trigger to start with a capture
 		try {
-	    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
-			setRepeatingRequest();
-	    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-			capture();
+			afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
+			setRepeatingRequest(afBuilder.build());
+			afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+			capture(afBuilder.build());
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -2305,7 +2306,7 @@ public class CameraController2 extends CameraController {
 			autofocus_cb.onAutoFocus(false);
 			autofocus_cb = null;
 		} 
-		previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
+		afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
 	}
 
 	@Override
