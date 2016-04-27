@@ -1640,8 +1640,8 @@ public class CameraController2 extends CameraController {
 		}
 
 		try {
-			if( camera_settings.flash_value.equals("flash_torch") ) {
-				// hack - first need to turn torch off, otherwise torch remains on (at least on Nexus 6)
+			if( camera_settings.flash_value.equals("flash_torch") && !flash_value.equals("flash_off") ) {
+				// hack - if switching to something other than flash_off, we first need to turn torch off, otherwise torch remains on (at least on Nexus 6)
 				camera_settings.flash_value = "flash_off";
 				camera_settings.setAEMode(previewBuilder, false);
 				CaptureRequest request = previewBuilder.build();
