@@ -2464,7 +2464,7 @@ public class CameraController2 extends CameraController {
 
 	    	state = STATE_WAITING_PRECAPTURE_START;
 
-	    	// first set precapture to idle - this is needed, otherwise we hang in state STATE_WAITING_PRECAPTURE_START, because precapture already occurred whilst autofocusing, and if doesn't occur again unless we first set the precapture trigger to idle
+	    	// first set precapture to idle - this is needed, otherwise we hang in state STATE_WAITING_PRECAPTURE_START, because precapture already occurred whilst autofocusing, and it doesn't occur again unless we first set the precapture trigger to idle
 			captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
 			captureSession.setRepeatingRequest(precaptureBuilder.build(), previewCaptureCallback, handler);
 
