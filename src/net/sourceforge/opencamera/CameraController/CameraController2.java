@@ -2002,6 +2002,7 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "camera: " + camera);
 		try {
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+			previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
 			camera_settings.setupBuilder(previewBuilder, false);
 		}
 		catch(CameraAccessException e) {
@@ -2378,6 +2379,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
 			}
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			camera_settings.setupBuilder(stillBuilder, true);
 			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
@@ -2420,6 +2422,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			camera_settings.setupBuilder(stillBuilder, true);
         	Surface surface = getPreviewSurface();
@@ -2455,6 +2458,7 @@ public class CameraController2 extends CameraController {
 		try {
 			// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
 			final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			precaptureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 
 			camera_settings.setupBuilder(precaptureBuilder, false);
 			precaptureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
@@ -2566,6 +2570,7 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "done");
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+			previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
 			camera_settings.setupBuilder(previewBuilder, false);
 			createCaptureSession(video_recorder);
 		}
