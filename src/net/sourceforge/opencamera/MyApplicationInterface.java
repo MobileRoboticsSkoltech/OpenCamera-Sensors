@@ -638,7 +638,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public long getExposureTimePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), 1000000000l/30);
+    	return sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
     }
     
     @Override

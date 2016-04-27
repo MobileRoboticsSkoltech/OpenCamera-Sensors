@@ -114,6 +114,9 @@ public class PopupView extends LinearLayout {
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     				SharedPreferences.Editor editor = sharedPreferences.edit();
     				editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
+    				// also reset exposure time when changing back to auto from the popup menu:
+    				if( option.equals("auto") )
+    					editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
     				editor.apply();
 
     				main_activity.updateForSettings("ISO: " + option);

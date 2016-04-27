@@ -25,6 +25,8 @@ public abstract class CameraController {
 	private static final String TAG = "CameraController";
 	int cameraId = 0;
 
+	public static final long EXPOSURE_TIME_DEFAULT = 1000000000l/30;
+
 	// for testing:
 	public int count_camera_parameters_exception = 0;
 

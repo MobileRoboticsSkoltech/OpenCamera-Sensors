@@ -111,7 +111,7 @@ public class CameraController2 extends CameraController {
 		//private int ae_mode = CameraMetadata.CONTROL_AE_MODE_ON;
 		//private int flash_mode = CameraMetadata.FLASH_MODE_OFF;
 		private int iso = 0;
-		private long exposure_time = 1000000000l/30;
+		private long exposure_time = EXPOSURE_TIME_DEFAULT;
 		private Rect scalar_crop_region = null; // no need for has_scalar_crop_region, as we can set to null instead
 		private boolean has_ae_exposure_compensation = false;
 		private int ae_exposure_compensation = 0;
