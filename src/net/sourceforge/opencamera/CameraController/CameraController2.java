@@ -78,6 +78,7 @@ public class CameraController2 extends CameraController {
 	private static final int STATE_WAITING_PRECAPTURE_START = 2;
 	private static final int STATE_WAITING_PRECAPTURE_DONE = 3;
 	private int state = STATE_NORMAL;
+	private long precapture_started = -1; // set for STATE_WAITING_PRECAPTURE_START state
 	private boolean ready_for_capture = false;
 
 	private ContinuousFocusMoveCallback continuous_focus_move_callback = null;
@@ -2286,6 +2287,7 @@ public class CameraController2 extends CameraController {
 			}
 		}
 		state = STATE_WAITING_AUTOFOCUS;
+		precapture_started = -1;
 		this.autofocus_cb = cb;
 		// Camera2Basic sets a repeating request rather than capture, for doing autofocus (and if we do a capture(), sometimes have problem that autofocus never returns)
 		// Google Camera sets to idle with a repeating request, then sets af trigger to start with a capture
@@ -2303,6 +2305,7 @@ public class CameraController2 extends CameraController {
 			}
 			e.printStackTrace();
 			state = STATE_NORMAL;
+			precapture_started = -1;
 			autofocus_cb.onAutoFocus(false);
 			autofocus_cb = null;
 		} 
@@ -2334,6 +2337,7 @@ public class CameraController2 extends CameraController {
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 		this.autofocus_cb = null;
 		state = STATE_NORMAL;
+		precapture_started = -1;
 		try {
 			setRepeatingRequest();
 		}
@@ -2456,6 +2460,7 @@ public class CameraController2 extends CameraController {
 			precaptureBuilder.addTarget(getPreviewSurface());
 
 	    	state = STATE_WAITING_PRECAPTURE_START;
+	    	precapture_started = System.currentTimeMillis();
 
 	    	// first set precapture to idle - this is needed, otherwise we hang in state STATE_WAITING_PRECAPTURE_START, because precapture already occurred whilst autofocusing, and it doesn't occur again unless we first set the precapture trigger to idle
 			captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
@@ -2510,6 +2515,7 @@ public class CameraController2 extends CameraController {
 		/*camera_settings.setupBuilder(previewBuilder, false);
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
 		state = STATE_WAITING_AUTOFOCUS;
+		precapture_started = -1;
     	//capture();
     	setRepeatingRequest();*/
 	}
@@ -2708,6 +2714,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "af_state: " + af_state);
 					}
 					state = STATE_NORMAL;
+					precapture_started = -1;
 					// we need to cancel af trigger, otherwise sometimes things seem to get confused, with the autofocus thinking it's completed too early
 			    	/*previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 			    	capture();
@@ -2740,6 +2747,15 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "precapture started");
 					}
 					state = STATE_WAITING_PRECAPTURE_DONE;
+					precapture_started = -1;
+				}
+				else if( precapture_started != -1 && System.currentTimeMillis() - precapture_started > 5000 ) {
+					// hack - give up waiting - sometimes we never get a CONTROL_AE_STATE_PRECAPTURE so would end up stuck
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "precapture timeout");
+					}
+					state = STATE_WAITING_PRECAPTURE_DONE;
+					precapture_started = -1;
 				}
 			}
 			else if( state == STATE_WAITING_PRECAPTURE_DONE ) {
@@ -2756,6 +2772,7 @@ public class CameraController2 extends CameraController {
 							Log.d(TAG, "CONTROL_AE_STATE is null");
 					}
 					state = STATE_NORMAL;
+					precapture_started = -1;
 					takePictureAfterPrecapture();
 				}
 			}
