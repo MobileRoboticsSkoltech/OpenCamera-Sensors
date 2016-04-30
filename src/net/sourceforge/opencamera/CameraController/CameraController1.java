@@ -1037,10 +1037,27 @@ public class CameraController1 extends CameraController {
 	}
 
 	public void autoFocus(final CameraController.AutoFocusCallback cb) {
+		if( MyDebug.LOG )
+			Log.e(TAG, "autoFocus");
         Camera.AutoFocusCallback camera_cb = new Camera.AutoFocusCallback() {
-			@Override
+    		boolean done_autofocus = false;
+
+    		@Override
 			public void onAutoFocus(boolean success, Camera camera) {
-				cb.onAutoFocus(success);
+				if( MyDebug.LOG )
+					Log.e(TAG, "autoFocus.onAutoFocus");
+				// in theory we should only ever get one call to onAutoFocus(), but some Samsung phones at least can call the callback multiple times
+				// see http://stackoverflow.com/questions/36316195/take-picture-fails-on-samsung-phones
+				// needed to fix problem on Samsung S7 with flash auto/on and continuous picture focus where it would claim failed to take picture even though it'd succeeded,
+				// because we repeatedly call takePicture(), and the subsequent ones cause a runtime exception
+				if( !done_autofocus ) {
+					done_autofocus = true;
+					cb.onAutoFocus(success);
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.e(TAG, "ignore repeated autofocus");
+				}
 			}
         };
         try {
@@ -1106,6 +1123,8 @@ public class CameraController1 extends CameraController {
 	}
 	
 	public void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicture");
     	Camera.ShutterCallback shutter = new TakePictureShutterCallback();
         Camera.PictureCallback camera_raw = raw == null ? null : new Camera.PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {

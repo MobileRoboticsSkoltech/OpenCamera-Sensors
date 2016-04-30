@@ -897,6 +897,9 @@ FIXED   Problems with flash mode on Camera2 API - now seems to be working
         better on my Nexus 6 at least...
 FIXED   With Camera2 API, if starting up with flash auto or on, and in focus
         modes other than auto, macro or locked, then flash wouldn't fire.
+FIXED   Problems on some devices where we claimed failed to take photo, even
+        though it had succeed (some Samsung devices call the autofocus callback
+        more than once).
 ADDED   Proper support for continuous focus mode for photo mode.
 ADDED   Graphical border effect when taking a photo (if you don't like this,
         you can disable it under Settings/On screen GUI/"Show border when
