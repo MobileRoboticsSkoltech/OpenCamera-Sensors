@@ -1607,8 +1607,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 		if( current_video_quality == -1 && video_quality.size() > 0 ) {
-			// default to highest quality
-			current_video_quality = 0;
+			// default to FullHD if available, else pick highest quality
+			// (FullHD will give smaller file sizes and generally give better performance than 4K so probably better for most users; also seems to suffer from less problems when using manual ISO in Camera2 API)
+			current_video_quality = 0; // start with highest quality
+			for(int i=0;i<video_quality.size();i++) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "check video quality: " + video_quality.get(i));
+				CamcorderProfile profile = getCamcorderProfile(video_quality.get(i));
+				if( profile.videoFrameWidth == 1920 && profile.videoFrameHeight == 1080 ) {
+					current_video_quality = i;
+					break;
+				}
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "set video_quality value to " + video_quality.get(current_video_quality));
 		}
