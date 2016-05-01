@@ -2503,9 +2503,9 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "takePicture: not ready for capture!");
 			//throw new RuntimeException(); // debugging
 		}
-		// Don't need precapture if flash off
+		// Don't need precapture if flash off or torch
 		// And currently has_iso manual mode doesn't support flash - but just in case that's changed later, we still probably don't want to be doing a precapture...
-		if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") ) {
+		if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") ) {
 			takePictureAfterPrecapture();
 		}
 		else {
