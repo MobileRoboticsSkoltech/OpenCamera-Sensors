@@ -2754,6 +2754,7 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG ) {
 						Log.e(TAG, "precapture timeout");
 					}
+					count_precapture_timeout++;
 					state = STATE_WAITING_PRECAPTURE_DONE;
 					precapture_started = -1;
 				}

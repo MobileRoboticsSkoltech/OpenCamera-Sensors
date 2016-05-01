@@ -29,6 +29,7 @@ public abstract class CameraController {
 
 	// for testing:
 	public int count_camera_parameters_exception = 0;
+	public int count_precapture_timeout = 0;
 
 	public static class CameraFeatures {
 		public boolean is_zoom_supported = false;
