@@ -2744,12 +2744,12 @@ public class CameraController2 extends CameraController {
 					// we have to wait for CONTROL_AE_STATE_PRECAPTURE; if we allow CONTROL_AE_STATE_FLASH_REQUIRED, then on Nexus 6 at least we get poor quality results with flash:
 					// varying levels of brightness, sometimes too bright or too dark, sometimes with blue tinge, sometimes even with green corruption
 					if( MyDebug.LOG ) {
-						Log.d(TAG, "precapture started");
+						Log.d(TAG, "precapture started after: " + (System.currentTimeMillis() - precapture_started));
 					}
 					state = STATE_WAITING_PRECAPTURE_DONE;
 					precapture_started = -1;
 				}
-				else if( precapture_started != -1 && System.currentTimeMillis() - precapture_started > 5000 ) {
+				else if( precapture_started != -1 && System.currentTimeMillis() - precapture_started > 2000 ) {
 					// hack - give up waiting - sometimes we never get a CONTROL_AE_STATE_PRECAPTURE so would end up stuck
 					if( MyDebug.LOG ) {
 						Log.e(TAG, "precapture timeout");
