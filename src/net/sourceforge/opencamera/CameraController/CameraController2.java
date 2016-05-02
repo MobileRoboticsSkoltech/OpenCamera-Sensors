@@ -529,53 +529,53 @@ public class CameraController2 extends CameraController {
 	private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr, float minimum_focus_distance) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFocusModesToValues()");
+		if( supported_focus_modes_arr.length == 0 )
+			return null;
 	    List<Integer> supported_focus_modes = new ArrayList<Integer>();
 	    for(int i=0;i<supported_focus_modes_arr.length;i++)
 	    	supported_focus_modes.add(supported_focus_modes_arr[i]);
 	    List<String> output_modes = new Vector<String>();
-		if( supported_focus_modes != null ) {
-			// also resort as well as converting
-			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_AUTO) ) {
-				output_modes.add("focus_mode_auto");
+		// also resort as well as converting
+		if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_AUTO) ) {
+			output_modes.add("focus_mode_auto");
+			if( MyDebug.LOG ) {
+				Log.d(TAG, " supports focus_mode_auto");
+			}
+		}
+		if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_MACRO) ) {
+			output_modes.add("focus_mode_macro");
+			if( MyDebug.LOG )
+				Log.d(TAG, " supports focus_mode_macro");
+		}
+		if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_AUTO) ) {
+			output_modes.add("focus_mode_locked");
+			if( MyDebug.LOG ) {
+				Log.d(TAG, " supports focus_mode_locked");
+			}
+		}
+		if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_OFF) ) {
+			output_modes.add("focus_mode_infinity");
+			if( minimum_focus_distance > 0.0f ) {
+				output_modes.add("focus_mode_manual2");
 				if( MyDebug.LOG ) {
-					Log.d(TAG, " supports focus_mode_auto");
+					Log.d(TAG, " supports focus_mode_manual2");
 				}
 			}
-			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_MACRO) ) {
-				output_modes.add("focus_mode_macro");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports focus_mode_macro");
-			}
-			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_AUTO) ) {
-				output_modes.add("focus_mode_locked");
-				if( MyDebug.LOG ) {
-					Log.d(TAG, " supports focus_mode_locked");
-				}
-			}
-			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_OFF) ) {
-				output_modes.add("focus_mode_infinity");
-				if( minimum_focus_distance > 0.0f ) {
-					output_modes.add("focus_mode_manual2");
-					if( MyDebug.LOG ) {
-						Log.d(TAG, " supports focus_mode_manual2");
-					}
-				}
-			}
-			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_EDOF) ) {
-				output_modes.add("focus_mode_edof");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports focus_mode_edof");
-			}
-			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE) ) {
-				output_modes.add("focus_mode_continuous_picture");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports focus_mode_continuous_picture");
-			}
-			if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO) ) {
-				output_modes.add("focus_mode_continuous_video");
-				if( MyDebug.LOG )
-					Log.d(TAG, " supports focus_mode_continuous_video");
-			}
+		}
+		if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_EDOF) ) {
+			output_modes.add("focus_mode_edof");
+			if( MyDebug.LOG )
+				Log.d(TAG, " supports focus_mode_edof");
+		}
+		if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE) ) {
+			output_modes.add("focus_mode_continuous_picture");
+			if( MyDebug.LOG )
+				Log.d(TAG, " supports focus_mode_continuous_picture");
+		}
+		if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO) ) {
+			output_modes.add("focus_mode_continuous_video");
+			if( MyDebug.LOG )
+				Log.d(TAG, " supports focus_mode_continuous_video");
 		}
 		return output_modes;
 	}
