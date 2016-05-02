@@ -1531,7 +1531,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		File picFile = null;
 		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
         try {
-			OutputStream outputStream = null;
 			if( image_capture_intent ) {
     			if( MyDebug.LOG )
     				Log.d(TAG, "image_capture_intent");
@@ -1540,7 +1539,6 @@ public class MyApplicationInterface implements ApplicationInterface {
     			    // Save the bitmap to the specified URI (use a try/catch block)
         			if( MyDebug.LOG )
         				Log.d(TAG, "save to: " + image_capture_intent_uri);
-    			    //outputStream = main_activity.getContentResolver().openOutputStream(image_capture_intent_uri);
         			saveUri = image_capture_intent_uri;
     			}
     			else
@@ -1598,13 +1596,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			else if( storageUtils.isUsingSAF() ) {
 				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE);
-			    //outputStream = main_activity.getContentResolver().openOutputStream(uriSAF);
 			}
 			else {
     			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
-	            outputStream = new FileOutputStream(picFile);
 			}
 			
 			if( saveUri != null && picFile == null ) {
@@ -1613,18 +1609,26 @@ public class MyApplicationInterface implements ApplicationInterface {
 				picFile = File.createTempFile("picFile", "jpg", main_activity.getCacheDir());
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
-	            outputStream = new FileOutputStream(picFile);
 			}
 			
+			OutputStream outputStream = null;
+			if( picFile != null ) {
+	            outputStream = new FileOutputStream(picFile);
+			}
+
 			if( outputStream != null ) {
-	            if( bitmap != null ) {
-	    			int image_quality = getImageQualityPref();
-    	            bitmap.compress(Bitmap.CompressFormat.JPEG, image_quality, outputStream);
-	            }
-	            else {
-	            	outputStream.write(data);
-	            }
-	            outputStream.close();
+				try {
+		            if( bitmap != null ) {
+		    			int image_quality = getImageQualityPref();
+	    	            bitmap.compress(Bitmap.CompressFormat.JPEG, image_quality, outputStream);
+		            }
+		            else {
+		            	outputStream.write(data);
+		            }
+				}
+				finally {
+					outputStream.close();
+				}
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "onPictureTaken saved photo");
 
@@ -1638,8 +1642,12 @@ public class MyApplicationInterface implements ApplicationInterface {
         	    			Log.d(TAG, "write temp file to record EXIF data");
 	            		File tempFile = File.createTempFile("opencamera_exif", "");
 	    	            OutputStream tempOutputStream = new FileOutputStream(tempFile);
-    	            	tempOutputStream.write(data);
-    	            	tempOutputStream.close();
+	    	            try {
+	    	            	tempOutputStream.write(data);
+	    	            }
+	    	            finally {
+	    	            	tempOutputStream.close();
+	    	            }
         	    		if( MyDebug.LOG )
         	    			Log.d(TAG, "read back EXIF data");
     	            	ExifInterface exif = new ExifInterface(tempFile.getAbsolutePath());
@@ -1767,16 +1775,22 @@ public class MyApplicationInterface implements ApplicationInterface {
 	            if( saveUri != null ) {
     	    		if( MyDebug.LOG )
     	    			Log.d(TAG, "now save to saveUri: " + saveUri);
-		            InputStream inputStream = new FileInputStream(picFile);
-	    		    OutputStream realOutputStream = main_activity.getContentResolver().openOutputStream(saveUri);
-	    		    // Transfer bytes from in to out
-	    		    byte [] buffer = new byte[1024];
-	    		    int len = 0;
-	    		    while( (len = inputStream.read(buffer)) > 0 ) {
-	    		    	realOutputStream.write(buffer, 0, len);
+		            InputStream inputStream = null;
+	    		    OutputStream realOutputStream = null;
+	    		    try {
+			            inputStream = new FileInputStream(picFile);
+		    		    realOutputStream = main_activity.getContentResolver().openOutputStream(saveUri);
+		    		    // Transfer bytes from in to out
+		    		    byte [] buffer = new byte[1024];
+		    		    int len = 0;
+		    		    while( (len = inputStream.read(buffer)) > 0 ) {
+		    		    	realOutputStream.write(buffer, 0, len);
+		    		    }
 	    		    }
-	    		    inputStream.close();
-	    		    realOutputStream.close();
+	    		    finally {
+		    		    inputStream.close();
+		    		    realOutputStream.close();
+	    		    }
 	    		    success = true;
 	    		    /* We still need to broadcastFile for SAF for two reasons:
 	    		    	1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
