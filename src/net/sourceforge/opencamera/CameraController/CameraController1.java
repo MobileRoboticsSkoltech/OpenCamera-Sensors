@@ -392,8 +392,9 @@ public class CameraController1 extends CameraController {
 		if( iso_values != null && iso_values.length() > 0 ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "iso_values: " + iso_values);
-			String [] isos_array = iso_values.split(",");					
-			if( isos_array != null && isos_array.length > 0 ) {
+			String [] isos_array = iso_values.split(",");
+			// split shouldn't return null
+			if( isos_array.length > 0 ) {
 				values = new ArrayList<String>();				
 				for(int i=0;i< isos_array.length;i++) {
 					values.add(isos_array[i]);

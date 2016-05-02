@@ -2670,7 +2670,7 @@ public class CameraController2 extends CameraController {
 
 			// use Integer instead of int, so can compare to null: Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
 			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
-			if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ) {
+			if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ) {
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "not ready for capture: " + af_state);*/
 				ready_for_capture = false;
@@ -2778,14 +2778,14 @@ public class CameraController2 extends CameraController {
 				}
 			}
 
-			if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
+			if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "continuous focusing started");
 				if( continuous_focus_move_callback != null ) {
 					continuous_focus_move_callback.onContinuousFocusMove(true);
 				}
 			}
-			else if( last_af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
+			else if( af_state != null && last_af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN && af_state != last_af_state ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "continuous focusing stopped");
 				if( continuous_focus_move_callback != null ) {
@@ -2793,11 +2793,11 @@ public class CameraController2 extends CameraController {
 				}
 			}
 
-			if( af_state != last_af_state ) {
+			if( af_state != null && af_state != last_af_state ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "CONTROL_AF_STATE changed from " + last_af_state + " to " + af_state);
+				last_af_state = af_state;
 			}
-			last_af_state = af_state;
 		}
 		
 		/** Processes a total result.

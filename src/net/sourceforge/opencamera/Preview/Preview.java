@@ -3223,7 +3223,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 			});
 		}
-		else {
+		else if( camera_controller != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "remove continuous picture focus move callback");
 			camera_controller.setContinuousFocusMoveCallback(null);
