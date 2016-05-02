@@ -464,7 +464,7 @@ public class DrawPreview {
 			text_base_y = canvas.getHeight() - (int)(0.5*text_y);
 		}
 		else if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
-			text_base_y = canvas.getHeight() - (int)(2.5*text_y);
+			text_base_y = canvas.getHeight() - (int)(2.5*text_y); // leave room for GUI icons
 		}
 		else if( ui_rotation == 90 || ui_rotation == 270 ) {
 			//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
@@ -482,8 +482,8 @@ public class DrawPreview {
     		}*/
 			int max_x = canvas.getWidth();
 			if( ui_rotation == 90 ) {
-				// so we don't interfere with the top bar info (time, etc)
-				max_x -= (int)(1.5*text_y);
+				// so we don't interfere with the top bar info (datetime, free memory, ISO)
+				max_x -= (int)(2.5*text_y);
 			}
 			if( canvas.getWidth()/2 + diff_x > max_x ) {
 				// in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
@@ -492,6 +492,7 @@ public class DrawPreview {
 			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
 		}
 		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
+		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 
 		final String ybounds_text = getContext().getResources().getString(R.string.zoom) + getContext().getResources().getString(R.string.angle) + getContext().getResources().getString(R.string.direction);
 		final double close_angle = 1.0f;
@@ -562,7 +563,7 @@ public class DrawPreview {
 					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
     			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
     			p.setTextAlign(Paint.Align.CENTER);
-				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom or ISO label
+				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom, and also allow a bit extra space
 				int color = Color.rgb(244, 67, 54); // Red 500
             	if( main_activity.isScreenLocked() ) {
             		// writing in reverse order, bottom to top
@@ -591,9 +592,22 @@ public class DrawPreview {
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
-			int pixels_offset_y = 2*text_y;
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.CENTER);
+			p.setTextAlign(Paint.Align.LEFT);
+			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
+			int location_y = top_y + (int) (32 * scale + 0.5f); // convert dps to pixels
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				int diff = canvas.getWidth() - canvas.getHeight();
+				location_x += diff/2;
+				location_y -= diff/2;
+			}
+			if( ui_rotation == 90 ) {
+				location_y = canvas.getHeight() - location_y - location_size;
+			}
+			if( ui_rotation == 180 ) {
+				location_x = canvas.getWidth() - location_x;
+				p.setTextAlign(Paint.Align.RIGHT);
+			}
 			String string = "";
 			if( camera_controller.captureResultHasIso() ) {
 				int iso = camera_controller.captureResultIso();
@@ -607,14 +621,14 @@ public class DrawPreview {
 					string += " ";
 				string += preview.getExposureTimeString(exposure_time);
 			}
-			if( camera_controller.captureResultHasFrameDuration() ) {
+			/*if( camera_controller.captureResultHasFrameDuration() ) {
 				long frame_duration = camera_controller.captureResultFrameDuration();
 				if( string.length() > 0 )
 					string += " ";
 				string += preview.getFrameDurationString(frame_duration);
-			}
+			}*/
 			if( string.length() > 0 ) {
-				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text, true); // Yellow 500
+				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y, true, ybounds_text, true); // Yellow 500
 			}
 		}
 		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {
@@ -666,7 +680,6 @@ public class DrawPreview {
 		}
 		
 		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
-		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 		if( store_location ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
 			int location_y = top_y;

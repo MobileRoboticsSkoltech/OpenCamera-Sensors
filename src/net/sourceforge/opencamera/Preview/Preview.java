@@ -2635,14 +2635,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public String getExposureTimeString(long exposure_time) {
 		double exposure_time_s = exposure_time/1000000000.0;
 		double exposure_time_r = 1.0/exposure_time_s;
-		return getResources().getString(R.string.exposure) + " 1/" + new DecimalFormat("#.#").format(exposure_time_r);
+		return " 1/" + new DecimalFormat("#.#").format(exposure_time_r);
 	}
 
-	public String getFrameDurationString(long frame_duration) {
+	/*public String getFrameDurationString(long frame_duration) {
 		double frame_duration_s = frame_duration/1000000000.0;
 		double frame_duration_r = 1.0/frame_duration_s;
 		return getResources().getString(R.string.fps) + " " + new DecimalFormat("#.#").format(frame_duration_r);
-	}
+	}*/
 	
 	public boolean canSwitchCamera() {
 		if( this.phase == PHASE_TAKING_PHOTO ) {
