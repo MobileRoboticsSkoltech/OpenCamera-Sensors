@@ -754,12 +754,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			    		if( MyDebug.LOG )
 			    			Log.d(TAG, "delete corrupt video: " + video_filename);
 		    			File file = new File(video_filename);
-		    			if( file != null ) {
-		    				if( !file.delete() ) {
-					    		if( MyDebug.LOG )
-					    			Log.e(TAG, "failed to delete corrupt video: " + video_filename);
-		    				}
-		    			}
+	    				if( !file.delete() ) {
+				    		if( MyDebug.LOG )
+				    			Log.e(TAG, "failed to delete corrupt video: " + video_filename);
+	    				}
 		    		}
 	    		}
 	    		else {
