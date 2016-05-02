@@ -535,7 +535,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return;
 		}
-		cancelAutoFocus();
+		// don't cancelAutoFocus() here, otherwise we get sluggish zoom behaviour on Camera2 API
         camera_controller.clearFocusAndMetering();
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
@@ -2540,6 +2540,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// problem where we crashed due to calling this function with null camera should be fixed now, but check again just to be safe
     	if( camera_controller != null ) {
 			if( this.has_zoom ) {
+				// don't cancelAutoFocus() here, otherwise we get sluggish zoom behaviour on Camera2 API
 				camera_controller.setZoom(new_zoom_factor);
 				applicationInterface.setZoomPref(new_zoom_factor);
 	    		clearFocusAreas();
