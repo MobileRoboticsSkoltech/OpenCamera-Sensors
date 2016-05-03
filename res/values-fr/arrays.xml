@@ -230,7 +230,7 @@
     </string-array>
     <string-array name="preference_grid_entries">
         <item>Aucune</item>
-        <item>Grille 3x3 ("règle des tiers")</item>
+        <item>Grille 3x3</item>
 		<item>Phi 3x3</item>
         <item>Grille 4x2 </item>
         <item>Crosshair</item>
