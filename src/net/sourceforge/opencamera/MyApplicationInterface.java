@@ -927,6 +927,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void onFailedCreateVideoFileError() {
 		main_activity.getPreview().showToast(null, R.string.failed_to_save_video);
+		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		view.setImageResource(R.drawable.take_video_selector);
+		view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
+		view.setTag(R.drawable.take_video_selector); // for testing
 	}
 
     @Override
