@@ -663,7 +663,7 @@ public class CameraController2 extends CameraController {
 		for(android.util.Size camera_size : camera_video_sizes) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "video size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
-			if( camera_size.getWidth() > 3840 || camera_size.getHeight() > 2160 )
+			if( camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160 )
 				continue; // Nexus 6 returns these, even though not supported?!
 			camera_features.video_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
