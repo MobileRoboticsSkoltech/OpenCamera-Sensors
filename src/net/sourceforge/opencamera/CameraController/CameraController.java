@@ -85,6 +85,9 @@ public abstract class CameraController {
 		}
 	}
 	
+	/** An area has values from [-1000,-1000] (for top-left) to [1000,1000] (for bottom-right) for whatever is
+	 * the current field of view (i.e., taking zoom into account).
+	 */
 	public static class Area {
 		public Rect rect = null;
 		public int weight = 0;
@@ -117,6 +120,9 @@ public abstract class CameraController {
 	
 	public static class Face {
 		public int score = 0;
+		/* The has values from [-1000,-1000] (for top-left) to [1000,1000] (for bottom-right) for whatever is
+		 * the current field of view (i.e., taking zoom into account).
+		 */
 		public Rect rect = null;
 
 		Face(int score, Rect rect) {

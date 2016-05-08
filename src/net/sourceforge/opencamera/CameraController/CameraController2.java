@@ -1732,25 +1732,46 @@ public class CameraController2 extends CameraController {
 		this.sounds_enabled = enabled;
 	}
 
-	private Rect convertRectToCamera2(Rect sensor_rect, Rect rect) {
-		// CameraController.Area is always [-1000, -1000] to [1000, 1000]
-		// but for CameraController2, we must convert to [0, 0] to [sensor width-1, sensor height-1] for use as a MeteringRectangle
+	/** Returns the viewable rect - this is crop region if available.
+	 *  We need this as callers will pass in (or expect returned) CameraController.Area values that
+	 *  are relative to the current view (i.e., taking zoom into account) (the old Camera API in
+	 *  CameraController1 always works in terms of the current view, whilst Camera2 works in terms
+	 *  of the full view always). Similarly for the rect field in CameraController.Face.
+	 */
+	private Rect getViewableRect() {
+		if( previewBuilder != null ) {
+			Rect crop_rect = previewBuilder.get(CaptureRequest.SCALER_CROP_REGION);
+			if( crop_rect != null ) {
+				return crop_rect;
+			}
+		}
+		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		sensor_rect.right -= sensor_rect.left;
+		sensor_rect.left = 0;
+		sensor_rect.bottom -= sensor_rect.top;
+		sensor_rect.top = 0;
+		return sensor_rect;
+	}
+	
+	private Rect convertRectToCamera2(Rect crop_rect, Rect rect) {
+		// CameraController.Area is always [-1000, -1000] to [1000, 1000] for the viewable region
+		// but for CameraController2, we must convert to be relative to the crop region
 		double left_f = (rect.left+1000)/2000.0;
 		double top_f = (rect.top+1000)/2000.0;
 		double right_f = (rect.right+1000)/2000.0;
 		double bottom_f = (rect.bottom+1000)/2000.0;
-		int left = (int)(left_f * (sensor_rect.width()-1));
-		int right = (int)(right_f * (sensor_rect.width()-1));
-		int top = (int)(top_f * (sensor_rect.height()-1));
-		int bottom = (int)(bottom_f * (sensor_rect.height()-1));
-		left = Math.max(left, 0);
-		right = Math.max(right, 0);
-		top = Math.max(top, 0);
-		bottom = Math.max(bottom, 0);
-		left = Math.min(left, sensor_rect.width()-1);
-		right = Math.min(right, sensor_rect.width()-1);
-		top = Math.min(top, sensor_rect.height()-1);
-		bottom = Math.min(bottom, sensor_rect.height()-1);
+		int left = (int)(crop_rect.left + left_f * (crop_rect.width()-1));
+		int right = (int)(crop_rect.left + right_f * (crop_rect.width()-1));
+		int top = (int)(crop_rect.top + top_f * (crop_rect.height()-1));
+		int bottom = (int)(crop_rect.top + bottom_f * (crop_rect.height()-1));
+		left = Math.max(left, crop_rect.left);
+		right = Math.max(right, crop_rect.left);
+		top = Math.max(top, crop_rect.top);
+		bottom = Math.max(bottom, crop_rect.top);
+		left = Math.min(left, crop_rect.right);
+		right = Math.min(right, crop_rect.right);
+		top = Math.min(top, crop_rect.bottom);
+		bottom = Math.min(bottom, crop_rect.bottom);
 
 		Rect camera2_rect = new Rect(left, top, right, bottom);
 		return camera2_rect;
@@ -1762,12 +1783,12 @@ public class CameraController2 extends CameraController {
 		return metering_rectangle;
 	}
 
-	private Rect convertRectFromCamera2(Rect sensor_rect, Rect camera2_rect) {
+	private Rect convertRectFromCamera2(Rect crop_rect, Rect camera2_rect) {
 		// inverse of convertRectToCamera2()
-		double left_f = camera2_rect.left/(double)(sensor_rect.width()-1);
-		double top_f = camera2_rect.top/(double)(sensor_rect.height()-1);
-		double right_f = camera2_rect.right/(double)(sensor_rect.width()-1);
-		double bottom_f = camera2_rect.bottom/(double)(sensor_rect.height()-1);
+		double left_f = (camera2_rect.left-crop_rect.left)/(double)(crop_rect.width()-1);
+		double top_f = (camera2_rect.top-crop_rect.top)/(double)(crop_rect.height()-1);
+		double right_f = (camera2_rect.right-crop_rect.left)/(double)(crop_rect.width()-1);
+		double bottom_f = (camera2_rect.bottom-crop_rect.top)/(double)(crop_rect.height()-1);
 		int left = (int)(left_f * 2000) - 1000;
 		int right = (int)(right_f * 2000) - 1000;
 		int top = (int)(top_f * 2000) - 1000;
@@ -1800,7 +1821,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean setFocusAndMeteringArea(List<Area> areas) {
-		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		Rect sensor_rect = getViewableRect();
 		if( MyDebug.LOG )
 			Log.d(TAG, "sensor_rect: " + sensor_rect.left + " , " + sensor_rect.top + " x " + sensor_rect.right + " , " + sensor_rect.bottom);
 		boolean has_focus = false;
@@ -1845,7 +1866,7 @@ public class CameraController2 extends CameraController {
 	
 	@Override
 	public void clearFocusAndMetering() {
-		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		Rect sensor_rect = getViewableRect();
 		boolean has_focus = false;
 		boolean has_metering = false;
 		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
@@ -1886,7 +1907,7 @@ public class CameraController2 extends CameraController {
     	MeteringRectangle [] metering_rectangles = previewBuilder.get(CaptureRequest.CONTROL_AF_REGIONS);
     	if( metering_rectangles == null )
     		return null;
-		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		Rect sensor_rect = getViewableRect();
 		camera_settings.af_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
 		if( metering_rectangles.length == 1 && metering_rectangles[0].getRect().left == 0 && metering_rectangles[0].getRect().top == 0 && metering_rectangles[0].getRect().right == sensor_rect.width()-1 && metering_rectangles[0].getRect().bottom == sensor_rect.height()-1 ) {
 			// for compatibility with CameraController1
@@ -1906,7 +1927,7 @@ public class CameraController2 extends CameraController {
     	MeteringRectangle [] metering_rectangles = previewBuilder.get(CaptureRequest.CONTROL_AE_REGIONS);
     	if( metering_rectangles == null )
     		return null;
-		Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+		Rect sensor_rect = getViewableRect();
 		if( metering_rectangles.length == 1 && metering_rectangles[0].getRect().left == 0 && metering_rectangles[0].getRect().top == 0 && metering_rectangles[0].getRect().right == sensor_rect.width()-1 && metering_rectangles[0].getRect().bottom == sensor_rect.height()-1 ) {
 			// for compatibility with CameraController1
 			return null;
@@ -2863,7 +2884,7 @@ public class CameraController2 extends CameraController {
 			}*/
 
 			if( face_detection_listener != null && previewBuilder != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL ) {
-				Rect sensor_rect = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+				Rect sensor_rect = getViewableRect();
 				android.hardware.camera2.params.Face [] camera_faces = result.get(CaptureResult.STATISTICS_FACES);
 				if( camera_faces != null ) {
 					CameraController.Face [] faces = new CameraController.Face[camera_faces.length];
