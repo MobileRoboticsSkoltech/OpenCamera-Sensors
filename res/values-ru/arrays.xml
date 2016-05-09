@@ -99,7 +99,7 @@
         <item>4x</item>
         <item>5x</item>
         <item>10x</item>
-        <item>Безгранично</item>
+        <item>Без ограничений</item>
     </string-array>
     <string-array name="preference_burst_mode_values">
         <item>1</item>
@@ -181,7 +181,7 @@
         <item>volume_zoom</item>
         <item>volume_exposure</item>
         <item>volume_auto_stabilise</item>
-        <item>volume_nothing</item>
+        <item>volume_nothing</item><!-- actually means change device volume! -->
         <item>volume_really_nothing</item>
     </string-array>
     <string-array name="preference_rotate_preview_entries">
@@ -211,6 +211,22 @@
         <item>immersive_mode_low_profile</item>
         <item>immersive_mode_gui</item>
         <item>immersive_mode_everything</item>
+        </string-array>
+    <string-array name="preference_angle_highlight_color_entries">
+        <item>Красный</item>
+        <item>Зеленый</item>
+        <item>Синий</item>
+        <item>Желтый</item>
+        <item>Фиолетовый</item>
+        <item>Белый</item>
+    </string-array>
+    <string-array name="preference_angle_highlight_color_values">
+        <item>#f44336</item> <!-- Red 500 -->
+        <item>#14e715</item> <!-- Green A400 -->
+        <item>#2196f3</item> <!-- Blue 500 -->
+        <item>#ffeb3b</item> <!-- Yellow 500 -->
+        <item>#9c27b0</item> <!-- Purple 500 -->
+        <item>#ffffff</item> <!-- White -->
     </string-array>
     <string-array name="preference_grid_entries">
         <item>Нет</item>
@@ -305,6 +321,39 @@
         <item>Градусы/минуты/секунды</item>
         <item>Нет</item>
     </string-array>
+    <string-array name="preference_stamp_gpsformat_values">
+        <item>preference_stamp_gpsformat_default</item>
+        <item>preference_stamp_gpsformat_dms</item>
+        <item>preference_stamp_gpsformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_fontsize_entries">
+        <item>6</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
+        <item>24</item>
+    </string-array>
+    <string-array name="preference_stamp_fontsize_values">
+        <item>6</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
+        <item>24</item>
+    </string-array>
     <string-array name="preference_stamp_style_entries">
         <item>Текст с тенью</item>
         <item>Обычный текст</item>
@@ -315,29 +364,29 @@
     </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>По умолчанию</item>
-        <item>100kbps</item>
-        <item>200kbps</item>
-        <item>500kbps</item>
-        <item>1Mbps</item>
-        <item>2Mbps</item>
-        <item>3Mbps</item>
-        <item>4Mbps</item>
-        <item>5Mbps</item>
-        <item>6Mbps</item>
-        <item>7Mbps</item>
-        <item>8Mbps</item>
-        <item>9Mbps</item>
-        <item>10Mbps</item>
-        <item>15Mbps</item>
-        <item>20Mbps</item>
-        <item>30Mbps</item>
-        <item>40Mbps</item>
-        <item>50Mbps</item>
-        <item>60Mbps</item>
-        <item>70Mbps</item>
-        <item>80Mbps</item>
-        <item>90Mbps</item>
-        <item>100Mbps</item>
+        <item>100 kbps</item>
+        <item>200 kbps</item>
+        <item>500 kbps</item>
+        <item>1 Mbps</item>
+        <item>2 Mbps</item>
+        <item>3 Mbps</item>
+        <item>4 Mbps</item>
+        <item>5 Mbps</item>
+        <item>6 Mbps</item>
+        <item>7 Mbps</item>
+        <item>8 Mbps</item>
+        <item>9 Mbps</item>
+        <item>10 Mbps</item>
+        <item>15 Mbps</item>
+        <item>20 Mbps</item>
+        <item>30 Mbps</item>
+        <item>40 Mbps</item>
+        <item>50 Mbps</item>
+        <item>60 Mbps</item>
+        <item>70 Mbps</item>
+        <item>80 Mbps</item>
+        <item>90 Mbps</item>
+        <item>100 Mbps</item>
     </string-array>
     <string-array name="preference_video_bitrate_values">
         <item>default</item>
@@ -388,7 +437,7 @@
         <item>120</item>
     </string-array>
     <string-array name="preference_video_max_duration_entries">
-        <item>Неограниченно</item>
+        <item>Без ограничений</item>
         <item>15 секунд</item>
         <item>30 секунд</item>
         <item>1 минута</item>
@@ -480,5 +529,47 @@
         <item>audio_default</item>
         <item>audio_mono</item>
         <item>audio_stereo</item>
+    </string-array>
+    <string-array name="preference_audio_control_entries">
+        <item>Нет</item>
+        <item>Громкий шум</item>
+        <item>Голосовая команда: \"cheese\"</item>
+    </string-array>
+    <string-array name="preference_audio_control_values">
+        <item>none</item>
+        <item>noise</item>
+        <item>voice</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_entries">
+        <item>+3 (высокая чувствительность)</item>
+        <item>+2</item>
+        <item>+1</item>
+        <item>0 (по умолчанию)</item>
+        <item>-1</item>
+        <item>-2 (низкая чувствительность)</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_values">
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+        <item>-2</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_entries">
+        <item>По умолчанию (зависит от устройства)</item>
+        <item>100 Мб</item>
+        <item>200 Мб</item>
+        <item>300 Мб</item>
+        <item>500 Мб</item>
+        <item>1 Гб</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_values">
+        <item>0</item>
+        <item>104857600</item>
+        <item>209715200</item>
+        <item>314572800</item>
+        <item>524288000</item>
+        <item>1073741824</item>
     </string-array>
 </resources>
