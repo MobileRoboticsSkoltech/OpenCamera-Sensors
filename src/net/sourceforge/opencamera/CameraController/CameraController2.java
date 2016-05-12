@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Range;
 import android.view.Display;
 import android.view.Surface;
@@ -92,6 +93,9 @@ public class CameraController2 extends CameraController {
 	private long capture_result_exposure_time = 0;
 	private boolean capture_result_has_frame_duration = false;
 	private long capture_result_frame_duration = 0;
+	private boolean capture_result_has_focus_distance = false;
+	private float capture_result_focus_distance_min = 0.0f;
+	private float capture_result_focus_distance_max = 0.0f;
 	
 	private static enum RequestTag {
 		CAPTURE
@@ -2882,6 +2886,18 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "capture_result_frame_duration: " + capture_result_frame_duration);
 				}
 			}*/
+			if( result.get(CaptureResult.LENS_FOCUS_RANGE) != null ) {
+				Pair<Float, Float> focus_range = result.get(CaptureResult.LENS_FOCUS_RANGE);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "capture result focus range: " + focus_range.first + " to " + focus_range.second);
+				}
+				capture_result_has_focus_distance = true;
+				capture_result_focus_distance_min = focus_range.first;
+				capture_result_focus_distance_max = focus_range.second;
+			}
+			else {
+				capture_result_has_focus_distance = false;
+			}
 
 			if( face_detection_listener != null && previewBuilder != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL ) {
 				Rect sensor_rect = getViewableRect();
