@@ -247,6 +247,15 @@ public abstract class CameraController {
 	public long captureResultFrameDuration() {
 		return 0;
 	}
+	public boolean captureResultHasFocusDistance() {
+		return false;
+	}
+	public float captureResultFocusDistanceMin() {
+		return 0.0f;
+	}
+	public float captureResultFocusDistanceMax() {
+		return 0.0f;
+	}
 
 	// gets the available values of a generic mode, e.g., scene, color etc, and makes sure the requested mode is available
 	protected SupportedValues checkModeIsSupported(List<String> values, String value, String default_value) {

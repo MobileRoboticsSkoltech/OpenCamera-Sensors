@@ -2652,6 +2652,21 @@ public class CameraController2 extends CameraController {
 	public long captureResultFrameDuration() {
 		return capture_result_frame_duration;
 	}
+	
+	@Override
+	public boolean captureResultHasFocusDistance() {
+		return capture_result_has_focus_distance;
+	}
+
+	@Override
+	public float captureResultFocusDistanceMin() {
+		return capture_result_focus_distance_min;
+	}
+
+	@Override
+	public float captureResultFocusDistanceMax() {
+		return capture_result_focus_distance_max;
+	}
 
 	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 		private long last_process_frame_number = 0;
@@ -2888,9 +2903,9 @@ public class CameraController2 extends CameraController {
 			}*/
 			if( result.get(CaptureResult.LENS_FOCUS_RANGE) != null ) {
 				Pair<Float, Float> focus_range = result.get(CaptureResult.LENS_FOCUS_RANGE);
-				if( MyDebug.LOG ) {
+				/*if( MyDebug.LOG ) {
 					Log.d(TAG, "capture result focus range: " + focus_range.first + " to " + focus_range.second);
-				}
+				}*/
 				capture_result_has_focus_distance = true;
 				capture_result_focus_distance_min = focus_range.first;
 				capture_result_focus_distance_max = focus_range.second;
