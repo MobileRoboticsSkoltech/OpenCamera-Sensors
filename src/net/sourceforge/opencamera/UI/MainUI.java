@@ -226,10 +226,29 @@ public class MainUI {
 	
 			view = main_activity.findViewById(R.id.zoom_seekbar);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_left, 0);
-			layoutParams.addRule(align_right, R.id.zoom);
-			layoutParams.addRule(above, R.id.zoom);
-			layoutParams.addRule(below, 0);
+			// if we are showing the zoom control, the align next to that; otherwise have it aligned close to the edge of screen
+			if( sharedPreferences.getBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), false) ) {
+				layoutParams.addRule(align_left, 0);
+				layoutParams.addRule(align_right, R.id.zoom);
+				layoutParams.addRule(above, R.id.zoom);
+				layoutParams.addRule(below, 0);
+				// need to clear the others, in case we turn zoom controls on/off
+				layoutParams.addRule(align_parent_left, 0);
+				layoutParams.addRule(align_parent_right, 0);
+				layoutParams.addRule(align_parent_top, 0);
+				layoutParams.addRule(align_parent_bottom, 0);
+			}
+			else {
+				layoutParams.addRule(align_parent_left, 0);
+				layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+				layoutParams.addRule(align_parent_top, 0);
+				layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
+				// need to clear the others, in case we turn zoom controls on/off
+				layoutParams.addRule(align_left, 0);
+				layoutParams.addRule(align_right, 0);
+				layoutParams.addRule(above, 0);
+				layoutParams.addRule(below, 0);
+			}
 			view.setLayoutParams(layoutParams);
 
 			view = main_activity.findViewById(R.id.focus_seekbar);
@@ -238,8 +257,8 @@ public class MainUI {
 			layoutParams.addRule(align_right, 0);
 			layoutParams.addRule(left_of, R.id.zoom_seekbar);
 			layoutParams.addRule(right_of, 0);
-			layoutParams.addRule(align_top, 0);
-			layoutParams.addRule(align_bottom, R.id.zoom_seekbar);
+			layoutParams.addRule(align_parent_top, 0);
+			layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
 			view.setLayoutParams(layoutParams);
 		}
 
