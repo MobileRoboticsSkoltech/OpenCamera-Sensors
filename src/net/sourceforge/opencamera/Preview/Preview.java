@@ -2642,6 +2642,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return getResources().getString(R.string.fps) + " " + new DecimalFormat("#.#").format(frame_duration_r);
 	}*/
 	
+	/*private String getFocusOneDistanceString(float dist) {
+		if( dist == 0.0f )
+			return "inf.";
+		float real_dist = 1.0f/dist;
+		return new DecimalFormat("#.##").format(real_dist) + getResources().getString(R.string.metres_abbreviation);
+	}
+	
+	public String getFocusDistanceString(float dist_min, float dist_max) {
+		String f_s = "f ";
+		//if( dist_min == dist_max )
+		//	return f_s + getFocusOneDistanceString(dist_min);
+		//return f_s + getFocusOneDistanceString(dist_min) + "-" + getFocusOneDistanceString(dist_max);
+		// just always show max for now
+		return f_s + getFocusOneDistanceString(dist_max);
+	}*/
+
 	public boolean canSwitchCamera() {
 		if( this.phase == PHASE_TAKING_PHOTO ) {
 			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up

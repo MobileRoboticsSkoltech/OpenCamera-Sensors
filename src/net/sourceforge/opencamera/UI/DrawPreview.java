@@ -596,13 +596,16 @@ public class DrawPreview {
 			p.setTextAlign(Paint.Align.LEFT);
 			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
 			int location_y = top_y + (int) (32 * scale + 0.5f); // convert dps to pixels
+			//int location_y2 = top_y + (int) (48 * scale + 0.5f); // convert dps to pixels
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
 				int diff = canvas.getWidth() - canvas.getHeight();
 				location_x += diff/2;
 				location_y -= diff/2;
+				//location_y2 -= diff/2;
 			}
 			if( ui_rotation == 90 ) {
 				location_y = canvas.getHeight() - location_y - location_size;
+				//location_y2 = canvas.getHeight() - location_y2 - location_size;
 			}
 			if( ui_rotation == 180 ) {
 				location_x = canvas.getWidth() - location_x;
@@ -630,6 +633,12 @@ public class DrawPreview {
 			if( string.length() > 0 ) {
 				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y, true, ybounds_text, true); // Yellow 500
 			}
+			/*if( camera_controller.captureResultHasFocusDistance() ) {
+				float dist_min = camera_controller.captureResultFocusDistanceMin();
+				float dist_max = camera_controller.captureResultFocusDistanceMin();
+				string = preview.getFocusDistanceString(dist_min, dist_max);
+				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y2, true, ybounds_text, true); // Yellow 500
+			}*/
 		}
 		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {
 			float zoom_ratio = preview.getZoomRatio();
