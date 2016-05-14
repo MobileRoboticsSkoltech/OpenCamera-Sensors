@@ -1108,6 +1108,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 
 		mainUI.layoutUI(); // needed in case we've changed left/right handed UI
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		if( sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none") ) {
+			// ensure icon is invisible if switching from audio control enabled to disabled
+			// (if enabling it, we'll make the icon visible later on)
+			View speechRecognizerButton = (View) findViewById(R.id.audio_control);
+			speechRecognizerButton.setVisibility(View.GONE);
+		}
         initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
 		initLocation(); // in case we've enabled or disabled GPS
 		if( toast_message != null )
@@ -2060,7 +2067,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: time after setting exposure lock button: " + (System.currentTimeMillis() - debug_time));
 
-		mainUI.setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
+	    mainUI.setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: time after setting popup icon: " + (System.currentTimeMillis() - debug_time));
 
