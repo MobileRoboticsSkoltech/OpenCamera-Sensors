@@ -123,21 +123,22 @@ public final class R {
         public static final int ic_mic_white_48dp=0x7f020017;
         public static final int popup=0x7f020018;
         public static final int popup_flash_auto=0x7f020019;
-        public static final int popup_flash_on=0x7f02001a;
-        public static final int popup_flash_red_eye=0x7f02001b;
-        public static final int popup_flash_torch=0x7f02001c;
-        public static final int settings=0x7f02001d;
-        public static final int share=0x7f02001e;
-        public static final int switch_camera=0x7f02001f;
-        public static final int switch_video=0x7f020020;
-        public static final int take_photo=0x7f020021;
-        public static final int take_photo_pressed=0x7f020022;
-        public static final int take_photo_selector=0x7f020023;
-        public static final int take_video=0x7f020024;
-        public static final int take_video_pressed=0x7f020025;
-        public static final int take_video_recording=0x7f020026;
-        public static final int take_video_selector=0x7f020027;
-        public static final int trash=0x7f020028;
+        public static final int popup_flash_off=0x7f02001a;
+        public static final int popup_flash_on=0x7f02001b;
+        public static final int popup_flash_red_eye=0x7f02001c;
+        public static final int popup_flash_torch=0x7f02001d;
+        public static final int settings=0x7f02001e;
+        public static final int share=0x7f02001f;
+        public static final int switch_camera=0x7f020020;
+        public static final int switch_video=0x7f020021;
+        public static final int take_photo=0x7f020022;
+        public static final int take_photo_pressed=0x7f020023;
+        public static final int take_photo_selector=0x7f020024;
+        public static final int take_video=0x7f020025;
+        public static final int take_video_pressed=0x7f020026;
+        public static final int take_video_recording=0x7f020027;
+        public static final int take_video_selector=0x7f020028;
+        public static final int trash=0x7f020029;
     }
     public static final class id {
         public static final int action_settings=0x7f0b001a;
@@ -241,10 +242,10 @@ public final class R {
   intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 
-  intentionally starts lower case 
-  intentionally starts lower case 
-  intentionally starts lower case 
  @TODO PER FAVORE VERIFICARE QUESTA TRADUZIONE! 
+  intentionally starts lower case 
+  intentionally starts lower case 
+  intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 

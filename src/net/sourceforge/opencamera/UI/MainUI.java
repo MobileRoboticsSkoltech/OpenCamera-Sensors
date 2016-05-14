@@ -664,7 +664,10 @@ public class MainUI {
 		String flash_value = main_activity.getPreview().getCurrentFlashValue();
 		if( MyDebug.LOG )
 			Log.d(TAG, "flash_value: " + flash_value);
-		if( flash_value != null && flash_value.equals("flash_torch") ) {
+    	if( flash_value != null && flash_value.equals("flash_off") ) {
+    		popup.setImageResource(R.drawable.popup_flash_off);
+    	}
+    	else if( flash_value != null && flash_value.equals("flash_torch") ) {
     		popup.setImageResource(R.drawable.popup_flash_torch);
     	}
 		else if( flash_value != null && flash_value.equals("flash_auto") ) {
