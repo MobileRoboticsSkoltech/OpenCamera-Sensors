@@ -83,8 +83,8 @@ public class MainUI {
 		main_activity.getPreview().setUIRotation(ui_rotation);
 		int align_left = RelativeLayout.ALIGN_LEFT;
 		int align_right = RelativeLayout.ALIGN_RIGHT;
-		int align_top = RelativeLayout.ALIGN_TOP;
-		int align_bottom = RelativeLayout.ALIGN_BOTTOM;
+		//int align_top = RelativeLayout.ALIGN_TOP;
+		//int align_bottom = RelativeLayout.ALIGN_BOTTOM;
 		int left_of = RelativeLayout.LEFT_OF;
 		int right_of = RelativeLayout.RIGHT_OF;
 		int above = RelativeLayout.ABOVE;
@@ -94,8 +94,8 @@ public class MainUI {
 		int align_parent_top = RelativeLayout.ALIGN_PARENT_TOP;
 		int align_parent_bottom = RelativeLayout.ALIGN_PARENT_BOTTOM;
 		if( !ui_placement_right ) {
-			align_top = RelativeLayout.ALIGN_BOTTOM;
-			align_bottom = RelativeLayout.ALIGN_TOP;
+			//align_top = RelativeLayout.ALIGN_BOTTOM;
+			//align_bottom = RelativeLayout.ALIGN_TOP;
 			above = RelativeLayout.BELOW;
 			below = RelativeLayout.ABOVE;
 			align_parent_top = RelativeLayout.ALIGN_PARENT_BOTTOM;
