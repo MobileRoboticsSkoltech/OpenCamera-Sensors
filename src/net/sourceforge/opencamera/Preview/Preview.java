@@ -239,7 +239,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private boolean has_geo_direction = false;
     private float [] geo_direction = new float[3];
 
-    // for testing:
+	private final DecimalFormat decimal_format_1dp = new DecimalFormat("#.#");
+	private final DecimalFormat decimal_format_2dp = new DecimalFormat("#.##");
+
+	// for testing:
 	public int count_cameraStartPreview = 0;
 	public int count_cameraAutoFocus = 0;
 	public int count_cameraTakePicture = 0;
@@ -2561,7 +2564,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					String focus_distance_s = "";
 					if( new_focus_distance > 0.0f ) {
 						float real_focus_distance = 1.0f / new_focus_distance;
-						focus_distance_s = new DecimalFormat("#.##").format(real_focus_distance) + "m";
+						focus_distance_s = decimal_format_2dp.format(real_focus_distance) + getResources().getString(R.string.metres_abbreviation);
 					}
 					else {
 						focus_distance_s = getResources().getString(R.string.infinite);
@@ -2623,7 +2626,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	public String getExposureCompensationString(int exposure) {
 		float exposure_ev = exposure * exposure_step;
-		return getResources().getString(R.string.exposure_compensation) + " " + (exposure > 0 ? "+" : "") + new DecimalFormat("#.##").format(exposure_ev) + " EV";
+		return getResources().getString(R.string.exposure_compensation) + " " + (exposure > 0 ? "+" : "") + decimal_format_2dp.format(exposure_ev) + " EV";
 	}
 	
 	public String getISOString(int iso) {
@@ -2633,20 +2636,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public String getExposureTimeString(long exposure_time) {
 		double exposure_time_s = exposure_time/1000000000.0;
 		double exposure_time_r = 1.0/exposure_time_s;
-		return " 1/" + new DecimalFormat("#.#").format(exposure_time_r);
+		return " 1/" + decimal_format_1dp.format(exposure_time_r);
 	}
 
 	/*public String getFrameDurationString(long frame_duration) {
 		double frame_duration_s = frame_duration/1000000000.0;
 		double frame_duration_r = 1.0/frame_duration_s;
-		return getResources().getString(R.string.fps) + " " + new DecimalFormat("#.#").format(frame_duration_r);
+		return getResources().getString(R.string.fps) + " " + decimal_format_1dp.format(frame_duration_r);
 	}*/
 	
 	/*private String getFocusOneDistanceString(float dist) {
 		if( dist == 0.0f )
 			return "inf.";
 		float real_dist = 1.0f/dist;
-		return new DecimalFormat("#.##").format(real_dist) + getResources().getString(R.string.metres_abbreviation);
+		return decimal_format_2dp.format(real_dist) + getResources().getString(R.string.metres_abbreviation);
 	}
 	
 	public String getFocusDistanceString(float dist_min, float dist_max) {
