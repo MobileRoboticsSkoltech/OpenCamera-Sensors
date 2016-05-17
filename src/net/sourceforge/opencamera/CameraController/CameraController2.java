@@ -520,14 +520,20 @@ public class CameraController2 extends CameraController {
 			camera.close();
 			camera = null;
 		}
-		if( imageReader != null ) {
-			imageReader.close();
-			imageReader = null;
-		}
+		closePictureImageReader();
 		/*if( previewImageReader != null ) {
 			previewImageReader.close();
 			previewImageReader = null;
 		}*/
+	}
+	
+	private void closePictureImageReader() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "closePictureImageReader()");
+		if( imageReader != null ) {
+			imageReader.close();
+			imageReader = null;
+		}
 	}
 
 	private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr, float minimum_focus_distance) {
@@ -1310,9 +1316,7 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "can't create picture image reader when captureSession running!");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
-		if( imageReader != null ) {
-			imageReader.close();
-		}
+		closePictureImageReader();
 		if( picture_width == 0 || picture_height == 0 ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "application needs to call setPictureSize()");
@@ -2072,10 +2076,7 @@ public class CameraController2 extends CameraController {
 			captureSession = null;
 
 			if( video_recorder != null ) {
-				if( imageReader != null ) {
-					imageReader.close();
-					imageReader = null;
-				}
+				closePictureImageReader();
 			}
 			else {
 				// in some cases need to recreate picture imageReader and the texture default buffer size (e.g., see test testTakePhotoPreviewPaused())
