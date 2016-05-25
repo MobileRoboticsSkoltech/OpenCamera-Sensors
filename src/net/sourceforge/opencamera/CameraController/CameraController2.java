@@ -23,6 +23,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.DngCreator;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -60,7 +61,12 @@ public class CameraController2 extends CameraController {
 	private AutoFocusCallback autofocus_cb = null;
 	private FaceDetectionListener face_detection_listener = null;
 	private ImageReader imageReader = null;
+	private boolean want_raw = false;
+	//private boolean want_raw = true;
+	private android.util.Size raw_size = null;
+	private ImageReader imageReaderRaw = null;
 	private PictureCallback jpeg_cb = null;
+	private PictureCallback raw_cb = null;
 	private ErrorCallback take_picture_error_cb = null;
 	//private ImageReader previewImageReader = null;
 	private SurfaceTexture texture = null;
@@ -86,7 +92,8 @@ public class CameraController2 extends CameraController {
 	
 	private MediaActionSound media_action_sound = new MediaActionSound();
 	private boolean sounds_enabled = true;
-	
+
+	private CaptureResult still_capture_result = null;
 	private boolean capture_result_has_iso = false;
 	private int capture_result_iso = 0;
 	private boolean capture_result_has_exposure_time = false;
@@ -534,6 +541,10 @@ public class CameraController2 extends CameraController {
 			imageReader.close();
 			imageReader = null;
 		}
+		if( imageReaderRaw != null ) {
+			imageReaderRaw.close();
+			imageReaderRaw = null;
+		}
 	}
 
 	private List<String> convertFocusModesToValues(int [] supported_focus_modes_arr, float minimum_focus_distance) {
@@ -668,6 +679,16 @@ public class CameraController2 extends CameraController {
 			camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 
+		if( want_raw ) {
+		    android.util.Size [] raw_camera_picture_sizes = configs.getOutputSizes(ImageFormat.RAW_SENSOR);
+			for(int i=0;i<raw_camera_picture_sizes.length;i++) {
+				android.util.Size size = raw_camera_picture_sizes[i];
+	        	if( raw_size == null || size.getWidth()*size.getHeight() > raw_size.getWidth()*raw_size.getHeight() ) {
+	        		raw_size = size;
+	        	}
+	        }
+		}
+		
 	    android.util.Size [] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
 		camera_features.video_sizes = new ArrayList<CameraController.Size>();
 		for(android.util.Size camera_size : camera_video_sizes) {
@@ -1347,12 +1368,50 @@ public class CameraController2 extends CameraController {
 	            // need to set jpeg_cb etc to null before calling onPictureTaken, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
 	            PictureCallback cb = jpeg_cb;
 	            jpeg_cb = null;
-	            take_picture_error_cb = null;
 	            cb.onPictureTaken(bytes);
+	            if( jpeg_cb == null && raw_cb == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "all image callbacks now completed");
+					cb.onCompleted();
+	            }
 				if( MyDebug.LOG )
 					Log.d(TAG, "done onImageAvailable");
 			}
 		}, null);
+		if( want_raw && raw_size != null ) {
+			imageReaderRaw = ImageReader.newInstance(raw_size.getWidth(), raw_size.getHeight(), ImageFormat.RAW_SENSOR, 2);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "created new imageReaderRaw: " + imageReaderRaw.toString());
+				Log.d(TAG, "imageReaderRaw surface: " + imageReaderRaw.getSurface().toString());
+			}
+			imageReaderRaw.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+				@Override
+				public void onImageAvailable(ImageReader reader) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "new still raw image available");
+					if( raw_cb == null ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "no picture callback available");
+						return;
+					}
+					Image image = reader.acquireNextImage();
+                    DngCreator dngCreator = new DngCreator(characteristics, still_capture_result);
+    	            // need to set raw_cb etc to null before calling onPictureTaken, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+    	            PictureCallback cb = raw_cb;
+    	            raw_cb = null;
+    	            cb.onRawPictureTaken(dngCreator, image);
+    	            if( jpeg_cb == null && raw_cb == null ) {
+    					if( MyDebug.LOG )
+    						Log.d(TAG, "all image callbacks now completed");
+    					cb.onCompleted();
+    	            }
+                	image.close();
+                	dngCreator.close();
+    				if( MyDebug.LOG )
+    					Log.d(TAG, "done onImageAvailable");
+				}
+			}, null);
+		}
 	}
 	@Override
 	public Size getPreviewSize() {
@@ -2163,19 +2222,35 @@ public class CameraController2 extends CameraController {
 			MyStateCallback myStateCallback = new MyStateCallback();
 
         	Surface preview_surface = getPreviewSurface();
-        	Surface capture_surface = video_recorder != null ? video_recorder.getSurface() : imageReader.getSurface();
+        	List<Surface> surfaces = null;
+        	if( video_recorder != null ) {
+        		surfaces = Arrays.asList(preview_surface, video_recorder.getSurface());
+        	}
+    		else if( imageReaderRaw != null ) {
+        		surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface());
+    		}
+    		else {
+        		surfaces = Arrays.asList(preview_surface, imageReader.getSurface());
+    		}
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "texture: " + texture);
 				Log.d(TAG, "preview_surface: " + preview_surface);
-				Log.d(TAG, "capture_surface: " + capture_surface);
 				if( video_recorder == null ) {
-					Log.d(TAG, "imageReader: " + imageReader);
-					Log.d(TAG, "imageReader: " + imageReader.getWidth());
-					Log.d(TAG, "imageReader: " + imageReader.getHeight());
-					Log.d(TAG, "imageReader: " + imageReader.getImageFormat());
+					if( imageReaderRaw != null ) {
+						Log.d(TAG, "imageReaderRaw: " + imageReaderRaw);
+						Log.d(TAG, "imageReaderRaw: " + imageReaderRaw.getWidth());
+						Log.d(TAG, "imageReaderRaw: " + imageReaderRaw.getHeight());
+						Log.d(TAG, "imageReaderRaw: " + imageReaderRaw.getImageFormat());
+					}
+					else {
+						Log.d(TAG, "imageReader: " + imageReader);
+						Log.d(TAG, "imageReader: " + imageReader.getWidth());
+						Log.d(TAG, "imageReader: " + imageReader.getHeight());
+						Log.d(TAG, "imageReader: " + imageReader.getImageFormat());
+					}
 				}
 			}
-			camera.createCaptureSession(Arrays.asList(preview_surface/*, previewImageReader.getSurface()*/, capture_surface),
+			camera.createCaptureSession(surfaces,
 				myStateCallback,
 		 		handler);
 			if( MyDebug.LOG )
@@ -2394,8 +2469,14 @@ public class CameraController2 extends CameraController {
 		}
 		try {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "imageReader: " + imageReader.toString());
-				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
+				if( imageReaderRaw != null ) {
+					Log.d(TAG, "imageReaderRaw: " + imageReaderRaw.toString());
+					Log.d(TAG, "imageReaderRaw surface: " + imageReaderRaw.getSurface().toString());
+				}
+				else {
+					Log.d(TAG, "imageReader: " + imageReader.toString());
+					Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
+				}
 			}
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
@@ -2405,7 +2486,9 @@ public class CameraController2 extends CameraController {
 			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
         	Surface surface = getPreviewSurface();
         	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
-			stillBuilder.addTarget(imageReader.getSurface());
+    		stillBuilder.addTarget(imageReader.getSurface());
+        	if( imageReaderRaw != null )
+    			stillBuilder.addTarget(imageReaderRaw.getSurface());
 
 			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
 			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
@@ -2513,7 +2596,7 @@ public class CameraController2 extends CameraController {
 	}
 	
 	@Override
-	public void takePicture(final PictureCallback raw, final PictureCallback jpeg, final ErrorCallback error) {
+	public void takePicture(final PictureCallback picture, final ErrorCallback error) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
 		if( camera == null || captureSession == null ) {
@@ -2522,7 +2605,12 @@ public class CameraController2 extends CameraController {
 			error.onError();
 			return;
 		}
-		this.jpeg_cb = jpeg;
+		// we store as two identical callbacks, so we can independently set each to null as the two callbacks occur
+		this.jpeg_cb = picture;
+		if( imageReaderRaw != null )
+			this.raw_cb = picture;
+		else
+			this.raw_cb = null;
 		this.take_picture_error_cb = error;
 		if( !ready_for_capture ) {
 			if( MyDebug.LOG )
@@ -2977,6 +3065,7 @@ public class CameraController2 extends CameraController {
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "capture request completed");
+				still_capture_result = result;
 				// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
 				// need to cancel the autofocus, and restart the preview after taking the photo
 				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);

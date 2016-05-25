@@ -6,7 +6,9 @@ import java.util.List;
 
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.DngCreator;
 import android.location.Location;
+import android.media.Image;
 import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -103,7 +105,9 @@ public abstract class CameraController {
 	}
 	
 	public static interface PictureCallback {
+		public abstract void onCompleted(); // called after all relevant on*PictureTaken() callbacks have been called and returned
 		public abstract void onPictureTaken(byte[] data);
+		public abstract void onRawPictureTaken(DngCreator dngCreator, Image image); // only called if RAW is requested
 	}
 	
 	public static interface AutoFocusCallback {
@@ -220,7 +224,7 @@ public abstract class CameraController {
 	public abstract void autoFocus(final CameraController.AutoFocusCallback cb);
 	public abstract void cancelAutoFocus();
 	public abstract void setContinuousFocusMoveCallback(ContinuousFocusMoveCallback cb);
-	public abstract void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error);
+	public abstract void takePicture(final CameraController.PictureCallback picture, final ErrorCallback error);
 	public abstract void setDisplayOrientation(int degrees);
 	public abstract int getDisplayOrientation();
 	public abstract int getCameraOrientation();

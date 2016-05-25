@@ -31,9 +31,11 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Paint.Align;
+import android.hardware.camera2.DngCreator;
 import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.ExifInterface;
+import android.media.Image;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -178,12 +180,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public File createOutputVideoFile() throws IOException {
-		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO);
+		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "mp4");
 	}
 
 	@Override
 	public Uri createOutputVideoSAF() throws IOException {
-		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO);
+		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "mp4");
 	}
 
 	@Override
@@ -666,7 +668,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( video_method == VIDEOMETHOD_FILE ) {
 			if( filename != null ) {
 				File file = new File(filename);
-				storageUtils.broadcastFile(file, false, true);
+				storageUtils.broadcastFile(file, false, true, true);
 				done = true;
 			}
 		}
@@ -677,7 +679,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				if( MyDebug.LOG )
 					Log.d(TAG, "real_file: " + real_file);
                 if( real_file != null ) {
-	            	storageUtils.broadcastFile(real_file, false, true);
+	            	storageUtils.broadcastFile(real_file, false, true, true);
 	            	main_activity.test_last_saved_image = real_file.getAbsolutePath();
                 }
                 else {
@@ -1226,6 +1228,32 @@ public class MyApplicationInterface implements ApplicationInterface {
 		canvas.drawText(text, location_x, location_y, paint);
 	}
 
+	/** Reads from saveUri and writes the contents to picFile.
+	 */
+	private void copyUriToFile(Uri saveUri, File picFile) throws FileNotFoundException, IOException {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "copyUriToFile");
+			Log.d(TAG, "saveUri: " + saveUri);
+			Log.d(TAG, "picFile: " + saveUri);
+		}
+        InputStream inputStream = null;
+	    OutputStream realOutputStream = null;
+	    try {
+            inputStream = new FileInputStream(picFile);
+		    realOutputStream = main_activity.getContentResolver().openOutputStream(saveUri);
+		    // Transfer bytes from in to out
+		    byte [] buffer = new byte[1024];
+		    int len = 0;
+		    while( (len = inputStream.read(buffer)) > 0 ) {
+		    	realOutputStream.write(buffer, 0, len);
+		    }
+	    }
+	    finally {
+		    inputStream.close();
+		    realOutputStream.close();
+	    }
+	}
+
 	@SuppressLint("SimpleDateFormat")
     @SuppressWarnings("deprecation")
     @Override
@@ -1599,10 +1627,10 @@ public class MyApplicationInterface implements ApplicationInterface {
     			}
 			}
 			else if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE);
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "jpg");
 			}
 			else {
-    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE);
+    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "jpg");
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}
@@ -1761,7 +1789,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     	            if( saveUri == null ) {
     	            	// broadcast for SAF is done later, when we've actually written out the file
-    	            	storageUtils.broadcastFile(picFile, true, false);
+    	            	storageUtils.broadcastFile(picFile, true, false, true);
     	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
     	            }
 	            }
@@ -1777,24 +1805,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	            }
 
 	            if( saveUri != null ) {
-    	    		if( MyDebug.LOG )
-    	    			Log.d(TAG, "now save to saveUri: " + saveUri);
-		            InputStream inputStream = null;
-	    		    OutputStream realOutputStream = null;
-	    		    try {
-			            inputStream = new FileInputStream(picFile);
-		    		    realOutputStream = main_activity.getContentResolver().openOutputStream(saveUri);
-		    		    // Transfer bytes from in to out
-		    		    byte [] buffer = new byte[1024];
-		    		    int len = 0;
-		    		    while( (len = inputStream.read(buffer)) > 0 ) {
-		    		    	realOutputStream.write(buffer, 0, len);
-		    		    }
-	    		    }
-	    		    finally {
-		    		    inputStream.close();
-		    		    realOutputStream.close();
-	    		    }
+	            	copyUriToFile(saveUri, picFile);
 	    		    success = true;
 	    		    /* We still need to broadcastFile for SAF for two reasons:
 	    		    	1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
@@ -1811,7 +1822,7 @@ public class MyApplicationInterface implements ApplicationInterface {
                     if( real_file != null ) {
     					if( MyDebug.LOG )
     						Log.d(TAG, "broadcast file");
-    	            	storageUtils.broadcastFile(real_file, true, false);
+    	            	storageUtils.broadcastFile(real_file, true, false, true);
     	            	main_activity.test_last_saved_image = real_file.getAbsolutePath();
                     }
                     else if( !image_capture_intent ) {
@@ -1927,7 +1938,101 @@ public class MyApplicationInterface implements ApplicationInterface {
 		
 		return success;
 	}
-    
+
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+	public boolean onRawPictureTaken(DngCreator dngCreator, Image image) {
+        System.gc();
+		if( MyDebug.LOG )
+			Log.d(TAG, "onRawPictureTaken");
+		boolean success = false;
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "RAW requires LOLLIPOP or higher");
+			return success;
+		}
+
+        FileOutputStream output = null;
+        try {
+    		File picFile = null;
+    		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
+
+			if( storageUtils.isUsingSAF() ) {
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "dng");
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "saveUri: " + saveUri);
+				picFile = File.createTempFile("picFile", "dng", main_activity.getCacheDir());
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
+			}
+			else {
+        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "dng");
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
+			}
+
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
+            output = new FileOutputStream(picFile);
+            dngCreator.writeImage(output, image);
+    		if( saveUri == null ) { // if saveUri is non-null, then we haven't succeeded until we've copied to the saveUri
+    			success = true;
+            	// broadcast for SAF is done later, when we've actually written out the file
+        		storageUtils.broadcastFile(picFile, true, false, false);
+    		}
+
+            if( saveUri != null ) {
+            	copyUriToFile(saveUri, picFile);
+    		    success = true;
+    		    /* We still need to broadcastFile for SAF - see notes above for onPictureTaken().
+    		    */
+	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri);
+				if( MyDebug.LOG )
+					Log.d(TAG, "real_file: " + real_file);
+                if( real_file != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "broadcast file");
+	            	storageUtils.broadcastFile(real_file, true, false, false);
+                }
+                else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "announce SAF uri");
+                	// announce the SAF Uri
+	    		    storageUtils.announceUri(saveUri, true, false);
+                }
+            }
+        }
+        catch(FileNotFoundException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "File not found: " + e.getMessage());
+            e.printStackTrace();
+            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
+        }
+        catch(IOException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "ioexception writing raw image file");
+            e.printStackTrace();
+            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
+        }
+        finally {
+        	if( output != null ) {
+				try {
+					output.close();
+				}
+				catch(IOException e) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "ioexception closing raw output");
+					e.printStackTrace();
+				}
+        	}
+        }
+
+        System.gc();
+		if( MyDebug.LOG )
+			Log.d(TAG, "onRawPictureTaken complete");
+		return success;
+	}
+
     private Bitmap rotateForExif(Bitmap bitmap, int exif_orientation_s, String path) {
 		try {
 			if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED ) {
@@ -2065,7 +2170,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	    	    preview.showToast(null, R.string.photo_deleted);
                     if( file != null ) {
                     	// SAF doesn't broadcast when deleting them
-    	            	storageUtils.broadcastFile(file, false, false);
+    	            	storageUtils.broadcastFile(file, false, false, true);
                     }
 				}
 			}
@@ -2081,7 +2186,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					if( MyDebug.LOG )
 						Log.d(TAG, "successfully deleted " + last_image_name);
     	    	    preview.showToast(null, R.string.photo_deleted);
-	            	storageUtils.broadcastFile(file, false, false);
+	            	storageUtils.broadcastFile(file, false, false, true);
 				}
 			}
 			last_image_saf = false;

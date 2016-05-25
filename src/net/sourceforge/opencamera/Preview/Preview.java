@@ -45,8 +45,10 @@ import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.hardware.camera2.DngCreator;
 import android.location.Location;
 import android.media.CamcorderProfile;
+import android.media.Image;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -3937,13 +3939,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
 
-		CameraController.PictureCallback jpegPictureCallback = new CameraController.PictureCallback() {
-			public void onPictureTaken(byte[] data) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "onPictureTaken");
-    	    	// n.b., this is automatically run in a different thread
-				boolean success = applicationInterface.onPictureTaken(data);
+		CameraController.PictureCallback pictureCallback = new CameraController.PictureCallback() {
+			private boolean success = false; // whether jpeg callback succeeded
 
+			public void onCompleted() {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onCompleted");
     	        if( !using_android_l ) {
     	        	is_preview_started = false; // preview automatically stopped due to taking photo on original Camera API
     	        }
@@ -4004,7 +4005,30 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	    			takePictureOnTimer(timer_delay, true);
     	    		}
     	        }
+			}
+			
+			public void onPictureTaken(byte[] data) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onPictureTaken");
+    	    	// n.b., this is automatically run in a different thread
+				if( !applicationInterface.onPictureTaken(data) ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "applicationInterface.onPictureTaken failed");
+					success = false;
+				}
+				else {
+					success = true;
+				}
     	    }
+
+			public void onRawPictureTaken(DngCreator dngCreator, Image image) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onRawPictureTaken");
+				if( !applicationInterface.onRawPictureTaken(dngCreator, image) ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "applicationInterface.onRawPictureTaken failed");
+				}
+			}
     	};
 		CameraController.ErrorCallback errorCallback = new CameraController.ErrorCallback() {
 			public void onError() {
@@ -4026,7 +4050,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	camera_controller.enableShutterSound(enable_sound);
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
-			camera_controller.takePicture(null, jpegPictureCallback, errorCallback);
+			camera_controller.takePicture(pictureCallback, errorCallback);
     		count_cameraTakePicture++;
     	}
 		if( MyDebug.LOG )

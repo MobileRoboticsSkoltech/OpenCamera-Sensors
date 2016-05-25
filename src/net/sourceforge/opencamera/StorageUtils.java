@@ -142,7 +142,7 @@ public class StorageUtils {
     	}
 	}
 	
-    public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video) {
+    public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFile: " + file.getAbsolutePath());
     	// note that the new method means that the new folder shows up as a file when connected to a PC via MTP (at least tested on Windows 8)
@@ -154,7 +154,10 @@ public class StorageUtils {
     	}
     	else {
         	// both of these work fine, but using MediaScannerConnection.scanFile() seems to be preferred over sending an intent
-    		//this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+    		//context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+    		/*boolean use_scanfile = true;
+    		if( use_scanfile )
+    		{*/
  			failed_to_scan = true; // set to true until scanned okay
  			if( MyDebug.LOG )
  				Log.d(TAG, "failed_to_scan set to true");
@@ -166,7 +169,11 @@ public class StorageUtils {
     		 				Log.d(TAG, "Scanned " + path + ":");
     		 				Log.d(TAG, "-> uri=" + uri);
     		 			}
-    		 			last_media_scanned = uri;
+    		 			if( set_last_scanned ) {
+    		 				last_media_scanned = uri;
+        		 			if( MyDebug.LOG )
+        		 				Log.d(TAG, "set last_media_scanned to " + last_media_scanned);
+    		 			}
     		 			announceUri(uri, is_new_picture, is_new_video);
 
     	    			// it seems caller apps seem to prefer the content:// Uri rather than one based on a File
@@ -183,29 +190,33 @@ public class StorageUtils {
     		 		}
     			}
     		);
-	        /*ContentValues values = new ContentValues(); 
-	        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
-	        values.put(ImageColumns.DISPLAY_NAME, file.getName());
-	        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
-	        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
-	        // TODO: orientation
-	        values.put(ImageColumns.DATA, file.getAbsolutePath());
-	        Location location = preview.getLocation();
-	        if( location != null ) {
-    	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
-    	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
-	        }
-	        try {
-	    		this.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
-	        }
-	        catch (Throwable th) { 
-    	        // This can happen when the external volume is already mounted, but 
-    	        // MediaScanner has not notify MediaProvider to add that volume. 
-    	        // The picture is still safe and MediaScanner will find it and 
-    	        // insert it into MediaProvider. The only problem is that the user 
-    	        // cannot click the thumbnail to review the picture. 
-    	        Log.e(TAG, "Failed to write MediaStore" + th); 
-    	    }*/
+    		/*}
+    		else {
+    	        ContentValues values = new ContentValues(); 
+    	        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
+    	        values.put(ImageColumns.DISPLAY_NAME, file.getName());
+    	        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
+    	        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
+    	        // TODO: orientation
+    	        values.put(ImageColumns.DATA, file.getAbsolutePath());
+    	        // TODO: location
+    	        Location location = preview.getLocation();
+    	        if( location != null ) {
+        	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
+        	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
+    	        }
+    	        try {
+    	    		context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
+    	        }
+    	        catch (Throwable th) { 
+        	        // This can happen when the external volume is already mounted, but 
+        	        // MediaScanner has not notify MediaProvider to add that volume. 
+        	        // The picture is still safe and MediaScanner will find it and 
+        	        // insert it into MediaProvider. The only problem is that the user 
+        	        // cannot click the thumbnail to review the picture. 
+        	        Log.e(TAG, "Failed to write MediaStore" + th); 
+        	    }
+    		}*/
     	}
 	}
 
@@ -360,7 +371,7 @@ public class StorageUtils {
 		return file;
 	}
 	
-	private String createMediaFilename(int type, int count) {
+	private String createMediaFilename(int type, int count, String extension) {
         String index = "";
         if( count > 0 ) {
             index = "_" + count; // try to find a unique filename
@@ -370,11 +381,11 @@ public class StorageUtils {
 		String mediaFilename = null;
         if( type == MEDIA_TYPE_IMAGE ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
-    		mediaFilename = prefix + timeStamp + index + ".jpg";
+    		mediaFilename = prefix + timeStamp + index + "." + extension;
         }
         else if( type == MEDIA_TYPE_VIDEO ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
-    		mediaFilename = prefix + timeStamp + index + ".mp4";
+    		mediaFilename = prefix + timeStamp + index + "." + extension;
         }
         else {
         	// throw exception as this is a programming error
@@ -387,7 +398,7 @@ public class StorageUtils {
     
     // only valid if !isUsingSAF()
     @SuppressLint("SimpleDateFormat")
-	File createOutputMediaFile(int type) throws IOException {
+	File createOutputMediaFile(int type, String extension) throws IOException {
     	File mediaStorageDir = getImageFolder();
 
         // Create the storage directory if it does not exist
@@ -397,13 +408,13 @@ public class StorageUtils {
         			Log.e(TAG, "failed to create directory");
         		throw new IOException();
             }
-            broadcastFile(mediaStorageDir, false, false);
+            broadcastFile(mediaStorageDir, false, false, false);
         }
 
         // Create a media file name
         File mediaFile = null;
         for(int count=0;count<100;count++) {
-        	String mediaFilename = createMediaFilename(type, count);
+        	String mediaFilename = createMediaFilename(type, count, extension);
             mediaFile = new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
             if( !mediaFile.exists() ) {
             	break;
@@ -420,7 +431,7 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    Uri createOutputMediaFileSAF(int type) throws IOException {
+    Uri createOutputMediaFileSAF(int type, String extension) throws IOException {
     	try {
 	    	Uri treeUri = getTreeUriSAF();
 		    if( MyDebug.LOG )
@@ -430,7 +441,10 @@ public class StorageUtils {
 		    	Log.d(TAG, "docUri: " + docUri);
 		    String mimeType = "";
 	        if( type == MEDIA_TYPE_IMAGE ) {
-	        	mimeType = "image/jpeg";
+	        	if( extension.equals("dng") )
+	        		mimeType = "image/dng";
+	        	else
+	        		mimeType = "image/jpeg";
 	        }
 	        else if( type == MEDIA_TYPE_VIDEO ) {
 	        	mimeType = "video/mp4";
@@ -442,7 +456,7 @@ public class StorageUtils {
 	        	throw new RuntimeException();
 	        }
 	        // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
-	        String mediaFilename = createMediaFilename(type, 0);
+	        String mediaFilename = createMediaFilename(type, 0, extension);
 		    Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, mediaFilename);   
 		    if( MyDebug.LOG )
 		    	Log.d(TAG, "returned fileUri: " + fileUri);

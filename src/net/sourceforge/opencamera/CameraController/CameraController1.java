@@ -1133,25 +1133,20 @@ public class CameraController1 extends CameraController {
         }
 	}
 	
-	public void takePicture(final CameraController.PictureCallback raw, final CameraController.PictureCallback jpeg, final ErrorCallback error) {
+	public void takePicture(final CameraController.PictureCallback picture, final ErrorCallback error) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
     	Camera.ShutterCallback shutter = new TakePictureShutterCallback();
-        Camera.PictureCallback camera_raw = raw == null ? null : new Camera.PictureCallback() {
+        Camera.PictureCallback camera_jpeg = picture == null ? null : new Camera.PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
     	    	// n.b., this is automatically run in a different thread
-    	    	raw.onPictureTaken(data);
-    	    }
-        };
-        Camera.PictureCallback camera_jpeg = jpeg == null ? null : new Camera.PictureCallback() {
-    	    public void onPictureTaken(byte[] data, Camera cam) {
-    	    	// n.b., this is automatically run in a different thread
-    	    	jpeg.onPictureTaken(data);
+    	    	picture.onPictureTaken(data);
+    	    	picture.onCompleted();
     	    }
         };
 
         try {
-        	camera.takePicture(shutter, camera_raw, camera_jpeg);
+        	camera.takePicture(shutter, null, camera_jpeg);
         }
 		catch(RuntimeException e) {
 			// just in case? We got a RuntimeException report here from 1 user on Google Play; I also encountered it myself once of Galaxy Nexus when starting up

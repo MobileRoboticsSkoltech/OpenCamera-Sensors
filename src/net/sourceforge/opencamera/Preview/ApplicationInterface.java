@@ -5,8 +5,10 @@ import java.io.IOException;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.hardware.camera2.DngCreator;
 import android.location.Location;
 import android.media.CamcorderProfile;
+import android.media.Image;
 import android.net.Uri;
 import android.util.Pair;
 import android.view.MotionEvent;
@@ -127,5 +129,6 @@ public interface ApplicationInterface {
 	// callbacks
 	void onDrawPreview(Canvas canvas);
 	boolean onPictureTaken(byte [] data);
+	boolean onRawPictureTaken(DngCreator dngCreator, Image image);
 	void onContinuousFocusMove(boolean start); // called when focusing starts/stop in continuous picture mode (in photo mode only)
 }
