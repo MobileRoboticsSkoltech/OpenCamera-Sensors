@@ -1249,8 +1249,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 		    }
 	    }
 	    finally {
-		    inputStream.close();
-		    realOutputStream.close();
+	    	if( inputStream != null ) {
+	    		inputStream.close();
+	    		inputStream = null;
+	    	}
+	    	if( realOutputStream != null ) {
+	    		realOutputStream.close();
+	    		realOutputStream = null;
+	    	}
 	    }
 	}
 
