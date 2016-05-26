@@ -1063,7 +1063,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		setWindowFlagsForSettings();
 		MyPreferenceFragment fragment = new MyPreferenceFragment();
 		fragment.setArguments(bundle);
-        getFragmentManager().beginTransaction().add(R.id.prefs_container, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commit();
+		// use commitAllowingStateLoss() instead of commit(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
+		// see http://stackoverflow.com/questions/7575921/illegalstateexception-can-not-perform-this-action-after-onsaveinstancestate-wit
+        getFragmentManager().beginTransaction().add(R.id.prefs_container, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commitAllowingStateLoss();
     }
 
     public void updateForSettings() {
