@@ -1369,7 +1369,7 @@ public class CameraController2 extends CameraController {
 	            PictureCallback cb = jpeg_cb;
 	            jpeg_cb = null;
 	            cb.onPictureTaken(bytes);
-	            if( jpeg_cb == null && raw_cb == null ) {
+	            if( raw_cb == null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "all image callbacks now completed");
 					cb.onCompleted();
@@ -1400,7 +1400,7 @@ public class CameraController2 extends CameraController {
     	            PictureCallback cb = raw_cb;
     	            raw_cb = null;
     	            cb.onRawPictureTaken(dngCreator, image);
-    	            if( jpeg_cb == null && raw_cb == null ) {
+    	            if( jpeg_cb == null ) {
     					if( MyDebug.LOG )
     						Log.d(TAG, "all image callbacks now completed");
     					cb.onCompleted();
