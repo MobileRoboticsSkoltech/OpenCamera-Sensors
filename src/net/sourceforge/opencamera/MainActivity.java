@@ -2162,6 +2162,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	return this.mainUI;
     }
     
+    public MyApplicationInterface getApplicationInterface() {
+    	return this.applicationInterface;
+    }
+    
     public LocationSupplier getLocationSupplier() {
     	return this.applicationInterface.getLocationSupplier();
     }
