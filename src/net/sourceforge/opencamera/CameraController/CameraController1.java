@@ -1094,8 +1094,8 @@ public class CameraController1 extends CameraController {
 			Log.d(TAG, "setContinuousFocusMoveCallback");
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
 			// setAutoFocusMoveCallback() requires JELLY_BEAN
-			if( cb != null ) {
-				try {
+			try {
+				if( cb != null ) {
 					camera.setAutoFocusMoveCallback(new AutoFocusMoveCallback() {
 						@Override
 						public void onAutoFocusMoving(boolean start, Camera camera) {
@@ -1105,17 +1105,15 @@ public class CameraController1 extends CameraController {
 						}
 					});
 				}
-				catch(RuntimeException e) {
-					// just in case? We got a RuntimeException report here from 1 user on Google Play on HTC Desire (bravo) Android 4.2
-					// note the HTC Desire is a very old phone (2010) as is likely running a custom ROM to have Android 4.2, so probably not a widespread bug,
-					// but seems best to catch exceptions so that the entire app doesn't crash, it just means they'll lose the visual continuous focus indicator
-					if( MyDebug.LOG )
-						Log.e(TAG, "runtime exception from setAutoFocusMoveCallback");
-					e.printStackTrace();
+				else {
+					camera.setAutoFocusMoveCallback(null);
 				}
 			}
-			else {
-				camera.setAutoFocusMoveCallback(null);
+			catch(RuntimeException e) {
+				// received RuntimeException reports from some users on Google Play - seems to be older devices, but still important to catch!
+				if( MyDebug.LOG )
+					Log.e(TAG, "runtime exception from setAutoFocusMoveCallback");
+				e.printStackTrace();
 			}
 		}
 		else {
