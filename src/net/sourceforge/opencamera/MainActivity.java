@@ -88,7 +88,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private ArrayList<String> save_location_history = new ArrayList<String>();
 	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
     private GestureDetector gestureDetector;
-    private boolean screen_is_locked = false;
+    private boolean screen_is_locked = false; // whether screen is "locked" - this is Open Camera's own lock to guard against accidental presses, not the standard Android lock
     private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<Integer, Bitmap>();
 
     private SoundPool sound_pool = null;
@@ -440,10 +440,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		editor.apply();
 	}
 
+	// for audio "noise" trigger option
 	private int last_level = -1;
 	private long time_quiet_loud = -1;
 	private long time_last_audio_trigger_photo = -1;
 
+	/** Listens to audio noise and decides when there's been a "loud" noise to trigger taking a photo.
+	 */
 	public void onAudio(int level) {
 		boolean audio_trigger = false;
 		/*if( level > 150 ) {
@@ -1339,6 +1342,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		container.setAlpha(show ? 0.0f : 1.0f);
     }
     
+    /** Shows the default "blank" gallery icon, when we don't have a thumbnail available.
+     */
     public void updateGalleryIconToBlank() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateGalleryIconToBlank");
@@ -1356,6 +1361,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		gallery_bitmap = null;
     }
 
+    /** Shows a thumbnail for the gallery icon.
+     */
     void updateGalleryIcon(Bitmap thumbnail) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateGalleryIcon: " + thumbnail);
@@ -1364,6 +1371,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		gallery_bitmap = thumbnail;
     }
 
+    /** Updates the gallery icon by searching for the most recent photo.
+     *  Launches the task in a separate thread.
+     */
     public void updateGalleryIcon() {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
@@ -1562,6 +1572,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		editor.apply();
     }
 
+    /** Opens the Storage Access Framework dialog to select a folder.
+     */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     void openFolderChooserDialogSAF() {
 		if( MyDebug.LOG )
@@ -1572,6 +1584,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		startActivityForResult(intent, 42);
     }
 
+    /** Listens for the response from the Storage Access Framework dialog to select a folder
+     *  (as opened with openFolderChooserDialogSAF()).
+     */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
 		if( MyDebug.LOG )
@@ -1612,6 +1627,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         }
     }
 
+    /** Opens Open Camera's own (non-Storage Access Framework) dialog to select a folder.
+     */
     private void openFolderChooserDialog() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "openFolderChooserDialog");
@@ -1637,7 +1654,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		};
 		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
     }
-    
+
+    /** User can long-click on gallery to select a recent save location from the history, of if not available,
+     *  go straight to the file dialog to pick a folder.
+     */
     private void longClickedGallery() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "longClickedGallery");
@@ -1772,6 +1792,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	this.preview.takePicturePressed();
     }
     
+    /** Lock the screen - this is Open Camera's own lock to guard against accidental presses,
+     *  not the standard Android lock.
+     */
     void lockScreen() {
 		((ViewGroup) findViewById(R.id.locker)).setOnTouchListener(new View.OnTouchListener() {
             @SuppressLint("ClickableViewAccessibility") @Override
@@ -1782,16 +1805,23 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		});
 		screen_is_locked = true;
     }
-    
+
+    /** Unlock the screen (see lockScreen()).
+     */
     void unlockScreen() {
 		((ViewGroup) findViewById(R.id.locker)).setOnTouchListener(null);
 		screen_is_locked = false;
     }
     
+    /** Whether the screen is locked (see lockScreen()).
+     */
     public boolean isScreenLocked() {
     	return screen_is_locked;
     }
 
+    /** Listen for gestures.
+     *  Doing a swipe will unlock the screen (see lockScreen()).
+     */
     class MyGestureDetector extends SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
