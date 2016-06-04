@@ -113,7 +113,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private boolean block_startup_toast = false;
     
 	// for testing:
-	public boolean is_test = false;
+	public boolean is_test = false; // whether called from OpenCamera.test testing
 	public Bitmap gallery_bitmap = null;
 	public boolean test_low_memory = false;
 	public boolean test_have_angle = false;
@@ -129,22 +129,26 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		PreferenceManager.setDefaultValues(this, R.xml.preferences, false); // initialise any unset preferences to their default values
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting default preference values: " + (System.currentTimeMillis() - debug_time));
 
 		if( getIntent() != null && getIntent().getExtras() != null ) {
+			// whether called from testing
 			is_test = getIntent().getExtras().getBoolean("test_project");
 			if( MyDebug.LOG )
 				Log.d(TAG, "is_test: " + is_test);
 		}
 		if( getIntent() != null && getIntent().getExtras() != null ) {
+			// whether called from Take Photo widget
 			boolean take_photo = getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO);
 			if( MyDebug.LOG )
 				Log.d(TAG, "take_photo?: " + take_photo);
 		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+		// determine whether we should support "auto stabilise" feature
+		// risk of running out of memory on lower end devices, due to manipulation of large bitmaps
 		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "standard max memory = " + activityManager.getMemoryClass() + "MB");
@@ -166,13 +170,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_force_video_4k? " + supports_force_video_4k);
 
+		// set up components
 		mainUI = new MainUI(this);
 		applicationInterface = new MyApplicationInterface(this, savedInstanceState);
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating application interface: " + (System.currentTimeMillis() - debug_time));
 
+		// determine whether we support Camera2 API
 		initCamera2Support();
 
+		// set up window flags for normal operation
         setWindowFlagsForCamera();
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting window flags: " + (System.currentTimeMillis() - debug_time));
@@ -196,8 +203,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after updating folder history: " + (System.currentTimeMillis() - debug_time));
 
+		// set up sensors
         mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-		if( mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null ) {
+
+        // accelerometer sensor (for device orientation)
+        if( mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "found accelerometer");
 			mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -209,6 +219,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating accelerometer sensor: " + (System.currentTimeMillis() - debug_time));
 
+		// magnetic sensor (for compass direction)
 		if( mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "found magnetic sensor");
@@ -221,12 +232,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating magnetic sensor: " + (System.currentTimeMillis() - debug_time));
 
+		// clear any seek bars (just in case??)
 		mainUI.clearSeekBar();
-		
+
+		// set up the camera and its preview
         preview = new Preview(applicationInterface, savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating preview: " + (System.currentTimeMillis() - debug_time));
-		
+
+		// initialise on-screen button visibility
 	    View switchCameraButton = (View) findViewById(R.id.switch_camera);
 	    switchCameraButton.setVisibility(preview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
 	    View speechRecognizerButton = (View) findViewById(R.id.audio_control);
@@ -234,6 +248,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting button visibility: " + (System.currentTimeMillis() - debug_time));
 
+		// listen for orientation event change
 	    orientationEventListener = new OrientationEventListener(this) {
 			@Override
 			public void onOrientationChanged(int orientation) {
@@ -243,6 +258,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting orientation event listener: " + (System.currentTimeMillis() - debug_time));
 
+		// set up gallery button long click
         View galleryButton = (View)findViewById(R.id.gallery);
         galleryButton.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
@@ -254,11 +270,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         });
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting gallery long click listener: " + (System.currentTimeMillis() - debug_time));
-        
+
+		// listen for gestures
         gestureDetector = new GestureDetector(this, new MyGestureDetector());
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating gesture detector: " + (System.currentTimeMillis() - debug_time));
-        
+
+		// set up listener to handle immersive mode options
         View decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener
                 (new View.OnSystemUiVisibilityChangeListener() {
@@ -292,6 +310,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting immersive mode listener: " + (System.currentTimeMillis() - debug_time));
 
+		// show "about" dialog for first time use
 		boolean has_done_first_time = sharedPreferences.contains(PreferenceKeys.getFirstTimePreferenceKey());
         if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
@@ -303,11 +322,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
             setFirstTimeFlag();
         }
 
+        // load icons
         preloadIcons(R.array.flash_icons);
         preloadIcons(R.array.focus_mode_icons);
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after preloading icons: " + (System.currentTimeMillis() - debug_time));
 
+		// initialise text to speech engine
         textToSpeechSuccess = false;
         // run in separate thread so as to not delay startup time
         new Thread(new Runnable() {
@@ -334,7 +355,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
 	}
-	
+
+	/** Determine whether we support Camera2 API.
+	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initCamera2Support() {
 		if( MyDebug.LOG )
@@ -1229,7 +1252,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	else
     		getWindow().getDecorView().setSystemUiVisibility(0);
     }
-    
+
+    /** Sets the window flags for normal operation (when camera preview is visible).
+     */
     private void setWindowFlagsForCamera() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setWindowFlagsForCamera");
@@ -1286,6 +1311,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		camera_in_background = false;
     }
     
+    /** Sets the window flags for when the settings window is open.
+     */
     private void setWindowFlagsForSettings() {
 		// allow screen rotation
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
