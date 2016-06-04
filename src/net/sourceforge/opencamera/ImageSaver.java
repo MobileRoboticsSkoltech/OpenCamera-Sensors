@@ -41,16 +41,19 @@ public class ImageSaver {
 	private Paint p = new Paint();
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	
-	ImageSaver() {
+	private MainActivity main_activity = null;
+
+	ImageSaver(MainActivity main_activity) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "ImageSaver");
-        p.setAntiAlias(true);
+		this.main_activity = main_activity;
+
+		p.setAntiAlias(true);
 	}
 
 	@SuppressLint("SimpleDateFormat")
 	@SuppressWarnings("deprecation")
 	public boolean saveImage(byte [] data,
-			MainActivity main_activity,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,

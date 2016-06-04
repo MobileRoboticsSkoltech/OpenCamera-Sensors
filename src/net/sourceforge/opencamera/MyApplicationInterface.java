@@ -78,7 +78,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "MyApplicationInterface: time after creating storage utils: " + (System.currentTimeMillis() - debug_time));
 		this.drawPreview = new DrawPreview(main_activity, this);
 		
-		this.imageSaver = new ImageSaver();
+		this.imageSaver = new ImageSaver(main_activity);
 
         if( savedInstanceState != null ) {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
@@ -1258,7 +1258,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
-		boolean success = imageSaver.saveImage(data, main_activity,
+		boolean success = imageSaver.saveImage(data,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
