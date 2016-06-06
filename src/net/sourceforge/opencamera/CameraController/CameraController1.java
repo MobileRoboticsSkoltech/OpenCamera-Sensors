@@ -1039,7 +1039,7 @@ public class CameraController1 extends CameraController {
 
 	public void autoFocus(final CameraController.AutoFocusCallback cb) {
 		if( MyDebug.LOG )
-			Log.e(TAG, "autoFocus");
+			Log.d(TAG, "autoFocus");
         Camera.AutoFocusCallback camera_cb = new Camera.AutoFocusCallback() {
     		boolean done_autofocus = false;
 
