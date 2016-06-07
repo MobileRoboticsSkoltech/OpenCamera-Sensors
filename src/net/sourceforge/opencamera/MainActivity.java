@@ -783,6 +783,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onPause");
 			debug_time = System.currentTimeMillis();
 		}
+		waitUntilImageQueueEmpty(); // so we don't risk losing any images
         super.onPause();
         mainUI.destroyPopup();
         mSensorManager.unregisterListener(accelerometerListener);
@@ -806,6 +807,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		// needed if app is paused/resumed when settings is open and device is in portrait mode
         preview.setCameraDisplayOrientation();
         super.onConfigurationChanged(newConfig);
+    }
+    
+    public void waitUntilImageQueueEmpty() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "waitUntilImageQueueEmpty");
+        applicationInterface.getImageSaver().waitUntilDone();
     }
 
     public void clickedTakePhoto(View view) {
@@ -988,6 +995,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     private void openSettings() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "openSettings");
+		waitUntilImageQueueEmpty(); // in theory not needed as we could continue running in the background, but best to be safe
 		closePopup();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
 		preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes

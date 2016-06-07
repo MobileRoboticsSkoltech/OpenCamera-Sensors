@@ -11,6 +11,8 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import android.annotation.SuppressLint;
@@ -32,7 +34,7 @@ import android.util.Log;
 
 /** Handles the saving (and any required processing) of photos.
  */
-public class ImageSaver {
+public class ImageSaver extends Thread {
 	private static final String TAG = "ImageSaver";
 
 	private static final String TAG_GPS_IMG_DIRECTION = "GPSImgDirection";
@@ -42,6 +44,62 @@ public class ImageSaver {
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	
 	private MainActivity main_activity = null;
+	private BlockingQueue<Request> queue = new ArrayBlockingQueue<Request>(1);
+	
+	private class Request {
+		byte [] data = null;
+		boolean image_capture_intent = false;
+		Uri image_capture_intent_uri = null;
+		boolean using_camera2 = false;
+		int image_quality = 0;
+		boolean do_auto_stabilise = false;
+		double level_angle = 0.0;
+		boolean is_front_facing = false;
+		String preference_stamp = null;
+		String preference_textstamp = null;
+		int font_size = 0;
+		int color = 0;
+		String pref_style = null;
+		String preference_stamp_dateformat = null;
+		String preference_stamp_timeformat = null;
+		String preference_stamp_gpsformat = null;
+		boolean store_location = false;
+		Location location = null;
+		boolean store_geo_direction = false;
+		double geo_direction = 0.0;
+		boolean has_thumbnail_animation = false;
+		
+		Request(byte [] data,
+			boolean image_capture_intent, Uri image_capture_intent_uri,
+			boolean using_camera2, int image_quality,
+			boolean do_auto_stabilise, double level_angle,
+			boolean is_front_facing,
+			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
+			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+			boolean has_thumbnail_animation) {
+			this.data = data;
+			this.image_capture_intent = image_capture_intent;
+			this.image_capture_intent_uri = image_capture_intent_uri;
+			this.using_camera2 = using_camera2;
+			this.image_quality = image_quality;
+			this.do_auto_stabilise = do_auto_stabilise;
+			this.level_angle = level_angle;
+			this.is_front_facing = is_front_facing;
+			this.preference_stamp = preference_stamp;
+			this.preference_textstamp = preference_textstamp;
+			this.font_size = font_size;
+			this.color = color;
+			this.pref_style = pref_style;
+			this.preference_stamp_dateformat = preference_stamp_dateformat;
+			this.preference_stamp_timeformat = preference_stamp_timeformat;
+			this.preference_stamp_gpsformat = preference_stamp_gpsformat;
+			this.store_location = store_location;
+			this.location = location;
+			this.store_geo_direction = store_geo_direction;
+			this.geo_direction = geo_direction;
+			this.has_thumbnail_animation = has_thumbnail_animation;
+		}
+	}
 
 	ImageSaver(MainActivity main_activity) {
 		if( MyDebug.LOG )
@@ -50,10 +108,128 @@ public class ImageSaver {
 
 		p.setAntiAlias(true);
 	}
+	
+	@Override
+	public void run() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "starting ImageSaver thread...");
+		while( true ) {
+			try {
+				if( MyDebug.LOG )
+					Log.d(TAG, "ImageSaver thread reading from queue, size: " + queue.size());
+				Request request = queue.take(); // if empty, take() blocks until non-empty
+				if( MyDebug.LOG )
+					Log.d(TAG, "ImageSaver thread found new request from queue, size is now: " + queue.size());
+				boolean success = saveImageNow(request.data,
+						request.image_capture_intent, request.image_capture_intent_uri,
+						request.using_camera2, request.image_quality,
+						request.do_auto_stabilise, request.level_angle,
+						request.is_front_facing,
+						request.preference_stamp, request.preference_textstamp, request.font_size, request.color, request.pref_style, request.preference_stamp_dateformat, request.preference_stamp_timeformat, request.preference_stamp_gpsformat,
+						request.store_location, request.location, request.store_geo_direction, request.geo_direction,
+						request.has_thumbnail_animation);
+				if( MyDebug.LOG ) {
+					if( success )
+						Log.d(TAG, "ImageSaver thread successfully saved image");
+					else
+						Log.e(TAG, "ImageSaver thread failed to save image");
+				}
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+				if( MyDebug.LOG )
+					Log.e(TAG, "interrupted while trying to read from ImageSaver queue");
+			}
+		}
+	}
+	
+	public boolean saveImage(boolean do_in_background,
+			byte [] data,
+			boolean image_capture_intent, Uri image_capture_intent_uri,
+			boolean using_camera2, int image_quality,
+			boolean do_auto_stabilise, double level_angle,
+			boolean is_front_facing,
+			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
+			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+			boolean has_thumbnail_animation) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "saveImage");
+			Log.d(TAG, "do_in_background? " + do_in_background);
+		}
+
+		boolean success = false;
+		
+		//do_in_background = false;
+		
+		if( do_in_background ) {
+			Request request = new Request(data,
+					image_capture_intent, image_capture_intent_uri,
+					using_camera2, image_quality,
+					do_auto_stabilise, level_angle,
+					is_front_facing,
+					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+					store_location, location, store_geo_direction, geo_direction,
+					has_thumbnail_animation);
+			synchronized( this ) {
+				boolean done = false;
+				while( !done ) {
+					try {
+						if( MyDebug.LOG )
+							Log.d(TAG, "ImageSaver thread adding to queue, size: " + queue.size());
+						queue.put(request); // if queue is full, put() blocks until it isn't full
+						if( MyDebug.LOG )
+							Log.d(TAG, "ImageSaver thread added to queue, size is now: " + queue.size());
+						done = true;
+					}
+					catch(InterruptedException e) {
+						e.printStackTrace();
+						if( MyDebug.LOG )
+							Log.e(TAG, "interrupted while trying to add to ImageSaver queue");
+					}
+				}
+			}
+		}
+		else {
+			// wait for queue to be empty
+			waitUntilDone();
+			success = saveImageNow(data,
+					image_capture_intent, image_capture_intent_uri,
+					using_camera2, image_quality,
+					do_auto_stabilise, level_angle,
+					is_front_facing,
+					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+					store_location, location, store_geo_direction, geo_direction,
+					has_thumbnail_animation);
+		}
+
+		return success;
+	}
+	
+	void waitUntilDone() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "waitUntilDone");
+		synchronized( this ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "queue is size " + queue.size());
+			while( queue.size() > 0 ) {
+				try {
+					wait();
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					e.printStackTrace();
+					if( MyDebug.LOG )
+						Log.e(TAG, "interrupted while waiting for ImageSaver queue to be empty");
+				}
+			}
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "queue now empty");
+	}
 
 	@SuppressLint("SimpleDateFormat")
 	@SuppressWarnings("deprecation")
-	public boolean saveImage(byte [] data,
+	private synchronized boolean saveImageNow(byte [] data,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
@@ -62,10 +238,10 @@ public class ImageSaver {
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			boolean has_thumbnail_animation) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "saveImage");
+			Log.d(TAG, "saveImageNow");
 
         boolean success = false;
-		MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
+		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
 		StorageUtils storageUtils = main_activity.getStorageUtils();
 
 		Bitmap bitmap = null;
@@ -675,7 +851,12 @@ public class ImageSaver {
 				// now get the rotation from the Exif data
 				thumbnail = rotateForExif(thumbnail, exif_orientation_s, picFile.getAbsolutePath());
 
-				applicationInterface.updateThumbnail(thumbnail);
+	    		final Bitmap thumbnail_f = thumbnail;
+		    	main_activity.runOnUiThread(new Runnable() {
+					public void run() {
+						applicationInterface.updateThumbnail(thumbnail_f);
+					}
+				});
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
 			}

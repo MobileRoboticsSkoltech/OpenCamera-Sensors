@@ -79,6 +79,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		this.drawPreview = new DrawPreview(main_activity, this);
 		
 		this.imageSaver = new ImageSaver(main_activity);
+		this.imageSaver.start();
 
         if( savedInstanceState != null ) {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
@@ -116,6 +117,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	StorageUtils getStorageUtils() {
 		return storageUtils;
+	}
+	
+	ImageSaver getImageSaver() {
+		return imageSaver;
 	}
 
     @Override
@@ -1258,7 +1263,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
-		boolean success = imageSaver.saveImage(data,
+		boolean do_in_background = true;
+		if( image_capture_intent )
+			do_in_background = false;
+		else if( getPausePreviewPref() )
+			do_in_background = false;
+
+		boolean success = imageSaver.saveImage(do_in_background, data,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
