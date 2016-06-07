@@ -243,6 +243,8 @@ public class ImageSaver extends Thread {
         boolean success = false;
 		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
 		StorageUtils storageUtils = main_activity.getStorageUtils();
+		
+		main_activity.savingImage(true);
 
 		Bitmap bitmap = null;
 		if( do_auto_stabilise )
@@ -879,6 +881,8 @@ public class ImageSaver extends Thread {
         
         System.gc();
         
+		main_activity.savingImage(false);
+
         return success;
 	}
 

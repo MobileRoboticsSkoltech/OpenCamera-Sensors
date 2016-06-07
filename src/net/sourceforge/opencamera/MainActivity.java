@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -36,6 +37,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -90,6 +93,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     private GestureDetector gestureDetector;
     private boolean screen_is_locked = false; // whether screen is "locked" - this is Open Camera's own lock to guard against accidental presses, not the standard Android lock
     private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<Integer, Bitmap>();
+	private ValueAnimator gallery_save_anim = null;
 
     private SoundPool sound_pool = null;
 	private SparseIntArray sound_ids = null;
@@ -814,7 +818,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "waitUntilImageQueueEmpty");
         applicationInterface.getImageSaver().waitUntilDone();
     }
-
+    
     public void clickedTakePhoto(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTakePhoto");
@@ -1457,6 +1461,39 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateGalleryIcon: total time to update gallery icon: " + (System.currentTimeMillis() - debug_time));
+    }
+
+	void savingImage(final boolean started) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "savingImage: " + started);
+
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				final ImageButton galleryButton = (ImageButton) findViewById(R.id.gallery);
+				if( started ) {
+					//galleryButton.setColorFilter(0x80ffffff, PorterDuff.Mode.MULTIPLY);
+					if( gallery_save_anim == null ) {
+						gallery_save_anim = ValueAnimator.ofInt(Color.argb(200, 255, 255, 255), Color.argb(127, 255, 255, 255));
+						gallery_save_anim.setEvaluator(new ArgbEvaluator());
+						gallery_save_anim.setRepeatCount(ValueAnimator.INFINITE);
+						gallery_save_anim.setRepeatMode(ValueAnimator.REVERSE);
+						gallery_save_anim.setDuration(500);
+					}
+					gallery_save_anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+					    @Override
+					    public void onAnimationUpdate(ValueAnimator animation) {
+							galleryButton.setColorFilter((Integer)animation.getAnimatedValue(), PorterDuff.Mode.MULTIPLY);
+					    }
+					});
+					gallery_save_anim.start();
+				}
+				else
+					if( gallery_save_anim != null ) {
+						gallery_save_anim.cancel();
+					}
+					galleryButton.setColorFilter(null);
+			}
+		});
     }
 
     public void clickedGallery(View view) {
