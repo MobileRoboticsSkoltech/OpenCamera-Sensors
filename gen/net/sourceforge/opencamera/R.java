@@ -27,6 +27,7 @@ public final class R {
  White 
  White 
  White 
+ White 
          */
         public static final int preference_angle_highlight_color_values=0x7f06001b;
         public static final int preference_audio_control_entries=0x7f060038;
@@ -194,6 +195,7 @@ public final class R {
         public static final int app_name=0x7f080000;
         /**  symbol short for megabytes 
  symbol short for megabytes 
+ symbol short for megabytes 
          */
         public static final int audio_control_start=0x7f08010c;
         public static final int audio_control_stop=0x7f08010d;
@@ -295,6 +297,7 @@ public final class R {
         public static final int parent_folder=0x7f0800fc;
         public static final int permission_location_not_available=0x7f080107;
         /**  the permission names such as Microphone should match what Android calls them in the App permission settings 
+ the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
