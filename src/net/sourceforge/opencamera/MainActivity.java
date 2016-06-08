@@ -1473,7 +1473,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				if( started ) {
 					//galleryButton.setColorFilter(0x80ffffff, PorterDuff.Mode.MULTIPLY);
 					if( gallery_save_anim == null ) {
-						gallery_save_anim = ValueAnimator.ofInt(Color.argb(200, 255, 255, 255), Color.argb(127, 255, 255, 255));
+						gallery_save_anim = ValueAnimator.ofInt(Color.argb(200, 255, 255, 255), Color.argb(63, 255, 255, 255));
 						gallery_save_anim.setEvaluator(new ArgbEvaluator());
 						gallery_save_anim.setRepeatCount(ValueAnimator.INFINITE);
 						gallery_save_anim.setRepeatMode(ValueAnimator.REVERSE);
