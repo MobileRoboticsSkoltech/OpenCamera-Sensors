@@ -2344,6 +2344,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					}
 				}
 			}
+			if( sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false) ) {
+				// important as users are sometimes confused at the behaviour if they don't realise the option is on
+				toast_string += "\n" + getResources().getString(R.string.preference_auto_stabilise);
+			}
 		}
 		if( applicationInterface.getFaceDetectionPref() ) {
 			// important so that the user realises why touching for focus/metering areas won't work - easy to forget that face detection has been turned on!
