@@ -1936,22 +1936,29 @@ public class CameraController2 extends CameraController {
 		Rect sensor_rect = getViewableRect();
 		boolean has_focus = false;
 		boolean has_metering = false;
-		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
-			has_focus = true;
-			camera_settings.af_regions = new MeteringRectangle[1];
-			camera_settings.af_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
-			camera_settings.setAFRegions(previewBuilder);
-		}
-		else
+		if( sensor_rect.width() <= 0 || sensor_rect.height() <= 0 ) {
+			// had a crash on Google Play due to creating a MeteringRectangle with -ve width/height ?!
 			camera_settings.af_regions = null;
-		if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
-			has_metering = true;
-			camera_settings.ae_regions = new MeteringRectangle[1];
-			camera_settings.ae_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
-			camera_settings.setAERegions(previewBuilder);
-		}
-		else
 			camera_settings.ae_regions = null;
+		}
+		else {
+			if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) > 0 ) {
+				has_focus = true;
+				camera_settings.af_regions = new MeteringRectangle[1];
+				camera_settings.af_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
+				camera_settings.setAFRegions(previewBuilder);
+			}
+			else
+				camera_settings.af_regions = null;
+			if( characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) > 0 ) {
+				has_metering = true;
+				camera_settings.ae_regions = new MeteringRectangle[1];
+				camera_settings.ae_regions[0] = new MeteringRectangle(0, 0, sensor_rect.width()-1, sensor_rect.height()-1, 0);
+				camera_settings.setAERegions(previewBuilder);
+			}
+			else
+				camera_settings.ae_regions = null;
+		}
 		if( has_focus || has_metering ) {
 			try {
 				setRepeatingRequest();
