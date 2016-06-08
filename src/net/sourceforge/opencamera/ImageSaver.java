@@ -406,7 +406,7 @@ public class ImageSaver extends Thread {
     			}
     			Canvas canvas = new Canvas(bitmap);
     			p.setColor(Color.WHITE);
-    			// we don't use the density of the screen, because we're stamping to the image, not drawing on the screen (we don't want the font height to depend on the device's resolution
+    			// we don't use the density of the screen, because we're stamping to the image, not drawing on the screen (we don't want the font height to depend on the device's resolution)
     			// instead we go by 1 pt == 1/72 inch height, and scale for an image height (or width if in portrait) of 4" (this means the font height is also independent of the photo resolution)
     			int smallest_size = (width<height) ? width : height;
     			float scale = ((float)smallest_size) / (72.0f*4.0f);
