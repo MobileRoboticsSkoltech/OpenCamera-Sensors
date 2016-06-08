@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
@@ -169,12 +170,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public File createOutputVideoFile() throws IOException {
-		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "mp4");
+		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "mp4", new Date());
 	}
 
 	@Override
 	public Uri createOutputVideoSAF() throws IOException {
-		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "mp4");
+		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "mp4", new Date());
 	}
 
 	@Override
@@ -1223,6 +1224,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken");
 
+		Date current_date = new Date(); // do asap so we date corresponds to actual photo time
+
 		boolean image_capture_intent = false;
 	        Uri image_capture_intent_uri = null;
         String action = main_activity.getIntent().getAction();
@@ -1274,6 +1277,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
+				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
 				has_thumbnail_animation);
@@ -1303,7 +1307,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
 
 			if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "dng");
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "saveUri: " + saveUri);
 				picFile = File.createTempFile("picFile", "dng", main_activity.getCacheDir());
@@ -1311,7 +1315,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    			Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
 			}
 			else {
-        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "dng");
+        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}

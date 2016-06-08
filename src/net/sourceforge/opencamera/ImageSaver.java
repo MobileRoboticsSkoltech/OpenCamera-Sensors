@@ -55,6 +55,7 @@ public class ImageSaver extends Thread {
 		boolean do_auto_stabilise = false;
 		double level_angle = 0.0;
 		boolean is_front_facing = false;
+		Date current_date = null;
 		String preference_stamp = null;
 		String preference_textstamp = null;
 		int font_size = 0;
@@ -74,6 +75,7 @@ public class ImageSaver extends Thread {
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
+			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			boolean has_thumbnail_animation) {
@@ -85,6 +87,7 @@ public class ImageSaver extends Thread {
 			this.do_auto_stabilise = do_auto_stabilise;
 			this.level_angle = level_angle;
 			this.is_front_facing = is_front_facing;
+			this.current_date = current_date;
 			this.preference_stamp = preference_stamp;
 			this.preference_textstamp = preference_textstamp;
 			this.font_size = font_size;
@@ -125,6 +128,7 @@ public class ImageSaver extends Thread {
 						request.using_camera2, request.image_quality,
 						request.do_auto_stabilise, request.level_angle,
 						request.is_front_facing,
+						request.current_date,
 						request.preference_stamp, request.preference_textstamp, request.font_size, request.color, request.pref_style, request.preference_stamp_dateformat, request.preference_stamp_timeformat, request.preference_stamp_gpsformat,
 						request.store_location, request.location, request.store_geo_direction, request.geo_direction,
 						request.has_thumbnail_animation);
@@ -149,6 +153,7 @@ public class ImageSaver extends Thread {
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
+			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			boolean has_thumbnail_animation) {
@@ -167,6 +172,7 @@ public class ImageSaver extends Thread {
 					using_camera2, image_quality,
 					do_auto_stabilise, level_angle,
 					is_front_facing,
+					current_date,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 					store_location, location, store_geo_direction, geo_direction,
 					has_thumbnail_animation);
@@ -197,6 +203,7 @@ public class ImageSaver extends Thread {
 					using_camera2, image_quality,
 					do_auto_stabilise, level_angle,
 					is_front_facing,
+					current_date,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 					store_location, location, store_geo_direction, geo_direction,
 					has_thumbnail_animation);
@@ -234,6 +241,7 @@ public class ImageSaver extends Thread {
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
+			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			boolean has_thumbnail_animation) {
@@ -433,7 +441,6 @@ public class ImageSaver extends Thread {
         			if( MyDebug.LOG )
         				Log.d(TAG, "stamp date");
         			// doesn't respect user preferences such as 12/24 hour - see note about in draw() about DateFormat.getTimeInstance()
-        			Date current_date = new Date();
         			String date_stamp = "", time_stamp = "";
         			if( !preference_stamp_dateformat.equals("preference_stamp_dateformat_none") ) {
             			if( preference_stamp_dateformat.equals("preference_stamp_dateformat_yyyymmdd") )
@@ -576,10 +583,10 @@ public class ImageSaver extends Thread {
     			}
 			}
 			else if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "jpg");
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "jpg", current_date);
 			}
 			else {
-    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "jpg");
+    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "jpg", current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}
