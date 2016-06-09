@@ -184,7 +184,7 @@
     <string name="preference_resolution">Camera resolution</string>
     <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
     <string name="preference_quality">Image quality</string>
-    <string name="preference_quality_summary">Set the image quality of saved photo images (recommended value is 90%%)</string>
+    <string name="preference_quality_summary">Set the image JPEG quality of saved photo images (recommended value is 90%%)</string>
     <string name="preference_location">Store location data (Geotagging)</string>
     <string name="preference_location_summary">Store GPS location data in the photos/videos</string>
     <string name="preference_gps_direction">Store compass direction</string>
