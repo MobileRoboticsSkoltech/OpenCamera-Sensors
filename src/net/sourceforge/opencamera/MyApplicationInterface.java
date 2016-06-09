@@ -1267,7 +1267,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
 		boolean do_in_background = true;
-		if( image_capture_intent )
+		if( !sharedPreferences.getBoolean(PreferenceKeys.getBackgroundPhotoSavingPreferenceKey(), true) )
+			do_in_background = false;
+		else if( image_capture_intent )
 			do_in_background = false;
 		else if( getPausePreviewPref() )
 			do_in_background = false;

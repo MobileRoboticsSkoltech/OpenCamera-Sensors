@@ -123,6 +123,10 @@ public class PreferenceKeys {
     	return "preference_stamp_style";
     }
 
+    public static String getBackgroundPhotoSavingPreferenceKey() {
+    	return "preference_background_photo_saving";
+    }
+
     public static String getUIPlacementPreferenceKey() {
     	return "preference_ui_placement";
     }

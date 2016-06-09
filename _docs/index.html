@@ -529,6 +529,9 @@ longer to save the photo. Also note that this option is only supported for photo
 <p><b>Text style</b> - Whether to render the text on the image with a shadow background effect, for
 options "Stamp photos" or "Custom text".</p>
 
+<p><b>Use background thread</b> - Whether to process and save photo in the background. Normally this should
+be left set to true for faster operation, but it's an option just in case.</p>
+
 <p><b>Video settings</b> - Select to access the following controls:</p>
 
 <p><b>Video resolution</b> - Select the resolution of videos taken by the camera.</p>
@@ -893,7 +896,9 @@ FIXED   Crash on Camera2 API (checkArgumentNonnegative).
 FIXED   Photo filename's date/time and date/time used for photostamp now match
         better with time the photo was actually taken, rather than when the
         image was saved.
-UPDATED Photos now processed in background thread, for smoother operation.
+UPDATED Photos now processed in background thread, for smoother operation (if
+        this causes problems, you can disable it under Settings/Photo settings/
+        Use background thread).
 UPDATED Gallery button shows animation effect to indicate saving images.
 UPDATED Photo/video info toast now indicates if auto-stabilise option is on.
 UPDATED Updated Russian translation (thanks to Grigorii Chirkov).
