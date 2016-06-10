@@ -3837,11 +3837,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhoto");
 		applicationInterface.cameraInOperation(true);
-		String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
-		if( MyDebug.LOG )
-			Log.d(TAG, "focus_value is " + focus_value);
 
-		if( focus_value != null && ( focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") ) ) {
+		if( camera_controller.focusIsContinuous() ) {
 			// we call via autoFocus(), to avoid risk of taking photo while the continuous focus is focusing - risk of blurred photo, also sometimes get bug in such situations where we end of repeatedly focusing
 			// this is the case even if skip_autofocus is true (as we still can't guarantee that continuous focusing might be occurring)
 	        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
@@ -3859,8 +3856,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "recently focused successfully, so no need to refocus");
 			takePhotoWhenFocused();
 		}
-		//else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) || focus_mode.equals(Camera.Parameters.FOCUS_MODE_MACRO) ) {
-		else if( focus_value != null && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) ) {
+		else if( camera_controller.supportsAutoFocus() ) {
 			synchronized(this) {
 				if( focus_success == FOCUS_WAITING ) {
 					// Needed to fix bug (on Nexus 6, old camera API): if flash was on, pointing at a dark scene, and we take photo when already autofocusing, the autofocus never returned so we got stuck!

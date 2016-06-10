@@ -2024,6 +2024,16 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public boolean focusIsContinuous() {
+		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
+			return false;
+		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE || focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO )
+			return true;
+		return false;
+	}
+
+	@Override
 	public boolean focusIsVideo() {
 		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
 			return false;
