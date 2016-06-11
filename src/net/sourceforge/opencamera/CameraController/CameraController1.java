@@ -1059,7 +1059,7 @@ public class CameraController1 extends CameraController {
     		@Override
 			public void onAutoFocus(boolean success, Camera camera) {
 				if( MyDebug.LOG )
-					Log.e(TAG, "autoFocus.onAutoFocus");
+					Log.d(TAG, "autoFocus.onAutoFocus");
 				// in theory we should only ever get one call to onAutoFocus(), but some Samsung phones at least can call the callback multiple times
 				// see http://stackoverflow.com/questions/36316195/take-picture-fails-on-samsung-phones
 				// needed to fix problem on Samsung S7 with flash auto/on and continuous picture focus where it would claim failed to take picture even though it'd succeeded,
