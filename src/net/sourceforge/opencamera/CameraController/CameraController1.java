@@ -643,7 +643,7 @@ public class CameraController1 extends CameraController {
 			Log.d(TAG, "convertFocusModeToValue: " + focus_mode);
 		String focus_value = "";
 		if( focus_mode == null ) {
-			// ignore, leave focus_value at null
+			// ignore, leave focus_value at ""
 		}
 		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) ) {
     		focus_value = "focus_mode_auto";
