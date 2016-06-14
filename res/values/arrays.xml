@@ -572,4 +572,12 @@
         <item>524288000</item>
         <item>1073741824</item>
     </string-array>
+    <string-array name="preference_save_zulu_time_entries">
+        <item>Local Time</item>
+        <item>UTC (Zulu)</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_values">
+        <item>local</item>
+        <item>zulu</item>
+    </string-array>
 </resources>

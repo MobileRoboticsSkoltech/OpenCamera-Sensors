@@ -219,6 +219,15 @@
 	            android:defaultValue="VID_"
 		        />
 
+            <ListPreference
+                android:key="preference_save_zulu_time"
+                android:title="@string/preference_save_zulu_time"
+                android:summary="@string/preference_save_zulu_time_summary"
+                android:entries="@array/preference_save_zulu_time_entries"
+                android:entryValues="@array/preference_save_zulu_time_values"
+                android:defaultValue="local"
+                />
+
 	       <SwitchPreference
                 android:key="preference_show_when_locked"
                 android:title="@string/preference_show_when_locked"

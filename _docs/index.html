@@ -396,6 +396,11 @@ device, so you'll have to look this up yourself (it's usually something inside /
 
 <p><b>Save video prefix</b> - This option allows you to customise save filenames for videos.</p>
 
+<p><b>Time format for filename</b> - By default, Open Camera uses the local timezone for the save filenames, but you
+can also select UTC <a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">(Coordinated Universal Time / Zulu Time)</a>.
+For the latter option, a "Z" will be appended to the filename (e.g., "IMG_20160524_155116Z.jpg"). The Z (Zulu) suffix
+is a standard convention for identifying UTC timestamps.</p>
+
 <p><b>Show camera when locked</b> - If you have a lock screen on your device (e.g., PIN to unlock), Open Camera by
 default will show above the lock screen - i.e., if locked, you won't have to enter the PIN to use Open Camera. The
 device still needs to be unlocked in order to go to the Settings or Gallery. If you would prefer Open Camera to always
@@ -834,6 +839,7 @@ further replies).</p>
 <ul>
 <li>App icon and take_photo.png, take_photo_pressed.png by <a href="http://www.yeti-designs.com">Adam Lapinski</a>.</li>
 <li>Improved selfie stick button support by Lau Keat Hwa.</li>
+<li>Option for filenames to be based on UTC (Zulu) time by <a href="https://www.cathedralcanyon.net">David Pletcher</a> ( lpm_sourceforge AT cathedralcanyon DOT net ).</li>
 <li>Azerbaijani translation by Eldost ( l-dost AT mail DOT ru ).</li>
 <li>Brazilian tranlation by Kaio Duarte.</li>
 <li>Chinese Simplified translation by Michael Lu ( yeskky AT gmail DOT com ).</li>
@@ -896,6 +902,8 @@ FIXED   Crash on Camera2 API (checkArgumentNonnegative).
 FIXED   Photo filename's date/time and date/time used for photostamp now match
         better with time the photo was actually taken, rather than when the
         image was saved.
+ADDED   New option for filenames to be based on UTC (Zulu) time (thanks to
+        David Pletcher).
 UPDATED Photos now processed in background thread, for smoother operation (if
         this causes problems, you can disable it under Settings/Photo settings/
         Use background thread).

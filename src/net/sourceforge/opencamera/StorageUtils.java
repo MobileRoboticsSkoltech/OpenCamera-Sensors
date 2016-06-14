@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -376,8 +377,17 @@ public class StorageUtils {
         if( count > 0 ) {
             index = "_" + count; // try to find a unique filename
         }
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(current_date);
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		boolean useZuluTime = sharedPreferences.getString(PreferenceKeys.getSaveZuluTimePreferenceKey(), "local").equals("zulu");
+		String timeStamp = null;
+		if( useZuluTime ) {
+			SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd_HHmmss'Z'", Locale.US);
+			fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+			timeStamp = fmt.format(current_date);
+		}
+		else {
+			timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(current_date);
+		}
 		String mediaFilename = null;
         if( type == MEDIA_TYPE_IMAGE ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
