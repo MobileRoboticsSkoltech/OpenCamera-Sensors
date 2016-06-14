@@ -2407,7 +2407,7 @@ public class CameraController2 extends CameraController {
 		state = STATE_WAITING_AUTOFOCUS;
 		precapture_started = -1;
 		this.autofocus_cb = cb;
-		// Camera2Basic sets a repeating request rather than capture, for doing autofocus (and if we do a capture(), sometimes have problem that autofocus never returns)
+		// Camera2Basic sets a trigger with capture
 		// Google Camera sets to idle with a repeating request, then sets af trigger to start with a capture
 		try {
 			afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
@@ -2845,33 +2845,38 @@ public class CameraController2 extends CameraController {
 			if( state == STATE_NORMAL ) {
 				// do nothing
 			}
-			else if( state == STATE_WAITING_AUTOFOCUS && af_state != null && af_state != last_af_state ) {
-				// check for autofocus completing
-				// need to check that af_state != last_af_state
-				if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ||
-						af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED
-						) {
-					boolean focus_success = af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED;
-					if( MyDebug.LOG ) {
-						if( focus_success )
-							Log.d(TAG, "onCaptureCompleted: autofocus success");
-						else
-							Log.d(TAG, "onCaptureCompleted: autofocus failed");
-						Log.d(TAG, "af_state: " + af_state);
-					}
+			else if( state == STATE_WAITING_AUTOFOCUS ) {
+				if( af_state == null ) {
+					// autofocus shouldn't really be requested if af not available, but still allow this rather than getting stuck waiting for autofocus to complete
+					if( MyDebug.LOG )
+						Log.e(TAG, "waiting for autofocus but af_state is null");
 					state = STATE_NORMAL;
 					precapture_started = -1;
-					// we need to cancel af trigger, otherwise sometimes things seem to get confused, with the autofocus thinking it's completed too early
-			    	/*previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-			    	capture();
-			    	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);*/
-
-					/*if( jpeg_cb != null ) {
-						runPrecapture();
-					}
-					else*/ if( autofocus_cb != null ) {
-						autofocus_cb.onAutoFocus(focus_success);
+					if( autofocus_cb != null ) {
+						autofocus_cb.onAutoFocus(false);
 						autofocus_cb = null;
+					}
+				}
+				else if( af_state != last_af_state ) {
+					// check for autofocus completing
+					// need to check that af_state != last_af_state, except for continuous focus mode where if we're already focused, should return immediately
+					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ||
+							af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED
+							) {
+						boolean focus_success = af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED;
+						if( MyDebug.LOG ) {
+							if( focus_success )
+								Log.d(TAG, "onCaptureCompleted: autofocus success");
+							else
+								Log.d(TAG, "onCaptureCompleted: autofocus failed");
+							Log.d(TAG, "af_state: " + af_state);
+						}
+						state = STATE_NORMAL;
+						precapture_started = -1;
+						if( autofocus_cb != null ) {
+							autofocus_cb.onAutoFocus(focus_success);
+							autofocus_cb = null;
+						}
 					}
 				}
 			}
@@ -3085,6 +3090,7 @@ public class CameraController2 extends CameraController {
 				still_capture_result = result;
 				// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
 				// need to cancel the autofocus, and restart the preview after taking the photo
+				// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
 				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 				camera_settings.setAEMode(previewBuilder, false); // not sure if needed, but the AE mode is set again in Camera2Basic
 				// n.b., if capture/setRepeatingRequest throw exception, we don't call the take_picture_error_cb.onError() callback, as the photo should have been taken by this point

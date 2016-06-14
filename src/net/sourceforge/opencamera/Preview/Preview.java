@@ -244,6 +244,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private final DecimalFormat decimal_format_1dp = new DecimalFormat("#.#");
 	private final DecimalFormat decimal_format_2dp = new DecimalFormat("#.##");
 
+	/* If the user touches to focus in continuous mode, we switch the camera_controller to autofocus mode.
+	 * autofocus_in_continuous_mode is set to true when this happens; the runnable reset_continuous_focus_runnable
+	 * switches back to continuous mode.
+	 */
+	private Handler reset_continuous_focus_handler = new Handler();
+	private Runnable reset_continuous_focus_runnable = null;
+	private boolean autofocus_in_continuous_mode = false;
+
 	// for testing:
 	public int count_cameraStartPreview = 0;
 	public int count_cameraAutoFocus = 0;
@@ -897,6 +905,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "closeCamera()");
 			debug_time = System.currentTimeMillis();
 		}
+		removePendingContinuousFocusReset();
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		focus_started_time = -1;
@@ -3126,6 +3135,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		updateFocus(focus_value, quiet, true, auto_focus);
 	}
 
+	private boolean supportedFocusValue(String focus_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportedFocusValue(): " + focus_value);
+		if( this.supported_focus_values != null ) {
+	    	int new_focus_index = supported_focus_values.indexOf(focus_value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "new_focus_index: " + new_focus_index);
+	    	return new_focus_index != -1;
+		}
+		return false;
+	}
+
 	private boolean updateFocus(String focus_value, boolean quiet, boolean save, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + focus_value);
@@ -3187,7 +3208,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	// this returns the flash mode indicated by the UI, rather than from the camera parameters
+	/** This returns the flash mode indicated by the UI, rather than from the camera parameters.
+	 */
 	public String getCurrentFocusValue() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentFocusValue()");
@@ -3210,6 +3232,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		}
 		cancelAutoFocus();
+		removePendingContinuousFocusReset(); // this isn't strictly needed as the reset_continuous_focus_runnable will check the ui focus mode when it runs, but good to remove it anyway
+		autofocus_in_continuous_mode = false;
         camera_controller.setFocusValue(focus_value);
 		setupContinuousFocusMove();
 		clearFocusAreas();
@@ -3837,10 +3861,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhoto");
 		applicationInterface.cameraInOperation(true);
+        String current_ui_focus_value = getCurrentFocusValue();
+		if( MyDebug.LOG )
+			Log.d(TAG, "current_ui_focus_value is " + current_ui_focus_value);
 
 		if( camera_controller.focusIsContinuous() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "call autofocus for continuous focus mode");
 			// we call via autoFocus(), to avoid risk of taking photo while the continuous focus is focusing - risk of blurred photo, also sometimes get bug in such situations where we end of repeatedly focusing
 			// this is the case even if skip_autofocus is true (as we still can't guarantee that continuous focusing might be occurring)
+			// note: if the user touches to focus in continuous mode, we camera controller may be in auto focus mode, so we should only enter this codepath if the camera_controller is in continuous focus mode
 	        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
 				@Override
 				public void onAutoFocus(boolean success) {
@@ -3856,7 +3886,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "recently focused successfully, so no need to refocus");
 			takePhotoWhenFocused();
 		}
-		else if( camera_controller.supportsAutoFocus() ) {
+		else if( current_ui_focus_value != null && ( current_ui_focus_value.equals("focus_mode_auto") || current_ui_focus_value.equals("focus_mode_macro") ) ) {
+			// n.b., we check focus_value rather than camera_controller.supportsAutoFocus(), as we want to discount focus_mode_locked
 			synchronized(this) {
 				if( focus_success == FOCUS_WAITING ) {
 					// Needed to fix bug (on Nexus 6, old camera API): if flash was on, pointing at a dark scene, and we take photo when already autofocusing, the autofocus never returned so we got stuck!
@@ -3928,6 +3959,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// they said this happened in every focus mode, including locked - so possible that on some devices, cancelAutoFocus() actually pulls the camera out of focus, or reverts to preview focus?
 			cancelAutoFocus();
 		}
+		removePendingContinuousFocusReset(); // to avoid switching back to continuous focus mode while taking a photo - instead we'll always make sure we switch back after taking a photo
 		updateParametersFromLocation(); // do this now, not before, so we don't set location parameters during focus (sometimes get RuntimeException)
 
 		focus_success = FOCUS_DONE; // clear focus rectangle if not already done
@@ -3978,6 +4010,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	        			Log.d(TAG, "onPictureTaken started preview");
     				}
     	        }
+				continuousFocusReset(); // in case we took a photo after user had touched to focus (causing us to switch from continuous to autofocus mode)
     			if( camera_controller != null && focus_value != null && ( focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") ) ) {
 	        		if( MyDebug.LOG )
 	        			Log.d(TAG, "cancelAutoFocus to restart continuous focusing");
@@ -4132,8 +4165,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "currently taking a photo");
 		}
 		else {
+			if( manual ) {
+				// remove any previous request to switch back to continuous
+				removePendingContinuousFocusReset();
+			}
+			if( manual && !is_video && camera_controller.focusIsContinuous() && supportedFocusValue("focus_mode_auto") ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "switch from continuous to autofocus mode for touch focus");
+		        camera_controller.setFocusValue("focus_mode_auto"); // switch to autofocus
+		        autofocus_in_continuous_mode = true;
+		        // we switch back to continuous via a new reset_continuous_focus_runnable in autoFocusCompleted()
+			}
 			// it's only worth doing autofocus when autofocus has an effect (i.e., auto or macro mode)
-	        if( camera_controller.supportsAutoFocus() ) {
+			// but also for continuous focus mode, triggering an autofocus is still important to fire flash when touching the screen
+			if( camera_controller.supportsAutoFocus() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "try to start autofocus");
 				if( !using_android_l ) {
@@ -4176,6 +4221,44 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
     }
     
+    /** If the user touches the screen in continuous focus mode, we switch the camera_controller to autofocus mode.
+     *  After the autofocus completes, we set a reset_continuous_focus_runnable to switch back to the camera_controller
+     *  back to continuous focus after a short delay.
+     *  This function removes any pending reset_continuous_focus_runnable.
+     */
+    private void removePendingContinuousFocusReset() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "removePendingContinuousFocusReset");
+		if( reset_continuous_focus_runnable != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "remove pending reset_continuous_focus_runnable");
+			reset_continuous_focus_handler.removeCallbacks(reset_continuous_focus_runnable);
+			reset_continuous_focus_runnable = null;
+		}
+    }
+
+    /** If the user touches the screen in continuous focus mode, we switch the camera_controller to autofocus mode.
+     *  This function is called to see if we should switch from autofocus mode back to continuous focus mode.
+     *  If this isn't required, calling this function does nothing.
+     */
+    private void continuousFocusReset() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "switch back to continuous focus after autofocus?");
+		if( camera_controller != null && autofocus_in_continuous_mode ) {
+	        autofocus_in_continuous_mode = false;
+			// check again
+	        String current_ui_focus_value = getCurrentFocusValue();
+	        if( current_ui_focus_value != null && !camera_controller.getFocusValue().equals(current_ui_focus_value) && camera_controller.getFocusValue().equals("focus_mode_auto") ) {
+				camera_controller.cancelAutoFocus();
+		        camera_controller.setFocusValue(current_ui_focus_value);
+	        }
+	        else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no need to switch back to continuous focus after autofocus, mode already changed");
+	        }
+		}
+    }
+    
     private void cancelAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
@@ -4212,6 +4295,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( manual && !cancelled && ( success || applicationInterface.isTestAlwaysFocus() ) ) {
 			successfully_focused = true;
 			successfully_focused_time = focus_complete_time;
+		}
+		if( manual && camera_controller != null && autofocus_in_continuous_mode ) {
+	        String current_ui_focus_value = getCurrentFocusValue();
+			if( MyDebug.LOG )
+				Log.d(TAG, "current_ui_focus_value: " + current_ui_focus_value);
+	        if( current_ui_focus_value != null && !camera_controller.getFocusValue().equals(current_ui_focus_value) && camera_controller.getFocusValue().equals("focus_mode_auto") ) {
+				reset_continuous_focus_runnable = new Runnable() {
+					@Override
+					public void run() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "reset_continuous_focus_runnable running...");
+						reset_continuous_focus_runnable = null;
+						continuousFocusReset();
+					}
+				};
+				reset_continuous_focus_handler.postDelayed(reset_continuous_focus_runnable, 3000);
+	        }
 		}
 		ensureFlashCorrect();
 		if( this.using_face_detection && !cancelled ) {
