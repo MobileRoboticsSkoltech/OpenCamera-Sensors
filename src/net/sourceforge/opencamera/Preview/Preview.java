@@ -3865,7 +3865,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "current_ui_focus_value is " + current_ui_focus_value);
 
-		if( camera_controller.focusIsContinuous() ) {
+		if( autofocus_in_continuous_mode ) {
+			if( autofocus_in_continuous_mode )
+				Log.d(TAG, "continuous mode where user touched to focus");
+			synchronized(this) {
+				// as below, if an autofocus is in progress, then take photo when it's completed
+				if( focus_success == FOCUS_WAITING ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "autofocus_in_continuous_mode: take photo after current focus");
+					take_photo_after_autofocus = true;
+				}
+				else {
+					// when autofocus_in_continuous_mode==true, it means the user recently touched to focus in continuous focus mode, so don't do another focus
+					if( MyDebug.LOG )
+						Log.d(TAG, "autofocus_in_continuous_mode: no need to refocus");
+					takePhotoWhenFocused();
+				}
+			}
+		}
+		else if( camera_controller.focusIsContinuous() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "call autofocus for continuous focus mode");
 			// we call via autoFocus(), to avoid risk of taking photo while the continuous focus is focusing - risk of blurred photo, also sometimes get bug in such situations where we end of repeatedly focusing
@@ -3881,9 +3899,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        };
 			camera_controller.autoFocus(autoFocusCallback);
 		}
-		else if( this.recentlyFocused() || skip_autofocus ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "recently focused successfully, so no need to refocus");
+		else if( skip_autofocus || this.recentlyFocused() ) {
+			if( MyDebug.LOG ) {
+				if( skip_autofocus ) {
+					Log.d(TAG, "skip_autofocus flag set");
+				}
+				else {
+					Log.d(TAG, "recently focused successfully, so no need to refocus");
+				}
+			}
 			takePhotoWhenFocused();
 		}
 		else if( current_ui_focus_value != null && ( current_ui_focus_value.equals("focus_mode_auto") || current_ui_focus_value.equals("focus_mode_macro") ) ) {
