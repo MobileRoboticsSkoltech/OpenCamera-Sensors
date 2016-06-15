@@ -147,6 +147,12 @@ public class ImageSaver extends Thread {
 		}
 	}
 	
+	/** Saves a photo.
+	 *  If do_in_background is true, the photo will be saved in a background thread. If the queue is full, the function will wait
+	 *  until it isn't full. Otherwise it will return immediately. The function always returns true for background saving.
+	 *  If do_in_background is false, the photo is saved on the current thread, and the function returns whether the photo was saved
+	 *  successfully.
+	 */
 	public boolean saveImage(boolean do_in_background,
 			byte [] data,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
@@ -194,6 +200,7 @@ public class ImageSaver extends Thread {
 					}
 				}
 			}
+			success = true; // always return true when done in background
 		}
 		else {
 			// wait for queue to be empty
@@ -209,6 +216,8 @@ public class ImageSaver extends Thread {
 					has_thumbnail_animation);
 		}
 
+		if( MyDebug.LOG )
+			Log.d(TAG, "success: " + success);
 		return success;
 	}
 	

@@ -1285,7 +1285,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				has_thumbnail_animation);
 		
 		if( MyDebug.LOG )
-			Log.d(TAG, "onPictureTaken complete");
+			Log.d(TAG, "onPictureTaken complete, success: " + success);
 		
 		return success;
 	}
