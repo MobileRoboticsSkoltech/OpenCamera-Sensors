@@ -2288,8 +2288,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "showPhotoVideoToast");
 		CameraController camera_controller = preview.getCameraController();
-		if( camera_controller == null || this.camera_in_background )
+		if( camera_controller == null || this.camera_in_background ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera not open or in background");
 			return;
+		}
 		String toast_string = "";
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean simple = true;
@@ -2347,6 +2350,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false) ) {
 				// important as users are sometimes confused at the behaviour if they don't realise the option is on
 				toast_string += "\n" + getResources().getString(R.string.preference_auto_stabilise);
+				simple = false;
 			}
 		}
 		if( applicationInterface.getFaceDetectionPref() ) {
@@ -2420,6 +2424,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			toast_string += "\n" + getResources().getString(R.string.preference_audio_noise_control);
 		}*/
 
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "toast_string: " + toast_string);
+			Log.d(TAG, "simple?: " + simple);
+		}
 		if( !simple || switch_video )
 			preview.showToast(switch_video_toast, toast_string);
 	}
