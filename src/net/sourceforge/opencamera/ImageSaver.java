@@ -46,7 +46,7 @@ public class ImageSaver extends Thread {
 	private MainActivity main_activity = null;
 	private BlockingQueue<Request> queue = new ArrayBlockingQueue<Request>(1);
 	
-	private class Request {
+	private static class Request {
 		byte [] data = null;
 		boolean image_capture_intent = false;
 		Uri image_capture_intent_uri = null;
