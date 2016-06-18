@@ -4900,7 +4900,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	public long getVideoTime() {
-		return System.currentTimeMillis() - video_start_time + video_accumulated_time;
+		long time_now = System.currentTimeMillis();
+		return time_now - video_start_time + video_accumulated_time;
 	}
 	
 	public long getVideoAccumulatedTime() {
