@@ -108,13 +108,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	
 	//private boolean ui_placement_right = true;
 
-	private ToastBoxer switch_camera_toast = new ToastBoxer();
 	private ToastBoxer switch_video_toast = new ToastBoxer();
     private ToastBoxer screen_locked_toast = new ToastBoxer();
     private ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
 	private ToastBoxer exposure_lock_toast = new ToastBoxer();
 	private ToastBoxer audio_control_toast = new ToastBoxer();
-	private boolean block_startup_toast = false;
+	private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
     
 	// for testing:
 	public boolean is_test = false; // whether called from OpenCamera.test testing
@@ -898,12 +897,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		this.closePopup();
 		if( this.preview.canSwitchCamera() ) {
 			int cameraId = getNextCameraId();
-		    if( preview.getCameraControllerManager().isFrontFacing( cameraId ) ) {
-		    	preview.showToast(switch_camera_toast, R.string.front_camera);
-		    }
-		    else {
-		    	preview.showToast(switch_camera_toast, R.string.back_camera);
-		    }
 		    View switchCameraButton = (View) findViewById(R.id.switch_camera);
 		    switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
 			this.preview.setCamera(cameraId);
@@ -2284,9 +2277,17 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	return changed_auto_stabilise_toast;
     }
 
-	private void showPhotoVideoToast(boolean switch_video) {
-		if( MyDebug.LOG )
+    /** Displays a toast with information about the current preferences.
+     *  If always_show is true, the toast is always displayed; otherwise, we only display
+     *  a toast if it's important to notify the user (i.e., unusual non-default settings are
+     *  set). We want a balance between not pestering the user too much, whilst also reminding
+     *  them if certain settings are on.
+     */
+	private void showPhotoVideoToast(boolean always_show) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "showPhotoVideoToast");
+			Log.d(TAG, "always_show? " + always_show);
+		}
 		CameraController camera_controller = preview.getCameraController();
 		if( camera_controller == null || this.camera_in_background ) {
 			if( MyDebug.LOG )
@@ -2428,7 +2429,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "toast_string: " + toast_string);
 			Log.d(TAG, "simple?: " + simple);
 		}
-		if( !simple || switch_video )
+		if( !simple || always_show )
 			preview.showToast(switch_video_toast, toast_string);
 	}
 
