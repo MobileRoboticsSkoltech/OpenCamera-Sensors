@@ -1160,6 +1160,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	/* Should only be called after camera first opened, or after preview is paused.
+	 * take_photo is true if we have been called from the TakePhoto widget (which means
+	 * we'll take a photo immediately after startup).
 	 */
 	public void setupCamera(boolean take_photo) {
 		if( MyDebug.LOG )
@@ -1236,7 +1238,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( this.is_video ) {
 				this.switchVideo(false); // set during_startup to false, as we now need to reset the preview
 			}
+		}
+
+		applicationInterface.cameraSetup(); // must call this after the above take_photo code for calling switchVideo
+	    if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCamera: total time after cameraSetup: " + (System.currentTimeMillis() - debug_time));
+		}
+
+	    if( take_photo ) {
 			// take photo after a delay - otherwise we sometimes get a black image?!
+	    	// also need a longer delay for continuous picture focus, to allow a chance to focus - 1000ms seems to work okay for Nexus 6, put 1500ms to be safe
+	    	String focus_value = getCurrentFocusValue();
+			final int delay = ( focus_value != null && focus_value.equals("focus_mode_continuous_picture") ) ? 1500 : 500;
+			if( MyDebug.LOG )
+				Log.d(TAG, "delay for take photo: " + delay);
 	    	final Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
 				@Override
@@ -1245,12 +1260,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Log.d(TAG, "do automatic take picture");
 					takePicture(false);
 				}
-			}, 500);
-		}
-
-		applicationInterface.cameraSetup(); // must call this after the above take_photo code in case it switches from video to photo mode
-	    if( MyDebug.LOG ) {
-			Log.d(TAG, "setupCamera: total time after cameraSetup: " + (System.currentTimeMillis() - debug_time));
+			}, delay);
 		}
 
 	    if( do_startup_focus ) {
