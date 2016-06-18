@@ -12,11 +12,14 @@ public class AudioListener {
 	private boolean is_running = true;
 	private int buffer_size = -1;
 	private AudioRecord ar = null;
-	
+	private Thread thread = null;
+
 	public static interface AudioListenerCallback {
 		public abstract void onAudio(int level);
 	}
-	
+
+	/** Create a new AudioListener. The caller should call the start() method to start listening.
+	 */
 	public AudioListener(final AudioListenerCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "new AudioListener");
@@ -50,7 +53,7 @@ public class AudioListener {
 		final short[] buffer = new short[buffer_size];
 		ar.startRecording();
 
-		Thread thread = new Thread() {
+		this.thread = new Thread() {
 			@Override
 			public void run() {
 				/*int sample_delay = (1000 * buffer_size) / sample_rate;
@@ -102,11 +105,26 @@ public class AudioListener {
 				ar = null;
 			}
 		};
-		thread.start();
+		// n.b., not good practice to start threads in constructors, so we require the caller to call start() instead
+	}
+
+	/** Start listening.
+	 */
+	void start() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "start");
+		if( thread != null ) {
+			thread.start();
+		}
 	}
 	
+	/** Stop listening and release the resources.
+	 */
 	void release() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "release");
 		is_running = false;
+		thread = null;
 	}
 	
 	boolean hasAudioRecorder() {

@@ -2453,6 +2453,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "startAudioListener");
 		audio_listener = new AudioListener(this);
+		audio_listener.start();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.getAudioNoiseControlSensitivityPreferenceKey(), "0");
 		if( sensitivity_pref.equals("3") ) {
