@@ -2855,6 +2855,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// very picky about what works when it comes to recording video - e.g., corruption in preview or resultant video.
 			// So for now, I'm just fixing the Nexus 5/6 behaviour without changing behaviour for other devices. Later we can test on other devices, to see if we can
 			// use chooseBestPreviewFps() more widely.
+			// Update for v1.31: we no longer seem to need this - I no longer get a dark preview in photo or video mode if we don't set the fps range;
+			// but leaving the code as it is, to be safe.
 			boolean preview_too_dark = Build.MODEL.equals("Nexus 5") || Build.MODEL.equals("Nexus 6");
 			String fps_value = applicationInterface.getVideoFPSPref();
 			if( MyDebug.LOG ) {
@@ -2874,6 +2876,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// we could hardcode behaviour like we do for video, but this is the same way that Google Camera chooses preview fps for photos
 			// or I could hardcode behaviour for Galaxy Nexus, but since it's an old device (and an obscure bug anyway - most users don't really need continuous focus in photo mode), better to live with the bug rather than complicating the code
 			// Update for v1.29: this doesn't seem to happen on Galaxy Nexus with continuous picture focus mode, which is what we now use
+			// Update for v1.31: we no longer seem to need this - I no longer get a dark preview in photo or video mode if we don't set the fps range;
+			// but leaving the code as it is, to be safe.
 			selected_fps = chooseBestPreviewFps(fps_ranges);
 		}
         camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);
