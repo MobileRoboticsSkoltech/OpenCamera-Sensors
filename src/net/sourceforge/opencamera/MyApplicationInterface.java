@@ -2,7 +2,6 @@ package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
@@ -1223,6 +1222,18 @@ public class MyApplicationInterface implements ApplicationInterface {
 		paint.setColor(foreground);
 		canvas.drawText(text, location_x, location_y, paint);
 	}
+	
+	private boolean saveInBackground(boolean image_capture_intent) {
+		boolean do_in_background = true;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		if( !sharedPreferences.getBoolean(PreferenceKeys.getBackgroundPhotoSavingPreferenceKey(), true) )
+			do_in_background = false;
+		else if( image_capture_intent )
+			do_in_background = false;
+		else if( getPausePreviewPref() )
+			do_in_background = false;
+		return do_in_background;
+	}
 
     @Override
 	public boolean onPictureTaken(byte [] data) {
@@ -1272,15 +1283,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
-		boolean do_in_background = true;
-		if( !sharedPreferences.getBoolean(PreferenceKeys.getBackgroundPhotoSavingPreferenceKey(), true) )
-			do_in_background = false;
-		else if( image_capture_intent )
-			do_in_background = false;
-		else if( getPausePreviewPref() )
-			do_in_background = false;
+		boolean do_in_background = saveInBackground(image_capture_intent);
 
-		boolean success = imageSaver.saveImage(do_in_background, data,
+		boolean success = imageSaver.saveImageJpeg(do_in_background, data,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
@@ -1296,95 +1301,18 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return success;
 	}
 
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
 	public boolean onRawPictureTaken(DngCreator dngCreator, Image image) {
         System.gc();
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRawPictureTaken");
-		boolean success = false;
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "RAW requires LOLLIPOP or higher");
-			return success;
-		}
 
-        FileOutputStream output = null;
-        try {
-    		File picFile = null;
-    		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
+		Date current_date = new Date(); // do asap so we date corresponds to actual photo time
 
-			if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "saveUri: " + saveUri);
-				picFile = File.createTempFile("picFile", "dng", main_activity.getCacheDir());
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
-			}
-			else {
-        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
-			}
+		boolean do_in_background = saveInBackground(false);
 
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
-            output = new FileOutputStream(picFile);
-            dngCreator.writeImage(output, image);
-    		if( saveUri == null ) { // if saveUri is non-null, then we haven't succeeded until we've copied to the saveUri
-    			success = true;
-            	// broadcast for SAF is done later, when we've actually written out the file
-        		storageUtils.broadcastFile(picFile, true, false, false);
-    		}
-
-            if( saveUri != null ) {
-            	imageSaver.copyUriToFile(main_activity, saveUri, picFile);
-    		    success = true;
-    		    /* We still need to broadcastFile for SAF - see notes above for onPictureTaken().
-    		    */
-	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri);
-				if( MyDebug.LOG )
-					Log.d(TAG, "real_file: " + real_file);
-                if( real_file != null ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "broadcast file");
-	            	storageUtils.broadcastFile(real_file, true, false, false);
-                }
-                else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "announce SAF uri");
-                	// announce the SAF Uri
-	    		    storageUtils.announceUri(saveUri, true, false);
-                }
-            }
-        }
-        catch(FileNotFoundException e) {
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "File not found: " + e.getMessage());
-            e.printStackTrace();
-            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
-        }
-        catch(IOException e) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "ioexception writing raw image file");
-            e.printStackTrace();
-            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
-        }
-        finally {
-        	if( output != null ) {
-				try {
-					output.close();
-				}
-				catch(IOException e) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "ioexception closing raw output");
-					e.printStackTrace();
-				}
-        	}
-        }
-
-        System.gc();
+		boolean success = imageSaver.saveImageRaw(do_in_background, dngCreator, image, current_date);
+		
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRawPictureTaken complete");
 		return success;

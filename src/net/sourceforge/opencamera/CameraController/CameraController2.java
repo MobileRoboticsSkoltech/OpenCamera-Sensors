@@ -1464,8 +1464,7 @@ public class CameraController2 extends CameraController {
     						Log.d(TAG, "all image callbacks now completed");
     					cb.onCompleted();
     	            }
-                	image.close();
-                	dngCreator.close();
+    	            // image and dngCreator should be closed by the application (we don't do it here, so that applications can keep hold of the data, e.g., in a queue for background processing)
     				if( MyDebug.LOG )
     					Log.d(TAG, "done onImageAvailable");
 				}

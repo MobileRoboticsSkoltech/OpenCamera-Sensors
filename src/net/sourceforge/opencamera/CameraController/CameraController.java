@@ -108,7 +108,10 @@ public abstract class CameraController {
 	public static interface PictureCallback {
 		public abstract void onCompleted(); // called after all relevant on*PictureTaken() callbacks have been called and returned
 		public abstract void onPictureTaken(byte[] data);
-		public abstract void onRawPictureTaken(DngCreator dngCreator, Image image); // only called if RAW is requested
+		/** Only called if RAW is requested.
+		 *  Caller should call image.close() and dngCreator.close() when done with the image.
+		 */
+		public abstract void onRawPictureTaken(DngCreator dngCreator, Image image);
 	}
 	
 	public static interface AutoFocusCallback {

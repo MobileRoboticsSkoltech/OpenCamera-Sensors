@@ -16,6 +16,7 @@ import java.util.concurrent.BlockingQueue;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,8 +27,10 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
+import android.hardware.camera2.DngCreator;
 import android.location.Location;
 import android.media.ExifInterface;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -47,7 +50,10 @@ public class ImageSaver extends Thread {
 	private BlockingQueue<Request> queue = new ArrayBlockingQueue<Request>(1);
 	
 	private static class Request {
-		byte [] data = null;
+		boolean is_raw = false;
+		byte [] data = null; // for jpeg
+		DngCreator dngCreator = null; // for raw
+		Image image = null; // for raw
 		boolean image_capture_intent = false;
 		Uri image_capture_intent_uri = null;
 		boolean using_camera2 = false;
@@ -70,7 +76,9 @@ public class ImageSaver extends Thread {
 		double geo_direction = 0.0;
 		boolean has_thumbnail_animation = false;
 		
-		Request(byte [] data,
+		Request(boolean is_raw,
+			byte [] data,
+			DngCreator dngCreator, Image image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
@@ -79,7 +87,10 @@ public class ImageSaver extends Thread {
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			boolean has_thumbnail_animation) {
+			this.is_raw = is_raw;
 			this.data = data;
+			this.dngCreator = dngCreator;
+			this.image = image;
 			this.image_capture_intent = image_capture_intent;
 			this.image_capture_intent_uri = image_capture_intent_uri;
 			this.using_camera2 = using_camera2;
@@ -123,15 +134,21 @@ public class ImageSaver extends Thread {
 				Request request = queue.take(); // if empty, take() blocks until non-empty
 				if( MyDebug.LOG )
 					Log.d(TAG, "ImageSaver thread found new request from queue, size is now: " + queue.size());
-				boolean success = saveImageNow(request.data,
-						request.image_capture_intent, request.image_capture_intent_uri,
-						request.using_camera2, request.image_quality,
-						request.do_auto_stabilise, request.level_angle,
-						request.is_front_facing,
-						request.current_date,
-						request.preference_stamp, request.preference_textstamp, request.font_size, request.color, request.pref_style, request.preference_stamp_dateformat, request.preference_stamp_timeformat, request.preference_stamp_gpsformat,
-						request.store_location, request.location, request.store_geo_direction, request.geo_direction,
-						request.has_thumbnail_animation);
+				boolean success = false;
+				if( request.is_raw ) {
+					success = saveImageNowRaw(request.dngCreator, request.image, request.current_date);
+				}
+				else {
+					success = saveImageNow(request.data,
+							request.image_capture_intent, request.image_capture_intent_uri,
+							request.using_camera2, request.image_quality,
+							request.do_auto_stabilise, request.level_angle,
+							request.is_front_facing,
+							request.current_date,
+							request.preference_stamp, request.preference_textstamp, request.font_size, request.color, request.pref_style, request.preference_stamp_dateformat, request.preference_stamp_timeformat, request.preference_stamp_gpsformat,
+							request.store_location, request.location, request.store_geo_direction, request.geo_direction,
+							request.has_thumbnail_animation);
+				}
 				if( MyDebug.LOG ) {
 					if( success )
 						Log.d(TAG, "ImageSaver thread successfully saved image");
@@ -153,8 +170,67 @@ public class ImageSaver extends Thread {
 	 *  If do_in_background is false, the photo is saved on the current thread, and the function returns whether the photo was saved
 	 *  successfully.
 	 */
-	public boolean saveImage(boolean do_in_background,
+	public boolean saveImageJpeg(boolean do_in_background,
 			byte [] data,
+			boolean image_capture_intent, Uri image_capture_intent_uri,
+			boolean using_camera2, int image_quality,
+			boolean do_auto_stabilise, double level_angle,
+			boolean is_front_facing,
+			Date current_date,
+			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
+			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+			boolean has_thumbnail_animation) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "saveImageJpeg");
+			Log.d(TAG, "do_in_background? " + do_in_background);
+		}
+		return saveImage(do_in_background,
+				false,
+				data,
+				null, null,
+				image_capture_intent, image_capture_intent_uri,
+				using_camera2, image_quality,
+				do_auto_stabilise, level_angle,
+				is_front_facing,
+				current_date,
+				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+				store_location, location, store_geo_direction, geo_direction,
+				has_thumbnail_animation);
+	}
+
+	/** Saves a RAW photo.
+	 *  If do_in_background is true, the photo will be saved in a background thread. If the queue is full, the function will wait
+	 *  until it isn't full. Otherwise it will return immediately. The function always returns true for background saving.
+	 *  If do_in_background is false, the photo is saved on the current thread, and the function returns whether the photo was saved
+	 *  successfully.
+	 */
+	public boolean saveImageRaw(boolean do_in_background,
+			DngCreator dngCreator, Image image,
+			Date current_date) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "saveImageRaw");
+			Log.d(TAG, "do_in_background? " + do_in_background);
+		}
+		return saveImage(do_in_background,
+				true,
+				null,
+				dngCreator, image,
+				false, null,
+				false, 0,
+				false, 0.0,
+				false,
+				current_date,
+				null, null, 0, 0, null, null, null, null,
+				false, null, false, 0.0,
+				false);
+	}
+
+	/** Internal saveImage method to handle both JPEG and RAW.
+	 */
+	private boolean saveImage(boolean do_in_background,
+			boolean is_raw,
+			byte [] data,
+			DngCreator dngCreator, Image image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
@@ -167,13 +243,14 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "saveImage");
 			Log.d(TAG, "do_in_background? " + do_in_background);
 		}
-
 		boolean success = false;
 		
 		//do_in_background = false;
 		
 		if( do_in_background ) {
-			Request request = new Request(data,
+			Request request = new Request(is_raw,
+					data,
+					dngCreator, image,
 					image_capture_intent, image_capture_intent_uri,
 					using_camera2, image_quality,
 					do_auto_stabilise, level_angle,
@@ -205,15 +282,20 @@ public class ImageSaver extends Thread {
 		else {
 			// wait for queue to be empty
 			waitUntilDone();
-			success = saveImageNow(data,
-					image_capture_intent, image_capture_intent_uri,
-					using_camera2, image_quality,
-					do_auto_stabilise, level_angle,
-					is_front_facing,
-					current_date,
-					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
-					store_location, location, store_geo_direction, geo_direction,
-					has_thumbnail_animation);
+			if( is_raw ) {
+				success = saveImageNowRaw(dngCreator, image, current_date);
+			}
+			else {
+				success = saveImageNow(data,
+						image_capture_intent, image_capture_intent_uri,
+						using_camera2, image_quality,
+						do_auto_stabilise, level_angle,
+						is_front_facing,
+						current_date,
+						preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+						store_location, location, store_geo_direction, geo_direction,
+						has_thumbnail_animation);
+			}
 		}
 
 		if( MyDebug.LOG )
@@ -902,6 +984,106 @@ public class ImageSaver extends Thread {
         return success;
 	}
 
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private synchronized boolean saveImageNowRaw(DngCreator dngCreator, Image image, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "saveImageNowRaw");
+
+        boolean success = false;
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "RAW requires LOLLIPOP or higher");
+			return success;
+		}
+		StorageUtils storageUtils = main_activity.getStorageUtils();
+		
+		main_activity.savingImage(true);
+
+        FileOutputStream output = null;
+        try {
+    		File picFile = null;
+    		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
+
+			if( storageUtils.isUsingSAF() ) {
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "saveUri: " + saveUri);
+				picFile = File.createTempFile("picFile", "dng", main_activity.getCacheDir());
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
+			}
+			else {
+        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
+			}
+
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
+            output = new FileOutputStream(picFile);
+            dngCreator.writeImage(output, image);
+    		if( saveUri == null ) { // if saveUri is non-null, then we haven't succeeded until we've copied to the saveUri
+    			success = true;
+            	// broadcast for SAF is done later, when we've actually written out the file
+        		storageUtils.broadcastFile(picFile, true, false, false);
+    		}
+
+            if( saveUri != null ) {
+            	this.copyUriToFile(main_activity, saveUri, picFile);
+    		    success = true;
+    		    /* We still need to broadcastFile for SAF - see notes above for onPictureTaken().
+    		    */
+	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri);
+				if( MyDebug.LOG )
+					Log.d(TAG, "real_file: " + real_file);
+                if( real_file != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "broadcast file");
+	            	storageUtils.broadcastFile(real_file, true, false, false);
+                }
+                else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "announce SAF uri");
+                	// announce the SAF Uri
+	    		    storageUtils.announceUri(saveUri, true, false);
+                }
+            }
+        }
+        catch(FileNotFoundException e) {
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "File not found: " + e.getMessage());
+            e.printStackTrace();
+            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
+        }
+        catch(IOException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "ioexception writing raw image file");
+            e.printStackTrace();
+            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
+        }
+        finally {
+        	if( output != null ) {
+				try {
+					output.close();
+				}
+				catch(IOException e) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "ioexception closing raw output");
+					e.printStackTrace();
+				}
+        	}
+        }
+
+    	image.close();
+    	dngCreator.close();
+
+    	System.gc();
+
+        main_activity.savingImage(false);
+
+        return success;
+	}
+
     private Bitmap rotateForExif(Bitmap bitmap, int exif_orientation_s, String path) {
 		try {
 			if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED ) {
@@ -1004,7 +1186,7 @@ public class ImageSaver extends Thread {
 
 	/** Reads from saveUri and writes the contents to picFile.
 	 */
-	void copyUriToFile(Context context, Uri saveUri, File picFile) throws FileNotFoundException, IOException {
+	private void copyUriToFile(Context context, Uri saveUri, File picFile) throws FileNotFoundException, IOException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "copyUriToFile");
 			Log.d(TAG, "saveUri: " + saveUri);
