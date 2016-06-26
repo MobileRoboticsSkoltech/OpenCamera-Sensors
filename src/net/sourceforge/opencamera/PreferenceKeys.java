@@ -59,6 +59,10 @@ public class PreferenceKeys {
     	return "preference_exposure_time";
     }
     
+    public static String getRawPreferenceKey() {
+    	return "preference_raw";
+    }
+    
     public static String getVolumeKeysPreferenceKey() {
     	return "preference_volume_keys";
     }

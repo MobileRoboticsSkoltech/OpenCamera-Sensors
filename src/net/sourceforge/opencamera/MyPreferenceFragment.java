@@ -132,6 +132,16 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
 		}
+		
+		final boolean supports_raw = bundle.getBoolean("supports_raw");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_raw: " + supports_raw);
+
+		if( !supports_raw ) {
+			Preference pref = findPreference("preference_raw");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+        	pg.removePreference(pref);
+		}
 
 		final String [] video_quality = bundle.getStringArray("video_quality");
 		final String [] video_quality_string = bundle.getStringArray("video_quality_string");
@@ -474,6 +484,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append("\nAuto-stabilise enabled?: " + sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false));
                         about_string.append("\nFace detection?: ");
                         about_string.append(getString(supports_face_detection ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nRAW?: ");
+                        about_string.append(getString(supports_raw ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nVideo stabilization?: ");
                         about_string.append(getString(supports_video_stabilization ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nFlash modes: ");

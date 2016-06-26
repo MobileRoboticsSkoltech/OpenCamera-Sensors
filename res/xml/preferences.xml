@@ -445,6 +445,16 @@
 		        android:defaultValue="90"
 		        />
 
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+	        <ListPreference 
+	            android:key="preference_raw"
+	            android:title="@string/preference_raw"
+	            android:summary="@string/preference_raw_summary"
+	            android:entries="@array/preference_raw_entries"
+	            android:entryValues="@array/preference_raw_values"
+	            android:defaultValue="preference_raw_no"
+	            />
+
 	        <ListPreference 
 	            android:key="preference_stamp"
 	            android:title="@string/preference_stamp"

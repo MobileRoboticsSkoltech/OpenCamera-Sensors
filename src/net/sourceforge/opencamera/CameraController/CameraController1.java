@@ -515,6 +515,7 @@ public class CameraController1 extends CameraController {
     	return new CameraController.Size(camera_size.width, camera_size.height);
     }
 
+	@Override
 	public void setPreviewSize(int width, int height) {
     	Camera.Parameters parameters = this.getParameters();
 		if( MyDebug.LOG )
@@ -525,6 +526,12 @@ public class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
     }
 	
+	@Override
+	public void setRaw(boolean want_raw) {
+		// not supported for CameraController1
+	}
+
+	@Override
 	public void setVideoStabilization(boolean enabled) {
 	    Camera.Parameters parameters = this.getParameters();
         parameters.setVideoStabilization(enabled);

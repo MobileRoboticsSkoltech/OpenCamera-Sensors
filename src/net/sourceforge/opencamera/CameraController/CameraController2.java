@@ -669,6 +669,16 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
+		int [] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES); 
+		boolean capabilities_raw = false;
+		for(int capability : capabilities) {
+			if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ) {
+				capabilities_raw = true;
+			}
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "capabilities_raw?: " + capabilities_raw);
+
 		StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
 	    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
@@ -679,15 +689,38 @@ public class CameraController2 extends CameraController {
 			camera_features.picture_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
 		}
 
-		if( want_raw ) {
+    	raw_size = null;
+    	if( capabilities_raw ) {
 		    android.util.Size [] raw_camera_picture_sizes = configs.getOutputSizes(ImageFormat.RAW_SENSOR);
-			for(int i=0;i<raw_camera_picture_sizes.length;i++) {
-				android.util.Size size = raw_camera_picture_sizes[i];
-	        	if( raw_size == null || size.getWidth()*size.getHeight() > raw_size.getWidth()*raw_size.getHeight() ) {
-	        		raw_size = size;
-	        	}
-	        }
-		}
+		    if( raw_camera_picture_sizes == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "RAW not supported, failed to get RAW_SENSOR sizes");
+				want_raw = false; // just in case it got set to true somehow
+		    }
+		    else {
+				for(int i=0;i<raw_camera_picture_sizes.length;i++) {
+					android.util.Size size = raw_camera_picture_sizes[i];
+		        	if( raw_size == null || size.getWidth()*size.getHeight() > raw_size.getWidth()*raw_size.getHeight() ) {
+		        		raw_size = size;
+		        	}
+		        }
+				if( raw_size == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "RAW not supported, failed to find a raw size");
+					want_raw = false; // just in case it got set to true somehow
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "raw supported, raw size: " + raw_size.getWidth() + " x " + raw_size.getHeight());
+					camera_features.supports_raw = true;				
+				}
+			}
+    	}
+    	else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "RAW capability not supported");
+			want_raw = false; // just in case it got set to true somehow
+    	}
 		
 	    android.util.Size [] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
 		camera_features.video_sizes = new ArrayList<CameraController.Size>();
@@ -1328,6 +1361,32 @@ public class CameraController2 extends CameraController {
 		this.picture_height = height;
 	}
 
+	@Override
+	public void setRaw(boolean want_raw) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setRaw: " + want_raw);
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "no camera");
+			return;
+		}
+		if( this.want_raw == want_raw ) {
+			return;
+		}
+		if( want_raw && this.raw_size == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "can't set raw when raw not supported");
+			return;
+		}
+		if( captureSession != null ) {
+			// can only call this when captureSession not created - as it affects how we create the imageReader
+			if( MyDebug.LOG )
+				Log.e(TAG, "can't set raw when captureSession running!");
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		this.want_raw = want_raw;
+	}
+
 	private void createPictureImageReader() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createPictureImageReader");
@@ -1365,7 +1424,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "read " + bytes.length + " bytes");
 	            buffer.get(bytes);
 	            image.close();
-	            // need to set jpeg_cb etc to null before calling onPictureTaken, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+	            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
 	            PictureCallback cb = jpeg_cb;
 	            jpeg_cb = null;
 	            cb.onPictureTaken(bytes);
@@ -1396,7 +1455,7 @@ public class CameraController2 extends CameraController {
 					}
 					Image image = reader.acquireNextImage();
                     DngCreator dngCreator = new DngCreator(characteristics, still_capture_result);
-    	            // need to set raw_cb etc to null before calling onPictureTaken, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+    	            // need to set raw_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
     	            PictureCallback cb = raw_cb;
     	            raw_cb = null;
     	            cb.onRawPictureTaken(dngCreator, image);

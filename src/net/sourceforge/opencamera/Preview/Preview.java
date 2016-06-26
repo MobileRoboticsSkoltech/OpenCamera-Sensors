@@ -179,6 +179,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int min_exposure = 0;
 	private int max_exposure = 0;
 	private float exposure_step = 0.0f;
+	
+	private boolean supports_raw = false;
 
 	private List<CameraController.Size> supported_preview_sizes = null;
 	
@@ -1045,6 +1047,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		min_exposure = 0;
 		max_exposure = 0;
 		exposure_step = 0.0f;
+		supports_raw = false;
 		sizes = null;
 		current_size_index = -1;
 		video_quality = null;
@@ -1212,6 +1215,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "set_flash_value_after_autofocus is now: " + set_flash_value_after_autofocus);
 		}
+		
+		if( this.supports_raw && applicationInterface.isRawPref() ) {
+			camera_controller.setRaw(true);
+		}
+		else {
+			camera_controller.setRaw(false);
+		}
 
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
@@ -1343,6 +1353,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.min_exposure = camera_features.min_exposure;
 			this.max_exposure = camera_features.max_exposure;
 			this.exposure_step = camera_features.exposure_step;
+			this.supports_raw = camera_features.supports_raw;
 			this.video_sizes = camera_features.video_sizes;
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
@@ -4629,6 +4640,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.exposures;
     }
 
+    public boolean supportsRaw() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsRaw");
+    	return this.supports_raw;
+    }
+    
     public List<CameraController.Size> getSupportedPreviewSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPreviewSizes");

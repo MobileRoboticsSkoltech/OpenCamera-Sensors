@@ -77,6 +77,7 @@ public interface ApplicationInterface {
 	// Camera2 only modes:
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
 	float getFocusDistancePref();
+	boolean isRawPref(); // whether to enable RAW photos
 	// for testing purposes:
 	boolean isTestAlwaysFocus(); // if true, pretend autofocus always successful
 

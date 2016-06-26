@@ -637,6 +637,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public float getFocusDistancePref() {
     	return focus_distance;
     }
+    
+    @Override
+	public boolean isRawPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_no").equals("preference_raw_yes");
+    }
 
     @Override
     public boolean isTestAlwaysFocus() {
