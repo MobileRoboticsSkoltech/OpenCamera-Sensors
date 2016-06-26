@@ -1031,7 +1031,7 @@ public class ImageSaver extends Thread {
             if( saveUri != null ) {
             	this.copyUriToFile(main_activity, saveUri, picFile);
     		    success = true;
-    		    /* We still need to broadcastFile for SAF - see notes above for onPictureTaken().
+    		    /* We still need to broadcastFile for SAF - see notes above for saveImageNow().
     		    */
 	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri);
 				if( MyDebug.LOG )
