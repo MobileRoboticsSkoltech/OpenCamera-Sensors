@@ -851,7 +851,7 @@ public class ImageSaver extends Thread {
 	            }
 
 	            if( saveUri != null ) {
-	            	copyUriToFile(main_activity, saveUri, picFile);
+	            	copyFileToUri(main_activity, saveUri, picFile);
 	    		    success = true;
 	    		    /* We still need to broadcastFile for SAF for two reasons:
 	    		    	1. To call storageUtils.announceUri() to broadcast NEW_PICTURE etc.
@@ -999,18 +999,18 @@ public class ImageSaver extends Thread {
 		
 		main_activity.savingImage(true);
 
-        FileOutputStream output = null;
+        OutputStream output = null;
         try {
     		File picFile = null;
-    		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
+    		Uri saveUri = null;
 
 			if( storageUtils.isUsingSAF() ) {
 				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "saveUri: " + saveUri);
-				picFile = File.createTempFile("picFile", "dng", main_activity.getCacheDir());
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
+	    		// When using SAF, we don't save to a temp file first (unlike for JPEGs). Firstly we don't need to modify Exif, so don't
+	    		// need a real file; secondly copying to a temp file is much slower for RAW; thirdly for some reason it means that the
+	    		// image doesn't show up (as if we haven't entered the file into the mediastore database)
 			}
 			else {
         		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
@@ -1018,33 +1018,37 @@ public class ImageSaver extends Thread {
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}
 
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
-            output = new FileOutputStream(picFile);
-            dngCreator.writeImage(output, image);
-    		if( saveUri == null ) { // if saveUri is non-null, then we haven't succeeded until we've copied to the saveUri
-    			success = true;
-            	// broadcast for SAF is done later, when we've actually written out the file
-        		storageUtils.broadcastFile(picFile, true, false, false);
+    		if( picFile != null ) {
+    			output = new FileOutputStream(picFile);
     		}
+    		else {
+    		    output = main_activity.getContentResolver().openOutputStream(saveUri);
+    		}
+            dngCreator.writeImage(output, image);
+    		image.close();
+    		image = null;
+    		dngCreator.close();
+    		dngCreator = null;
+    		output.close();
+    		output = null;
 
-            if( saveUri != null ) {
-            	this.copyUriToFile(main_activity, saveUri, picFile);
+    		if( saveUri == null ) {
+    			success = true;
+        		storageUtils.broadcastFileRaw(picFile);
+    		}
+    		else {
     		    success = true;
-    		    /* We still need to broadcastFile for SAF - see notes above for saveImageNow().
-    		    */
 	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri);
 				if( MyDebug.LOG )
 					Log.d(TAG, "real_file: " + real_file);
                 if( real_file != null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "broadcast file");
-	            	storageUtils.broadcastFile(real_file, true, false, false);
+	        		storageUtils.broadcastFileRaw(real_file);
                 }
                 else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "announce SAF uri");
-                	// announce the SAF Uri
 	    		    storageUtils.announceUri(saveUri, true, false);
                 }
             }
@@ -1072,10 +1076,16 @@ public class ImageSaver extends Thread {
 					e.printStackTrace();
 				}
         	}
+        	if( image != null ) {
+        		image.close();
+        		image = null;
+        	}
+        	if( dngCreator != null ) {
+        		dngCreator.close();
+        		dngCreator = null;
+        	}
         }
 
-    	image.close();
-    	dngCreator.close();
 
     	System.gc();
 
@@ -1184,11 +1194,11 @@ public class ImageSaver extends Thread {
 		return false;
 	}
 
-	/** Reads from saveUri and writes the contents to picFile.
+	/** Reads from picFile and writes the contents to saveUri.
 	 */
-	private void copyUriToFile(Context context, Uri saveUri, File picFile) throws FileNotFoundException, IOException {
+	private void copyFileToUri(Context context, Uri saveUri, File picFile) throws FileNotFoundException, IOException {
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "copyUriToFile");
+			Log.d(TAG, "copyFileToUri");
 			Log.d(TAG, "saveUri: " + saveUri);
 			Log.d(TAG, "picFile: " + saveUri);
 		}

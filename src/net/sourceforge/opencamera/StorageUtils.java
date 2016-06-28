@@ -12,6 +12,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -143,6 +144,35 @@ public class StorageUtils {
     	}
 	}
 	
+	public void broadcastFileRaw(File file) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "broadcastFileRaw: " + file.getAbsolutePath());
+        ContentValues values = new ContentValues(); 
+        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
+        values.put(ImageColumns.DISPLAY_NAME, file.getName());
+        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
+        values.put(ImageColumns.MIME_TYPE, "image/dng");
+        //values.put(ImageColumns.MIME_TYPE, "image/jpeg");
+        // TODO: orientation
+        values.put(ImageColumns.DATA, file.getAbsolutePath());
+        // TODO: location
+        /*if( location != null ) {
+	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
+	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
+        }*/
+        try {
+    		context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
+        }
+        catch (Throwable th) { 
+	        // This can happen when the external volume is already mounted, but 
+	        // MediaScanner has not notify MediaProvider to add that volume. 
+	        // The picture is still safe and MediaScanner will find it and 
+	        // insert it into MediaProvider. The only problem is that the user 
+	        // cannot click the thumbnail to review the picture. 
+	        Log.e(TAG, "Failed to write MediaStore" + th); 
+	    }
+	}
+	
     public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFile: " + file.getAbsolutePath());
@@ -156,9 +186,6 @@ public class StorageUtils {
     	else {
         	// both of these work fine, but using MediaScannerConnection.scanFile() seems to be preferred over sending an intent
     		//context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
-    		/*boolean use_scanfile = true;
-    		if( use_scanfile )
-    		{*/
  			failed_to_scan = true; // set to true until scanned okay
  			if( MyDebug.LOG )
  				Log.d(TAG, "failed_to_scan set to true");
@@ -191,33 +218,6 @@ public class StorageUtils {
     		 		}
     			}
     		);
-    		/*}
-    		else {
-    	        ContentValues values = new ContentValues(); 
-    	        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
-    	        values.put(ImageColumns.DISPLAY_NAME, file.getName());
-    	        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
-    	        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
-    	        // TODO: orientation
-    	        values.put(ImageColumns.DATA, file.getAbsolutePath());
-    	        // TODO: location
-    	        Location location = preview.getLocation();
-    	        if( location != null ) {
-        	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
-        	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
-    	        }
-    	        try {
-    	    		context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
-    	        }
-    	        catch (Throwable th) { 
-        	        // This can happen when the external volume is already mounted, but 
-        	        // MediaScanner has not notify MediaProvider to add that volume. 
-        	        // The picture is still safe and MediaScanner will find it and 
-        	        // insert it into MediaProvider. The only problem is that the user 
-        	        // cannot click the thumbnail to review the picture. 
-        	        Log.e(TAG, "Failed to write MediaStore" + th); 
-        	    }
-    		}*/
     	}
 	}
 
