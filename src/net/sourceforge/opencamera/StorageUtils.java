@@ -155,13 +155,16 @@ public class StorageUtils {
         //values.put(ImageColumns.MIME_TYPE, "image/jpeg");
         // TODO: orientation
         values.put(ImageColumns.DATA, file.getAbsolutePath());
+        //values.put(ImageColumns.DATA, "/storage/emulated/0/DCIM/OpenCamera/blah.dng");
         // TODO: location
         /*if( location != null ) {
 	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
 	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
         }*/
         try {
-    		context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
+    		Uri uri = context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
+ 			if( MyDebug.LOG )
+ 				Log.d(TAG, "inserted media uri: " + uri);
         }
         catch (Throwable th) { 
 	        // This can happen when the external volume is already mounted, but 
