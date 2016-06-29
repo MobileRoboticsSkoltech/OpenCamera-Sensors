@@ -28,6 +28,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
+import android.media.ExifInterface;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaActionSound;
@@ -137,6 +138,33 @@ public class CameraController2 extends CameraController {
 		private boolean has_face_detect_mode = false;
 		private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
 		private boolean video_stabilization = false;
+		
+		private int getExifOrientation() {
+			int exif_orientation = ExifInterface.ORIENTATION_NORMAL;
+			switch( (rotation + 360) % 360 ) {
+				case 0:
+					exif_orientation = ExifInterface.ORIENTATION_NORMAL;
+					break;
+				case 90:
+					exif_orientation = isFrontFacing() ?
+							ExifInterface.ORIENTATION_ROTATE_270 :
+							ExifInterface.ORIENTATION_ROTATE_90;
+					break;
+				case 180:
+					exif_orientation = ExifInterface.ORIENTATION_ROTATE_180;
+					break;
+				case 270:
+					exif_orientation = isFrontFacing() ?
+							ExifInterface.ORIENTATION_ROTATE_90 :
+							ExifInterface.ORIENTATION_ROTATE_270;
+					break;
+			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "rotation: " + rotation);
+				Log.d(TAG, "exif_orientation: " + exif_orientation);
+			}
+			return exif_orientation;
+		}
 
 		private void setupBuilder(CaptureRequest.Builder builder, boolean is_still) {
 			//builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
@@ -1455,6 +1483,11 @@ public class CameraController2 extends CameraController {
 					}
 					Image image = reader.acquireNextImage();
                     DngCreator dngCreator = new DngCreator(characteristics, still_capture_result);
+                    // set fields
+                    dngCreator.setOrientation(camera_settings.getExifOrientation());
+    				if( camera_settings.location != null ) {
+                        dngCreator.setLocation(camera_settings.location);
+    				}
     	            // need to set raw_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
     	            PictureCallback cb = raw_cb;
     	            raw_cb = null;
