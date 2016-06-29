@@ -639,6 +639,8 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public boolean isRawPref() {
+    	if( isImageCaptureIntent() )
+    		return false;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_no").equals("preference_raw_yes");
     }
@@ -1234,6 +1236,17 @@ public class MyApplicationInterface implements ApplicationInterface {
 			do_in_background = false;
 		return do_in_background;
 	}
+	
+	private boolean isImageCaptureIntent() {
+		boolean image_capture_intent = false;
+		String action = main_activity.getIntent().getAction();
+		if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "from image capture intent");
+			image_capture_intent = true;
+		}
+		return image_capture_intent;
+	}
 
     @Override
 	public boolean onPictureTaken(byte [] data) {
@@ -1243,13 +1256,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 		Date current_date = new Date(); // do asap so we date corresponds to actual photo time
 
-		boolean image_capture_intent = false;
-	        Uri image_capture_intent_uri = null;
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) ) {
+		boolean image_capture_intent = isImageCaptureIntent();
+        Uri image_capture_intent_uri = null;
+        if( image_capture_intent ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "from image capture intent");
-			image_capture_intent = true;
 	        Bundle myExtras = main_activity.getIntent().getExtras();
 	        if (myExtras != null) {
 	        	image_capture_intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
