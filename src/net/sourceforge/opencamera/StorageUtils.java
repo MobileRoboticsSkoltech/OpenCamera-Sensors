@@ -61,7 +61,7 @@ public class StorageUtils {
 
 	void announceUri(Uri uri, boolean is_new_picture, boolean is_new_video) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "announceUri");
+			Log.d(TAG, "announceUri: " + uri);
     	if( is_new_picture ) {
     		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcase the string for other apps
     		context.sendBroadcast(new Intent( "android.hardware.action.NEW_PICTURE" , uri));
@@ -144,7 +144,7 @@ public class StorageUtils {
     	}
 	}
 	
-	public void broadcastFileRaw(File file) {
+	public Uri broadcastFileRaw(File file) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFileRaw: " + file.getAbsolutePath());
         ContentValues values = new ContentValues(); 
@@ -161,8 +161,9 @@ public class StorageUtils {
 	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
 	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
         }*/
+        Uri uri = null;
         try {
-    		Uri uri = context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
+    		uri = context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
  			if( MyDebug.LOG )
  				Log.d(TAG, "inserted media uri: " + uri);
         }
@@ -174,6 +175,7 @@ public class StorageUtils {
 	        // cannot click the thumbnail to review the picture. 
 	        Log.e(TAG, "Failed to write MediaStore" + th); 
 	    }
+        return uri;
 	}
 	
     public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {

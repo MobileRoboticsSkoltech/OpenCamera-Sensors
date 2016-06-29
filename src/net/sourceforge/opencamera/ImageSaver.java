@@ -1034,7 +1034,8 @@ public class ImageSaver extends Thread {
 
     		if( saveUri == null ) {
     			success = true;
-        		storageUtils.broadcastFileRaw(picFile);
+        		Uri media_uri = storageUtils.broadcastFileRaw(picFile);
+    		    storageUtils.announceUri(media_uri, true, false);
     		}
     		else {
     		    success = true;
@@ -1044,7 +1045,8 @@ public class ImageSaver extends Thread {
                 if( real_file != null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "broadcast file");
-	        		storageUtils.broadcastFileRaw(real_file);
+	        		Uri media_uri = storageUtils.broadcastFileRaw(real_file);
+	    		    storageUtils.announceUri(media_uri, true, false);
                 }
                 else {
 					if( MyDebug.LOG )
