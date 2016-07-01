@@ -68,6 +68,8 @@ public class CameraController2 extends CameraController {
 	private ImageReader imageReaderRaw = null;
 	private PictureCallback jpeg_cb = null;
 	private PictureCallback raw_cb = null;
+	private DngCreator pending_dngCreator = null;
+	private Image pending_image = null;
 	private ErrorCallback take_picture_error_cb = null;
 	//private ImageReader previewImageReader = null;
 	private SurfaceTexture texture = null;
@@ -1461,6 +1463,14 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "all image callbacks now completed");
 					cb.onCompleted();
 	            }
+	            else if( pending_dngCreator != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "can now call pending raw callback");
+    				takePendingRaw();
+					if( MyDebug.LOG )
+						Log.d(TAG, "all image callbacks now completed");
+					cb.onCompleted();
+	            }
 				if( MyDebug.LOG )
 					Log.d(TAG, "done onImageAvailable");
 			}
@@ -1488,22 +1498,50 @@ public class CameraController2 extends CameraController {
     				if( camera_settings.location != null ) {
                         dngCreator.setLocation(camera_settings.location);
     				}
-    	            // need to set raw_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+    				
+    				pending_dngCreator = dngCreator;
+    				pending_image = image;
+    				
     	            PictureCallback cb = raw_cb;
-    	            raw_cb = null;
-    	            cb.onRawPictureTaken(dngCreator, image);
     	            if( jpeg_cb == null ) {
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "jpeg callback already done, so can go ahead with raw callback");
+        				takePendingRaw();
     					if( MyDebug.LOG )
     						Log.d(TAG, "all image callbacks now completed");
     					cb.onCompleted();
     	            }
-    	            // image and dngCreator should be closed by the application (we don't do it here, so that applications can keep hold of the data, e.g., in a queue for background processing)
+    	            else {
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "need to wait for jpeg callback");
+    	            }
     				if( MyDebug.LOG )
     					Log.d(TAG, "done onImageAvailable");
 				}
 			}, null);
 		}
 	}
+	
+	private void clearPendingRaw() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearPendingRaw");
+		pending_dngCreator = null;
+		pending_image = null;
+	}
+	
+	private void takePendingRaw() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePendingRaw");
+		if( pending_dngCreator != null ) {
+            PictureCallback cb = raw_cb;
+            raw_cb = null;
+            cb.onRawPictureTaken(pending_dngCreator, pending_image);
+            // image and dngCreator should be closed by the application (we don't do it here, so that applications can keep hold of the data, e.g., in a queue for background processing)
+            pending_dngCreator = null;
+            pending_image = null;
+		}
+	}
+	
 	@Override
 	public Size getPreviewSize() {
 		return new Size(preview_width, preview_height);
@@ -2592,6 +2630,7 @@ public class CameraController2 extends CameraController {
 			camera_settings.setupBuilder(stillBuilder, true);
 			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+			clearPendingRaw();
         	Surface surface = getPreviewSurface();
         	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
     		stillBuilder.addTarget(imageReader.getSurface());
@@ -2635,6 +2674,7 @@ public class CameraController2 extends CameraController {
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			camera_settings.setupBuilder(stillBuilder, true);
+			clearPendingRaw();
         	Surface surface = getPreviewSurface();
         	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
 			stillBuilder.addTarget(imageReader.getSurface());
