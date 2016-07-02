@@ -22,6 +22,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -4018,6 +4019,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		CameraController.PictureCallback pictureCallback = new CameraController.PictureCallback() {
 			private boolean success = false; // whether jpeg callback succeeded
+			private boolean has_date = false;
+			private Date current_date = null;
 
 			public void onCompleted() {
 				if( MyDebug.LOG )
@@ -4084,12 +4087,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	    		}
     	        }
 			}
+
+			/** Ensures we get the same date for both JPEG and RAW; and that we set the date ASAP so that it corresponds to actual
+			 *  photo time.
+			 */
+			private void initDate() {
+				if( !has_date ) {
+					has_date = true;
+					current_date = new Date();
+					if( MyDebug.LOG )
+						Log.d(TAG, "picture taken on date: " + current_date);
+				}
+			}
 			
 			public void onPictureTaken(byte[] data) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onPictureTaken");
     	    	// n.b., this is automatically run in a different thread
-				if( !applicationInterface.onPictureTaken(data) ) {
+				initDate();
+				if( !applicationInterface.onPictureTaken(data, current_date) ) {
 					if( MyDebug.LOG )
 						Log.e(TAG, "applicationInterface.onPictureTaken failed");
 					success = false;
@@ -4102,7 +4118,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			public void onRawPictureTaken(DngCreator dngCreator, Image image) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onRawPictureTaken");
-				if( !applicationInterface.onRawPictureTaken(dngCreator, image) ) {
+				initDate();
+				if( !applicationInterface.onRawPictureTaken(dngCreator, image, current_date) ) {
 					if( MyDebug.LOG )
 						Log.e(TAG, "applicationInterface.onRawPictureTaken failed");
 				}

@@ -1249,12 +1249,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
     @Override
-	public boolean onPictureTaken(byte [] data) {
+	public boolean onPictureTaken(byte [] data, Date current_date) {
         System.gc();
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken");
-
-		Date current_date = new Date(); // do asap so we date corresponds to actual photo time
 
 		boolean image_capture_intent = isImageCaptureIntent();
         Uri image_capture_intent_uri = null;
@@ -1313,12 +1311,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
     @Override
-	public boolean onRawPictureTaken(DngCreator dngCreator, Image image) {
+	public boolean onRawPictureTaken(DngCreator dngCreator, Image image, Date current_date) {
         System.gc();
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRawPictureTaken");
-
-		Date current_date = new Date(); // do asap so we date corresponds to actual photo time
 
 		boolean do_in_background = saveInBackground(false);
 
