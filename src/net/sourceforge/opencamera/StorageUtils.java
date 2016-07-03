@@ -19,6 +19,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -144,28 +145,28 @@ public class StorageUtils {
     	}
 	}
 	
-	public Uri broadcastFileRaw(File file) {
+	public Uri broadcastFileRaw(File file, Date current_date, Location location) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFileRaw: " + file.getAbsolutePath());
         ContentValues values = new ContentValues(); 
         values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
         values.put(ImageColumns.DISPLAY_NAME, file.getName());
-        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
+        values.put(ImageColumns.DATE_TAKEN, current_date.getTime()); 
         values.put(ImageColumns.MIME_TYPE, "image/dng");
         //values.put(ImageColumns.MIME_TYPE, "image/jpeg");
-        // TODO: orientation
+        if( location != null ) {
+            values.put(ImageColumns.LATITUDE, location.getLatitude());
+            values.put(ImageColumns.LONGITUDE, location.getLongitude());
+        }
+        // leave ORIENTATION for now - this doesn't seem to get inserted for JPEGs anyway (via MediaScannerConnection.scanFile())
         values.put(ImageColumns.DATA, file.getAbsolutePath());
         //values.put(ImageColumns.DATA, "/storage/emulated/0/DCIM/OpenCamera/blah.dng");
-        // TODO: location
-        /*if( location != null ) {
-	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
-	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
-        }*/
         Uri uri = null;
         try {
     		uri = context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
  			if( MyDebug.LOG )
  				Log.d(TAG, "inserted media uri: " + uri);
+    		context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
         }
         catch (Throwable th) { 
 	        // This can happen when the external volume is already mounted, but 
@@ -456,8 +457,10 @@ public class StorageUtils {
 		    	Log.d(TAG, "docUri: " + docUri);
 		    String mimeType = "";
 	        if( type == MEDIA_TYPE_IMAGE ) {
-	        	if( extension.equals("dng") )
+	        	if( extension.equals("dng") ) {
 	        		mimeType = "image/dng";
+	        		//mimeType = "image/x-adobe-dng";
+	        	}
 	        	else
 	        		mimeType = "image/jpeg";
 	        }

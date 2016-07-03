@@ -1067,10 +1067,18 @@ public class ImageSaver extends Thread {
     		output.close();
     		output = null;
 
+    		Location location = null;
+    		if( main_activity.getApplicationInterface().getGeotaggingPref() ) {
+    			location = main_activity.getApplicationInterface().getLocation();
+	    		if( MyDebug.LOG )
+	    			Log.d(TAG, "location: " + location);
+    		}
+
     		if( saveUri == null ) {
     			success = true;
-        		Uri media_uri = storageUtils.broadcastFileRaw(picFile);
+        		Uri media_uri = storageUtils.broadcastFileRaw(picFile, current_date, location);
     		    storageUtils.announceUri(media_uri, true, false);
+            	//storageUtils.broadcastFile(picFile, true, false, false);
     		}
     		else {
     		    success = true;
@@ -1080,8 +1088,9 @@ public class ImageSaver extends Thread {
                 if( real_file != null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "broadcast file");
-	        		Uri media_uri = storageUtils.broadcastFileRaw(real_file);
+	        		Uri media_uri = storageUtils.broadcastFileRaw(real_file, current_date, location);
 	    		    storageUtils.announceUri(media_uri, true, false);
+	            	//storageUtils.broadcastFile(real_file, true, false, false);
                 }
                 else {
 					if( MyDebug.LOG )
