@@ -47,7 +47,14 @@ public class ImageSaver extends Thread {
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	
 	private MainActivity main_activity = null;
-	private BlockingQueue<Request> queue = new ArrayBlockingQueue<Request>(1);
+
+	/* We use a separate count n_images_to_save, rather than just relying on the queue size, so we can take() an image from queue,
+	 * but only decrement the count when we've finished saving the image.
+	 * In general, n_images_to_save represents the number of images still to process, including ones currently being processed.
+	 * Therefore we should always have n_images_to_save >= queue.size().
+	 */
+	private int n_images_to_save = 0;
+	private BlockingQueue<Request> queue = new ArrayBlockingQueue<Request>(1); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
 	
 	private static class Request {
 		boolean is_raw = false;
@@ -132,6 +139,8 @@ public class ImageSaver extends Thread {
 				if( MyDebug.LOG )
 					Log.d(TAG, "ImageSaver thread reading from queue, size: " + queue.size());
 				Request request = queue.take(); // if empty, take() blocks until non-empty
+				// Only decrement n_images_to_save after we've actually saved the image! Otherwise waitUntilDone() will return
+				// even though we still have a last image to be saved.
 				if( MyDebug.LOG )
 					Log.d(TAG, "ImageSaver thread found new request from queue, size is now: " + queue.size());
 				boolean success = false;
@@ -154,6 +163,16 @@ public class ImageSaver extends Thread {
 						Log.d(TAG, "ImageSaver thread successfully saved image");
 					else
 						Log.e(TAG, "ImageSaver thread failed to save image");
+				}
+				synchronized( this ) {
+					n_images_to_save--;
+					if( MyDebug.LOG )
+						Log.d(TAG, "ImageSaver thread processed new request from queue, images to save is now: " + n_images_to_save);
+					if( MyDebug.LOG && n_images_to_save < 0 ) {
+						Log.e(TAG, "images to save has become negative");
+						throw new RuntimeException();
+					}
+					notifyAll();
 				}
 			}
 			catch(InterruptedException e) {
@@ -259,22 +278,25 @@ public class ImageSaver extends Thread {
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 					store_location, location, store_geo_direction, geo_direction,
 					has_thumbnail_animation);
-			synchronized( this ) {
-				boolean done = false;
-				while( !done ) {
-					try {
-						if( MyDebug.LOG )
-							Log.d(TAG, "ImageSaver thread adding to queue, size: " + queue.size());
-						queue.put(request); // if queue is full, put() blocks until it isn't full
-						if( MyDebug.LOG )
-							Log.d(TAG, "ImageSaver thread added to queue, size is now: " + queue.size());
-						done = true;
+			// this should not be synchronized on "this": BlockingQueue is thread safe, and if it's blocking in queue.put(), we'll hang because
+			// the saver queue will need to synchronize on "this" in order to notifyAll() the main thread
+			boolean done = false;
+			while( !done ) {
+				try {
+					if( MyDebug.LOG )
+						Log.d(TAG, "ImageSaver thread adding to queue, size: " + queue.size());
+					n_images_to_save++; // increment before adding to the queue, just to make sure the main thread doesn't think we're all done
+					queue.put(request); // if queue is full, put() blocks until it isn't full
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "ImageSaver thread added to queue, size is now: " + queue.size());
+						Log.d(TAG, "images still to save is now: " + n_images_to_save);
 					}
-					catch(InterruptedException e) {
-						e.printStackTrace();
-						if( MyDebug.LOG )
-							Log.e(TAG, "interrupted while trying to add to ImageSaver queue");
-					}
+					done = true;
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					if( MyDebug.LOG )
+						Log.e(TAG, "interrupted while trying to add to ImageSaver queue");
 				}
 			}
 			success = true; // always return true when done in background
@@ -302,32 +324,43 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "success: " + success);
 		return success;
 	}
-	
+
+	/** Wait until the queue is empty and all pending images have been saved.
+	 */
 	void waitUntilDone() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "waitUntilDone");
 		synchronized( this ) {
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "queue is size " + queue.size());
-			while( queue.size() > 0 ) {
+				Log.d(TAG, "images still to save " + n_images_to_save);
+			}
+			while( n_images_to_save > 0 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "wait until done...");
 				try {
 					wait();
 				}
 				catch(InterruptedException e) {
 					e.printStackTrace();
-					e.printStackTrace();
 					if( MyDebug.LOG )
 						Log.e(TAG, "interrupted while waiting for ImageSaver queue to be empty");
+				}
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "waitUntilDone: queue is size " + queue.size());
+					Log.d(TAG, "waitUntilDone: images still to save " + n_images_to_save);
 				}
 			}
 		}
 		if( MyDebug.LOG )
-			Log.d(TAG, "queue now empty");
+			Log.d(TAG, "waitUntilDone: images all saved");
 	}
 
+	/** May be run in saver thread or picture callback thread (depending on whether running in backgrond).
+	 */
 	@SuppressLint("SimpleDateFormat")
 	@SuppressWarnings("deprecation")
-	private synchronized boolean saveImageNow(byte [] data,
+	private boolean saveImageNow(byte [] data,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
@@ -708,7 +741,7 @@ public class ImageSaver extends Thread {
 					outputStream.close();
 				}
 	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "onPictureTaken saved photo");
+	    			Log.d(TAG, "saveImageNow saved photo");
 
 	    		if( saveUri == null ) { // if saveUri is non-null, then we haven't succeeded until we've copied to the saveUri
 	    			success = true;
@@ -984,8 +1017,10 @@ public class ImageSaver extends Thread {
         return success;
 	}
 
+	/** May be run in saver thread or picture callback thread (depending on whether running in backgrond).
+	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private synchronized boolean saveImageNowRaw(DngCreator dngCreator, Image image, Date current_date) {
+	private boolean saveImageNowRaw(DngCreator dngCreator, Image image, Date current_date) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImageNowRaw");
 
