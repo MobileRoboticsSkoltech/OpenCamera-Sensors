@@ -64,7 +64,7 @@ public class StorageUtils {
 		if( MyDebug.LOG )
 			Log.d(TAG, "announceUri: " + uri);
     	if( is_new_picture ) {
-    		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcase the string for other apps
+    		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcast the string for other apps
     		context.sendBroadcast(new Intent( "android.hardware.action.NEW_PICTURE" , uri));
     		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
     		context.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
