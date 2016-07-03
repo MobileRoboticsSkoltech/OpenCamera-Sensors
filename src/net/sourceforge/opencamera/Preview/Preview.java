@@ -2436,7 +2436,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    }
 	}
 
-	/* Returns the rotation to use for images/videos, taking the preference_lock_orientation into account.
+	/* Returns the rotation (in degrees) to use for images/videos, taking the preference_lock_orientation into account.
 	 */
 	private int getImageVideoRotation() {
 		if( MyDebug.LOG )
