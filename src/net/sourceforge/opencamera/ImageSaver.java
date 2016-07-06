@@ -1044,8 +1044,7 @@ public class ImageSaver extends Thread {
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "saveUri: " + saveUri);
 	    		// When using SAF, we don't save to a temp file first (unlike for JPEGs). Firstly we don't need to modify Exif, so don't
-	    		// need a real file; secondly copying to a temp file is much slower for RAW; thirdly for some reason it means that the
-	    		// image doesn't show up (as if we haven't entered the file into the mediastore database)
+	    		// need a real file; secondly copying to a temp file is much slower for RAW.
 			}
 			else {
         		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "dng", current_date);
@@ -1076,9 +1075,9 @@ public class ImageSaver extends Thread {
 
     		if( saveUri == null ) {
     			success = true;
-        		Uri media_uri = storageUtils.broadcastFileRaw(picFile, current_date, location);
-    		    storageUtils.announceUri(media_uri, true, false);
-            	//storageUtils.broadcastFile(picFile, true, false, false);
+        		//Uri media_uri = storageUtils.broadcastFileRaw(picFile, current_date, location);
+    		    //storageUtils.announceUri(media_uri, true, false);    			
+            	storageUtils.broadcastFile(picFile, true, false, false);
     		}
     		else {
     		    success = true;
@@ -1088,9 +1087,9 @@ public class ImageSaver extends Thread {
                 if( real_file != null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "broadcast file");
-	        		Uri media_uri = storageUtils.broadcastFileRaw(real_file, current_date, location);
-	    		    storageUtils.announceUri(media_uri, true, false);
-	            	//storageUtils.broadcastFile(real_file, true, false, false);
+	        		//Uri media_uri = storageUtils.broadcastFileRaw(real_file, current_date, location);
+	    		    //storageUtils.announceUri(media_uri, true, false);
+	    		    storageUtils.broadcastFile(real_file, true, false, false);
                 }
                 else {
 					if( MyDebug.LOG )

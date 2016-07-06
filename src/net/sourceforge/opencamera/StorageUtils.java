@@ -12,14 +12,14 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentUris;
-import android.content.ContentValues;
+//import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
-import android.location.Location;
+//import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -145,7 +145,7 @@ public class StorageUtils {
     	}
 	}
 	
-	public Uri broadcastFileRaw(File file, Date current_date, Location location) {
+	/*public Uri broadcastFileRaw(File file, Date current_date, Location location) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFileRaw: " + file.getAbsolutePath());
         ContentValues values = new ContentValues(); 
@@ -177,7 +177,7 @@ public class StorageUtils {
 	        Log.e(TAG, "Failed to write MediaStore" + th); 
 	    }
         return uri;
-	}
+	}*/
 	
     public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {
 		if( MyDebug.LOG )
