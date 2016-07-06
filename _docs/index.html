@@ -89,7 +89,7 @@
 <li>Apply a date and timestamp, location coordinates, and custom text to photos.</li>
 <li>Support for (some) external microphones.</li>
 <li>Widget to automatically take a photo after launching.</li>
-<li>Support for Android 5 Camera2 API: manual focus distance; manual ISO; manual exposure time.</li>
+<li>Support for Android 5 Camera2 API: manual focus distance; manual ISO; manual exposure time; RAW (DNG) files.</li>
 <li>Small file size.</li>
 <li>Completely free, and no ads in the app. Open Source.</li>
 </ul>
@@ -510,6 +510,26 @@ images will in general come out as a slightly lower resolution (due to the rotat
 <p><b>Image quality</b> - The image quality of saved JPEG images. Higher means better quality, but the image files will take up
 more storage space. Note that 100% does not necessarily mean there is no lossy compression, rather that there is minimum compression.</p>
 
+<p><b>RAW</b> - Only available if Camera2 API is used. If set to "JPEG and DNG (RAW)", then photos
+will also be saved in RAW (DNG) files. DNG stands for
+<a href="https://en.wikipedia.org/wiki/Digital_Negative">"digital negative"</a>, and contains the full
+uncompressed and unprocessed information from your camera. Please note the following points:</p>
+<ul>
+	<li>Most gallery applications don't recognise DNG files - you won't even see them listed. Instead,
+	use specialised RAW viewer or editing tools such as
+	<a href="https://play.google.com/store/apps/details?id=com.niksoftware.snapseed">Google Snapseed</a>
+	(Note that Snapseed will only show the JPEGs when you try to open a photo - but it will automatically
+	instead load the corresponding DNG file if it exists; Lightroom shows both the JPEG and DNG files
+	separately.) Or transfer to a PC to use DNG editing applications there.</li>
+	<li>A file explorer application may also be useful, to delete DNGs if you don't want them (DNGs take
+	up a lot of space - and won't be deleted when you delete the corresponding JPEG from a Gallery app).
+	<a href="https://play.google.com/store/apps/details?id=com.sharpened.androidfileviewer">File Viewer
+	for Android</a> also has built in support for viewing DNG files.</li>
+	<li>Note that various processing options such as "Stamp photos" and "Auto-stabilise" will only apply
+	to the JPEG images, and not the DNG images. This is not a bug - the DNGs represent the RAW output
+	of the camera device.</li>
+</ul>
+
 <p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
 location data" is enabled (see "Location settings" below), then the current location latitude
 and longitude coordinates will also be stamped on the resultant photos (if the location is known).
@@ -899,6 +919,10 @@ available from
 <textarea readonly rows="20" cols="80" style="width:100%; height:50%; white-space: pre; word-wrap: normal; overflow-x: scroll">
 Version 1.32 (Work in progress)
 
+ADDED   Support for RAW (DNG) files. Only available in Camera2 mode, and if
+        your device supports it. Note that most Gallery apps don't recognise
+        DNG files, instead use specialised applications like Google Snapseed
+        and Adobe Photoshop Lightroom, or transfer to a PC.
 UPDATED Allow one more photo to be processed in background at a time.
 
 Version 1.31 (2016/06/19)
