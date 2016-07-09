@@ -9,6 +9,7 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -22,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
@@ -141,6 +143,38 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Preference pref = findPreference("preference_raw");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
         	pg.removePreference(pref);
+		}
+		else {
+        	Preference pref = findPreference("preference_raw");
+        	pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+        		@Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+            		if( MyDebug.LOG )
+            			Log.d(TAG, "clicked raw: " + newValue);
+            		if( newValue.equals("preference_raw_yes") ) {
+            			// we check done_raw_info every time, so that this works if the user selects RAW again without leaving and returning to Settings
+            			boolean done_raw_info = sharedPreferences.contains(PreferenceKeys.getRawInfoPreferenceKey());
+            			if( !done_raw_info ) {
+	        		        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
+	        	            alertDialog.setTitle(R.string.preference_raw);
+	        	            alertDialog.setMessage(R.string.raw_info);
+	        	            alertDialog.setPositiveButton(android.R.string.ok, null);
+	        	            alertDialog.setNegativeButton(R.string.dont_show_again, new OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+				            		if( MyDebug.LOG )
+				            			Log.d(TAG, "user clicked dont_show_again for raw info dialog");
+				            		SharedPreferences.Editor editor = sharedPreferences.edit();
+				            		editor.putBoolean(PreferenceKeys.getRawInfoPreferenceKey(), true);
+				            		editor.apply();
+								}
+	        	            });
+	        	            alertDialog.show();
+            			}
+                    }
+                	return true;
+                }
+            });        	
 		}
 
 		final String [] video_quality = bundle.getStringArray("video_quality");

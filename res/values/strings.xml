@@ -298,4 +298,8 @@
     <string name="audio_control_stop">Stop audio listening</string>
     <string name="speech_recognizer_started">Say \"cheese\"</string>
     <string name="audio_listener_started">Make a loud noise</string>
+
+    <string name="raw_info">DNG files contain the full uncompressed and unprocessed information from your camera.\n\nMost gallery apps won\'t recognise DNG, instead they should be used with specialised apps like Snapseed or Lightroom.\n\nNote that various processing options such as "Stamp photos" and "Auto-stabilise" will only apply to the JPEG images, and not the DNG images.\n\nDNG files take up a lot of space; a file explorer app may be useful for transferring or deleting them.</string>
+
+    <string name="dont_show_again">Don\'t show again</string>
 </resources>
