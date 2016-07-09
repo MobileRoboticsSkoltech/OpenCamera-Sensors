@@ -1097,6 +1097,18 @@ public class ImageSaver extends Thread {
 	    		    storageUtils.announceUri(saveUri, true, false);
                 }
             }
+
+    		MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
+    		if( success && saveUri == null ) {
+            	applicationInterface.setLastImageRaw(picFile);
+            }
+            else if( storageUtils.isUsingSAF() ){
+            	applicationInterface.setLastImageRawSAF(saveUri);
+            }
+            else {
+            	applicationInterface.clearLastImageRaw();
+            }
+
         }
         catch(FileNotFoundException e) {
     		if( MyDebug.LOG )

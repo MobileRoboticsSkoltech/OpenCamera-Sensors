@@ -57,6 +57,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private boolean last_image_saf = false;
 	private Uri last_image_uri = null;
 	private String last_image_name = null;
+	private boolean last_image_raw_saf = false;
+	private Uri last_image_raw_uri = null;
+	private String last_image_raw_name = null;
 	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
@@ -1327,20 +1330,43 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	void setLastImage(File file) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setLastImage");
+			Log.d(TAG, "setLastImage: " + file);
     	last_image_saf = false;
     	last_image_name = file.getAbsolutePath();
     	last_image_uri = Uri.parse("file://" + last_image_name);
 	}
 
+	void setLastImageRaw(File file) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setLastImageRaw: " + file);
+    	last_image_raw_saf = false;
+    	last_image_raw_name = file.getAbsolutePath();
+    	last_image_raw_uri = Uri.parse("file://" + last_image_raw_name);
+	}
+
 	void setLastImageSAF(Uri uri) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setLastImageSAF");
+			Log.d(TAG, "setLastImageSAF: " + uri);
     	last_image_saf = true;
     	last_image_name = null;
     	last_image_uri = uri;
 	}
 	
+	void setLastImageRawSAF(Uri uri) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setLastImageRawSAF: " + uri);
+    	last_image_raw_saf = true;
+    	last_image_raw_name = null;
+    	last_image_raw_uri = uri;
+	}
+	
+	private void clearLastImages() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearLastImages");
+		clearLastImage();
+		clearLastImageRaw();
+	}
+
 	void clearLastImage() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearLastImage");
@@ -1349,7 +1375,17 @@ public class MyApplicationInterface implements ApplicationInterface {
 		last_image_uri = null;
 	}
 
+	void clearLastImageRaw() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearLastImageRaw");
+		last_image_raw_saf = false;
+		last_image_raw_name = null;
+		last_image_raw_uri = null;
+	}
+
 	void shareLastImage() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "shareLastImage");
 		Preview preview  = main_activity.getPreview();
 		if( preview.isPreviewPaused() ) {
 			if( last_image_uri != null ) {
@@ -1360,49 +1396,59 @@ public class MyApplicationInterface implements ApplicationInterface {
 				intent.putExtra(Intent.EXTRA_STREAM, last_image_uri);
 				main_activity.startActivity(Intent.createChooser(intent, "Photo"));
 			}
-			clearLastImage();
+			clearLastImages();
 			preview.startCameraPreview();
 		}
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void trashImage(boolean image_saf, Uri image_uri, String image_name) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "trashImage");
+		Preview preview  = main_activity.getPreview();
+		if( image_saf && image_uri != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "Delete: " + image_uri);
+    	    File file = storageUtils.getFileFromDocumentUriSAF(image_uri); // need to get file before deleting it, as fileFromDocumentUriSAF may depend on the file still existing
+			if( !DocumentsContract.deleteDocument(main_activity.getContentResolver(), image_uri) ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to delete " + image_uri);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "successfully deleted " + image_uri);
+	    	    preview.showToast(null, R.string.photo_deleted);
+                if( file != null ) {
+                	// SAF doesn't broadcast when deleting them
+	            	storageUtils.broadcastFile(file, false, false, true);
+                }
+			}
+		}
+		else if( image_name != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "Delete: " + image_name);
+			File file = new File(image_name);
+			if( !file.delete() ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to delete " + image_name);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "successfully deleted " + image_name);
+	    	    preview.showToast(null, R.string.photo_deleted);
+            	storageUtils.broadcastFile(file, false, false, true);
+			}
+		}
+	}
+	
 	void trashLastImage() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "trashImage");
 		Preview preview  = main_activity.getPreview();
 		if( preview.isPreviewPaused() ) {
-			if( last_image_saf && last_image_uri != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "Delete: " + last_image_uri);
-	    	    File file = storageUtils.getFileFromDocumentUriSAF(last_image_uri); // need to get file before deleting it, as fileFromDocumentUriSAF may depend on the file still existing
-				if( !DocumentsContract.deleteDocument(main_activity.getContentResolver(), last_image_uri) ) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "failed to delete " + last_image_uri);
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "successfully deleted " + last_image_uri);
-    	    	    preview.showToast(null, R.string.photo_deleted);
-                    if( file != null ) {
-                    	// SAF doesn't broadcast when deleting them
-    	            	storageUtils.broadcastFile(file, false, false, true);
-                    }
-				}
-			}
-			else if( last_image_name != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "Delete: " + last_image_name);
-				File file = new File(last_image_name);
-				if( !file.delete() ) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "failed to delete " + last_image_name);
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "successfully deleted " + last_image_name);
-    	    	    preview.showToast(null, R.string.photo_deleted);
-	            	storageUtils.broadcastFile(file, false, false, true);
-				}
-			}
-			clearLastImage();
+			trashImage(last_image_saf, last_image_uri, last_image_name);
+			trashImage(last_image_raw_saf, last_image_raw_uri, last_image_raw_name);
+			clearLastImages();
 			preview.startCameraPreview();
 		}
     	// Calling updateGalleryIcon() immediately has problem that it still returns the latest image that we've just deleted!
