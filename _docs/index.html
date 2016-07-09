@@ -50,11 +50,35 @@
 <img align="right" src="Screenshot_2014-09-22-14-34-48_thumbversion.jpg" title="Screenshot" style="max-width:33%">
 </a></p>-->
 
-<div style="display:block;float:right;margin: 5px 5px 5px 20px; max-width:33%">
+<div style="display:block;float:right;margin: 5px 0px 5px 0px;width:40%">
+<!-- div to contain the screenshot and the ads. Important to use width and not max-width, otherwise
+responsive ads won't show (at least on my Nexus 6)!
+If any code is changed here, make sure layout is still good and ads show on laptop, Nexus 6 and Galaxy Nexus.
+-->
 <a href="Screenshot_2014-09-22-14-34-48.jpg">
 <img src="Screenshot_2014-09-22-14-34-48_thumbversion.jpg" alt="Screenshot" title="Screenshot" style="max-width:100%">
-	<!-- we set max width of 100%, as this is in terms of the outer div (which has max-width 33%), and we don't want this being larger than the div -->
+	<!-- we set max width of 100%, as this is in terms of the outer div (which has width 33%), and we don't want this being larger than the div -->
 </a>
+
+<div style="min-width:125px;max-width:320px;float:right;margin-top:5px">
+<!-- need min-width of 125px for responsive ads; set a max-width so that ads aren't huge on non-mobile
+browsers -->
+<!-- start adsense code -->
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- contents_ad -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1960368062214160"
+     data-ad-slot="6626649930"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- end adsense code -->
+</div>
+
+<div style="float:right;margin-top:5px">
+<!-- start adsense code -->
 <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 <!-- ad_top_vertical_banner_thinner -->
 <ins class="adsbygoogle"
@@ -64,9 +88,9 @@
 <script>
 (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
-<div style="float:right">
-<!-- adsense -->
+<!-- end adsense code -->
 </div>
+
 </div>
 
 <p><small><a href="#contents">Jump to Contents.</a></small></p>
@@ -146,16 +170,16 @@ Thanks! Donations can be used for: purchasing hardware for porting/testing; app 
 </ul>
 
 <!-- adsense -->
-<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!--<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
 <!-- contents_ad -->
-<ins class="adsbygoogle"
+<!--<ins class="adsbygoogle"
      style="display:block"
      data-ad-client="ca-pub-1960368062214160"
      data-ad-slot="6626649930"
      data-ad-format="auto"></ins>
 <script>
 (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+</script>-->
 
 <p><a name="requirements"></a><b>Requirements</b></p>
 
