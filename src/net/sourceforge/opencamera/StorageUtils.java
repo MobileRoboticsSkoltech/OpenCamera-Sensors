@@ -60,6 +60,9 @@ public class StorageUtils {
 		last_media_scanned = null;
 	}
 
+	/** Sends the intents to announce the new file to other Android applications. E.g., cloud storage applications like
+	 *  OwnCloud use this to listen for new photos/videos to automatically upload.
+	 */
 	void announceUri(Uri uri, boolean is_new_picture, boolean is_new_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "announceUri: " + uri);
@@ -178,7 +181,16 @@ public class StorageUtils {
 	    }
         return uri;
 	}*/
-	
+
+	/** Sends a "broadcast" for the new file. This is necessary so that Android recognises the new file without needing a reboot:
+	 *  - So that they show up when connected to a PC using MTP.
+	 *  - For JPEGs, so that they show up in gallery applications.
+	 *  - This also calls announceUri() on the resultant Uri for the new file.
+	 *  - Note this should also be called after deleting a file.
+	 *  - Note that for DNG files, MediaScannerConnection.scanFile() doesn't result in the files being shown in gallery applications.
+	 *    This may well be intentional, since most gallery applications won't read DNG files anyway. But it's still important to
+	 *    call this function for DNGs, so that they show up on MTP.
+	 */
     public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFile: " + file.getAbsolutePath());
