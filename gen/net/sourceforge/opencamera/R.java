@@ -205,6 +205,7 @@ public final class R {
         public static final int audio_control_stop=0x7f080114;
         public static final int audio_disabled=0x7f080034;
         public static final int audio_listener_started=0x7f080116;
+        public static final int auto_stabilise_info=0x7f080117;
         public static final int auto_stabilise_not_supported=0x7f080033;
         public static final int back_camera=0x7f08001c;
         public static final int cancelled_burst_mode=0x7f080022;
@@ -231,7 +232,7 @@ public final class R {
         public static final int clear_folder_history_question=0x7f08000b;
         public static final int color_effect=0x7f080036;
         public static final int direction=0x7f08003a;
-        public static final int dont_show_again=0x7f080118;
+        public static final int dont_show_again=0x7f080119;
         public static final int enter_new_folder=0x7f080108;
         public static final int exposure=0x7f0800f9;
         public static final int exposure_compensation=0x7f080017;
@@ -503,7 +504,7 @@ public final class R {
         public static final int preference_volume_keys_summary=0x7f080069;
         public static final int preference_white_balance=0x7f08004c;
         public static final int preference_white_balance_summary=0x7f08004d;
-        public static final int raw_info=0x7f080117;
+        public static final int raw_info=0x7f080118;
         public static final int repeats_to_go=0x7f08000f;
         public static final int saf_cancelled=0x7f08010c;
         public static final int saf_select_save_location=0x7f08010b;

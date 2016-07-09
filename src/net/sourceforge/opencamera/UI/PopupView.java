@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -146,13 +148,53 @@ public class PopupView extends LinearLayout {
         		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
-	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
 						editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), isChecked);
 						editor.apply();
 
-						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
-						preview.showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
+						boolean done_dialog = false;
+	            		if( isChecked ) {
+	            			boolean done_auto_stabilise_info = sharedPreferences.contains(PreferenceKeys.getAutoStabiliseInfoPreferenceKey());
+	            			if( !done_auto_stabilise_info ) {
+		        		        AlertDialog.Builder alertDialog = new AlertDialog.Builder(PopupView.this.getContext());
+		        	            alertDialog.setTitle(R.string.preference_auto_stabilise);
+		        	            alertDialog.setMessage(R.string.auto_stabilise_info);
+		        	            alertDialog.setPositiveButton(android.R.string.ok, null);
+		        	            alertDialog.setNegativeButton(R.string.dont_show_again, new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+					            		if( MyDebug.LOG )
+					            			Log.d(TAG, "user clicked dont_show_again for auto-stabilise info dialog");
+					            		SharedPreferences.Editor editor = sharedPreferences.edit();
+					            		editor.putBoolean(PreferenceKeys.getAutoStabiliseInfoPreferenceKey(), true);
+					            		editor.apply();
+									}
+		        	            });
+
+		        	    		main_activity.showPreview(false);
+		        	    		main_activity.setWindowFlagsForSettings();
+
+		        	    		AlertDialog alert = alertDialog.create();
+		        	    		// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+		        	    		alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+									@Override
+									public void onDismiss(DialogInterface arg0) {
+					            		if( MyDebug.LOG )
+					            			Log.d(TAG, "auto-stabilise info dialog dismissed");
+					            		main_activity.setWindowFlagsForCamera();
+					            		main_activity.showPreview(true);
+									}
+		        	            });
+		        	    		alert.show();
+		        	    		done_dialog = true;
+	            			}
+	                    }
+
+	            		if( !done_dialog ) {
+	            			String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
+	            			preview.showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
+	            		}
 						main_activity.closePopup();
 					}
         		});

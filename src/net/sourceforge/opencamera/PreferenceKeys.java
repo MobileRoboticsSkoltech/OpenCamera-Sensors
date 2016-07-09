@@ -13,7 +13,13 @@ public class PreferenceKeys {
         return "done_first_time";
     }
     
-	/** If this preference is set, no longer show the raw info dialog.
+	/** If this preference is set, no longer show the auto-stabilise info dialog.
+	 */
+    public static String getAutoStabiliseInfoPreferenceKey() {
+        return "done_auto_stabilise_info";
+    }
+
+    /** If this preference is set, no longer show the raw info dialog.
 	 */
     public static String getRawInfoPreferenceKey() {
         return "done_raw_info";

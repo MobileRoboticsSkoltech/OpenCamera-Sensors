@@ -1264,7 +1264,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
     /** Sets the window flags for normal operation (when camera preview is visible).
      */
-    private void setWindowFlagsForCamera() {
+    public void setWindowFlagsForCamera() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setWindowFlagsForCamera");
     	/*{
@@ -1322,7 +1322,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     
     /** Sets the window flags for when the settings window is open.
      */
-    private void setWindowFlagsForSettings() {
+    public void setWindowFlagsForSettings() {
 		// allow screen rotation
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 		// revert to standard screen blank behaviour
@@ -1340,7 +1340,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		camera_in_background = true;
     }
     
-    private void showPreview(boolean show) {
+    public void showPreview(boolean show) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "showPreview: " + show);
 		final ViewGroup container = (ViewGroup)findViewById(R.id.hide_container);
