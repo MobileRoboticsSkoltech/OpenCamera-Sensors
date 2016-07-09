@@ -930,7 +930,7 @@ public class ImageSaver extends Thread {
         if( success && saveUri == null ) {
         	applicationInterface.setLastImage(picFile);
         }
-        else if( storageUtils.isUsingSAF() ){
+        else if( success && storageUtils.isUsingSAF() ){
         	applicationInterface.setLastImageSAF(saveUri);
         }
         else {
@@ -1102,7 +1102,7 @@ public class ImageSaver extends Thread {
     		if( success && saveUri == null ) {
             	applicationInterface.setLastImageRaw(picFile);
             }
-            else if( storageUtils.isUsingSAF() ){
+            else if( success && storageUtils.isUsingSAF() ){
             	applicationInterface.setLastImageRawSAF(saveUri);
             }
             else {
