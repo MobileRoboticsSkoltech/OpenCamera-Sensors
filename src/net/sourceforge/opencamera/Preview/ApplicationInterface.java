@@ -97,7 +97,7 @@ public interface ApplicationInterface {
 	void onFailedReconnectError(); // failed to reconnect camera after stopping video recording
 	void onFailedCreateVideoFileError(); // callback if unable to create file for recording video
 	void hasPausedPreview(boolean paused); // called when the preview is paused or unpaused (due to getPausePreviewPref())
-	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video), use to disable GUI elements during camera operation
+	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video, including if preview is paused after taking a photo), use to disable GUI elements during camera operation
 	void cameraClosed();
 	void timerBeep(long remaining_time); // n.b., called once per second on timer countdown - so application can beep, or do whatever it likes
 
@@ -132,5 +132,6 @@ public interface ApplicationInterface {
 	void onDrawPreview(Canvas canvas);
 	boolean onPictureTaken(byte [] data, Date current_date);
 	boolean onRawPictureTaken(DngCreator dngCreator, Image image, Date current_date);
+	void onPictureCompleted(); // called after all picture callbacks have been called and returned
 	void onContinuousFocusMove(boolean start); // called when focusing starts/stop in continuous picture mode (in photo mode only)
 }

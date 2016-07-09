@@ -4025,6 +4025,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			public void onCompleted() {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onCompleted");
+				applicationInterface.onPictureCompleted();
     	        if( !using_android_l ) {
     	        	is_preview_started = false; // preview automatically stopped due to taking photo on original Camera API
     	        }

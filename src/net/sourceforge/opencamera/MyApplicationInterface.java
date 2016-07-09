@@ -956,6 +956,14 @@ public class MyApplicationInterface implements ApplicationInterface {
     	main_activity.getMainUI().showGUI(!in_operation);
     }
 
+    @Override
+	public void onPictureCompleted() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onPictureCompleted");
+		// call this, so that if pause-preview-after-taking-photo option is set, we remove the "taking photo" border indicator straight away
+    	drawPreview.cameraInOperation(false);
+    }
+
 	@Override
 	public void cameraClosed() {
 		main_activity.getMainUI().clearSeekBar();
@@ -1253,9 +1261,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public boolean onPictureTaken(byte [] data, Date current_date) {
-        System.gc();
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken");
+        System.gc();
 
 		boolean image_capture_intent = isImageCaptureIntent();
         Uri image_capture_intent_uri = null;
@@ -1315,9 +1323,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public boolean onRawPictureTaken(DngCreator dngCreator, Image image, Date current_date) {
-        System.gc();
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRawPictureTaken");
+        System.gc();
 
 		boolean do_in_background = saveInBackground(false);
 
@@ -1327,7 +1335,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "onRawPictureTaken complete");
 		return success;
 	}
-	
+    
 	void setLastImage(File file) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setLastImage: " + file);
