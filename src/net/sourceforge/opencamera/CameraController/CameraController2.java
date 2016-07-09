@@ -189,6 +189,7 @@ public class CameraController2 extends CameraController {
 			setAFRegions(builder);
 			setAERegions(builder);
 			setFaceDetectMode(builder);
+			setRawMode(builder);
 			setVideoStabilization(builder);
 
 			if( is_still ) {
@@ -366,6 +367,14 @@ public class CameraController2 extends CameraController {
 		private void setFaceDetectMode(CaptureRequest.Builder builder) {
 			if( has_face_detect_mode )
 				builder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, face_detect_mode);
+		}
+		
+		private void setRawMode(CaptureRequest.Builder builder) {
+			// DngCreator says "For best quality DNG files, it is strongly recommended that lens shading map output is enabled if supported"
+			// docs also say "ON is always supported on devices with the RAW capability", so we don't check for STATISTICS_LENS_SHADING_MAP_MODE_ON being available
+			if( want_raw ) {
+				builder.set(CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE, CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE_ON);
+			}
 		}
 		
 		private void setVideoStabilization(CaptureRequest.Builder builder) {
