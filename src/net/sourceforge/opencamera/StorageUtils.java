@@ -314,7 +314,7 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	File getFileFromDocumentIdSAF(String id) {
+	private File getFileFromDocumentIdSAF(String id) {
 	    File file = null;
         String [] split = id.split(":");
         if( split.length >= 2 ) {
@@ -550,8 +550,8 @@ public class StorageUtils {
 					Log.d(TAG, "found: " + cursor.getCount());
 				// now sorted in order of date - scan to most recent one in the Open Camera save folder
 				boolean found = false;
-				File save_folder = isUsingSAF() ? null : getImageFolder();
-				String save_folder_string = isUsingSAF() ? null : save_folder.getAbsolutePath() + File.separator;
+				File save_folder = getImageFolder(); // may be null if using SAF
+				String save_folder_string = save_folder == null ? null : save_folder.getAbsolutePath() + File.separator;
 				if( MyDebug.LOG )
 					Log.d(TAG, "save_folder_string: " + save_folder_string);
 				do {
@@ -559,8 +559,7 @@ public class StorageUtils {
 					if( MyDebug.LOG )
 						Log.d(TAG, "path: " + path);
 					// path may be null on Android 4.4!: http://stackoverflow.com/questions/3401579/get-filename-and-path-from-uri-from-mediastore
-					// and if isUsingSAF(), it's not clear how we can get the real path, or otherwise tell if an item is a subset of the SAF treeUri
-					if( isUsingSAF() || (path != null && path.contains(save_folder_string) ) ) {
+					if( save_folder_string == null || (path != null && path.contains(save_folder_string) ) ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "found most recent in Open Camera folder");
 						// we filter files with dates in future, in case there exists an image in the folder with incorrect datestamp set to the future
