@@ -1114,13 +1114,13 @@ public class ImageSaver extends Thread {
     		if( MyDebug.LOG )
     			Log.e(TAG, "File not found: " + e.getMessage());
             e.printStackTrace();
-            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
+            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo_raw);
         }
         catch(IOException e) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "ioexception writing raw image file");
             e.printStackTrace();
-            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
+            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo_raw);
         }
         finally {
         	if( output != null ) {
