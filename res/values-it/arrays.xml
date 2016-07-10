@@ -320,6 +320,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Illimitata</item>
+        <item>5 secondi</item>
+        <item>10 secondi</item>
         <item>15 secondi</item>
         <item>30 secondi</item>
         <item>1 minuto</item>
@@ -343,6 +345,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
+        <item>5</item>
+        <item>10</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>

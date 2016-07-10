@@ -438,6 +438,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Unbegrenzt</item>
+        <item>5 Sekunden</item>
+        <item>10 Sekunden</item>
         <item>15 Sekunden</item>
         <item>30 Sekunden</item>
         <item>1 Minute</item>
@@ -461,6 +463,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
+        <item>5</item>
+        <item>10</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>

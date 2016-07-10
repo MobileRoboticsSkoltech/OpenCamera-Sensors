@@ -368,6 +368,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>무제한</item>
+        <item>5초</item>
+        <item>10초</item>
         <item>15초</item>
         <item>30초</item>
         <item>1분</item>
@@ -391,6 +393,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
+        <item>5</item>
+        <item>10</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>
