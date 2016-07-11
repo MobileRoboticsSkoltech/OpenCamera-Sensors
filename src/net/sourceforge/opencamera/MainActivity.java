@@ -591,7 +591,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    			}
 	    			else {
 	    				// important not to repeatedly request focus, even though preview.requestAutoFocus() will cancel, as causes problem if key is held down (e.g., flash gets stuck on)
-	    				if( !preview.isFocusWaiting() ) {
+	    				// also check DownTime vs EventTime to prevent repeated focusing whilst the key is held down
+	    				if( event.getDownTime() == event.getEventTime() && !preview.isFocusWaiting() ) {
 		    				if( MyDebug.LOG )
 		    					Log.d(TAG, "request focus due to volume key");
 		    				preview.requestAutoFocus();
@@ -669,7 +670,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		case KeyEvent.KEYCODE_FOCUS:
 			{
 				// important not to repeatedly request focus, even though preview.requestAutoFocus() will cancel - causes problem with hardware camera key where a half-press means to focus
-				if( !preview.isFocusWaiting() ) {
+				// also check DownTime vs EventTime to prevent repeated focusing whilst the key is held down - see https://sourceforge.net/p/opencamera/tickets/174/ ,
+				// or same issue above for volume key focus
+				if( event.getDownTime() == event.getEventTime() && !preview.isFocusWaiting() ) {
     				if( MyDebug.LOG )
     					Log.d(TAG, "request focus due to focus key");
     				preview.requestAutoFocus();
