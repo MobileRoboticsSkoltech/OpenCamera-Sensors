@@ -115,6 +115,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private ToastBoxer audio_control_toast = new ToastBoxer();
 	private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
     
+	private boolean keydown_volume_up = false;
+	private boolean keydown_volume_down = false;
+	
 	// for testing:
 	public boolean is_test = false; // whether called from OpenCamera.test testing
 	public Bitmap gallery_bitmap = null;
@@ -566,6 +569,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
         case KeyEvent.KEYCODE_MEDIA_STOP:
 	        {
+    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+    				keydown_volume_up = true;
+    			else if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN )
+    				keydown_volume_down = true;
+
 	    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 	    		String volume_keys = sharedPreferences.getString(PreferenceKeys.getVolumeKeysPreferenceKey(), "volume_take_photo");
 
@@ -583,7 +591,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	                return true;
 	    		}
 	    		else if( volume_keys.equals("volume_focus") ) {
-	    			if( preview.getCurrentFocusValue() != null && preview.getCurrentFocusValue().equals("focus_mode_manual2") ) {
+	    			if( keydown_volume_up && keydown_volume_down ) {
+	    				if( MyDebug.LOG )
+	    					Log.d(TAG, "take photo rather than focus, as both volume keys are down");
+		            	takePicture();
+	    			}
+	    			else if( preview.getCurrentFocusValue() != null && preview.getCurrentFocusValue().equals("focus_mode_manual2") ) {
 		    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
 		    				this.changeFocusDistance(-1);
 		    			else
@@ -692,7 +705,18 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
         return super.onKeyDown(keyCode, event); 
     }
-	
+
+	public boolean onKeyUp(int keyCode, KeyEvent event) { 
+		if( MyDebug.LOG )
+			Log.d(TAG, "onKeyUp: " + keyCode);
+		if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+			keydown_volume_up = false;
+		else if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN )
+			keydown_volume_down = false;
+
+        return super.onKeyUp(keyCode, event); 
+	}
+
 	public void zoomIn() {
 		mainUI.changeSeekbar(R.id.zoom_seekbar, -1);
 	}

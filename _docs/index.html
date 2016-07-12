@@ -375,10 +375,17 @@ then isn't supported on all devices.)</p>
 <p><b>Voice timer countdown</b> - Whether to give a voice countdown when the timer is counting down, or for the burst mode
 delay (see below).</p>
 
-<p><b>Volume keys</b> - You can set what happens when the volume keys are pressed: either take photo/video,
-focus (trigger an autofocus - or if in manual mode, change the focus distance in/out), zoom in/out, change
-the exposure compensation (or if in manual ISO mode and using Camera2 API, change the ISO), switch
-auto-stabilise on/off, just change the device's volume as normal, or do nothing.</p>
+<p><b>Volume keys</b> - You can set what happens when your device's volume keys are pressed:</p><ul>
+<li>Take photo or start/stop video (depending on photo/video mode).</li>
+<li>Trigger an autofocus - or if in manual mode, change the focus distance in/out. In this mode, holding down both volume keys
+will take a photo (or start/stop video). This makes your volume keys behave more like a physical camera button - hold down one
+key to focus, then both to take a photo.</li>
+<li>Zoom in/out.</li>
+<li>Change the exposure compensation (or if in manual ISO mode and using Camera2 API, change the ISO).</li>
+<li>Switch auto-stabilise on/off.</li>
+<li>Change the device's volume as normal.</li>
+<li>Do nothing.</li>
+</ul>
 
 <p><b>Audio control options</b> - If enabled, this allows taking a photo (or starting video recording, depending on the mode)
 by making a noise. An on-screen microphone button <img src="ic_mic_white_48dp.png" alt="Microphone icon" width="32" height="32"> will appear, to
@@ -964,6 +971,10 @@ ADDED   Support for RAW (DNG) files. Only available in Camera2 mode, and if
         your device supports it. Note that most Gallery apps don't recognise
         DNG files, instead use specialised applications like Google Snapseed
         and Adobe Photoshop Lightroom, or transfer to a PC.
+UPDATED If volume keys are set to "focus", then holding down both volume keys
+        will take a photo (this makes your volume keys behave more like a
+        physical camera button - hold down one key to focus, then both to take
+        a photo).
 UPDATED Allow one more photo to be processed in background at a time.
 UPDATED Enabling auto-stabilise now shows an info dialog. Select "Don't show
         again" to prevent the dialog from showing again.
