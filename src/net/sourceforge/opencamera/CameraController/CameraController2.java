@@ -540,6 +540,11 @@ public class CameraController2 extends CameraController {
 	    StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 	    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
 		imageReader = ImageReader.newInstance(camera_picture_sizes[0].getWidth(), , ImageFormat.JPEG, 2);*/
+		
+		// preload sounds to reduce latency - important so that START_VIDEO_RECORDING sound doesn't play after video has started (which means it'll be heard in the resultant video)
+		media_action_sound.load(MediaActionSound.START_VIDEO_RECORDING);
+		media_action_sound.load(MediaActionSound.STOP_VIDEO_RECORDING);
+		media_action_sound.load(MediaActionSound.SHUTTER_CLICK);
 	}
 
 	@Override
@@ -2823,7 +2828,9 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public void initVideoRecorderPrePrepare(MediaRecorder video_recorder) {
-		// do nothing at this stage
+		// if we change where we play the START_VIDEO_RECORDING sound, make sure it can't be heard in resultant video
+		if( sounds_enabled )
+			media_action_sound.play(MediaActionSound.START_VIDEO_RECORDING);
 	}
 
 	@Override
@@ -2855,6 +2862,9 @@ public class CameraController2 extends CameraController {
 	public void reconnect() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "reconnect");
+		// if we change where we play the STOP_VIDEO_RECORDING sound, make sure it can't be heard in resultant video
+		if( sounds_enabled )
+			media_action_sound.play(MediaActionSound.STOP_VIDEO_RECORDING);
 		createPreviewRequest();
 		createCaptureSession(null);
 		/*if( MyDebug.LOG )

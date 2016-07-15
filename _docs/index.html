@@ -368,7 +368,8 @@ affects taking photos.</p>
 photo. To keep the photo and continue, touch the screen (or take another photo).</p>
 
 <p><b>Shutter sound</b> - Whether to play a sound after taking a photo. (Requires Android 4.2 or higher to disable, and even
-then isn't supported on all devices.)</p>
+then isn't supported on all devices.) For Camera2 API, this also controls whether to play a sound for start/stop video
+recording.</p>
 
 <p><b>Timer beep</b> - Whether to beep when the timer is counting down, or for the burst mode delay (see below).</p>
 
@@ -967,6 +968,8 @@ FIXED   Don't repeatedly focus when volume key held down (for "focus" volume
         buttons.
 FIXED   Border to indicate photo is being taken no longer remains for "Pause
         after taking photo" option.
+FIXED   Now plays sound for start/stop video recording (if shutter sound
+        enabled) for Camera2 API.
 ADDED   Support for RAW (DNG) files. Only available in Camera2 mode, and if
         your device supports it. Note that most Gallery apps don't recognise
         DNG files, instead use specialised applications like Google Snapseed
