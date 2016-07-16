@@ -3892,7 +3892,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "current_ui_focus_value is " + current_ui_focus_value);
 
 		if( autofocus_in_continuous_mode ) {
-			if( autofocus_in_continuous_mode )
+			if( MyDebug.LOG )
 				Log.d(TAG, "continuous mode where user touched to focus");
 			synchronized(this) {
 				// as below, if an autofocus is in progress, then take photo when it's completed

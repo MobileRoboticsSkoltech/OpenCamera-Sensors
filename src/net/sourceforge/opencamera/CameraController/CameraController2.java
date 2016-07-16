@@ -160,6 +160,11 @@ public class CameraController2 extends CameraController {
 							ExifInterface.ORIENTATION_ROTATE_90 :
 							ExifInterface.ORIENTATION_ROTATE_270;
 					break;
+				default:
+					// leave exif_orientation unchanged
+					if( MyDebug.LOG )
+						Log.e(TAG, "unexpected rotation: " + rotation);
+					break;
 			}
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "rotation: " + rotation);

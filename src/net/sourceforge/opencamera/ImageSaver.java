@@ -280,6 +280,7 @@ public class ImageSaver extends Thread {
 					has_thumbnail_animation);
 			// this should not be synchronized on "this": BlockingQueue is thread safe, and if it's blocking in queue.put(), we'll hang because
 			// the saver queue will need to synchronize on "this" in order to notifyAll() the main thread
+			// note that FindBugs complaints that n_images_to_save isn't synchronized whilst it is elsewhere; I think this is fine though
 			boolean done = false;
 			while( !done ) {
 				try {
