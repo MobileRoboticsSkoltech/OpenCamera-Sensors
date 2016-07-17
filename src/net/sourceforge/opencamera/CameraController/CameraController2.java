@@ -2658,6 +2658,8 @@ public class CameraController2 extends CameraController {
 
 			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
 			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
+			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
+				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -2703,6 +2705,8 @@ public class CameraController2 extends CameraController {
 
 			captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
 			captureSession.captureBurst(requests, previewCaptureCallback, handler);
+			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
+				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -2937,8 +2941,7 @@ public class CameraController2 extends CameraController {
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onCaptureStarted: capture");
-				if( sounds_enabled )
-					media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
+				// n.b., we don't play the shutter sound here, as it typically sounds "too late"
 			}
 		}
 
