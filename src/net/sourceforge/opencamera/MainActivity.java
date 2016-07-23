@@ -2739,7 +2739,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         }
 	}
 	
-	/*public void processHDR(List<Bitmap> bitmaps) {
+	public void processHDR(List<Bitmap> bitmaps) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
     	long time_s = System.currentTimeMillis();
@@ -2754,6 +2754,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			total_g[i] = 0;
 			total_b[i] = 0;
 		}
+		/* Initial test implementation - for now just doing an average, rather than HDR.
+		 */
 		//int [] buffer = new int[bm.getWidth()*bm.getHeight()];
 		int [] buffer = new int[bm.getWidth()];
 		for(int i=0;i<n_bitmaps;i++) {
@@ -2794,7 +2796,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for processHDR: " + (System.currentTimeMillis() - time_s));
-	}*/
+	}
 
     // for testing:
 	public ArrayList<String> getSaveLocationHistory() {

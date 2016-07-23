@@ -62,12 +62,16 @@ public class CameraController2 extends CameraController {
 	private AutoFocusCallback autofocus_cb = null;
 	private FaceDetectionListener face_detection_listener = null;
 	private ImageReader imageReader = null;
+	private boolean want_hdr = false;
+	//private boolean want_hdr = true;
 	private boolean want_raw = false;
 	//private boolean want_raw = true;
 	private android.util.Size raw_size = null;
 	private ImageReader imageReaderRaw = null;
 	private PictureCallback jpeg_cb = null;
 	private PictureCallback raw_cb = null;
+	private int n_burst = 0;
+	private List<byte []> pending_burst_images = new Vector<byte []>();
 	private DngCreator pending_dngCreator = null;
 	private Image pending_image = null;
 	private ErrorCallback take_picture_error_cb = null;
@@ -1473,22 +1477,41 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "read " + bytes.length + " bytes");
 	            buffer.get(bytes);
 	            image.close();
-	            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
-	            PictureCallback cb = jpeg_cb;
-	            jpeg_cb = null;
-	            cb.onPictureTaken(bytes);
-	            if( raw_cb == null ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "all image callbacks now completed");
-					cb.onCompleted();
+	            if( want_hdr && n_burst > 1 ) {
+	            	pending_burst_images.add(bytes);
+	            	if( pending_burst_images.size() == n_burst ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "all burst images available");
+			            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+			            PictureCallback cb = jpeg_cb;
+			            jpeg_cb = null;
+			            cb.onBurstPictureTaken(pending_burst_images);
+			            pending_burst_images.clear();
+						cb.onCompleted();
+	            	}
+	            	else {
+						if( MyDebug.LOG )
+							Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
+	            	}
 	            }
-	            else if( pending_dngCreator != null ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "can now call pending raw callback");
-    				takePendingRaw();
-					if( MyDebug.LOG )
-						Log.d(TAG, "all image callbacks now completed");
-					cb.onCompleted();
+	            else {
+		            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+		            PictureCallback cb = jpeg_cb;
+		            jpeg_cb = null;
+		            cb.onPictureTaken(bytes);
+		            if( raw_cb == null ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "all image callbacks now completed");
+						cb.onCompleted();
+		            }
+		            else if( pending_dngCreator != null ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "can now call pending raw callback");
+	    				takePendingRaw();
+						if( MyDebug.LOG )
+							Log.d(TAG, "all image callbacks now completed");
+						cb.onCompleted();
+		            }
 	            }
 				if( MyDebug.LOG )
 					Log.d(TAG, "done onImageAvailable");
@@ -1541,11 +1564,13 @@ public class CameraController2 extends CameraController {
 		}
 	}
 	
-	private void clearPendingRaw() {
+	private void clearPending() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "clearPendingRaw");
+			Log.d(TAG, "clearPending");
+		pending_burst_images.clear();
 		pending_dngCreator = null;
 		pending_image = null;
+		n_burst = 0;
 	}
 	
 	private void takePendingRaw() {
@@ -2649,7 +2674,7 @@ public class CameraController2 extends CameraController {
 			camera_settings.setupBuilder(stillBuilder, true);
 			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-			clearPendingRaw();
+			clearPending();
         	Surface surface = getPreviewSurface();
         	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
     		stillBuilder.addTarget(imageReader.getSurface());
@@ -2677,7 +2702,7 @@ public class CameraController2 extends CameraController {
 		}
 	}
 
-	/*private void takePictureBurstHdr() {
+	private void takePictureBurstHdr() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureBurstHdr");
 		if( camera == null || captureSession == null ) {
@@ -2695,13 +2720,41 @@ public class CameraController2 extends CameraController {
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			camera_settings.setupBuilder(stillBuilder, true);
-			clearPendingRaw();
+			clearPending();
         	Surface surface = getPreviewSurface();
         	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
 			stillBuilder.addTarget(imageReader.getSurface());
 
 			List<CaptureRequest> requests = new ArrayList<CaptureRequest>();
+
+			/*stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+			stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+
+			stillBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, -6);
 			requests.add( stillBuilder.build() );
+			stillBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, 0);
+			requests.add( stillBuilder.build() );
+			stillBuilder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, 6);
+			requests.add( stillBuilder.build() );*/
+
+			stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
+			stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+			stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 1600);
+			stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000l/30);
+
+			final long base_exposure_time = 1000000000l/30;
+			final double scale = 2.0;
+
+			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, (long)(base_exposure_time/scale));
+			requests.add( stillBuilder.build() );
+			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, base_exposure_time);
+			requests.add( stillBuilder.build() );
+			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, (long)(base_exposure_time*scale));
+			requests.add( stillBuilder.build() );
+
+			n_burst = requests.size();
+			if( MyDebug.LOG )
+				Log.d(TAG, "n_burst: " + n_burst);
 
 			captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
 			captureSession.captureBurst(requests, previewCaptureCallback, handler);
@@ -2722,7 +2775,7 @@ public class CameraController2 extends CameraController {
 				return;
 			}
 		}
-	}*/
+	}
 
 	private void runPrecapture() {
 		if( MyDebug.LOG )
@@ -2788,13 +2841,18 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "takePicture: not ready for capture!");
 			//throw new RuntimeException(); // debugging
 		}
-		// Don't need precapture if flash off or torch
-		// And currently has_iso manual mode doesn't support flash - but just in case that's changed later, we still probably don't want to be doing a precapture...
-		if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") ) {
-			takePictureAfterPrecapture();
+		if( want_hdr ) {
+			takePictureBurstHdr();
 		}
 		else {
-			runPrecapture();
+			// Don't need precapture if flash off or torch
+			// And currently has_iso manual mode doesn't support flash - but just in case that's changed later, we still probably don't want to be doing a precapture...
+			if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") ) {
+				takePictureAfterPrecapture();
+			}
+			else {
+				runPrecapture();
+			}
 		}
 
 		/*camera_settings.setupBuilder(previewBuilder, false);

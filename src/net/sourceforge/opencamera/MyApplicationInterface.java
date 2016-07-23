@@ -2,8 +2,12 @@ package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
@@ -16,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -1320,6 +1325,62 @@ public class MyApplicationInterface implements ApplicationInterface {
 		
 		return success;
 	}
+
+	@SuppressWarnings("deprecation")
+    @Override
+	public boolean onBurstPictureTaken(List<byte []> images, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onBurstPictureTaken");
+        System.gc();
+
+        boolean success = true;
+    	
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inMutable = true; // first bitmap needs to be writable
+		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+			// setting is ignored in Android 5 onwards
+			options.inPurgeable = true;
+		}
+		List<Bitmap> bitmaps = new Vector<Bitmap>();
+		for(byte [] image : images) {
+			Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length, options);
+			if( bitmap == null ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to decode bitmap");
+		        System.gc();
+		        return false;
+			}
+			bitmaps.add(bitmap);
+			options.inMutable = false; // later bitmaps don't need to be writable
+		}
+		main_activity.processHDR(bitmaps);
+
+		int image_quality = getImageQualityPref();
+		try {
+			Bitmap bitmap = bitmaps.get(0);
+			File picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "jpg", current_date);
+			if( MyDebug.LOG )
+				Log.d(TAG, "save to: " + picFile.getAbsolutePath());
+			OutputStream outputStream = new FileOutputStream(picFile);
+			try {
+	            bitmap.compress(Bitmap.CompressFormat.JPEG, image_quality, outputStream);
+            	storageUtils.broadcastFile(picFile, true, false, true);
+			}
+			finally {
+				outputStream.close();
+			}
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+
+		for(Bitmap bitmap : bitmaps) {
+			bitmap.recycle();
+		}
+        System.gc();
+
+        return success;
+    }
 
     @Override
 	public boolean onRawPictureTaken(DngCreator dngCreator, Image image, Date current_date) {

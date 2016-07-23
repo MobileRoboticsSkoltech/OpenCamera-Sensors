@@ -3,6 +3,7 @@ package net.sourceforge.opencamera.Preview;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -131,6 +132,7 @@ public interface ApplicationInterface {
 	// callbacks
 	void onDrawPreview(Canvas canvas);
 	boolean onPictureTaken(byte [] data, Date current_date);
+	boolean onBurstPictureTaken(List<byte []> images, Date current_date);
 	boolean onRawPictureTaken(DngCreator dngCreator, Image image, Date current_date);
 	void onPictureCompleted(); // called after all picture callbacks have been called and returned
 	void onContinuousFocusMove(boolean start); // called when focusing starts/stop in continuous picture mode (in photo mode only)

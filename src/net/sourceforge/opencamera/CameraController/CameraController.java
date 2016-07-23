@@ -112,6 +112,9 @@ public abstract class CameraController {
 		 *  Caller should call image.close() and dngCreator.close() when done with the image.
 		 */
 		public abstract void onRawPictureTaken(DngCreator dngCreator, Image image);
+		/** Only called if burst is requested.
+		 */
+		public abstract void onBurstPictureTaken(List<byte[]> images);
 	}
 	
 	public static interface AutoFocusCallback {

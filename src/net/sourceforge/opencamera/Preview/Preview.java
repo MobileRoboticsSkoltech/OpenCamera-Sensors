@@ -4125,6 +4125,28 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Log.e(TAG, "applicationInterface.onRawPictureTaken failed");
 				}
 			}
+
+			public void onBurstPictureTaken(List<byte[]> images) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onBurstPictureTaken");
+    	    	// n.b., this is automatically run in a different thread
+				initDate();
+
+				success = true;
+				// debug: write images separately
+				for(byte [] image : images) {
+					if( !applicationInterface.onPictureTaken(image, current_date) ) {
+						if( MyDebug.LOG )
+							Log.e(TAG, "applicationInterface.onPictureTaken failed");
+						success = false;
+					}
+				}
+				if( !applicationInterface.onBurstPictureTaken(images, current_date) ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "applicationInterface.onBurstPictureTaken failed");
+					success = false;
+				}
+    	    }
     	};
 		CameraController.ErrorCallback errorCallback = new CameraController.ErrorCallback() {
 			public void onError() {
