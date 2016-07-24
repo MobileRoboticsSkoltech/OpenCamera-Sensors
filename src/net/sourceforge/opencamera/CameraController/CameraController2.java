@@ -61,6 +61,7 @@ public class CameraController2 extends CameraController {
 	private CaptureRequest.Builder previewBuilder = null;
 	private AutoFocusCallback autofocus_cb = null;
 	private FaceDetectionListener face_detection_listener = null;
+	private Object image_reader_lock = new Object(); // lock to make sure we only handle one image being available at a time
 	private ImageReader imageReader = null;
 	private boolean want_hdr = false;
 	//private boolean want_hdr = true;
@@ -68,6 +69,7 @@ public class CameraController2 extends CameraController {
 	//private boolean want_raw = true;
 	private android.util.Size raw_size = null;
 	private ImageReader imageReaderRaw = null;
+	private OnRawImageAvailableListener onRawImageAvailableListener = null;
 	private PictureCallback jpeg_cb = null;
 	private PictureCallback raw_cb = null;
 	private int n_burst = 0;
@@ -100,7 +102,6 @@ public class CameraController2 extends CameraController {
 	private MediaActionSound media_action_sound = new MediaActionSound();
 	private boolean sounds_enabled = true;
 
-	private CaptureResult still_capture_result = null;
 	private boolean capture_result_has_iso = false;
 	private int capture_result_iso = 0;
 	private boolean capture_result_has_exposure_time = false;
@@ -392,6 +393,97 @@ public class CameraController2 extends CameraController {
 		
 		// n.b., if we add more methods, remember to update setupBuilder() above!
 	}
+
+	class OnRawImageAvailableListener implements ImageReader.OnImageAvailableListener {
+		private CaptureResult capture_result = null;
+		private Image image = null;
+		
+		void setCaptureResult(CaptureResult capture_result) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "setCaptureResult()");
+			synchronized( image_reader_lock ) {
+				/* synchronize, as we don't want to set the capture_result, at the same time that onImageAvailable() is called, as
+				 * we'll end up calling processImage() both in onImageAvailable() and here.
+				 */
+				this.capture_result = capture_result;
+				if( image != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "can now process the image");
+					processImage();
+				}
+			}
+		}
+		
+		void clear() {
+			if( MyDebug.LOG )
+				Log.d(TAG, "clear()");
+			synchronized( image_reader_lock ) {
+				// synchronize just to be safe?
+				capture_result = null;
+				image = null;
+			}
+		}
+		
+		private void processImage() {
+			if( MyDebug.LOG )
+				Log.d(TAG, "processImage()");
+			if( capture_result == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "don't yet have still_capture_result");
+				return;
+			}
+			if( image == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "don't have image?!");
+				return;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "now have all info to process raw image");
+            DngCreator dngCreator = new DngCreator(characteristics, capture_result);
+            // set fields
+            dngCreator.setOrientation(camera_settings.getExifOrientation());
+			if( camera_settings.location != null ) {
+                dngCreator.setLocation(camera_settings.location);
+			}
+			
+			pending_dngCreator = dngCreator;
+			pending_image = image;
+			
+            PictureCallback cb = raw_cb;
+            if( jpeg_cb == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "jpeg callback already done, so can go ahead with raw callback");
+				takePendingRaw();
+				if( MyDebug.LOG )
+					Log.d(TAG, "all image callbacks now completed");
+				cb.onCompleted();
+            }
+            else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "need to wait for jpeg callback");
+            }
+			if( MyDebug.LOG )
+				Log.d(TAG, "done processImage");
+		}
+
+		@Override
+		public void onImageAvailable(ImageReader reader) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "new still raw image available");
+			if( raw_cb == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no picture callback available");
+				return;
+			}
+			synchronized( image_reader_lock ) {
+				// see comment above in setCaptureResult() for why we sychonize
+				image = reader.acquireNextImage();
+				processImage();
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "done onImageAvailable");
+		}
+	}
 	
 	private CameraSettings camera_settings = new CameraSettings();
 	private boolean push_repeating_request_when_torch_off = false;
@@ -597,6 +689,7 @@ public class CameraController2 extends CameraController {
 		if( imageReaderRaw != null ) {
 			imageReaderRaw.close();
 			imageReaderRaw = null;
+			onRawImageAvailableListener = null;
 		}
 	}
 
@@ -1470,49 +1563,55 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "no picture callback available");
 					return;
 				}
-				Image image = reader.acquireNextImage();
-	            ByteBuffer buffer = image.getPlanes()[0].getBuffer(); 
-	            byte [] bytes = new byte[buffer.remaining()]; 
-				if( MyDebug.LOG )
-					Log.d(TAG, "read " + bytes.length + " bytes");
-	            buffer.get(bytes);
-	            image.close();
-	            if( want_hdr && n_burst > 1 ) {
-	            	pending_burst_images.add(bytes);
-	            	if( pending_burst_images.size() == n_burst ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "all burst images available");
+				synchronized( image_reader_lock ) {
+					/* Whilst in theory the two setOnImageAvailableListener methods (for JPEG and RAW) seem to be called separately, I don't know if this is always true;
+					 * also, we may process the RAW image when the capture result is available (see
+					 * OnRawImageAvailableListener.setCaptureResult()), which may be in a separte thread.
+					 */
+					Image image = reader.acquireNextImage();
+		            ByteBuffer buffer = image.getPlanes()[0].getBuffer(); 
+		            byte [] bytes = new byte[buffer.remaining()]; 
+					if( MyDebug.LOG )
+						Log.d(TAG, "read " + bytes.length + " bytes");
+		            buffer.get(bytes);
+		            image.close();
+		            if( want_hdr && n_burst > 1 ) {
+		            	pending_burst_images.add(bytes);
+		            	if( pending_burst_images.size() == n_burst ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "all burst images available");
+				            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+				            PictureCallback cb = jpeg_cb;
+				            jpeg_cb = null;
+				            cb.onBurstPictureTaken(pending_burst_images);
+				            pending_burst_images.clear();
+							cb.onCompleted();
+		            	}
+		            	else {
+							if( MyDebug.LOG )
+								Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
+		            	}
+		            }
+		            else {
 			            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
 			            PictureCallback cb = jpeg_cb;
 			            jpeg_cb = null;
-			            cb.onBurstPictureTaken(pending_burst_images);
-			            pending_burst_images.clear();
-						cb.onCompleted();
-	            	}
-	            	else {
-						if( MyDebug.LOG )
-							Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
-	            	}
-	            }
-	            else {
-		            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
-		            PictureCallback cb = jpeg_cb;
-		            jpeg_cb = null;
-		            cb.onPictureTaken(bytes);
-		            if( raw_cb == null ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "all image callbacks now completed");
-						cb.onCompleted();
+			            cb.onPictureTaken(bytes);
+			            if( raw_cb == null ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "all image callbacks now completed");
+							cb.onCompleted();
+			            }
+			            else if( pending_dngCreator != null ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "can now call pending raw callback");
+		    				takePendingRaw();
+							if( MyDebug.LOG )
+								Log.d(TAG, "all image callbacks now completed");
+							cb.onCompleted();
+			            }
 		            }
-		            else if( pending_dngCreator != null ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "can now call pending raw callback");
-	    				takePendingRaw();
-						if( MyDebug.LOG )
-							Log.d(TAG, "all image callbacks now completed");
-						cb.onCompleted();
-		            }
-	            }
+				}
 				if( MyDebug.LOG )
 					Log.d(TAG, "done onImageAvailable");
 			}
@@ -1523,44 +1622,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "created new imageReaderRaw: " + imageReaderRaw.toString());
 				Log.d(TAG, "imageReaderRaw surface: " + imageReaderRaw.getSurface().toString());
 			}
-			imageReaderRaw.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
-				@Override
-				public void onImageAvailable(ImageReader reader) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "new still raw image available");
-					if( raw_cb == null ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "no picture callback available");
-						return;
-					}
-					Image image = reader.acquireNextImage();
-                    DngCreator dngCreator = new DngCreator(characteristics, still_capture_result);
-                    // set fields
-                    dngCreator.setOrientation(camera_settings.getExifOrientation());
-    				if( camera_settings.location != null ) {
-                        dngCreator.setLocation(camera_settings.location);
-    				}
-    				
-    				pending_dngCreator = dngCreator;
-    				pending_image = image;
-    				
-    	            PictureCallback cb = raw_cb;
-    	            if( jpeg_cb == null ) {
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "jpeg callback already done, so can go ahead with raw callback");
-        				takePendingRaw();
-    					if( MyDebug.LOG )
-    						Log.d(TAG, "all image callbacks now completed");
-    					cb.onCompleted();
-    	            }
-    	            else {
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "need to wait for jpeg callback");
-    	            }
-    				if( MyDebug.LOG )
-    					Log.d(TAG, "done onImageAvailable");
-				}
-			}, null);
+			imageReaderRaw.setOnImageAvailableListener(onRawImageAvailableListener = new OnRawImageAvailableListener(), null);
 		}
 	}
 	
@@ -1570,6 +1632,9 @@ public class CameraController2 extends CameraController {
 		pending_burst_images.clear();
 		pending_dngCreator = null;
 		pending_image = null;
+		if( onRawImageAvailableListener != null ) {
+			onRawImageAvailableListener.clear();
+		}
 		n_burst = 0;
 	}
 	
@@ -1583,6 +1648,9 @@ public class CameraController2 extends CameraController {
             // image and dngCreator should be closed by the application (we don't do it here, so that applications can keep hold of the data, e.g., in a queue for background processing)
             pending_dngCreator = null;
             pending_image = null;
+			if( onRawImageAvailableListener != null ) {
+				onRawImageAvailableListener.clear();
+			}
 		}
 	}
 	
@@ -3303,7 +3371,22 @@ public class CameraController2 extends CameraController {
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "capture request completed");
-				still_capture_result = result;
+				if( onRawImageAvailableListener != null ) {
+					if( test_wait_capture_result ) {
+						// for RAW capture, we require the capture result before creating DngCreator
+						// but for testing purposes, we need to test the possibility where onImageAvailable() for
+						// the RAW image is called before we receive the capture result here
+						try {
+							if( MyDebug.LOG )
+								Log.d(TAG, "test_wait_capture_result: waiting...");
+							Thread.sleep(500); // 200ms is enough to test the problem on Nexus 6, but use 500ms to be sure
+						}
+						catch(InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					onRawImageAvailableListener.setCaptureResult(result);
+				}
 				// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
 				// need to cancel the autofocus, and restart the preview after taking the photo
 				// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe

@@ -32,6 +32,7 @@ public abstract class CameraController {
 	// for testing:
 	public int count_camera_parameters_exception = 0;
 	public int count_precapture_timeout = 0;
+	public boolean test_wait_capture_result = false; // whether to test delayed capture result in Camera2 API
 
 	public static class CameraFeatures {
 		public boolean is_zoom_supported = false;
