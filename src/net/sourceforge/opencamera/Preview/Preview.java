@@ -3977,7 +3977,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void takePhotoWhenFocused() {
 		// should be called when auto-focused
 		if( MyDebug.LOG )
-			Log.d(TAG, "takePictureWhenFocused");
+			Log.d(TAG, "takePhotoWhenFocused");
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
@@ -4172,7 +4172,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		count_cameraTakePicture++;
     	}
 		if( MyDebug.LOG )
-			Log.d(TAG, "takePictureWhenFocused exit");
+			Log.d(TAG, "takePhotoWhenFocused exit");
     }
 
 	/*void clickedShare() {
