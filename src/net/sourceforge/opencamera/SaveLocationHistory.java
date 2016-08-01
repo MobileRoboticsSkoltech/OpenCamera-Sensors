@@ -17,8 +17,9 @@ public class SaveLocationHistory {
 	/** Creates a new SaveLocationHistory class. This manages a history of save folder locations.
 	 * @param main_activity MainActivity.
 	 * @param pref_base String to use for shared preferences.
+	 * @param folder_name The current save folder.
 	 */
-	SaveLocationHistory(MainActivity main_activity, String pref_base) {
+	SaveLocationHistory(MainActivity main_activity, String pref_base, String folder_name) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "pref_base: " + pref_base);
 		this.main_activity = main_activity;
@@ -39,16 +40,16 @@ public class SaveLocationHistory {
         	}
         }
         // also update, just in case a new folder has been set
-		updateFolderHistory(false); // update_icon can be false, as updateGalleryIcon() is called later in onResume()
+		updateFolderHistory(folder_name, false); // update_icon can be false, as updateGalleryIcon() is called later in MainActivity.onResume()
 		//updateFolderHistory("/sdcard/Pictures/OpenCameraTest");
 	}
 
 	/** Updates the save history with the current save location (should be called after changing the save location).
+     * @param folder_name The folder name to add or update in the history.
 	 * @param update_icon Whether to update the gallery icon. If false, it's the caller's responsibility to call
 	 * MainActivity.updateGalleryIcon().
 	 */
-    void updateFolderHistory(boolean update_icon) {
-		String folder_name = main_activity.getStorageUtils().getSaveLocation();
+    void updateFolderHistory(String folder_name, boolean update_icon) {
 		updateFolderHistory(folder_name);
 		if( update_icon ) {
 			main_activity.updateGalleryIcon(); // if the folder has changed, need to update the gallery icon
@@ -82,13 +83,14 @@ public class SaveLocationHistory {
 		}
     }
     
-    /** Clears the folder history.
+    /** Clears the folder history, and reinitialise it with the current folder.
+     * @param folder_name The current folder name.
      */
-    public void clearFolderHistory() {
+    public void clearFolderHistory(String folder_name) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearFolderHistory");
 		save_location_history.clear();
-		updateFolderHistory(true); // to re-add the current choice, and save
+		updateFolderHistory(folder_name, true); // to re-add the current choice, and save
     }
 
     /** Writes the history to the SharedPreferences.

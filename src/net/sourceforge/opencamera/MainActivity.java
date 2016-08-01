@@ -88,7 +88,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private boolean supports_auto_stabilise = false;
 	private boolean supports_force_video_4k = false;
 	private boolean supports_camera2 = false;
-	private SaveLocationHistory save_location_history = null;
+	private SaveLocationHistory save_location_history = null; // save location for non-SAF
 	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
     private GestureDetector gestureDetector;
     private boolean screen_is_locked = false; // whether screen is "locked" - this is Open Camera's own lock to guard against accidental presses, not the standard Android lock
@@ -190,7 +190,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting window flags: " + (System.currentTimeMillis() - debug_time));
 
-		save_location_history = new SaveLocationHistory(this, "save_location_history");
+		save_location_history = new SaveLocationHistory(this, "save_location_history", getStorageUtils().getSaveLocation());
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after updating folder history: " + (System.currentTimeMillis() - debug_time));
 
@@ -1134,7 +1134,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved_focus_value: " + saved_focus_value);
     	
-		save_location_history.updateFolderHistory(true);
+		save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true);
 
 		// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
 		// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
@@ -1641,7 +1641,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				if( !orig_save_location.equals(new_save_location) ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "changed save_folder to: " + applicationInterface.getStorageUtils().getSaveLocation());
-					save_location_history.updateFolderHistory(true);
+					save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true);
 					preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + applicationInterface.getStorageUtils().getSaveLocation());
 				}
 				super.onDismiss(dialog);
@@ -1695,7 +1695,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					        public void onClick(DialogInterface dialog, int which) {
 								if( MyDebug.LOG )
 									Log.d(TAG, "confirmed clear save history");
-								save_location_history.clearFolderHistory();
+								clearFolderHistory();
 								setWindowFlagsForCamera();
 								showPreview(true);
 					        }
@@ -1737,7 +1737,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						SharedPreferences.Editor editor = sharedPreferences.edit();
 						editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), save_folder);
 						editor.apply();
-						save_location_history.updateFolderHistory(true); // to move new selection to most recent
+						save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true); // to move new selection to most recent
 					}
 					setWindowFlagsForCamera();
 					showPreview(true);
@@ -1754,6 +1754,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         alertDialog.show();
 		//getWindow().setLayout(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		setWindowFlagsForSettings();
+    }
+
+    /** Clears the non-SAF folder history.
+     */
+    public void clearFolderHistory() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearFolderHistory");
+		save_location_history.clearFolderHistory(getStorageUtils().getSaveLocation());
     }
 
     static private void putBundleExtra(Bundle bundle, String key, List<String> values) {
@@ -2733,7 +2741,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 	
     public void usedFolderPicker() {
-    	save_location_history.updateFolderHistory(true);
+    	save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true);
     }
     
 	public boolean hasThumbnailAnimation() {
