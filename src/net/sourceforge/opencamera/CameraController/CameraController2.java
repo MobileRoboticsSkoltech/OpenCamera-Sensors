@@ -2266,7 +2266,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean focusIsContinuous() {
-		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
+		if( previewBuilder == null || previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
 			return false;
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE || focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO )
@@ -2621,6 +2621,25 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "no camera or capture session");
 			// should call the callback, so the application isn't left waiting (e.g., when we autofocus before trying to take a photo)
 			cb.onAutoFocus(false);
+			return;
+		}
+		Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+		if( focus_mode == null ) {
+			// we preserve the old Camera API where calling autoFocus() on a device without autofocus immediately calls the callback
+			// (unclear if Open Camera needs this, but just to be safe and consistent between camera APIs)
+			cb.onAutoFocus(true);
+			return;
+		}
+		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
+			/* In the old Camera API, doing an autofocus in FOCUS_MODE_CONTINUOUS_PICTURE mode would call the callback when the camera isn't focusing,
+			 * and return whether focus was successful or not. So we replicate the behaviour here too (see previewCaptureCallback.process()).
+			 * This is essential to have correct behaviour for flash mode in continuous picture focus mode. Otherwise:
+			 *  - Taking photo with flash auto when flash is used, or flash on, takes longer (excessive amount of flash firing due to an additional unnecessary focus before taking photo).
+			 *  - Taking photo with flash auto when flash is needed sometime results in flash firing for the (unnecessary) autofocus, then not firing for final picture, resulting in too dark pictures.
+			 *    This seems to happen with scenes that have both light and dark regions.
+			 *  (All tested on Nexus 6, Android 6.)
+			 */
+			this.autofocus_cb = cb;
 			return;
 		}
 		/*if( state == STATE_WAITING_AUTOFOCUS ) {
@@ -3097,7 +3116,7 @@ public class CameraController2 extends CameraController {
 				return;
 			}
 			last_process_frame_number = result.getFrameNumber();
-
+			
 			// use Integer instead of int, so can compare to null: Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
 			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ) {
@@ -3105,10 +3124,27 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "not ready for capture: " + af_state);*/
 				ready_for_capture = false;
 			}
-			else if( !ready_for_capture ) {
+			else {
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "ready for capture: " + af_state);*/
 				ready_for_capture = true;
+				if( autofocus_cb != null && focusIsContinuous() ) {
+					Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+					if( focus_mode != null && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "call autofocus callback, as continuous mode and not focusing: " + af_state);
+						boolean focus_success = af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED;
+						if( MyDebug.LOG ) {
+							if( focus_success )
+								Log.d(TAG, "autofocus success");
+							else
+								Log.d(TAG, "autofocus failed");
+							Log.d(TAG, "af_state: " + af_state);
+						}
+						autofocus_cb.onAutoFocus(focus_success);
+						autofocus_cb = null;
+					}
+				}
 			}
 
 			/*if( MyDebug.LOG ) {

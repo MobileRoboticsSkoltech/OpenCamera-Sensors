@@ -3954,6 +3954,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 							if( MyDebug.LOG )
 								Log.d(TAG, "autofocus complete: " + success);
 							ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
+							prepareAutoFocusPhoto();
 							takePhotoWhenFocused();
 						}
 			        };
@@ -3966,6 +3967,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		else {
 			takePhotoWhenFocused();
+		}
+	}
+	
+	/** Should be called when taking a photo immediately after an autofocus.
+	 *  This is needed for a workaround for Camera2 bug (at least on Nexus 6) where photos sometimes come out dark when using flash
+	 *  auto, when the flash fires. This happens when taking a photo in autofocus mode (including when continuous mode has
+	 *  transitioned to autofocus mode due to touching to focus). Seems to happen with scenes that have bright and dark regions,
+	 *  i.e., on verge of flash firing.
+	 *  Seems to be fixed if we have a short delay...
+	 */
+	private void prepareAutoFocusPhoto() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "prepareAutoFocusPhoto");
+		if( using_android_l ) {
+			String flash_value = camera_controller.getFlashValue();
+			// getFlashValue() may return "" if flash not supported!
+			if( flash_value.length() > 0 && ( flash_value.equals("flash_auto") || flash_value.equals("flash_red_eye") ) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "wait for a bit...");
+				try {
+					Thread.sleep(100);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	
@@ -4415,6 +4442,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG ) 
 					Log.d(TAG, "take_photo_after_autofocus is set");
 				take_photo_after_autofocus = false;
+				prepareAutoFocusPhoto();
 				takePhotoWhenFocused();
 			}
 		}
