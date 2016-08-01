@@ -88,7 +88,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private boolean supports_auto_stabilise = false;
 	private boolean supports_force_video_4k = false;
 	private boolean supports_camera2 = false;
-	private ArrayList<String> save_location_history = new ArrayList<String>();
+	private SaveLocationHistory save_location_history = null;
 	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
     private GestureDetector gestureDetector;
     private boolean screen_is_locked = false; // whether screen is "locked" - this is Open Camera's own lock to guard against accidental presses, not the standard Android lock
@@ -190,22 +190,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting window flags: " + (System.currentTimeMillis() - debug_time));
 
-        // read save locations
-        save_location_history.clear();
-        int save_location_history_size = sharedPreferences.getInt("save_location_history_size", 0);
-		if( MyDebug.LOG )
-			Log.d(TAG, "save_location_history_size: " + save_location_history_size);
-        for(int i=0;i<save_location_history_size;i++) {
-        	String string = sharedPreferences.getString("save_location_history_" + i, null);
-        	if( string != null ) {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "save_location_history " + i + ": " + string);
-        		save_location_history.add(string);
-        	}
-        }
-        // also update, just in case a new folder has been set
-		updateFolderHistory(false); // update_icon can be false, as updateGalleryIcon() is called later in onResume()
-		//updateFolderHistory("/sdcard/Pictures/OpenCameraTest");
+		save_location_history = new SaveLocationHistory(this, "save_location_history");
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after updating folder history: " + (System.currentTimeMillis() - debug_time));
 
@@ -1149,7 +1134,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved_focus_value: " + saved_focus_value);
     	
-		updateFolderHistory(true);
+		save_location_history.updateFolderHistory(true);
 
 		// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
 		// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
@@ -1582,62 +1567,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
     }
 
-    /* update_icon should be true, unless it's known we'll call updateGalleryIcon afterwards anyway.
-     */
-    private void updateFolderHistory(boolean update_icon) {
-		String folder_name = applicationInterface.getStorageUtils().getSaveLocation();
-		updateFolderHistory(folder_name);
-		if( update_icon ) {
-			updateGalleryIcon(); // if the folder has changed, need to update the gallery icon
-		}
-    }
-    
-    private void updateFolderHistory(String folder_name) {
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "updateFolderHistory: " + folder_name);
-			Log.d(TAG, "save_location_history size: " + save_location_history.size());
-			for(int i=0;i<save_location_history.size();i++) {
-				Log.d(TAG, save_location_history.get(i));
-			}
-		}
-		while( save_location_history.remove(folder_name) ) {
-		}
-		save_location_history.add(folder_name);
-		while( save_location_history.size() > 6 ) {
-			save_location_history.remove(0);
-		}
-		writeSaveLocations();
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "updateFolderHistory exit:");
-			Log.d(TAG, "save_location_history size: " + save_location_history.size());
-			for(int i=0;i<save_location_history.size();i++) {
-				Log.d(TAG, save_location_history.get(i));
-			}
-		}
-    }
-    
-    public void clearFolderHistory() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "clearFolderHistory");
-		save_location_history.clear();
-		updateFolderHistory(true); // to re-add the current choice, and save
-    }
-    
-    private void writeSaveLocations() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "writeSaveLocations");
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putInt("save_location_history_size", save_location_history.size());
-		if( MyDebug.LOG )
-			Log.d(TAG, "save_location_history_size = " + save_location_history.size());
-        for(int i=0;i<save_location_history.size();i++) {
-        	String string = save_location_history.get(i);
-    		editor.putString("save_location_history_" + i, string);
-        }
-		editor.apply();
-    }
-
     /** Opens the Storage Access Framework dialog to select a folder.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -1712,7 +1641,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				if( !orig_save_location.equals(new_save_location) ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "changed save_folder to: " + applicationInterface.getStorageUtils().getSaveLocation());
-					updateFolderHistory(true);
+					save_location_history.updateFolderHistory(true);
 					preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + applicationInterface.getStorageUtils().getSaveLocation());
 				}
 				super.onDismiss(dialog);
@@ -1766,7 +1695,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					        public void onClick(DialogInterface dialog, int which) {
 								if( MyDebug.LOG )
 									Log.d(TAG, "confirmed clear save history");
-								clearFolderHistory();
+								save_location_history.clearFolderHistory();
 								setWindowFlagsForCamera();
 								showPreview(true);
 					        }
@@ -1808,7 +1737,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						SharedPreferences.Editor editor = sharedPreferences.edit();
 						editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), save_folder);
 						editor.apply();
-						updateFolderHistory(true); // to move new selection to most recent
+						save_location_history.updateFolderHistory(true); // to move new selection to most recent
 					}
 					setWindowFlagsForCamera();
 					showPreview(true);
@@ -2799,12 +2728,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 
     // for testing:
-	public ArrayList<String> getSaveLocationHistory() {
+	public SaveLocationHistory getSaveLocationHistory() {
 		return this.save_location_history;
 	}
 	
     public void usedFolderPicker() {
-    	updateFolderHistory(true);
+    	save_location_history.updateFolderHistory(true);
     }
     
 	public boolean hasThumbnailAnimation() {
