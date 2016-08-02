@@ -278,24 +278,47 @@ public class StorageUtils {
     }
 
     // only valid if isUsingSAF()
-    Uri getTreeUriSAF() {
+    String getSaveLocationSAF() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-		Uri treeUri = Uri.parse(sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), ""));
+		String folder_name = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+		return folder_name;
+    }
+
+    // only valid if isUsingSAF()
+    Uri getTreeUriSAF() {
+    	String folder_name = getSaveLocationSAF();
+		Uri treeUri = Uri.parse(folder_name);
 		return treeUri;
     }
 
+	/** Returns a human readable name for the current SAF save folder location.
+     * Only valid if isUsingSAF().
+	 * @return The human readable form. This will be null if the Uri is not recognised.
+	 */
     // only valid if isUsingSAF()
     // return a human readable name for the SAF save folder location
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	String getImageFolderNameSAF() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getImageFolderNameSAF");
-	    String filename = null;
 		Uri uri = getTreeUriSAF();
 		if( MyDebug.LOG )
 			Log.d(TAG, "uri: " + uri);
-		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
-            final String id = DocumentsContract.getTreeDocumentId(uri);
+		return getImageFolderNameSAF(uri);
+	}
+
+	/** Returns a human readable name for a SAF save folder location.
+     * Only valid if isUsingSAF().
+	 * @param folder_name The SAF uri for the requested save location.
+	 * @return The human readable form. This will be null if the Uri is not recognised.
+	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	String getImageFolderNameSAF(Uri folder_name) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getImageFolderNameSAF: " + folder_name);
+	    String filename = null;
+		if( "com.android.externalstorage.documents".equals(folder_name.getAuthority()) ) {
+            final String id = DocumentsContract.getTreeDocumentId(folder_name);
     		if( MyDebug.LOG )
     			Log.d(TAG, "id: " + id);
             String [] split = id.split(":");

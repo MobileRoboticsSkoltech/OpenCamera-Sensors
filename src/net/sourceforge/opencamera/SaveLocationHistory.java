@@ -88,7 +88,7 @@ public class SaveLocationHistory {
      */
     public void clearFolderHistory(String folder_name) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "clearFolderHistory");
+			Log.d(TAG, "clearFolderHistory: " + folder_name);
 		save_location_history.clear();
 		updateFolderHistory(folder_name, true); // to re-add the current choice, and save
     }

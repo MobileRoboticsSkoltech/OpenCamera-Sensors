@@ -319,7 +319,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             			Log.d(TAG, "clicked save location");
             		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
             		if( main_activity.getStorageUtils().isUsingSAF() ) {
-                		main_activity.openFolderChooserDialogSAF();
+                		main_activity.openFolderChooserDialogSAF(true);
             			return true;
                     }
             		else {
@@ -353,7 +353,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                     		{
                         		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
                     			Toast.makeText(main_activity, R.string.saf_select_save_location, Toast.LENGTH_SHORT).show();
-                        		main_activity.openFolderChooserDialogSAF();
+                        		main_activity.openFolderChooserDialogSAF(true);
                     		}
             			}
             			else {
