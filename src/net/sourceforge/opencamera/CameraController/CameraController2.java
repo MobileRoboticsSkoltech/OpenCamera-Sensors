@@ -506,7 +506,7 @@ public class CameraController2 extends CameraController {
 		final CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 
 		class MyStateCallback extends CameraDevice.StateCallback {
-			boolean callback_done = false;
+			boolean callback_done = false; // must sychronize on this and notifyAll when setting to true
 			boolean first_callback = true; // Google Camera says we may get multiple callbacks, but only the first indicates the status of the camera opening operation
 			@Override
 			public void onOpened(CameraDevice cam) {
@@ -534,7 +534,10 @@ public class CameraController2 extends CameraController {
 						// don't throw CameraControllerException here - instead error is handled by setting callback_done to callback_done, and the fact that camera will still be null
 					}
 
-					callback_done = true;
+				    synchronized( this ) {
+				    	callback_done = true;
+				    	this.notifyAll();
+				    }
 				}
 			}
 
@@ -562,7 +565,10 @@ public class CameraController2 extends CameraController {
 					cam.close();
 					if( MyDebug.LOG )
 						Log.d(TAG, "onDisconnected: camera is now closed");
-					callback_done = true;
+				    synchronized( this ) {
+				    	callback_done = true;
+				    	this.notifyAll();
+				    }
 				}
 			}
 
@@ -587,7 +593,10 @@ public class CameraController2 extends CameraController {
 				cam.close();
 				if( MyDebug.LOG )
 					Log.d(TAG, "onError: camera is now closed");
-				callback_done = true;
+			    synchronized( this ) {
+			    	callback_done = true;
+			    	this.notifyAll();
+			    }
 			}
 		};
 		MyStateCallback myStateCallback = new MyStateCallback();
@@ -627,7 +636,16 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "wait until camera opened...");
 		// need to wait until camera is opened
-		while( !myStateCallback.callback_done ) {
+		synchronized( myStateCallback ) {
+			while( !myStateCallback.callback_done ) {
+				try {
+					// release the myStateCallback lock, and wait until myStateCallback calls notifyAll()
+					myStateCallback.wait();
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		if( camera == null ) {
 			if( MyDebug.LOG )
@@ -2433,7 +2451,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "preview size: " + this.preview_width + " x " + this.preview_height);
 
 			class MyStateCallback extends CameraCaptureSession.StateCallback {
-				boolean callback_done = false;
+				boolean callback_done = false; // must sychronize on this and notifyAll when setting to true
 				@Override
 				public void onConfigured(CameraCaptureSession session) {
 					if( MyDebug.LOG ) {
@@ -2444,7 +2462,10 @@ public class CameraController2 extends CameraController {
 						if( MyDebug.LOG ) {
 							Log.d(TAG, "camera is closed");
 						}
-						callback_done = true;
+					    synchronized( this ) {
+					    	callback_done = true;
+					    	this.notifyAll();
+					    }
 						return;
 					}
 					captureSession = session;
@@ -2464,7 +2485,10 @@ public class CameraController2 extends CameraController {
 						e.printStackTrace();
 						preview_error_cb.onError();
 					} 
-					callback_done = true;
+				    synchronized( this ) {
+				    	callback_done = true;
+				    	this.notifyAll();
+				    }
 				}
 
 				@Override
@@ -2473,7 +2497,10 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "onConfigureFailed: " + session);
 						Log.d(TAG, "captureSession was: " + captureSession);
 					}
-					callback_done = true;
+				    synchronized( this ) {
+				    	callback_done = true;
+				    	this.notifyAll();
+				    }
 					// don't throw CameraControllerException here, as won't be caught - instead we throw CameraControllerException below
 				}
 			}
@@ -2513,7 +2540,16 @@ public class CameraController2 extends CameraController {
 		 		handler);
 			if( MyDebug.LOG )
 				Log.d(TAG, "wait until session created...");
-			while( !myStateCallback.callback_done ) {
+			synchronized( myStateCallback ) {
+				while( !myStateCallback.callback_done ) {
+					try {
+						// release the myStateCallback lock, and wait until myStateCallback calls notifyAll()
+						myStateCallback.wait();
+					}
+					catch(InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "created captureSession: " + captureSession);
