@@ -7,6 +7,7 @@ import net.sourceforge.opencamera.R;
 
 import android.annotation.TargetApi;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -43,6 +44,38 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "MainUI");
 		this.main_activity = main_activity;
+		
+		this.setSeekbarColors();
+	}
+	
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void setSeekbarColors() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setSeekbarColors");
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			ColorStateList progress_color = ColorStateList.valueOf( Color.argb(255, 240, 240, 240) );
+			ColorStateList thumb_color = ColorStateList.valueOf( Color.argb(255, 255, 255, 255) );
+
+			SeekBar seekBar = (SeekBar)main_activity.findViewById(R.id.zoom_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.focus_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.exposure_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.iso_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+		}
 	}
 
     public void layoutUI() {
