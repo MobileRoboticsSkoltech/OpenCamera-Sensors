@@ -223,7 +223,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
 	private String set_flash_value_after_autofocus = "";
-	private boolean take_photo_after_autofocus = false;
+	private boolean take_photo_after_autofocus = false; // set to take a photo when the in-progress autofocus has completed
 	private boolean successfully_focused = false;
 	private long successfully_focused_time = -1;
 
@@ -912,7 +912,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		focus_started_time = -1;
-		take_photo_after_autofocus = false;
+		synchronized( this ) {
+			// synchronise for consistency (keep FindBugs happy)
+			take_photo_after_autofocus = false;
+		}
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
@@ -1021,7 +1024,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		focus_started_time = -1;
-		take_photo_after_autofocus = false;
+		synchronized( this ) {
+			// synchronise for consistency (keep FindBugs happy)
+			take_photo_after_autofocus = false;
+		}
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
@@ -3523,7 +3529,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "takePicture");
 		//this.thumbnail_anim = false;
         this.phase = PHASE_TAKING_PHOTO;
-		this.take_photo_after_autofocus = false;
+		synchronized( this ) {
+			// synchronise for consistency (keep FindBugs happy)
+			take_photo_after_autofocus = false;
+		}
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
