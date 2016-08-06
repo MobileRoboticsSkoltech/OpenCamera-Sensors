@@ -56,6 +56,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private StorageUtils storageUtils = null;
 	private DrawPreview drawPreview = null;
 	private ImageSaver imageSaver = null;
+	private HDRProcessor hdrProcessor = null;
 
 	private Rect text_bounds = new Rect();
 
@@ -88,6 +89,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		
 		this.imageSaver = new ImageSaver(main_activity);
 		this.imageSaver.start();
+		
+		this.hdrProcessor = new HDRProcessor();
 
         if( savedInstanceState != null ) {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
@@ -1353,7 +1356,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			bitmaps.add(bitmap);
 			options.inMutable = false; // later bitmaps don't need to be writable
 		}
-		main_activity.processHDR(bitmaps);
+		hdrProcessor.processHDR(bitmaps);
 
 		int image_quality = getImageQualityPref();
 		try {
