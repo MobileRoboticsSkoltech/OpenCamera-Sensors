@@ -1539,4 +1539,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public boolean hasThumbnailAnimation() {
 		return this.drawPreview.hasThumbnailAnimation();
 	}
+	
+	public HDRProcessor getHDRProcessor() {
+		return hdrProcessor;
+	}
 }
