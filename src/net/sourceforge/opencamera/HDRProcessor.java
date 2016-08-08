@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.util.Log;
 
 public class HDRProcessor {
@@ -166,11 +167,28 @@ public class HDRProcessor {
 	/** Converts a HDR brightness to a 0-255 value.
 	 */
 	private int tonemap(double hdr) {
-		// TODO: use proper tonemapping
+		// simple clamp:
+		/*
 		int rgb = (int)hdr;
 		if( rgb > 255 )
 			rgb = 255;
+			*/
+		/*
+		// exponential:
+		final double exposure_c = 1.2 / 255.0;
+		int rgb = (int)(255.0*(1.0 - Math.exp(- hdr * exposure_c)));
+		*/
+		// Reinhard (Global):
+		final double scale_c = 0.5*255.0;
+		int rgb = (int)(255.0 * ( hdr / (scale_c + hdr) ));
 		return rgb;
+	}
+	
+	private double calculateWeight(double value) {
+		// scale chosen so that 0 and 255 map to a non-zero weight of 1.0/127.5
+		final double scale = (1.0-1.0/127.5)/127.5;
+		double weight = 1.0 - scale * Math.abs( 127.5 - value );
+		return weight;
 	}
 
 	/** Core implementation of HDR algorithm.
@@ -219,14 +237,15 @@ public class HDRProcessor {
 					double r = (double)((color & 0xFF0000) >> 16);
 					double g = (double)((color & 0xFF00) >> 8);
 					double b = (double)(color & 0xFF);
-					/*if( MyDebug.LOG )
-						Log.d(TAG, "" + x + "," + y + ":" + i + ":" + r + "," + g + "," + b);*/
+					double weight = calculateWeight( (r+g+b) / 3.0 );
+					//double weight = 1.0;
+					if( MyDebug.LOG && x == 1547 && y == 1547 )
+						Log.d(TAG, "" + x + "," + y + ":" + i + ":" + r + "," + g + "," + b + " weight: " + weight);
 					if( response_functions[i] != null ) {
 						r = response_functions[i].value(r);
 						g = response_functions[i].value(g);
 						b = response_functions[i].value(b);
 					}
-					double weight = 1.0;
 					hdr_r += weight * r;
 					hdr_g += weight * g;
 					hdr_b += weight * b;
@@ -238,8 +257,19 @@ public class HDRProcessor {
 				int new_r = tonemap(hdr_r);
 				int new_g = tonemap(hdr_g);
 				int new_b = tonemap(hdr_b);
-				//int new_col = (new_r & 0xFF0000) | (new_g & 0xFF00) | new_b;
+				/*{
+					// check
+					if( new_r < 0 || new_r > 255 )
+						throw new RuntimeException();
+					else if( new_g < 0 || new_g > 255 )
+						throw new RuntimeException();
+					else if( new_b < 0 || new_b > 255 )
+						throw new RuntimeException();
+				}*/
+				if( MyDebug.LOG && x == 1547 && y == 1547 )
+					Log.d(TAG, "" + x + "," + y + ":" + new_r + "," + new_g + "," + new_b);
 				int new_col = (new_r << 16) | (new_g << 8) | new_b;
+				//int new_col = Color.rgb(new_r, new_g, new_b);
 				buffers[0][x] = new_col;
 			}
 			bm.setPixels(buffers[0], 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
