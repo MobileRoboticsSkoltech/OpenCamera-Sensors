@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.util.Log;
 
 public class HDRProcessor {
