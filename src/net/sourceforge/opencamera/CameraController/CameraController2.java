@@ -1551,6 +1551,27 @@ public class CameraController2 extends CameraController {
 		this.want_raw = want_raw;
 	}
 
+	@Override
+	public void setHDR(boolean want_hdr) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setHDR: " + want_hdr);
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "no camera");
+			return;
+		}
+		if( this.want_hdr == want_hdr ) {
+			return;
+		}
+		if( captureSession != null ) {
+			// can only call this when captureSession not created - as it affects how we create the imageReader
+			if( MyDebug.LOG )
+				Log.e(TAG, "can't set hdr when captureSession running!");
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		this.want_hdr = want_hdr;
+	}
+
 	private void createPictureImageReader() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createPictureImageReader");
@@ -2862,17 +2883,52 @@ public class CameraController2 extends CameraController {
 
 			stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
 			stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-			stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 1600);
-			stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000l/30);
+			if( capture_result_has_iso )
+				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, capture_result_iso );
+			else
+				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 800);
+			if( capture_result_has_frame_duration  )
+				stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, capture_result_frame_duration);
+			else
+				stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000l/30);
 
-			final long base_exposure_time = 1000000000l/30;
-			final double scale = 2.0;
+			long base_exposure_time = 1000000000l/30;
+			if( capture_result_has_exposure_time )
+				base_exposure_time = capture_result_exposure_time;
+			long dark_exposure_time = base_exposure_time;
+			long light_exposure_time = base_exposure_time;
+			long min_exposure_time = base_exposure_time;
+			long max_exposure_time = base_exposure_time;
+			//final double scale = 2.0;
+			final double scale = 4.0;
+			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+			if( exposure_time_range != null ) {
+				min_exposure_time = exposure_time_range.getLower();
+				max_exposure_time = exposure_time_range.getUpper();
+				dark_exposure_time = (long)(base_exposure_time/scale);
+				light_exposure_time = (long)(base_exposure_time*scale);
+				if( dark_exposure_time < min_exposure_time )
+					dark_exposure_time = min_exposure_time;
+				if( light_exposure_time > max_exposure_time )
+					light_exposure_time = max_exposure_time;
+			}
 
-			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, (long)(base_exposure_time/scale));
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "taking HDR with:");
+				Log.d(TAG, "ISO: " + stillBuilder.get(CaptureRequest.SENSOR_SENSITIVITY));
+				Log.d(TAG, "Frame duration: " + stillBuilder.get(CaptureRequest.SENSOR_FRAME_DURATION));
+				Log.d(TAG, "Dark exposure time: " + dark_exposure_time);
+				Log.d(TAG, "Base exposure time: " + base_exposure_time);
+				Log.d(TAG, "Light exposure time: " + light_exposure_time);
+				Log.d(TAG, "Min exposure time: " + min_exposure_time);
+				Log.d(TAG, "Max exposure time: " + max_exposure_time);
+			}
+
+			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, dark_exposure_time);
 			requests.add( stillBuilder.build() );
 			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, base_exposure_time);
 			requests.add( stillBuilder.build() );
-			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, (long)(base_exposure_time*scale));
+			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, light_exposure_time);
 			requests.add( stillBuilder.build() );
 
 			n_burst = requests.size();

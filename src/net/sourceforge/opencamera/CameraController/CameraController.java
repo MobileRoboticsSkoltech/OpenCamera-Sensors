@@ -178,6 +178,7 @@ public abstract class CameraController {
     public abstract void setPictureSize(int width, int height);
     public abstract CameraController.Size getPreviewSize();
     public abstract void setPreviewSize(int width, int height);
+	public abstract void setHDR(boolean want_hdr);
 	public abstract void setRaw(boolean want_raw);
 	public abstract void setVideoStabilization(boolean enabled);
 	public abstract boolean getVideoStabilization();
