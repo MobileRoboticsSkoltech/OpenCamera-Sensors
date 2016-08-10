@@ -37,12 +37,19 @@ public class HDRProcessor {
 		/** Computes the response function.
 		 * @param x_samples List of Xi samples. Must be at least 3 samples.
 		 * @param y_samples List of Yi samples. Must be same length as x_samples.
+		 * @param weights List of weights. Must be same length as x_samples.
 		 */
-		ResponseFunction(int id, List<Double> x_samples, List<Double> y_samples) {
+		ResponseFunction(int id, List<Double> x_samples, List<Double> y_samples, List<Double> weights) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "ResponseFunction");
 
 			if( x_samples.size() != y_samples.size() ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "unequal number of samples");
+				// throw RuntimeException, as this is a programming error
+				throw new RuntimeException();
+			}
+			else if( x_samples.size() != weights.size() ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "unequal number of samples");
 				// throw RuntimeException, as this is a programming error
@@ -60,8 +67,9 @@ public class HDRProcessor {
 			for(int i=0;i<x_samples.size();i++) {
 				double x = x_samples.get(i);
 				double y = y_samples.get(i);
-				numer += x*y;
-				denom += x*x;
+				double w = weights.get(i);
+				numer += w*x*y;
+				denom += w*x*x;
 			}
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "numer = " + numer);
@@ -164,16 +172,17 @@ public class HDRProcessor {
 			Log.d(TAG, "createFunctionFromBitmaps");
 		List<Double> x_samples = new ArrayList<Double>();
 		List<Double> y_samples = new ArrayList<Double>();
+		List<Double> weights = new ArrayList<Double>();
 
 		final int n_samples_c = 100;
-		final int n_x_samples = (int)Math.sqrt(n_samples_c);
-		final int n_y_samples = n_samples_c/n_x_samples;
+		final int n_w_samples = (int)Math.sqrt(n_samples_c);
+		final int n_h_samples = n_samples_c/n_w_samples;
 		
-		for(int y=0;y<n_y_samples;y++) {
-			double alpha = ((double)y+1.0) / ((double)n_y_samples+1.0);
+		for(int y=0;y<n_h_samples;y++) {
+			double alpha = ((double)y+1.0) / ((double)n_h_samples+1.0);
 			int y_coord = (int)(alpha * in_bitmap.getHeight());
-			for(int x=0;x<n_x_samples;x++) {
-				double beta = ((double)x+1.0) / ((double)n_x_samples+1.0);
+			for(int x=0;x<n_w_samples;x++) {
+				double beta = ((double)x+1.0) / ((double)n_w_samples+1.0);
 				int x_coord = (int)(beta * in_bitmap.getWidth());
 				if( MyDebug.LOG )
 					Log.d(TAG, "sample from " + x_coord + " , " + y_coord);
@@ -183,10 +192,35 @@ public class HDRProcessor {
 				double out_value = brightness(out_col);
 				x_samples.add(in_value);
 				y_samples.add(out_value);
+				//double weight = calculateWeight(in_value);
+				//weights.add(weight);
+			}
+		}
+		{
+			// calculate weights
+			double min_value = x_samples.get(0);
+			double max_value = x_samples.get(0);
+			for(int i=1;i<x_samples.size();i++) {
+				double value = x_samples.get(i);
+				if( value < min_value )
+					min_value = value;
+				if( value > max_value )
+					max_value = value;
+			}
+			double med_value = 0.5*(min_value + max_value);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "min_value: " + min_value);
+				Log.d(TAG, "max_value: " + max_value);
+				Log.d(TAG, "med_value: " + med_value);
+			}
+			for(int i=0;i<x_samples.size();i++) {
+				double value = x_samples.get(i);
+				double weight = (value <= med_value) ? value - min_value : max_value - value;
+				weights.add(weight);
 			}
 		}
 		
-		ResponseFunction function = new ResponseFunction(id, x_samples, y_samples);
+		ResponseFunction function = new ResponseFunction(id, x_samples, y_samples, weights);
 		return function;
 	}
 
