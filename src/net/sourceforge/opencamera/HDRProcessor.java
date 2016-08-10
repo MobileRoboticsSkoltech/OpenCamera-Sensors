@@ -245,7 +245,7 @@ public class HDRProcessor {
 	 * @param hdr The input HDR brightness.
 	 * @param l_avg The log average luminance of the HDR image. That is, exp( sum{log(Li)}/N ).
 	 */
-	private int tonemap(double hdr, double l_avg) {
+	private void tonemap(int [] rgb, double [] hdr, double l_avg) {
 		// simple clamp:
 		/*
 		int rgb = (int)hdr;
@@ -261,8 +261,8 @@ public class HDRProcessor {
 		//final double scale_c = 0.5*255.0;
 		//final double scale_c = 1.0*255.0;
 		final double scale_c = l_avg / 0.5;
-		int rgb = (int)(255.0 * ( hdr / (scale_c + hdr) ));
-		return rgb;
+		for(int i=0;i<3;i++)
+			rgb[i] = (int)(255.0 * ( hdr[i] / (scale_c + hdr[i]) ));
 	}
 	
 	private double calculateWeight(double value) {
@@ -289,6 +289,7 @@ public class HDRProcessor {
 			buffers[i] = new int[bm.getWidth()];
 		}
 		double [] hdr = new double[3];
+		int [] rgb = new int[3];
 		
 		// compute response_functions
 		for(int i=0;i<n_bitmaps;i++) {
@@ -340,9 +341,7 @@ public class HDRProcessor {
 			for(int x=0;x<bm.getWidth();x++) {
 				//int this_col = buffer[c];
 				calculateHDR(hdr, n_bitmaps, buffers, x, response_functions);
-				int new_r = tonemap(hdr[0], avg_luminance);
-				int new_g = tonemap(hdr[1], avg_luminance);
-				int new_b = tonemap(hdr[2], avg_luminance);
+				tonemap(rgb, hdr, avg_luminance);
 				/*{
 					// check
 					if( new_r < 0 || new_r > 255 )
@@ -352,10 +351,7 @@ public class HDRProcessor {
 					else if( new_b < 0 || new_b > 255 )
 						throw new RuntimeException();
 				}*/
-				if( MyDebug.LOG && x == 1547 && y == 1547 )
-					Log.d(TAG, "" + x + "," + y + ":" + new_r + "," + new_g + "," + new_b);
-				int new_col = (new_r << 16) | (new_g << 8) | new_b;
-				//int new_col = Color.rgb(new_r, new_g, new_b);
+				int new_col = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
 				buffers[0][x] = new_col;
 			}
 			bm.setPixels(buffers[0], 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
