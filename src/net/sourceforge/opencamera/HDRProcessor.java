@@ -185,7 +185,7 @@ public class HDRProcessor {
 				double beta = ((double)x+1.0) / ((double)n_w_samples+1.0);
 				int x_coord = (int)(beta * in_bitmap.getWidth());
 				if( MyDebug.LOG )
-					Log.d(TAG, "sample from " + x_coord + " , " + y_coord);
+					Log.d(TAG, "sample response from " + x_coord + " , " + y_coord);
 				int in_col = in_bitmap.getPixel(x_coord, y_coord);
 				int out_col = out_bitmap.getPixel(x_coord, y_coord);
 				double in_value = brightness(in_col);
@@ -235,8 +235,10 @@ public class HDRProcessor {
 	}
 	
 	/** Converts a HDR brightness to a 0-255 value.
+	 * @param hdr The input HDR brightness.
+	 * @param l_avg The log average luminance of the HDR image. That is, exp( sum{log(Li)}/N ).
 	 */
-	private int tonemap(double hdr) {
+	private int tonemap(double hdr, double l_avg) {
 		// simple clamp:
 		/*
 		int rgb = (int)hdr;
@@ -249,7 +251,9 @@ public class HDRProcessor {
 		int rgb = (int)(255.0*(1.0 - Math.exp(- hdr * exposure_c)));
 		*/
 		// Reinhard (Global):
-		final double scale_c = 0.5*255.0;
+		//final double scale_c = 0.5*255.0;
+		//final double scale_c = 1.0*255.0;
+		final double scale_c = l_avg / 0.5;
 		int rgb = (int)(255.0 * ( hdr / (scale_c + hdr) ));
 		return rgb;
 	}
@@ -270,8 +274,14 @@ public class HDRProcessor {
     	long time_s = System.currentTimeMillis();
 		
 		int n_bitmaps = bitmaps.size();
+		Bitmap bm = bitmaps.get(0);
 		final int base_bitmap = 1; // index of the bitmap with the base exposure
 		ResponseFunction [] response_functions = new ResponseFunction[n_bitmaps]; // ResponseFunction for each image (the ResponseFunction entry can be left null to indicate the Identity)
+		int [][] buffers = new int[n_bitmaps][];
+		for(int i=0;i<n_bitmaps;i++) {
+			buffers[i] = new int[bm.getWidth()];
+		}
+		double [] hdr = new double[3];
 		
 		// compute response_functions
 		for(int i=0;i<n_bitmaps;i++) {
@@ -281,14 +291,36 @@ public class HDRProcessor {
 			}
 			response_functions[i] = function;
 		}
+		
+		// calculate average luminance by sampling
+		final int n_samples_c = 100;
+		final int n_w_samples = (int)Math.sqrt(n_samples_c);
+		final int n_h_samples = n_samples_c/n_w_samples;
+
+		double sum_log_luminance = 0.0;
+		int count = 0;
+		for(int y=0;y<n_h_samples;y++) {
+			double alpha = ((double)y+1.0) / ((double)n_h_samples+1.0);
+			int y_coord = (int)(alpha * bm.getHeight());
+			for(int i=0;i<n_bitmaps;i++) {
+				bitmaps.get(i).getPixels(buffers[i], 0, bm.getWidth(), 0, y_coord, bm.getWidth(), 1);
+			}
+			for(int x=0;x<n_w_samples;x++) {
+				double beta = ((double)x+1.0) / ((double)n_w_samples+1.0);
+				int x_coord = (int)(beta * bm.getWidth());
+				if( MyDebug.LOG )
+					Log.d(TAG, "sample luminance from " + x_coord + " , " + y_coord);
+				calculateHDR(hdr, n_bitmaps, buffers, x_coord, response_functions);
+				double luminance = (hdr[0] + hdr[1] + hdr[2])/3.0 + 1.0; // add 1 so we don't take log of 0...
+				sum_log_luminance += Math.log(luminance);
+				count++;
+			}
+		}
+		double avg_luminance = Math.exp( sum_log_luminance / count );
+		if( MyDebug.LOG )
+			Log.d(TAG, "avg_luminance: " + avg_luminance);
 
 		// write new hdr image
-		Bitmap bm = bitmaps.get(0);
-		//int [] buffer = new int[bm.getWidth()];
-		int [][] buffers = new int[n_bitmaps][];
-		for(int i=0;i<n_bitmaps;i++) {
-			buffers[i] = new int[bm.getWidth()];
-		}
 		for(int y=0;y<bm.getHeight();y++) {
 			if( MyDebug.LOG ) {
 				if( y % 100 == 0 )
@@ -300,33 +332,10 @@ public class HDRProcessor {
 			}
 			for(int x=0;x<bm.getWidth();x++) {
 				//int this_col = buffer[c];
-				double hdr_r = 0.0, hdr_g = 0.0, hdr_b = 0.0;
-				double sum_weight = 0.0;
-				for(int i=0;i<n_bitmaps;i++) {
-					int color = buffers[i][x];
-					double r = (double)((color & 0xFF0000) >> 16);
-					double g = (double)((color & 0xFF00) >> 8);
-					double b = (double)(color & 0xFF);
-					double weight = calculateWeight( (r+g+b) / 3.0 );
-					//double weight = 1.0;
-					if( MyDebug.LOG && x == 1547 && y == 1547 )
-						Log.d(TAG, "" + x + "," + y + ":" + i + ":" + r + "," + g + "," + b + " weight: " + weight);
-					if( response_functions[i] != null ) {
-						r = response_functions[i].value(r);
-						g = response_functions[i].value(g);
-						b = response_functions[i].value(b);
-					}
-					hdr_r += weight * r;
-					hdr_g += weight * g;
-					hdr_b += weight * b;
-					sum_weight += weight;
-				}
-				hdr_r /= sum_weight;
-				hdr_g /= sum_weight;
-				hdr_b /= sum_weight;
-				int new_r = tonemap(hdr_r);
-				int new_g = tonemap(hdr_g);
-				int new_b = tonemap(hdr_b);
+				calculateHDR(hdr, n_bitmaps, buffers, x, response_functions);
+				int new_r = tonemap(hdr[0], avg_luminance);
+				int new_g = tonemap(hdr[1], avg_luminance);
+				int new_b = tonemap(hdr[2], avg_luminance);
 				/*{
 					// check
 					if( new_r < 0 || new_r > 255 )
@@ -347,6 +356,36 @@ public class HDRProcessor {
 		
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for processHDRCore: " + (System.currentTimeMillis() - time_s));
+	}
+	
+	private void calculateHDR(double [] hdr, int n_bitmaps, int [][] buffers, int x, ResponseFunction [] response_functions) {
+		double hdr_r = 0.0, hdr_g = 0.0, hdr_b = 0.0;
+		double sum_weight = 0.0;
+		for(int i=0;i<n_bitmaps;i++) {
+			int color = buffers[i][x];
+			double r = (double)((color & 0xFF0000) >> 16);
+			double g = (double)((color & 0xFF00) >> 8);
+			double b = (double)(color & 0xFF);
+			double weight = calculateWeight( (r+g+b) / 3.0 );
+			//double weight = 1.0;
+			/*if( MyDebug.LOG && x == 1547 && y == 1547 )
+				Log.d(TAG, "" + x + "," + y + ":" + i + ":" + r + "," + g + "," + b + " weight: " + weight);*/
+			if( response_functions[i] != null ) {
+				r = response_functions[i].value(r);
+				g = response_functions[i].value(g);
+				b = response_functions[i].value(b);
+			}
+			hdr_r += weight * r;
+			hdr_g += weight * g;
+			hdr_b += weight * b;
+			sum_weight += weight;
+		}
+		hdr_r /= sum_weight;
+		hdr_g /= sum_weight;
+		hdr_b /= sum_weight;
+		hdr[0] = hdr_r;
+		hdr[1] = hdr_g;
+		hdr[2] = hdr_b;
 	}
 
 	/* Initial test implementation - for now just doing an average, rather than HDR.
