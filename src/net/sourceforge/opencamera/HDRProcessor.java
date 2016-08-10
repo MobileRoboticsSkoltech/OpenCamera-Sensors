@@ -1,18 +1,30 @@
 package net.sourceforge.opencamera;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
+import android.os.Environment;
 import android.util.Log;
 
 public class HDRProcessor {
 	private static final String TAG = "HDRProcessor";
+	
+	private Context context = null;
 
 	enum HDRAlgorithm {
 		HDRALGORITHM_AVERAGE,
 		HDRALGORITHM_STANDARD
 	};
+	
+	HDRProcessor(Context context) {
+		this.context = context;
+	}
 
 	/** Given a set of data Xi and Yi, this function estimates a relation between X and Y
 	 *  using linear least squares.
@@ -26,7 +38,7 @@ public class HDRProcessor {
 		 * @param x_samples List of Xi samples. Must be at least 3 samples.
 		 * @param y_samples List of Yi samples. Must be same length as x_samples.
 		 */
-		ResponseFunction(List<Double> x_samples, List<Double> y_samples) {
+		ResponseFunction(int id, List<Double> x_samples, List<Double> y_samples) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "ResponseFunction");
 
@@ -66,6 +78,31 @@ public class HDRProcessor {
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "parameter = " + parameter);
+
+			if( MyDebug.LOG ) {
+				// log samples to a CSV file
+				File file = new File(Environment.getExternalStorageDirectory().getPath() + "/net.sourceforge.opencamera.hdr_samples_" + id + ".csv");
+				if( file.exists() ) {
+					file.delete();
+				}
+				try {
+					FileWriter writer = new FileWriter(file);
+					writer.append("X,Y\n");
+					writer.append("Parameter," + parameter + "\n");
+					for(int i=0;i<x_samples.size();i++) {
+						Log.d(TAG, "log: " + i + " / " + x_samples.size());
+						double x = x_samples.get(i);
+						double y = y_samples.get(i);
+						writer.append(x + "," + y + "\n");
+					}
+					writer.close();
+		        	MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath() }, null, null);
+				}
+				catch (IOException e) {
+					Log.e(TAG, "failed to open csv file");
+					e.printStackTrace();
+				}
+			}
 		}
 
 		/** Evaluates the response function at parameter x.
@@ -122,7 +159,7 @@ public class HDRProcessor {
 	/** Creates a ResponseFunction to estimate how pixels from the in_bitmap should be adjusted to
 	 *  match the exposure level of out_bitmap.
 	 */
-	private ResponseFunction createFunctionFromBitmaps(Bitmap in_bitmap, Bitmap out_bitmap) {
+	private ResponseFunction createFunctionFromBitmaps(int id, Bitmap in_bitmap, Bitmap out_bitmap) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createFunctionFromBitmaps");
 		List<Double> x_samples = new ArrayList<Double>();
@@ -149,16 +186,16 @@ public class HDRProcessor {
 			}
 		}
 		
-		ResponseFunction function = new ResponseFunction(x_samples, y_samples);
+		ResponseFunction function = new ResponseFunction(id, x_samples, y_samples);
 		return function;
 	}
 
 	/** Calculates the brightness for the supplied color.
 	 */
 	private double brightness(int color) {
-		int r = color & 0xFF0000;
-		int g = color & 0xFF00;
-		int b = color & 0xFF;
+		int r = (color & 0xFF0000) >> 16;
+		int g = (color & 0xFF00) >> 8;
+		int b = (color & 0xFF);
 		double value = (r + g + b)/3.0;
 		return value;
 	}
@@ -206,7 +243,7 @@ public class HDRProcessor {
 		for(int i=0;i<n_bitmaps;i++) {
 			ResponseFunction function = null;
 			if( i != base_bitmap ) {
-				function = createFunctionFromBitmaps(bitmaps.get(i), bitmaps.get(base_bitmap));
+				function = createFunctionFromBitmaps(i, bitmaps.get(i), bitmaps.get(base_bitmap));
 			}
 			response_functions[i] = function;
 		}

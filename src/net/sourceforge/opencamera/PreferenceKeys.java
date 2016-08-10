@@ -97,6 +97,10 @@ public class PreferenceKeys {
     	return "preference_auto_stabilise";
     }
     
+    public static String getHDRPreferenceKey() {
+    	return "preference_hdr";
+    }
+    
     public static String getLocationPreferenceKey() {
     	return "preference_location";
     }

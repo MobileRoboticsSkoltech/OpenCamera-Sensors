@@ -90,7 +90,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		this.imageSaver = new ImageSaver(main_activity);
 		this.imageSaver.start();
 		
-		this.hdrProcessor = new HDRProcessor();
+		this.hdrProcessor = new HDRProcessor(main_activity);
 
         if( savedInstanceState != null ) {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
@@ -648,6 +648,12 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return focus_distance;
     }
     
+    @Override
+	public boolean isHDRPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return sharedPreferences.getBoolean(PreferenceKeys.getHDRPreferenceKey(), false);
+    }
+
     @Override
 	public boolean isRawPref() {
     	if( isImageCaptureIntent() )

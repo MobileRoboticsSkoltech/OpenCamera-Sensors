@@ -1230,6 +1230,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			camera_controller.setRaw(false);
 		}
 
+		if( applicationInterface.isHDRPref() ) {
+			camera_controller.setHDR(true);
+		}
+		else {
+			camera_controller.setHDR(false);
+		}
+
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
 		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time
