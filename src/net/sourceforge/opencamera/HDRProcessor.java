@@ -188,8 +188,8 @@ public class HDRProcessor {
 					Log.d(TAG, "sample response from " + x_coord + " , " + y_coord);
 				int in_col = in_bitmap.getPixel(x_coord, y_coord);
 				int out_col = out_bitmap.getPixel(x_coord, y_coord);
-				double in_value = brightness(in_col);
-				double out_value = brightness(out_col);
+				double in_value = averageRGB(in_col);
+				double out_value = averageRGB(out_col);
 				x_samples.add(in_value);
 				y_samples.add(out_value);
 				//double weight = calculateWeight(in_value);
@@ -224,13 +224,20 @@ public class HDRProcessor {
 		return function;
 	}
 
-	/** Calculates the brightness for the supplied color.
+	/** Calculates average of RGB values for the supplied color.
 	 */
-	private double brightness(int color) {
+	private double averageRGB(int color) {
 		int r = (color & 0xFF0000) >> 16;
 		int g = (color & 0xFF00) >> 8;
 		int b = (color & 0xFF);
 		double value = (r + g + b)/3.0;
+		return value;
+	}
+	
+	/** Calculates the luminance for an RGB colour.
+	 */
+	private double calculateLuminance(double r, double g, double b) {
+		double value = 0.27*r + 0.67*g + 0.06*b;
 		return value;
 	}
 	
@@ -311,7 +318,7 @@ public class HDRProcessor {
 				if( MyDebug.LOG )
 					Log.d(TAG, "sample luminance from " + x_coord + " , " + y_coord);
 				calculateHDR(hdr, n_bitmaps, buffers, x_coord, response_functions);
-				double luminance = (hdr[0] + hdr[1] + hdr[2])/3.0 + 1.0; // add 1 so we don't take log of 0...
+				double luminance = calculateLuminance(hdr[0], hdr[1], hdr[2]) + 1.0; // add 1 so we don't take log of 0..;
 				sum_log_luminance += Math.log(luminance);
 				count++;
 			}
