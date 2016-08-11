@@ -32,7 +32,7 @@ public class HDRProcessor {
 	 *  levels, to estimate what the pixel should be at the "base" exposure.
 	 */
 	private class ResponseFunction {
-		double parameter = 0.0;
+		float parameter = 0.0f;
 
 		/** Computes the response function.
 		 * @param x_samples List of Xi samples. Must be at least 3 samples.
@@ -79,10 +79,10 @@ public class HDRProcessor {
 			if( denom < 1.0e-5 ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "denom too small");
-				parameter = 1.0;
+				parameter = 1.0f;
 			}
 			else {
-				parameter = numer / denom;
+				parameter = (float)(numer / denom);
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "parameter = " + parameter);
@@ -115,7 +115,7 @@ public class HDRProcessor {
 
 		/** Evaluates the response function at parameter x.
 		 */
-		double value(double x) {
+		float value(float x) {
 			return parameter * x;
 		}
 	}
@@ -245,7 +245,7 @@ public class HDRProcessor {
 	 * @param hdr The input HDR brightness.
 	 * @param l_avg The log average luminance of the HDR image. That is, exp( sum{log(Li)}/N ).
 	 */
-	private void tonemap(int [] rgb, double [] hdr, double l_avg) {
+	private void tonemap(int [] rgb, float [] hdr, float l_avg) {
 		// simple clamp:
 		/*
 		int rgb = (int)hdr;
@@ -260,15 +260,15 @@ public class HDRProcessor {
 		// Reinhard (Global):
 		//final double scale_c = 0.5*255.0;
 		//final double scale_c = 1.0*255.0;
-		final double scale_c = l_avg / 0.5;
+		final float scale_c = l_avg / 0.5f;
 		for(int i=0;i<3;i++)
 			rgb[i] = (int)(255.0 * ( hdr[i] / (scale_c + hdr[i]) ));
 	}
 	
-	private double calculateWeight(double value) {
+	private float calculateWeight(float value) {
 		// scale chosen so that 0 and 255 map to a non-zero weight of 1.0/127.5
-		final double scale = (1.0-1.0/127.5)/127.5;
-		double weight = 1.0 - scale * Math.abs( 127.5 - value );
+		final float scale = (float)((1.0-1.0/127.5)/127.5);
+		float weight = 1.0f - scale * Math.abs( 127.5f - value );
 		return weight;
 	}
 
@@ -288,7 +288,7 @@ public class HDRProcessor {
 		for(int i=0;i<n_bitmaps;i++) {
 			buffers[i] = new int[bm.getWidth()];
 		}
-		double [] hdr = new double[3];
+		float [] hdr = new float[3];
 		int [] rgb = new int[3];
 		
 		// compute response_functions
@@ -324,7 +324,7 @@ public class HDRProcessor {
 				count++;
 			}
 		}
-		double avg_luminance = Math.exp( sum_log_luminance / count );
+		float avg_luminance = (float)(Math.exp( sum_log_luminance / count ));
 		if( MyDebug.LOG )
 			Log.d(TAG, "avg_luminance: " + avg_luminance);
 
@@ -361,15 +361,15 @@ public class HDRProcessor {
 			Log.d(TAG, "time for processHDRCore: " + (System.currentTimeMillis() - time_s));
 	}
 	
-	private void calculateHDR(double [] hdr, int n_bitmaps, int [][] buffers, int x, ResponseFunction [] response_functions) {
-		double hdr_r = 0.0, hdr_g = 0.0, hdr_b = 0.0;
-		double sum_weight = 0.0;
+	private void calculateHDR(float [] hdr, int n_bitmaps, int [][] buffers, int x, ResponseFunction [] response_functions) {
+		float hdr_r = 0.0f, hdr_g = 0.0f, hdr_b = 0.0f;
+		float sum_weight = 0.0f;
 		for(int i=0;i<n_bitmaps;i++) {
 			int color = buffers[i][x];
-			double r = (double)((color & 0xFF0000) >> 16);
-			double g = (double)((color & 0xFF00) >> 8);
-			double b = (double)(color & 0xFF);
-			double weight = calculateWeight( (r+g+b) / 3.0 );
+			float r = (float)((color & 0xFF0000) >> 16);
+			float g = (float)((color & 0xFF00) >> 8);
+			float b = (float)(color & 0xFF);
+			float weight = calculateWeight( (r+g+b) / 3.0f );
 			//double weight = 1.0;
 			/*if( MyDebug.LOG && x == 1547 && y == 1547 )
 				Log.d(TAG, "" + x + "," + y + ":" + i + ":" + r + "," + g + "," + b + " weight: " + weight);*/
