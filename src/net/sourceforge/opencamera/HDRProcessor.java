@@ -112,12 +112,6 @@ public class HDRProcessor {
 				}
 			}
 		}
-
-		/** Evaluates the response function at parameter x.
-		 */
-		float value(float x) {
-			return parameter * x;
-		}
 	}
 
 	/** Converts a list of bitmaps into a HDR image, which is then tonemapped to a final RGB image.
@@ -293,13 +287,6 @@ public class HDRProcessor {
 		}*/
 	}
 	
-	private float calculateWeight(float value) {
-		// scale chosen so that 0 and 255 map to a non-zero weight of 1.0/127.5
-		final float scale = (float)((1.0-1.0/127.5)/127.5);
-		float weight = 1.0f - scale * Math.abs( 127.5f - value );
-		return weight;
-	}
-
 	/** Core implementation of HDR algorithm.
 	 */
 	private void processHDRCore(List<Bitmap> bitmaps) {
@@ -389,6 +376,8 @@ public class HDRProcessor {
 			Log.d(TAG, "time for processHDRCore: " + (System.currentTimeMillis() - time_s));
 	}
 	
+	final float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
+
 	private void calculateHDR(float [] hdr, int n_bitmaps, int [][] buffers, int x, ResponseFunction [] response_functions) {
 		float hdr_r = 0.0f, hdr_g = 0.0f, hdr_b = 0.0f;
 		float sum_weight = 0.0f;
@@ -397,14 +386,18 @@ public class HDRProcessor {
 			float r = (float)((color & 0xFF0000) >> 16);
 			float g = (float)((color & 0xFF00) >> 8);
 			float b = (float)(color & 0xFF);
-			float weight = calculateWeight( (r+g+b) / 3.0f );
+			float avg = (r+g+b) / 3.0f;
+			// weight_scale_c chosen so that 0 and 255 map to a non-zero weight of 1.0/127.5
+			float weight = 1.0f - weight_scale_c * Math.abs( 127.5f - avg );
 			//double weight = 1.0;
 			/*if( MyDebug.LOG && x == 1547 && y == 1547 )
 				Log.d(TAG, "" + x + "," + y + ":" + i + ":" + r + "," + g + "," + b + " weight: " + weight);*/
 			if( response_functions[i] != null ) {
-				r = response_functions[i].value(r);
-				g = response_functions[i].value(g);
-				b = response_functions[i].value(b);
+				// faster to access the parameter directly
+				float parameter = response_functions[i].parameter;
+				r *= parameter;
+				g *= parameter;
+				b *= parameter;
 			}
 			hdr_r += weight * r;
 			hdr_g += weight * g;
