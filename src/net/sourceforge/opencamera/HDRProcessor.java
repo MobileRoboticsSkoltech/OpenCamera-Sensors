@@ -241,17 +241,29 @@ public class HDRProcessor {
 		return value;
 	}
 	
+	/*final float A = 0.15f;
+	final float B = 0.50f;
+	final float C = 0.10f;
+	final float D = 0.20f;
+	final float E = 0.02f;
+	final float F = 0.30f;
+	final float W = 11.2f;
+	
+	float Uncharted2Tonemap(float x) {
+		return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+	}*/
+
 	/** Converts a HDR brightness to a 0-255 value.
 	 * @param hdr The input HDR brightness.
 	 * @param l_avg The log average luminance of the HDR image. That is, exp( sum{log(Li)}/N ).
 	 */
 	private void tonemap(int [] rgb, float [] hdr, float l_avg) {
 		// simple clamp:
-		/*
-		int rgb = (int)hdr;
-		if( rgb > 255 )
-			rgb = 255;
-			*/
+		/*for(int i=0;i<3;i++) {
+			rgb[i] = (int)hdr[i];
+			if( rgb[i] > 255 )
+				rgb[i] = 255;
+		}*/
 		/*
 		// exponential:
 		final double exposure_c = 1.2 / 255.0;
@@ -261,8 +273,24 @@ public class HDRProcessor {
 		//final double scale_c = 0.5*255.0;
 		//final double scale_c = 1.0*255.0;
 		final float scale_c = l_avg / 0.5f;
-		for(int i=0;i<3;i++)
+		/*for(int i=0;i<3;i++)
 			rgb[i] = (int)(255.0 * ( hdr[i] / (scale_c + hdr[i]) ));
+			*/
+		float max_hdr = hdr[0];
+		if( hdr[1] > max_hdr )
+			max_hdr = hdr[1];
+		if( hdr[2] > max_hdr )
+			max_hdr = hdr[2];
+		float scale = 255.0f / ( scale_c + max_hdr );
+		for(int i=0;i<3;i++)
+			rgb[i] = (int)(scale * hdr[i]);
+		// Uncharted 2 Hable
+		/*final float exposure_bias = 2.0f / 255.0f;
+		final float white_scale = 255.0f / Uncharted2Tonemap(W);
+		for(int i=0;i<3;i++) {
+			float curr = Uncharted2Tonemap(exposure_bias * hdr[i]);
+			rgb[i] = (int)(curr * white_scale);
+		}*/
 	}
 	
 	private float calculateWeight(float value) {
