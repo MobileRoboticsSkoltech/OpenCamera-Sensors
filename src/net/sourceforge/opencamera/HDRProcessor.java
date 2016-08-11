@@ -287,6 +287,67 @@ public class HDRProcessor {
 		}*/
 	}
 	
+	class HDRWriterThread extends Thread {
+		int y_start = 0, y_stop = 0;
+		List<Bitmap> bitmaps;
+		ResponseFunction [] response_functions;
+		float avg_luminance = 0.0f;
+
+		int n_bitmaps = 0;
+		Bitmap bm = null;
+		int [][] buffers = null;
+		
+		HDRWriterThread(int y_start, int y_stop, List<Bitmap> bitmaps, ResponseFunction [] response_functions, float avg_luminance) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "thread " + this.getId() + " will process " + y_start + " to " + y_stop);
+			this.y_start = y_start;
+			this.y_stop = y_stop;
+			this.bitmaps = bitmaps;
+			this.response_functions = response_functions;
+			this.avg_luminance = avg_luminance;
+
+			this.n_bitmaps = bitmaps.size();
+			this.bm = bitmaps.get(0);
+			this.buffers = new int[n_bitmaps][];
+			for(int i=0;i<n_bitmaps;i++) {
+				buffers[i] = new int[bm.getWidth()];
+			}
+		}
+		
+		public void run() {
+			float [] hdr = new float[3];
+			int [] rgb = new int[3];
+
+			for(int y=y_start;y<y_stop;y++) {
+				if( MyDebug.LOG ) {
+					if( y % 100 == 0 )
+						Log.d(TAG, "thread " + this.getId() + ": process: " + (y - y_start) + " / " + (y_stop - y_start));
+				}
+				// read out this row for each bitmap
+				for(int i=0;i<n_bitmaps;i++) {
+					bitmaps.get(i).getPixels(buffers[i], 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
+				}
+				for(int x=0;x<bm.getWidth();x++) {
+					//int this_col = buffer[c];
+					calculateHDR(hdr, n_bitmaps, buffers, x, response_functions);
+					tonemap(rgb, hdr, avg_luminance);
+					/*{
+						// check
+						if( new_r < 0 || new_r > 255 )
+							throw new RuntimeException();
+						else if( new_g < 0 || new_g > 255 )
+							throw new RuntimeException();
+						else if( new_b < 0 || new_b > 255 )
+							throw new RuntimeException();
+					}*/
+					int new_col = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
+					buffers[0][x] = new_col;
+				}
+				bm.setPixels(buffers[0], 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
+			}
+		}
+	}
+	
 	/** Core implementation of HDR algorithm.
 	 */
 	private void processHDRCore(List<Bitmap> bitmaps) {
@@ -304,7 +365,7 @@ public class HDRProcessor {
 			buffers[i] = new int[bm.getWidth()];
 		}
 		float [] hdr = new float[3];
-		int [] rgb = new int[3];
+		//int [] rgb = new int[3];
 		
 		// compute response_functions
 		for(int i=0;i<n_bitmaps;i++) {
@@ -344,32 +405,33 @@ public class HDRProcessor {
 			Log.d(TAG, "avg_luminance: " + avg_luminance);
 
 		// write new hdr image
-		for(int y=0;y<bm.getHeight();y++) {
-			if( MyDebug.LOG ) {
-				if( y % 100 == 0 )
-					Log.d(TAG, "process: " + y + " / " + bm.getHeight());
+		final int n_threads =  Runtime.getRuntime().availableProcessors();
+		if( MyDebug.LOG )
+			Log.d(TAG, "create n_threads: " + n_threads);
+		// create threads
+		HDRWriterThread [] threads = new HDRWriterThread[n_threads];
+		for(int i=0;i<n_threads;i++) {
+			int y_start = (i*bm.getHeight()) / n_threads;
+			int y_stop = ((i+1)*bm.getHeight()) / n_threads;
+			threads[i] = new HDRWriterThread(y_start, y_stop, bitmaps, response_functions, avg_luminance);
+		}
+		// start threads
+		if( MyDebug.LOG )
+			Log.d(TAG, "start threads");
+		for(int i=0;i<n_threads;i++) {
+			threads[i].start();
+		}
+		// wait for threads to complete
+		if( MyDebug.LOG )
+			Log.d(TAG, "wait for threads to complete");
+		try {
+			for(int i=0;i<n_threads;i++) {
+				threads[i].join();
 			}
-			// read out this row for each bitmap
-			for(int i=0;i<n_bitmaps;i++) {
-				bitmaps.get(i).getPixels(buffers[i], 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
-			}
-			for(int x=0;x<bm.getWidth();x++) {
-				//int this_col = buffer[c];
-				calculateHDR(hdr, n_bitmaps, buffers, x, response_functions);
-				tonemap(rgb, hdr, avg_luminance);
-				/*{
-					// check
-					if( new_r < 0 || new_r > 255 )
-						throw new RuntimeException();
-					else if( new_g < 0 || new_g > 255 )
-						throw new RuntimeException();
-					else if( new_b < 0 || new_b > 255 )
-						throw new RuntimeException();
-				}*/
-				int new_col = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
-				buffers[0][x] = new_col;
-			}
-			bm.setPixels(buffers[0], 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
+		}
+		catch(InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		if( MyDebug.LOG )
