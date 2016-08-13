@@ -32,7 +32,8 @@ public class HDRProcessor {
 	 *  levels, to estimate what the pixel should be at the "base" exposure.
 	 */
 	private class ResponseFunction {
-		float parameter = 0.0f;
+		float parameter_A = 0.0f;
+		float parameter_B = 0.0f;
 
 		/** Computes the response function.
 		 * @param x_samples List of Xi samples. Must be at least 3 samples.
@@ -61,31 +62,111 @@ public class HDRProcessor {
 				// throw RuntimeException, as this is a programming error
 				throw new RuntimeException();
 			}
-			
-			double numer = 0.0;
-			double denom = 0.0;
+
+			// linear Y = AX + B
+			boolean done = false;
+			double sum_wx = 0.0;
+			double sum_wx2 = 0.0;
+			double sum_wxy = 0.0;
+			double sum_wy = 0.0;
+			double sum_w = 0.0;
 			for(int i=0;i<x_samples.size();i++) {
 				double x = x_samples.get(i);
 				double y = y_samples.get(i);
 				double w = weights.get(i);
-				numer += w*x*y;
-				denom += w*x*x;
+				sum_wx += w * x;
+				sum_wx2 += w * x * x;
+				sum_wxy += w * x * y;
+				sum_wy += w * y;
+				sum_w += w;
 			}
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "numer = " + numer);
-				Log.d(TAG, "denom = " + denom);
+				Log.d(TAG, "sum_wx = " + sum_wx);
+				Log.d(TAG, "sum_wx2 = " + sum_wx2);
+				Log.d(TAG, "sum_wxy = " + sum_wxy);
+				Log.d(TAG, "sum_wy = " + sum_wy);
+				Log.d(TAG, "sum_w = " + sum_w);
 			}
-			
-			if( denom < 1.0e-5 ) {
+			// need to solve:
+			// A . sum_wx + B . sum_w - sum_wy = 0
+			// A . sum_wx2 + B . sum_wx - sum_wxy = 0
+			// =>
+			// A . sum_wx^2 + B . sum_w . sum_wx - sum_wy . sum_wx = 0
+			// A . sum_w . sum_wx2 + B . sum_w . sum_wx - sum_w . sum_wxy = 0
+			// A ( sum_wx^2 - sum_w . sum_wx2 ) = sum_wy . sum_wx - sum_w . sum_wxy
+			// then plug A into:
+			// B . sum_w = sum_wy - A . sum_wx
+			double A_numer = sum_wy * sum_wx - sum_w * sum_wxy;
+			double A_denom = sum_wx * sum_wx - sum_w * sum_wx2;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "A_numer = " + A_numer);
+				Log.d(TAG, "A_denom = " + A_denom);
+			}
+			if( Math.abs(A_denom) < 1.0e-5 ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "denom too small");
-				parameter = 1.0f;
+				// will fall back to linear Y = AX
 			}
 			else {
-				parameter = (float)(numer / denom);
+				parameter_A = (float)(A_numer / A_denom);
+				parameter_B = (float)((sum_wy - parameter_A * sum_wx) / sum_w);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "parameter_A = " + parameter_A);
+					Log.d(TAG, "parameter_B = " + parameter_B);
+				}
+				// we don't want a function that is not monotonic, or can be negative!
+				if( parameter_A < 1.0e-5 ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "parameter A too small or negative: " + parameter_A);
+				}
+				else if( parameter_B < 1.0e-5 ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "parameter B too small or negative: " + parameter_B);
+				}
+				else {
+					done = true;
+				}
 			}
-			if( MyDebug.LOG )
-				Log.d(TAG, "parameter = " + parameter);
+			
+			if( !done ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "falling back to linear Y = AX");
+				// linear Y = AX
+				double numer = 0.0;
+				double denom = 0.0;
+				for(int i=0;i<x_samples.size();i++) {
+					double x = x_samples.get(i);
+					double y = y_samples.get(i);
+					double w = weights.get(i);
+					numer += w*x*y;
+					denom += w*x*x;
+				}
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "numer = " + numer);
+					Log.d(TAG, "denom = " + denom);
+				}
+				
+				if( denom < 1.0e-5 ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "denom too small");
+					parameter_A = 1.0f;
+				}
+				else {
+					parameter_A = (float)(numer / denom);
+					// we don't want a function that is not monotonic!
+					if( parameter_A < 1.0e-5 ) {
+						if( MyDebug.LOG )
+							Log.e(TAG, "parameter A too small or negative: " + parameter_A);
+						parameter_A = 1.0e-5f;
+					}
+				}
+				parameter_B = 0.0f;
+			}
+
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "parameter_A = " + parameter_A);
+				Log.d(TAG, "parameter_B = " + parameter_B);
+			}
 
 			if( MyDebug.LOG ) {
 				// log samples to a CSV file
@@ -95,13 +176,15 @@ public class HDRProcessor {
 				}
 				try {
 					FileWriter writer = new FileWriter(file);
-					writer.append("X,Y\n");
-					writer.append("Parameter," + parameter + "\n");
+					//writer.append("Parameter," + parameter + "\n");
+					writer.append("Parameters," + parameter_A + "," + parameter_B + "\n");
+					writer.append("X,Y,Weight\n");
 					for(int i=0;i<x_samples.size();i++) {
-						Log.d(TAG, "log: " + i + " / " + x_samples.size());
+						//Log.d(TAG, "log: " + i + " / " + x_samples.size());
 						double x = x_samples.get(i);
 						double y = y_samples.get(i);
-						writer.append(x + "," + y + "\n");
+						double w = weights.get(i);
+						writer.append(x + "," + y + "," + w + "\n");
 					}
 					writer.close();
 		        	MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath() }, null, null);
@@ -171,24 +254,34 @@ public class HDRProcessor {
 		final int n_samples_c = 100;
 		final int n_w_samples = (int)Math.sqrt(n_samples_c);
 		final int n_h_samples = n_samples_c/n_w_samples;
-		
+
+		double avg_in = 0.0;
+		double avg_out = 0.0;
 		for(int y=0;y<n_h_samples;y++) {
 			double alpha = ((double)y+1.0) / ((double)n_h_samples+1.0);
 			int y_coord = (int)(alpha * in_bitmap.getHeight());
 			for(int x=0;x<n_w_samples;x++) {
 				double beta = ((double)x+1.0) / ((double)n_w_samples+1.0);
 				int x_coord = (int)(beta * in_bitmap.getWidth());
-				if( MyDebug.LOG )
-					Log.d(TAG, "sample response from " + x_coord + " , " + y_coord);
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "sample response from " + x_coord + " , " + y_coord);*/
 				int in_col = in_bitmap.getPixel(x_coord, y_coord);
 				int out_col = out_bitmap.getPixel(x_coord, y_coord);
 				double in_value = averageRGB(in_col);
 				double out_value = averageRGB(out_col);
+				avg_in += in_value;
+				avg_out += out_value;
 				x_samples.add(in_value);
 				y_samples.add(out_value);
-				//double weight = calculateWeight(in_value);
-				//weights.add(weight);
 			}
+		}
+		avg_in /= x_samples.size();
+		avg_out /= x_samples.size();
+		boolean is_dark_exposure = avg_in < avg_out;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "avg_in: " + avg_in);
+			Log.d(TAG, "avg_out: " + avg_out);
+			Log.d(TAG, "is_dark_exposure: " + is_dark_exposure);
 		}
 		{
 			// calculate weights
@@ -207,10 +300,36 @@ public class HDRProcessor {
 				Log.d(TAG, "max_value: " + max_value);
 				Log.d(TAG, "med_value: " + med_value);
 			}
+			double min_value_y = y_samples.get(0);
+			double max_value_y = y_samples.get(0);
+			for(int i=1;i<y_samples.size();i++) {
+				double value = y_samples.get(i);
+				if( value < min_value_y )
+					min_value_y = value;
+				if( value > max_value_y )
+					max_value_y = value;
+			}
+			double med_value_y = 0.5*(min_value_y + max_value_y);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "min_value_y: " + min_value_y);
+				Log.d(TAG, "max_value_y: " + max_value_y);
+				Log.d(TAG, "med_value_y: " + med_value_y);
+			}
 			for(int i=0;i<x_samples.size();i++) {
 				double value = x_samples.get(i);
-				double weight = (value <= med_value) ? value - min_value : max_value - value;
-				weights.add(weight);
+				double value_y = y_samples.get(i);
+				if( is_dark_exposure ) {
+					// for dark exposure, also need to worry about the y values (which will be brighter than x) being overexposed
+					double weight = (value <= med_value) ? value - min_value : max_value - value;
+					double weight_y = (value_y <= med_value_y) ? value_y - min_value_y : max_value_y - value_y;
+					if( weight_y < weight )
+						weight = weight_y;
+					weights.add(weight);
+				}
+				else {
+					double weight = (value <= med_value) ? value - min_value : max_value - value;
+					weights.add(weight);
+				}
 			}
 		}
 		
@@ -225,6 +344,7 @@ public class HDRProcessor {
 		int g = (color & 0xFF00) >> 8;
 		int b = (color & 0xFF);
 		double value = (r + g + b)/3.0;
+		//double value = 0.27*r + 0.67*g + 0.06*b;
 		return value;
 	}
 	
@@ -266,18 +386,22 @@ public class HDRProcessor {
 		// Reinhard (Global):
 		//final double scale_c = 0.5*255.0;
 		//final double scale_c = 1.0*255.0;
-		final float scale_c = l_avg / 0.5f;
-		/*for(int i=0;i<3;i++)
-			rgb[i] = (int)(255.0 * ( hdr[i] / (scale_c + hdr[i]) ));
-			*/
+		//final float scale_c = l_avg / 0.5f;
+		final float scale_c = l_avg / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
+		//final float scale_c = l_avg / 1.0f;
+		//for(int i=0;i<3;i++)
+		//	rgb[i] = (int)(255.0 * ( hdr[i] / (scale_c + hdr[i]) ));
 		float max_hdr = hdr[0];
 		if( hdr[1] > max_hdr )
 			max_hdr = hdr[1];
 		if( hdr[2] > max_hdr )
 			max_hdr = hdr[2];
 		float scale = 255.0f / ( scale_c + max_hdr );
-		for(int i=0;i<3;i++)
+		for(int i=0;i<3;i++) {
+			//float ref_hdr = 0.5f * ( hdr[i] + max_hdr );
+			//float scale = 255.0f / ( scale_c + ref_hdr );
 			rgb[i] = (int)(scale * hdr[i]);
+		}
 		// Uncharted 2 Hable
 		/*final float exposure_bias = 2.0f / 255.0f;
 		final float white_scale = 255.0f / Uncharted2Tonemap(W);
@@ -455,11 +579,16 @@ public class HDRProcessor {
 			/*if( MyDebug.LOG && x == 1547 && y == 1547 )
 				Log.d(TAG, "" + x + "," + y + ":" + i + ":" + r + "," + g + "," + b + " weight: " + weight);*/
 			if( response_functions[i] != null ) {
-				// faster to access the parameter directly
-				float parameter = response_functions[i].parameter;
+				// faster to access the parameters directly
+				/*float parameter = response_functions[i].parameter;
 				r *= parameter;
 				g *= parameter;
-				b *= parameter;
+				b *= parameter;*/
+				float parameter_A = response_functions[i].parameter_A;
+				float parameter_B = response_functions[i].parameter_B;
+				r = parameter_A * r + parameter_B;
+				g = parameter_A * g + parameter_B;
+				b = parameter_A * b + parameter_B;
 			}
 			hdr_r += weight * r;
 			hdr_g += weight * g;
