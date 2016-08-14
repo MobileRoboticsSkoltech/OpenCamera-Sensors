@@ -4,6 +4,7 @@ _docs/cai_lan_gong_muri_all_contributors.jpg
 _other/
 
 bin/
+gen/
 gfx/
 
 *.db
