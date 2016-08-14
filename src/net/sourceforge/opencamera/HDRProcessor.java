@@ -10,12 +10,15 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
+import android.support.v8.renderscript.Allocation;
+import android.support.v8.renderscript.RenderScript;
 import android.util.Log;
 
 public class HDRProcessor {
 	private static final String TAG = "HDRProcessor";
 	
 	private Context context = null;
+	private RenderScript rs = null;
 
 	enum HDRAlgorithm {
 		HDRALGORITHM_AVERAGE,
@@ -24,6 +27,7 @@ public class HDRProcessor {
 	
 	HDRProcessor(Context context) {
 		this.context = context;
+		this.rs = RenderScript.create(context);
 	}
 
 	/** Given a set of data Xi and Yi, this function estimates a relation between X and Y
@@ -490,7 +494,7 @@ public class HDRProcessor {
 		}
 		float [] hdr = new float[3];
 		//int [] rgb = new int[3];
-		
+
 		// compute response_functions
 		for(int i=0;i<n_bitmaps;i++) {
 			ResponseFunction function = null;
@@ -499,6 +503,8 @@ public class HDRProcessor {
 			}
 			response_functions[i] = function;
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "time after creating response functions: " + (System.currentTimeMillis() - time_s));
 		
 		// calculate average luminance by sampling
 		final int n_samples_c = 100;
@@ -527,35 +533,79 @@ public class HDRProcessor {
 		float avg_luminance = (float)(Math.exp( sum_log_luminance / count ));
 		if( MyDebug.LOG )
 			Log.d(TAG, "avg_luminance: " + avg_luminance);
+		if( MyDebug.LOG )
+			Log.d(TAG, "time after calculating average luminance: " + (System.currentTimeMillis() - time_s));
+
+		//final boolean use_renderscript = false;
+		final boolean use_renderscript = true;
 
 		// write new hdr image
-		final int n_threads =  Runtime.getRuntime().availableProcessors();
-		if( MyDebug.LOG )
-			Log.d(TAG, "create n_threads: " + n_threads);
-		// create threads
-		HDRWriterThread [] threads = new HDRWriterThread[n_threads];
-		for(int i=0;i<n_threads;i++) {
-			int y_start = (i*bm.getHeight()) / n_threads;
-			int y_stop = ((i+1)*bm.getHeight()) / n_threads;
-			threads[i] = new HDRWriterThread(y_start, y_stop, bitmaps, response_functions, avg_luminance);
-		}
-		// start threads
-		if( MyDebug.LOG )
-			Log.d(TAG, "start threads");
-		for(int i=0;i<n_threads;i++) {
-			threads[i].start();
-		}
-		// wait for threads to complete
-		if( MyDebug.LOG )
-			Log.d(TAG, "wait for threads to complete");
-		try {
-			for(int i=0;i<n_threads;i++) {
-				threads[i].join();
+		if( use_renderscript ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "use renderscipt");
+			// create allocations
+	    	Allocation [] allocations = new Allocation[n_bitmaps];
+			for(int i=0;i<n_bitmaps;i++) {
+				allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
 			}
+			
+			// create RenderScript
+			ScriptC_process_hdr processHDRScript = new ScriptC_process_hdr(rs);
+			
+			// set allocations
+			processHDRScript.set_bitmap1(allocations[1]);
+			processHDRScript.set_bitmap2(allocations[2]);
+			
+			// set response functions
+			processHDRScript.set_parameter_A0( response_functions[0].parameter_A );
+			processHDRScript.set_parameter_B0( response_functions[0].parameter_B );
+			// no response function for middle image
+			processHDRScript.set_parameter_A2( response_functions[2].parameter_A );
+			processHDRScript.set_parameter_B2( response_functions[2].parameter_B );
+
+			// set globals
+			final float tonemap_scale_c = avg_luminance / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
+			processHDRScript.set_tonemap_scale(tonemap_scale_c);
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "call renderscript");
+			processHDRScript.forEach_hdr(allocations[0], allocations[0]);
+			
+			if( MyDebug.LOG )
+				Log.d(TAG, "done renderscript");
+			allocations[0].copyTo(bm);
 		}
-		catch(InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "use java");
+			final int n_threads = Runtime.getRuntime().availableProcessors();
+			if( MyDebug.LOG )
+				Log.d(TAG, "create n_threads: " + n_threads);
+			// create threads
+			HDRWriterThread [] threads = new HDRWriterThread[n_threads];
+			for(int i=0;i<n_threads;i++) {
+				int y_start = (i*bm.getHeight()) / n_threads;
+				int y_stop = ((i+1)*bm.getHeight()) / n_threads;
+				threads[i] = new HDRWriterThread(y_start, y_stop, bitmaps, response_functions, avg_luminance);
+			}
+			// start threads
+			if( MyDebug.LOG )
+				Log.d(TAG, "start threads");
+			for(int i=0;i<n_threads;i++) {
+				threads[i].start();
+			}
+			// wait for threads to complete
+			if( MyDebug.LOG )
+				Log.d(TAG, "wait for threads to complete");
+			try {
+				for(int i=0;i<n_threads;i++) {
+					threads[i].join();
+				}
+			}
+			catch(InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		if( MyDebug.LOG )
