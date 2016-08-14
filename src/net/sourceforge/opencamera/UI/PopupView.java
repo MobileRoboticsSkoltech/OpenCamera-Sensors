@@ -137,7 +137,7 @@ public class PopupView extends LinearLayout {
 	        	List<String> supported_color_effects = preview.getSupportedColorEffects();
 	        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT");
     		}
-        	
+    		
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
@@ -202,6 +202,28 @@ public class PopupView extends LinearLayout {
         		this.addView(checkBox);
         	}
 
+    		if( main_activity.getApplicationInterface().useCamera2() ) {
+        		CheckBox checkBox = new CheckBox(main_activity);
+        		checkBox.setText("Use HDR");
+        		checkBox.setTextColor(Color.WHITE);
+
+        		boolean hdr = sharedPreferences.getBoolean(PreferenceKeys.getHDRPreferenceKey(), false);
+        		checkBox.setChecked(hdr);
+        		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putBoolean(PreferenceKeys.getHDRPreferenceKey(), isChecked);
+						editor.apply();
+	    				main_activity.updateForSettings("HDR: " + isChecked);
+						main_activity.closePopup();
+					}
+        		});
+
+        		this.addView(checkBox);
+    		}
+        	
     		final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes();
     		picture_size_index = preview.getCurrentPictureSizeIndex();
     		final List<String> picture_size_strings = new ArrayList<String>();
