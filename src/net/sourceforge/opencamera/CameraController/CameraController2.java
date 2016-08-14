@@ -1356,6 +1356,8 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public SupportedValues setISO(String value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setISO: " + value);
 		String default_value = getDefaultISO();
 		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
 		if( iso_range == null ) {
