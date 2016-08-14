@@ -116,9 +116,29 @@ public class PopupView extends LinearLayout {
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     				SharedPreferences.Editor editor = sharedPreferences.edit();
     				editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
-    				// also reset exposure time when changing back to auto from the popup menu:
-    				if( option.equals("auto") )
+    				if( option.equals("auto") ) {
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "switched from manual to auto iso");
+        				// also reset exposure time when changing from manual to auto from the popup menu:
     					editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
+    				}
+    				else {
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "switched from auto to manual iso");
+        				if( preview.usingCamera2API() ) {
+        					// if changing from auto to manual, preserve the current exposure time if it exists
+        					if( preview.getCameraController() != null && preview.getCameraController().captureResultHasExposureTime() ) {
+        						long exposure_time = preview.getCameraController().captureResultExposureTime();
+                				if( MyDebug.LOG )
+                					Log.d(TAG, "apply existing exposure time of " + exposure_time);
+            					editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
+        					}
+        					else {
+                				if( MyDebug.LOG )
+                					Log.d(TAG, "no existing exposure time available");
+        					}
+        				}
+    				}
     				editor.apply();
 
     				main_activity.updateForSettings("ISO: " + option);
