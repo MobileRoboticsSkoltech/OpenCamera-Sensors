@@ -186,7 +186,8 @@ public final class R {
     public static final class raw {
         public static final int beep=0x7f050000;
         public static final int beep_hi=0x7f050001;
-        public static final int process_hdr=0x7f050002;
+        public static final int histogram_adjust=0x7f050002;
+        public static final int process_hdr=0x7f050003;
     }
     public static final class string {
         public static final int about_available=0x7f0800f4;
@@ -254,11 +255,11 @@ public final class R {
   intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 
+  intentionally starts lower case 
+  intentionally starts lower case 
+  intentionally starts lower case 
+  intentionally starts lower case 
  @TODO PER FAVORE VERIFICARE QUESTA TRADUZIONE! 
-  intentionally starts lower case 
-  intentionally starts lower case 
-  intentionally starts lower case 
-  intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 
   intentionally starts lower case 
