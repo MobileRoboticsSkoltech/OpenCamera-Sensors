@@ -653,6 +653,7 @@ public class HDRProcessor {
 	
 	final float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
 
+	// If this algorithm is changed, also update the Renderscript version in process_hdr.rs
 	private void calculateHDR(float [] hdr, int n_bitmaps, int [][] buffers, int x, ResponseFunction [] response_functions) {
 		float hdr_r = 0.0f, hdr_g = 0.0f, hdr_b = 0.0f;
 		float sum_weight = 0.0f;
