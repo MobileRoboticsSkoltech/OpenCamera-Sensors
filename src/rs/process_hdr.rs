@@ -15,6 +15,18 @@ float parameter_B2 = 0.0f;
 const float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
 float tonemap_scale = 1.0f;
 
+/*const float W = 11.2f;
+
+static float Uncharted2Tonemap(float x) {
+	const float A = 0.15f;
+	const float B = 0.50f;
+	const float C = 0.10f;
+	const float D = 0.20f;
+	const float E = 0.02f;
+	const float F = 0.30f;
+	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+}*/
+
 uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	// If this algorithm is changed, also update the Java version in HDRProcessor.calculateHDR()
 	const int n_bitmaps = 3;
@@ -158,6 +170,17 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		out.g = (uchar)(scale * hdr_g);
 		out.b = (uchar)(scale * hdr_b);
 		out.a = 255;
+		/*
+		// Filmic Uncharted 2
+		const float exposure_bias = 8.0f / 255.0f;
+		float white_scale = 255.0f / Uncharted2Tonemap(W);
+		float curr_r = Uncharted2Tonemap(exposure_bias * hdr_r);
+		float curr_g = Uncharted2Tonemap(exposure_bias * hdr_g);
+		float curr_b = Uncharted2Tonemap(exposure_bias * hdr_b);
+		out.r = (uchar)(curr_r * white_scale);
+		out.g = (uchar)(curr_g * white_scale);
+		out.b = (uchar)(curr_b * white_scale);
+		*/
 	}
 	
 	return out;

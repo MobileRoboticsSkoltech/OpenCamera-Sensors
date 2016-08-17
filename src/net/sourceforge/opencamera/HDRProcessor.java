@@ -356,10 +356,10 @@ public class HDRProcessor {
 	
 	/** Calculates the luminance for an RGB colour.
 	 */
-	private double calculateLuminance(double r, double g, double b) {
+	/*private double calculateLuminance(double r, double g, double b) {
 		double value = 0.27*r + 0.67*g + 0.06*b;
 		return value;
-	}
+	}*/
 	
 	/*final float A = 0.15f;
 	final float B = 0.50f;
@@ -377,7 +377,7 @@ public class HDRProcessor {
 	 * @param hdr The input HDR brightness.
 	 * @param l_avg The log average luminance of the HDR image. That is, exp( sum{log(Li)}/N ).
 	 */
-	private void tonemap(int [] rgb, float [] hdr, float l_avg) {
+	private void tonemap(int [] rgb, float [] hdr/*, float l_avg*/) {
 		// simple clamp:
 		/*for(int i=0;i<3;i++) {
 			rgb[i] = (int)hdr[i];
@@ -390,11 +390,10 @@ public class HDRProcessor {
 		int rgb = (int)(255.0*(1.0 - Math.exp(- hdr * exposure_c)));
 		*/
 		// Reinhard (Global):
-		//final double scale_c = 0.5*255.0;
-		//final double scale_c = 1.0*255.0;
 		//final float scale_c = l_avg / 0.5f;
-		final float scale_c = l_avg / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
+		//final float scale_c = l_avg / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
 		//final float scale_c = l_avg / 1.0f;
+		final float scale_c = 255.0f;
 		//for(int i=0;i<3;i++)
 		//	rgb[i] = (int)(255.0 * ( hdr[i] / (scale_c + hdr[i]) ));
 		float max_hdr = hdr[0];
@@ -421,20 +420,20 @@ public class HDRProcessor {
 		int y_start = 0, y_stop = 0;
 		List<Bitmap> bitmaps;
 		ResponseFunction [] response_functions;
-		float avg_luminance = 0.0f;
+		//float avg_luminance = 0.0f;
 
 		int n_bitmaps = 0;
 		Bitmap bm = null;
 		int [][] buffers = null;
 		
-		HDRWriterThread(int y_start, int y_stop, List<Bitmap> bitmaps, ResponseFunction [] response_functions, float avg_luminance) {
+		HDRWriterThread(int y_start, int y_stop, List<Bitmap> bitmaps, ResponseFunction [] response_functions/*, float avg_luminance*/) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "thread " + this.getId() + " will process " + y_start + " to " + y_stop);
 			this.y_start = y_start;
 			this.y_stop = y_stop;
 			this.bitmaps = bitmaps;
 			this.response_functions = response_functions;
-			this.avg_luminance = avg_luminance;
+			//this.avg_luminance = avg_luminance;
 
 			this.n_bitmaps = bitmaps.size();
 			this.bm = bitmaps.get(0);
@@ -460,7 +459,7 @@ public class HDRProcessor {
 				for(int x=0;x<bm.getWidth();x++) {
 					//int this_col = buffer[c];
 					calculateHDR(hdr, n_bitmaps, buffers, x, response_functions);
-					tonemap(rgb, hdr, avg_luminance);
+					tonemap(rgb, hdr/*, avg_luminance*/);
 					/*{
 						// check
 						if( new_r < 0 || new_r > 255 )
@@ -494,7 +493,7 @@ public class HDRProcessor {
 		for(int i=0;i<n_bitmaps;i++) {
 			buffers[i] = new int[bm.getWidth()];
 		}
-		float [] hdr = new float[3];
+		//float [] hdr = new float[3];
 		//int [] rgb = new int[3];
 
 		// compute response_functions
@@ -508,6 +507,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "time after creating response functions: " + (System.currentTimeMillis() - time_s));
 		
+		/*
 		// calculate average luminance by sampling
 		final int n_samples_c = 100;
 		final int n_w_samples = (int)Math.sqrt(n_samples_c);
@@ -537,6 +537,7 @@ public class HDRProcessor {
 			Log.d(TAG, "avg_luminance: " + avg_luminance);
 		if( MyDebug.LOG )
 			Log.d(TAG, "time after calculating average luminance: " + (System.currentTimeMillis() - time_s));
+			*/
 
 		//final boolean use_renderscript = false;
 		final boolean use_renderscript = true;
@@ -566,7 +567,8 @@ public class HDRProcessor {
 			processHDRScript.set_parameter_B2( response_functions[2].parameter_B );
 
 			// set globals
-			final float tonemap_scale_c = avg_luminance / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
+			//final float tonemap_scale_c = avg_luminance / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
+			final float tonemap_scale_c = 255.0f;
 			processHDRScript.set_tonemap_scale(tonemap_scale_c);
 
 			if( MyDebug.LOG )
@@ -630,7 +632,7 @@ public class HDRProcessor {
 			for(int i=0;i<n_threads;i++) {
 				int y_start = (i*bm.getHeight()) / n_threads;
 				int y_stop = ((i+1)*bm.getHeight()) / n_threads;
-				threads[i] = new HDRWriterThread(y_start, y_stop, bitmaps, response_functions, avg_luminance);
+				threads[i] = new HDRWriterThread(y_start, y_stop, bitmaps, response_functions/*, avg_luminance*/);
 			}
 			// start threads
 			if( MyDebug.LOG )
