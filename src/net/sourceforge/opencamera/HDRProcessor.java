@@ -574,40 +574,45 @@ public class HDRProcessor {
 			processHDRScript.forEach_hdr(allocations[0], allocations[0]);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after processHDRScript: " + (System.currentTimeMillis() - time_s));
+			
+			//final boolean adjust_histogram = false;
+			final boolean adjust_histogram = true;
 
-			// create histogram
-			ScriptIntrinsicHistogram histogramScript = ScriptIntrinsicHistogram.create(rs, Element.U8_4(rs));
-			//Allocation histogramAllocation = Allocation.createSized(rs, Element.I32_3(rs), 256);
-			Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
-			histogramScript.setOutput(histogramAllocation);
-			histogramScript.forEach(allocations[0]);
-			if( MyDebug.LOG )
-				Log.d(TAG, "time after creating histogram: " + (System.currentTimeMillis() - time_s));
-
-			int [] histogram = new int[256];
-			//histogramAllocation.setAutoPadding(true);
-			histogramAllocation.copyTo(histogram);
-
-			int [] c_histogram = new int[256];
-			c_histogram[0] = histogram[0];
-			for(int x=1;x<256;x++) {
-				c_histogram[x] = c_histogram[x-1] + histogram[x];
-			}
-			if( MyDebug.LOG ) {
-				for(int x=0;x<256;x++) {
-					Log.d(TAG, "histogram[" + x + "] = " + histogram[x] + " cumulative: " + c_histogram[x]);
+			if( adjust_histogram ) {
+				// create histogram
+				ScriptIntrinsicHistogram histogramScript = ScriptIntrinsicHistogram.create(rs, Element.U8_4(rs));
+				//Allocation histogramAllocation = Allocation.createSized(rs, Element.I32_3(rs), 256);
+				Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
+				histogramScript.setOutput(histogramAllocation);
+				histogramScript.forEach(allocations[0]);
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after creating histogram: " + (System.currentTimeMillis() - time_s));
+	
+				int [] histogram = new int[256];
+				//histogramAllocation.setAutoPadding(true);
+				histogramAllocation.copyTo(histogram);
+	
+				int [] c_histogram = new int[256];
+				c_histogram[0] = histogram[0];
+				for(int x=1;x<256;x++) {
+					c_histogram[x] = c_histogram[x-1] + histogram[x];
 				}
+				if( MyDebug.LOG ) {
+					for(int x=0;x<256;x++) {
+						Log.d(TAG, "histogram[" + x + "] = " + histogram[x] + " cumulative: " + c_histogram[x]);
+					}
+				}
+				histogramAllocation.copyFrom(c_histogram);
+	
+				ScriptC_histogram_adjust histogramAdjustScript = new ScriptC_histogram_adjust(rs);
+				histogramAdjustScript.set_c_histogram(histogramAllocation);
+	
+				if( MyDebug.LOG )
+					Log.d(TAG, "call histogramAdjustScript");
+				histogramAdjustScript.forEach_histogram_adjust(allocations[0], allocations[0]);
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
 			}
-			histogramAllocation.copyFrom(c_histogram);
-
-			ScriptC_histogram_adjust histogramAdjustScript = new ScriptC_histogram_adjust(rs);
-			histogramAdjustScript.set_c_histogram(histogramAllocation);
-
-			if( MyDebug.LOG )
-				Log.d(TAG, "call histogramAdjustScript");
-			histogramAdjustScript.forEach_histogram_adjust(allocations[0], allocations[0]);
-			if( MyDebug.LOG )
-				Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
 
 			allocations[0].copyTo(bm);
 			if( MyDebug.LOG )
