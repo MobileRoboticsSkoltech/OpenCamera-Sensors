@@ -121,9 +121,9 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 			sum_weight += weight;
 			
 			// testing: make all non-safe images black:
-			/*hdr_r = 0;
-			hdr_g = 0;
-			hdr_b = 0;*/
+			//hdr_r = 0;
+			//hdr_g = 0;
+			//hdr_b = 0;
 		}
 	}
 
