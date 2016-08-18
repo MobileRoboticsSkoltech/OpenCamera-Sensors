@@ -160,11 +160,8 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		out.a = 255;
 		*/
 		// Reinhard
-		float max_hdr = hdr_r;
-		if( hdr_g > max_hdr )
-			max_hdr = hdr_g;
-		if( hdr_b > max_hdr )
-			max_hdr = hdr_b;
+		float max_hdr = fmax(hdr_r, hdr_g);
+		max_hdr = fmax(max_hdr, hdr_b);
 		float scale = 255.0f / ( tonemap_scale + max_hdr );
 		out.r = (uchar)(scale * hdr_r);
 		out.g = (uchar)(scale * hdr_g);
