@@ -44,9 +44,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	parameter_A[2] = parameter_A2;
 	parameter_B[2] = parameter_B2;
 	
-	float hdr_r = 0.0f;
-	float hdr_g = 0.0f;
-	float hdr_b = 0.0f;
+	float3 hdr = (float3){0.0f, 0.0f, 0.0f};
 	float sum_weight = 0.0f;
 
 	// calculateHDR	
@@ -72,10 +70,8 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	{
 		//const float safe_range_c = 64.0f;
 		const float safe_range_c = 96.0f;
-		float r = (float)pixels[1].r;
-		float g = (float)pixels[1].g;
-		float b = (float)pixels[1].b;
-		float avg = (r+g+b) / 3.0f;
+		float3 rgb = (float3){ (float)pixels[1].r, (float)pixels[1].g, (float)pixels[1].b };
+		float avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 		float diff = fabs( avg - 127.5f );
 		float weight = 1.0f;
 		if( diff > safe_range_c ) {
@@ -84,52 +80,38 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		}
 
 		// response function
-		r = parameter_A[1] * r + parameter_B[1];
-		g = parameter_A[1] * g + parameter_B[1];
-		b = parameter_A[1] * b + parameter_B[1];
+		rgb = parameter_A[1] * rgb + parameter_B[1];
 
-		hdr_r += weight * r;
-		hdr_g += weight * g;
-		hdr_b += weight * b;
+		hdr += weight * rgb;
 		sum_weight += weight;
 
 		if( weight < 1.0 ) {
 			// now look at a neighbour image
 			weight = 1.0f - weight;
 			if( avg <= 127.5f ) {
-				r = (float)pixels[2].r;
-				g = (float)pixels[2].g;
-				b = (float)pixels[2].b;
-				avg = (r+g+b) / 3.0f;
+				rgb = (float3){ (float)pixels[2].r, (float)pixels[2].g, (float)pixels[2].b };
+				avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 				diff = fabs( avg - 127.5f );
 				if( diff > safe_range_c ) {
 					// scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
 					weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
 				}
 	
-				r = parameter_A[2] * r + parameter_B[2];
-				g = parameter_A[2] * g + parameter_B[2];
-				b = parameter_A[2] * b + parameter_B[2];
+				rgb = parameter_A[2] * rgb + parameter_B[2];
 			}
 			else {
-				r = (float)pixels[0].r;
-				g = (float)pixels[0].g;
-				b = (float)pixels[0].b;
-				avg = (r+g+b) / 3.0f;
+				rgb = (float3){ (float)pixels[0].r, (float)pixels[0].g, (float)pixels[0].b };
+				avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 				diff = fabs( avg - 127.5f );
 				if( diff > safe_range_c ) {
 					// scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
 					weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
 				}
 	
-				r = parameter_A[0] * r + parameter_B[0];
-				g = parameter_A[0] * g + parameter_B[0];
-				b = parameter_A[0] * b + parameter_B[0];
+				rgb = parameter_A[0] * rgb + parameter_B[0];
 			}
 	
-			hdr_r += weight * r;
-			hdr_g += weight * g;
-			hdr_b += weight * b;
+			hdr += weight * rgb;
 			sum_weight += weight;
 			
 			// testing: make all non-safe images black:
@@ -139,9 +121,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		}
 	}
 
-	hdr_r /= sum_weight;
-	hdr_g /= sum_weight;
-	hdr_b /= sum_weight;
+	hdr /= sum_weight;
 
 	// tonemap
 	uchar4 out;
@@ -160,12 +140,12 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		out.a = 255;
 		*/
 		// Reinhard
-		float max_hdr = fmax(hdr_r, hdr_g);
-		max_hdr = fmax(max_hdr, hdr_b);
+		float max_hdr = fmax(hdr.r, hdr.g);
+		max_hdr = fmax(max_hdr, hdr.b);
 		float scale = 255.0f / ( tonemap_scale + max_hdr );
-		out.r = (uchar)(scale * hdr_r);
-		out.g = (uchar)(scale * hdr_g);
-		out.b = (uchar)(scale * hdr_b);
+		out.r = (uchar)(scale * hdr.r);
+		out.g = (uchar)(scale * hdr.g);
+		out.b = (uchar)(scale * hdr.b);
 		out.a = 255;
 		/*
 		// Filmic Uncharted 2
