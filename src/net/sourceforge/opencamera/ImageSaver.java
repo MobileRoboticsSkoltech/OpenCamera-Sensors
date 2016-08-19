@@ -148,15 +148,7 @@ public class ImageSaver extends Thread {
 					success = saveImageNowRaw(request.dngCreator, request.image, request.current_date);
 				}
 				else {
-					success = saveImageNow(request.data,
-							request.image_capture_intent, request.image_capture_intent_uri,
-							request.using_camera2, request.image_quality,
-							request.do_auto_stabilise, request.level_angle,
-							request.is_front_facing,
-							request.current_date,
-							request.preference_stamp, request.preference_textstamp, request.font_size, request.color, request.pref_style, request.preference_stamp_dateformat, request.preference_stamp_timeformat, request.preference_stamp_gpsformat,
-							request.store_location, request.location, request.store_geo_direction, request.geo_direction,
-							request.has_thumbnail_animation);
+					success = saveImageNow(request);
 				}
 				if( MyDebug.LOG ) {
 					if( success )
@@ -266,18 +258,19 @@ public class ImageSaver extends Thread {
 		
 		//do_in_background = false;
 		
+		Request request = new Request(is_raw,
+				data,
+				dngCreator, image,
+				image_capture_intent, image_capture_intent_uri,
+				using_camera2, image_quality,
+				do_auto_stabilise, level_angle,
+				is_front_facing,
+				current_date,
+				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+				store_location, location, store_geo_direction, geo_direction,
+				has_thumbnail_animation);
+
 		if( do_in_background ) {
-			Request request = new Request(is_raw,
-					data,
-					dngCreator, image,
-					image_capture_intent, image_capture_intent_uri,
-					using_camera2, image_quality,
-					do_auto_stabilise, level_angle,
-					is_front_facing,
-					current_date,
-					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
-					store_location, location, store_geo_direction, geo_direction,
-					has_thumbnail_animation);
 			// this should not be synchronized on "this": BlockingQueue is thread safe, and if it's blocking in queue.put(), we'll hang because
 			// the saver queue will need to synchronize on "this" in order to notifyAll() the main thread
 			boolean done = false;
@@ -315,15 +308,7 @@ public class ImageSaver extends Thread {
 				success = saveImageNowRaw(dngCreator, image, current_date);
 			}
 			else {
-				success = saveImageNow(data,
-						image_capture_intent, image_capture_intent_uri,
-						using_camera2, image_quality,
-						do_auto_stabilise, level_angle,
-						is_front_facing,
-						current_date,
-						preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
-						store_location, location, store_geo_direction, geo_direction,
-						has_thumbnail_animation);
+				success = saveImageNow(request);
 			}
 		}
 
@@ -367,18 +352,24 @@ public class ImageSaver extends Thread {
 	 */
 	@SuppressLint("SimpleDateFormat")
 	@SuppressWarnings("deprecation")
-	private boolean saveImageNow(byte [] data,
-			boolean image_capture_intent, Uri image_capture_intent_uri,
-			boolean using_camera2, int image_quality,
-			boolean do_auto_stabilise, double level_angle,
-			boolean is_front_facing,
-			Date current_date,
-			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
-			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
-			boolean has_thumbnail_animation) {
+	private boolean saveImageNow(final Request request) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImageNow");
 
+		if( request.is_raw ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "saveImageNow called with raw request");
+			// throw runtime exception, as this is a programming error
+			throw new RuntimeException();
+		}
+		// unpack:
+		byte [] data = request.data;
+		boolean image_capture_intent = request.image_capture_intent;
+		boolean using_camera2 = request.using_camera2;
+		Date current_date = request.current_date;
+		boolean store_location = request.store_location;
+		boolean store_geo_direction = request.store_geo_direction;
+		
         boolean success = false;
 		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
 		StorageUtils storageUtils = main_activity.getStorageUtils();
@@ -386,8 +377,9 @@ public class ImageSaver extends Thread {
 		main_activity.savingImage(true);
 
 		Bitmap bitmap = null;
-		if( do_auto_stabilise )
+		if( request.do_auto_stabilise )
 		{
+			double level_angle = request.level_angle;
 			while( level_angle < -90 )
 				level_angle += 180;
 			while( level_angle > 90 )
@@ -448,7 +440,7 @@ public class ImageSaver extends Thread {
     				Log.d(TAG, "after scaling: w0 = " + w0 + " , h0 = " + h0);
     				Log.d(TAG, "after scaling: w1 = " + w1 + " , h1 = " + h1);
     			}
-    		    if( is_front_facing ) {
+    		    if( request.is_front_facing ) {
         		    matrix.postRotate((float)-level_angle);
     		    }
     		    else {
@@ -516,8 +508,8 @@ public class ImageSaver extends Thread {
     			}
 			}
 		}
-		boolean dategeo_stamp = preference_stamp.equals("preference_stamp_yes");
-		boolean text_stamp = preference_textstamp.length() > 0;
+		boolean dategeo_stamp = request.preference_stamp.equals("preference_stamp_yes");
+		boolean text_stamp = request.preference_textstamp.length() > 0;
 		if( dategeo_stamp || text_stamp ) {
 			if( bitmap == null ) {
     			if( MyDebug.LOG )
@@ -537,6 +529,12 @@ public class ImageSaver extends Thread {
 			if( bitmap != null ) {
     			if( MyDebug.LOG )
     				Log.d(TAG, "stamp info to bitmap");
+    			int font_size = request.font_size;
+    			int color = request.color;
+    			String pref_style = request.pref_style;
+    			String preference_stamp_dateformat = request.preference_stamp_dateformat;
+    			String preference_stamp_timeformat = request.preference_stamp_timeformat;
+    			String preference_stamp_gpsformat = request.preference_stamp_gpsformat;
     			int width = bitmap.getWidth();
     			int height = bitmap.getHeight();
     			if( MyDebug.LOG ) {
@@ -610,6 +608,7 @@ public class ImageSaver extends Thread {
     				String gps_stamp = "";
         			if( !preference_stamp_gpsformat.equals("preference_stamp_gpsformat_none") ) {
 	    				if( store_location ) {
+	    					Location location = request.location;
 	            			if( preference_stamp_gpsformat.equals("preference_stamp_gpsformat_dms") )
 	            				gps_stamp += LocationSupplier.locationToDMS(location.getLatitude()) + ", " + LocationSupplier.locationToDMS(location.getLongitude());
             				else
@@ -619,6 +618,7 @@ public class ImageSaver extends Thread {
 	    					}
 	    				}
 				    	if( store_geo_direction ) {
+				    		double geo_direction = request.geo_direction;
 							float geo_angle = (float)Math.toDegrees(geo_direction);
 							if( geo_angle < 0.0f ) {
 								geo_angle += 360.0f;
@@ -640,7 +640,7 @@ public class ImageSaver extends Thread {
     	        if( text_stamp ) {
         			if( MyDebug.LOG )
         				Log.d(TAG, "stamp text");
-        			applicationInterface.drawTextWithBackground(canvas, p, preference_textstamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
+        			applicationInterface.drawTextWithBackground(canvas, p, request.preference_textstamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
     				ypos -= diff_y;
     	        }
 			}
@@ -653,12 +653,12 @@ public class ImageSaver extends Thread {
 			if( image_capture_intent ) {
     			if( MyDebug.LOG )
     				Log.d(TAG, "image_capture_intent");
-    			if( image_capture_intent_uri != null )
+    			if( request.image_capture_intent_uri != null )
     			{
     			    // Save the bitmap to the specified URI (use a try/catch block)
         			if( MyDebug.LOG )
-        				Log.d(TAG, "save to: " + image_capture_intent_uri);
-        			saveUri = image_capture_intent_uri;
+        				Log.d(TAG, "save to: " + request.image_capture_intent_uri);
+        			saveUri = request.image_capture_intent_uri;
     			}
     			else
     			{
@@ -738,7 +738,7 @@ public class ImageSaver extends Thread {
 			if( outputStream != null ) {
 				try {
 		            if( bitmap != null ) {
-	    	            bitmap.compress(Bitmap.CompressFormat.JPEG, image_quality, outputStream);
+	    	            bitmap.compress(Bitmap.CompressFormat.JPEG, request.image_quality, outputStream);
 		            }
 		            else {
 		            	outputStream.write(data);
@@ -837,7 +837,7 @@ public class ImageSaver extends Thread {
         	            	exif_new.setAttribute(ExifInterface.TAG_ORIENTATION, "" + exif_orientation);
         	            if( exif_white_balance != null )
         	            	exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
-        	            setGPSDirectionExif(exif_new, store_geo_direction, geo_direction);
+        	            setGPSDirectionExif(exif_new, store_geo_direction, request.geo_direction);
         	            setDateTimeExif(exif_new);
         	            if( needGPSTimestampHack(using_camera2, store_location) ) {
         	            	fixGPSTimestamp(exif_new);
@@ -851,7 +851,7 @@ public class ImageSaver extends Thread {
         	    			Log.d(TAG, "add GPS direction exif info");
     	            	long time_s = System.currentTimeMillis();
     	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
-        	            setGPSDirectionExif(exif, store_geo_direction, geo_direction);
+        	            setGPSDirectionExif(exif, store_geo_direction, request.geo_direction);
         	            setDateTimeExif(exif);
         	            if( needGPSTimestampHack(using_camera2, store_location) ) {
         	            	fixGPSTimestamp(exif);
@@ -951,7 +951,7 @@ public class ImageSaver extends Thread {
         	CameraController.Size size = main_activity.getPreview().getCameraController().getPictureSize();
     		int ratio = (int) Math.ceil((double) size.width / main_activity.getPreview().getView().getWidth());
     		int sample_size = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality
-			if( !has_thumbnail_animation ) {
+			if( !request.has_thumbnail_animation ) {
 				// can use lower resolution if we don't have the thumbnail animation
 				sample_size *= 4;
 			}
