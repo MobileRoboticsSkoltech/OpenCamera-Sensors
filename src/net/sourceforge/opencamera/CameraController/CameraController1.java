@@ -407,8 +407,12 @@ public class CameraController1 extends CameraController {
 			iso_key = "iso-speed"; // Micromax A101
 			if( parameters.get(iso_key) == null ) {
 				iso_key = "nv-picture-iso"; // LG dual P990
-				if( parameters.get(iso_key) == null )
-					iso_key = null; // not supported
+				if( parameters.get(iso_key) == null ) {
+					if ( Build.MODEL.contains("Z00") )
+						iso_key = "iso"; // Asus Zenfone 2 Z00A and Z008: see https://sourceforge.net/p/opencamera/tickets/183/
+					else
+						iso_key = null; // not supported
+				}
 			}
 		}
 		/*values = new ArrayList<String>();
@@ -443,6 +447,7 @@ public class CameraController1 extends CameraController {
 				// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
 				values = new ArrayList<String>();
 				values.add("auto");
+				values.add("50");
 				values.add("100");
 				values.add("200");
 				values.add("400");
