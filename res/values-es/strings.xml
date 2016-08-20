@@ -157,6 +157,7 @@
     <string name="preference_show_battery_summary">Muestra el nivel actual de batería en pantalla</string>
     <string name="preference_grid">Mostrar una cuadrícula</string>
     <string name="preference_grid_summary">Muestra una de las varias cuadrículas</string>
+    <string name="grid">Cuadrícula</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Muestra una guía de recorte</string>
     <string name="preference_crop_guide_summary">Una guía de recorte enseña un rectangulo que muestra como se vería con el aspecto ratio seleccionado - útil si planeas recortar el foto o el vídeo después a un ratio distinto. Requiere modo de foto WYSIWYG, o estar en modo vídeo.</string>
     <string name="preference_show_toasts">Enseñar mensajes \"toast\"</string>

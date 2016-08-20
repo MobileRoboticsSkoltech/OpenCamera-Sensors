@@ -434,7 +434,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find grid_value " + grid_value + " in grid_values!");
 				grid_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.preference_grid), true, grid_index, true, "GRID", new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.grid), true, grid_index, true, "GRID", new ArrayOptionsPopupListener() {
     			private void update() {
     				if( grid_index == -1 )
     					return;

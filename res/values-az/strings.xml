@@ -141,6 +141,7 @@
     <string name="preference_show_battery_summary">Cari batareya səviyyəsi ekranda görünür</string>
     <string name="preference_grid">Tor göstər</string>
     <string name="preference_grid_summary">Müxtəlif torlardan biri ekranda görünür</string>
+    <string name="grid">Tor</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Kəsmək üçün təlimat</string>
     <string name="preference_crop_guide_summary">Kənarların nisbətini göstərən dördbucaqlı təsvir - şəkil/video kəsən zaman faydalıdır. WYSIWYG şəkilçəkmə və ya video rejimi tələb olunur</string>
     <string name="preference_thumbnail_animation">Eskiz animasiyasını göstər</string>

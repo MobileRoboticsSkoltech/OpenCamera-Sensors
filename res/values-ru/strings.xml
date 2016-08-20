@@ -164,6 +164,7 @@
     <string name="preference_show_battery_summary">Отображение текущего уровня заряда батареи</string>
     <string name="preference_grid">Показать сетку</string>
     <string name="preference_grid_summary">Отображение одной из различных сеток</string>
+    <string name="grid">Сетка</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Руководство по обрезке</string>
     <string name="preference_crop_guide_summary">Отображение прямоугольника, показывающего соотношение сторон - полезно, если вы планируете, обрезать фото/видео. Требуется WYSIWYG режим фотосъемки или режим видео.</string>
     <string name="preference_show_toasts">Всплывающие сообщения</string>

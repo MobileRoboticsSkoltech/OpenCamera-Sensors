@@ -125,6 +125,7 @@
     <string name="preference_show_geo_direction_summary">Mostra la direzione della bussola sullo schermo</string>
     <string name="preference_grid">Mostra griglia</string>
     <string name="preference_grid_summary">Mostra vari tipi di griglia</string>
+    <string name="grid">Griglia</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Mostra guida rigaglio</string>
     <string name="preference_crop_guide_summary">La guida al ritaglio mostra sullo schermo un rettangolo di certe proporzioni - utile se in un secondo momento si ha intenzione di ritagliare la foto o il video ad un certo rapporto di proporzioni. Richiede la modalità foto WYSIWYG, o di essere in modalità video.</string>
     <string name="preference_thumbnail_animation">Mostra animazione miniatura</string>

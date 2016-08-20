@@ -160,6 +160,7 @@
     <string name="preference_show_battery_summary">Zobrazovat aktuální kapacitu baterie na obrazovce</string>
     <string name="preference_grid">Zobrazit mřížku</string>
     <string name="preference_grid_summary">Zobrazovat jednu z různých mřížek</string>
+    <string name="grid">Mřížka</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Zobrazit vodítka oříznutí</string>
     <string name="preference_crop_guide_summary">Vodítko oříznutí zobrazuje obdélník ukazující jak zvolený poměr stran vypadá - vhodné pokud poté plánujete ořez fotografie/videa na jiný poměr stran. Vyžaduje WYSIWYG fotografický mód nebo video mód.</string>
     <string name="preference_show_toasts">Zobrazit \"toast\" zprávy</string>

@@ -160,6 +160,7 @@
     <string name="preference_show_battery_summary">画面上に電池残量を表示します</string>
     <string name="preference_grid">グリッドを表示する</string>
     <string name="preference_grid_summary">画面上にグリッドを表示します</string>
+    <string name="grid">グリッド</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">クロップを表示する</string>
     <string name="preference_crop_guide_summary">画面上に切り取り用の線を表示します - 異なる比率に加工する場合に便利です。使用にはWYSIWYGでの写真モード、もしくはビデオモードを必要とします。</string>
     <string name="preference_show_toasts">トーストを表示する</string>
