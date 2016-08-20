@@ -6,14 +6,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
+import android.os.Build;
 import android.os.Environment;
-import android.support.v8.renderscript.Allocation;
-import android.support.v8.renderscript.Element;
-import android.support.v8.renderscript.RenderScript;
-import android.support.v8.renderscript.ScriptIntrinsicHistogram;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicHistogram;
 import android.util.Log;
 
 public class HDRProcessor {
@@ -478,11 +480,24 @@ public class HDRProcessor {
 	}
 	
 	/** Core implementation of HDR algorithm.
+	 *  Requires Android 4.4 (API level 19, Kitkat), due to using Renderscript without the support libraries.
+	 *  Using the support libraries (set via project.properties renderscript.support.mode) would bloat the APK
+	 *  by around 1799KB! We don't care about pre-Android 4.4 (HDR requires CameraController2 which requires
+	 *  Android 5 anyway; even if we later added support for CameraController1, we can simply say HDR requires
+	 *  Android 4.4 which is old enough these days).
 	 */
+	@TargetApi(Build.VERSION_CODES.KITKAT)
 	private void processHDRCore(List<Bitmap> bitmaps) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
 		
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "HDR requires at least Android 4.4");
+			// throw runtime exception as this is a programming error - HDR should not be offered as supported on older Android versions
+			// (we require Android 5 for Camera2 API, to offer burst mode, anyway)
+			throw new RuntimeException();
+		}
     	long time_s = System.currentTimeMillis();
 		
 		int n_bitmaps = bitmaps.size();
