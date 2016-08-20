@@ -4,7 +4,7 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Настройки</string>
     <string name="action_popup">Настройки всплывающих окон</string>
-    <string name="intro_text">Нажмите фокус и выберите синюю кнопку, чтобы сделать фото. В настройках вас ждет очень много плюшек. :)</string>
+    <string name="intro_text">Нажмите на экран для фокуса и нажмите синюю кнопку, чтобы сделать фото. В настройках вас ждет очень много плюшек. :)</string>
     <string name="intro_ok">Ок (Это сообщение больше не появится.)</string>
     
     <string name="answer_yes">Да</string>
@@ -54,8 +54,8 @@
     <string name="no_gallery_app">Галерея недоступна</string>
     <string name="screen_is_locked">Экран заблокирован,\nпроведите пальцем по экрану чтобы разблокировать</string>
     <string name="unlocked">Разблокировано</string>
-    <string name="auto_stabilise_not_supported">К сожалению, авто-стабилизация не\nподдерживается на данном устройстве</string>
-    <string name="audio_disabled">Аудио отключено</string>
+    <string name="auto_stabilise_not_supported">К сожалению, автостабилизация не\nподдерживается на данном устройстве</string>
+    <string name="audio_disabled">Аудио выключено</string>
     <string name="max_duration">Макс. продолжительность</string>
     <string name="color_effect">Цветовой эффект</string>
     <string name="scene_mode">Сцена</string>
@@ -126,7 +126,7 @@
     <string name="preference_save_video_prefix">Префикс для видео</string>
     <string name="preference_save_video_prefix_summary">Префикс имен файлов для сохраняемых видео</string>
     <string name="preference_show_when_locked">Камера на экране блокировки</string>
-    <string name="preference_show_when_locked_summary">Если включено, то Open Camera все равно будет отображаться поверх любого экрана блокировки (вы можете получить доступ к настройкам, галереи и т.д.)</string>
+    <string name="preference_show_when_locked_summary">Если включено, то Open Camera будет отображаться поверх экрана блокировки (вы можете получить доступ к настройкам, галерее и т.д.)</string>
     <string name="preference_startup_focus">Автофокус при запуске</string>
     <string name="preference_startup_focus_summary">Включить автофокус при запуске Open Camera. Если у вас проблемы со включением вспышки при запуске, отключите эту опцию</string>
     <string name="preference_lock_video">Блокировать экран при записи видео</string>
@@ -173,7 +173,7 @@
     <string name="preference_take_photo_border">Показывать рамку во время фотосъемки</string>
     <string name="preference_take_photo_border_summary">Показывать рамку на экране для индикации фотосъемки</string>
     <string name="preference_keep_display_on">Не выключать дисплей</string>
-    <string name="preference_keep_display_on_summary">Если включено, экран не будет выключаться, пока активен интерфейс Open Camera</string>
+    <string name="preference_keep_display_on_summary">Если включено, экран не будет выключаться пока Open Camera открыта</string>
     <string name="preference_max_brightness">Максимальная яркость</string>
     <string name="preference_max_brightness_summary">Включение максимальной яркости во время съемки</string>
     
@@ -191,14 +191,14 @@
     <string name="preference_gps_direction_summary">Хранить данные о направлении компаса в фотографиях</string>
     <string name="preference_require_location">Требовать данные о местоположении</string>
     <string name="preference_require_location_summary">Если данные о местоположении включены, вы сможете снять фото/видео только, если они доступны</string>
-    <string name="preference_stamp">Отметки</string>
+    <string name="preference_stamp">Штампы</string>
     <string name="preference_stamp_summary">Сохранение вместе с фотографией таких данных как: дата/время/местоположение</string>
     <string name="preference_stamp_dateformat">Формат даты</string>
-    <string name="preference_stamp_dateformat_summary">Определение формата даты (если включено)</string>
+    <string name="preference_stamp_dateformat_summary">Изменение формата даты (если включено)</string>
     <string name="preference_stamp_timeformat">Формат времени</string>
-    <string name="preference_stamp_timeformat_summary">Определение формата времени (если включено)</string>
+    <string name="preference_stamp_timeformat_summary">Изменение формата времени (если включено)</string>
     <string name="preference_stamp_gpsformat">Формат GPS</string>
-    <string name="preference_stamp_gpsformat_summary">Определение формата отметки GPS (если включено)</string>
+    <string name="preference_stamp_gpsformat_summary">Изменение формата отметки GPS (если включено)</string>
     <string name="preference_textstamp">Подписывание фото</string>
     <string name="preference_textstamp_summary">Добавление текста на фотографию</string>
     <string name="preference_stamp_fontsize">Размер шрифта</string>
@@ -214,13 +214,13 @@
     <string name="preference_video_stabilization">Включить стабилизацию видео</string>
     <string name="preference_video_stabilization_summary">Стабилизация видео уменьшает тряску в связи с движением камеры</string>
     <string name="preference_video_bitrate">Видео битрейт (примерно)</string>
-    <string name="preference_video_bitrate_summary">Выбор битрейта видео. Чем выше битрейт, тем лучше качество, но файл будет занимать больше места на флешке. Неподдерживаемый битрейт может стать причиной ошибки при записи видео.</string>
+    <string name="preference_video_bitrate_summary">Выбор битрейта видео. (чем выше, тем лучше качество, но файл будет занимать больше места на диске. Неподдерживаемый битрейт может стать причиной ошибки при записи видео).</string>
     <string name="preference_video_fps">Частота кадров видео (примерно)</string>
     <string name="preference_video_fps_summary">Кол-во кадров в секунду (FPS) в видео (примерное). Может привести к записи с ошибкой, если частота кадров не поддерживается</string>
     <string name="preference_video_max_duration">Максимальная длительность видео</string>
     <string name="preference_video_max_duration_summary">Видеозапись прекратится по истечении указанной продолжительности</string>
     <string name="preference_video_restart">Записать новое видео после достижения лимита</string>
-    <string name="preference_video_restart_summary">При достижении лимита продолжительности будет записано новое видео (столько раз, сколько вы выбрали)</string>
+    <string name="preference_video_restart_summary">При достижении лимита продолжительности, будет записано новое видео (столько раз, сколько вы выбрали)</string>
     <string name="preference_video_max_filesize">Максимальный размер файла видео</string>
     <string name="preference_video_max_filesize_summary">Видеозапись прекратится или начнется заново (смотрите опцию ниже), когда размер файла достигнет указанной величины (приблизительно). Стоит заметить, что почти у всех Android-устройств есть ограничение на максимальный размер видео (обычно около 2 или 4 Гб), однако с помощью этой опции можно указать конкретное значение</string>
     <string name="preference_video_restart_max_filesize">Начать видеозапись заново при достижении максимального размера файла</string>
@@ -230,7 +230,7 @@
     <string name="preference_record_audio_src">Источник звука</string>
     <string name="preference_record_audio_src_summary">Микрофон для записи звука</string>
     <string name="preference_record_audio_channels">Число каналов</string>
-    <string name="preference_record_audio_channels_summary">Настройка моно или стереозвука (стерео доступно не для всех устройств)</string>
+    <string name="preference_record_audio_channels_summary">Настройка моно или стереозвука (стерео доступно не на всех устройствах)</string>
     <string name="preference_video_flash">Вспышка во время записи видео</string>
     <string name="preference_video_flash_summary">Если включено, вспышка будет включаться/выключаться при записи видео (можно использовать, чтобы выполнить запись на расстоянии)</string>
     
