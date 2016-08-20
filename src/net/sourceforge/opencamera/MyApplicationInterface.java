@@ -2,12 +2,10 @@ package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
@@ -20,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -56,7 +53,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private StorageUtils storageUtils = null;
 	private DrawPreview drawPreview = null;
 	private ImageSaver imageSaver = null;
-	private HDRProcessor hdrProcessor = null;
 
 	private Rect text_bounds = new Rect();
 
@@ -90,8 +86,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		this.imageSaver = new ImageSaver(main_activity);
 		this.imageSaver.start();
 		
-		this.hdrProcessor = new HDRProcessor(main_activity);
-
         if( savedInstanceState != null ) {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
 			if( MyDebug.LOG )
@@ -1272,14 +1266,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		return image_capture_intent;
 	}
-
-    @Override
-	public boolean onPictureTaken(byte [] data, Date current_date) {
+	
+	private boolean saveImage(boolean is_hdr, List<byte []> images, Date current_date) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "onPictureTaken");
-        System.gc();
+			Log.d(TAG, "saveImage");
 
-		boolean image_capture_intent = isImageCaptureIntent();
+		System.gc();
+
+        boolean image_capture_intent = isImageCaptureIntent();
         Uri image_capture_intent_uri = null;
         if( image_capture_intent ) {
 			if( MyDebug.LOG )
@@ -1319,7 +1313,7 @@ public class MyApplicationInterface implements ApplicationInterface {
         
 		boolean do_in_background = saveInBackground(image_capture_intent);
 
-		boolean success = imageSaver.saveImageJpeg(do_in_background, data,
+		boolean success = imageSaver.saveImageJpeg(do_in_background, is_hdr, images,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
@@ -1328,67 +1322,37 @@ public class MyApplicationInterface implements ApplicationInterface {
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
 				has_thumbnail_animation);
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "saveImage complete, success: " + success);
 		
+		return success;
+	}
+
+    @Override
+	public boolean onPictureTaken(byte [] data, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onPictureTaken");
+
+		List<byte []> images = new ArrayList<byte []>();
+		images.add(data);
+
+		boolean success = saveImage(false, images, current_date);
+        
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken complete, success: " + success);
 		
 		return success;
 	}
-
-	@SuppressWarnings("deprecation")
+    
     @Override
 	public boolean onBurstPictureTaken(List<byte []> images, Date current_date) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "onBurstPictureTaken");
-        System.gc();
+			Log.d(TAG, "onBurstPictureTaken: received " + images.size() + " images");
 
-        boolean success = true;
-    	
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inMutable = true; // first bitmap needs to be writable
-		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-			// setting is ignored in Android 5 onwards
-			options.inPurgeable = true;
-		}
-		List<Bitmap> bitmaps = new Vector<Bitmap>();
-		for(byte [] image : images) {
-			Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length, options);
-			if( bitmap == null ) {
-				if( MyDebug.LOG )
-					Log.e(TAG, "failed to decode bitmap");
-		        System.gc();
-		        return false;
-			}
-			bitmaps.add(bitmap);
-			options.inMutable = false; // later bitmaps don't need to be writable
-		}
-		hdrProcessor.processHDR(bitmaps);
+		boolean success = saveImage(true, images, current_date);
 
-		int image_quality = getImageQualityPref();
-		try {
-			Bitmap bitmap = bitmaps.get(0);
-			File picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "jpg", current_date);
-			if( MyDebug.LOG )
-				Log.d(TAG, "save to: " + picFile.getAbsolutePath());
-			OutputStream outputStream = new FileOutputStream(picFile);
-			try {
-	            bitmap.compress(Bitmap.CompressFormat.JPEG, image_quality, outputStream);
-            	storageUtils.broadcastFile(picFile, true, false, true);
-			}
-			finally {
-				outputStream.close();
-			}
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
-
-		for(Bitmap bitmap : bitmaps) {
-			bitmap.recycle();
-		}
-        System.gc();
-
-        return success;
+		return success;
     }
 
     @Override
@@ -1547,6 +1511,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 	
 	public HDRProcessor getHDRProcessor() {
-		return hdrProcessor;
+		return imageSaver.getHDRProcessor();
 	}
 }

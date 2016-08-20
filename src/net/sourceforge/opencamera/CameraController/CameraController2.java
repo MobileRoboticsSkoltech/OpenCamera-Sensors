@@ -511,13 +511,17 @@ public class CameraController2 extends CameraController {
 			@Override
 			public void onOpened(CameraDevice cam) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "camera opened");
+					Log.d(TAG, "camera opened, first_callback? " + first_callback);
 				if( first_callback ) {
 					first_callback = false;
 
 				    try {
 				    	// we should be able to get characteristics at any time, but Google Camera only does so when camera opened - so do so similarly to be safe
+						if( MyDebug.LOG )
+							Log.d(TAG, "try to get camera characteristics");
 						characteristics = manager.getCameraCharacteristics(cameraIdS);
+						if( MyDebug.LOG )
+							Log.d(TAG, "successfully obtained camera characteristics");
 
 						CameraController2.this.camera = cam;
 
@@ -534,9 +538,15 @@ public class CameraController2 extends CameraController {
 						// don't throw CameraControllerException here - instead error is handled by setting callback_done to callback_done, and the fact that camera will still be null
 					}
 
+					if( MyDebug.LOG )
+						Log.d(TAG, "about to synchronize to say callback done");
 				    synchronized( this ) {
 				    	callback_done = true;
+						if( MyDebug.LOG )
+							Log.d(TAG, "callback done, about to notify");
 				    	this.notifyAll();
+						if( MyDebug.LOG )
+							Log.d(TAG, "callback done, notification done");
 				    }
 				}
 			}
@@ -544,7 +554,7 @@ public class CameraController2 extends CameraController {
 			@Override
 			public void onClosed(CameraDevice cam) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "camera closed");
+					Log.d(TAG, "camera closed, first_callback? " + first_callback);
 				// caller should ensure camera variables are set to null
 				if( first_callback ) {
 					first_callback = false;
@@ -554,7 +564,7 @@ public class CameraController2 extends CameraController {
 			@Override
 			public void onDisconnected(CameraDevice cam) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "camera disconnected");
+					Log.d(TAG, "camera disconnected, first_callback? " + first_callback);
 				if( first_callback ) {
 					first_callback = false;
 					// must call close() if disconnected before camera was opened
@@ -565,9 +575,15 @@ public class CameraController2 extends CameraController {
 					cam.close();
 					if( MyDebug.LOG )
 						Log.d(TAG, "onDisconnected: camera is now closed");
+					if( MyDebug.LOG )
+						Log.d(TAG, "about to synchronize to say callback done");
 				    synchronized( this ) {
 				    	callback_done = true;
+						if( MyDebug.LOG )
+							Log.d(TAG, "callback done, about to notify");
 				    	this.notifyAll();
+						if( MyDebug.LOG )
+							Log.d(TAG, "callback done, notification done");
 				    }
 				}
 			}
@@ -578,6 +594,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "camera error: " + error);
 					Log.d(TAG, "received camera: " + cam);
 					Log.d(TAG, "actual camera: " + CameraController2.this.camera);
+					Log.d(TAG, "first_callback? " + first_callback);
 				}
 				if( first_callback ) {
 					first_callback = false;
@@ -593,17 +610,29 @@ public class CameraController2 extends CameraController {
 				cam.close();
 				if( MyDebug.LOG )
 					Log.d(TAG, "onError: camera is now closed");
+				if( MyDebug.LOG )
+					Log.d(TAG, "about to synchronize to say callback done");
 			    synchronized( this ) {
 			    	callback_done = true;
+					if( MyDebug.LOG )
+						Log.d(TAG, "callback done, about to notify");
 			    	this.notifyAll();
+					if( MyDebug.LOG )
+						Log.d(TAG, "callback done, notification done");
 			    }
 			}
 		};
 		MyStateCallback myStateCallback = new MyStateCallback();
 
 		try {
+			if( MyDebug.LOG )
+				Log.d(TAG, "get camera id list");
 			this.cameraIdS = manager.getCameraIdList()[cameraId];
+			if( MyDebug.LOG )
+				Log.d(TAG, "about to open camera: " + cameraIdS);
 			manager.openCamera(cameraIdS, myStateCallback, handler);
+			if( MyDebug.LOG )
+				Log.d(TAG, "open camera request complete");
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -643,6 +672,8 @@ public class CameraController2 extends CameraController {
 					myStateCallback.wait();
 				}
 				catch(InterruptedException e) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "interrupted while waiting until camera opened");
 					e.printStackTrace();
 				}
 			}
@@ -1382,6 +1413,8 @@ public class CameraController2 extends CameraController {
 		SupportedValues supported_values = null;
 		try {
 			if( value.equals(default_value) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting auto iso");
 				supported_values = new SupportedValues(values, value);
 				camera_settings.has_iso = false;
 				camera_settings.iso = 0;
@@ -1391,6 +1424,8 @@ public class CameraController2 extends CameraController {
 			}
 			else {
 				try {
+					if( MyDebug.LOG )
+						Log.d(TAG, "setting manual iso");
 					int selected_value2 = Integer.parseInt(value);
 					if( selected_value2 < iso_range.getLower() )
 						selected_value2 = iso_range.getLower();
@@ -1624,7 +1659,9 @@ public class CameraController2 extends CameraController {
 				            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
 				            PictureCallback cb = jpeg_cb;
 				            jpeg_cb = null;
-				            cb.onBurstPictureTaken(pending_burst_images);
+				            // take a copy, so that we can clear pending_burst_images
+				            List<byte []> images = new Vector<byte []>(pending_burst_images);
+				            cb.onBurstPictureTaken(images);
 				            pending_burst_images.clear();
 							cb.onCompleted();
 		            	}
@@ -2361,6 +2398,8 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 		captureSession.setRepeatingRequest(request, previewCaptureCallback, handler);
+		if( MyDebug.LOG )
+			Log.d(TAG, "setRepeatingRequest done");
 	}
 
 	private void capture() throws CameraAccessException {
@@ -2392,6 +2431,8 @@ public class CameraController2 extends CameraController {
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
 			previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
 			camera_settings.setupBuilder(previewBuilder, false);
+			if( MyDebug.LOG )
+				Log.d(TAG, "successfully created preview request");
 		}
 		catch(CameraAccessException e) {
 			//captureSession = null;

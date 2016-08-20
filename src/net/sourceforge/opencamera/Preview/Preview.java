@@ -4176,14 +4176,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				initDate();
 
 				success = true;
-				// debug: write images separately
-				for(byte [] image : images) {
-					if( !applicationInterface.onPictureTaken(image, current_date) ) {
-						if( MyDebug.LOG )
-							Log.e(TAG, "applicationInterface.onPictureTaken failed");
-						success = false;
-					}
-				}
 				if( !applicationInterface.onBurstPictureTaken(images, current_date) ) {
 					if( MyDebug.LOG )
 						Log.e(TAG, "applicationInterface.onBurstPictureTaken failed");

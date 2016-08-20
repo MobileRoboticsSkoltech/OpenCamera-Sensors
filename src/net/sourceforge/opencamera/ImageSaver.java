@@ -11,6 +11,8 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -47,6 +49,7 @@ public class ImageSaver extends Thread {
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	
 	private MainActivity main_activity = null;
+	private HDRProcessor hdrProcessor = null;
 
 	/* We use a separate count n_images_to_save, rather than just relying on the queue size, so we can take() an image from queue,
 	 * but only decrement the count when we've finished saving the image.
@@ -58,7 +61,8 @@ public class ImageSaver extends Thread {
 	
 	private static class Request {
 		boolean is_raw = false;
-		byte [] data = null; // for jpeg
+		boolean is_hdr = false; // for jpeg
+		List<byte []> jpeg_images = null; // for jpeg
 		DngCreator dngCreator = null; // for raw
 		Image image = null; // for raw
 		boolean image_capture_intent = false;
@@ -84,7 +88,8 @@ public class ImageSaver extends Thread {
 		boolean has_thumbnail_animation = false;
 		
 		Request(boolean is_raw,
-			byte [] data,
+			boolean is_hdr,
+			List<byte []> jpeg_images,
 			DngCreator dngCreator, Image image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
@@ -95,7 +100,8 @@ public class ImageSaver extends Thread {
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			boolean has_thumbnail_animation) {
 			this.is_raw = is_raw;
-			this.data = data;
+			this.is_hdr = is_hdr;
+			this.jpeg_images = jpeg_images;
 			this.dngCreator = dngCreator;
 			this.image = image;
 			this.image_capture_intent = image_capture_intent;
@@ -126,6 +132,7 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "ImageSaver");
 		this.main_activity = main_activity;
+		this.hdrProcessor = new HDRProcessor(main_activity);
 
 		p.setAntiAlias(true);
 	}
@@ -182,7 +189,8 @@ public class ImageSaver extends Thread {
 	 *  successfully.
 	 */
 	public boolean saveImageJpeg(boolean do_in_background,
-			byte [] data,
+			boolean is_hdr,
+			List<byte []> images,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
@@ -194,10 +202,12 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saveImageJpeg");
 			Log.d(TAG, "do_in_background? " + do_in_background);
+			Log.d(TAG, "number of images: " + images.size());
 		}
 		return saveImage(do_in_background,
 				false,
-				data,
+				is_hdr,
+				images,
 				null, null,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
@@ -224,6 +234,7 @@ public class ImageSaver extends Thread {
 		}
 		return saveImage(do_in_background,
 				true,
+				false,
 				null,
 				dngCreator, image,
 				false, null,
@@ -240,7 +251,8 @@ public class ImageSaver extends Thread {
 	 */
 	private boolean saveImage(boolean do_in_background,
 			boolean is_raw,
-			byte [] data,
+			boolean is_hdr,
+			List<byte []> jpeg_images,
 			DngCreator dngCreator, Image image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
@@ -259,7 +271,8 @@ public class ImageSaver extends Thread {
 		//do_in_background = false;
 		
 		Request request = new Request(is_raw,
-				data,
+				is_hdr,
+				jpeg_images,
 				dngCreator, image,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
@@ -347,10 +360,9 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "waitUntilDone: images all saved");
 	}
-
-	/** May be run in saver thread or picture callback thread (depending on whether running in backgrond).
+	
+	/** May be run in saver thread or picture callback thread (depending on whether running in background).
 	 */
-	@SuppressLint("SimpleDateFormat")
 	@SuppressWarnings("deprecation")
 	private boolean saveImageNow(final Request request) {
 		if( MyDebug.LOG )
@@ -362,8 +374,115 @@ public class ImageSaver extends Thread {
 			// throw runtime exception, as this is a programming error
 			throw new RuntimeException();
 		}
+		else if( request.jpeg_images.size() == 0 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "saveImageNow called with zero images");
+			// throw runtime exception, as this is a programming error
+			throw new RuntimeException();
+		}
+
+		boolean success = false;
+		if( request.is_hdr ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "hdr");
+			if( request.jpeg_images.size() != 3 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "saveImageNow expected 3 images for hdr, not " + request.jpeg_images.size());
+				// throw runtime exception, as this is a programming error
+				throw new RuntimeException();
+			}
+
+	        // debug: write images separately
+			if( MyDebug.LOG )
+				Log.e(TAG, "save exposures");
+			for(byte [] image : request.jpeg_images) {
+				if( !saveSingleImageNow(request, image, null) ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "saveSingleImageNow failed for exposure image");
+					success = false;
+				}
+			}
+
+			if( MyDebug.LOG )
+				Log.e(TAG, "create HDR image");
+			main_activity.savingImage(true);
+			BitmapFactory.Options options = new BitmapFactory.Options();
+
+			options.inMutable = true; // first bitmap needs to be writable
+			if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+				// setting is ignored in Android 5 onwards
+				options.inPurgeable = true;
+			}
+			List<Bitmap> bitmaps = new Vector<Bitmap>();
+			for(byte [] image : request.jpeg_images) {
+				Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length, options);
+				if( bitmap == null ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "failed to decode bitmap");
+			        System.gc();
+			        return false;
+				}
+				bitmaps.add(bitmap);
+				options.inMutable = false; // later bitmaps don't need to be writable
+			}
+			hdrProcessor.processHDR(bitmaps);
+			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap:
+			for(int i=1;i<bitmaps.size();i++) {
+				Bitmap bitmap = bitmaps.get(i);
+				bitmap.recycle();
+			}
+			Bitmap hdr_bitmap = bitmaps.get(0);
+			bitmaps.clear();
+	        System.gc();
+			main_activity.savingImage(false);
+
+			if( MyDebug.LOG )
+				Log.e(TAG, "save HDR image");
+			success = saveSingleImageNow(request, request.jpeg_images.get(1), hdr_bitmap);
+			if( MyDebug.LOG && !success )
+				Log.e(TAG, "saveSingleImageNow failed for hdr image");
+			hdr_bitmap.recycle();
+			hdr_bitmap = null;
+	        System.gc();
+		}
+		else {
+			if( request.jpeg_images.size() > 1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "saveImageNow called with multiple images, only supported for hdr");
+				// throw runtime exception, as this is a programming error
+				throw new RuntimeException();
+			}
+			success = saveSingleImageNow(request, request.jpeg_images.get(0), null);
+		}
+
+		return success;
+	}
+
+	/** May be run in saver thread or picture callback thread (depending on whether running in background).
+	 *  The requests.images field is ignored, instead we save the supplied data or bitmap.
+	 *  If bitmap is null, then the supplied jpeg data is saved. If bitmap is non-null, then the bitmap is
+	 *  saved, but the supplied data is still used to read EXIF data from.
+	 */
+	@SuppressLint("SimpleDateFormat")
+	@SuppressWarnings("deprecation")
+	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "saveSingleImageNow");
+
+		if( request.is_raw ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "saveSingleImageNow called with raw request");
+			// throw runtime exception, as this is a programming error
+			throw new RuntimeException();
+		}
+		else if( data == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "saveSingleImageNow called with no data");
+			// throw runtime exception, as this is a programming error
+			throw new RuntimeException();
+		}
+		
 		// unpack:
-		byte [] data = request.data;
 		boolean image_capture_intent = request.image_capture_intent;
 		boolean using_camera2 = request.using_camera2;
 		Date current_date = request.current_date;
@@ -376,7 +495,6 @@ public class ImageSaver extends Thread {
 		
 		main_activity.savingImage(true);
 
-		Bitmap bitmap = null;
 		if( request.do_auto_stabilise )
 		{
 			double level_angle = request.level_angle;
@@ -386,18 +504,22 @@ public class ImageSaver extends Thread {
 				level_angle -= 180;
 			if( MyDebug.LOG )
 				Log.d(TAG, "auto stabilising... angle: " + level_angle);
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			//options.inMutable = true;
-			if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-				// setting is ignored in Android 5 onwards
-				options.inPurgeable = true;
-			}
-			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 			if( bitmap == null ) {
-				main_activity.getPreview().showToast(null, R.string.failed_to_auto_stabilise);
-	            System.gc();
+				if( MyDebug.LOG )
+					Log.d(TAG, "need to decode bitmap to auto-stabilise");
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				//options.inMutable = true;
+				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+					// setting is ignored in Android 5 onwards
+					options.inPurgeable = true;
+				}
+				bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+				if( bitmap == null ) {
+					main_activity.getPreview().showToast(null, R.string.failed_to_auto_stabilise);
+		            System.gc();
+				}
 			}
-			else {
+			if( bitmap != null ) {
     			int width = bitmap.getWidth();
     			int height = bitmap.getHeight();
     			if( MyDebug.LOG ) {
@@ -1288,5 +1410,11 @@ public class ImageSaver extends Thread {
 	    		realOutputStream = null;
 	    	}
 	    }
+	}
+	
+	// for testing:
+	
+	public HDRProcessor getHDRProcessor() {
+		return hdrProcessor;
 	}
 }
