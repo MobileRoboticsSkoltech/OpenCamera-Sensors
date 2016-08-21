@@ -65,7 +65,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Brez odštevanja</item>
+        <item>Off</item>
         <item>1 s</item>
         <item>2 s</item>
         <item>3 s</item>

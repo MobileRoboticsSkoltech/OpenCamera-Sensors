@@ -65,7 +65,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Нет</item>
+        <item>Выкл</item>
         <item>1 секунда</item>
         <item>2 секунды</item>
         <item>3 секунды</item>

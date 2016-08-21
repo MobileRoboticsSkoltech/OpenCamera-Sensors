@@ -99,7 +99,7 @@
     <string name="preference_timer_beep_summary">Cuando el timer esta contando suena un beep, también para el timer de modo Ráfaga</string>
     <string name="preference_timer_speak">Cuenta atras del timer por voz</string>
     <string name="preference_timer_speak_summary">Dice la cuenta atras por voz para el timer o el modo ráfaga (desde 60 segundos)</string>
-    <string name="preference_burst_mode">Modo Ráfaga</string>
+    <string name="preference_burst_mode">Ráfaga</string>
     <string name="preference_burst_mode_summary">Realiza multiples fotos seguidas</string>
     <string name="preference_burst_interval">Intervalo Modo Rafaga</string>
     <string name="preference_burst_interval_summary">Establece un retraso entre cada foto del modo ráfaga</string>

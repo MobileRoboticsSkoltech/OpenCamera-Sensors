@@ -94,13 +94,13 @@
     <string name="preference_face_detection_summary">Stellt die Schärfe auf die Gesichter ein</string>
 
     <string name="preference_category_camera_controls">Kamera-Einstellungen</string>
-    <string name="preference_timer">Auslöseverzögerung</string>
+    <string name="preference_timer">Timer</string>
     <string name="preference_timer_summary">Auslöseverzögerung einstellen</string>
     <string name="preference_timer_beep">Timer-Signalton</string>
     <string name="preference_timer_beep_summary">Beim Herunterzählen der Auslöseverzögerung einen Signalton ausgeben</string>
     <string name="preference_timer_speak">Timer-Sprachausgabe</string>
     <string name="preference_timer_speak_summary">Sprachausgabe beim Herunterzählen der Auslöseverzögerung (ab 60 s)</string>
-    <string name="preference_burst_mode">Serienbildmodus</string>
+    <string name="preference_burst_mode">Serienbild</string>
     <string name="preference_burst_mode_summary">Mehrere Fotos in Folge nacheinander aufnehmen</string>
     <string name="preference_burst_interval">Serienbild-Intervall</string>
     <string name="preference_burst_interval_summary">Verzögerung zwischen den Fotoaufnahmen</string>

@@ -93,7 +93,7 @@
         <item>300</item>
     </string-array>
     <string-array name="preference_burst_mode_entries">
-        <item>Off</item>
+        <item>Désactivé</item>
         <item>2x</item>
         <item>3x</item>
         <item>4x</item>

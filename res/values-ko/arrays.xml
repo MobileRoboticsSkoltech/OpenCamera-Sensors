@@ -65,7 +65,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>타이머 없음</item>
+        <item>사용 안함</item>
         <item>1초</item>
         <item>2초</item>
         <item>3초</item>
