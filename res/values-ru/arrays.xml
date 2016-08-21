@@ -99,7 +99,7 @@
         <item>4x</item>
         <item>5x</item>
         <item>10x</item>
-        <item>Неограниченно</item>
+        <item>Навсегда</item> <!-- Russian uses 'Forever' intead of 'Unlimited' (Неограниченно) so it's not too long for popup menu on small screens! -->
     </string-array>
     <string-array name="preference_burst_mode_values">
         <item>1</item>

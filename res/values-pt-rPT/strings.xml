@@ -101,7 +101,7 @@
     <string name="preference_timer_beep_summary">Emitir um sinal sonoro quando o temporizador estiver em contagem decrescente ou para o atraso do modo disparo contínuo</string>
     <string name="preference_timer_speak">Voz de contagem do temporizador</string>
     <string name="preference_timer_speak_summary">Falar a contagem decrescente do temporizador ou do modo disparo contínuo (a partir dos 60 segundos)</string>
-    <string name="preference_burst_mode">Disparo contínuo</string>
+    <string name="preference_burst_mode">Contínuo</string>
     <string name="preference_burst_mode_summary">Tirar múltiplas fotografias sucessivamente</string>
     <string name="preference_burst_interval">Intervalo do modo disparo contínuo</string>
     <string name="preference_burst_interval_summary">Atraso (se houver) entre as fotografias tiradas no modo disparo contínuo</string>

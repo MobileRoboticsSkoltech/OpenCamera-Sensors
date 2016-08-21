@@ -98,7 +98,7 @@
     <string name="preference_timer_summary">Definir temporizador para câmera</string>
     <string name="preference_timer_beep">Som do Temporizador</string>
     <string name="preference_timer_beep_summary">Toca quando o temporizador está em contagem regressiva ou no intervalo do modo disparo</string>
-    <string name="preference_burst_mode">Disparo Contínuo</string>
+    <string name="preference_burst_mode">Contínuo</string>
     <string name="preference_burst_mode_summary">Tire múltiplas fotos em sucessão</string>
     <string name="preference_burst_interval">Intervalo Disparo Contínuo</string>
     <string name="preference_burst_interval_summary">Intervalo entre as fotos no modo disparo contínuo</string>

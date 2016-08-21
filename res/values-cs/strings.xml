@@ -100,7 +100,7 @@
     <string name="preference_timer_beep_summary">Pípat když časovač odpočítává nebo při prodlení sekvenčního snímání</string>
     <string name="preference_timer_speak">Hlasové odpočítávání</string>
     <string name="preference_timer_speak_summary">Hlasové odpočítávání pro časovač nebo prodlení sekvenčního snímání (od 60 sekund)</string>
-    <string name="preference_burst_mode">Sekvenční snímání</string>
+    <string name="preference_burst_mode">Sekvenční</string>
     <string name="preference_burst_mode_summary">Pořídit několik fotografií v posloupnosti</string>
     <string name="preference_burst_interval">Mezidobí sekvenčního snímání</string>
     <string name="preference_burst_interval_summary">Prodlení (pokud je) mezi pořizováním snímků v sekvenčním snímání</string>

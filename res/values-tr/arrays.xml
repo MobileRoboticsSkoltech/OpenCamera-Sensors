@@ -65,7 +65,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Zamanlama yok</item>
+        <item>Kapalı</item>
         <item>1sn</item>
         <item>2sn</item>
         <item>3sn</item>
