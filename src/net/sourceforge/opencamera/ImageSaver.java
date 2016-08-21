@@ -60,7 +60,12 @@ public class ImageSaver extends Thread {
 	private BlockingQueue<Request> queue = new ArrayBlockingQueue<Request>(1); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
 	
 	private static class Request {
-		boolean is_raw = false;
+		enum Type {
+			JPEG,
+			RAW,
+			DUMMY
+		}
+		Type type = Type.JPEG;
 		boolean is_hdr = false; // for jpeg
 		List<byte []> jpeg_images = null; // for jpeg
 		DngCreator dngCreator = null; // for raw
@@ -87,7 +92,7 @@ public class ImageSaver extends Thread {
 		double geo_direction = 0.0;
 		boolean has_thumbnail_animation = false;
 		
-		Request(boolean is_raw,
+		Request(Type type,
 			boolean is_hdr,
 			List<byte []> jpeg_images,
 			DngCreator dngCreator, Image image,
@@ -99,7 +104,7 @@ public class ImageSaver extends Thread {
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			boolean has_thumbnail_animation) {
-			this.is_raw = is_raw;
+			this.type = type;
 			this.is_hdr = is_hdr;
 			this.jpeg_images = jpeg_images;
 			this.dngCreator = dngCreator;
@@ -151,11 +156,24 @@ public class ImageSaver extends Thread {
 				if( MyDebug.LOG )
 					Log.d(TAG, "ImageSaver thread found new request from queue, size is now: " + queue.size());
 				boolean success = false;
-				if( request.is_raw ) {
+				if( request.type == Request.Type.RAW ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "request is raw");
 					success = saveImageNowRaw(request.dngCreator, request.image, request.current_date);
 				}
-				else {
+				else if( request.type == Request.Type.JPEG ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "request is jpeg");
 					success = saveImageNow(request);
+				}
+				else if( request.type == Request.Type.DUMMY ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "request is dummy");
+					success = true;
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.e(TAG, "request is unknown type!");
 				}
 				if( MyDebug.LOG ) {
 					if( success )
@@ -270,7 +288,7 @@ public class ImageSaver extends Thread {
 		
 		//do_in_background = false;
 		
-		Request request = new Request(is_raw,
+		Request request = new Request(is_raw ? Request.Type.RAW : Request.Type.JPEG,
 				is_hdr,
 				jpeg_images,
 				dngCreator, image,
@@ -284,33 +302,28 @@ public class ImageSaver extends Thread {
 				has_thumbnail_animation);
 
 		if( do_in_background ) {
-			// this should not be synchronized on "this": BlockingQueue is thread safe, and if it's blocking in queue.put(), we'll hang because
-			// the saver queue will need to synchronize on "this" in order to notifyAll() the main thread
-			boolean done = false;
-			while( !done ) {
-				try {
-					if( MyDebug.LOG )
-						Log.d(TAG, "ImageSaver thread adding to queue, size: " + queue.size());
-					synchronized( this ) {
-						// see above for why we don't synchronize the queue.put call
-						// but we synchronize modification to avoid risk of problems related to compiler optimisation (local caching or reordering)
-						// also see FindBugs warning due to inconsistent synchronisation
-						n_images_to_save++; // increment before adding to the queue, just to make sure the main thread doesn't think we're all done
-					}
-					queue.put(request); // if queue is full, put() blocks until it isn't full
-					if( MyDebug.LOG ) {
-						synchronized( this ) { // keep FindBugs happy
-							Log.d(TAG, "ImageSaver thread added to queue, size is now: " + queue.size());
-							Log.d(TAG, "images still to save is now: " + n_images_to_save);
-						}
-					}
-					done = true;
-				}
-				catch(InterruptedException e) {
-					e.printStackTrace();
-					if( MyDebug.LOG )
-						Log.e(TAG, "interrupted while trying to add to ImageSaver queue");
-				}
+			if( MyDebug.LOG )
+				Log.d(TAG, "add background request");
+			addRequest(request);
+			if( request.is_hdr ) {
+				// For HDR, we also add a dummy request, effectively giving it a cost of 2 - to reflect the fact that HDR is more memory intensive
+				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
+				// of 2, due to RAW and JPEG each needing their own request).
+				Request dummy_request = new Request(Request.Type.DUMMY,
+					false,
+					null,
+					null, null,
+					false, null,
+					false, 0,
+					false, 0.0,
+					false,
+					null,
+					null, null, 0, 0, null, null, null, null,
+					false, null, false, 0.0,
+					false);
+				if( MyDebug.LOG )
+					Log.d(TAG, "add dummy request");
+				addRequest(dummy_request);
 			}
 			success = true; // always return true when done in background
 		}
@@ -328,6 +341,41 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "success: " + success);
 		return success;
+	}
+	
+	/** Adds a request to the background queue, blocking if the queue is already full
+	 */
+	private void addRequest(Request request) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "addRequest");
+		// this should not be synchronized on "this": BlockingQueue is thread safe, and if it's blocking in queue.put(), we'll hang because
+		// the saver queue will need to synchronize on "this" in order to notifyAll() the main thread
+		boolean done = false;
+		while( !done ) {
+			try {
+				if( MyDebug.LOG )
+					Log.d(TAG, "ImageSaver thread adding to queue, size: " + queue.size());
+				synchronized( this ) {
+					// see above for why we don't synchronize the queue.put call
+					// but we synchronize modification to avoid risk of problems related to compiler optimisation (local caching or reordering)
+					// also see FindBugs warning due to inconsistent synchronisation
+					n_images_to_save++; // increment before adding to the queue, just to make sure the main thread doesn't think we're all done
+				}
+				queue.put(request); // if queue is full, put() blocks until it isn't full
+				if( MyDebug.LOG ) {
+					synchronized( this ) { // keep FindBugs happy
+						Log.d(TAG, "ImageSaver thread added to queue, size is now: " + queue.size());
+						Log.d(TAG, "images still to save is now: " + n_images_to_save);
+					}
+				}
+				done = true;
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+				if( MyDebug.LOG )
+					Log.e(TAG, "interrupted while trying to add to ImageSaver queue");
+			}
+		}
 	}
 
 	/** Wait until the queue is empty and all pending images have been saved.
@@ -368,9 +416,9 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImageNow");
 
-		if( request.is_raw ) {
+		if( request.type != Request.Type.JPEG ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "saveImageNow called with raw request");
+				Log.d(TAG, "saveImageNow called with non-jpeg request");
 			// throw runtime exception, as this is a programming error
 			throw new RuntimeException();
 		}
@@ -469,9 +517,9 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveSingleImageNow");
 
-		if( request.is_raw ) {
+		if( request.type != Request.Type.JPEG ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "saveSingleImageNow called with raw request");
+				Log.d(TAG, "saveImageNow called with non-jpeg request");
 			// throw runtime exception, as this is a programming error
 			throw new RuntimeException();
 		}
@@ -1153,7 +1201,7 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImageNowRaw");
 
-        boolean success = false;
+		boolean success = false;
 		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "RAW requires LOLLIPOP or higher");
