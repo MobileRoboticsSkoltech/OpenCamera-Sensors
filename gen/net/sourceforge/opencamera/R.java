@@ -38,6 +38,8 @@ public final class R {
         public static final int preference_audio_noise_control_sensitivity_values=0x7f06003d;
         public static final int preference_burst_interval_entries=0x7f06000c;
         public static final int preference_burst_interval_values=0x7f06000d;
+        /**  Russian uses 'Forever' intead of 'Unlimited' (Неограниченно) so it's not too long for popup menu on small screens! 
+         */
         public static final int preference_burst_mode_entries=0x7f06000a;
         public static final int preference_burst_mode_values=0x7f06000b;
         public static final int preference_crop_guide_entries=0x7f06001e;
