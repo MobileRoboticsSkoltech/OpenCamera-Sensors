@@ -413,7 +413,7 @@ public class StorageUtils {
 		return file;
 	}
 	
-	private String createMediaFilename(int type, int count, String extension, Date current_date) {
+	private String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
         String index = "";
         if( count > 0 ) {
             index = "_" + count; // try to find a unique filename
@@ -432,11 +432,11 @@ public class StorageUtils {
 		String mediaFilename = null;
         if( type == MEDIA_TYPE_IMAGE ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
-    		mediaFilename = prefix + timeStamp + index + "." + extension;
+    		mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
         }
         else if( type == MEDIA_TYPE_VIDEO ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
-    		mediaFilename = prefix + timeStamp + index + "." + extension;
+    		mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
         }
         else {
         	// throw exception as this is a programming error
@@ -449,7 +449,7 @@ public class StorageUtils {
     
     // only valid if !isUsingSAF()
     @SuppressLint("SimpleDateFormat")
-	File createOutputMediaFile(int type, String extension, Date current_date) throws IOException {
+	File createOutputMediaFile(int type, String suffix, String extension, Date current_date) throws IOException {
     	File mediaStorageDir = getImageFolder();
 
         // Create the storage directory if it does not exist
@@ -465,7 +465,7 @@ public class StorageUtils {
         // Create a media file name
         File mediaFile = null;
         for(int count=0;count<100;count++) {
-        	String mediaFilename = createMediaFilename(type, count, extension, current_date);
+        	String mediaFilename = createMediaFilename(type, suffix, count, extension, current_date);
             mediaFile = new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
             if( !mediaFile.exists() ) {
             	break;
@@ -482,7 +482,7 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    Uri createOutputMediaFileSAF(int type, String extension, Date current_date) throws IOException {
+    Uri createOutputMediaFileSAF(int type, String suffix, String extension, Date current_date) throws IOException {
     	try {
 	    	Uri treeUri = getTreeUriSAF();
 		    if( MyDebug.LOG )
@@ -509,7 +509,7 @@ public class StorageUtils {
 	        	throw new RuntimeException();
 	        }
 	        // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
-	        String mediaFilename = createMediaFilename(type, 0, extension, current_date);
+	        String mediaFilename = createMediaFilename(type, suffix, 0, extension, current_date);
 		    Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, mediaFilename);   
 		    if( MyDebug.LOG )
 		    	Log.d(TAG, "returned fileUri: " + fileUri);

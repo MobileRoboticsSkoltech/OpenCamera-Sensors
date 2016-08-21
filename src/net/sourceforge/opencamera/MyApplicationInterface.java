@@ -174,12 +174,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public File createOutputVideoFile() throws IOException {
-		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "mp4", new Date());
+		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
 	}
 
 	@Override
 	public Uri createOutputVideoSAF() throws IOException {
-		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "mp4", new Date());
+		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
 	}
 
 	@Override

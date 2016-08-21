@@ -331,7 +331,7 @@ public class ImageSaver extends Thread {
 			// wait for queue to be empty
 			waitUntilDone();
 			if( is_raw ) {
-				success = saveImageNowRaw(dngCreator, image, current_date);
+				success = saveImageNowRaw(request.dngCreator, request.image, request.current_date);
 			}
 			else {
 				success = saveImageNow(request);
@@ -443,8 +443,10 @@ public class ImageSaver extends Thread {
 	        // debug: write images separately
 			if( MyDebug.LOG )
 				Log.e(TAG, "save exposures");
-			for(byte [] image : request.jpeg_images) {
-				if( !saveSingleImageNow(request, image, null) ) {
+			for(int i=0;i<request.jpeg_images.size();i++) {
+				byte [] image = request.jpeg_images.get(i);
+				String filename_suffix = "_EXP" + i;
+				if( !saveSingleImageNow(request, image, null, filename_suffix) ) {
 					if( MyDebug.LOG )
 						Log.e(TAG, "saveSingleImageNow failed for exposure image");
 					success = false;
@@ -486,7 +488,7 @@ public class ImageSaver extends Thread {
 
 			if( MyDebug.LOG )
 				Log.e(TAG, "save HDR image");
-			success = saveSingleImageNow(request, request.jpeg_images.get(1), hdr_bitmap);
+			success = saveSingleImageNow(request, request.jpeg_images.get(1), hdr_bitmap, "_HDR");
 			if( MyDebug.LOG && !success )
 				Log.e(TAG, "saveSingleImageNow failed for hdr image");
 			hdr_bitmap.recycle();
@@ -500,7 +502,7 @@ public class ImageSaver extends Thread {
 				// throw runtime exception, as this is a programming error
 				throw new RuntimeException();
 			}
-			success = saveSingleImageNow(request, request.jpeg_images.get(0), null);
+			success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "");
 		}
 
 		return success;
@@ -513,7 +515,7 @@ public class ImageSaver extends Thread {
 	 */
 	@SuppressLint("SimpleDateFormat")
 	@SuppressWarnings("deprecation")
-	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap) {
+	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveSingleImageNow");
 
@@ -884,10 +886,10 @@ public class ImageSaver extends Thread {
     			}
 			}
 			else if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "jpg", current_date);
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", current_date);
 			}
 			else {
-    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "jpg", current_date);
+    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}
@@ -1217,14 +1219,14 @@ public class ImageSaver extends Thread {
     		Uri saveUri = null;
 
 			if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "dng", current_date);
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "saveUri: " + saveUri);
 	    		// When using SAF, we don't save to a temp file first (unlike for JPEGs). Firstly we don't need to modify Exif, so don't
 	    		// need a real file; secondly copying to a temp file is much slower for RAW.
 			}
 			else {
-        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "dng", current_date);
+        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}
