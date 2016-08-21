@@ -382,6 +382,7 @@ public final class R {
  short form of Show a grid 
  short form of Show a grid 
  short form of Show a grid 
+ short form of Show a grid 
          */
         public static final int preference_crop_guide=0x7f0800a0;
         public static final int preference_crop_guide_summary=0x7f0800a1;

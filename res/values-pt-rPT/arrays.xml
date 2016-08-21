@@ -65,7 +65,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Sem temporizador</item>
+        <item>Desligado</item>
         <item>1s</item>
         <item>2s</item>
         <item>3s</item>

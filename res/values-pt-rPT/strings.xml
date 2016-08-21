@@ -167,6 +167,7 @@
     <string name="preference_show_battery_summary">Exibir no ecrã o nível da bateria atual</string>
     <string name="preference_grid">Mostrar uma grelha</string>
     <string name="preference_grid_summary">Exibir uma de várias grelhas</string>
+    <string name="grid">Grelha</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Mostrar um guia de recorte</string>
     <string name="preference_crop_guide_summary">Um guia de recorte exibe um retângulo mostrando como pareceria o rácio de aspeto especificado - útil se planeia recortar posteriormente a fotografia/vídeo para um rácio de aspeto diferente. Requer o modo de fotografia WYSIWYG, ou estar em modo vídeo.</string>
     <string name="preference_show_toasts">Mostrar mensagens \"toast\"</string>
