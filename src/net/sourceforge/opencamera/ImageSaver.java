@@ -440,16 +440,19 @@ public class ImageSaver extends Thread {
 				throw new RuntimeException();
 			}
 
-	        // debug: write images separately
-			if( MyDebug.LOG )
-				Log.e(TAG, "save exposures");
-			for(int i=0;i<request.jpeg_images.size();i++) {
-				byte [] image = request.jpeg_images.get(i);
-				String filename_suffix = "_EXP" + i;
-				if( !saveSingleImageNow(request, image, null, filename_suffix) ) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "saveSingleImageNow failed for exposure image");
-					success = false;
+			if( !request.image_capture_intent ) {
+		        // debug: write images separately
+				if( MyDebug.LOG )
+					Log.e(TAG, "save exposures");
+				for(int i=0;i<request.jpeg_images.size();i++) {
+					byte [] image = request.jpeg_images.get(i);
+					String filename_suffix = "_EXP" + i;
+					// don't update the thumbnails, only do this for the final HDR image - so user doesn't think it's complete, click gallery, then wonder why the final image isn't there
+					if( !saveSingleImageNow(request, image, null, filename_suffix, false) ) {
+						if( MyDebug.LOG )
+							Log.e(TAG, "saveSingleImageNow failed for exposure image");
+						success = false;
+					}
 				}
 			}
 
@@ -488,7 +491,7 @@ public class ImageSaver extends Thread {
 
 			if( MyDebug.LOG )
 				Log.e(TAG, "save HDR image");
-			success = saveSingleImageNow(request, request.jpeg_images.get(1), hdr_bitmap, "_HDR");
+			success = saveSingleImageNow(request, request.jpeg_images.get(1), hdr_bitmap, "_HDR", true);
 			if( MyDebug.LOG && !success )
 				Log.e(TAG, "saveSingleImageNow failed for hdr image");
 			hdr_bitmap.recycle();
@@ -502,7 +505,7 @@ public class ImageSaver extends Thread {
 				// throw runtime exception, as this is a programming error
 				throw new RuntimeException();
 			}
-			success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "");
+			success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", true);
 		}
 
 		return success;
@@ -515,7 +518,7 @@ public class ImageSaver extends Thread {
 	 */
 	@SuppressLint("SimpleDateFormat")
 	@SuppressWarnings("deprecation")
-	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix) {
+	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveSingleImageNow");
 
@@ -1117,7 +1120,7 @@ public class ImageSaver extends Thread {
         }
 
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
-        if( success && main_activity.getPreview().getCameraController() != null ) {
+        if( success && main_activity.getPreview().getCameraController() != null && update_thumbnail ) {
         	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
         	long time_s = System.currentTimeMillis();
         	CameraController.Size size = main_activity.getPreview().getCameraController().getPictureSize();
