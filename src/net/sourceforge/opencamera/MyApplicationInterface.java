@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Vector;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
@@ -56,12 +57,27 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	private Rect text_bounds = new Rect();
 
-	private boolean last_image_saf = false;
-	private Uri last_image_uri = null;
-	private String last_image_name = null;
-	private boolean last_image_raw_saf = false;
-	private Uri last_image_raw_uri = null;
-	private String last_image_raw_name = null;
+	private boolean last_images_saf = false; // whether the last images array are using SAF or not
+	/** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
+	 */
+	private static class LastImage {
+		public boolean share = false; // one of the images in the list should have share set to true, to indicate which image to share
+		public String name = null;
+		public Uri uri = null;
+
+		LastImage(Uri uri, boolean share) {
+			this.name = null;
+			this.uri = uri;
+			this.share = share;
+		}
+		
+		LastImage(String filename, boolean share) {
+	    	this.name = filename;
+	    	this.uri = Uri.parse("file://" + this.name);
+			this.share = share;
+		}
+	}
+	private List<LastImage> last_images = new Vector<LastImage>();
 	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
@@ -954,8 +970,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    else {
 			shareButton.setVisibility(View.GONE);
 		    trashButton.setVisibility(View.GONE);
+		    this.clearLastImages();
 	    }
-		
 	}
 	
     @Override
@@ -1370,59 +1386,31 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return success;
 	}
     
-	void setLastImage(File file) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setLastImage: " + file);
-    	last_image_saf = false;
-    	last_image_name = file.getAbsolutePath();
-    	last_image_uri = Uri.parse("file://" + last_image_name);
-	}
+    void addLastImage(File file, boolean share) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "addLastImage: " + file);
+			Log.d(TAG, "share?: " + share);
+		}
+    	last_images_saf = false;
+    	LastImage last_image = new LastImage(file.getAbsolutePath(), share);
+    	last_images.add(last_image);
+    }
+    
+    void addLastImageSAF(Uri uri, boolean share) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "addLastImageSAF: " + uri);
+			Log.d(TAG, "share?: " + share);
+		}
+		last_images_saf = true;
+    	LastImage last_image = new LastImage(uri, share);
+    	last_images.add(last_image);
+    }
 
-	void setLastImageRaw(File file) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setLastImageRaw: " + file);
-    	last_image_raw_saf = false;
-    	last_image_raw_name = file.getAbsolutePath();
-    	last_image_raw_uri = Uri.parse("file://" + last_image_raw_name);
-	}
-
-	void setLastImageSAF(Uri uri) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setLastImageSAF: " + uri);
-    	last_image_saf = true;
-    	last_image_name = null;
-    	last_image_uri = uri;
-	}
-	
-	void setLastImageRawSAF(Uri uri) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setLastImageRawSAF: " + uri);
-    	last_image_raw_saf = true;
-    	last_image_raw_name = null;
-    	last_image_raw_uri = uri;
-	}
-	
 	private void clearLastImages() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "clearLastImages");
-		clearLastImage();
-		clearLastImageRaw();
-	}
-
-	void clearLastImage() {
-		if( MyDebug.LOG )
 			Log.d(TAG, "clearLastImage");
-		last_image_saf = false;
-		last_image_name = null;
-		last_image_uri = null;
-	}
-
-	void clearLastImageRaw() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "clearLastImageRaw");
-		last_image_raw_saf = false;
-		last_image_raw_name = null;
-		last_image_raw_uri = null;
+		last_images_saf = false;
+		last_images.clear();
 	}
 
 	void shareLastImage() {
@@ -1430,7 +1418,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "shareLastImage");
 		Preview preview  = main_activity.getPreview();
 		if( preview.isPreviewPaused() ) {
-			if( last_image_uri != null ) {
+			LastImage share_image = null;
+			for(int i=0;i<last_images.size() && share_image == null;i++) {
+				LastImage last_image = last_images.get(i);
+				if( last_image.share ) {
+					share_image = last_image;
+				}
+			}
+			if( share_image != null ) {
+				Uri last_image_uri = share_image.uri;
 				if( MyDebug.LOG )
 					Log.d(TAG, "Share: " + last_image_uri);
 				Intent intent = new Intent(Intent.ACTION_SEND);
@@ -1488,8 +1484,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "trashImage");
 		Preview preview  = main_activity.getPreview();
 		if( preview.isPreviewPaused() ) {
-			trashImage(last_image_saf, last_image_uri, last_image_name);
-			trashImage(last_image_raw_saf, last_image_raw_uri, last_image_raw_name);
+			for(int i=0;i<last_images.size();i++) {
+				LastImage last_image = last_images.get(i);
+				trashImage(last_images_saf, last_image.uri, last_image.name);
+			}
 			clearLastImages();
 			preview.startCameraPreview();
 		}

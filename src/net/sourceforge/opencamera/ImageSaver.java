@@ -1110,13 +1110,10 @@ public class ImageSaver extends Thread {
         }
 
         if( success && saveUri == null ) {
-        	applicationInterface.setLastImage(picFile);
+        	applicationInterface.addLastImage(picFile, true);
         }
         else if( success && storageUtils.isUsingSAF() ){
-        	applicationInterface.setLastImageSAF(saveUri);
-        }
-        else {
-        	applicationInterface.clearLastImage();
+        	applicationInterface.addLastImageSAF(saveUri, true);
         }
 
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
@@ -1282,13 +1279,10 @@ public class ImageSaver extends Thread {
 
     		MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
     		if( success && saveUri == null ) {
-            	applicationInterface.setLastImageRaw(picFile);
+            	applicationInterface.addLastImage(picFile, false);
             }
             else if( success && storageUtils.isUsingSAF() ){
-            	applicationInterface.setLastImageRawSAF(saveUri);
-            }
-            else {
-            	applicationInterface.clearLastImageRaw();
+            	applicationInterface.addLastImageSAF(saveUri, false);
             }
 
         }
