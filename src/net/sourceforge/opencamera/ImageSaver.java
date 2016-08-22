@@ -448,7 +448,8 @@ public class ImageSaver extends Thread {
 					byte [] image = request.jpeg_images.get(i);
 					String filename_suffix = "_EXP" + i;
 					// don't update the thumbnails, only do this for the final HDR image - so user doesn't think it's complete, click gallery, then wonder why the final image isn't there
-					if( !saveSingleImageNow(request, image, null, filename_suffix, false) ) {
+					// also don't mark these images as being shared
+					if( !saveSingleImageNow(request, image, null, filename_suffix, false, false) ) {
 						if( MyDebug.LOG )
 							Log.e(TAG, "saveSingleImageNow failed for exposure image");
 						success = false;
@@ -491,7 +492,7 @@ public class ImageSaver extends Thread {
 
 			if( MyDebug.LOG )
 				Log.e(TAG, "save HDR image");
-			success = saveSingleImageNow(request, request.jpeg_images.get(1), hdr_bitmap, "_HDR", true);
+			success = saveSingleImageNow(request, request.jpeg_images.get(1), hdr_bitmap, "_HDR", true, true);
 			if( MyDebug.LOG && !success )
 				Log.e(TAG, "saveSingleImageNow failed for hdr image");
 			hdr_bitmap.recycle();
@@ -505,7 +506,7 @@ public class ImageSaver extends Thread {
 				// throw runtime exception, as this is a programming error
 				throw new RuntimeException();
 			}
-			success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", true);
+			success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", true, true);
 		}
 
 		return success;
@@ -515,10 +516,13 @@ public class ImageSaver extends Thread {
 	 *  The requests.images field is ignored, instead we save the supplied data or bitmap.
 	 *  If bitmap is null, then the supplied jpeg data is saved. If bitmap is non-null, then the bitmap is
 	 *  saved, but the supplied data is still used to read EXIF data from.
+	 *  @param update_thumbnail - Whether to update the thumbnail (and show the animation).
+	 *  @param share_image - Whether this image should be marked as the one to share (if multiple images can
+	 *  be saved from a single shot (e.g., saving exposure images with HDR).
 	 */
 	@SuppressLint("SimpleDateFormat")
 	@SuppressWarnings("deprecation")
-	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail) {
+	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail, boolean share_image) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveSingleImageNow");
 
@@ -1110,10 +1114,10 @@ public class ImageSaver extends Thread {
         }
 
         if( success && saveUri == null ) {
-        	applicationInterface.addLastImage(picFile, true);
+        	applicationInterface.addLastImage(picFile, share_image);
         }
         else if( success && storageUtils.isUsingSAF() ){
-        	applicationInterface.addLastImageSAF(saveUri, true);
+        	applicationInterface.addLastImageSAF(saveUri, share_image);
         }
 
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
