@@ -449,6 +449,7 @@ public class ImageSaver extends Thread {
 				throw new RuntimeException();
 			}
 
+        	long time_s = System.currentTimeMillis();
 			if( !request.image_capture_intent && request.save_expo ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "save exposures");
@@ -465,6 +466,9 @@ public class ImageSaver extends Thread {
 					}
 				}
 			}
+    		if( MyDebug.LOG ) {
+    			Log.d(TAG, "HDR performance: time after saving base exposures: " + (System.currentTimeMillis() - time_s));
+    		}
 
 			// note, even if we failed saving some of the expo images, still try to save the HDR image
 			if( MyDebug.LOG )
@@ -489,7 +493,13 @@ public class ImageSaver extends Thread {
 				bitmaps.add(bitmap);
 				options.inMutable = false; // later bitmaps don't need to be writable
 			}
+    		if( MyDebug.LOG ) {
+    			Log.d(TAG, "HDR performance: time after decompressing base exposures: " + (System.currentTimeMillis() - time_s));
+    		}
 			hdrProcessor.processHDR(bitmaps);
+    		if( MyDebug.LOG ) {
+    			Log.d(TAG, "HDR performance: time after creating HDR image: " + (System.currentTimeMillis() - time_s));
+    		}
 			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap:
 			for(int i=1;i<bitmaps.size();i++) {
 				Bitmap bitmap = bitmaps.get(i);
@@ -501,10 +511,13 @@ public class ImageSaver extends Thread {
 			main_activity.savingImage(false);
 
 			if( MyDebug.LOG )
-				Log.e(TAG, "save HDR image");
+				Log.d(TAG, "save HDR image");
 			success = saveSingleImageNow(request, request.jpeg_images.get(1), hdr_bitmap, "_HDR", true, true);
 			if( MyDebug.LOG && !success )
 				Log.e(TAG, "saveSingleImageNow failed for hdr image");
+    		if( MyDebug.LOG ) {
+    			Log.d(TAG, "HDR performance: time after saving HDR image: " + (System.currentTimeMillis() - time_s));
+    		}
 			hdr_bitmap.recycle();
 			hdr_bitmap = null;
 	        System.gc();
@@ -548,6 +561,7 @@ public class ImageSaver extends Thread {
 			// throw runtime exception, as this is a programming error
 			throw new RuntimeException();
 		}
+    	long time_s = System.currentTimeMillis();
 		
 		// unpack:
 		boolean image_capture_intent = request.image_capture_intent;
@@ -697,6 +711,9 @@ public class ImageSaver extends Thread {
     			}
 			}
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "Save single image performance: time after auto-stabilise: " + (System.currentTimeMillis() - time_s));
+		}
 		boolean dategeo_stamp = request.preference_stamp.equals("preference_stamp_yes");
 		boolean text_stamp = request.preference_textstamp.length() > 0;
 		if( dategeo_stamp || text_stamp ) {
@@ -834,6 +851,9 @@ public class ImageSaver extends Thread {
     	        }
 			}
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "Save single image performance: time after photostamp: " + (System.currentTimeMillis() - time_s));
+		}
 
 		int exif_orientation_s = ExifInterface.ORIENTATION_UNDEFINED;
 		File picFile = null;
@@ -938,6 +958,9 @@ public class ImageSaver extends Thread {
 				}
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "saveImageNow saved photo");
+	    		if( MyDebug.LOG ) {
+	    			Log.d(TAG, "Save single image performance: time after saving photo: " + (System.currentTimeMillis() - time_s));
+	    		}
 
 	    		if( saveUri == null ) { // if saveUri is non-null, then we haven't succeeded until we've copied to the saveUri
 	    			success = true;
@@ -955,6 +978,9 @@ public class ImageSaver extends Thread {
 	    	            finally {
 	    	            	tempOutputStream.close();
 	    	            }
+	    	    		if( MyDebug.LOG ) {
+	    	    			Log.d(TAG, "Save single image performance: time after saving temp photo for EXIF: " + (System.currentTimeMillis() - time_s));
+	    	    		}
         	    		if( MyDebug.LOG )
         	    			Log.d(TAG, "read back EXIF data");
     	            	ExifInterface exif = new ExifInterface(tempFile.getAbsolutePath());
@@ -979,6 +1005,9 @@ public class ImageSaver extends Thread {
     	            	int exif_orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
     	            	exif_orientation_s = exif_orientation; // store for later use (for the thumbnail, to save rereading it)
     	            	String exif_white_balance = exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE);
+    	        		if( MyDebug.LOG ) {
+    	        			Log.d(TAG, "Save single image performance: time after reading EXIF: " + (System.currentTimeMillis() - time_s));
+    	        		}
 
     					if( !tempFile.delete() ) {
     						if( MyDebug.LOG )
@@ -1034,11 +1063,13 @@ public class ImageSaver extends Thread {
     	            	exif_new.saveAttributes();
         	    		if( MyDebug.LOG )
         	    			Log.d(TAG, "now saved EXIF data");
+        	    		if( MyDebug.LOG ) {
+        	    			Log.d(TAG, "Save single image performance: time after writing EXIF: " + (System.currentTimeMillis() - time_s));
+        	    		}
 	            	}
 	            	else if( store_geo_direction ) {
     	            	if( MyDebug.LOG )
         	    			Log.d(TAG, "add GPS direction exif info");
-    	            	long time_s = System.currentTimeMillis();
     	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
         	            setGPSDirectionExif(exif, store_geo_direction, request.geo_direction);
         	            setDateTimeExif(exif);
@@ -1046,20 +1077,19 @@ public class ImageSaver extends Thread {
         	            	fixGPSTimestamp(exif);
         	            }
     	            	exif.saveAttributes();
-        	    		if( MyDebug.LOG ) {
-        	    			Log.d(TAG, "done adding GPS direction exif info, time taken: " + (System.currentTimeMillis() - time_s));
-        	    		}
+    	        		if( MyDebug.LOG ) {
+    	        			Log.d(TAG, "Save single image performance: time after adding GPS direction exif info: " + (System.currentTimeMillis() - time_s));
+    	        		}
 	            	}
 	            	else if( needGPSTimestampHack(using_camera2, store_location) ) {
     	            	if( MyDebug.LOG )
         	    			Log.d(TAG, "remove GPS timestamp hack");
-    	            	long time_s = System.currentTimeMillis();
     	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
     	            	fixGPSTimestamp(exif);
     	            	exif.saveAttributes();
-        	    		if( MyDebug.LOG ) {
-        	    			Log.d(TAG, "done removing GPS timestamp exif info, time taken: " + (System.currentTimeMillis() - time_s));
-        	    		}
+    	        		if( MyDebug.LOG ) {
+    	        			Log.d(TAG, "Save single image performance: time after removing GPS timestamp hack: " + (System.currentTimeMillis() - time_s));
+    	        		}
 	            	}
 
     	            if( saveUri == null ) {
@@ -1133,7 +1163,6 @@ public class ImageSaver extends Thread {
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
         if( success && main_activity.getPreview().getCameraController() != null && update_thumbnail ) {
         	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
-        	long time_s = System.currentTimeMillis();
         	CameraController.Size size = main_activity.getPreview().getCameraController().getPictureSize();
     		int ratio = (int) Math.ceil((double) size.width / main_activity.getPreview().getView().getWidth());
     		int sample_size = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality
@@ -1183,8 +1212,9 @@ public class ImageSaver extends Thread {
 						applicationInterface.updateThumbnail(thumbnail_f);
 					}
 				});
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
+        		if( MyDebug.LOG ) {
+        			Log.d(TAG, "Save single image performance: time after creating thumbnail: " + (System.currentTimeMillis() - time_s));
+        		}
 			}
         }
 
@@ -1207,6 +1237,9 @@ public class ImageSaver extends Thread {
         
 		main_activity.savingImage(false);
 
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "Save single image performance: total time: " + (System.currentTimeMillis() - time_s));
+		}
         return success;
 	}
 
