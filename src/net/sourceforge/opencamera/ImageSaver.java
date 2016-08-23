@@ -1064,7 +1064,7 @@ public class ImageSaver extends Thread {
 
     	            if( saveUri == null ) {
     	            	// broadcast for SAF is done later, when we've actually written out the file
-    	            	storageUtils.broadcastFile(picFile, true, false, true);
+    	            	storageUtils.broadcastFile(picFile, true, false, update_thumbnail);
     	            	main_activity.test_last_saved_image = picFile.getAbsolutePath();
     	            }
 	            }
