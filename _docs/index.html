@@ -100,6 +100,7 @@ browsers -->
 <li>Support for (some) external microphones.</li>
 <li>Widget to automatically take a photo after launching.</li>
 <li>Support for Android 5 Camera2 API: manual focus distance; manual ISO; manual exposure time; RAW (DNG) files.</li>
+<li>Support for <a href="#hdr">HDR</a>.</li>
 <li>Small file size.</li>
 <li>Completely free, and no ads in the app. Open Source.</li>
 </ul>
@@ -146,6 +147,7 @@ Thanks! Donations can be used for: purchasing hardware for porting/testing; app 
 <li><a href="#quickstart">Quickstart</a></li>
 <li><a href="#user_interface">On-Screen User Interface</a></li>
 <li><a href="#auto_stabilise">Auto-stabilise feature</a></li>
+<li><a href="#hdr">HDR</a></li>
 <li><a href="#settings">Settings</a></li>
 <li><a href="#widgets">Widgets</a></li>
 <li><a href="#faq">FAQ</a></li>
@@ -240,6 +242,8 @@ setting may not be supported on all cameras. See
 If Camera2 API is used, then if a non-auto ISO is used, then selecting the exposure compensation icon
 <img src="exposure.png" alt="Exposure Compensation icon" width="32" height="32"> will bring up sliders allowing direct control over the ISO and exposure
 time.</li>
+<li><b>Photo Mode</b> - If Camera2 API is enabled, you can also choose different photo modes. Currently
+this is just <a href="#hdr">HDR</a>.</li>
 <li><b>White balance</b> - Choose a method to control how the white balance is set. See
 <a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an
 explanation of white balance. (Only available if the camera supports different white balance
@@ -295,6 +299,36 @@ to test. If you do have problems, you'll have to disable the feature again.</p>
 <p>Also note that the feature reduces the available space in the image - because rotating an image makes it no longer fit into a
 rectangular image, so we have to crop it. So it's still advisable to try to hold the camera reasonably level when using this
 feature.</p>
+
+<p><a name="hdr"></a><b>HDR</b></p>
+
+<p>High Dynamic Range Imaging (HDR) is a technique where the camera takes multiple shots at different exposures, and combines them
+into a single image. A typical problem in photography is that a scene may contain a brightness range that is wider than what can be
+captured in a single shot. Varying the exposure (whether by touching on the screen, or exposure compentation or manual exposure) might
+make darker regions brighter, but leave other areas over-exposured. Or reducing the exposure to prevent over-exposure may result in
+the rest of the scene being too dark. HDR uses an algorithm to combine the best parts of each image, and adjusts the colours so that
+the full range of brightness values are captured in the scene:</p>
+
+<p><a href="hdr_image_test8.jpg">
+<img src="hdr_image_test8_thumb.jpg" style="max-width:100%" alt="Screenshots demonstrating HDR" title="Screenshots demonstrating HDR">
+</a></p>
+
+<p>The left set of three images show the individual exposures, the right the final HDR image. Note that on the middle picture on the
+left, the sky is completely over-exposed (making a nice blue sky look like white clouds), as is the bark in the tree centre-left and
+the grass. Meanwhile the tree branches in the foreground is a bit too dark.</p>
+
+<p>Some things to note about Open Camera's HDR feature:</p>
+<ul>
+<li>HDR requires Camera2 API to be enabled (under Settings), which is only available on some devices.</li>
+<li>Taking photos with HDR is significantly slower than regular photos.</li>
+<li>Flash is not supported for HDR mode.</li>
+<li>HDR isn't suitable for fast moving scenes, due to combining an image from multiple shots.</li>
+<li>HDR can sometimes result in inaccurate colour reproduction (due to trying to estimate the colours from multiple exposures).</li>
+<li>Some Android camera apps use "HDR" to mean "apply a whacky-looking filter". Whilst HDR filters can be used to apply a rather
+unreal or vivid image, for now Open Camera's HDR is more geared towards capturing the range of exposures. Also note that many camera
+apps that advertise "HDR" don't even make use of multiple images - this is more a case of filtering, than HDR.</li>
+<li>See <a href="http://www.androidauthority.com/how-to-use-hdr-android-173210/">this guide</a> for more information on HDR.</li>
+</ul>
 
 <p><a name="settings"></a><b>Settings</b></p>
 
@@ -549,6 +583,7 @@ uncompressed and unprocessed information from your camera. Please note the follo
 	<li>Note that various processing options such as "Stamp photos" and "Auto-stabilise" will only apply
 	to the JPEG images, and not the DNG images. This is not a bug - the DNGs represent the RAW output
 	of the camera device.</li>
+	<li>RAW images will only be saved in the Standard Photo Mode.</li>
 </ul>
 
 <p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
@@ -845,6 +880,18 @@ on this page.</p>
 <p><b>My device has Android 5, why can't I select the Camera2 API?</b> - Only some Android 5 devices support the new
 Camera2 API, such as the Nexus 5 and Nexus 6.</p>
 
+<p><b>Why doesn't Open Camera's HDR images look like other HDR camera apps?</b> - There are a great many different ways
+of applying a HDR algorithm, some may do better or worse in different circumstances; some may look more or less pleasing
+depending on what you are after. Also note that some Android camera apps use "HDR" to mean "apply a whacky-looking filter".
+Whilst HDR filters can be used to apply a rather unreal or vivid image, for now Open Camera's HDR is more geared towards
+capturing the range of exposures.</p>
+
+<p><b>Why doesn't Open Camera's HDR photos look as good as other HDR photos I see?</b> - Firstly, see the previous question.
+Beyond that, many HDR photos you see on the Internet may have been manually processed in HDR software that allows the
+user to tweak settings for optimal results for a given image. Such photos may have had additional processing done. Open
+Camera's HDR algorithm tries to get the best results for most purposes automatically, but isn't going to beat manual
+editing.</p>
+
 <p><b>I don't like the UI!</b> - The UI for Open Camera has improved significantly over the versions (both in terms
 of having a consistent look, and the operation), so this criticism seems to have gone down, but there's always room
 for improvement! However, in order for me to improve, please be specific: comments like this could mean all sorts of
@@ -971,6 +1018,8 @@ FIXED   Problems with Camera2 and flash: no longer does excessive flash; also
 FIXED   Problem with Pause Preview option: if a photo with RAW was saved, then
         another photo without RAW saved and deleted, the previous RAW was also
         deleted.
+ADDED   New photo mode HDR. Only supported for devices with Camera2 API (and
+        Camera2 must be enabled).
 ADDED   Support for manual ISO for old camera API on Asus Zenphone 2 Z00A and
         Z008 (thanks to Flávio Keglevich).
 ADDED   Portuguese translation.
