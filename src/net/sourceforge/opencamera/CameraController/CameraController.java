@@ -58,6 +58,7 @@ public abstract class CameraController {
 		public int max_exposure = 0;
 		public float exposure_step = 0.0f;
 		public boolean can_disable_shutter_sound = false;
+		public boolean supports_hdr = false;
 		public boolean supports_raw = false;
 	}
 

@@ -661,7 +661,10 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public boolean isHDRPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getBoolean(PreferenceKeys.getHDRPreferenceKey(), false);
+		boolean hdr = sharedPreferences.getBoolean(PreferenceKeys.getHDRPreferenceKey(), false);
+		if( hdr && main_activity.supportsHDR() )
+			return true;
+		return false;
     }
 
     @Override

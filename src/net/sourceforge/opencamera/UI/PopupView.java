@@ -222,7 +222,7 @@ public class PopupView extends LinearLayout {
         		this.addView(checkBox);
         	}
 
-    		if( main_activity.getApplicationInterface().useCamera2() ) {
+    		if( main_activity.supportsHDR() ) {
         		CheckBox checkBox = new CheckBox(main_activity);
         		checkBox.setText("Use HDR");
         		checkBox.setTextColor(Color.WHITE);

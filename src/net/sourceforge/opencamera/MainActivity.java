@@ -2228,6 +2228,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	return this.supports_auto_stabilise;
     }
 
+    public boolean supportsHDR() {
+    	// we also require the device have sufficient memory to do the processing, simplest to use the same test as we do for auto-stabilise...
+		if( this.supportsAutoStabilise() && preview.supportsHDR() )
+			return true;
+		return false;
+    }
+    
     public boolean supportsForceVideo4K() {
     	return this.supports_force_video_4k;
     }

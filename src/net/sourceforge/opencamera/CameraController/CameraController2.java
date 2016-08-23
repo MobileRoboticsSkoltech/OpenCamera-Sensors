@@ -977,6 +977,7 @@ public class CameraController2 extends CameraController {
 			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
 			if( exposure_time_range != null ) {
 				camera_features.supports_exposure_time = true;
+				camera_features.supports_hdr = true;
 				camera_features.min_exposure_time = exposure_time_range.getLower();
 				camera_features.max_exposure_time = exposure_time_range.getUpper();
 			}
