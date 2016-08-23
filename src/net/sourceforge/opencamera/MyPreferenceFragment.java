@@ -177,6 +177,16 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             });        	
 		}
 
+		final boolean supports_hdr = bundle.getBoolean("supports_hdr");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_hdr: " + supports_hdr);
+
+		if( !supports_hdr ) {
+			Preference pref = findPreference("preference_hdr_save_expo");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+        	pg.removePreference(pref);
+		}
+
 		final String [] video_quality = bundle.getStringArray("video_quality");
 		final String [] video_quality_string = bundle.getStringArray("video_quality_string");
 		if( video_quality != null && video_quality_string != null ) {

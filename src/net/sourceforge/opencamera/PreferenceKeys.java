@@ -100,7 +100,11 @@ public class PreferenceKeys {
     public static String getPhotoModePreferenceKey() {
     	return "preference_photo_mode";
     }
-    
+
+    public static String getHDRSaveExpoPreferenceKey() {
+    	return "preference_hdr_save_expo";
+    }
+
     public static String getLocationPreferenceKey() {
     	return "preference_location";
     }

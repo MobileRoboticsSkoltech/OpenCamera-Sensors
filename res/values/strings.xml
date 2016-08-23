@@ -307,4 +307,7 @@
 
     <string name="photo_mode_standard">Standard</string>
     <string name="photo_mode_hdr">HDR</string>
+    <string name="preference_category_stamp">Photo Stamp</string>
+    <string name="preference_hdr_save_expo">Save all images for HDR mode</string>
+    <string name="preference_hdr_save_expo_summary">If enabled, when using HDR photo mode, the three base exposure images will be saved as well as the final HDR photo. Note this will make saving slower, especially if options like \"Stamp photos\" or Auto-stabilise are also used.</string>
 </resources>

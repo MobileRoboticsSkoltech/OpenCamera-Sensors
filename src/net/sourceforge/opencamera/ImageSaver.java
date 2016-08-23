@@ -67,6 +67,7 @@ public class ImageSaver extends Thread {
 		}
 		Type type = Type.JPEG;
 		boolean is_hdr = false; // for jpeg
+		boolean save_expo = false; // for is_hdr
 		List<byte []> jpeg_images = null; // for jpeg
 		DngCreator dngCreator = null; // for raw
 		Image image = null; // for raw
@@ -94,6 +95,7 @@ public class ImageSaver extends Thread {
 		
 		Request(Type type,
 			boolean is_hdr,
+			boolean save_expo,
 			List<byte []> jpeg_images,
 			DngCreator dngCreator, Image image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
@@ -106,6 +108,7 @@ public class ImageSaver extends Thread {
 			boolean has_thumbnail_animation) {
 			this.type = type;
 			this.is_hdr = is_hdr;
+			this.save_expo = save_expo;
 			this.jpeg_images = jpeg_images;
 			this.dngCreator = dngCreator;
 			this.image = image;
@@ -208,6 +211,7 @@ public class ImageSaver extends Thread {
 	 */
 	public boolean saveImageJpeg(boolean do_in_background,
 			boolean is_hdr,
+			boolean save_expo,
 			List<byte []> images,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
@@ -225,6 +229,7 @@ public class ImageSaver extends Thread {
 		return saveImage(do_in_background,
 				false,
 				is_hdr,
+				save_expo,
 				images,
 				null, null,
 				image_capture_intent, image_capture_intent_uri,
@@ -253,6 +258,7 @@ public class ImageSaver extends Thread {
 		return saveImage(do_in_background,
 				true,
 				false,
+				false,
 				null,
 				dngCreator, image,
 				false, null,
@@ -270,6 +276,7 @@ public class ImageSaver extends Thread {
 	private boolean saveImage(boolean do_in_background,
 			boolean is_raw,
 			boolean is_hdr,
+			boolean save_expo,
 			List<byte []> jpeg_images,
 			DngCreator dngCreator, Image image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
@@ -290,6 +297,7 @@ public class ImageSaver extends Thread {
 		
 		Request request = new Request(is_raw ? Request.Type.RAW : Request.Type.JPEG,
 				is_hdr,
+				save_expo,
 				jpeg_images,
 				dngCreator, image,
 				image_capture_intent, image_capture_intent_uri,
@@ -310,6 +318,7 @@ public class ImageSaver extends Thread {
 				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
 				// of 2, due to RAW and JPEG each needing their own request).
 				Request dummy_request = new Request(Request.Type.DUMMY,
+					false,
 					false,
 					null,
 					null, null,
@@ -440,8 +449,7 @@ public class ImageSaver extends Thread {
 				throw new RuntimeException();
 			}
 
-			if( !request.image_capture_intent ) {
-		        // debug: write images separately
+			if( !request.image_capture_intent && request.save_expo ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "save exposures");
 				for(int i=0;i<request.jpeg_images.size();i++) {

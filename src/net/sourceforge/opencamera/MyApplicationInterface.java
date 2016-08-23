@@ -1286,7 +1286,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return image_capture_intent;
 	}
 	
-	private boolean saveImage(boolean is_hdr, List<byte []> images, Date current_date) {
+	private boolean saveImage(boolean is_hdr, boolean save_expo, List<byte []> images, Date current_date) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImage");
 
@@ -1332,7 +1332,7 @@ public class MyApplicationInterface implements ApplicationInterface {
         
 		boolean do_in_background = saveInBackground(image_capture_intent);
 
-		boolean success = imageSaver.saveImageJpeg(do_in_background, is_hdr, images,
+		boolean success = imageSaver.saveImageJpeg(do_in_background, is_hdr, save_expo, images,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
@@ -1356,7 +1356,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		List<byte []> images = new ArrayList<byte []>();
 		images.add(data);
 
-		boolean success = saveImage(false, images, current_date);
+		boolean success = saveImage(false, false, images, current_date);
         
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken complete, success: " + success);
@@ -1369,7 +1369,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onBurstPictureTaken: received " + images.size() + " images");
 
-		boolean success = saveImage(true, images, current_date);
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		boolean save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
+		if( MyDebug.LOG )
+			Log.d(TAG, "save_expo: " + save_expo);
+
+		boolean success = saveImage(true, save_expo, images, current_date);
 
 		return success;
     }
