@@ -815,6 +815,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         freeSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
 		releaseSound();
+		applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
 		preview.onPause();
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "onPause: total time to pause: " + (System.currentTimeMillis() - debug_time));

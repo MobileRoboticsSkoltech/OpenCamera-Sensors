@@ -1414,9 +1414,9 @@ public class MyApplicationInterface implements ApplicationInterface {
     	last_images.add(last_image);
     }
 
-	private void clearLastImages() {
+	void clearLastImages() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "clearLastImage");
+			Log.d(TAG, "clearLastImages");
 		last_images_saf = false;
 		last_images.clear();
 	}
