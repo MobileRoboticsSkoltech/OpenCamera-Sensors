@@ -331,6 +331,8 @@ public final class R {
         public static final int permission_record_audio_not_available=0x7f08010e;
         public static final int photo=0x7f08001d;
         public static final int photo_deleted=0x7f08002f;
+        public static final int photo_mode_hdr=0x7f08011c;
+        public static final int photo_mode_standard=0x7f08011b;
         public static final int preference_about=0x7f0800ef;
         public static final int preference_about_summary=0x7f0800f0;
         public static final int preference_angle_highlight_color=0x7f080095;

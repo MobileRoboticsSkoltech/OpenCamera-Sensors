@@ -97,8 +97,8 @@ public class PreferenceKeys {
     	return "preference_auto_stabilise";
     }
     
-    public static String getHDRPreferenceKey() {
-    	return "preference_hdr";
+    public static String getPhotoModePreferenceKey() {
+    	return "preference_photo_mode";
     }
     
     public static String getLocationPreferenceKey() {

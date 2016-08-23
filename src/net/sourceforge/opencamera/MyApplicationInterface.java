@@ -661,7 +661,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public boolean isHDRPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		boolean hdr = sharedPreferences.getBoolean(PreferenceKeys.getHDRPreferenceKey(), false);
+		boolean hdr = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
 		if( hdr && main_activity.supportsHDR() )
 			return true;
 		return false;
