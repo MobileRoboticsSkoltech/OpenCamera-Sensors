@@ -445,6 +445,7 @@ public class ImageSaver extends Thread {
 				if( MyDebug.LOG )
 					Log.e(TAG, "save exposures");
 				for(int i=0;i<request.jpeg_images.size();i++) {
+					// note, even if one image fails, we still try saving the other images - might as well give the user as many images as we can...
 					byte [] image = request.jpeg_images.get(i);
 					String filename_suffix = "_EXP" + i;
 					// don't update the thumbnails, only do this for the final HDR image - so user doesn't think it's complete, click gallery, then wonder why the final image isn't there
@@ -452,11 +453,12 @@ public class ImageSaver extends Thread {
 					if( !saveSingleImageNow(request, image, null, filename_suffix, false, false) ) {
 						if( MyDebug.LOG )
 							Log.e(TAG, "saveSingleImageNow failed for exposure image");
-						success = false;
+						// we don't set success to false here - as for deciding whether to pause preview or not (which is all we use the success return for), all that matters is whether we saved the final HDR image
 					}
 				}
 			}
 
+			// note, even if we failed saving some of the expo images, still try to save the HDR image
 			if( MyDebug.LOG )
 				Log.e(TAG, "create HDR image");
 			main_activity.savingImage(true);
