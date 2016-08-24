@@ -418,9 +418,37 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "waitUntilDone: images all saved");
 	}
 	
-	/** May be run in saver thread or picture callback thread (depending on whether running in background).
+	/** Converts the array of jpegs to Bitmaps.
 	 */
 	@SuppressWarnings("deprecation")
+	private List<Bitmap> loadBitmaps(List<byte []> jpeg_images) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "loadBitmaps");
+		List<Bitmap> bitmaps = new Vector<Bitmap>();
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inMutable = true; // first bitmap needs to be writable
+		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+			// setting is ignored in Android 5 onwards
+			options.inPurgeable = true;
+		}
+
+		for(byte [] image : jpeg_images) {
+			Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length, options);
+			if( bitmap == null ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to decode bitmap");
+		        System.gc();
+		        return null;
+			}
+			bitmaps.add(bitmap);
+			options.inMutable = false; // later bitmaps don't need to be writable
+		}
+		return bitmaps;
+	}
+	
+	/** May be run in saver thread or picture callback thread (depending on whether running in background).
+	 */
 	private boolean saveImageNow(final Request request) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImageNow");
@@ -474,24 +502,12 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.e(TAG, "create HDR image");
 			main_activity.savingImage(true);
-			BitmapFactory.Options options = new BitmapFactory.Options();
 
-			options.inMutable = true; // first bitmap needs to be writable
-			if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-				// setting is ignored in Android 5 onwards
-				options.inPurgeable = true;
-			}
-			List<Bitmap> bitmaps = new Vector<Bitmap>();
-			for(byte [] image : request.jpeg_images) {
-				Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length, options);
-				if( bitmap == null ) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "failed to decode bitmap");
-			        System.gc();
-			        return false;
-				}
-				bitmaps.add(bitmap);
-				options.inMutable = false; // later bitmaps don't need to be writable
+			List<Bitmap> bitmaps = loadBitmaps(request.jpeg_images);
+			if( bitmaps == null ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to load bitmaps");
+		        return false;
 			}
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after decompressing base exposures: " + (System.currentTimeMillis() - time_s));
