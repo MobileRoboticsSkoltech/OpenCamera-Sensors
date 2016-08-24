@@ -1,5 +1,7 @@
 package net.sourceforge.opencamera;
 
+import net.sourceforge.opencamera.CameraController.CameraController;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,7 +18,6 @@ import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import net.sourceforge.opencamera.CameraController.CameraController;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -418,6 +419,20 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "waitUntilDone: images all saved");
 	}
 	
+	class LoadBitmapThread extends Thread {
+		Bitmap bitmap = null;
+		BitmapFactory.Options options = null;
+		byte [] jpeg = null;
+		LoadBitmapThread(BitmapFactory.Options options, byte [] jpeg) {
+			this.options = options;
+			this.jpeg = jpeg;
+		}
+
+		public void run() {
+			this.bitmap = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length, options);
+		}
+	}
+
 	/** Converts the array of jpegs to Bitmaps.
 	 */
 	@SuppressWarnings("deprecation")
@@ -426,24 +441,65 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "loadBitmaps");
 		List<Bitmap> bitmaps = new Vector<Bitmap>();
 
+		BitmapFactory.Options mutable_options = new BitmapFactory.Options();
+		mutable_options.inMutable = true; // first bitmap needs to be writable
 		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inMutable = true; // first bitmap needs to be writable
+		options.inMutable = false; // later bitmaps don't need to be writable
 		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
 			// setting is ignored in Android 5 onwards
+			mutable_options.inPurgeable = true;
 			options.inPurgeable = true;
 		}
+		LoadBitmapThread [] threads = new LoadBitmapThread[jpeg_images.size()];
+		for(int i=0;i<jpeg_images.size();i++) {
+			threads[i] = new LoadBitmapThread( i==0 ? mutable_options : options, jpeg_images.get(i) );
+		}
+		// start threads
+		if( MyDebug.LOG )
+			Log.d(TAG, "start threads");
+		for(int i=0;i<jpeg_images.size();i++) {
+			threads[i].start();
+		}
+		// wait for threads to complete
+		boolean ok = true;
+		if( MyDebug.LOG )
+			Log.d(TAG, "wait for threads to complete");
+		try {
+			for(int i=0;i<jpeg_images.size();i++) {
+				threads[i].join();
+			}
+		}
+		catch(InterruptedException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "threads interrupted");
+			e.printStackTrace();
+			ok = false;
+		}
 
-		for(byte [] image : jpeg_images) {
-			Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length, options);
+		for(int i=0;i<jpeg_images.size() && ok;i++) {
+			Bitmap bitmap = threads[i].bitmap;
 			if( bitmap == null ) {
 				if( MyDebug.LOG )
-					Log.e(TAG, "failed to decode bitmap");
-		        System.gc();
-		        return null;
+					Log.e(TAG, "failed to decode bitmap in thread: " + i);
+				ok = false;
 			}
 			bitmaps.add(bitmap);
-			options.inMutable = false; // later bitmaps don't need to be writable
 		}
+		
+		if( !ok ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "cleanup from failure");
+			for(int i=0;i<jpeg_images.size();i++) {
+				if( threads[i].bitmap != null ) {
+					threads[i].bitmap.recycle();
+					threads[i].bitmap = null;
+				}
+			}
+			bitmaps.clear();
+	        System.gc();
+	        return null;
+		}
+
 		return bitmaps;
 	}
 	
