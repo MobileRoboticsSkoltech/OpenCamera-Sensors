@@ -203,7 +203,21 @@ public class PopupView extends LinearLayout {
                 					Log.e(TAG, "unknown mode id: " + option_id);
     						}
     						editor.apply();
-    						
+
+    						boolean done_dialog = false;
+    	            		if( option_id == mode_hdr ) {
+    	            			boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.getHDRInfoPreferenceKey());
+    	            			if( !done_hdr_info ) {
+    	            				showInfoDialog(R.string.photo_mode_hdr, R.string.hdr_info, PreferenceKeys.getHDRInfoPreferenceKey());
+    		        	    		done_dialog = true;
+    	            			}
+    	                    }
+
+    	            		if( done_dialog ) {
+    	            			// no need to show toast
+    	            			toast_message = null;
+    	            		}
+
     	    				main_activity.updateForSettings(toast_message);
     						main_activity.closePopup();
         				}
@@ -242,36 +256,7 @@ public class PopupView extends LinearLayout {
 	            		if( isChecked ) {
 	            			boolean done_auto_stabilise_info = sharedPreferences.contains(PreferenceKeys.getAutoStabiliseInfoPreferenceKey());
 	            			if( !done_auto_stabilise_info ) {
-		        		        AlertDialog.Builder alertDialog = new AlertDialog.Builder(PopupView.this.getContext());
-		        	            alertDialog.setTitle(R.string.preference_auto_stabilise);
-		        	            alertDialog.setMessage(R.string.auto_stabilise_info);
-		        	            alertDialog.setPositiveButton(android.R.string.ok, null);
-		        	            alertDialog.setNegativeButton(R.string.dont_show_again, new DialogInterface.OnClickListener() {
-									@Override
-									public void onClick(DialogInterface dialog, int which) {
-					            		if( MyDebug.LOG )
-					            			Log.d(TAG, "user clicked dont_show_again for auto-stabilise info dialog");
-					            		SharedPreferences.Editor editor = sharedPreferences.edit();
-					            		editor.putBoolean(PreferenceKeys.getAutoStabiliseInfoPreferenceKey(), true);
-					            		editor.apply();
-									}
-		        	            });
-
-		        	    		main_activity.showPreview(false);
-		        	    		main_activity.setWindowFlagsForSettings();
-
-		        	    		AlertDialog alert = alertDialog.create();
-		        	    		// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
-		        	    		alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
-									@Override
-									public void onDismiss(DialogInterface arg0) {
-					            		if( MyDebug.LOG )
-					            			Log.d(TAG, "auto-stabilise info dialog dismissed");
-					            		main_activity.setWindowFlagsForCamera();
-					            		main_activity.showPreview(true);
-									}
-		        	            });
-		        	    		alert.show();
+	            				showInfoDialog(R.string.preference_auto_stabilise, R.string.auto_stabilise_info, PreferenceKeys.getAutoStabiliseInfoPreferenceKey());
 		        	    		done_dialog = true;
 	            			}
 	                    }
@@ -859,6 +844,41 @@ public class PopupView extends LinearLayout {
 
 			this.addView(ll2);
     	}
+    }
+    
+    private void showInfoDialog(int title_id, int info_id, final String info_preference_key) {
+		final MainActivity main_activity = (MainActivity)this.getContext();
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(PopupView.this.getContext());
+        alertDialog.setTitle(title_id);
+        alertDialog.setMessage(info_id);
+        alertDialog.setPositiveButton(android.R.string.ok, null);
+        alertDialog.setNegativeButton(R.string.dont_show_again, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "user clicked dont_show_again for auto-stabilise info dialog");
+				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+        		SharedPreferences.Editor editor = sharedPreferences.edit();
+        		editor.putBoolean(info_preference_key, true);
+        		editor.apply();
+			}
+        });
+
+		main_activity.showPreview(false);
+		main_activity.setWindowFlagsForSettings();
+
+		AlertDialog alert = alertDialog.create();
+		// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+		alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface arg0) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "auto-stabilise info dialog dismissed");
+        		main_activity.setWindowFlagsForCamera();
+        		main_activity.showPreview(true);
+			}
+        });
+		alert.show();
     }
 
     // for testing

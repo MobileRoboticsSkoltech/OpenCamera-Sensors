@@ -18,7 +18,13 @@ public class PreferenceKeys {
     public static String getAutoStabiliseInfoPreferenceKey() {
         return "done_auto_stabilise_info";
     }
-
+    
+	/** If this preference is set, no longer show the HDR info dialog.
+	 */
+    public static String getHDRInfoPreferenceKey() {
+        return "done_hdr_info";
+    }
+    
     /** If this preference is set, no longer show the raw info dialog.
 	 */
     public static String getRawInfoPreferenceKey() {
