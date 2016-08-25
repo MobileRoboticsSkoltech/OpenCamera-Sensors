@@ -2406,6 +2406,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				toast_string += "\n" + getResources().getString(R.string.preference_auto_stabilise);
 				simple = false;
 			}
+			if( applicationInterface.isHDRPref() ) {
+				toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + getResources().getString(R.string.photo_mode_hdr);
+				simple = false;
+			}
 		}
 		if( applicationInterface.getFaceDetectionPref() ) {
 			// important so that the user realises why touching for focus/metering areas won't work - easy to forget that face detection has been turned on!

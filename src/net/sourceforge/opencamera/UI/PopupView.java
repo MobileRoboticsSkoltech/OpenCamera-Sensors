@@ -164,7 +164,7 @@ public class PopupView extends LinearLayout {
     			boolean hdr = main_activity.getApplicationInterface().isHDRPref();
         		String current_mode = photo_modes.get( hdr ? mode_hdr : mode_std );
 
-        		addTitleToPopup("Photo Mode");
+        		addTitleToPopup(getResources().getString(R.string.photo_mode));
         		
             	addButtonOptionsToPopup(photo_modes, -1, -1, "", current_mode, "TEST_PHOTO_MODE", new ButtonOptionsPopupListener() {
         			@Override

@@ -332,8 +332,9 @@ public final class R {
         public static final int permission_record_audio_not_available=0x7f08010e;
         public static final int photo=0x7f08001d;
         public static final int photo_deleted=0x7f08002f;
-        public static final int photo_mode_hdr=0x7f08011d;
-        public static final int photo_mode_standard=0x7f08011c;
+        public static final int photo_mode=0x7f08011c;
+        public static final int photo_mode_hdr=0x7f08011e;
+        public static final int photo_mode_standard=0x7f08011d;
         public static final int preference_about=0x7f0800ef;
         public static final int preference_about_summary=0x7f0800f0;
         public static final int preference_angle_highlight_color=0x7f080095;
@@ -370,7 +371,7 @@ public final class R {
         public static final int preference_category_camera_effects=0x7f080045;
         public static final int preference_category_camera_quality=0x7f0800ac;
         public static final int preference_category_online=0x7f0800e8;
-        public static final int preference_category_stamp=0x7f08011e;
+        public static final int preference_category_stamp=0x7f08011f;
         /**  @TODO PER FAVORE RIGUARDARE "livellate" PERCHÈ SECONDO ME NON HA SENSO! 
          */
         public static final int preference_color_effect=0x7f080048;
@@ -406,8 +407,8 @@ public final class R {
         public static final int preference_gps_direction_summary=0x7f0800b9;
         public static final int preference_grid=0x7f08009d;
         public static final int preference_grid_summary=0x7f08009e;
-        public static final int preference_hdr_save_expo=0x7f08011f;
-        public static final int preference_hdr_save_expo_summary=0x7f080120;
+        public static final int preference_hdr_save_expo=0x7f080120;
+        public static final int preference_hdr_save_expo_summary=0x7f080121;
         public static final int preference_immersive_mode=0x7f080085;
         public static final int preference_immersive_mode_summary=0x7f080086;
         public static final int preference_iso=0x7f08004e;
