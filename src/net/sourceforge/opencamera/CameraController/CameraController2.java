@@ -273,6 +273,7 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
 				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
 				// for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
+				// if we enable this ever, remember to still keep disabled for hdr (unless we've added support for flash with hdr by then)
 				builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 				// set flash via CaptureRequest.FLASH
 		    	/*if( flash_value.equals("flash_off") ) {
@@ -297,7 +298,8 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "flash_value: " + flash_value);
 				}
 				// prefer to set flash via the ae mode (otherwise get even worse results), except for torch which we can't
-		    	if( flash_value.equals("flash_off") ) {
+				// for now, flash not supported for HDR
+		    	if( CameraController2.this.want_hdr || flash_value.equals("flash_off") ) {
 					builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 		    	}
@@ -1608,6 +1610,7 @@ public class CameraController2 extends CameraController {
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		this.want_hdr = want_hdr;
+		camera_settings.setAEMode(previewBuilder, false); // need to set the ae mode, as flash is disabled for HDR mode
 	}
 
 	private void createPictureImageReader() {

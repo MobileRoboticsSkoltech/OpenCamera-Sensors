@@ -67,17 +67,24 @@ public class PopupView extends LinearLayout {
 
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
-        List<String> supported_flash_values = preview.getSupportedFlashValues();
-    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
-			@Override
-			public void onClick(String option) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "clicked flash: " + option);
-				preview.updateFlash(option);
-		    	main_activity.getMainUI().setPopupIcon();
-				main_activity.closePopup();
-			}
-		});
+		if( main_activity.getApplicationInterface().isHDRPref() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "flash not supported for HDR");
+			// HDR doesn't support flash, so don't show the options
+		}
+		else {
+	        List<String> supported_flash_values = preview.getSupportedFlashValues();
+	    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
+				@Override
+				public void onClick(String option) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "clicked flash: " + option);
+					preview.updateFlash(option);
+			    	main_activity.getMainUI().setPopupIcon();
+					main_activity.closePopup();
+				}
+			});
+		}
     	
 		if( preview.isVideo() && preview.isTakingPhoto() ) {
     		// don't add any more options
