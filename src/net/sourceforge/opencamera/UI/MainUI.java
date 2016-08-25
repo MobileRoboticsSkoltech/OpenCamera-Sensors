@@ -694,7 +694,10 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPopupIcon");
 		ImageButton popup = (ImageButton)main_activity.findViewById(R.id.popup);
-		String flash_value = main_activity.getPreview().getCurrentFlashValue();
+		String flash_value = null;
+		// flash not supported for HDR, so don't show the popup flash icon
+		if( !main_activity.getApplicationInterface().isHDRPref() )
+			flash_value = main_activity.getPreview().getCurrentFlashValue();
 		if( MyDebug.LOG )
 			Log.d(TAG, "flash_value: " + flash_value);
     	if( flash_value != null && flash_value.equals("flash_off") ) {
