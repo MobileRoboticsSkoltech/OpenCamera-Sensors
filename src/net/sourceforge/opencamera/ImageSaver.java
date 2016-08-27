@@ -419,7 +419,7 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "waitUntilDone: images all saved");
 	}
 	
-	class LoadBitmapThread extends Thread {
+	private static class LoadBitmapThread extends Thread {
 		Bitmap bitmap = null;
 		BitmapFactory.Options options = null;
 		byte [] jpeg = null;

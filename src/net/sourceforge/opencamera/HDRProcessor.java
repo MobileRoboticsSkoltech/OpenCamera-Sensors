@@ -39,16 +39,17 @@ public class HDRProcessor {
 	 *  We use it to modify the pixels of images taken at the brighter or darker exposure
 	 *  levels, to estimate what the pixel should be at the "base" exposure.
 	 */
-	private class ResponseFunction {
+	private static class ResponseFunction {
 		float parameter_A = 0.0f;
 		float parameter_B = 0.0f;
 
 		/** Computes the response function.
+		 * @param We pass the context, so this inner class can be made static.
 		 * @param x_samples List of Xi samples. Must be at least 3 samples.
 		 * @param y_samples List of Yi samples. Must be same length as x_samples.
 		 * @param weights List of weights. Must be same length as x_samples.
 		 */
-		ResponseFunction(int id, List<Double> x_samples, List<Double> y_samples, List<Double> weights) {
+		ResponseFunction(Context context, int id, List<Double> x_samples, List<Double> y_samples, List<Double> weights) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "ResponseFunction");
 
@@ -180,10 +181,14 @@ public class HDRProcessor {
 				// log samples to a CSV file
 				File file = new File(Environment.getExternalStorageDirectory().getPath() + "/net.sourceforge.opencamera.hdr_samples_" + id + ".csv");
 				if( file.exists() ) {
-					file.delete();
+					if( !file.delete() ) {
+						// keep FindBugs happy by checking return argument
+						Log.e(TAG, "failed to delete csv file");
+					}
 				}
+				FileWriter writer = null;
 				try {
-					FileWriter writer = new FileWriter(file);
+					writer = new FileWriter(file);
 					//writer.append("Parameter," + parameter + "\n");
 					writer.append("Parameters," + parameter_A + "," + parameter_B + "\n");
 					writer.append("X,Y,Weight\n");
@@ -194,13 +199,22 @@ public class HDRProcessor {
 						double w = weights.get(i);
 						writer.append(x + "," + y + "," + w + "\n");
 					}
-					writer.close();
-		        	MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath() }, null, null);
 				}
 				catch (IOException e) {
 					Log.e(TAG, "failed to open csv file");
 					e.printStackTrace();
 				}
+				finally {
+					try {
+						if( writer != null )
+							writer.close();
+					}
+					catch (IOException e) {
+						Log.e(TAG, "failed to close csv file");
+						e.printStackTrace();
+					}
+				}
+	        	MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath() }, null, null);
 			}
 		}
 	}
@@ -341,7 +355,7 @@ public class HDRProcessor {
 			}
 		}
 		
-		ResponseFunction function = new ResponseFunction(id, x_samples, y_samples, weights);
+		ResponseFunction function = new ResponseFunction(context, id, x_samples, y_samples, weights);
 		return function;
 	}
 
@@ -428,7 +442,9 @@ public class HDRProcessor {
 		Bitmap bm = null;
 		int [][] buffers = null;
 		
-		HDRWriterThread(int y_start, int y_stop, List<Bitmap> bitmaps, ResponseFunction [] response_functions/*, float avg_luminance*/) {
+		HDRWriterThread(int y_start, int y_stop, List<Bitmap> bitmaps, ResponseFunction [] response_functions
+			//, float avg_luminance
+			) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "thread " + this.getId() + " will process " + y_start + " to " + y_stop);
 			this.y_start = y_start;
@@ -461,16 +477,9 @@ public class HDRProcessor {
 				for(int x=0;x<bm.getWidth();x++) {
 					//int this_col = buffer[c];
 					calculateHDR(hdr, n_bitmaps, buffers, x, response_functions);
-					tonemap(rgb, hdr/*, avg_luminance*/);
-					/*{
-						// check
-						if( new_r < 0 || new_r > 255 )
-							throw new RuntimeException();
-						else if( new_g < 0 || new_g > 255 )
-							throw new RuntimeException();
-						else if( new_b < 0 || new_b > 255 )
-							throw new RuntimeException();
-					}*/
+					tonemap(rgb, hdr
+							//, avg_luminance
+					);
 					int new_col = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
 					buffers[0][x] = new_col;
 				}
@@ -504,10 +513,10 @@ public class HDRProcessor {
 		Bitmap bm = bitmaps.get(0);
 		final int base_bitmap = 1; // index of the bitmap with the base exposure
 		ResponseFunction [] response_functions = new ResponseFunction[n_bitmaps]; // ResponseFunction for each image (the ResponseFunction entry can be left null to indicate the Identity)
-		int [][] buffers = new int[n_bitmaps][];
+		/*int [][] buffers = new int[n_bitmaps][];
 		for(int i=0;i<n_bitmaps;i++) {
 			buffers[i] = new int[bm.getWidth()];
-		}
+		}*/
 		//float [] hdr = new float[3];
 		//int [] rgb = new int[3];
 
@@ -673,7 +682,7 @@ public class HDRProcessor {
 			Log.d(TAG, "time for processHDRCore: " + (System.currentTimeMillis() - time_s));
 	}
 	
-	final float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
+	final static float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
 
 	// If this algorithm is changed, also update the Renderscript version in process_hdr.rs
 	private void calculateHDR(float [] hdr, int n_bitmaps, int [][] buffers, int x, ResponseFunction [] response_functions) {
