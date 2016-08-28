@@ -431,6 +431,8 @@ public final class R {
         public static final int preference_preview_size_summary=0x7f080082;
         public static final int preference_quality=0x7f0800b2;
         public static final int preference_quality_summary=0x7f0800b3;
+        /**  '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! 
+         */
         public static final int preference_raw=0x7f0800b4;
         public static final int preference_raw_summary=0x7f0800b5;
         /**  @TODO MA IN CHE SENSO? COSA FA? 
