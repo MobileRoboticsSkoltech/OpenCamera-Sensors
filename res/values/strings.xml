@@ -188,7 +188,7 @@
     <string name="preference_resolution">Camera resolution</string>
     <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
     <string name="preference_quality">Image quality</string>
-    <string name="preference_quality_summary">Set the image JPEG quality of saved photo images (recommended value is 90%%)</string>
+    <string name="preference_quality_summary">Set the image JPEG quality of saved photo images (recommended value is 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
     <string name="preference_raw_summary">Whether to save in RAW (DNG) format</string>
     <string name="preference_location">Store location data (Geotagging)</string>
