@@ -100,7 +100,7 @@
     <string name="preference_timer_beep_summary">Zapiskaj ob odštevanju samosprožilca ali zakasnitvi zaporednega načina</string>
     <string name="preference_timer_speak">Glasovno odštevanje samosprožilca</string>
     <string name="preference_timer_speak_summary">Glasovno odštevanje samosprožilca ali zakasnitev zaporednega načina (od 60-ih s naprej)</string>
-    <string name="preference_burst_mode">Zaporedni način</string>
+    <string name="preference_burst_mode">Zaporedni</string>
     <string name="preference_burst_mode_summary">Posnemi več fotografij v zaporedju</string>
     <string name="preference_burst_interval">Razmik zaporednega načina</string>
     <string name="preference_burst_interval_summary">Zakasnitev (če obstaja) med fotografjami v zaporednem načinu</string>
