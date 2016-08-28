@@ -53,6 +53,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.renderscript.RenderScript;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -401,11 +402,20 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 	}
 	
+    @TargetApi(Build.VERSION_CODES.M)
 	@Override
 	protected void onDestroy() {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "onDestroy");
 			Log.d(TAG, "size of preloaded_bitmap_resources: " + preloaded_bitmap_resources.size());
+		}
+		if( applicationInterface != null ) {
+			applicationInterface.onDestroy();
+		}
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+			// see note in HDRProcessor.onDestroy() - but from Android M, renderscript contexts are released with releaseAllContexts()
+			// doc for releaseAllContexts() says "If no contexts have been created this function does nothing"
+			RenderScript.releaseAllContexts();
 		}
 		// Need to recycle to avoid out of memory when running tests - probably good practice to do anyway
 		for(Map.Entry<Integer, Bitmap> entry : preloaded_bitmap_resources.entrySet()) {

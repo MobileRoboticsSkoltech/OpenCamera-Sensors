@@ -146,7 +146,15 @@ public class ImageSaver extends Thread {
 		p.setAntiAlias(true);
 	}
 	
+	protected void onDestroy() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDestroy");
+		if( hdrProcessor != null ) {
+			hdrProcessor.onDestroy();
+		}
+	}
 	@Override
+
 	public void run() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "starting ImageSaver thread...");

@@ -131,6 +131,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "save focus_distance: " + focus_distance);
     	state.putFloat("focus_distance", focus_distance);
 	}
+	
+	protected void onDestroy() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDestroy");
+		if( imageSaver != null ) {
+			imageSaver.onDestroy();
+		}
+	}
 
 	LocationSupplier getLocationSupplier() {
 		return locationSupplier;

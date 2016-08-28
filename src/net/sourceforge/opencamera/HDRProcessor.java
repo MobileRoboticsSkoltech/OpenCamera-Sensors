@@ -22,7 +22,7 @@ public class HDRProcessor {
 	private static final String TAG = "HDRProcessor";
 	
 	private Context context = null;
-	private RenderScript rs = null;
+	private RenderScript rs = null; // lazily created, so we don't take up resources if application isn't using HDR
 
 	enum HDRAlgorithm {
 		HDRALGORITHM_AVERAGE,
@@ -31,7 +31,17 @@ public class HDRProcessor {
 	
 	HDRProcessor(Context context) {
 		this.context = context;
-		this.rs = RenderScript.create(context);
+	}
+
+	protected void onDestroy() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDestroy");
+		if( rs != null ) {
+			// need to destroy context, otherwise this isn't necessarily garbage collected - we had tests failing with out of memory
+			// problems e.g. when running MainTests as a full set with Camera2 API. Although we now reduce the problem by creating
+			// the rs lazily, it's still good to explicitly clear.
+			rs.destroy(); // on Android M onwards this is a NOP - instead we call RenderScript.releaseAllContexts(); in MainActivity.onDestroy()
+		}
 	}
 
 	/** Given a set of data Xi and Yi, this function estimates a relation between X and Y
@@ -570,6 +580,13 @@ public class HDRProcessor {
 		if( use_renderscript ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "use renderscipt");
+			if( rs == null ) {
+				this.rs = RenderScript.create(context);
+				if( MyDebug.LOG )
+					Log.d(TAG, "create renderscript object");
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after creating renderscript: " + (System.currentTimeMillis() - time_s));
+			}
 			// create allocations
 	    	Allocation [] allocations = new Allocation[n_bitmaps];
 			for(int i=0;i<n_bitmaps;i++) {
