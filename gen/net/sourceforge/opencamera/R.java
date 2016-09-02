@@ -158,7 +158,7 @@ public final class R {
         public static final int exposure_seekbar_zoom=0x7f0b0011;
         public static final int exposure_time_seekbar=0x7f0b0013;
         public static final int focus_seekbar=0x7f0b0004;
-        public static final int gallery=0x7f0b0007;
+        public static final int gallery=0x7f0b0006;
         public static final int gui_anchor=0x7f0b0005;
         public static final int hide_container=0x7f0b0017;
         public static final int iso_seekbar=0x7f0b0012;
@@ -167,7 +167,7 @@ public final class R {
         public static final int popup_container=0x7f0b0016;
         public static final int prefs_container=0x7f0b0014;
         public static final int preview=0x7f0b0000;
-        public static final int settings=0x7f0b0006;
+        public static final int settings=0x7f0b0007;
         public static final int share=0x7f0b000f;
         public static final int switch_camera=0x7f0b000c;
         public static final int switch_video=0x7f0b000b;
