@@ -3272,13 +3272,17 @@ public class CameraController2 extends CameraController {
 					if( focus_mode != null && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "call autofocus callback, as continuous mode and not focusing: " + af_state);
-						boolean focus_success = af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED;
+						// need to check af_state != null, I received Google Play crash in 1.33 where it was null
+						boolean focus_success = af_state != null && ( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED );
 						if( MyDebug.LOG ) {
 							if( focus_success )
 								Log.d(TAG, "autofocus success");
 							else
 								Log.d(TAG, "autofocus failed");
-							Log.d(TAG, "af_state: " + af_state);
+							if( af_state == null )
+								Log.e(TAG, "continuous focus mode but af_state is null");
+							else
+								Log.d(TAG, "af_state: " + af_state);
 						}
 						autofocus_cb.onAutoFocus(focus_success);
 						autofocus_cb = null;
