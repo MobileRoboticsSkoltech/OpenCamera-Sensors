@@ -856,7 +856,7 @@ public class PopupView extends LinearLayout {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
         		if( MyDebug.LOG )
-        			Log.d(TAG, "user clicked dont_show_again for auto-stabilise info dialog");
+        			Log.d(TAG, "user clicked dont_show_again for info dialog");
 				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
         		SharedPreferences.Editor editor = sharedPreferences.edit();
         		editor.putBoolean(info_preference_key, true);
@@ -873,7 +873,7 @@ public class PopupView extends LinearLayout {
 			@Override
 			public void onDismiss(DialogInterface arg0) {
         		if( MyDebug.LOG )
-        			Log.d(TAG, "auto-stabilise info dialog dismissed");
+        			Log.d(TAG, "info dialog dismissed");
         		main_activity.setWindowFlagsForCamera();
         		main_activity.showPreview(true);
 			}
