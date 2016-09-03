@@ -110,6 +110,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private double aspect_ratio = 0.0f;
 	private CameraControllerManager camera_controller_manager = null;
 	private CameraController camera_controller = null;
+	private boolean has_permissions = true; // whether we have permissions necessary to operate the camera (camera, storage); assume true until we've been denied one of them
 	private boolean is_video = false;
 	private MediaRecorder video_recorder = null;
 	private boolean video_start_time_set = false;
@@ -1009,6 +1010,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	//private int debug_count_opencamera = 0; // see usage below
 
+	/** Try to open the camera. Should only be called if camera_controller==null.
+	 */
 	private void openCamera() {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
@@ -1080,6 +1083,33 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			return;
 		}
+		
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+			// we restrict the checks to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+			if( MyDebug.LOG )
+				Log.d(TAG, "check for permissions");
+			if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "camera permission not available");
+				has_permissions = false;
+		    	applicationInterface.requestCameraPermission();
+		    	// return for now - the application should try to reopen the camera if permission is granted
+				return;
+			}
+			if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "storage permission not available");
+				has_permissions = false;
+		    	applicationInterface.requestStoragePermission();
+		    	// return for now - the application should try to reopen the camera if permission is granted
+				return;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "permissions available");
+		}
+		// set in case this was previously set to false
+		has_permissions = true;
+
 		/*{
 			// debug
 			if( debug_count_opencamera++ == 0 ) {
@@ -1168,6 +1198,28 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera: total time to open camera: " + (System.currentTimeMillis() - debug_time));
 		}
+	}
+
+	/** Try to reopen the camera, if not currently open (e.g., permission wasn't granted, but now it is).
+	 */
+	public void retryOpenCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "retryOpenCamera()");
+        if( camera_controller == null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "try to reopen camera");
+    		this.openCamera();
+        }
+        else {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "camera already open");
+        }
+	}
+
+	/** Returns false if we failed to open the camera because camera or storage permission wasn't available.
+	 */
+	public boolean hasPermissions() {
+		return has_permissions;
 	}
 	
 	/* Should only be called after camera first opened, or after preview is paused.
@@ -2991,6 +3043,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				setFocusPref(false);
 				updateFocusForVideo(false);
 			}*/
+			if( is_video ) {
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+					// check for audio permission now, rather than when user starts video recording
+					// we restrict the checks to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+					if( MyDebug.LOG )
+						Log.d(TAG, "check for record audio permission");
+					if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "record audio permission not available");
+				    	applicationInterface.requestRecordAudioPermission();
+				    	// we can now carry on - if the user starts recording video, we'll check then if the permission was granted
+					}
+				}
+			}
 		}
 	}
 	
@@ -3682,7 +3748,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
 				// needed for Android 6, in case users deny storage permission, otherwise we'll crash
 				// see https://developer.android.com/training/permissions/requesting.html
-				// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+				// we request permission when switching to video mode - if it wasn't granted, here we just switch it off
 				// we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
 				if( MyDebug.LOG )
 					Log.e(TAG, "don't have RECORD_AUDIO permission");

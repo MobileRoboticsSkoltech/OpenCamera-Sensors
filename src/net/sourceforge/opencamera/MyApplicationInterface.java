@@ -1180,8 +1180,30 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public void setZoomPref(int zoom) {
-		Log.d(TAG, "setZoomPref: " + zoom);
+		if( MyDebug.LOG )
+			Log.d(TAG, "setZoomPref: " + zoom);
     	this.zoom_factor = zoom;
+    }
+    
+    @Override
+	public void requestCameraPermission() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "requestCameraPermission");
+		main_activity.requestCameraPermission();
+    }
+    
+    @Override
+	public void requestStoragePermission() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "requestStoragePermission");
+		main_activity.requestStoragePermission();
+    }
+    
+    @Override
+	public void requestRecordAudioPermission() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "requestRecordAudioPermission");
+		main_activity.requestRecordAudioPermission();
     }
     
     @Override

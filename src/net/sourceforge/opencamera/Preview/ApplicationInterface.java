@@ -125,6 +125,9 @@ public interface ApplicationInterface {
 	void setCameraResolutionPref(int width, int height);
 	void setVideoQualityPref(String video_quality);
 	void setZoomPref(int zoom);
+	void requestCameraPermission(); // for Android 6+: called when trying to open camera, but CAMERA permission not available
+	void requestStoragePermission(); // for Android 6+: called when trying to open camera, but WRITE_EXTERNAL_STORAGE permission not available
+	void requestRecordAudioPermission(); // for Android 6+: called when switching to (or starting up in) video mode, but RECORD_AUDIO permission not available
 	// Camera2 only modes:
 	void setExposureTimePref(long exposure_time);
 	void clearExposureTimePref();

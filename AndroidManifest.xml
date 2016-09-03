@@ -8,7 +8,7 @@
 
     <uses-sdk
         android:minSdkVersion="15"
-        android:targetSdkVersion="22" /> <!-- don't update to 23 yet, need to update for permissions https://developer.android.com/training/permissions/requesting.html -->
+        android:targetSdkVersion="23" />
 
     <supports-screens android:xlargeScreens="true" android:largeScreens="true" android:normalScreens="true" android:smallScreens="true" android:anyDensity="true"/>
 

@@ -548,7 +548,7 @@ public class StorageUtils {
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
 			// needed for Android 6, in case users deny storage permission, otherwise we get java.lang.SecurityException from ContentResolver.query()
 			// see https://developer.android.com/training/permissions/requesting.html
-			// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+			// we now request storage permission before opening the camera, but keep this here just in case
 			// we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
 			if( MyDebug.LOG )
 				Log.e(TAG, "don't have READ_EXTERNAL_STORAGE permission");

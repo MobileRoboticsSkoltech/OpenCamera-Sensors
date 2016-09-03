@@ -312,4 +312,11 @@
     <string name="preference_category_stamp">Photo Stamp</string>
     <string name="preference_hdr_save_expo">Save all images for HDR mode</string>
     <string name="preference_hdr_save_expo_summary">If enabled, when using HDR photo mode, the three base exposure images will be saved as well as the final HDR photo. Note this will make saving slower, especially if options like \"Stamp photos\" or Auto-stabilise are also used.</string>
+
+    <string name="no_permission">PERMISSIONS NOT AVAILABLE</string>
+    <string name="permission_rationale_title">Permission required</string>
+    <string name="permission_rationale_camera">Camera permission is required to enable the camera</string>
+    <string name="permission_rationale_storage">Storage read/write permission is required to save photos</string>
+    <string name="permission_rationale_record_audio">Microphone permission is required to record video with audio</string>
+    <string name="permission_rationale_location">Location permission is required for geotagging</string>
 </resources>

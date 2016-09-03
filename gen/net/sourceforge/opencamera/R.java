@@ -299,6 +299,7 @@ public final class R {
         public static final int metres_abbreviation=0x7f080044;
         public static final int new_folder=0x7f080106;
         public static final int no_gallery_app=0x7f080030;
+        public static final int no_permission=0x7f080122;
         public static final int not_supported=0x7f080012;
         /**  whether a setting is turned on, e.g., "Auto-stabilise: On" 
  whether a setting is turned on, e.g., "Auto-stabilise: On" 
@@ -319,6 +320,11 @@ public final class R {
         public static final int on=0x7f080007;
         public static final int parent_folder=0x7f080104;
         public static final int permission_location_not_available=0x7f08010f;
+        public static final int permission_rationale_camera=0x7f080124;
+        public static final int permission_rationale_location=0x7f080127;
+        public static final int permission_rationale_record_audio=0x7f080126;
+        public static final int permission_rationale_storage=0x7f080125;
+        public static final int permission_rationale_title=0x7f080123;
         /**  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
