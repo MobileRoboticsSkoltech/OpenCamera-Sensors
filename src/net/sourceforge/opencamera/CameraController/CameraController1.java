@@ -5,7 +5,6 @@ import net.sourceforge.opencamera.MyDebug;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import android.annotation.TargetApi;
 import android.graphics.SurfaceTexture;
@@ -122,7 +121,7 @@ public class CameraController1 extends CameraController {
 	private List<String> convertFlashModesToValues(List<String> supported_flash_modes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFlashModesToValues()");
-		List<String> output_modes = new Vector<String>();
+		List<String> output_modes = new ArrayList<String>();
 		if( supported_flash_modes != null ) {
 			// also resort as well as converting
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
@@ -157,7 +156,7 @@ public class CameraController1 extends CameraController {
 	private List<String> convertFocusModesToValues(List<String> supported_focus_modes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFocusModesToValues()");
-		List<String> output_modes = new Vector<String>();
+		List<String> output_modes = new ArrayList<String>();
 		if( supported_focus_modes != null ) {
 			// also resort as well as converting
 			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {

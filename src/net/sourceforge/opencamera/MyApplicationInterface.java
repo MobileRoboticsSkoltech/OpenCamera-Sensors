@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
@@ -77,7 +76,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			this.share = share;
 		}
 	}
-	private List<LastImage> last_images = new Vector<LastImage>();
+	private List<LastImage> last_images = new ArrayList<LastImage>();
 	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;

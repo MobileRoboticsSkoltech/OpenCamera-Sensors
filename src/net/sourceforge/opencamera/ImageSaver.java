@@ -12,9 +12,9 @@ import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -447,8 +447,6 @@ public class ImageSaver extends Thread {
 	private List<Bitmap> loadBitmaps(List<byte []> jpeg_images) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "loadBitmaps");
-		List<Bitmap> bitmaps = new Vector<Bitmap>();
-
 		BitmapFactory.Options mutable_options = new BitmapFactory.Options();
 		mutable_options.inMutable = true; // first bitmap needs to be writable
 		BitmapFactory.Options options = new BitmapFactory.Options();
@@ -484,6 +482,7 @@ public class ImageSaver extends Thread {
 			ok = false;
 		}
 
+		List<Bitmap> bitmaps = new ArrayList<Bitmap>();
 		for(int i=0;i<jpeg_images.size() && ok;i++) {
 			Bitmap bitmap = threads[i].bitmap;
 			if( bitmap == null ) {
@@ -1323,7 +1322,7 @@ public class ImageSaver extends Thread {
         return success;
 	}
 
-	/** May be run in saver thread or picture callback thread (depending on whether running in backgrond).
+	/** May be run in saver thread or picture callback thread (depending on whether running in background).
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private boolean saveImageNowRaw(DngCreator dngCreator, Image image, Date current_date) {

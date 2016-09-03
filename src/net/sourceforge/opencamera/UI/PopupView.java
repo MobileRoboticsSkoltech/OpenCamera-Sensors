@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -155,7 +154,7 @@ public class PopupView extends LinearLayout {
     		});
 
     		if( main_activity.supportsHDR() ) {
-    			final List<String> photo_modes = new Vector<String>();
+    			final List<String> photo_modes = new ArrayList<String>();
     			final int mode_std = photo_modes.size();
     			photo_modes.add( getResources().getString(R.string.photo_mode_standard) );
     			final int mode_hdr = photo_modes.size();

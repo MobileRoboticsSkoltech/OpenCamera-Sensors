@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -1584,7 +1583,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// get min/max exposure
 			exposures = null;
 			if( min_exposure != 0 || max_exposure != 0 ) {
-				exposures = new Vector<String>();
+				exposures = new ArrayList<String>();
 				for(int i=min_exposure;i<=max_exposure;i++) {
 					exposures.add("" + i);
 				}
@@ -1780,7 +1779,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "focus not supported");
 				supported_focus_values = null;
 			}
-			/*supported_focus_values = new Vector<String>();
+			/*supported_focus_values = new ArrayList<String>();
 			supported_focus_values.add("focus_mode_auto");
 			supported_focus_values.add("focus_mode_infinity");
 			supported_focus_values.add("focus_mode_macro");
@@ -1991,7 +1990,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void initialiseVideoQualityFromProfiles(SparseArray<Pair<Integer, Integer>> profiles) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initialiseVideoQualityFromProfiles()");
-        video_quality = new Vector<String>();
+        video_quality = new ArrayList<String>();
         boolean done_video_size[] = null;
         if( video_sizes != null ) {
         	done_video_size = new boolean[video_sizes.size()];

@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -73,7 +72,7 @@ public class CameraController2 extends CameraController {
 	private PictureCallback jpeg_cb = null;
 	private PictureCallback raw_cb = null;
 	private int n_burst = 0;
-	private List<byte []> pending_burst_images = new Vector<byte []>();
+	private List<byte []> pending_burst_images = new ArrayList<byte []>();
 	private DngCreator pending_dngCreator = null;
 	private Image pending_image = null;
 	private ErrorCallback take_picture_error_cb = null;
@@ -752,7 +751,7 @@ public class CameraController2 extends CameraController {
 	    List<Integer> supported_focus_modes = new ArrayList<Integer>();
 	    for(int i=0;i<supported_focus_modes_arr.length;i++)
 	    	supported_focus_modes.add(supported_focus_modes_arr[i]);
-	    List<String> output_modes = new Vector<String>();
+	    List<String> output_modes = new ArrayList<String>();
 		// also resort as well as converting
 		if( supported_focus_modes.contains(CaptureRequest.CONTROL_AF_MODE_AUTO) ) {
 			output_modes.add("focus_mode_auto");
@@ -1646,7 +1645,7 @@ public class CameraController2 extends CameraController {
 				synchronized( image_reader_lock ) {
 					/* Whilst in theory the two setOnImageAvailableListener methods (for JPEG and RAW) seem to be called separately, I don't know if this is always true;
 					 * also, we may process the RAW image when the capture result is available (see
-					 * OnRawImageAvailableListener.setCaptureResult()), which may be in a separte thread.
+					 * OnRawImageAvailableListener.setCaptureResult()), which may be in a separate thread.
 					 */
 					Image image = reader.acquireNextImage();
 		            ByteBuffer buffer = image.getPlanes()[0].getBuffer(); 
@@ -1664,7 +1663,7 @@ public class CameraController2 extends CameraController {
 				            PictureCallback cb = jpeg_cb;
 				            jpeg_cb = null;
 				            // take a copy, so that we can clear pending_burst_images
-				            List<byte []> images = new Vector<byte []>(pending_burst_images);
+				            List<byte []> images = new ArrayList<byte []>(pending_burst_images);
 				            cb.onBurstPictureTaken(images);
 				            pending_burst_images.clear();
 							cb.onCompleted();
