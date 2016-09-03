@@ -69,6 +69,8 @@ public class DrawPreview {
 	private long continuous_focus_moving_ms = 0;
 
 	public DrawPreview(MainActivity main_activity, MyApplicationInterface applicationInterface) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "DrawPreview");
 		this.main_activity = main_activity;
 		this.applicationInterface = applicationInterface;
 
@@ -80,6 +82,20 @@ public class DrawPreview {
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth);
     	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth_off);
+	}
+	
+	public void onDestroy() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDestroy");
+		// clean up just in case
+		if( location_bitmap != null ) {
+			location_bitmap.recycle();
+			location_bitmap = null;
+		}
+		if( location_off_bitmap != null ) {
+			location_off_bitmap.recycle();
+			location_off_bitmap = null;
+		}
 	}
 
 	private Context getContext() {

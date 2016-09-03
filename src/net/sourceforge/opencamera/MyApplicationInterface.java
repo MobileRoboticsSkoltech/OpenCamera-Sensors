@@ -117,7 +117,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "MyApplicationInterface: total time to create MyApplicationInterface: " + (System.currentTimeMillis() - debug_time));
 	}
-
+	
 	void onSaveInstanceState(Bundle state) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSaveInstanceState");
@@ -135,6 +135,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 	protected void onDestroy() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onDestroy");
+		if( drawPreview != null ) {
+			drawPreview.onDestroy();
+		}
 		if( imageSaver != null ) {
 			imageSaver.onDestroy();
 		}
