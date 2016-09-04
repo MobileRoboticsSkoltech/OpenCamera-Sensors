@@ -762,6 +762,7 @@ public class DrawPreview {
 	        // http://stackoverflow.com/questions/15981516/simpledateformat-gettimeinstance-ignores-24-hour-format
 	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
 	        // http://code.google.com/p/android/issues/detail?id=42104
+	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
 	        String current_time = DateFormat.getTimeInstance().format(c.getTime());
 	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
 	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, true);
