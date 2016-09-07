@@ -1677,7 +1677,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "image quality: " + image_quality);
 		}
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "setupCameraParameters: time after jpe quality: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "setupCameraParameters: time after jpeg quality: " + (System.currentTimeMillis() - debug_time));
 		}
 
 		// get available sizes
