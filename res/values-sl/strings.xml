@@ -68,7 +68,7 @@
     <string name="failed_to_open_camera_3">DRUG PROGRAM?</string>
     <string name="iso">ISO</string>
     <string name="zoom">Povečava</string>
-    <string name="free_memory">Nezasedenega</string>
+    <string name="free_memory">Nezased.</string>
     <string name="screen_lock_message_1">[ZAKLENJENO:</string>
     <string name="screen_lock_message_2">povlecite za odklepanje]</string>
     
@@ -99,7 +99,7 @@
     <string name="preference_timer_beep">Pisk samosprožilca</string>
     <string name="preference_timer_beep_summary">Zapiskaj ob odštevanju samosprožilca ali zakasnitvi zaporednega načina</string>
     <string name="preference_timer_speak">Glasovno odštevanje samosprožilca</string>
-    <string name="preference_timer_speak_summary">Glasovno odštevanje samosprožilca ali zakasnitev zaporednega načina (od 60-ih s naprej)</string>
+    <string name="preference_timer_speak_summary">Glasovno odštevanje samosprožilca ali zakasnitve zaporednega načina (od 60-ih s naprej)</string>
     <string name="preference_burst_mode">Zaporedni način</string>
     <string name="preference_burst_mode_summary">Posnemi več fotografij v zaporedju</string>
     <string name="preference_burst_interval">Razmik zaporednega načina</string>
@@ -218,13 +218,13 @@
     <string name="preference_video_bitrate">Bitna hitrost videoposnetkov (pribl.)</string>
     <string name="preference_video_bitrate_summary">Nastavite pribl. hitrost videoposnetkov (višje vrednosti pomenijo boljšo kakovost, vendar zavzamejo več prostora na disku; snemanje videoposnetkov lahko spodleti, če bitna hitrost ni podprta)</string>
     <string name="preference_video_fps">Hitrost sličic videoposnetkov (pribl.)</string>
-    <string name="preference_video_fps_summary">Nastavite hitrost sličic (sl./s) videoposnetkov (je lahko približna, doseganje nastavljene vrednosti ni zagotovljeno in snemanje videoposnetkov lahko spodleti, če hitrost sličic ni podprta)</string>
+    <string name="preference_video_fps_summary">Nastavite hitrost sličic (sl./s) videoposnetkov (je lahko približna. Doseganje nastavljene vrednosti ni zagotovljeno in snemanje videoposnetkov lahko spodleti, če hitrost sličic ni podprta)</string>
     <string name="preference_video_max_duration">Najdaljše trajanje videoposnetkov</string>
     <string name="preference_video_max_duration_summary">Snemanje videoposnetkov se bo ustavilo po tem času</string>
     <string name="preference_video_restart">Ponovno zaženi videoposnetek po najdaljšem trajanju</string>
     <string name="preference_video_restart_summary">Če se je videoposnetek ustavil, ko je bilo doseženo najdaljše trajanje (če je nastavljeno), bo ta možnost povzročila ponovni zagon videoposnetka do določenega števila ponovitev</string>
     <string name="preference_video_max_filesize">Največja velikost videoposnetkov</string>
-    <string name="preference_video_max_filesize_summary">Snemanje videoposnetkov se bo ustavilo in/ali ponovno zagnalo (glejte spodnjo možnost), ko je dosežena (pribl.) največja velikost datoteke. Upoštevajte, da imajo skoraj vse naprave Android največjo velikost datoteke za videoposnetke (običajno okoli 2 ali 4 GB), vendar ta možnost omogoča nastavitev določene vrednosti</string>
+    <string name="preference_video_max_filesize_summary">Snemanje videoposnetkov se bo ustavilo in/ali ponovno zagnalo (glejte spodnjo možnost), ko je dosežena (pribl.) največja velikost datoteke. Upoštevajte, da imajo skoraj vse naprave Android zgornjo omejitev velikosti datoteke za videoposnetke (običajno okoli 2 ali 4 GB), vendar ta možnost omogoča nastavitev določene vrednosti</string>
     <string name="preference_video_restart_max_filesize">Ponovno zaženi ob največji velikosti datoteke</string>
     <string name="preference_video_restart_max_filesize_summary">Ali naj se videoposnetek ponovno zažene, ko je dosežena (privzeta ali uporabniško določena) največja velikost datoteke</string>
     <string name="preference_record_audio">Snemaj zvok</string>
