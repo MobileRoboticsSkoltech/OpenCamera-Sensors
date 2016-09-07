@@ -65,7 +65,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>No timer</item>
+        <item>Off</item>
         <item>1s</item>
         <item>2s</item>
         <item>3s</item>
@@ -282,6 +282,14 @@
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>
     </string-array>
+    <string-array name="preference_raw_entries">
+        <item>JPEG only</item>
+        <item>JPEG and DNG (RAW)</item>
+    </string-array>
+    <string-array name="preference_raw_values">
+        <item>preference_raw_no</item>
+        <item>preference_raw_yes</item>
+    </string-array>
     <string-array name="preference_stamp_entries">
         <item>No stamp</item>
         <item>Stamp photos</item>
@@ -438,6 +446,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Unlimited</item>
+        <item>5 seconds</item>
+        <item>10 seconds</item>
         <item>15 seconds</item>
         <item>30 seconds</item>
         <item>1 minute</item>
@@ -461,6 +471,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
+        <item>5</item>
+        <item>10</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>
@@ -571,5 +583,13 @@
         <item>314572800</item>
         <item>524288000</item>
         <item>1073741824</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_entries">
+        <item>Local Time</item>
+        <item>UTC (Zulu)</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_values">
+        <item>local</item>
+        <item>zulu</item>
     </string-array>
 </resources>

@@ -1,9 +1,10 @@
 _archive/
 _devdocs/
-_docs/cai_lan_gong_muri_all_contributors.jpg
+_docs/*.jpg
 _other/
 
 bin/
+gen/
 gfx/
 
 *.db

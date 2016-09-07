@@ -2,9 +2,10 @@ package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
@@ -55,9 +56,27 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	private Rect text_bounds = new Rect();
 
-	private boolean last_image_saf = false;
-	private Uri last_image_uri = null;
-	private String last_image_name = null;
+	private boolean last_images_saf = false; // whether the last images array are using SAF or not
+	/** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
+	 */
+	private static class LastImage {
+		public boolean share = false; // one of the images in the list should have share set to true, to indicate which image to share
+		public String name = null;
+		public Uri uri = null;
+
+		LastImage(Uri uri, boolean share) {
+			this.name = null;
+			this.uri = uri;
+			this.share = share;
+		}
+		
+		LastImage(String filename, boolean share) {
+	    	this.name = filename;
+	    	this.uri = Uri.parse("file://" + this.name);
+			this.share = share;
+		}
+	}
+	private List<LastImage> last_images = new ArrayList<LastImage>();
 	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
@@ -81,7 +100,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		
 		this.imageSaver = new ImageSaver(main_activity);
 		this.imageSaver.start();
-
+		
         if( savedInstanceState != null ) {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
 			if( MyDebug.LOG )
@@ -97,7 +116,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "MyApplicationInterface: total time to create MyApplicationInterface: " + (System.currentTimeMillis() - debug_time));
 	}
-
+	
 	void onSaveInstanceState(Bundle state) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSaveInstanceState");
@@ -110,6 +129,17 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "save focus_distance: " + focus_distance);
     	state.putFloat("focus_distance", focus_distance);
+	}
+	
+	protected void onDestroy() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDestroy");
+		if( drawPreview != null ) {
+			drawPreview.onDestroy();
+		}
+		if( imageSaver != null ) {
+			imageSaver.onDestroy();
+		}
 	}
 
 	LocationSupplier getLocationSupplier() {
@@ -170,12 +200,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public File createOutputVideoFile() throws IOException {
-		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "mp4", new Date());
+		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
 	}
 
 	@Override
 	public Uri createOutputVideoSAF() throws IOException {
-		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "mp4", new Date());
+		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
 	}
 
 	@Override
@@ -637,6 +667,23 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public float getFocusDistancePref() {
     	return focus_distance;
     }
+    
+    @Override
+	public boolean isHDRPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		boolean hdr = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		if( hdr && main_activity.supportsHDR() )
+			return true;
+		return false;
+    }
+
+    @Override
+	public boolean isRawPref() {
+    	if( isImageCaptureIntent() )
+    		return false;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_no").equals("preference_raw_yes");
+    }
 
     @Override
     public boolean isTestAlwaysFocus() {
@@ -936,14 +983,22 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    else {
 			shareButton.setVisibility(View.GONE);
 		    trashButton.setVisibility(View.GONE);
+		    this.clearLastImages();
 	    }
-		
 	}
 	
     @Override
     public void cameraInOperation(boolean in_operation) {
     	drawPreview.cameraInOperation(in_operation);
     	main_activity.getMainUI().showGUI(!in_operation);
+    }
+
+    @Override
+	public void onPictureCompleted() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onPictureCompleted");
+		// call this, so that if pause-preview-after-taking-photo option is set, we remove the "taking photo" border indicator straight away
+    	drawPreview.cameraInOperation(false);
     }
 
 	@Override
@@ -1127,8 +1182,30 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public void setZoomPref(int zoom) {
-		Log.d(TAG, "setZoomPref: " + zoom);
+		if( MyDebug.LOG )
+			Log.d(TAG, "setZoomPref: " + zoom);
     	this.zoom_factor = zoom;
+    }
+    
+    @Override
+	public void requestCameraPermission() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "requestCameraPermission");
+		main_activity.requestCameraPermission();
+    }
+    
+    @Override
+	public void requestStoragePermission() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "requestStoragePermission");
+		main_activity.requestStoragePermission();
+    }
+    
+    @Override
+	public void requestRecordAudioPermission() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "requestRecordAudioPermission");
+		main_activity.requestRecordAudioPermission();
     }
     
     @Override
@@ -1217,22 +1294,41 @@ public class MyApplicationInterface implements ApplicationInterface {
 		paint.setColor(foreground);
 		canvas.drawText(text, location_x, location_y, paint);
 	}
-
-    @Override
-	public boolean onPictureTaken(byte [] data) {
-        System.gc();
-		if( MyDebug.LOG )
-			Log.d(TAG, "onPictureTaken");
-
-		Date current_date = new Date(); // do asap so we date corresponds to actual photo time
-
+	
+	private boolean saveInBackground(boolean image_capture_intent) {
+		boolean do_in_background = true;
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		if( !sharedPreferences.getBoolean(PreferenceKeys.getBackgroundPhotoSavingPreferenceKey(), true) )
+			do_in_background = false;
+		else if( image_capture_intent )
+			do_in_background = false;
+		else if( getPausePreviewPref() )
+			do_in_background = false;
+		return do_in_background;
+	}
+	
+	private boolean isImageCaptureIntent() {
 		boolean image_capture_intent = false;
-	        Uri image_capture_intent_uri = null;
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) ) {
+		String action = main_activity.getIntent().getAction();
+		if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "from image capture intent");
 			image_capture_intent = true;
+		}
+		return image_capture_intent;
+	}
+	
+	private boolean saveImage(boolean is_hdr, boolean save_expo, List<byte []> images, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "saveImage");
+
+		System.gc();
+
+        boolean image_capture_intent = isImageCaptureIntent();
+        Uri image_capture_intent_uri = null;
+        if( image_capture_intent ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "from image capture intent");
 	        Bundle myExtras = main_activity.getIntent().getExtras();
 	        if (myExtras != null) {
 	        	image_capture_intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
@@ -1266,15 +1362,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
-		boolean do_in_background = true;
-		if( !sharedPreferences.getBoolean(PreferenceKeys.getBackgroundPhotoSavingPreferenceKey(), true) )
-			do_in_background = false;
-		else if( image_capture_intent )
-			do_in_background = false;
-		else if( getPausePreviewPref() )
-			do_in_background = false;
+		boolean do_in_background = saveInBackground(image_capture_intent);
 
-		boolean success = imageSaver.saveImage(do_in_background, data,
+		boolean success = imageSaver.saveImageJpeg(do_in_background, is_hdr, save_expo, images,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
@@ -1283,135 +1373,100 @@ public class MyApplicationInterface implements ApplicationInterface {
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
 				has_thumbnail_animation);
-		
+
 		if( MyDebug.LOG )
-			Log.d(TAG, "onPictureTaken complete");
+			Log.d(TAG, "saveImage complete, success: " + success);
 		
 		return success;
 	}
 
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
-	public boolean onRawPictureTaken(DngCreator dngCreator, Image image) {
-        System.gc();
+	public boolean onPictureTaken(byte [] data, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onPictureTaken");
+
+		List<byte []> images = new ArrayList<byte []>();
+		images.add(data);
+
+		boolean success = saveImage(false, false, images, current_date);
+        
+		if( MyDebug.LOG )
+			Log.d(TAG, "onPictureTaken complete, success: " + success);
+		
+		return success;
+	}
+    
+    @Override
+	public boolean onBurstPictureTaken(List<byte []> images, Date current_date) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onBurstPictureTaken: received " + images.size() + " images");
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		boolean save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
+		if( MyDebug.LOG )
+			Log.d(TAG, "save_expo: " + save_expo);
+
+		boolean success = saveImage(true, save_expo, images, current_date);
+
+		return success;
+    }
+
+    @Override
+	public boolean onRawPictureTaken(DngCreator dngCreator, Image image, Date current_date) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRawPictureTaken");
-		boolean success = false;
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "RAW requires LOLLIPOP or higher");
-			return success;
-		}
-
-        FileOutputStream output = null;
-        try {
-    		File picFile = null;
-    		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
-
-			if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "saveUri: " + saveUri);
-				picFile = File.createTempFile("picFile", "dng", main_activity.getCacheDir());
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
-			}
-			else {
-        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "dng", new Date());
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
-			}
-
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
-            output = new FileOutputStream(picFile);
-            dngCreator.writeImage(output, image);
-    		if( saveUri == null ) { // if saveUri is non-null, then we haven't succeeded until we've copied to the saveUri
-    			success = true;
-            	// broadcast for SAF is done later, when we've actually written out the file
-        		storageUtils.broadcastFile(picFile, true, false, false);
-    		}
-
-            if( saveUri != null ) {
-            	imageSaver.copyUriToFile(main_activity, saveUri, picFile);
-    		    success = true;
-    		    /* We still need to broadcastFile for SAF - see notes above for onPictureTaken().
-    		    */
-	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri);
-				if( MyDebug.LOG )
-					Log.d(TAG, "real_file: " + real_file);
-                if( real_file != null ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "broadcast file");
-	            	storageUtils.broadcastFile(real_file, true, false, false);
-                }
-                else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "announce SAF uri");
-                	// announce the SAF Uri
-	    		    storageUtils.announceUri(saveUri, true, false);
-                }
-            }
-        }
-        catch(FileNotFoundException e) {
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "File not found: " + e.getMessage());
-            e.printStackTrace();
-            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
-        }
-        catch(IOException e) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "ioexception writing raw image file");
-            e.printStackTrace();
-            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
-        }
-        finally {
-        	if( output != null ) {
-				try {
-					output.close();
-				}
-				catch(IOException e) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "ioexception closing raw output");
-					e.printStackTrace();
-				}
-        	}
-        }
-
         System.gc();
+
+		boolean do_in_background = saveInBackground(false);
+
+		boolean success = imageSaver.saveImageRaw(do_in_background, dngCreator, image, current_date);
+		
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRawPictureTaken complete");
 		return success;
 	}
-	
-	void setLastImage(File file) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "setLastImage");
-    	last_image_saf = false;
-    	last_image_name = file.getAbsolutePath();
-    	last_image_uri = Uri.parse("file://" + last_image_name);
-	}
+    
+    void addLastImage(File file, boolean share) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "addLastImage: " + file);
+			Log.d(TAG, "share?: " + share);
+		}
+    	last_images_saf = false;
+    	LastImage last_image = new LastImage(file.getAbsolutePath(), share);
+    	last_images.add(last_image);
+    }
+    
+    void addLastImageSAF(Uri uri, boolean share) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "addLastImageSAF: " + uri);
+			Log.d(TAG, "share?: " + share);
+		}
+		last_images_saf = true;
+    	LastImage last_image = new LastImage(uri, share);
+    	last_images.add(last_image);
+    }
 
-	void setLastImageSAF(Uri uri) {
+	void clearLastImages() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setLastImageSAF");
-    	last_image_saf = true;
-    	last_image_name = null;
-    	last_image_uri = uri;
-	}
-	
-	void clearLastImage() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "clearLastImage");
-		last_image_saf = false;
-		last_image_name = null;
-		last_image_uri = null;
+			Log.d(TAG, "clearLastImages");
+		last_images_saf = false;
+		last_images.clear();
 	}
 
 	void shareLastImage() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "shareLastImage");
 		Preview preview  = main_activity.getPreview();
 		if( preview.isPreviewPaused() ) {
-			if( last_image_uri != null ) {
+			LastImage share_image = null;
+			for(int i=0;i<last_images.size() && share_image == null;i++) {
+				LastImage last_image = last_images.get(i);
+				if( last_image.share ) {
+					share_image = last_image;
+				}
+			}
+			if( share_image != null ) {
+				Uri last_image_uri = share_image.uri;
 				if( MyDebug.LOG )
 					Log.d(TAG, "Share: " + last_image_uri);
 				Intent intent = new Intent(Intent.ACTION_SEND);
@@ -1419,49 +1474,61 @@ public class MyApplicationInterface implements ApplicationInterface {
 				intent.putExtra(Intent.EXTRA_STREAM, last_image_uri);
 				main_activity.startActivity(Intent.createChooser(intent, "Photo"));
 			}
-			clearLastImage();
+			clearLastImages();
 			preview.startCameraPreview();
 		}
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void trashImage(boolean image_saf, Uri image_uri, String image_name) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "trashImage");
+		Preview preview  = main_activity.getPreview();
+		if( image_saf && image_uri != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "Delete: " + image_uri);
+    	    File file = storageUtils.getFileFromDocumentUriSAF(image_uri); // need to get file before deleting it, as fileFromDocumentUriSAF may depend on the file still existing
+			if( !DocumentsContract.deleteDocument(main_activity.getContentResolver(), image_uri) ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to delete " + image_uri);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "successfully deleted " + image_uri);
+	    	    preview.showToast(null, R.string.photo_deleted);
+                if( file != null ) {
+                	// SAF doesn't broadcast when deleting them
+	            	storageUtils.broadcastFile(file, false, false, true);
+                }
+			}
+		}
+		else if( image_name != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "Delete: " + image_name);
+			File file = new File(image_name);
+			if( !file.delete() ) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to delete " + image_name);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "successfully deleted " + image_name);
+	    	    preview.showToast(null, R.string.photo_deleted);
+            	storageUtils.broadcastFile(file, false, false, true);
+			}
+		}
+	}
+	
 	void trashLastImage() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "trashImage");
 		Preview preview  = main_activity.getPreview();
 		if( preview.isPreviewPaused() ) {
-			if( last_image_saf && last_image_uri != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "Delete: " + last_image_uri);
-	    	    File file = storageUtils.getFileFromDocumentUriSAF(last_image_uri); // need to get file before deleting it, as fileFromDocumentUriSAF may depend on the file still existing
-				if( !DocumentsContract.deleteDocument(main_activity.getContentResolver(), last_image_uri) ) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "failed to delete " + last_image_uri);
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "successfully deleted " + last_image_uri);
-    	    	    preview.showToast(null, R.string.photo_deleted);
-                    if( file != null ) {
-                    	// SAF doesn't broadcast when deleting them
-    	            	storageUtils.broadcastFile(file, false, false, true);
-                    }
-				}
+			for(int i=0;i<last_images.size();i++) {
+				LastImage last_image = last_images.get(i);
+				trashImage(last_images_saf, last_image.uri, last_image.name);
 			}
-			else if( last_image_name != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "Delete: " + last_image_name);
-				File file = new File(last_image_name);
-				if( !file.delete() ) {
-					if( MyDebug.LOG )
-						Log.e(TAG, "failed to delete " + last_image_name);
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "successfully deleted " + last_image_name);
-    	    	    preview.showToast(null, R.string.photo_deleted);
-	            	storageUtils.broadcastFile(file, false, false, true);
-				}
-			}
-			clearLastImage();
+			clearLastImages();
 			preview.startCameraPreview();
 		}
     	// Calling updateGalleryIcon() immediately has problem that it still returns the latest image that we've just deleted!
@@ -1479,5 +1546,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	public boolean hasThumbnailAnimation() {
 		return this.drawPreview.hasThumbnailAnimation();
+	}
+	
+	public HDRProcessor getHDRProcessor() {
+		return imageSaver.getHDRProcessor();
 	}
 }

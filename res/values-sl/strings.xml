@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">Open Camera</string>
@@ -99,8 +99,13 @@
     <string name="preference_timer_beep">Pisk samosprožilca</string>
     <string name="preference_timer_beep_summary">Zapiskaj ob odštevanju samosprožilca ali zakasnitvi zaporednega načina</string>
     <string name="preference_timer_speak">Glasovno odštevanje samosprožilca</string>
+<<<<<<< HEAD
     <string name="preference_timer_speak_summary">Glasovno odštevanje samosprožilca ali zakasnitve zaporednega načina (od 60-ih s naprej)</string>
-    <string name="preference_burst_mode">Zaporedni način</string>
+    <string name="preference_burst_mode">Zaporedje</string>
+=======
+    <string name="preference_timer_speak_summary">Glasovno odštevanje samosprožilca ali zakasnitev zaporednega načina (od 60-ih s naprej)</string>
+    <string name="preference_burst_mode">Zaporedje</string>
+>>>>>>> 7e37663a898eff34f4fbc1f2f70f127a998094c9
     <string name="preference_burst_mode_summary">Posnemi več fotografij v zaporedju</string>
     <string name="preference_burst_interval">Razmik zaporednega načina</string>
     <string name="preference_burst_interval_summary">Zakasnitev (če obstaja) med fotografjami v zaporednem načinu</string>

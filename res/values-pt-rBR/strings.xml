@@ -98,7 +98,7 @@
     <string name="preference_timer_summary">Definir temporizador para câmera</string>
     <string name="preference_timer_beep">Som do Temporizador</string>
     <string name="preference_timer_beep_summary">Toca quando o temporizador está em contagem regressiva ou no intervalo do modo disparo</string>
-    <string name="preference_burst_mode">Disparo Contínuo</string>
+    <string name="preference_burst_mode">Contínuo</string>
     <string name="preference_burst_mode_summary">Tire múltiplas fotos em sucessão</string>
     <string name="preference_burst_interval">Intervalo Disparo Contínuo</string>
     <string name="preference_burst_interval_summary">Intervalo entre as fotos no modo disparo contínuo</string>
@@ -151,6 +151,7 @@
     <string name="preference_show_battery_summary">Exibe na tela o atual nível de bateria</string>
     <string name="preference_grid">Mostrar grade</string>
     <string name="preference_grid_summary">Exibe uma das várias grades</string>
+    <string name="grid">Grade</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Mostrar uma guia cortada</string>
     <string name="preference_crop_guide_summary">Uma guia cortada exibe um retângulo mostrando que a relação de aspecto especificado parece útil se você planeja cortar a foto/vídeo depois para um diferente aspecto especificado. Requer modo WYSIWYG ou estar em modo de vídeo.</string>
     <string name="preference_thumbnail_animation">Mostrar animação para captura de fotos</string>

@@ -8,11 +8,11 @@
         <item>drawable/flash_red_eye</item>
     </string-array>
     <string-array name="flash_entries">
-        <item>Bliskavica izk.</item>
-        <item>Samodejna bliskavica</item>
-        <item>Bliskavica vkl.</item>
-        <item>Svetilka</item>
-        <item>Zm. uč. rdečih oči</item>
+        <item>Flash desligado</item>
+        <item>Flash automático</item>
+        <item>Flash ligado</item>
+        <item>Lanterna</item>
+        <item>Olhos vermelhos</item>
     </string-array>
     <string-array name="flash_values">
         <item>flash_off</item>
@@ -33,15 +33,15 @@
         <item>drawable/focus_mode_continuous_video</item>
     </string-array>
     <string-array name="focus_mode_entries">
-        <item>Samodejno ostrenje</item>
-        <item>Ostrenje v neskončnosti</item>
-        <item>Ostrenje makro</item>
-        <item>Zaklenjeno ostrenje</item>
-        <item>Ročno ostrenje</item>
-        <item>Pritrjeno ostrenje</item>
-        <item>Ostrenje EDOF</item>
-        <item>Neprekinjeno ostrenje slike</item>
-        <item>Neprekinjeno ostrenje videoposnetkov</item>
+        <item>Foco automático</item>
+        <item>Foco infinito</item>
+        <item>Foco macro</item>
+        <item>Foco bloqueado</item>
+        <item>Foco manual</item>
+        <item>Foco fixo</item>
+        <item>Foco EDOF</item>
+        <item>Foco contínuo de fotografia</item>
+        <item>Foco contínuo de vídeo</item>
     </string-array>
     <string-array name="focus_mode_values">
         <item>focus_mode_auto</item>
@@ -55,9 +55,9 @@
         <item>focus_mode_continuous_video</item>
     </string-array>
     <string-array name="preference_lock_orientation_entries">
-        <item>Ni zaklenjeno</item>
-        <item>Zakleni na ležeče</item>
-        <item>Zakleni na pokončno</item>
+        <item>Sem bloqueio</item>
+        <item>Bloquear em paisagem</item>
+        <item>Bloquear em retrato</item>
     </string-array>
     <string-array name="preference_lock_orientation_values">
         <item>none</item>
@@ -65,18 +65,18 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Off</item>
-        <item>1 s</item>
-        <item>2 s</item>
-        <item>3 s</item>
-        <item>5 s</item>
-        <item>10 s</item>
-        <item>15 s</item>
-        <item>20 s</item>
-        <item>30 s</item>
-        <item>1 min.</item>
-        <item>2 min.</item>
-        <item>5 min.</item>
+        <item>Desligado</item>
+        <item>1s</item>
+        <item>2s</item>
+        <item>3s</item>
+        <item>5s</item>
+        <item>10s</item>
+        <item>15s</item>
+        <item>20s</item>
+        <item>30s</item>
+        <item>1m</item>
+        <item>2m</item>
+        <item>5m</item>
     </string-array>
     <string-array name="preference_timer_values">
         <item>0</item>
@@ -93,13 +93,13 @@
         <item>300</item>
     </string-array>
     <string-array name="preference_burst_mode_entries">
-        <item>Izk.</item>
+        <item>Desligado</item>
         <item>2x</item>
         <item>3x</item>
         <item>4x</item>
         <item>5x</item>
         <item>10x</item>
-        <item>Neomejeno</item>
+        <item>Ilimitado</item>
     </string-array>
     <string-array name="preference_burst_mode_values">
         <item>1</item>
@@ -111,23 +111,23 @@
         <item>unlimited</item>
     </string-array>
     <string-array name="preference_burst_interval_entries">
-        <item>Brez zakasnitve</item>
-        <item>1 s</item>
-        <item>2 s</item>
-        <item>3 s</item>
-        <item>5 s</item>
-        <item>10 s</item>
-        <item>15 s</item>
-        <item>20 s</item>
-        <item>30 s</item>
-        <item>1 min.</item>
-        <item>2 min.</item>
-        <item>5 min.</item>
-        <item>10 min.</item>
-        <item>20 min.</item>
-		<item>30 min.</item>
-		<item>1 ura</item>
-		<item>2 uri</item>
+        <item>Sem atraso</item>
+        <item>1s</item>
+        <item>2s</item>
+        <item>3s</item>
+        <item>5s</item>
+        <item>10s</item>
+        <item>15s</item>
+        <item>20s</item>
+        <item>30s</item>
+        <item>1m</item>
+        <item>2m</item>
+        <item>5m</item>
+        <item>10m</item>
+        <item>20m</item>
+		<item>30m</item>
+		<item>1h</item>
+		<item>2h</item>
     </string-array>
     <string-array name="preference_burst_interval_values">
         <item>0</item>
@@ -149,31 +149,31 @@
         <item>7200</item>
     </string-array>
     <string-array name="preference_preview_size_entries">
-        <item>Največja velikost predogleda</item>
-        <item>Ujemaj velikost fotografije (WYSIWYG)</item>
+        <item>Maximizar o tamanho da pré-visualização</item>
+        <item>Corresponder ao tamanho da fotografia (WYSIWYG)</item>
     </string-array>
     <string-array name="preference_preview_size_values">
         <item>preference_preview_size_display</item>
         <item>preference_preview_size_wysiwyg</item>
     </string-array>
     <string-array name="preference_touch_capture_entries">
-        <item>Brez</item>
-        <item>En dotik</item>
-        <item>Dvojni dotik</item>
-    </string-array>
+        <item>Nenhum</item>
+        <item>Toque único</item>
+        <item>Toque duplo</item>
+        </string-array>
     <string-array name="preference_touch_capture_values">
         <item>none</item>
         <item>single</item>
         <item>double</item>
     </string-array>
     <string-array name="preference_volume_keys_entries">
-        <item>Posnemi fotografijo (ali začni/ustavi snemanje videoposnetka)</item>
-        <item>Ostrenje</item>
-        <item>Povečaj/Pomanjšaj</item>
-        <item>Spremeni raven osvetlitve</item>
-        <item>Vklopi/Izklopi samodejno ustalitev</item>
-        <item>Spremeni glasnost naprave</item>
-        <item>Ne naredi ničesar</item>
+        <item>Tirar fotografia (ou iniciar/parar gravação de vídeo)</item>
+        <item>Focar</item>
+        <item>Ampliar/diminuir</item>
+        <item>Alterar nível de exposição</item>
+        <item>Ativar/desativar auto-estabilizar</item>
+        <item>Alterar volume do dispositivo</item>
+        <item>Não fazer nada</item>
     </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
@@ -185,26 +185,26 @@
         <item>volume_really_nothing</item>
     </string-array>
     <string-array name="preference_rotate_preview_entries">
-        <item>Ne zavrti</item>
-        <item>Zavrti za 180°</item>
+        <item>Não rodar</item>
+        <item>Rodar 180 graus</item>
         </string-array>
     <string-array name="preference_rotate_preview_values">
         <item>0</item>
         <item>180</item>
     </string-array>
     <string-array name="preference_ui_placement_entries">
-        <item>Up. vmesnik za levičarje</item>
-        <item>Up. vmesnik za desničarje</item>
+        <item>Interface de mão esquerda</item>
+        <item>Interface de mão direita</item>
     </string-array>
     <string-array name="preference_ui_placement_values">
         <item>ui_left</item>
         <item>ui_right</item>
     </string-array>
     <string-array name="preference_immersive_mode_entries">
-        <item>Izk.</item>
-        <item>Skrij samo zaslonske gumbe za navidezno krmarjenje</item>
-        <item>Skrij gr. up. vmsnik</item>
-        <item>Skrij vse</item>
+        <item>Desligado</item>
+        <item>Apenas ocultar os botões de navegação virtuais</item>
+        <item>Ocultar interface</item>
+        <item>Ocultar tudo</item>
     </string-array>
     <string-array name="preference_immersive_mode_values">
         <item>immersive_mode_off</item>
@@ -213,12 +213,12 @@
         <item>immersive_mode_everything</item>
         </string-array>
     <string-array name="preference_angle_highlight_color_entries">
-        <item>Rdeča</item>
-        <item>Zelena</item>
-        <item>Modra</item>
-        <item>Rumena</item>
-        <item>Vijolična</item>
-        <item>Bela</item>
+        <item>Vermelho</item>
+        <item>Verde</item>
+        <item>Azul</item>
+        <item>Amarelo</item>
+        <item>Roxo</item>
+        <item>Branco</item>
     </string-array>
     <string-array name="preference_angle_highlight_color_values">
         <item>#f44336</item> <!-- Red 500 -->
@@ -229,18 +229,18 @@
         <item>#ffffff</item> <!-- White -->
     </string-array>
     <string-array name="preference_grid_entries">
-        <item>Brez</item>
+        <item>Nenhuma</item>
         <item>3x3</item>
-        <item>ø3x3</item>
+        <item>Phi 3x3</item>
         <item>4x2</item>
-        <item>Križec</item>
-        <item>Zlata (1)</item>
-        <item>Zlata (2)</item>
-        <item>Zlata (3)</item>
-        <item>Zlata (4)</item>
-        <item>Trikotnik (1)</item>
-        <item>Trikotnik (2)</item>
-        <item>Diagonala</item>
+        <item>Mira</item>
+        <item>Fibonacci (1)</item>
+        <item>Fibonacci (2)</item>
+        <item>Fibonacci (3)</item>
+        <item>Fibonacci (4)</item>
+        <item>Triângulo (1)</item>
+        <item>Triângulo (2)</item>
+        <item>Diagonais</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
@@ -257,17 +257,17 @@
         <item>preference_grid_diagonals</item>
     </string-array>
     <string-array name="preference_crop_guide_entries">
-        <item>Brez</item>
+        <item>Nenhum</item>
         <item>1 (1:1)</item>
-        <item>1,25 (5:4)</item>
-        <item>1,33 (4:3)</item>
-        <item>1,4 (7:4)</item>
-        <item>1,5 (3:2)</item>
-        <item>1,78 (16:9)</item>
-        <item>1,85 (37:20)</item>
-        <item>2,33 (21:9)</item>
-        <item>2,35 (47:20)</item>
-        <item>2,4 (12:5)</item>
+        <item>1.25 (5:4)</item>
+        <item>1.33 (4:3)</item>
+        <item>1.4 (7:4)</item>
+        <item>1.5 (3:2)</item>
+        <item>1.78 (16:9)</item>
+        <item>1.85 (37:20)</item>
+        <item>2.33 (21:9)</item>
+        <item>2.35 (47:20)</item>
+        <item>2.4 (12:5)</item>
     </string-array>
     <string-array name="preference_crop_guide_values">
         <item>crop_guide_none</item>
@@ -282,20 +282,28 @@
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>
     </string-array>
+    <string-array name="preference_raw_entries">
+        <item>Apenas JPEG</item>
+        <item>JPEG e DNG (RAW)</item>
+    </string-array>
+    <string-array name="preference_raw_values">
+        <item>preference_raw_no</item>
+        <item>preference_raw_yes</item>
+    </string-array>
     <string-array name="preference_stamp_entries">
-        <item>Brez žiga</item>
-        <item>Dodaj žig</item>
+        <item>Sem carimbo</item>
+        <item>Carimbar fotografias</item>
     </string-array>
     <string-array name="preference_stamp_values">
         <item>preference_stamp_no</item>
         <item>preference_stamp_yes</item>
     </string-array>
     <string-array name="preference_stamp_dateformat_entries">
-        <item>Privzeta</item>
-        <item>yyyy/mm/dd</item>
-        <item>dd.mm.yyyy</item>
-        <item>mm/dd/yyyy</item>
-        <item>Brez</item>
+        <item>Predefinição</item>
+        <item>aaaa/mm/dd</item>
+        <item>dd/mm/aaaa</item>
+        <item>mm/dd/aaaa</item>
+        <item>Nenhum</item>
     </string-array>
     <string-array name="preference_stamp_dateformat_values">
         <item>preference_stamp_dateformat_default</item>
@@ -305,10 +313,10 @@
         <item>preference_stamp_dateformat_none</item>
     </string-array>
     <string-array name="preference_stamp_timeformat_entries">
-        <item>Privzeta</item>
-        <item>12-urna</item>
-        <item>24-urna</item>
-        <item>Brez</item>
+        <item>Predefinição</item>
+        <item>12 horas</item>
+        <item>24 horas</item>
+        <item>Nenhum</item>
     </string-array>
     <string-array name="preference_stamp_timeformat_values">
         <item>preference_stamp_timeformat_default</item>
@@ -317,9 +325,9 @@
         <item>preference_stamp_timeformat_none</item>
     </string-array>
     <string-array name="preference_stamp_gpsformat_entries">
-        <item>Privzeta</item>
-        <item>Stopinje/minute/sekunde</item>
-        <item>Brez</item>
+        <item>Predefinição</item>
+        <item>Graus/minutos/segundos</item>
+        <item>Nenhum</item>
     </string-array>
     <string-array name="preference_stamp_gpsformat_values">
         <item>preference_stamp_gpsformat_default</item>
@@ -355,38 +363,38 @@
         <item>24</item>
     </string-array>
     <string-array name="preference_stamp_style_entries">
-        <item>Osenčeno besedilo</item>
-        <item>Golo besedilo</item>
+        <item>Texto sombreado</item>
+        <item>Texto simples</item>
     </string-array>
     <string-array name="preference_stamp_style_values">
         <item>preference_stamp_style_shadowed</item>
         <item>preference_stamp_style_plain</item>
     </string-array>
     <string-array name="preference_video_bitrate_entries">
-        <item>Privzeta</item>
-        <item>100 kb/s</item>
-        <item>200 kb/s</item>
-        <item>500 kb/s</item>
-        <item>1 Mb/s</item>
-        <item>2 Mb/s</item>
-        <item>3 Mb/s</item>
-        <item>4 Mb/s</item>
-        <item>5 Mb/s</item>
-        <item>6 Mb/s</item>
-        <item>7 Mb/s</item>
-        <item>8 Mb/s</item>
-        <item>9 Mb/s</item>
-        <item>10 Mb/s</item>
-        <item>15 Mb/s</item>
-        <item>20 Mb/s</item>
-        <item>30 Mb/s</item>
-        <item>40 Mb/s</item>
-        <item>50 Mb/s</item>
-        <item>60 Mb/s</item>
-        <item>70 Mb/s</item>
-        <item>80 Mb/s</item>
-        <item>90 Mb/s</item>
-        <item>100 Mb/s</item>
+        <item>Predefinição</item>
+        <item>100kbps</item>
+        <item>200kbps</item>
+        <item>500kbps</item>
+        <item>1Mbps</item>
+        <item>2Mbps</item>
+        <item>3Mbps</item>
+        <item>4Mbps</item>
+        <item>5Mbps</item>
+        <item>6Mbps</item>
+        <item>7Mbps</item>
+        <item>8Mbps</item>
+        <item>9Mbps</item>
+        <item>10Mbps</item>
+        <item>15Mbps</item>
+        <item>20Mbps</item>
+        <item>30Mbps</item>
+        <item>40Mbps</item>
+        <item>50Mbps</item>
+        <item>60Mbps</item>
+        <item>70Mbps</item>
+        <item>80Mbps</item>
+        <item>90Mbps</item>
+        <item>100Mbps</item>
     </string-array>
     <string-array name="preference_video_bitrate_values">
         <item>default</item>
@@ -415,7 +423,7 @@
         <item>100000000</item>
     </string-array>
     <string-array name="preference_video_fps_entries">
-        <item>Privzeta</item>
+        <item>Predefinição</item>
         <item>15</item>
         <item>24</item>
         <item>25</item>
@@ -437,29 +445,29 @@
         <item>120</item>
     </string-array>
     <string-array name="preference_video_max_duration_entries">
-        <item>Neomejeno</item>
-        <item>5 s</item>
-        <item>10 s</item>
-        <item>15 s</item>
-        <item>30 s</item>
-        <item>1 min.</item>
-        <item>2 min.</item>
-        <item>3 min.</item>
-        <item>4 min.</item>
-        <item>5 min.</item>
-        <item>6 min.</item>
-        <item>7 min.</item>
-        <item>8 min.</item>
-        <item>9 min.</item>
-        <item>10 min.</item>
-        <item>11 min.</item>
-        <item>12 min.</item>
-        <item>15 min.</item>
-        <item>20 min.</item>
-        <item>25 min.</item>
-        <item>30 min.</item>
-        <item>45 min.</item>
-        <item>1 ura</item>
+        <item>Ilimitado</item>
+        <item>5 segundos</item>
+        <item>10 segundos</item>
+        <item>15 segundos</item>
+        <item>30 segundos</item>
+        <item>1 minuto</item>
+        <item>2 minutos</item>
+        <item>3 minutos</item>
+        <item>4 minutos</item>
+        <item>5 minutos</item>
+        <item>6 minutos</item>
+        <item>7 minutos</item>
+        <item>8 minutos</item>
+        <item>9 minutos</item>
+        <item>10 minutos</item>
+        <item>11 minutos</item>
+        <item>12 minutos</item>
+        <item>15 minutos</item>
+        <item>20 minutos</item>
+        <item>25 minutos</item>
+        <item>30 minutos</item>
+        <item>45 minutos</item>
+        <item>1 hora</item>
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
@@ -487,17 +495,17 @@
         <item>3600</item>
     </string-array>
     <string-array name="preference_video_restart_entries">
-        <item>Ne zaženi ponovno</item>
-        <item>Ponovi 1x</item>
-        <item>Ponovi 2x</item>
-        <item>Ponovi 3x</item>
-        <item>Ponovi 4x</item>
-        <item>Ponovi 5x</item>
-        <item>Ponovi 6x</item>
-        <item>Ponovi 7x</item>
-        <item>Ponovi 8x</item>
-        <item>Ponovi 9x</item>
-        <item>Ponovi 10x</item>
+        <item>Não reiniciar</item>
+        <item>Repetir 1 vez</item>
+        <item>Repetir 2 vezes</item>
+        <item>Repetir 3 vezes</item>
+        <item>Repetir 4 vezes</item>
+        <item>Repetir 5 vezes</item>
+        <item>Repetir 6 vezes</item>
+        <item>Repetir 7 vezes</item>
+        <item>Repetir 8 vezes</item>
+        <item>Repetir 9 vezes</item>
+        <item>Repetir 10 vezes</item>
     </string-array>
     <string-array name="preference_video_restart_values">
         <item>0</item>
@@ -513,10 +521,10 @@
         <item>10</item>
     </string-array>
     <string-array name="preference_record_audio_src_entries">
-        <item>Kamera</item>
-        <item>Zunanji mikrofon (če je prisoten)</item>
-        <item>Privzeti vir zvoka</item>
-        <item>Optimizirano za glas</item>
+        <item>Câmara de vídeo</item>
+        <item>Microfone externo (se presente)</item>
+        <item>Fonte de áudio predefinida</item>
+        <item>Otimizado para voz</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>
@@ -525,9 +533,9 @@
         <item>audio_src_voice_communication</item>
     </string-array>
     <string-array name="preference_record_audio_channels_entries">
-        <item>Privzeto</item>
+        <item>Predefinição</item>
         <item>Mono</item>
-        <item>Stereo (podprto samo na nekaterih napravah)</item>
+        <item>Stereo (apenas suportado em alguns dispositivos)</item>
     </string-array>
     <string-array name="preference_record_audio_channels_values">
         <item>audio_default</item>
@@ -535,9 +543,9 @@
         <item>audio_stereo</item>
     </string-array>
     <string-array name="preference_audio_control_entries">
-        <item>Brez</item>
-        <item>Glasen šum</item>
-        <item>Glasovni ukaz: \"cheese\"</item>
+        <item>Nenhum</item>
+        <item>Ruído alto</item>
+        <item>Comando de voz: \"cheese\"</item>
     </string-array>
     <string-array name="preference_audio_control_values">
         <item>none</item>
@@ -545,12 +553,12 @@
         <item>voice</item>
     </string-array>
     <string-array name="preference_audio_noise_control_sensitivity_entries">
-        <item>+3 (visoka občutljivost)</item>
+        <item>+3 (alta sensibilidade)</item>
         <item>+2</item>
         <item>+1</item>
-        <item>0 (privzeta)</item>
+        <item>0 (predefinido)</item>
         <item>-1</item>
-        <item>-2 (nizka občutljivost)</item>
+        <item>-2 (baixa sensibilidade)</item>
     </string-array>
     <string-array name="preference_audio_noise_control_sensitivity_values">
         <item>3</item>
@@ -561,12 +569,12 @@
         <item>-2</item>
     </string-array>
     <string-array name="preference_video_max_filesize_entries">
-        <item>Privzeta od naprave</item>
-        <item>100 MB</item>
-        <item>200 MB</item>
-        <item>300 MB</item>
-        <item>500 MB</item>
-        <item>1 GB</item>
+        <item>Predefinição do dispositivo</item>
+        <item>100MB</item>
+        <item>200MB</item>
+        <item>300MB</item>
+        <item>500MB</item>
+        <item>1GB</item>
     </string-array>
     <string-array name="preference_video_max_filesize_values">
         <item>0</item>
@@ -575,5 +583,13 @@
         <item>314572800</item>
         <item>524288000</item>
         <item>1073741824</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_entries">
+        <item>Hora local</item>
+        <item>UTC (Zulu)</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_values">
+        <item>local</item>
+        <item>zulu</item>
     </string-array>
 </resources>

@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -64,17 +66,24 @@ public class PopupView extends LinearLayout {
 
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
-        List<String> supported_flash_values = preview.getSupportedFlashValues();
-    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
-			@Override
-			public void onClick(String option) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "clicked flash: " + option);
-				preview.updateFlash(option);
-		    	main_activity.getMainUI().setPopupIcon();
-				main_activity.closePopup();
-			}
-		});
+		if( main_activity.getApplicationInterface().isHDRPref() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "flash not supported for HDR");
+			// HDR doesn't support flash, so don't show the options
+		}
+		else {
+	        List<String> supported_flash_values = preview.getSupportedFlashValues();
+	    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
+				@Override
+				public void onClick(String option) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "clicked flash: " + option);
+					preview.updateFlash(option);
+			    	main_activity.getMainUI().setPopupIcon();
+					main_activity.closePopup();
+				}
+			});
+		}
     	
 		if( preview.isVideo() && preview.isTakingPhoto() ) {
     		// don't add any more options
@@ -114,9 +123,29 @@ public class PopupView extends LinearLayout {
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     				SharedPreferences.Editor editor = sharedPreferences.edit();
     				editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
-    				// also reset exposure time when changing back to auto from the popup menu:
-    				if( option.equals("auto") )
+    				if( option.equals("auto") ) {
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "switched from manual to auto iso");
+        				// also reset exposure time when changing from manual to auto from the popup menu:
     					editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
+    				}
+    				else {
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "switched from auto to manual iso");
+        				if( preview.usingCamera2API() ) {
+        					// if changing from auto to manual, preserve the current exposure time if it exists
+        					if( preview.getCameraController() != null && preview.getCameraController().captureResultHasExposureTime() ) {
+        						long exposure_time = preview.getCameraController().captureResultExposureTime();
+                				if( MyDebug.LOG )
+                					Log.d(TAG, "apply existing exposure time of " + exposure_time);
+            					editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
+        					}
+        					else {
+                				if( MyDebug.LOG )
+                					Log.d(TAG, "no existing exposure time available");
+        					}
+        				}
+    				}
     				editor.apply();
 
     				main_activity.updateForSettings("ISO: " + option);
@@ -124,6 +153,77 @@ public class PopupView extends LinearLayout {
     			}
     		});
 
+    		if( main_activity.supportsHDR() ) {
+    			final List<String> photo_modes = new ArrayList<String>();
+    			final int mode_std = photo_modes.size();
+    			photo_modes.add( getResources().getString(R.string.photo_mode_standard) );
+    			final int mode_hdr = photo_modes.size();
+    			photo_modes.add( getResources().getString(R.string.photo_mode_hdr) );
+    			
+    			boolean hdr = main_activity.getApplicationInterface().isHDRPref();
+        		String current_mode = photo_modes.get( hdr ? mode_hdr : mode_std );
+
+        		addTitleToPopup(getResources().getString(R.string.photo_mode));
+        		
+            	addButtonOptionsToPopup(photo_modes, -1, -1, "", current_mode, "TEST_PHOTO_MODE", new ButtonOptionsPopupListener() {
+        			@Override
+        			public void onClick(String option) {
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "clicked photo mode: " + option);
+
+        				int option_id = -1;
+        				for(int i=0;i<photo_modes.size() && option_id==-1;i++) {
+        					if( option.equals( photo_modes.get(i) ) )
+        						option_id = i;
+        				}
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "mode id: " + option_id);
+        				if( option_id == -1 ) {
+            				if( MyDebug.LOG )
+            					Log.e(TAG, "unknown mode id: " + option_id);
+        				}
+        				else {
+        					boolean new_hdr = option_id == mode_hdr;
+            				if( MyDebug.LOG )
+            					Log.d(TAG, "new_hdr?: " + new_hdr);
+    						String toast_message = null;
+    	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+    						SharedPreferences.Editor editor = sharedPreferences.edit();
+    						if( option_id == mode_std ) {
+    							toast_message = getResources().getString(R.string.photo_mode_standard);
+        						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+    						}
+    						else if( option_id == mode_hdr ) {
+    							toast_message = getResources().getString(R.string.photo_mode_hdr);
+        						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
+    						}
+    						else {
+                				if( MyDebug.LOG )
+                					Log.e(TAG, "unknown mode id: " + option_id);
+    						}
+    						editor.apply();
+
+    						boolean done_dialog = false;
+    	            		if( option_id == mode_hdr ) {
+    	            			boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.getHDRInfoPreferenceKey());
+    	            			if( !done_hdr_info ) {
+    	            				showInfoDialog(R.string.photo_mode_hdr, R.string.hdr_info, PreferenceKeys.getHDRInfoPreferenceKey());
+    		        	    		done_dialog = true;
+    	            			}
+    	                    }
+
+    	            		if( done_dialog ) {
+    	            			// no need to show toast
+    	            			toast_message = null;
+    	            		}
+
+    	    				main_activity.updateForSettings(toast_message);
+    						main_activity.closePopup();
+        				}
+        			}
+        		});
+    		}
+        	
         	// popup should only be opened if we have a camera controller, but check just to be safe
     		if( preview.getCameraController() != null ) {
 	        	List<String> supported_white_balances = preview.getSupportedWhiteBalances();
@@ -135,7 +235,7 @@ public class PopupView extends LinearLayout {
 	        	List<String> supported_color_effects = preview.getSupportedColorEffects();
 	        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT");
     		}
-        	
+    		
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
@@ -146,13 +246,24 @@ public class PopupView extends LinearLayout {
         		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
-	    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
 						editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), isChecked);
 						editor.apply();
 
-						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
-						preview.showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
+						boolean done_dialog = false;
+	            		if( isChecked ) {
+	            			boolean done_auto_stabilise_info = sharedPreferences.contains(PreferenceKeys.getAutoStabiliseInfoPreferenceKey());
+	            			if( !done_auto_stabilise_info ) {
+	            				showInfoDialog(R.string.preference_auto_stabilise, R.string.auto_stabilise_info, PreferenceKeys.getAutoStabiliseInfoPreferenceKey());
+		        	    		done_dialog = true;
+	            			}
+	                    }
+
+	            		if( !done_dialog ) {
+	            			String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
+	            			preview.showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
+	            		}
 						main_activity.closePopup();
 					}
         		});
@@ -350,7 +461,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find grid_value " + grid_value + " in grid_values!");
 				grid_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.preference_grid), true, grid_index, true, "GRID", new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.grid), false, grid_index, true, "GRID", new ArrayOptionsPopupListener() {
     			private void update() {
     				if( grid_index == -1 )
     					return;
@@ -390,7 +501,7 @@ public class PopupView extends LinearLayout {
 		public abstract void onClick(String option);
     }
     
-    private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String string, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
+    private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String prefix_string, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addButtonOptionsToPopup");
     	if( supported_options != null ) {
@@ -450,16 +561,19 @@ public class PopupView extends LinearLayout {
     				Log.d(TAG, "addButtonOptionsToPopup time 2.1: " + (System.currentTimeMillis() - time_s));
 
         		String button_string = "";
-    			// hack for ISO mode ISO_HJR (e.g., on Samsung S5)
+    			// hacks for ISO mode ISO_HJR (e.g., on Samsung S5)
     			// also some devices report e.g. "ISO100" etc
-    			if( string.equalsIgnoreCase("ISO") && supported_option.length() >= 4 && supported_option.substring(0, 4).equalsIgnoreCase("ISO_") ) {
-        			button_string = string + "\n" + supported_option.substring(4);
+        		if( prefix_string.length() == 0 ) {
+    				button_string = supported_option;
+        		}
+        		else if( prefix_string.equalsIgnoreCase("ISO") && supported_option.length() >= 4 && supported_option.substring(0, 4).equalsIgnoreCase("ISO_") ) {
+        			button_string = prefix_string + "\n" + supported_option.substring(4);
     			}
-    			else if( string.equalsIgnoreCase("ISO") && supported_option.length() >= 3 && supported_option.substring(0, 3).equalsIgnoreCase("ISO") ) {
-    				button_string = string + "\n" + supported_option.substring(3);
+    			else if( prefix_string.equalsIgnoreCase("ISO") && supported_option.length() >= 3 && supported_option.substring(0, 3).equalsIgnoreCase("ISO") ) {
+    				button_string = prefix_string + "\n" + supported_option.substring(3);
     			}
     			else {
-    				button_string = string + "\n" + supported_option;
+    				button_string = prefix_string + "\n" + supported_option;
     			}
     			if( MyDebug.LOG )
     				Log.d(TAG, "button_string: " + button_string);
@@ -555,8 +669,8 @@ public class PopupView extends LinearLayout {
 	        			new OnGlobalLayoutListener() {
 							@Override
 							public void onGlobalLayout() {
-								if( MyDebug.LOG )
-									Log.d(TAG, "jump to " + final_current_view.getLeft());
+								/*if( MyDebug.LOG )
+									Log.d(TAG, "jump to " + final_current_view.getLeft());*/
 				        		scroll.scrollTo(final_current_view.getLeft(), 0);
 							}
 	        			}
@@ -573,19 +687,23 @@ public class PopupView extends LinearLayout {
         }
     }
     
+    private void addTitleToPopup(final String title) {
+		TextView text_view = new TextView(this.getContext());
+		text_view.setText(title);
+		text_view.setTextColor(Color.WHITE);
+		text_view.setGravity(Gravity.CENTER);
+		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
+    	this.addView(text_view);
+    }
+    
     private void addRadioOptionsToPopup(List<String> supported_options, final String title, final String preference_key, final String default_option, final String test_key) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addOptionsToPopup: " + title);
     	if( supported_options != null ) {
     		final MainActivity main_activity = (MainActivity)this.getContext();
 
-    		TextView text_view = new TextView(this.getContext());
-    		text_view.setText(title);
-    		text_view.setTextColor(Color.WHITE);
-    		text_view.setGravity(Gravity.CENTER);
-    		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
-        	this.addView(text_view);
-
+    		addTitleToPopup(title);
+    		
     		RadioGroup rg = new RadioGroup(this.getContext()); 
         	rg.setOrientation(RadioGroup.VERTICAL);
         	this.popup_buttons.put(test_key, rg);
@@ -725,6 +843,41 @@ public class PopupView extends LinearLayout {
 
 			this.addView(ll2);
     	}
+    }
+    
+    private void showInfoDialog(int title_id, int info_id, final String info_preference_key) {
+		final MainActivity main_activity = (MainActivity)this.getContext();
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(PopupView.this.getContext());
+        alertDialog.setTitle(title_id);
+        alertDialog.setMessage(info_id);
+        alertDialog.setPositiveButton(android.R.string.ok, null);
+        alertDialog.setNegativeButton(R.string.dont_show_again, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "user clicked dont_show_again for info dialog");
+				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+        		SharedPreferences.Editor editor = sharedPreferences.edit();
+        		editor.putBoolean(info_preference_key, true);
+        		editor.apply();
+			}
+        });
+
+		main_activity.showPreview(false);
+		main_activity.setWindowFlagsForSettings();
+
+		AlertDialog alert = alertDialog.create();
+		// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+		alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface arg0) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "info dialog dismissed");
+        		main_activity.setWindowFlagsForCamera();
+        		main_activity.showPreview(true);
+			}
+        });
+		alert.show();
     }
 
     // for testing

@@ -65,7 +65,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Zamanlama yok</item>
+        <item>Kapalı</item>
         <item>1sn</item>
         <item>2sn</item>
         <item>3sn</item>
@@ -438,6 +438,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Sınırsız</item>
+        <item>5 saniye</item>
+        <item>10 saniye</item>
         <item>15 saniye</item>
         <item>30 saniye</item>
         <item>1 dakika</item>
@@ -461,6 +463,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
+        <item>5</item>
+        <item>10</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>

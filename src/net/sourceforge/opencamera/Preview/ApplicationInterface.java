@@ -2,6 +2,8 @@ package net.sourceforge.opencamera.Preview;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -77,6 +79,8 @@ public interface ApplicationInterface {
 	// Camera2 only modes:
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
 	float getFocusDistancePref();
+	boolean isHDRPref(); // whether to enable HDR photos
+	boolean isRawPref(); // whether to enable RAW photos
 	// for testing purposes:
 	boolean isTestAlwaysFocus(); // if true, pretend autofocus always successful
 
@@ -95,7 +99,7 @@ public interface ApplicationInterface {
 	void onFailedReconnectError(); // failed to reconnect camera after stopping video recording
 	void onFailedCreateVideoFileError(); // callback if unable to create file for recording video
 	void hasPausedPreview(boolean paused); // called when the preview is paused or unpaused (due to getPausePreviewPref())
-	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video), use to disable GUI elements during camera operation
+	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video, including if preview is paused after taking a photo), use to disable GUI elements during camera operation
 	void cameraClosed();
 	void timerBeep(long remaining_time); // n.b., called once per second on timer countdown - so application can beep, or do whatever it likes
 
@@ -121,6 +125,9 @@ public interface ApplicationInterface {
 	void setCameraResolutionPref(int width, int height);
 	void setVideoQualityPref(String video_quality);
 	void setZoomPref(int zoom);
+	void requestCameraPermission(); // for Android 6+: called when trying to open camera, but CAMERA permission not available
+	void requestStoragePermission(); // for Android 6+: called when trying to open camera, but WRITE_EXTERNAL_STORAGE permission not available
+	void requestRecordAudioPermission(); // for Android 6+: called when switching to (or starting up in) video mode, but RECORD_AUDIO permission not available
 	// Camera2 only modes:
 	void setExposureTimePref(long exposure_time);
 	void clearExposureTimePref();
@@ -128,7 +135,9 @@ public interface ApplicationInterface {
 	
 	// callbacks
 	void onDrawPreview(Canvas canvas);
-	boolean onPictureTaken(byte [] data);
-	boolean onRawPictureTaken(DngCreator dngCreator, Image image);
+	boolean onPictureTaken(byte [] data, Date current_date);
+	boolean onBurstPictureTaken(List<byte []> images, Date current_date);
+	boolean onRawPictureTaken(DngCreator dngCreator, Image image, Date current_date);
+	void onPictureCompleted(); // called after all picture callbacks have been called and returned
 	void onContinuousFocusMove(boolean start); // called when focusing starts/stop in continuous picture mode (in photo mode only)
 }
