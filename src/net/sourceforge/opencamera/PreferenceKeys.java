@@ -7,8 +7,28 @@ public class PreferenceKeys {
 	
 	// arguably the static methods here that don't receive an argument could just be static final strings? Though we may want to change some of them to be cameraId-specific in future
 
+	/** If this preference is set, no longer show the intro dialog.
+	 */
     public static String getFirstTimePreferenceKey() {
         return "done_first_time";
+    }
+    
+	/** If this preference is set, no longer show the auto-stabilise info dialog.
+	 */
+    public static String getAutoStabiliseInfoPreferenceKey() {
+        return "done_auto_stabilise_info";
+    }
+    
+	/** If this preference is set, no longer show the HDR info dialog.
+	 */
+    public static String getHDRInfoPreferenceKey() {
+        return "done_hdr_info";
+    }
+    
+    /** If this preference is set, no longer show the raw info dialog.
+	 */
+    public static String getRawInfoPreferenceKey() {
+        return "done_raw_info";
     }
 
     public static String getUseCamera2PreferenceKey() {
@@ -59,6 +79,10 @@ public class PreferenceKeys {
     	return "preference_exposure_time";
     }
     
+    public static String getRawPreferenceKey() {
+    	return "preference_raw";
+    }
+    
     public static String getVolumeKeysPreferenceKey() {
     	return "preference_volume_keys";
     }
@@ -79,6 +103,14 @@ public class PreferenceKeys {
     	return "preference_auto_stabilise";
     }
     
+    public static String getPhotoModePreferenceKey() {
+    	return "preference_photo_mode";
+    }
+
+    public static String getHDRSaveExpoPreferenceKey() {
+    	return "preference_hdr_save_expo";
+    }
+
     public static String getLocationPreferenceKey() {
     	return "preference_location";
     }
@@ -185,6 +217,10 @@ public class PreferenceKeys {
 
     public static String getSaveVideoPrefixPreferenceKey() {
     	return "preference_save_video_prefix";
+    }
+    
+    public static String getSaveZuluTimePreferenceKey() {
+    	return "preference_save_zulu_time";
     }
 
     public static String getShowZoomControlsPreferenceKey() {

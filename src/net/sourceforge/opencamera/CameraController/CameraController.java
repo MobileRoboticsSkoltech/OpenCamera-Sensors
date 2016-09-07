@@ -32,6 +32,7 @@ public abstract class CameraController {
 	// for testing:
 	public int count_camera_parameters_exception = 0;
 	public int count_precapture_timeout = 0;
+	public boolean test_wait_capture_result = false; // whether to test delayed capture result in Camera2 API
 
 	public static class CameraFeatures {
 		public boolean is_zoom_supported = false;
@@ -57,6 +58,8 @@ public abstract class CameraController {
 		public int max_exposure = 0;
 		public float exposure_step = 0.0f;
 		public boolean can_disable_shutter_sound = false;
+		public boolean supports_hdr = false;
+		public boolean supports_raw = false;
 	}
 
 	public static class Size {
@@ -107,7 +110,13 @@ public abstract class CameraController {
 	public static interface PictureCallback {
 		public abstract void onCompleted(); // called after all relevant on*PictureTaken() callbacks have been called and returned
 		public abstract void onPictureTaken(byte[] data);
-		public abstract void onRawPictureTaken(DngCreator dngCreator, Image image); // only called if RAW is requested
+		/** Only called if RAW is requested.
+		 *  Caller should call image.close() and dngCreator.close() when done with the image.
+		 */
+		public abstract void onRawPictureTaken(DngCreator dngCreator, Image image);
+		/** Only called if burst is requested.
+		 */
+		public abstract void onBurstPictureTaken(List<byte[]> images);
 	}
 	
 	public static interface AutoFocusCallback {
@@ -170,6 +179,8 @@ public abstract class CameraController {
     public abstract void setPictureSize(int width, int height);
     public abstract CameraController.Size getPreviewSize();
     public abstract void setPreviewSize(int width, int height);
+	public abstract void setHDR(boolean want_hdr);
+	public abstract void setRaw(boolean want_raw);
 	public abstract void setVideoStabilization(boolean enabled);
 	public abstract boolean getVideoStabilization();
 	public abstract int getJpegQuality();

@@ -65,7 +65,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Без таймера</item>
+        <item>Выключана</item>
         <item>1 с</item>
         <item>2 с</item>
         <item>3 с</item>
@@ -438,6 +438,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Не абмежавана</item>
+        <item>5 секунд</item>
+        <item>10 секунд</item>
         <item>15 секунд</item>
         <item>30 секунд</item>
         <item>1 хвіліна</item>
@@ -461,6 +463,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
+        <item>5</item>
+        <item>10</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>

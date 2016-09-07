@@ -158,6 +158,7 @@
     <string name="preference_show_battery_summary">Affiche le niveau actuel de la batterie sur l\'écran</string>
     <string name="preference_grid">Afficher une grille</string>
     <string name="preference_grid_summary">Affiche l\'une des différentes grilles</string>
+    <string name="grid">La grille</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Afficher un guide de recadrage</string>
     <string name="preference_crop_guide_summary">Un guide de recadrage affiche un rectangle montrant à quoi le rapport d\'aspect spécifié ressemble - utile si vous prévoyez de recadrer la photo/vidéo après un ratio d\'aspect différent. Nécessite le mode photo WYSIWYG, ou d\'être en mode vidéo.</string>
     <string name="preference_show_toasts">Afficher les messages d\'information</string>

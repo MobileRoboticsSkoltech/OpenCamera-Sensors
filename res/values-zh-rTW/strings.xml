@@ -157,6 +157,7 @@
     <string name="preference_show_battery_summary">在螢幕上顯示目前電池電量</string>
     <string name="preference_grid">顯示格線</string>
     <string name="preference_grid_summary">顯示各種格線中的一種</string>
+    <string name="grid">格</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">顯示裁切輔助</string>
     <string name="preference_crop_guide_summary">裁切輔助顯示一個矩形來表示指定的長寬比看起來如何 - 如果您計畫以後裁切照片/影片為不同的解析度很有用。需要所見即所得拍照模式，或處於錄影模式中。</string>
     <string name="preference_show_toasts">顯示拍照前提示訊息</string>

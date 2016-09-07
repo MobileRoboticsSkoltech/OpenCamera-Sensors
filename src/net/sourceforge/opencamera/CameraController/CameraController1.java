@@ -5,7 +5,6 @@ import net.sourceforge.opencamera.MyDebug;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import android.annotation.TargetApi;
 import android.graphics.SurfaceTexture;
@@ -122,7 +121,7 @@ public class CameraController1 extends CameraController {
 	private List<String> convertFlashModesToValues(List<String> supported_flash_modes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFlashModesToValues()");
-		List<String> output_modes = new Vector<String>();
+		List<String> output_modes = new ArrayList<String>();
 		if( supported_flash_modes != null ) {
 			// also resort as well as converting
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
@@ -157,7 +156,7 @@ public class CameraController1 extends CameraController {
 	private List<String> convertFocusModesToValues(List<String> supported_focus_modes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFocusModesToValues()");
-		List<String> output_modes = new Vector<String>();
+		List<String> output_modes = new ArrayList<String>();
 		if( supported_focus_modes != null ) {
 			// also resort as well as converting
 			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
@@ -407,8 +406,12 @@ public class CameraController1 extends CameraController {
 			iso_key = "iso-speed"; // Micromax A101
 			if( parameters.get(iso_key) == null ) {
 				iso_key = "nv-picture-iso"; // LG dual P990
-				if( parameters.get(iso_key) == null )
-					iso_key = null; // not supported
+				if( parameters.get(iso_key) == null ) {
+					if ( Build.MODEL.contains("Z00") )
+						iso_key = "iso"; // Asus Zenfone 2 Z00A and Z008: see https://sourceforge.net/p/opencamera/tickets/183/
+					else
+						iso_key = null; // not supported
+				}
 			}
 		}
 		/*values = new ArrayList<String>();
@@ -443,6 +446,7 @@ public class CameraController1 extends CameraController {
 				// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
 				values = new ArrayList<String>();
 				values.add("auto");
+				values.add("50");
 				values.add("100");
 				values.add("200");
 				values.add("400");
@@ -515,6 +519,7 @@ public class CameraController1 extends CameraController {
     	return new CameraController.Size(camera_size.width, camera_size.height);
     }
 
+	@Override
 	public void setPreviewSize(int width, int height) {
     	Camera.Parameters parameters = this.getParameters();
 		if( MyDebug.LOG )
@@ -525,6 +530,17 @@ public class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
     }
 	
+	@Override
+	public void setHDR(boolean want_hdr) {
+		// not supported for CameraController1
+	}
+	
+	@Override
+	public void setRaw(boolean want_raw) {
+		// not supported for CameraController1
+	}
+
+	@Override
 	public void setVideoStabilization(boolean enabled) {
 	    Camera.Parameters parameters = this.getParameters();
         parameters.setVideoStabilization(enabled);
@@ -643,7 +659,7 @@ public class CameraController1 extends CameraController {
 			Log.d(TAG, "convertFocusModeToValue: " + focus_mode);
 		String focus_value = "";
 		if( focus_mode == null ) {
-			// ignore, leave focus_value at null
+			// ignore, leave focus_value at ""
 		}
 		else if( focus_mode.equals(Camera.Parameters.FOCUS_MODE_AUTO) ) {
     		focus_value = "focus_mode_auto";
@@ -1059,7 +1075,7 @@ public class CameraController1 extends CameraController {
     		@Override
 			public void onAutoFocus(boolean success, Camera camera) {
 				if( MyDebug.LOG )
-					Log.e(TAG, "autoFocus.onAutoFocus");
+					Log.d(TAG, "autoFocus.onAutoFocus");
 				// in theory we should only ever get one call to onAutoFocus(), but some Samsung phones at least can call the callback multiple times
 				// see http://stackoverflow.com/questions/36316195/take-picture-fails-on-samsung-phones
 				// needed to fix problem on Samsung S7 with flash auto/on and continuous picture focus where it would claim failed to take picture even though it'd succeeded,

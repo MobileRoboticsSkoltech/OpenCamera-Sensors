@@ -150,6 +150,7 @@
     <string name="preference_show_battery_summary">현재 배터리 잔량을 화면에 표시합니다</string>
     <string name="preference_grid">격자 표시</string>
     <string name="preference_grid_summary">격자를 표시합니다</string>
+    <string name="grid">격자</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">크롭 안내선 표시</string>
     <string name="preference_crop_guide_summary">크롭 안내선은 특정한 종횡비가 어떤 식으로 보이는지를 사각형으로 보여줍니다 - 사진이나 동영상을 나중에 다른 종횡비로 잘라낼 예정이라면 활용할 수 있습니다. 동영상 촬영 모드 혹은 WYSIWYG 사진 모드가 필요합니다</string>
     <string name="preference_thumbnail_animation">썸네일 애니메이션 표시</string>

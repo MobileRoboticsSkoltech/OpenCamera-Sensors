@@ -100,7 +100,7 @@
     <string name="preference_timer_beep_summary">Гукавы сігнал, калі ідзе адлік таймера або за затрымку ў пакетным рэжыме  здымкі</string>
     <string name="preference_timer_speak">Галасавы таймер зваротнага адліку</string>
     <string name="preference_timer_speak_summary">Агучваць зваротны адлік таймера  або пакетнага  рэжыму фатаграфавання (ад 60 секунд)</string>
-    <string name="preference_burst_mode"> Рэжым пакетнай здымкі</string>
+    <string name="preference_burst_mode">пакетнай здымкі</string>
     <string name="preference_burst_mode_summary">Зрабіць некалькі фотаздымкаў запар</string>
     <string name="preference_burst_interval">Інтэрвал пры пакетнай здымцы</string>
     <string name="preference_burst_interval_summary">Затрымка (калі такія маюцца) паміж фотаздымкамі ў пакетным рэжыме здымкі</string>

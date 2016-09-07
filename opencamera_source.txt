@@ -3,15 +3,17 @@ Source Control
 
 The Git repository is available at https://sourceforge.net/p/opencamera/code/ . Note that I work with the auto crlf turned off (otherwise it converts all the Linux line endings into Windows format). If you want to work on the source, please check out the latest version from the repository.
 
+The Git repository for the test project is also available at https://sourceforge.net/p/opencamera/tests/ .
+
 Licence
 =======
 
 This source is released under the GPL v3 or later.
 
-Please contact me if you have suggestions, bug fixes, ports to other platforms or whatever: mark dot harman at ntlworld dot com .
+Please contact me if you have suggestions, bug fixes, or whatever: mark DOT harman DOT apps AT gmail DOT com .
 
 Homepage: http://opencamera.sourceforge.net/
 
 Google Play download: https://play.google.com/store/apps/details?id=net.sourceforge.opencamera
 
-Mark Harman 17 October 2013
+Mark Harman 18 June 2016

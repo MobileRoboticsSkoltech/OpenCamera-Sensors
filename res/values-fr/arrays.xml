@@ -93,7 +93,7 @@
         <item>300</item>
     </string-array>
     <string-array name="preference_burst_mode_entries">
-        <item>Off</item>
+        <item>Désactivé</item>
         <item>2x</item>
         <item>3x</item>
         <item>4x</item>
@@ -438,6 +438,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Illimité</item>
+        <item>5 secondes</item>
+        <item>10 secondes</item>
         <item>15 secondes</item>
         <item>30 secondes</item>
         <item>1 minute</item>
@@ -461,6 +463,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
+        <item>5</item>
+        <item>10</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>

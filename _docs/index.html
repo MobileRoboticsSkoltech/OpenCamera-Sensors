@@ -50,23 +50,33 @@
 <img align="right" src="Screenshot_2014-09-22-14-34-48_thumbversion.jpg" title="Screenshot" style="max-width:33%">
 </a></p>-->
 
-<div style="display:block;float:right;margin: 5px 5px 5px 20px; max-width:33%">
+<div style="display:block;float:right;margin: 5px 0px 5px 0px;width:40%">
+<!-- div to contain the screenshot and the ads. Important to use width and not max-width, otherwise
+responsive ads won't show (at least on my Nexus 6)!
+If any code is changed here, make sure layout is still good and ads show on laptop, Nexus 6 and Galaxy Nexus.
+-->
 <a href="Screenshot_2014-09-22-14-34-48.jpg">
 <img src="Screenshot_2014-09-22-14-34-48_thumbversion.jpg" alt="Screenshot" title="Screenshot" style="max-width:100%">
-	<!-- we set max width of 100%, as this is in terms of the outer div (which has max-width 33%), and we don't want this being larger than the div -->
+	<!-- we set max width of 100%, as this is in terms of the outer div (which has width 33%), and we don't want this being larger than the div -->
 </a>
+
+<div style="min-width:125px;float:right;margin-top:5px">
+<!-- need min-width of 125px for responsive ads; optionally set a max-width if necessary so that ads aren't huge on non-mobile
+browsers -->
+<!-- start adsense code -->
 <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<!-- ad_top_vertical_banner_thinner -->
+<!-- ad_top_responsive -->
 <ins class="adsbygoogle"
-     style="display:inline-block;width:120px;height:240px"
+     style="display:block"
      data-ad-client="ca-pub-1960368062214160"
-     data-ad-slot="7318517136"></ins>
+     data-ad-slot="3383301936"
+     data-ad-format="auto"></ins>
 <script>
 (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
-<div style="float:right">
-<!-- adsense -->
+<!-- end adsense code -->
 </div>
+
 </div>
 
 <p><small><a href="#contents">Jump to Contents.</a></small></p>
@@ -89,7 +99,8 @@
 <li>Apply a date and timestamp, location coordinates, and custom text to photos.</li>
 <li>Support for (some) external microphones.</li>
 <li>Widget to automatically take a photo after launching.</li>
-<li>Support for Android 5 Camera2 API: manual focus distance; manual ISO; manual exposure time.</li>
+<li>Support for Android 5 Camera2 API: manual focus distance; manual ISO; manual exposure time; RAW (DNG) files.</li>
+<li>Support for <a href="#hdr">HDR</a>.</li>
 <li>Small file size.</li>
 <li>Completely free, and no ads in the app. Open Source.</li>
 </ul>
@@ -136,16 +147,18 @@ Thanks! Donations can be used for: purchasing hardware for porting/testing; app 
 <li><a href="#quickstart">Quickstart</a></li>
 <li><a href="#user_interface">On-Screen User Interface</a></li>
 <li><a href="#auto_stabilise">Auto-stabilise feature</a></li>
+<li><a href="#hdr">HDR</a></li>
 <li><a href="#settings">Settings</a></li>
 <li><a href="#widgets">Widgets</a></li>
 <li><a href="#faq">FAQ</a></li>
 <li><a href="#contact">Contacting me (bugs etc)</a></li>
 <li><a href="#credits">Credits</a></li>
 <li><a href="#licence">Licence</a></li>
+<li><a href="#privacy">Privacy policy</a></li>
 <li><a href="#history">History</a></li>
 </ul>
 
-<!-- adsense -->
+<!-- start adsense code -->
 <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 <!-- contents_ad -->
 <ins class="adsbygoogle"
@@ -156,16 +169,17 @@ Thanks! Donations can be used for: purchasing hardware for porting/testing; app 
 <script>
 (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
+<!-- end adsense code -->
 
 <p><a name="requirements"></a><b>Requirements</b></p>
 
-<p>This requires Android 4.0 or better. I've tested this successfully on the Galaxy Nexus running Android 4.3, and
-the Nexus 6 and Nexus 7 (2013) running Android 5. The auto-stabilise feature may not be available if the app deems
+<p>Open Camera requires Android 4.0.3 or better. I've tested Open Camera on my Nexus 6 (Android 6), Nexus 7 (2013) (Android 5)
+and Galaxy Nexus (Android 4.3). The auto-stabilise feature may not be available if Open Camera deems
 there is not enough memory (RAM) available (technical explanation: requires 128MB of "large heap").</p>
 
-<p>Note that I've had reports of problems on CyanogenMod (CM11) - unfortunately I don't have any CM11 devices to test on,
-and CyanogenMod doesn't appear to offer any means of testing without a real device (e.g., no emulator AVD images, no
-remote device testing), so I have no way of supporting this.</p>
+<p>Note that it's not possible for me to test Open Camera on every Android device out there, let alone in combination with different
+Android versions (or especially alternative ROMs like CyanogenMod). Please test before using Open Camera to photo/video
+your wedding etc :)</p>
 
 <p><a name="quickstart"></a><b>Quickstart</b></p>
 
@@ -179,11 +193,7 @@ photo, but you can change this to zoom in/out from the <a href="#settings">Setti
 
 <p>You can press the gallery icon to view your photos
 (by default saved in the OpenCamera folder) - it will show the most recent image or video. The gallery button's
-icon will also show a thumbnail for the most recent image/video. Note that there is also an option
-in the <a href="#settings">Settings</a> to "Pause after taking photo" - if ticked,
-then when you take a photo, the image will be displayed - to keep the photo, touch the screen (or take another photo). To delete it,
-press the trash icon <img src="trash.png" alt="Trash icon" width="32" height="32">. To share an image, press the share icon
-<img src="share.png" alt="Share icon" width="32" height="32">.</p>
+icon will also show a thumbnail for the most recent image/video.</p>
 
 <p>The screen display is kept on when Open Camera is running as the foreground app (if
 you want to switch off the display, do so on your device manually).</p>
@@ -232,6 +242,8 @@ setting may not be supported on all cameras. See
 If Camera2 API is used, then if a non-auto ISO is used, then selecting the exposure compensation icon
 <img src="exposure.png" alt="Exposure Compensation icon" width="32" height="32"> will bring up sliders allowing direct control over the ISO and exposure
 time.</li>
+<li><b>Photo Mode</b> - If Camera2 API is enabled, you can also choose different photo modes. Currently
+this is just <a href="#hdr">HDR</a>.</li>
 <li><b>White balance</b> - Choose a method to control how the white balance is set. See
 <a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an
 explanation of white balance. (Only available if the camera supports different white balance
@@ -248,8 +260,8 @@ color effects.)</li>
 <p><b>Gallery</b> - Click to launch the Gallery app, to view the most recent
 photo/video (by default saved in the OpenCamera folder). If you get the message "No Gallery app available", then you should install
 a Gallery app (e.g., <a href="https://play.google.com/store/apps/details?id=com.moblynx.galleryics">Gallery ICS</a>).
-You can also "long press" on the Gallery icon - this will let you switch between the recent save locations (if not using Storage Access
-Framework), or take you straight to a file dialog to choose a save location if additional locations have yet been defined. See
+You can also "long press" on the Gallery icon - this will let you switch between the recent save locations, or take you straight to a
+file dialog to choose a save location if additional locations have yet been defined. See
 <a href="#save_location">Save location</a> under Settings/More camera controls for more details.</p>
 
 <p><img src="settings.png" alt="Settings icon" width="32" height="32"><b>Settings</b> - Click to open the <a href="#settings">Settings</a>. (If your phone/tablet
@@ -273,10 +285,13 @@ photos so they are perfectly level, so your shots come out looking perfectly lev
 <img src="auto_stabilise_image_20131009.jpg" style="max-width:100%" alt="Screenshots demonstrating auto-stabilise" title="Screenshots demonstrating auto-stabilise">
 </a></p>
 
+<p>(Note the above screenshot is from a rather old version of Open Camera - the user interface icons look better
+these days!)</p>
+
 <p>The above shows a rather exaggerated example - in practice, you can probably take better photos, but this feature ensures they
 come out perfectly level, without you having to edit them afterwards in a photo editor. Of course you won't always want this -
-perhaps you're going for artistic 45-degree shots - so this is an option. By default it is disabled.  To enable, go to the
-<a href="#settings">Settings</a>, and enable "Auto-stabilise". Note that this feature is memory intensive - it will not be available
+perhaps you're going for artistic 45-degree shots - so this is an option. By default it is disabled.  To enable, open the
+<a href="#user_interface">Popup menu</a>, and enable "Auto-stabilise". Note that this feature is memory intensive - it will not be available
 on devices with low memory. Even where it is available, the performance of taking photos will be
 slower, and there is a risk it may cause the app to fail on devices I haven't been able
 to test. If you do have problems, you'll have to disable the feature again.</p>
@@ -284,6 +299,36 @@ to test. If you do have problems, you'll have to disable the feature again.</p>
 <p>Also note that the feature reduces the available space in the image - because rotating an image makes it no longer fit into a
 rectangular image, so we have to crop it. So it's still advisable to try to hold the camera reasonably level when using this
 feature.</p>
+
+<p><a name="hdr"></a><b>HDR</b></p>
+
+<p>High Dynamic Range Imaging (HDR) is a technique where the camera takes multiple shots at different exposures, and combines them
+into a single image. A typical problem in photography is that a scene may contain a brightness range that is wider than what can be
+captured in a single shot. Varying the exposure (whether by touching on the screen, or exposure compentation or manual exposure) might
+make darker regions brighter, but leave other areas over-exposured. Or reducing the exposure to prevent over-exposure may result in
+the rest of the scene being too dark. HDR uses an algorithm to combine the best parts of each image, and adjusts the colours so that
+the full range of brightness values are captured in the scene:</p>
+
+<p><a href="hdr_image_test8.jpg">
+<img src="hdr_image_test8_thumb.jpg" style="max-width:100%" alt="Screenshots demonstrating HDR" title="Screenshots demonstrating HDR">
+</a></p>
+
+<p>The left set of three images show the individual exposures, the right the final HDR image. Note that on the middle picture on the
+left, the sky is completely over-exposed (making a nice blue sky look like white clouds), as is the bark in the tree centre-left and
+the grass. Meanwhile the tree branches in the foreground is a bit too dark.</p>
+
+<p>Some things to note about Open Camera's HDR feature:</p>
+<ul>
+<li>HDR requires Camera2 API to be enabled (under Settings), which is only available on some devices.</li>
+<li>Taking photos with HDR is significantly slower than regular photos.</li>
+<li>Flash is not supported for HDR mode.</li>
+<li>HDR isn't suitable for fast moving scenes, due to combining an image from multiple shots.</li>
+<li>HDR can sometimes result in inaccurate colour reproduction (due to trying to estimate the colours from multiple exposures).</li>
+<li>Some Android camera apps use "HDR" to mean "apply a whacky-looking filter". Whilst HDR filters can be used to apply a rather
+unreal or vivid image, for now Open Camera's HDR is more geared towards capturing the range of exposures. Also note that many camera
+apps that advertise "HDR" don't even make use of multiple images - this is more a case of filtering, than HDR.</li>
+<li>See <a href="http://www.androidauthority.com/how-to-use-hdr-android-173210/">this guide</a> for more information on HDR.</li>
+</ul>
 
 <p><a name="settings"></a><b>Settings</b></p>
 
@@ -339,21 +384,31 @@ include the time taken to auto-focus and take each photo.</p>
 preview screen. Note that starting/stopping video recording is still performed in the normal way; this option only
 affects taking photos.</p>
 
-<p><b>Pause after taking photo</b> - If ticked, after taking a photo the display will pause, with options to share or delete the
+<p><b>Pause after taking photo</b> - If ticked, after taking a photo the display will pause, with options to share
+<img src="share.png" alt="Share icon" width="32" height="32"> or delete
+<img src="trash.png" alt="Trash icon" width="32" height="32"> the
 photo. To keep the photo and continue, touch the screen (or take another photo).</p>
 
 <p><b>Shutter sound</b> - Whether to play a sound after taking a photo. (Requires Android 4.2 or higher to disable, and even
-then isn't supported on all devices.)</p>
+then isn't supported on all devices.) For Camera2 API, this also controls whether to play a sound for start/stop video
+recording.</p>
 
 <p><b>Timer beep</b> - Whether to beep when the timer is counting down, or for the burst mode delay (see below).</p>
 
 <p><b>Voice timer countdown</b> - Whether to give a voice countdown when the timer is counting down, or for the burst mode
 delay (see below).</p>
 
-<p><b>Volume keys</b> - You can set what happens when the volume keys are pressed: either take photo/video,
-focus (trigger an autofocus - or if in manual mode, change the focus distance in/out), zoom in/out, change
-the exposure compensation (or if in manual ISO mode and using Camera2 API, change the ISO), switch
-auto-stabilise on/off, just change the device's volume as normal, or do nothing.</p>
+<p><b>Volume keys</b> - You can set what happens when your device's volume keys are pressed:</p><ul>
+<li>Take photo or start/stop video (depending on photo/video mode).</li>
+<li>Trigger an autofocus - or if in manual mode, change the focus distance in/out. In this mode, holding down both volume keys
+will take a photo (or start/stop video). This makes your volume keys behave more like a physical camera button - hold down one
+key to focus, then both to take a photo.</li>
+<li>Zoom in/out.</li>
+<li>Change the exposure compensation (or if in manual ISO mode and using Camera2 API, change the ISO).</li>
+<li>Switch auto-stabilise on/off.</li>
+<li>Change the device's volume as normal.</li>
+<li>Do nothing.</li>
+</ul>
 
 <p><b>Audio control options</b> - If enabled, this allows taking a photo (or starting video recording, depending on the mode)
 by making a noise. An on-screen microphone button <img src="ic_mic_white_48dp.png" alt="Microphone icon" width="32" height="32"> will appear, to
@@ -395,6 +450,11 @@ device, so you'll have to look this up yourself (it's usually something inside /
 <p><b>Save photo prefix</b> - This option allows you to customise save filenames for photos.</p>
 
 <p><b>Save video prefix</b> - This option allows you to customise save filenames for videos.</p>
+
+<p><b>Time format for filename</b> - By default, Open Camera uses the local timezone for the save filenames, but you
+can also select UTC <a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">(Coordinated Universal Time / Zulu Time)</a>.
+For the latter option, a "Z" will be appended to the filename (e.g., "IMG_20160524_155116Z.jpg"). The Z (Zulu) suffix
+is a standard convention for identifying UTC timestamps.</p>
 
 <p><b>Show camera when locked</b> - If you have a lock screen on your device (e.g., PIN to unlock), Open Camera by
 default will show above the lock screen - i.e., if locked, you won't have to enter the PIN to use Open Camera. The
@@ -504,6 +564,39 @@ images will in general come out as a slightly lower resolution (due to the rotat
 <p><b>Image quality</b> - The image quality of saved JPEG images. Higher means better quality, but the image files will take up
 more storage space. Note that 100% does not necessarily mean there is no lossy compression, rather that there is minimum compression.</p>
 
+<p><b>RAW</b> - Only available if Camera2 API is used. If set to "JPEG and DNG (RAW)", then photos
+will also be saved in RAW (DNG) files. DNG stands for
+<a href="https://en.wikipedia.org/wiki/Digital_Negative">"digital negative"</a>, and contains the full
+uncompressed and unprocessed information from your camera. Please note the following points:</p>
+<ul>
+	<li>Most gallery applications don't recognise DNG files - you won't even see them listed. Instead,
+	use specialised RAW viewer or editing tools such as
+	<a href="https://play.google.com/store/apps/details?id=com.niksoftware.snapseed">Google Snapseed</a>
+	and <a href="https://play.google.com/store/apps/details?id=com.adobe.lrmobile">Adobe Photoshop Lightroom</a>.
+	(Note that Snapseed will only show the JPEGs when you try to open a photo - but it will automatically
+	instead load the corresponding DNG file if it exists; Lightroom shows both the JPEG and DNG files
+	separately.) Or transfer to a PC to use DNG editing applications there.</li>
+	<li>A file explorer application such as
+	<a href="https://play.google.com/store/apps/details?id=com.amaze.filemanager">Amaze</a> may also be useful,
+	to delete DNGs if you don't want them (DNGs take up a lot of space - and won't be deleted when you delete
+	the corresponding JPEG from a Gallery app).</li>
+	<li>Note that various processing options such as "Stamp photos" and "Auto-stabilise" will only apply
+	to the JPEG images, and not the DNG images. This is not a bug - the DNGs represent the RAW output
+	of the camera device.</li>
+	<li>RAW images will only be saved in the Standard Photo Mode.</li>
+</ul>
+
+<p><b>Save all images for HDR mode</b> - When using <a href="#hdr">HDR</a> mode, if this option is enabled,
+then the three base exposure images will be saved as well as the final HDR photo. This is useful if you want
+to use external HDR applications (such as <a href="http://qtpfsgui.sourceforge.net/">Luminance HDR</a>) to
+create the final HDR image.</p>
+
+Note this will make saving
+slower, especially if options like \"Stamp photos\" or Auto-stabilise are also used.
+
+<p><b>Use background thread</b> - Whether to process and save photo in the background. Normally this should
+be left set to true for faster operation, but it's an option just in case.</p>
+
 <p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
 location data" is enabled (see "Location settings" below), then the current location latitude
 and longitude coordinates will also be stamped on the resultant photos (if the location is known).
@@ -528,9 +621,6 @@ longer to save the photo. Also note that this option is only supported for photo
 
 <p><b>Text style</b> - Whether to render the text on the image with a shadow background effect, for
 options "Stamp photos" or "Custom text".</p>
-
-<p><b>Use background thread</b> - Whether to process and save photo in the background. Normally this should
-be left set to true for faster operation, but it's an option just in case.</p>
 
 <p><b>Video settings</b> - Select to access the following controls:</p>
 
@@ -667,7 +757,11 @@ e.g., "extSdCard").</li>
 <li><b>Android 4.4</b> - Unfortunately it is not possible for 3rd party apps to write to external SD cards.
 <b>This is not a bug or missing feature in Open Camera</b>, rather that 
 <a href="http://www.androidpolice.com/2014/02/17/external-blues-google-has-brought-big-changes-to-sd-cards-in-kitkat-and-even-samsung-may-be-implementing-them/">Google
-have blocked write access to external SD cards in Android 4.4</a>.</li>
+have blocked write access to external SD cards in Android 4.4</a>. There is one exception: if you use a
+folder in <small>Android/data/net.sourceforge.opencamera/</small> on your SD card (use the "New folder" option to create
+the folders/sub-folders if necessary), that should allow saving to the SD card. <b>Note that all files in this
+folder will be deleted if you uninstall Open Camera</b>, so be careful that you don't lose your photo/videos
+if you use this method, and then uninstall!</li>
 <li><b>Android 5.0 onwards</b> - The restrictions on SD cards introduced in Android 4.4 still apply, however
 instead you can enable "Settings/More camera controls/"Use Storage Access Framework", and this should allow you
 to save to external SD cards. If when choosing a folder, you only see "Recent", you may need to click on the
@@ -677,7 +771,8 @@ hopefully you'll see something similar for the SD card).</li>
 <a href="http://www.idigitaltimes.com/android-m-update-will-include-native-micro-sd-support-445463">select to use
 an SD card as internal storage</a>. Note that not all devices support this, even if running Android 6. If your device
 doesn't support this, or you want to instead use an SD card as "portable storage", you'll have to use
-the Storage Access Framework method as with Android 5.</li>
+the Storage Access Framework method as with Android 5 (or the <small>Android/data/net.sourceforge.opencamera/</small> method as
+with Android 4.4).</li>
 </ul>
 
 <!--<p><b>But I have Android 5 (Lollipop), wasn't this supposed to fix saving to SD cards?</b> - Android 5 Lollipop does
@@ -695,7 +790,8 @@ Other reasons may be if some options are set (such as auto-stabilise, or "Stamp 
 times.</p>
 
 <p><b>My pictures are being rotated/cropped!</b> - This likely means the <a href="#auto_stabilise">auto-stabilise</a>
-option is on. It's off by default, but you may have accidentally switched it on. To turn off, go to the "popup" menu
+option is on. (If they're being rotated even when the phone is held level, it may mean the accelerometer sensor on your
+device isn't calibrated.) It's off by default, but you may have accidentally switched it on. To turn off, go to the "popup" menu
 and untick Auto-stabilise.</p>
 
 <p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - Unfortunately many devices with 4K support
@@ -734,6 +830,11 @@ version of Open Camera, and the problem isn't resolved by a reinstall/Clear data
 know, but in the meantime you can install the older versions from
 <!-- use &#8203; to limit widths on continuous text to 30 characters, to avoid messing up view on mobile devices -->
 <a href="https://sourceforge.net/projects/opencamera/files/">https://sourceforge.net/&#8203;projects/opencamera/files/</a> .</p>
+
+<p><b>How do I load RAW (DNG) files into Photoshop Express?</b> - Unfortunately the Android version of
+Photoshop Express is limited in the options for importing images, and doesn't let you select DNG files directly.
+See <a href="https://feedback.photoshop.com/photoshop_family/topics/open-dng-files-in-photoshop-express-android">this thread</a>
+for some suggestions.</p>
 
 <p><b>Why doesn't the preview display match the resultant photo/video? One of them is cropped.</b> - Firstly, make
 sure that Settings/On screen GUI/Preview size is set to "Match photo size (WYSIWYG)". However if that doesn't fix
@@ -787,6 +888,18 @@ on this page.</p>
 <p><b>My device has Android 5, why can't I select the Camera2 API?</b> - Only some Android 5 devices support the new
 Camera2 API, such as the Nexus 5 and Nexus 6.</p>
 
+<p><b>Why doesn't Open Camera's HDR images look like other HDR camera apps?</b> - There are a great many different ways
+of applying a HDR algorithm, some may do better or worse in different circumstances; some may look more or less pleasing
+depending on what you are after. Also note that some Android camera apps use "HDR" to mean "apply a whacky-looking filter".
+Whilst HDR filters can be used to apply a rather unreal or vivid image, for now Open Camera's HDR is more geared towards
+capturing the range of exposures.</p>
+
+<p><b>Why doesn't Open Camera's HDR photos look as good as other HDR photos I see?</b> - Firstly, see the previous question.
+Beyond that, many HDR photos you see on the Internet may have been manually processed in HDR software that allows the
+user to tweak settings for optimal results for a given image. Such photos may have had additional processing done. Open
+Camera's HDR algorithm tries to get the best results for most purposes automatically, but isn't going to beat manual
+editing.</p>
+
 <p><b>I don't like the UI!</b> - The UI for Open Camera has improved significantly over the versions (both in terms
 of having a consistent look, and the operation), so this criticism seems to have gone down, but there's always room
 for improvement! However, in order for me to improve, please be specific: comments like this could mean all sorts of
@@ -820,7 +933,8 @@ can paste the information into your web browser, Google Keep, email or whatever.
 <p>For more general questions or things like feature suggestions, please use the
 <a href="http://sourceforge.net/p/opencamera/discussion/">forums</a>.
 For some enquiries (e.g., requests for specific projects you are working on), you may prefer to use email.
-Please contact me at <b>mark DOT harman DOT apps AT gmail DOT com</b> . Please note that I get a <i>lot</i> of emails
+Please contact me at <a href="mailto:mark.harman.apps@gmail.com?subject=Open%20Camera">mark.harman.apps@gmail.com</a>.
+Please note that I get a <i>lot</i> of emails
 for Open Camera these days - I try to reply as many as I can, but this is not always feasible. I do however
 read every email and forum post.</p>
 
@@ -834,6 +948,8 @@ further replies).</p>
 <ul>
 <li>App icon and take_photo.png, take_photo_pressed.png by <a href="http://www.yeti-designs.com">Adam Lapinski</a>.</li>
 <li>Improved selfie stick button support by Lau Keat Hwa.</li>
+<li>Option for filenames to be based on UTC (Zulu) time by <a href="https://www.cathedralcanyon.net">David Pletcher</a> ( lpm_sourceforge AT cathedralcanyon DOT net ).</li>
+<li>Support for manual ISO for old camera API on Asus Zenphone 2 Z00A and Z008 by Fl&aacute;vio Keglevich ( fkeglevich AT gmail DOT com ).</li>
 <li>Azerbaijani translation by Eldost ( l-dost AT mail DOT ru ).</li>
 <li>Brazilian tranlation by Kaio Duarte.</li>
 <li>Chinese Simplified translation by Michael Lu ( yeskky AT gmail DOT com ).</li>
@@ -845,7 +961,9 @@ further replies).</p>
 <li>Italian tranlation by Valerio Bozzolan.</li>
 <li>Japanese translation by Mitsuse.</li>
 <li>Korean translation by Halcyonest.</li>
-<li>Russian translation by maksnogin ( maksnogin AT gmail DOT com ) and Grigorii Chirkov<!--and Vitamin - Vitamin said no need to credit -->.</li>
+<!-- Portugese translation by johnny, says no need to credit -->
+<li>Russian translation by maksnogin ( maksnogin AT gmail DOT com ), Grigorii Chirkov and Dmitry Vahnin aka JSBmanD<!--and Vitamin - Vitamin said no need to credit -->.</li>
+<li>Slovenian translation by Peter Klofutar.</li>
 <li>Spanish translation by <a href="https://play.google.com/store/apps/developer?id=Mario+Sanoguera">Mario Sanoguera</a> ( sanogueralorenzo AT gmail DOT com ) ).</li>
 <li>Turkish translation by Serdar Erkoc ( serdarerkoc2004 AT yahoo DOT com ).</li>
 <li>Earlier versions (pre-Material Design) has an icon/logo by Cosmin Saveanu ( <a href="http://aboutfoto.wordpress.com/">http://aboutfoto.wordpress.com/</a> ).</li>
@@ -886,21 +1004,88 @@ available from
 <li>beep.ogg, beep_hi.ogg - from <a href="http://opengameart.org/content/interface-beeps">http://opengameart.org/&#8203;content/interface-beeps</a> , by bart, under CC0 (public domain).</li>
 </ul>
 
+<p><a name="privacy"></a><b>Privacy policy</b></p>
+
+<p>Google Play requires me to disclose that Open Camera will record camera sensor and microphone data, which is used for the purpose
+of taking photos and recording videos.</p>
+
+<p>Location permission is required for geotagging of photos, but this is disabled by default. If enabled, your location is encoded
+in the saved image and video files (and it is only used for this purpose).</p>
+
 <p><a name="history"></a><b>History</b></p>
 <!-- we use a textarea rather than pre, so that we don't have problems on mobile devices where the width is too wide for the screen - having a horizontal scrollbar seems nicer than having wordwrapping. -->
 <!-- note, the rows and cols attributes are overridden by the style width/height, but we still specify the rows/cols attributes for older browsers (and also required for html validation) -->
 <textarea readonly rows="20" cols="80" style="width:100%; height:50%; white-space: pre; word-wrap: normal; overflow-x: scroll">
-Version 1.31 (Work in progress)
+Version 1.33 (2016/08/29)
+
+FIXED   Hang when starting with Camera2 API on Android N.
+FIXED   Problems with popup menu on some languages and screen sizes.
+FIXED   Problems with Camera2 and flash: no longer does excessive flash; also
+        fixed problem where with flash auto, flash would sometimes misfire
+        resulting in too dark photos.
+FIXED   Problem with Pause Preview option: if a photo with RAW was saved, then
+        another photo without RAW saved and deleted, the previous RAW was also
+        deleted.
+ADDED   New photo mode HDR. Only supported for devices with Camera2 API (and
+        Camera2 must be enabled).
+ADDED   Support for manual ISO for old camera API on Asus Zenphone 2 Z00A and
+        Z008 (thanks to Fl&aacute;vio Keglevich).
+ADDED   Portuguese translation.
+ADDED   Slovenian translation (thanks to Peter Klofutar).
+UPDATED Folder history (via Gallery long click) now supported when using Storage
+        Access Framework.
+UPDATED When switching from auto to manual ISO mode in Camera2 API, exposure
+        time now defaults to the current (auto) exposure time.
+UPDATED Updated Russian translation (thanks to Dmitry Vahnin aka JSBmanD).
+
+Version 1.32.1 (2016/07/24)
+
+FIXED   Crash on some devices when taking photos with RAW enabled.
+
+Version 1.32 (2016/07/19)
+
+FIXED   Don't repeatedly focus when volume key held down (for "focus" volume
+        key option). Hopefully this may help for devices with physical focus
+        buttons.
+FIXED   Border to indicate photo is being taken no longer remains for "Pause
+        after taking photo" option.
+FIXED   Now plays sound for start/stop video recording (if shutter sound
+        enabled) for Camera2 API.
+ADDED   Support for RAW (DNG) files. Only available in Camera2 mode, and if
+        your device supports it. Note that most Gallery apps don't recognise
+        DNG files, instead use specialised applications like Google Snapseed
+        and Adobe Photoshop Lightroom, or transfer to a PC.
+UPDATED If volume keys are set to "focus", then holding down both volume keys
+        will take a photo (this makes your volume keys behave more like a
+        physical camera button - hold down one key to focus, then both to take
+        a photo).
+UPDATED Allow one more photo to be processed in background at a time.
+UPDATED Improved timing of shutter sound for Camera2 API.
+UPDATED Enabling auto-stabilise now shows an info dialog. Select "Don't show
+        again" to prevent the dialog from showing again.
+UPDATED Thumbnail for most recent photo/video now restricted to Open Camera's
+        save folder when using Storage Access Framework (this was aready the
+        case when not using Storage Access Framework).
+UPDATED 5s and 10s options for maximum video duration.
+
+Version 1.31 (2016/06/19)
 
 FIXED   Crash on Camera2 API (checkArgumentNonnegative).
 FIXED   Photo filename's date/time and date/time used for photostamp now match
         better with time the photo was actually taken, rather than when the
         image was saved.
+FIXED   Improved Take Photo widget behaviour so it focuses in continuous focus
+        mode.
+ADDED   New option for filenames to be based on UTC (Zulu) time (thanks to
+        David Pletcher).
 UPDATED Photos now processed in background thread, for smoother operation (if
         this causes problems, you can disable it under Settings/Photo settings/
         Use background thread).
+UPDATED Touching the screen with continuous focus mode in photo mode now causes
+        an autofocus.
 UPDATED Gallery button shows animation effect to indicate saving images.
 UPDATED Photo/video info toast now indicates if auto-stabilise option is on.
+UPDATED Don't display pointless toast for front/back camera any more.
 UPDATED Updated Russian translation (thanks to Grigorii Chirkov).
 
 Version 1.30.1 (2016/06/01)

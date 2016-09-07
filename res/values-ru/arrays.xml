@@ -36,12 +36,12 @@
         <item>Автофокус</item>
         <item>Бесконечность</item>
         <item>Макро</item>
-        <item>Запертый</item>
+        <item>Заблокированный</item>
         <item>Ручной</item>
         <item>Фиксированный</item>
         <item>EDOF</item>
-        <item>Непрерывный</item>
-        <item>Непрерывный</item>
+        <item>Непрерывный(фото)</item>
+        <item>Непрерывный(видео)</item>
     </string-array>
     <string-array name="focus_mode_values">
         <item>focus_mode_auto</item>
@@ -65,7 +65,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Нет</item>
+        <item>Выкл</item>
         <item>1 секунда</item>
         <item>2 секунды</item>
         <item>3 секунды</item>
@@ -99,7 +99,7 @@
         <item>4x</item>
         <item>5x</item>
         <item>10x</item>
-        <item>Без ограничений</item>
+        <item>Навсегда</item> <!-- Russian uses 'Forever' intead of 'Unlimited' (Неограниченно) so it's not too long for popup menu on small screens! -->
     </string-array>
     <string-array name="preference_burst_mode_values">
         <item>1</item>
@@ -120,14 +120,14 @@
         <item>15 секунд</item>
         <item>20 секунд</item>
         <item>30 секунд</item>
-        <item>1 минуты</item>
+        <item>1 минута</item>
         <item>2 минуты</item>
         <item>5 минут</item>
         <item>10 минут</item>
         <item>20 минут</item>
 		<item>30 минут</item>
-		<item>1 часов</item>
-		<item>2 часов</item>
+		<item>1 час</item>
+		<item>2 часа</item>
     </string-array>
     <string-array name="preference_burst_interval_values">
         <item>0</item>
@@ -283,8 +283,8 @@
         <item>crop_guide_2.4</item>
     </string-array>
     <string-array name="preference_stamp_entries">
-        <item>Без отметки</item>
-        <item>С отметками</item>
+        <item>Без штампа</item>
+        <item>Со штампом</item>
     </string-array>
     <string-array name="preference_stamp_values">
         <item>preference_stamp_no</item>
@@ -438,6 +438,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_entries">
         <item>Без ограничений</item>
+        <item>5 секунд</item>
+        <item>10 секунд</item>
         <item>15 секунд</item>
         <item>30 секунд</item>
         <item>1 минута</item>
@@ -461,6 +463,8 @@
     </string-array>
     <string-array name="preference_video_max_duration_values">
         <item>0</item>
+        <item>5</item>
+        <item>10</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>
@@ -509,10 +513,10 @@
         <item>10</item>
     </string-array>
     <string-array name="preference_record_audio_src_entries">
-        <item>Видеокамера</item>
-        <item>Внешний микрофон (если имеется)</item>
+        <item>Микрофон видеокамеры</item>
+        <item>Внешний микрофон (если есть)</item>
         <item>По умолчанию</item>
-        <item>Внутренний микрофон</item>
+        <item>Оптимизированно для голоса</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>

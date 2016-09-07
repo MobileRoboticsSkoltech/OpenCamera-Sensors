@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.sourceforge.opencamera"
-    android:versionCode="37"
-    android:versionName="1.31"
+    android:versionCode="40"
+    android:versionName="1.33"
     android:installLocation="auto"
     >
 
     <uses-sdk
         android:minSdkVersion="15"
-        android:targetSdkVersion="22" /> <!-- don't update to 23 yet, need to update for permissions https://developer.android.com/training/permissions/requesting.html -->
+        android:targetSdkVersion="23" />
 
     <supports-screens android:xlargeScreens="true" android:largeScreens="true" android:normalScreens="true" android:smallScreens="true" android:anyDensity="true"/>
 

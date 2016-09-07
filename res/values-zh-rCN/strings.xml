@@ -164,6 +164,7 @@
     <string name="preference_show_battery_summary">在屏幕上显示当前电池电量</string>
     <string name="preference_grid">显示网格</string>
     <string name="preference_grid_summary">显示各种网格中的一种</string>
+    <string name="grid">格</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">显示裁剪指南</string>
     <string name="preference_crop_guide_summary">裁剪指南显示一个矩形显示指定的宽高比看起来像什么 - 如果你计划以后裁剪照片/视频为不同的分辨率，这有用。需要所见即所得照片模式，或处于视频模式中。</string>
     <string name="preference_show_toasts">显示 \"toast\" 消息</string>

@@ -5,18 +5,21 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentUris;
+//import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+//import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -57,11 +60,14 @@ public class StorageUtils {
 		last_media_scanned = null;
 	}
 
+	/** Sends the intents to announce the new file to other Android applications. E.g., cloud storage applications like
+	 *  OwnCloud use this to listen for new photos/videos to automatically upload.
+	 */
 	void announceUri(Uri uri, boolean is_new_picture, boolean is_new_video) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "announceUri");
+			Log.d(TAG, "announceUri: " + uri);
     	if( is_new_picture ) {
-    		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcase the string for other apps
+    		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcast the string for other apps
     		context.sendBroadcast(new Intent( "android.hardware.action.NEW_PICTURE" , uri));
     		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
     		context.sendBroadcast(new Intent("com.android.camera.NEW_PICTURE", uri));
@@ -142,6 +148,49 @@ public class StorageUtils {
     	}
 	}
 	
+	/*public Uri broadcastFileRaw(File file, Date current_date, Location location) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "broadcastFileRaw: " + file.getAbsolutePath());
+        ContentValues values = new ContentValues(); 
+        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
+        values.put(ImageColumns.DISPLAY_NAME, file.getName());
+        values.put(ImageColumns.DATE_TAKEN, current_date.getTime()); 
+        values.put(ImageColumns.MIME_TYPE, "image/dng");
+        //values.put(ImageColumns.MIME_TYPE, "image/jpeg");
+        if( location != null ) {
+            values.put(ImageColumns.LATITUDE, location.getLatitude());
+            values.put(ImageColumns.LONGITUDE, location.getLongitude());
+        }
+        // leave ORIENTATION for now - this doesn't seem to get inserted for JPEGs anyway (via MediaScannerConnection.scanFile())
+        values.put(ImageColumns.DATA, file.getAbsolutePath());
+        //values.put(ImageColumns.DATA, "/storage/emulated/0/DCIM/OpenCamera/blah.dng");
+        Uri uri = null;
+        try {
+    		uri = context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
+ 			if( MyDebug.LOG )
+ 				Log.d(TAG, "inserted media uri: " + uri);
+    		context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
+        }
+        catch (Throwable th) { 
+	        // This can happen when the external volume is already mounted, but 
+	        // MediaScanner has not notify MediaProvider to add that volume. 
+	        // The picture is still safe and MediaScanner will find it and 
+	        // insert it into MediaProvider. The only problem is that the user 
+	        // cannot click the thumbnail to review the picture. 
+	        Log.e(TAG, "Failed to write MediaStore" + th); 
+	    }
+        return uri;
+	}*/
+
+	/** Sends a "broadcast" for the new file. This is necessary so that Android recognises the new file without needing a reboot:
+	 *  - So that they show up when connected to a PC using MTP.
+	 *  - For JPEGs, so that they show up in gallery applications.
+	 *  - This also calls announceUri() on the resultant Uri for the new file.
+	 *  - Note this should also be called after deleting a file.
+	 *  - Note that for DNG files, MediaScannerConnection.scanFile() doesn't result in the files being shown in gallery applications.
+	 *    This may well be intentional, since most gallery applications won't read DNG files anyway. But it's still important to
+	 *    call this function for DNGs, so that they show up on MTP.
+	 */
     public void broadcastFile(final File file, final boolean is_new_picture, final boolean is_new_video, final boolean set_last_scanned) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "broadcastFile: " + file.getAbsolutePath());
@@ -155,9 +204,6 @@ public class StorageUtils {
     	else {
         	// both of these work fine, but using MediaScannerConnection.scanFile() seems to be preferred over sending an intent
     		//context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
-    		/*boolean use_scanfile = true;
-    		if( use_scanfile )
-    		{*/
  			failed_to_scan = true; // set to true until scanned okay
  			if( MyDebug.LOG )
  				Log.d(TAG, "failed_to_scan set to true");
@@ -190,33 +236,6 @@ public class StorageUtils {
     		 		}
     			}
     		);
-    		/*}
-    		else {
-    	        ContentValues values = new ContentValues(); 
-    	        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
-    	        values.put(ImageColumns.DISPLAY_NAME, file.getName());
-    	        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
-    	        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
-    	        // TODO: orientation
-    	        values.put(ImageColumns.DATA, file.getAbsolutePath());
-    	        // TODO: location
-    	        Location location = preview.getLocation();
-    	        if( location != null ) {
-        	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
-        	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
-    	        }
-    	        try {
-    	    		context.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
-    	        }
-    	        catch (Throwable th) { 
-        	        // This can happen when the external volume is already mounted, but 
-        	        // MediaScanner has not notify MediaProvider to add that volume. 
-        	        // The picture is still safe and MediaScanner will find it and 
-        	        // insert it into MediaProvider. The only problem is that the user 
-        	        // cannot click the thumbnail to review the picture. 
-        	        Log.e(TAG, "Failed to write MediaStore" + th); 
-        	    }
-    		}*/
     	}
 	}
 
@@ -259,24 +278,47 @@ public class StorageUtils {
     }
 
     // only valid if isUsingSAF()
-    Uri getTreeUriSAF() {
+    String getSaveLocationSAF() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-		Uri treeUri = Uri.parse(sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), ""));
+		String folder_name = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+		return folder_name;
+    }
+
+    // only valid if isUsingSAF()
+    Uri getTreeUriSAF() {
+    	String folder_name = getSaveLocationSAF();
+		Uri treeUri = Uri.parse(folder_name);
 		return treeUri;
     }
 
+	/** Returns a human readable name for the current SAF save folder location.
+     * Only valid if isUsingSAF().
+	 * @return The human readable form. This will be null if the Uri is not recognised.
+	 */
     // only valid if isUsingSAF()
     // return a human readable name for the SAF save folder location
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	String getImageFolderNameSAF() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getImageFolderNameSAF");
-	    String filename = null;
 		Uri uri = getTreeUriSAF();
 		if( MyDebug.LOG )
 			Log.d(TAG, "uri: " + uri);
-		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
-            final String id = DocumentsContract.getTreeDocumentId(uri);
+		return getImageFolderNameSAF(uri);
+	}
+
+	/** Returns a human readable name for a SAF save folder location.
+     * Only valid if isUsingSAF().
+	 * @param folder_name The SAF uri for the requested save location.
+	 * @return The human readable form. This will be null if the Uri is not recognised.
+	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	String getImageFolderNameSAF(Uri folder_name) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getImageFolderNameSAF: " + folder_name);
+	    String filename = null;
+		if( "com.android.externalstorage.documents".equals(folder_name.getAuthority()) ) {
+            final String id = DocumentsContract.getTreeDocumentId(folder_name);
     		if( MyDebug.LOG )
     			Log.d(TAG, "id: " + id);
             String [] split = id.split(":");
@@ -295,7 +337,7 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	File getFileFromDocumentIdSAF(String id) {
+	private File getFileFromDocumentIdSAF(String id) {
 	    File file = null;
         String [] split = id.split(":");
         if( split.length >= 2 ) {
@@ -371,21 +413,30 @@ public class StorageUtils {
 		return file;
 	}
 	
-	private String createMediaFilename(int type, int count, String extension, Date current_date) {
+	private String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
         String index = "";
         if( count > 0 ) {
             index = "_" + count; // try to find a unique filename
         }
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(current_date);
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		boolean useZuluTime = sharedPreferences.getString(PreferenceKeys.getSaveZuluTimePreferenceKey(), "local").equals("zulu");
+		String timeStamp = null;
+		if( useZuluTime ) {
+			SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd_HHmmss'Z'", Locale.US);
+			fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+			timeStamp = fmt.format(current_date);
+		}
+		else {
+			timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(current_date);
+		}
 		String mediaFilename = null;
         if( type == MEDIA_TYPE_IMAGE ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
-    		mediaFilename = prefix + timeStamp + index + "." + extension;
+    		mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
         }
         else if( type == MEDIA_TYPE_VIDEO ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSaveVideoPrefixPreferenceKey(), "VID_");
-    		mediaFilename = prefix + timeStamp + index + "." + extension;
+    		mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
         }
         else {
         	// throw exception as this is a programming error
@@ -398,7 +449,7 @@ public class StorageUtils {
     
     // only valid if !isUsingSAF()
     @SuppressLint("SimpleDateFormat")
-	File createOutputMediaFile(int type, String extension, Date current_date) throws IOException {
+	File createOutputMediaFile(int type, String suffix, String extension, Date current_date) throws IOException {
     	File mediaStorageDir = getImageFolder();
 
         // Create the storage directory if it does not exist
@@ -414,7 +465,7 @@ public class StorageUtils {
         // Create a media file name
         File mediaFile = null;
         for(int count=0;count<100;count++) {
-        	String mediaFilename = createMediaFilename(type, count, extension, current_date);
+        	String mediaFilename = createMediaFilename(type, suffix, count, extension, current_date);
             mediaFile = new File(mediaStorageDir.getPath() + File.separator + mediaFilename);
             if( !mediaFile.exists() ) {
             	break;
@@ -431,7 +482,7 @@ public class StorageUtils {
 
     // only valid if isUsingSAF()
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    Uri createOutputMediaFileSAF(int type, String extension, Date current_date) throws IOException {
+    Uri createOutputMediaFileSAF(int type, String suffix, String extension, Date current_date) throws IOException {
     	try {
 	    	Uri treeUri = getTreeUriSAF();
 		    if( MyDebug.LOG )
@@ -441,8 +492,10 @@ public class StorageUtils {
 		    	Log.d(TAG, "docUri: " + docUri);
 		    String mimeType = "";
 	        if( type == MEDIA_TYPE_IMAGE ) {
-	        	if( extension.equals("dng") )
+	        	if( extension.equals("dng") ) {
 	        		mimeType = "image/dng";
+	        		//mimeType = "image/x-adobe-dng";
+	        	}
 	        	else
 	        		mimeType = "image/jpeg";
 	        }
@@ -456,7 +509,7 @@ public class StorageUtils {
 	        	throw new RuntimeException();
 	        }
 	        // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
-	        String mediaFilename = createMediaFilename(type, 0, extension, current_date);
+	        String mediaFilename = createMediaFilename(type, suffix, 0, extension, current_date);
 		    Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, mediaFilename);   
 		    if( MyDebug.LOG )
 		    	Log.d(TAG, "returned fileUri: " + fileUri);
@@ -495,7 +548,7 @@ public class StorageUtils {
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
 			// needed for Android 6, in case users deny storage permission, otherwise we get java.lang.SecurityException from ContentResolver.query()
 			// see https://developer.android.com/training/permissions/requesting.html
-			// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+			// we now request storage permission before opening the camera, but keep this here just in case
 			// we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
 			if( MyDebug.LOG )
 				Log.e(TAG, "don't have READ_EXTERNAL_STORAGE permission");
@@ -520,8 +573,8 @@ public class StorageUtils {
 					Log.d(TAG, "found: " + cursor.getCount());
 				// now sorted in order of date - scan to most recent one in the Open Camera save folder
 				boolean found = false;
-				File save_folder = isUsingSAF() ? null : getImageFolder();
-				String save_folder_string = isUsingSAF() ? null : save_folder.getAbsolutePath() + File.separator;
+				File save_folder = getImageFolder(); // may be null if using SAF
+				String save_folder_string = save_folder == null ? null : save_folder.getAbsolutePath() + File.separator;
 				if( MyDebug.LOG )
 					Log.d(TAG, "save_folder_string: " + save_folder_string);
 				do {
@@ -529,8 +582,7 @@ public class StorageUtils {
 					if( MyDebug.LOG )
 						Log.d(TAG, "path: " + path);
 					// path may be null on Android 4.4!: http://stackoverflow.com/questions/3401579/get-filename-and-path-from-uri-from-mediastore
-					// and if isUsingSAF(), it's not clear how we can get the real path, or otherwise tell if an item is a subset of the SAF treeUri
-					if( isUsingSAF() || (path != null && path.contains(save_folder_string) ) ) {
+					if( save_folder_string == null || (path != null && path.contains(save_folder_string) ) ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "found most recent in Open Camera folder");
 						// we filter files with dates in future, in case there exists an image in the folder with incorrect datestamp set to the future

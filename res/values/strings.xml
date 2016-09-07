@@ -45,6 +45,7 @@
     <string name="started_recording_video">Started recording video</string>
     <string name="sorry">Sorry</string>
     <string name="failed_to_save_photo">Failed to save photo</string>
+    <string name="failed_to_save_photo_raw">Failed to save RAW photo</string>
     <string name="failed_to_auto_stabilise">Failed to auto-stabilise</string>
     <string name="failed_to_start_camera_preview">Failed to start camera preview</string>
     <string name="taking_photo">Taking photo</string>
@@ -100,7 +101,7 @@
     <string name="preference_timer_beep_summary">Beep when timer is counting down or for burst mode delay</string>
     <string name="preference_timer_speak">Voice timer countdown</string>
     <string name="preference_timer_speak_summary">Speak the countdown for timer or burst mode delay (from 60 seconds)</string>
-    <string name="preference_burst_mode">Burst mode</string>
+    <string name="preference_burst_mode">Burst</string>
     <string name="preference_burst_mode_summary">Take multiple photos in succession</string>
     <string name="preference_burst_interval">Burst mode interval</string>
     <string name="preference_burst_interval_summary">Delay (if any) between taking photos in burst mode</string>
@@ -110,7 +111,7 @@
     <string name="preference_pause_preview">Pause after taking photo</string>
     <string name="preference_pause_preview_summary">Pause the screen after taking a photo, with the option to share or delete the photo</string>
     <string name="preference_shutter_sound">Shutter sound</string>
-    <string name="preference_shutter_sound_summary">Play a sound when taking a photo (requires Android 4.2 or greater to disable)</string>
+    <string name="preference_shutter_sound_summary">Play a sound when taking a photo</string>
     <string name="preference_volume_keys">Volume keys</string>
     <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
     <string name="preference_audio_control">Audio control options</string>
@@ -125,6 +126,8 @@
     <string name="preference_save_photo_prefix_summary">The prefix to use for the save filenames for photos</string>
     <string name="preference_save_video_prefix">Save video prefix</string>
     <string name="preference_save_video_prefix_summary">The prefix to use for the save filenames for videos</string>
+    <string name="preference_save_zulu_time">Time format for filename</string>
+    <string name="preference_save_zulu_time_summary">Whether to use local or UTC (Coordinated Universal Time) time for naming photos and videos</string>
     <string name="preference_show_when_locked">Show camera when locked</string>
     <string name="preference_show_when_locked_summary">If enabled, Open Camera will still show above any lockscreen (you\'ll still have to unlock to access Settings, Gallery etc)</string>
     <string name="preference_startup_focus">Perform auto-focus on startup</string>
@@ -164,6 +167,7 @@
     <string name="preference_show_battery_summary">Display the current battery level on screen</string>
     <string name="preference_grid">Show a grid</string>
     <string name="preference_grid_summary">Display one of various grids</string>
+    <string name="grid">Grid</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Show a crop guide</string>
     <string name="preference_crop_guide_summary">A crop guide displays a rectangle showing what the specified aspect ratio looks like - useful if you plan to crop the photo/video afterwards to a different aspect ratio. Requires WYSIWYG photo mode, or being in video mode.</string>
     <string name="preference_show_toasts">Show \"toast\" messages</string>
@@ -184,7 +188,9 @@
     <string name="preference_resolution">Camera resolution</string>
     <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
     <string name="preference_quality">Image quality</string>
-    <string name="preference_quality_summary">Set the image JPEG quality of saved photo images (recommended value is 90%%)</string>
+    <string name="preference_quality_summary">Set the image JPEG quality of saved photo images (recommended value is 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
+    <string name="preference_raw">RAW</string>
+    <string name="preference_raw_summary">Whether to save in RAW (DNG) format</string>
     <string name="preference_location">Store location data (Geotagging)</string>
     <string name="preference_location_summary">Store GPS location data in the photos/videos</string>
     <string name="preference_gps_direction">Store compass direction</string>
@@ -293,4 +299,24 @@
     <string name="audio_control_stop">Stop audio listening</string>
     <string name="speech_recognizer_started">Say \"cheese\"</string>
     <string name="audio_listener_started">Make a loud noise</string>
+
+    <string name="auto_stabilise_info">Auto-stabilise will automatically rotate photos so that they appear level.\n\nNote that this means images will come out a slightly lower resolution (due to the rotation and cropping that\'s required).</string>
+    <string name="raw_info">DNG files contain the full uncompressed and unprocessed information from your camera.\n\nMost gallery apps won\'t recognise DNG, instead they should be used with specialised apps like Snapseed or Lightroom.\n\nNote that various processing options such as "Stamp photos" and "Auto-stabilise" will only apply to the JPEG images, and not the DNG images.\n\nDNG files take up a lot of space; a file explorer app may be useful for transferring or deleting them.\n\nDNG files are only saved in Standard Photo Mode.</string>
+    <string name="hdr_info">HDR mode is useful for shots with a large variation in brightness. It works by taking multiple shots at different exposures, and combining them to create the final image.\n\nNote that HDR is not suitable for scenes with fast movement, and may result in less accurate colour reproduction. Flash is also disabled for HDR.\n\nTaking photos in HDR mode will be slower.</string>
+
+    <string name="dont_show_again">Don\'t show again</string>
+
+    <string name="photo_mode">Photo Mode</string>
+    <string name="photo_mode_standard">Standard</string>
+    <string name="photo_mode_hdr">HDR</string>
+    <string name="preference_category_stamp">Photo Stamp</string>
+    <string name="preference_hdr_save_expo">Save all images for HDR mode</string>
+    <string name="preference_hdr_save_expo_summary">If enabled, when using HDR photo mode, the three base exposure images will be saved as well as the final HDR photo. Note this will make saving slower, especially if options like \"Stamp photos\" or Auto-stabilise are also used.</string>
+
+    <string name="no_permission">PERMISSIONS NOT AVAILABLE</string>
+    <string name="permission_rationale_title">Permission required</string>
+    <string name="permission_rationale_camera">Camera permission is required to enable the camera</string>
+    <string name="permission_rationale_storage">Storage read/write permission is required to save photos</string>
+    <string name="permission_rationale_record_audio">Microphone permission is required to record video with audio</string>
+    <string name="permission_rationale_location">Location permission is required for geotagging</string>
 </resources>

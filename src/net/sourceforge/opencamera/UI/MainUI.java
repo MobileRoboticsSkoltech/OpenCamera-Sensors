@@ -7,6 +7,7 @@ import net.sourceforge.opencamera.R;
 
 import android.annotation.TargetApi;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -43,6 +44,38 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "MainUI");
 		this.main_activity = main_activity;
+		
+		this.setSeekbarColors();
+	}
+	
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void setSeekbarColors() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setSeekbarColors");
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			ColorStateList progress_color = ColorStateList.valueOf( Color.argb(255, 240, 240, 240) );
+			ColorStateList thumb_color = ColorStateList.valueOf( Color.argb(255, 255, 255, 255) );
+
+			SeekBar seekBar = (SeekBar)main_activity.findViewById(R.id.zoom_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.focus_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.exposure_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.iso_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
+		}
 	}
 
     public void layoutUI() {
@@ -114,7 +147,7 @@ public class MainUI {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 	
-			view = main_activity.findViewById(R.id.settings);
+			view = main_activity.findViewById(R.id.gallery);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
@@ -123,11 +156,11 @@ public class MainUI {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 	
-			view = main_activity.findViewById(R.id.gallery);
+			view = main_activity.findViewById(R.id.settings);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.settings);
+			layoutParams.addRule(left_of, R.id.gallery);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -136,7 +169,7 @@ public class MainUI {
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.gallery);
+			layoutParams.addRule(left_of, R.id.settings);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -661,7 +694,10 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPopupIcon");
 		ImageButton popup = (ImageButton)main_activity.findViewById(R.id.popup);
-		String flash_value = main_activity.getPreview().getCurrentFlashValue();
+		String flash_value = null;
+		// flash not supported for HDR, so don't show the popup flash icon
+		if( !main_activity.getApplicationInterface().isHDRPref() )
+			flash_value = main_activity.getPreview().getCurrentFlashValue();
 		if( MyDebug.LOG )
 			Log.d(TAG, "flash_value: " + flash_value);
     	if( flash_value != null && flash_value.equals("flash_off") ) {

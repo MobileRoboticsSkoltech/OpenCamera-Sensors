@@ -22,11 +22,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -109,6 +109,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private double aspect_ratio = 0.0f;
 	private CameraControllerManager camera_controller_manager = null;
 	private CameraController camera_controller = null;
+	private boolean has_permissions = true; // whether we have permissions necessary to operate the camera (camera, storage); assume true until we've been denied one of them
 	private boolean is_video = false;
 	private MediaRecorder video_recorder = null;
 	private boolean video_start_time_set = false;
@@ -179,6 +180,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int min_exposure = 0;
 	private int max_exposure = 0;
 	private float exposure_step = 0.0f;
+	private boolean supports_hdr = false;
+	private boolean supports_raw = false;
 
 	private List<CameraController.Size> supported_preview_sizes = null;
 	
@@ -220,7 +223,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
 	private String set_flash_value_after_autofocus = "";
-	private boolean take_photo_after_autofocus = false;
+	private boolean take_photo_after_autofocus = false; // set to take a photo when the in-progress autofocus has completed
 	private boolean successfully_focused = false;
 	private long successfully_focused_time = -1;
 
@@ -243,6 +246,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	private final DecimalFormat decimal_format_1dp = new DecimalFormat("#.#");
 	private final DecimalFormat decimal_format_2dp = new DecimalFormat("#.##");
+
+	/* If the user touches to focus in continuous mode, we switch the camera_controller to autofocus mode.
+	 * autofocus_in_continuous_mode is set to true when this happens; the runnable reset_continuous_focus_runnable
+	 * switches back to continuous mode.
+	 */
+	private Handler reset_continuous_focus_handler = new Handler();
+	private Runnable reset_continuous_focus_runnable = null;
+	private boolean autofocus_in_continuous_mode = false;
 
 	// for testing:
 	public int count_cameraStartPreview = 0;
@@ -897,10 +908,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "closeCamera()");
 			debug_time = System.currentTimeMillis();
 		}
+		removePendingContinuousFocusReset();
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		focus_started_time = -1;
-		take_photo_after_autofocus = false;
+		synchronized( this ) {
+			// synchronise for consistency (keep FindBugs happy)
+			take_photo_after_autofocus = false;
+		}
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
@@ -994,6 +1009,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	//private int debug_count_opencamera = 0; // see usage below
 
+	/** Try to open the camera. Should only be called if camera_controller==null.
+	 */
 	private void openCamera() {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
@@ -1009,7 +1026,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		has_focus_area = false;
 		focus_success = FOCUS_DONE;
 		focus_started_time = -1;
-		take_photo_after_autofocus = false;
+		synchronized( this ) {
+			// synchronise for consistency (keep FindBugs happy)
+			take_photo_after_autofocus = false;
+		}
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
 		preview_targetRatio = 0.0;
@@ -1036,6 +1056,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		min_exposure = 0;
 		max_exposure = 0;
 		exposure_step = 0.0f;
+		supports_hdr = false;
+		supports_raw = false;
 		sizes = null;
 		current_size_index = -1;
 		video_quality = null;
@@ -1060,6 +1082,33 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			return;
 		}
+		
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+			// we restrict the checks to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+			if( MyDebug.LOG )
+				Log.d(TAG, "check for permissions");
+			if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "camera permission not available");
+				has_permissions = false;
+		    	applicationInterface.requestCameraPermission();
+		    	// return for now - the application should try to reopen the camera if permission is granted
+				return;
+			}
+			if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "storage permission not available");
+				has_permissions = false;
+		    	applicationInterface.requestStoragePermission();
+		    	// return for now - the application should try to reopen the camera if permission is granted
+				return;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "permissions available");
+		}
+		// set in case this was previously set to false
+		has_permissions = true;
+
 		/*{
 			// debug
 			if( debug_count_opencamera++ == 0 ) {
@@ -1149,8 +1198,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "openCamera: total time to open camera: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
+
+	/** Try to reopen the camera, if not currently open (e.g., permission wasn't granted, but now it is).
+	 */
+	public void retryOpenCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "retryOpenCamera()");
+        if( camera_controller == null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "try to reopen camera");
+    		this.openCamera();
+        }
+        else {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "camera already open");
+        }
+	}
+
+	/** Returns false if we failed to open the camera because camera or storage permission wasn't available.
+	 */
+	public boolean hasPermissions() {
+		return has_permissions;
+	}
 	
 	/* Should only be called after camera first opened, or after preview is paused.
+	 * take_photo is true if we have been called from the TakePhoto widget (which means
+	 * we'll take a photo immediately after startup).
 	 */
 	public void setupCamera(boolean take_photo) {
 		if( MyDebug.LOG )
@@ -1201,6 +1274,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "set_flash_value_after_autofocus is now: " + set_flash_value_after_autofocus);
 		}
+		
+		if( this.supports_raw && applicationInterface.isRawPref() ) {
+			camera_controller.setRaw(true);
+		}
+		else {
+			camera_controller.setRaw(false);
+		}
+
+		if( this.supports_hdr && applicationInterface.isHDRPref() ) {
+			camera_controller.setHDR(true);
+		}
+		else {
+			camera_controller.setHDR(false);
+		}
 
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
@@ -1227,7 +1314,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( this.is_video ) {
 				this.switchVideo(false); // set during_startup to false, as we now need to reset the preview
 			}
+		}
+
+		applicationInterface.cameraSetup(); // must call this after the above take_photo code for calling switchVideo
+	    if( MyDebug.LOG ) {
+			Log.d(TAG, "setupCamera: total time after cameraSetup: " + (System.currentTimeMillis() - debug_time));
+		}
+
+	    if( take_photo ) {
 			// take photo after a delay - otherwise we sometimes get a black image?!
+	    	// also need a longer delay for continuous picture focus, to allow a chance to focus - 1000ms seems to work okay for Nexus 6, put 1500ms to be safe
+	    	String focus_value = getCurrentFocusValue();
+			final int delay = ( focus_value != null && focus_value.equals("focus_mode_continuous_picture") ) ? 1500 : 500;
+			if( MyDebug.LOG )
+				Log.d(TAG, "delay for take photo: " + delay);
 	    	final Handler handler = new Handler();
 			handler.postDelayed(new Runnable() {
 				@Override
@@ -1236,12 +1336,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Log.d(TAG, "do automatic take picture");
 					takePicture(false);
 				}
-			}, 500);
-		}
-
-		applicationInterface.cameraSetup(); // must call this after the above take_photo code in case it switches from video to photo mode
-	    if( MyDebug.LOG ) {
-			Log.d(TAG, "setupCamera: total time after cameraSetup: " + (System.currentTimeMillis() - debug_time));
+			}, delay);
 		}
 
 	    if( do_startup_focus ) {
@@ -1324,6 +1419,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.min_exposure = camera_features.min_exposure;
 			this.max_exposure = camera_features.max_exposure;
 			this.exposure_step = camera_features.exposure_step;
+			this.supports_hdr = camera_features.supports_hdr;
+			this.supports_raw = camera_features.supports_raw;
 			this.video_sizes = camera_features.video_sizes;
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
@@ -1486,7 +1583,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// get min/max exposure
 			exposures = null;
 			if( min_exposure != 0 || max_exposure != 0 ) {
-				exposures = new Vector<String>();
+				exposures = new ArrayList<String>();
 				for(int i=min_exposure;i<=max_exposure;i++) {
 					exposures.add("" + i);
 				}
@@ -1682,7 +1779,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "focus not supported");
 				supported_focus_values = null;
 			}
-			/*supported_focus_values = new Vector<String>();
+			/*supported_focus_values = new ArrayList<String>();
 			supported_focus_values.add("focus_mode_auto");
 			supported_focus_values.add("focus_mode_infinity");
 			supported_focus_values.add("focus_mode_macro");
@@ -1893,7 +1990,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void initialiseVideoQualityFromProfiles(SparseArray<Pair<Integer, Integer>> profiles) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initialiseVideoQualityFromProfiles()");
-        video_quality = new Vector<String>();
+        video_quality = new ArrayList<String>();
         boolean done_video_size[] = null;
         if( video_sizes != null ) {
         	done_video_size = new boolean[video_sizes.size()];
@@ -2405,7 +2502,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    }
 	}
 
-	/* Returns the rotation to use for images/videos, taking the preference_lock_orientation into account.
+	/* Returns the rotation (in degrees) to use for images/videos, taking the preference_lock_orientation into account.
 	 */
 	private int getImageVideoRotation() {
 		if( MyDebug.LOG )
@@ -2846,6 +2943,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// very picky about what works when it comes to recording video - e.g., corruption in preview or resultant video.
 			// So for now, I'm just fixing the Nexus 5/6 behaviour without changing behaviour for other devices. Later we can test on other devices, to see if we can
 			// use chooseBestPreviewFps() more widely.
+			// Update for v1.31: we no longer seem to need this - I no longer get a dark preview in photo or video mode if we don't set the fps range;
+			// but leaving the code as it is, to be safe.
 			boolean preview_too_dark = Build.MODEL.equals("Nexus 5") || Build.MODEL.equals("Nexus 6");
 			String fps_value = applicationInterface.getVideoFPSPref();
 			if( MyDebug.LOG ) {
@@ -2865,6 +2964,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// we could hardcode behaviour like we do for video, but this is the same way that Google Camera chooses preview fps for photos
 			// or I could hardcode behaviour for Galaxy Nexus, but since it's an old device (and an obscure bug anyway - most users don't really need continuous focus in photo mode), better to live with the bug rather than complicating the code
 			// Update for v1.29: this doesn't seem to happen on Galaxy Nexus with continuous picture focus mode, which is what we now use
+			// Update for v1.31: we no longer seem to need this - I no longer get a dark preview in photo or video mode if we don't set the fps range;
+			// but leaving the code as it is, to be safe.
 			selected_fps = chooseBestPreviewFps(fps_ranges);
 		}
         camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);
@@ -2941,6 +3042,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				setFocusPref(false);
 				updateFocusForVideo(false);
 			}*/
+			if( is_video ) {
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+					// check for audio permission now, rather than when user starts video recording
+					// we restrict the checks to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+					if( MyDebug.LOG )
+						Log.d(TAG, "check for record audio permission");
+					if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "record audio permission not available");
+				    	applicationInterface.requestRecordAudioPermission();
+				    	// we can now carry on - if the user starts recording video, we'll check then if the permission was granted
+					}
+				}
+			}
 		}
 	}
 	
@@ -3126,6 +3241,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		updateFocus(focus_value, quiet, true, auto_focus);
 	}
 
+	private boolean supportedFocusValue(String focus_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportedFocusValue(): " + focus_value);
+		if( this.supported_focus_values != null ) {
+	    	int new_focus_index = supported_focus_values.indexOf(focus_value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "new_focus_index: " + new_focus_index);
+	    	return new_focus_index != -1;
+		}
+		return false;
+	}
+
 	private boolean updateFocus(String focus_value, boolean quiet, boolean save, boolean auto_focus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocus(): " + focus_value);
@@ -3187,7 +3314,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	// this returns the flash mode indicated by the UI, rather than from the camera parameters
+	/** This returns the flash mode indicated by the UI, rather than from the camera parameters.
+	 */
 	public String getCurrentFocusValue() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCurrentFocusValue()");
@@ -3210,6 +3338,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		}
 		cancelAutoFocus();
+		removePendingContinuousFocusReset(); // this isn't strictly needed as the reset_continuous_focus_runnable will check the ui focus mode when it runs, but good to remove it anyway
+		autofocus_in_continuous_mode = false;
         camera_controller.setFocusValue(focus_value);
 		setupContinuousFocusMove();
 		clearFocusAreas();
@@ -3473,7 +3603,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "takePicture");
 		//this.thumbnail_anim = false;
         this.phase = PHASE_TAKING_PHOTO;
-		this.take_photo_after_autofocus = false;
+		synchronized( this ) {
+			// synchronise for consistency (keep FindBugs happy)
+			take_photo_after_autofocus = false;
+		}
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
@@ -3614,7 +3747,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
 				// needed for Android 6, in case users deny storage permission, otherwise we'll crash
 				// see https://developer.android.com/training/permissions/requesting.html
-				// currently we don't bother requesting the permission, as still using targetSdkVersion 22
+				// we request permission when switching to video mode - if it wasn't granted, here we just switch it off
 				// we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
 				if( MyDebug.LOG )
 					Log.e(TAG, "don't have RECORD_AUDIO permission");
@@ -3837,10 +3970,34 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhoto");
 		applicationInterface.cameraInOperation(true);
+        String current_ui_focus_value = getCurrentFocusValue();
+		if( MyDebug.LOG )
+			Log.d(TAG, "current_ui_focus_value is " + current_ui_focus_value);
 
-		if( camera_controller.focusIsContinuous() ) {
+		if( autofocus_in_continuous_mode ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "continuous mode where user touched to focus");
+			synchronized(this) {
+				// as below, if an autofocus is in progress, then take photo when it's completed
+				if( focus_success == FOCUS_WAITING ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "autofocus_in_continuous_mode: take photo after current focus");
+					take_photo_after_autofocus = true;
+				}
+				else {
+					// when autofocus_in_continuous_mode==true, it means the user recently touched to focus in continuous focus mode, so don't do another focus
+					if( MyDebug.LOG )
+						Log.d(TAG, "autofocus_in_continuous_mode: no need to refocus");
+					takePhotoWhenFocused();
+				}
+			}
+		}
+		else if( camera_controller.focusIsContinuous() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "call autofocus for continuous focus mode");
 			// we call via autoFocus(), to avoid risk of taking photo while the continuous focus is focusing - risk of blurred photo, also sometimes get bug in such situations where we end of repeatedly focusing
 			// this is the case even if skip_autofocus is true (as we still can't guarantee that continuous focusing might be occurring)
+			// note: if the user touches to focus in continuous mode, we camera controller may be in auto focus mode, so we should only enter this codepath if the camera_controller is in continuous focus mode
 	        CameraController.AutoFocusCallback autoFocusCallback = new CameraController.AutoFocusCallback() {
 				@Override
 				public void onAutoFocus(boolean success) {
@@ -3851,12 +4008,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        };
 			camera_controller.autoFocus(autoFocusCallback);
 		}
-		else if( this.recentlyFocused() || skip_autofocus ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "recently focused successfully, so no need to refocus");
+		else if( skip_autofocus || this.recentlyFocused() ) {
+			if( MyDebug.LOG ) {
+				if( skip_autofocus ) {
+					Log.d(TAG, "skip_autofocus flag set");
+				}
+				else {
+					Log.d(TAG, "recently focused successfully, so no need to refocus");
+				}
+			}
 			takePhotoWhenFocused();
 		}
-		else if( camera_controller.supportsAutoFocus() ) {
+		else if( current_ui_focus_value != null && ( current_ui_focus_value.equals("focus_mode_auto") || current_ui_focus_value.equals("focus_mode_macro") ) ) {
+			// n.b., we check focus_value rather than camera_controller.supportsAutoFocus(), as we want to discount focus_mode_locked
 			synchronized(this) {
 				if( focus_success == FOCUS_WAITING ) {
 					// Needed to fix bug (on Nexus 6, old camera API): if flash was on, pointing at a dark scene, and we take photo when already autofocusing, the autofocus never returned so we got stuck!
@@ -3873,6 +4037,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 							if( MyDebug.LOG )
 								Log.d(TAG, "autofocus complete: " + success);
 							ensureFlashCorrect(); // need to call this in case user takes picture before startup focus completes!
+							prepareAutoFocusPhoto();
 							takePhotoWhenFocused();
 						}
 			        };
@@ -3888,6 +4053,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
+	/** Should be called when taking a photo immediately after an autofocus.
+	 *  This is needed for a workaround for Camera2 bug (at least on Nexus 6) where photos sometimes come out dark when using flash
+	 *  auto, when the flash fires. This happens when taking a photo in autofocus mode (including when continuous mode has
+	 *  transitioned to autofocus mode due to touching to focus). Seems to happen with scenes that have bright and dark regions,
+	 *  i.e., on verge of flash firing.
+	 *  Seems to be fixed if we have a short delay...
+	 */
+	private void prepareAutoFocusPhoto() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "prepareAutoFocusPhoto");
+		if( using_android_l ) {
+			String flash_value = camera_controller.getFlashValue();
+			// getFlashValue() may return "" if flash not supported!
+			if( flash_value.length() > 0 && ( flash_value.equals("flash_auto") || flash_value.equals("flash_red_eye") ) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "wait for a bit...");
+				try {
+					Thread.sleep(100);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	/** Take photo, assumes any autofocus has already been taken care of, and that applicationInterface.cameraInOperation(true) has
 	 *  already been called.
 	 *  Note that even if a caller wants to take a photo without focusing, you probably want to call takePhoto() with skip_autofocus
@@ -3896,7 +4087,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void takePhotoWhenFocused() {
 		// should be called when auto-focused
 		if( MyDebug.LOG )
-			Log.d(TAG, "takePictureWhenFocused");
+			Log.d(TAG, "takePhotoWhenFocused");
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
@@ -3928,6 +4119,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// they said this happened in every focus mode, including locked - so possible that on some devices, cancelAutoFocus() actually pulls the camera out of focus, or reverts to preview focus?
 			cancelAutoFocus();
 		}
+		removePendingContinuousFocusReset(); // to avoid switching back to continuous focus mode while taking a photo - instead we'll always make sure we switch back after taking a photo
 		updateParametersFromLocation(); // do this now, not before, so we don't set location parameters during focus (sometimes get RuntimeException)
 
 		focus_success = FOCUS_DONE; // clear focus rectangle if not already done
@@ -3937,10 +4129,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		CameraController.PictureCallback pictureCallback = new CameraController.PictureCallback() {
 			private boolean success = false; // whether jpeg callback succeeded
+			private boolean has_date = false;
+			private Date current_date = null;
 
 			public void onCompleted() {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onCompleted");
+				applicationInterface.onPictureCompleted();
     	        if( !using_android_l ) {
     	        	is_preview_started = false; // preview automatically stopped due to taking photo on original Camera API
     	        }
@@ -3978,6 +4173,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	        			Log.d(TAG, "onPictureTaken started preview");
     				}
     	        }
+				continuousFocusReset(); // in case we took a photo after user had touched to focus (causing us to switch from continuous to autofocus mode)
     			if( camera_controller != null && focus_value != null && ( focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") ) ) {
 	        		if( MyDebug.LOG )
 	        			Log.d(TAG, "cancelAutoFocus to restart continuous focusing");
@@ -4002,12 +4198,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	    		}
     	        }
 			}
+
+			/** Ensures we get the same date for both JPEG and RAW; and that we set the date ASAP so that it corresponds to actual
+			 *  photo time.
+			 */
+			private void initDate() {
+				if( !has_date ) {
+					has_date = true;
+					current_date = new Date();
+					if( MyDebug.LOG )
+						Log.d(TAG, "picture taken on date: " + current_date);
+				}
+			}
 			
 			public void onPictureTaken(byte[] data) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onPictureTaken");
     	    	// n.b., this is automatically run in a different thread
-				if( !applicationInterface.onPictureTaken(data) ) {
+				initDate();
+				if( !applicationInterface.onPictureTaken(data, current_date) ) {
 					if( MyDebug.LOG )
 						Log.e(TAG, "applicationInterface.onPictureTaken failed");
 					success = false;
@@ -4020,11 +4229,26 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			public void onRawPictureTaken(DngCreator dngCreator, Image image) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onRawPictureTaken");
-				if( !applicationInterface.onRawPictureTaken(dngCreator, image) ) {
+				initDate();
+				if( !applicationInterface.onRawPictureTaken(dngCreator, image, current_date) ) {
 					if( MyDebug.LOG )
 						Log.e(TAG, "applicationInterface.onRawPictureTaken failed");
 				}
 			}
+
+			public void onBurstPictureTaken(List<byte[]> images) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onBurstPictureTaken");
+    	    	// n.b., this is automatically run in a different thread
+				initDate();
+
+				success = true;
+				if( !applicationInterface.onBurstPictureTaken(images, current_date) ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "applicationInterface.onBurstPictureTaken failed");
+					success = false;
+				}
+    	    }
     	};
 		CameraController.ErrorCallback errorCallback = new CameraController.ErrorCallback() {
 			public void onError() {
@@ -4050,7 +4274,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		count_cameraTakePicture++;
     	}
 		if( MyDebug.LOG )
-			Log.d(TAG, "takePictureWhenFocused exit");
+			Log.d(TAG, "takePhotoWhenFocused exit");
     }
 
 	/*void clickedShare() {
@@ -4132,8 +4356,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "currently taking a photo");
 		}
 		else {
+			if( manual ) {
+				// remove any previous request to switch back to continuous
+				removePendingContinuousFocusReset();
+			}
+			if( manual && !is_video && camera_controller.focusIsContinuous() && supportedFocusValue("focus_mode_auto") ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "switch from continuous to autofocus mode for touch focus");
+		        camera_controller.setFocusValue("focus_mode_auto"); // switch to autofocus
+		        autofocus_in_continuous_mode = true;
+		        // we switch back to continuous via a new reset_continuous_focus_runnable in autoFocusCompleted()
+			}
 			// it's only worth doing autofocus when autofocus has an effect (i.e., auto or macro mode)
-	        if( camera_controller.supportsAutoFocus() ) {
+			// but also for continuous focus mode, triggering an autofocus is still important to fire flash when touching the screen
+			if( camera_controller.supportsAutoFocus() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "try to start autofocus");
 				if( !using_android_l ) {
@@ -4176,6 +4412,44 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
     }
     
+    /** If the user touches the screen in continuous focus mode, we switch the camera_controller to autofocus mode.
+     *  After the autofocus completes, we set a reset_continuous_focus_runnable to switch back to the camera_controller
+     *  back to continuous focus after a short delay.
+     *  This function removes any pending reset_continuous_focus_runnable.
+     */
+    private void removePendingContinuousFocusReset() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "removePendingContinuousFocusReset");
+		if( reset_continuous_focus_runnable != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "remove pending reset_continuous_focus_runnable");
+			reset_continuous_focus_handler.removeCallbacks(reset_continuous_focus_runnable);
+			reset_continuous_focus_runnable = null;
+		}
+    }
+
+    /** If the user touches the screen in continuous focus mode, we switch the camera_controller to autofocus mode.
+     *  This function is called to see if we should switch from autofocus mode back to continuous focus mode.
+     *  If this isn't required, calling this function does nothing.
+     */
+    private void continuousFocusReset() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "switch back to continuous focus after autofocus?");
+		if( camera_controller != null && autofocus_in_continuous_mode ) {
+	        autofocus_in_continuous_mode = false;
+			// check again
+	        String current_ui_focus_value = getCurrentFocusValue();
+	        if( current_ui_focus_value != null && !camera_controller.getFocusValue().equals(current_ui_focus_value) && camera_controller.getFocusValue().equals("focus_mode_auto") ) {
+				camera_controller.cancelAutoFocus();
+		        camera_controller.setFocusValue(current_ui_focus_value);
+	        }
+	        else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no need to switch back to continuous focus after autofocus, mode already changed");
+	        }
+		}
+    }
+    
     private void cancelAutoFocus() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cancelAutoFocus");
@@ -4213,6 +4487,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			successfully_focused = true;
 			successfully_focused_time = focus_complete_time;
 		}
+		if( manual && camera_controller != null && autofocus_in_continuous_mode ) {
+	        String current_ui_focus_value = getCurrentFocusValue();
+			if( MyDebug.LOG )
+				Log.d(TAG, "current_ui_focus_value: " + current_ui_focus_value);
+	        if( current_ui_focus_value != null && !camera_controller.getFocusValue().equals(current_ui_focus_value) && camera_controller.getFocusValue().equals("focus_mode_auto") ) {
+				reset_continuous_focus_runnable = new Runnable() {
+					@Override
+					public void run() {
+						if( MyDebug.LOG )
+							Log.d(TAG, "reset_continuous_focus_runnable running...");
+						reset_continuous_focus_runnable = null;
+						continuousFocusReset();
+					}
+				};
+				reset_continuous_focus_handler.postDelayed(reset_continuous_focus_runnable, 3000);
+	        }
+		}
 		ensureFlashCorrect();
 		if( this.using_face_detection && !cancelled ) {
 			// On some devices such as mtk6589, face detection does not resume as written in documentation so we have
@@ -4226,6 +4517,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG ) 
 					Log.d(TAG, "take_photo_after_autofocus is set");
 				take_photo_after_autofocus = false;
+				prepareAutoFocusPhoto();
 				takePhotoWhenFocused();
 			}
 		}
@@ -4491,6 +4783,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.exposures;
     }
 
+    public boolean supportsHDR() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsHDR");
+    	return this.supports_hdr;
+    }
+    
+    public boolean supportsRaw() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsRaw");
+    	return this.supports_raw;
+    }
+    
     public List<CameraController.Size> getSupportedPreviewSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPreviewSizes");
@@ -4762,7 +5066,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	public long getVideoTime() {
-		return System.currentTimeMillis() - video_start_time + video_accumulated_time;
+		long time_now = System.currentTimeMillis();
+		return time_now - video_start_time + video_accumulated_time;
 	}
 	
 	public long getVideoAccumulatedTime() {
