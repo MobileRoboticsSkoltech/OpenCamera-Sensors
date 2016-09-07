@@ -195,7 +195,7 @@
     <string name="preference_quality">Kakovost slik</string>
     <string name="preference_quality_summary">Nastavite kakovost shranjenih slik JPEG (priporočljiva vrednost je 90 %%)</string>
 	<string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Ali naj se shranjuje v obliki RAW (DNG)</string>
+    <string name="preference_raw_summary">Ali naj se slike shranjuje v obliki RAW (DNG)</string>
     <string name="preference_location">Shrani podatke o lokaciji (označevanje z zemljepisnim položajem)</string>
     <string name="preference_location_summary">Shrani podatke o lokaicji GPS v fotografijah/videoposnetkih</string>
     <string name="preference_gps_direction">Shrani smer kompasa</string>
