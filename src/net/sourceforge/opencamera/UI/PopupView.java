@@ -20,6 +20,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
@@ -689,10 +690,11 @@ public class PopupView extends LinearLayout {
     
     private void addTitleToPopup(final String title) {
 		TextView text_view = new TextView(this.getContext());
-		text_view.setText(title);
+		text_view.setText(title + ":");
 		text_view.setTextColor(Color.WHITE);
 		text_view.setGravity(Gravity.CENTER);
-		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
+		text_view.setTypeface(null, Typeface.BOLD);
+		//text_view.setBackgroundColor(Color.GRAY); // debug
     	this.addView(text_view);
     }
     
@@ -754,12 +756,7 @@ public class PopupView extends LinearLayout {
     private void addArrayOptionsToPopup(final List<String> supported_options, final String title, final boolean title_in_options, final int current_index, final boolean cyclic, final String test_key, final ArrayOptionsPopupListener listener) {
 		if( supported_options != null && current_index != -1 ) {
 			if( !title_in_options ) {
-	    		TextView text_view = new TextView(this.getContext());
-	    		text_view.setText(title);
-	    		text_view.setTextColor(Color.WHITE);
-	    		text_view.setGravity(Gravity.CENTER);
-	    		text_view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 8.0f);
-	        	this.addView(text_view);
+				addTitleToPopup(title);
 			}
 
 			/*final Button prev_button = new Button(this.getContext());
@@ -782,16 +779,18 @@ public class PopupView extends LinearLayout {
 			resolution_text_view.setLayoutParams(params);
 
 			final float scale = getResources().getDisplayMetrics().density;
+			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
+			final int button_w = (int) (60 * scale + 0.5f); // convert dps to pixels
+			final int button_h = (int) (30 * scale + 0.5f); // convert dps to pixels
 			final Button prev_button = new Button(this.getContext());
 			prev_button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
 			ll2.addView(prev_button);
 			prev_button.setText("<");
 			prev_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
-			final int padding = (int) (0 * scale + 0.5f); // convert dps to pixels
 			prev_button.setPadding(padding, padding, padding, padding);
 			ViewGroup.LayoutParams vg_params = prev_button.getLayoutParams();
-			vg_params.width = (int) (60 * scale + 0.5f); // convert dps to pixels
-			vg_params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+			vg_params.width = button_w;
+			vg_params.height = button_h;
 			prev_button.setLayoutParams(vg_params);
 			prev_button.setVisibility( (cyclic || current_index > 0) ? View.VISIBLE : View.INVISIBLE);
 			this.popup_buttons.put(test_key + "_PREV", prev_button);
@@ -806,8 +805,8 @@ public class PopupView extends LinearLayout {
 			next_button.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12.0f);
 			next_button.setPadding(padding, padding, padding, padding);
 			vg_params = next_button.getLayoutParams();
-			vg_params.width = (int) (60 * scale + 0.5f); // convert dps to pixels
-			vg_params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
+			vg_params.width = button_w;
+			vg_params.height = button_h;
 			next_button.setLayoutParams(vg_params);
 			next_button.setVisibility( (cyclic || current_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
 			this.popup_buttons.put(test_key + "_NEXT", next_button);
