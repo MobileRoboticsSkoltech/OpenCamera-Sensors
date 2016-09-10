@@ -158,6 +158,10 @@ public class PreferenceKeys {
     public static String getBackgroundPhotoSavingPreferenceKey() {
     	return "preference_background_photo_saving";
     }
+    
+    public static String getCamera2FakeFlashPreferenceKey() {
+    	return "preference_camera2_fake_flash";
+    }
 
     public static String getUIPlacementPreferenceKey() {
     	return "preference_ui_placement";

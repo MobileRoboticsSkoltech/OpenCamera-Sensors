@@ -1143,6 +1143,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        	    }
 	    		};
 	        	camera_controller = new CameraController2(this.getContext(), cameraId, previewErrorCallback);
+	    		if( applicationInterface.useCamera2FakeFlash() ) {
+	    			camera_controller.setUseCamera2FakeFlash(true);
+	    		}
 	        }
 	        else
 				camera_controller = new CameraController1(cameraId);
@@ -1288,7 +1291,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else {
 			camera_controller.setHDR(false);
 		}
-
+		
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
 		setPreviewSize(); // need to call this when we switch cameras, not just when we run for the first time

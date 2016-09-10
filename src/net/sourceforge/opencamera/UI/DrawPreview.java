@@ -62,6 +62,8 @@ public class DrawPreview {
 	private RectF thumbnail_anim_src_rect = new RectF();
 	private RectF thumbnail_anim_dst_rect = new RectF();
 	private Matrix thumbnail_anim_matrix = new Matrix();
+	
+	private long ae_started_scanning_ms = -1; // time when ae started scanning
 
     private boolean taking_picture = false;
     
@@ -652,7 +654,20 @@ public class DrawPreview {
 				string += preview.getFrameDurationString(frame_duration);
 			}*/
 			if( string.length() > 0 ) {
-				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y, true, ybounds_text, true); // Yellow 500
+				int text_color = Color.rgb(255, 235, 59); // Yellow 500
+				if( camera_controller.captureResultIsAEScanning() ) {
+					// we only change the color if ae scanning is at least a certain time, otherwise we get a lot of flickering of the color
+					if( ae_started_scanning_ms == -1 ) {
+						ae_started_scanning_ms = System.currentTimeMillis();
+					}
+					else if( System.currentTimeMillis() - ae_started_scanning_ms > 500 ) {
+						text_color = Color.rgb(244, 67, 54); // Red 500
+					}
+				}
+				else {
+					ae_started_scanning_ms = -1;
+				}
+				applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, true, ybounds_text, true);
 			}
 			/*if( camera_controller.captureResultHasFocusDistance() ) {
 				float dist_min = camera_controller.captureResultFocusDistanceMin();

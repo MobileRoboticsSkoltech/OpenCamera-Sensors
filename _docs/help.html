@@ -395,7 +395,8 @@ to only have the preview showing.</li>
 
 <p><b>Show zoom slider controls</b> - Whether to display to a slider to control zoom.</p>
 
-<p><b>Show ISO</b> - If selected, the current ISO, exposure time and frame rate (FPS) will be displayed (only available if Camera2 API is used).</p>
+<p><b>Show ISO</b> - If selected, the current ISO, exposure time and frame rate (FPS) will be displayed (only available if Camera2
+API is used). The text will be shown in red when the auto-exposure routine is scanning.</p>
 
 <p><b>Show free memory</b> - Whether to display the remaining storage space of the device.</p>
 
@@ -483,9 +484,6 @@ to use external HDR applications (such as <a href="http://qtpfsgui.sourceforge.n
 create the final HDR image. Note this will make saving slower, especially if options like "Stamp photos" or
 Auto-stabilise are also used.</p>
 
-<p><b>Use background thread</b> - Whether to process and save photo in the background. Normally this should
-be left set to true for faster operation, but it's an option just in case.</p>
-
 <p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
 location data" is enabled (see "Location settings" below), then the current location latitude
 and longitude coordinates will also be stamped on the resultant photos (if the location is known).
@@ -510,6 +508,14 @@ longer to save the photo. Also note that this option is only supported for photo
 
 <p><b>Text style</b> - Whether to render the text on the image with a shadow background effect, for
 options "Stamp photos" or "Custom text".</p>
+
+<p><b>Use background thread</b> - Whether to process and save photo in the background. Normally this should
+be left set to true for faster operation, but it's an option just in case.</p>
+
+<p><b>Use alternative flash method</b> - (Camera2 API only.) Unfortunately many devices have poor support for the
+Camera2 API. A common issue is poor flash behaviour (either flash doesn't fire, or photos are over or under exposed).
+If so, enabling this option may help - this uses an alternative algorithm for flash (using the torch to simulate flash
+as a workaround). Note that this is enabled by default for Samsung devices.</p>
 
 <p><b>Video settings</b> - Select to access the following controls:</p>
 
@@ -607,13 +613,13 @@ have location data in them).</p>
 <a href="https://play.google.com/store/apps/details?id=harman.mark.donation">my donation app</a>.</p>
 
 <p><b>Use Camera2 API</b> - If selected, this enables support for the Camera2 API that was introduced
-in Android 5. This enables some new features, but is currently experimental. Note that not all Android 5
-devices have full support for the Camera2 API (Open Camera will only show this option if all cameras
-report either "LIMITED" or "FULL" support for the API; "LEGACY" devices are not supported). Supported devices
-include the Nexus 5 and Nexus 6. Known issues with the Camera2 API include bugs with flash (sometimes shots come
-out too bright or dark, or auto-exposure routine stops - I've seen this on the Nexus 6 with other camera apps
-using Camera2 API), problems with focusing in some cases, and a problem that ISO doesn't always work properly
-for recording video. Turning this option on or off will cause Open Camera to restart. (Requires Android 5.0 or higher.)</p>
+in Android 5. Turning this option on or off will cause Open Camera to restart. This enables some new features.
+Note that not all Android 5 devices have full support for the Camera2 API (Open Camera will only show this
+option if all cameras report either "LIMITED" or "FULL" support for the API; "LEGACY" devices are not supported).
+Supported devices include the Nexus 5 and Nexus 6. Also note that even if devices support Camera2 API, many
+devices have extremely poor support, leading to bugs such as poor flash behaviour, or video recording not working.
+These are not necessarily bugs in Open Camera, but problems with manufacturer support for Camera2 API. If you have
+problems with flash behaviour, try the "Use alternative flash method" setting under "Photo Settings".</p>
 
 <p><b>About</b> - Provides various debug information about the app and your device's camera. You can also copy
 this information to the clipboard.</p>

@@ -81,6 +81,8 @@ public interface ApplicationInterface {
 	float getFocusDistancePref();
 	boolean isHDRPref(); // whether to enable HDR photos
 	boolean isRawPref(); // whether to enable RAW photos
+	boolean useCamera2FakeFlash(); // whether to enable CameraController.setUseCamera2FakeFlash() for Camera2 API
+
 	// for testing purposes:
 	boolean isTestAlwaysFocus(); // if true, pretend autofocus always successful
 

@@ -319,4 +319,8 @@
     <string name="permission_rationale_storage">Storage read/write permission is required to save photos</string>
     <string name="permission_rationale_record_audio">Microphone permission is required to record video with audio</string>
     <string name="permission_rationale_location">Location permission is required for geotagging</string>
+
+    <string name="preference_category_photo_debugging">Debugging options</string>
+    <string name="preference_camera2_fake_flash">Use alternative flash method</string>
+    <string name="preference_camera2_fake_flash_summary">Enable this if your device has buggy flash behaviour with Camera2 API</string>
 </resources>

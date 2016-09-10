@@ -359,6 +359,8 @@ public final class R {
         public static final int preference_burst_interval_summary=0x7f080060;
         public static final int preference_burst_mode=0x7f08005d;
         public static final int preference_burst_mode_summary=0x7f08005e;
+        public static final int preference_camera2_fake_flash=0x7f080129;
+        public static final int preference_camera2_fake_flash_summary=0x7f08012a;
         public static final int preference_category_camera_controls=0x7f080056;
         /**  symbol short for metres 
  symbol short for metres 
@@ -377,6 +379,7 @@ public final class R {
         public static final int preference_category_camera_effects=0x7f080045;
         public static final int preference_category_camera_quality=0x7f0800ac;
         public static final int preference_category_online=0x7f0800e8;
+        public static final int preference_category_photo_debugging=0x7f080128;
         public static final int preference_category_stamp=0x7f08011f;
         /**  @TODO PER FAVORE RIGUARDARE "livellate" PERCHÈ SECONDO ME NON HA SENSO! 
          */
