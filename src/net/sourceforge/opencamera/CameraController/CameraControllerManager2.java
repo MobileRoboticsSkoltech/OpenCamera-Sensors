@@ -30,12 +30,16 @@ public class CameraControllerManager2 extends CameraControllerManager {
 		try {
 			return manager.getCameraIdList().length;
 		}
-		catch (CameraAccessException e) {
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "exception trying to get camera ids");
 			e.printStackTrace();
 		}
 		catch(AssertionError e) {
 			// had reported java.lang.AssertionError on Google Play, "Expected to get non-empty characteristics" from CameraManager.getOrCreateDeviceIdListLocked(CameraManager.java:465)
-			// yes, in theory we shouldn't catch AssertionError as it represents a programming error, however it's a programming error by Google (a condition they thought couldn't happen)
+			// yes, in theory we shouldn't catch AssertionError as it represents a programming error, however it's a programming error in the camera driver (a condition they thought couldn't happen)
+			if( MyDebug.LOG )
+				Log.e(TAG, "assertion error trying to get camera ids");
 			e.printStackTrace();
 		}
 		return 0;
@@ -49,7 +53,9 @@ public class CameraControllerManager2 extends CameraControllerManager {
 			CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
 			return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT;
 		}
-		catch (CameraAccessException e) {
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "exception trying to get camera characteristics");
 			e.printStackTrace();
 		}
 		return false;
@@ -91,7 +97,15 @@ public class CameraControllerManager2 extends CameraControllerManager {
 			boolean supported = isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
 			return supported;
 		}
-		catch (CameraAccessException e) {
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "exception trying to get camera characteristics");
+			e.printStackTrace();
+		}
+		catch(NumberFormatException e) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "exception trying to get camera characteristics");
+			// I've seen Google Play NumberFormatException crashes from CameraManager.getCameraCharacteristics on Asus ZenFones with Android 5.0
 			e.printStackTrace();
 		}
 		return false;
