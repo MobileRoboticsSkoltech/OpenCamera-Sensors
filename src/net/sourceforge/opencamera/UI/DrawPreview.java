@@ -79,7 +79,7 @@ public class DrawPreview {
 		p.setAntiAlias(true);
         p.setStrokeCap(Paint.Cap.ROUND);
 		final float scale = getContext().getResources().getDisplayMetrics().density;
-		this.stroke_width = (float) (0.5f * scale + 0.5f); // convert dps to pixels
+		this.stroke_width = (float) (1.0f * scale + 0.5f); // convert dps to pixels
 		p.setStrokeWidth(stroke_width);
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth);
