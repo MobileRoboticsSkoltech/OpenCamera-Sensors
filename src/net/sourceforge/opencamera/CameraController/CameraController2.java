@@ -3453,13 +3453,13 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
 			}*/
 			if( ae_state != null && ae_state == CaptureResult.CONTROL_AE_STATE_SEARCHING ) {
-				if( MyDebug.LOG && !capture_result_is_ae_scanning )
-					Log.d(TAG, "ae_state now searching");
+				/*if( MyDebug.LOG && !capture_result_is_ae_scanning )
+					Log.d(TAG, "ae_state now searching");*/
 				capture_result_is_ae_scanning = true;
 			}
 			else {
-				if( MyDebug.LOG && capture_result_is_ae_scanning )
-					Log.d(TAG, "ae_state stopped searching");
+				/*if( MyDebug.LOG && capture_result_is_ae_scanning )
+					Log.d(TAG, "ae_state stopped searching");*/
 				capture_result_is_ae_scanning = false;
 			}
 
