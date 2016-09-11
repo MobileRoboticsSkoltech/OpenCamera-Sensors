@@ -50,7 +50,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
     public static enum PhotoMode {
     	Standard,
-    	HDR
+    	HDR,
+    	ExpoBracketing
     }
     
 	private MainActivity main_activity = null;
@@ -675,16 +676,21 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public boolean isExpoBracketingPref() {
-    	if( getPhotoMode() == PhotoMode.HDR )
+    	PhotoMode photo_mode = getPhotoMode();
+    	if( photo_mode == PhotoMode.HDR || photo_mode == PhotoMode.ExpoBracketing )
 			return true;
 		return false;
     }
 
     public PhotoMode getPhotoMode() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		boolean hdr = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+		boolean hdr = photo_mode_pref.equals("preference_photo_mode_hdr");
 		if( hdr && main_activity.supportsHDR() )
 			return PhotoMode.HDR;
+		boolean expo_bracketing = photo_mode_pref.equals("preference_photo_mode_expo_bracketing");
+		if( expo_bracketing && main_activity.supportsExpoBracketing() )
+			return PhotoMode.ExpoBracketing;
 		return PhotoMode.Standard;
     }
 
@@ -1418,13 +1424,27 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onBurstPictureTaken: received " + images.size() + " images");
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		boolean save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
-		if( MyDebug.LOG )
-			Log.d(TAG, "save_expo: " + save_expo);
+		boolean success = false;
+		PhotoMode photo_mode = getPhotoMode();
+		if( photo_mode == PhotoMode.HDR ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "HDR mode");
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+			boolean save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
+			if( MyDebug.LOG )
+				Log.d(TAG, "save_expo: " + save_expo);
 
-		boolean success = saveImage(true, save_expo, images, current_date);
-
+			success = saveImage(true, save_expo, images, current_date);
+		}
+		else {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "exposure bracketing mode mode");
+				if( photo_mode != PhotoMode.ExpoBracketing )
+					Log.e(TAG, "onBurstPictureTaken called with unexpected photo mode?!: " + photo_mode);
+			}
+			
+			success = saveImage(false, true, images, current_date);
+		}
 		return success;
     }
 

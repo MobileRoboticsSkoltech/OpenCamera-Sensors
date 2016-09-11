@@ -322,10 +322,11 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
 			addRequest(request);
-			if( request.is_hdr ) {
+			if( request.is_hdr || request.jpeg_images.size() > 1 ) {
 				// For HDR, we also add a dummy request, effectively giving it a cost of 2 - to reflect the fact that HDR is more memory intensive
 				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
 				// of 2, due to RAW and JPEG each needing their own request).
+				// Similarly for saving multiple images (expo-bracketing)
 				Request dummy_request = new Request(Request.Type.DUMMY,
 					false,
 					false,
@@ -604,11 +605,24 @@ public class ImageSaver extends Thread {
 		else {
 			if( request.jpeg_images.size() > 1 ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "saveImageNow called with multiple images, only supported for hdr");
-				// throw runtime exception, as this is a programming error
-				throw new RuntimeException();
+					Log.d(TAG, "saveImageNow called with multiple images");
+				int mid_image = request.jpeg_images.size()/2;
+				success = true;
+				for(int i=0;i<request.jpeg_images.size();i++) {
+					// note, even if one image fails, we still try saving the other images - might as well give the user as many images as we can...
+					byte [] image = request.jpeg_images.get(i);
+					String filename_suffix = "_EXP" + i;
+					boolean share_image = i == mid_image;
+					if( !saveSingleImageNow(request, image, null, filename_suffix, true, share_image) ) {
+						if( MyDebug.LOG )
+							Log.e(TAG, "saveSingleImageNow failed for exposure image");
+						success = false; // require all images to be saved in order for success to be true (used for pausing the preview)
+					}
+				}
 			}
-			success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", true, true);
+			else {
+				success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", true, true);
+			}
 		}
 
 		return success;

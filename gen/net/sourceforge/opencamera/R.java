@@ -299,7 +299,7 @@ public final class R {
         public static final int metres_abbreviation=0x7f080044;
         public static final int new_folder=0x7f080106;
         public static final int no_gallery_app=0x7f080030;
-        public static final int no_permission=0x7f080122;
+        public static final int no_permission=0x7f080124;
         public static final int not_supported=0x7f080012;
         /**  whether a setting is turned on, e.g., "Auto-stabilise: On" 
  whether a setting is turned on, e.g., "Auto-stabilise: On" 
@@ -320,11 +320,11 @@ public final class R {
         public static final int on=0x7f080007;
         public static final int parent_folder=0x7f080104;
         public static final int permission_location_not_available=0x7f08010f;
-        public static final int permission_rationale_camera=0x7f080124;
-        public static final int permission_rationale_location=0x7f080127;
-        public static final int permission_rationale_record_audio=0x7f080126;
-        public static final int permission_rationale_storage=0x7f080125;
-        public static final int permission_rationale_title=0x7f080123;
+        public static final int permission_rationale_camera=0x7f080126;
+        public static final int permission_rationale_location=0x7f080129;
+        public static final int permission_rationale_record_audio=0x7f080128;
+        public static final int permission_rationale_storage=0x7f080127;
+        public static final int permission_rationale_title=0x7f080125;
         /**  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
@@ -339,6 +339,8 @@ public final class R {
         public static final int photo=0x7f08001d;
         public static final int photo_deleted=0x7f08002f;
         public static final int photo_mode=0x7f08011c;
+        public static final int photo_mode_expo_bracketing=0x7f08011f;
+        public static final int photo_mode_expo_bracketing_full=0x7f080120;
         public static final int photo_mode_hdr=0x7f08011e;
         public static final int photo_mode_standard=0x7f08011d;
         public static final int preference_about=0x7f0800ef;
@@ -359,8 +361,8 @@ public final class R {
         public static final int preference_burst_interval_summary=0x7f080060;
         public static final int preference_burst_mode=0x7f08005d;
         public static final int preference_burst_mode_summary=0x7f08005e;
-        public static final int preference_camera2_fake_flash=0x7f080129;
-        public static final int preference_camera2_fake_flash_summary=0x7f08012a;
+        public static final int preference_camera2_fake_flash=0x7f08012b;
+        public static final int preference_camera2_fake_flash_summary=0x7f08012c;
         public static final int preference_category_camera_controls=0x7f080056;
         /**  symbol short for metres 
  symbol short for metres 
@@ -379,8 +381,8 @@ public final class R {
         public static final int preference_category_camera_effects=0x7f080045;
         public static final int preference_category_camera_quality=0x7f0800ac;
         public static final int preference_category_online=0x7f0800e8;
-        public static final int preference_category_photo_debugging=0x7f080128;
-        public static final int preference_category_stamp=0x7f08011f;
+        public static final int preference_category_photo_debugging=0x7f08012a;
+        public static final int preference_category_stamp=0x7f080121;
         /**  @TODO PER FAVORE RIGUARDARE "livellate" PERCHÈ SECONDO ME NON HA SENSO! 
          */
         public static final int preference_color_effect=0x7f080048;
@@ -416,8 +418,8 @@ public final class R {
         public static final int preference_gps_direction_summary=0x7f0800b9;
         public static final int preference_grid=0x7f08009d;
         public static final int preference_grid_summary=0x7f08009e;
-        public static final int preference_hdr_save_expo=0x7f080120;
-        public static final int preference_hdr_save_expo_summary=0x7f080121;
+        public static final int preference_hdr_save_expo=0x7f080122;
+        public static final int preference_hdr_save_expo_summary=0x7f080123;
         public static final int preference_immersive_mode=0x7f080085;
         public static final int preference_immersive_mode_summary=0x7f080086;
         public static final int preference_iso=0x7f08004e;

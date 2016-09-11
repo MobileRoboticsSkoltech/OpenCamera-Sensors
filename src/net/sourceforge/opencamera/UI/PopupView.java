@@ -155,16 +155,19 @@ public class PopupView extends LinearLayout {
     			}
     		});
 
+			final List<String> photo_modes = new ArrayList<String>();
+			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<MyApplicationInterface.PhotoMode>();
+			photo_modes.add( getResources().getString(R.string.photo_mode_standard) );
+			photo_mode_values.add( MyApplicationInterface.PhotoMode.Standard );
     		if( main_activity.supportsHDR() ) {
-    			final List<String> photo_modes = new ArrayList<String>();
-    			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<MyApplicationInterface.PhotoMode>();
-
-    			photo_modes.add( getResources().getString(R.string.photo_mode_standard) );
-    			photo_mode_values.add( MyApplicationInterface.PhotoMode.Standard );
-
     			photo_modes.add( getResources().getString(R.string.photo_mode_hdr) );
     			photo_mode_values.add( MyApplicationInterface.PhotoMode.HDR );
-    			
+    		}
+    		if( main_activity.supportsExpoBracketing() ) {
+    			photo_modes.add( getResources().getString(R.string.photo_mode_expo_bracketing) );
+    			photo_mode_values.add( MyApplicationInterface.PhotoMode.ExpoBracketing );
+    		}
+    		if( photo_modes.size() > 1 ) {
     			MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
     			String current_mode = null;
     			for(int i=0;i<photo_modes.size() && current_mode==null;i++) {
@@ -199,8 +202,10 @@ public class PopupView extends LinearLayout {
             					Log.e(TAG, "unknown mode id: " + option_id);
         				}
         				else {
-    						String toast_message = option;
     						MyApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
+    						String toast_message = option;
+    						if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing )
+    							toast_message = getResources().getString(R.string.photo_mode_expo_bracketing_full);
     	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     						SharedPreferences.Editor editor = sharedPreferences.edit();
     						if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard ) {
@@ -208,6 +213,9 @@ public class PopupView extends LinearLayout {
     						}
     						else if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
         						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
+    						}
+    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
+        						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_expo_bracketing");
     						}
     						else {
                 				if( MyDebug.LOG )

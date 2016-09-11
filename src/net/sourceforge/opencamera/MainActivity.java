@@ -2274,6 +2274,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		return false;
     }
     
+    public boolean supportsExpoBracketing() {
+		if( preview.supportsExpoBracketing() )
+			return true;
+		return false;
+    }
+    
     public boolean supportsForceVideo4K() {
     	return this.supports_force_video_4k;
     }
@@ -2447,6 +2453,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
 			if( photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
 				photo_mode_string = getResources().getString(R.string.photo_mode_hdr);
+			}
+			else if( photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
+				photo_mode_string = getResources().getString(R.string.photo_mode_expo_bracketing_full);
 			}
 			if( photo_mode_string != null ) {
 				toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + photo_mode_string;
