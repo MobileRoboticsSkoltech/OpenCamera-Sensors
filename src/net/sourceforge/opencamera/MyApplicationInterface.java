@@ -682,6 +682,60 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return false;
     }
 
+    @Override
+    public int getExpoBracketingNImagesPref() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getExpoBracketingNImagesPref");
+		int n_images = 0;
+    	PhotoMode photo_mode = getPhotoMode();
+    	if( photo_mode == PhotoMode.HDR ) {
+    		// always set 3 images for HDR
+    		n_images = 3;
+    	}
+    	else {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+			String n_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
+			try {
+				n_images = Integer.parseInt(n_images_s);
+			}
+			catch(NumberFormatException exception) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "n_images_s invalid format: " + n_images_s);
+				n_images = 3;
+			}
+    	}
+		if( MyDebug.LOG )
+			Log.d(TAG, "n_images = " + n_images);
+		return n_images;
+    }
+
+    @Override
+    public double getExpoBracketingStopsPref() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getExpoBracketingStopsPref");
+		double n_stops = 0.0;
+    	PhotoMode photo_mode = getPhotoMode();
+    	if( photo_mode == PhotoMode.HDR ) {
+    		// always set 2 stops for HDR
+    		n_stops = 2.0;
+    	}
+    	else {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+			String n_stops_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingStopsPreferenceKey(), "2");
+			try {
+				n_stops = Double.parseDouble(n_stops_s);
+			}
+			catch(NumberFormatException exception) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "n_stops_s invalid format: " + n_stops_s);
+				n_stops = 2.0;
+			}
+    	}
+		if( MyDebug.LOG )
+			Log.d(TAG, "n_stops = " + n_stops);
+		return n_stops;
+    }
+
     public PhotoMode getPhotoMode() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");

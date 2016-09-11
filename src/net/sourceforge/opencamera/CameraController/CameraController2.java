@@ -63,6 +63,8 @@ public class CameraController2 extends CameraController {
 	private Object image_reader_lock = new Object(); // lock to make sure we only handle one image being available at a time
 	private ImageReader imageReader = null;
 	private boolean want_expo_bracketing = false;
+	private int expo_bracketing_n_images = 3;
+	private double expo_bracketing_stops = 2.0;
 	private boolean want_raw = false;
 	//private boolean want_raw = true;
 	private android.util.Size raw_size = null;
@@ -1630,7 +1632,31 @@ public class CameraController2 extends CameraController {
 		this.want_expo_bracketing = want_expo_bracketing;
 		camera_settings.setAEMode(previewBuilder, false); // need to set the ae mode, as flash is disabled for HDR mode
 	}
-	
+
+	@Override
+	public void setExpoBracketingNImages(int n_images) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setExpoBracketingNImages: " + n_images);
+		if( n_images <= 1 || (n_images % 2) != 1 ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "n_images should be an odd number greater than 1");
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		this.expo_bracketing_n_images = n_images;
+	}
+
+	@Override
+	public void setExpoBracketingStops(double stops) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setExpoBracketingStops: " + stops);
+		if( stops <= 0.0 ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "stops should be positive");
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		this.expo_bracketing_stops = stops;
+	}
+
 	@Override
 	public void setUseCamera2FakeFlash(boolean use_fake_precapture) {
 		if( MyDebug.LOG )
@@ -3004,41 +3030,71 @@ public class CameraController2 extends CameraController {
 			long base_exposure_time = 1000000000l/30;
 			if( capture_result_has_exposure_time )
 				base_exposure_time = capture_result_exposure_time;
-			long dark_exposure_time = base_exposure_time;
-			long light_exposure_time = base_exposure_time;
+
+			int n_half_images = expo_bracketing_n_images/2;
 			long min_exposure_time = base_exposure_time;
 			long max_exposure_time = base_exposure_time;
-			//final double scale = 2.0;
-			final double scale = 4.0;
+			final double scale = Math.pow(2.0, expo_bracketing_stops);
 			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
 			if( exposure_time_range != null ) {
 				min_exposure_time = exposure_time_range.getLower();
 				max_exposure_time = exposure_time_range.getUpper();
-				dark_exposure_time = (long)(base_exposure_time/scale);
-				light_exposure_time = (long)(base_exposure_time*scale);
-				if( dark_exposure_time < min_exposure_time )
-					dark_exposure_time = min_exposure_time;
-				if( light_exposure_time > max_exposure_time )
-					light_exposure_time = max_exposure_time;
 			}
 
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "taking expo bracketing with:");
+				Log.d(TAG, "taking expo bracketing with n_images: " + expo_bracketing_n_images);
 				Log.d(TAG, "ISO: " + stillBuilder.get(CaptureRequest.SENSOR_SENSITIVITY));
 				Log.d(TAG, "Frame duration: " + stillBuilder.get(CaptureRequest.SENSOR_FRAME_DURATION));
-				Log.d(TAG, "Dark exposure time: " + dark_exposure_time);
 				Log.d(TAG, "Base exposure time: " + base_exposure_time);
-				Log.d(TAG, "Light exposure time: " + light_exposure_time);
 				Log.d(TAG, "Min exposure time: " + min_exposure_time);
 				Log.d(TAG, "Max exposure time: " + max_exposure_time);
 			}
 
-			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, dark_exposure_time);
-			requests.add( stillBuilder.build() );
+			// darker images
+			for(int i=0;i<n_half_images;i++) {
+				long exposure_time = base_exposure_time;
+				if( exposure_time_range != null ) {
+					double this_scale = scale;
+					for(int j=i;j<n_half_images-1;j++)
+						this_scale *= scale;
+					exposure_time /= this_scale;
+					if( exposure_time < min_exposure_time )
+						exposure_time = min_exposure_time;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "add burst request for " + i + "th dark image:");
+						Log.d(TAG, "    this_scale: " + this_scale);
+						Log.d(TAG, "    exposure_time: " + exposure_time);
+					}
+					stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+					requests.add( stillBuilder.build() );
+				}
+			}
+			
+			// base image
+			if( MyDebug.LOG )
+				Log.d(TAG, "add burst request for base image");
 			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, base_exposure_time);
 			requests.add( stillBuilder.build() );
-			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, light_exposure_time);
-			requests.add( stillBuilder.build() );
+
+			// lighter images
+			for(int i=0;i<n_half_images;i++) {
+				long exposure_time = base_exposure_time;
+				if( exposure_time_range != null ) {
+					double this_scale = scale;
+					for(int j=0;j<i;j++)
+						this_scale *= scale;
+					exposure_time *= this_scale;
+					if( exposure_time > max_exposure_time )
+						exposure_time = max_exposure_time;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "add burst request for " + i + "th light image:");
+						Log.d(TAG, "    this_scale: " + this_scale);
+						Log.d(TAG, "    exposure_time: " + exposure_time);
+					}
+					stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+					requests.add( stillBuilder.build() );
+				}
+			}
 
 			n_burst = requests.size();
 			if( MyDebug.LOG )

@@ -80,6 +80,8 @@ public interface ApplicationInterface {
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
 	float getFocusDistancePref();
 	boolean isExpoBracketingPref(); // whether to enable burst photos with expo bracketing
+    int getExpoBracketingNImagesPref(); // how many images to take for exposure bracketing
+    double getExpoBracketingStopsPref(); // stops per image for exposure bracketing
 	boolean isRawPref(); // whether to enable RAW photos
 	boolean useCamera2FakeFlash(); // whether to enable CameraController.setUseCamera2FakeFlash() for Camera2 API
 

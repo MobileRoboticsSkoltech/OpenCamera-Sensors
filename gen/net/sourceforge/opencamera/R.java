@@ -44,6 +44,10 @@ public final class R {
         public static final int preference_burst_mode_values=0x7f06000b;
         public static final int preference_crop_guide_entries=0x7f06001e;
         public static final int preference_crop_guide_values=0x7f06001f;
+        public static final int preference_expo_bracketing_n_images_entries=0x7f060042;
+        public static final int preference_expo_bracketing_n_images_values=0x7f060043;
+        public static final int preference_expo_bracketing_stops_entries=0x7f060044;
+        public static final int preference_expo_bracketing_stops_values=0x7f060045;
         public static final int preference_grid_entries=0x7f06001c;
         public static final int preference_grid_values=0x7f06001d;
         public static final int preference_immersive_mode_entries=0x7f060018;
@@ -406,6 +410,10 @@ public final class R {
         public static final int preference_crop_guide_summary=0x7f0800a1;
         public static final int preference_donate=0x7f0800eb;
         public static final int preference_donate_summary=0x7f0800ec;
+        public static final int preference_expo_bracketing_n_images=0x7f08012d;
+        public static final int preference_expo_bracketing_n_images_summary=0x7f08012e;
+        public static final int preference_expo_bracketing_stops=0x7f08012f;
+        public static final int preference_expo_bracketing_stops_summary=0x7f080130;
         public static final int preference_exposure=0x7f080050;
         public static final int preference_exposure_summary=0x7f080051;
         public static final int preference_face_detection=0x7f080054;

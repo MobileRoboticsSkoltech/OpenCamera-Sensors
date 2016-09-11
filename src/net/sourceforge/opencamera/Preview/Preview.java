@@ -1287,6 +1287,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		if( this.supports_expo_bracketing && applicationInterface.isExpoBracketingPref() ) {
 			camera_controller.setExpoBracketing(true);
+			camera_controller.setExpoBracketingNImages( applicationInterface.getExpoBracketingNImagesPref() );
+			camera_controller.setExpoBracketingStops( applicationInterface.getExpoBracketingStopsPref() );
 		}
 		else {
 			camera_controller.setExpoBracketing(false);

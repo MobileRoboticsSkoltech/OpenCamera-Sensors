@@ -187,6 +187,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 
+		final boolean supports_expo_bracketing = bundle.getBoolean("supports_expo_bracketing");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_expo_bracketing: " + supports_expo_bracketing);
+
+		if( !supports_expo_bracketing ) {
+			Preference pref = findPreference("preference_expo_bracketing_n_images");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+        	pg.removePreference(pref);
+			pref = findPreference("preference_expo_bracketing_stops");
+			pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+        	pg.removePreference(pref);
+		}
+
 		final String [] video_quality = bundle.getStringArray("video_quality");
 		final String [] video_quality_string = bundle.getStringArray("video_quality_string");
 		if( video_quality != null && video_quality_string != null ) {

@@ -180,6 +180,10 @@ public abstract class CameraController {
     public abstract CameraController.Size getPreviewSize();
     public abstract void setPreviewSize(int width, int height);
 	public abstract void setExpoBracketing(boolean want_expo_bracketing);
+	/** n_images must be an odd number greater than 1.
+	 */
+	public abstract void setExpoBracketingNImages(int n_images);
+	public abstract void setExpoBracketingStops(double stops);
 	public abstract void setRaw(boolean want_raw);
 	/**
 	 * setUseCamera2FakeFlash() should be called after creating the CameraController, and before calling getCameraFeatures() or

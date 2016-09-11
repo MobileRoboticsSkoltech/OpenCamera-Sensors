@@ -463,6 +463,26 @@
 	            android:defaultValue="false"
 	            />
 
+	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+	        <ListPreference
+	            android:key="preference_expo_bracketing_n_images"
+	            android:title="@string/preference_expo_bracketing_n_images"
+	            android:summary="@string/preference_expo_bracketing_n_images_summary"
+	            android:entries="@array/preference_expo_bracketing_n_images_entries"
+	            android:entryValues="@array/preference_expo_bracketing_n_images_values"
+	            android:defaultValue="3"
+	            />
+
+	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+	        <ListPreference
+	            android:key="preference_expo_bracketing_stops"
+	            android:title="@string/preference_expo_bracketing_stops"
+	            android:summary="@string/preference_expo_bracketing_stops_summary"
+	            android:entries="@array/preference_expo_bracketing_stops_entries"
+	            android:entryValues="@array/preference_expo_bracketing_stops_values"
+	            android:defaultValue="2"
+	            />
+
 			<PreferenceCategory
 		        android:key="preference_category_stamp"
 		        android:title="@string/preference_category_stamp"

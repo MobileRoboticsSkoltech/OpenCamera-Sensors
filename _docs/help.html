@@ -136,7 +136,8 @@ time.</li>
 <li><b>Photo Mode</b> - If Camera2 API is enabled, you can also choose different photo modes:<ul>
 	<li><b>Standard</b> - Ordinary operation: takes a single photo.</li>
 	<li><b>HDR</b> - Enables <a href="#hdr">High Dynamic Range</a> mode.</li>
-	<li><b>Exposure Bracketing</b> - Takes multiple images at different exposure levels.</li>
+	<li><b>Exposure Bracketing</b> - Takes multiple images at different exposure levels (see
+	Settings/"Photo settings" for options to control the number of images and stops.</li>
 </ul></li>
 <li><b>White balance</b> - Choose a method to control how the white balance is set. See
 <a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an
@@ -487,6 +488,12 @@ to use external HDR applications (such as <a href="http://qtpfsgui.sourceforge.n
 create the final HDR image (although if you don't want Open Camera's HDR mode at all, you can instead use the
 Exposure Bracketing Photo Mode). Note this will make saving slower, especially if options like "Stamp photos" or
 Auto-stabilise are also used.</p>
+
+<p><b>Exposure Bracketing</b> - Specifies the total number of images to save in Exposure Bracketing Photo Mode
+(Camera2 API only).</p>
+
+<p><b>Exposure Bracketing Stops</b> - Specifies the number of stops between each successive image in Exposure
+Bracketing Photo Mode. An increase of 1 stop means a doubling of the amount of light (Camera2 API only).</p>
 
 <p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
 location data" is enabled (see "Location settings" below), then the current location latitude

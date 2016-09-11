@@ -1054,6 +1054,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putBoolean("supports_face_detection", this.preview.supportsFaceDetection());
 		bundle.putBoolean("supports_raw", this.preview.supportsRaw());
 		bundle.putBoolean("supports_hdr", this.supportsHDR());
+		bundle.putBoolean("supports_expo_bracketing", this.supportsExpoBracketing());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
 		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
 

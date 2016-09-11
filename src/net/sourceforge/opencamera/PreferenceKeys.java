@@ -83,6 +83,14 @@ public class PreferenceKeys {
     	return "preference_raw";
     }
     
+    public static String getExpoBracketingNImagesPreferenceKey() {
+    	return "preference_expo_bracketing_n_images";
+    }
+
+    public static String getExpoBracketingStopsPreferenceKey() {
+    	return "preference_expo_bracketing_stops";
+    }
+    
     public static String getVolumeKeysPreferenceKey() {
     	return "preference_volume_keys";
     }
