@@ -48,6 +48,11 @@ import android.widget.SeekBar;
 public class MyApplicationInterface implements ApplicationInterface {
 	private static final String TAG = "MyApplicationInterface";
 	
+    public static enum PhotoMode {
+    	Standard,
+    	HDR
+    }
+    
 	private MainActivity main_activity = null;
 	private LocationSupplier locationSupplier = null;
 	private StorageUtils storageUtils = null;
@@ -670,17 +675,17 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public boolean isExpoBracketingPref() {
-    	if( isHDRPref() )
+    	if( getPhotoMode() == PhotoMode.HDR )
 			return true;
 		return false;
     }
 
-	public boolean isHDRPref() {
+    public PhotoMode getPhotoMode() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		boolean hdr = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
 		if( hdr && main_activity.supportsHDR() )
-			return true;
-		return false;
+			return PhotoMode.HDR;
+		return PhotoMode.Standard;
     }
 
     @Override

@@ -2443,8 +2443,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				toast_string += "\n" + getResources().getString(R.string.preference_auto_stabilise);
 				simple = false;
 			}
-			if( applicationInterface.isHDRPref() ) {
-				toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + getResources().getString(R.string.photo_mode_hdr);
+			String photo_mode_string = null;
+			MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
+			if( photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
+				photo_mode_string = getResources().getString(R.string.photo_mode_hdr);
+			}
+			if( photo_mode_string != null ) {
+				toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + photo_mode_string;
 				simple = false;
 			}
 		}

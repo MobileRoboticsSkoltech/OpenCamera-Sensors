@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera.UI;
 
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
@@ -67,10 +68,10 @@ public class PopupView extends LinearLayout {
 
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
-		if( main_activity.getApplicationInterface().isHDRPref() ) {
+		if( main_activity.getApplicationInterface().isExpoBracketingPref() ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "flash not supported for HDR");
-			// HDR doesn't support flash, so don't show the options
+				Log.d(TAG, "flash not supported for expo bracketing");
+			// expo bracketing doesn't support flash, so don't show the options
 		}
 		else {
 	        List<String> supported_flash_values = preview.getSupportedFlashValues();
@@ -156,13 +157,27 @@ public class PopupView extends LinearLayout {
 
     		if( main_activity.supportsHDR() ) {
     			final List<String> photo_modes = new ArrayList<String>();
-    			final int mode_std = photo_modes.size();
+    			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<MyApplicationInterface.PhotoMode>();
+
     			photo_modes.add( getResources().getString(R.string.photo_mode_standard) );
-    			final int mode_hdr = photo_modes.size();
+    			photo_mode_values.add( MyApplicationInterface.PhotoMode.Standard );
+
     			photo_modes.add( getResources().getString(R.string.photo_mode_hdr) );
+    			photo_mode_values.add( MyApplicationInterface.PhotoMode.HDR );
     			
-    			boolean hdr = main_activity.getApplicationInterface().isHDRPref();
-        		String current_mode = photo_modes.get( hdr ? mode_hdr : mode_std );
+    			MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
+    			String current_mode = null;
+    			for(int i=0;i<photo_modes.size() && current_mode==null;i++) {
+    				if( photo_mode_values.get(i) == photo_mode ) {
+    					current_mode = photo_modes.get(i);
+    				}
+    			}
+    			if( current_mode == null ) {
+    				// applicationinterface should only report we're in a mode if it's supported, but just in case...
+    				if( MyDebug.LOG )
+    					Log.e(TAG, "can't find current mode for mode: " + photo_mode);
+    				current_mode = ""; // this will mean no photo mode is highlighted in the UI
+    			}
 
         		addTitleToPopup(getResources().getString(R.string.photo_mode));
         		
@@ -184,28 +199,24 @@ public class PopupView extends LinearLayout {
             					Log.e(TAG, "unknown mode id: " + option_id);
         				}
         				else {
-        					boolean new_hdr = option_id == mode_hdr;
-            				if( MyDebug.LOG )
-            					Log.d(TAG, "new_hdr?: " + new_hdr);
-    						String toast_message = null;
+    						String toast_message = option;
+    						MyApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
     	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     						SharedPreferences.Editor editor = sharedPreferences.edit();
-    						if( option_id == mode_std ) {
-    							toast_message = getResources().getString(R.string.photo_mode_standard);
+    						if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard ) {
         						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
     						}
-    						else if( option_id == mode_hdr ) {
-    							toast_message = getResources().getString(R.string.photo_mode_hdr);
+    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
         						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
     						}
     						else {
                 				if( MyDebug.LOG )
-                					Log.e(TAG, "unknown mode id: " + option_id);
+                					Log.e(TAG, "unknown new_photo_mode: " + new_photo_mode);
     						}
     						editor.apply();
 
     						boolean done_dialog = false;
-    	            		if( option_id == mode_hdr ) {
+    						if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
     	            			boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.getHDRInfoPreferenceKey());
     	            			if( !done_hdr_info ) {
     	            				showInfoDialog(R.string.photo_mode_hdr, R.string.hdr_info, PreferenceKeys.getHDRInfoPreferenceKey());
