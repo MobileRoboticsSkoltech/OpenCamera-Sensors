@@ -46,6 +46,24 @@ public class MainUI {
 		this.main_activity = main_activity;
 		
 		this.setSeekbarColors();
+
+		this.setIcon(R.id.gallery);
+		this.setIcon(R.id.settings);
+		this.setIcon(R.id.popup);
+		this.setIcon(R.id.exposure_lock);
+		this.setIcon(R.id.exposure);
+		this.setIcon(R.id.switch_video);
+		this.setIcon(R.id.switch_camera);
+		this.setIcon(R.id.audio_control);
+		this.setIcon(R.id.trash);
+		this.setIcon(R.id.share);
+	}
+	
+	private void setIcon(int id) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setIcon: " + id);
+	    ImageButton button = (ImageButton)main_activity.findViewById(id);
+	    button.setBackgroundColor(Color.argb(63, 255, 0, 0));
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
