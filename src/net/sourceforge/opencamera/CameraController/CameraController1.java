@@ -531,7 +531,7 @@ public class CameraController1 extends CameraController {
     }
 	
 	@Override
-	public void setHDR(boolean want_hdr) {
+	public void setExpoBracketing(boolean want_expo_bracketing) {
 		// not supported for CameraController1
 	}
 	

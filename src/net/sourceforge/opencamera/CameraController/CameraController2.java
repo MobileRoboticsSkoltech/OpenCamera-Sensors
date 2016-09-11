@@ -62,8 +62,7 @@ public class CameraController2 extends CameraController {
 	private FaceDetectionListener face_detection_listener = null;
 	private Object image_reader_lock = new Object(); // lock to make sure we only handle one image being available at a time
 	private ImageReader imageReader = null;
-	private boolean want_hdr = false;
-	//private boolean want_hdr = true;
+	private boolean want_expo_bracketing = false;
 	private boolean want_raw = false;
 	//private boolean want_raw = true;
 	private android.util.Size raw_size = null;
@@ -284,7 +283,7 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
 				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
 				// for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
-				// if we enable this ever, remember to still keep disabled for hdr (unless we've added support for flash with hdr by then)
+				// if we enable this ever, remember to still keep disabled for expo bracketing (unless we've added support for flash with expo by then)
 				builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 				// set flash via CaptureRequest.FLASH
 		    	/*if( flash_value.equals("flash_off") ) {
@@ -309,8 +308,8 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "flash_value: " + flash_value);
 				}
 				// prefer to set flash via the ae mode (otherwise get even worse results), except for torch which we can't
-				// for now, flash not supported for HDR
-		    	if( CameraController2.this.want_hdr || flash_value.equals("flash_off") ) {
+				// for now, flash not supported for expo bracketing
+		    	if( CameraController2.this.want_expo_bracketing || flash_value.equals("flash_off") ) {
 		    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 		    	}
@@ -998,7 +997,7 @@ public class CameraController2 extends CameraController {
 			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
 			if( exposure_time_range != null ) {
 				camera_features.supports_exposure_time = true;
-				camera_features.supports_hdr = true;
+				camera_features.supports_expo_bracketing = true;
 				camera_features.min_exposure_time = exposure_time_range.getLower();
 				camera_features.max_exposure_time = exposure_time_range.getUpper();
 			}
@@ -1611,15 +1610,15 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	public void setHDR(boolean want_hdr) {
+	public void setExpoBracketing(boolean want_expo_bracketing) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setHDR: " + want_hdr);
+			Log.d(TAG, "setExpoBracketing: " + want_expo_bracketing);
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "no camera");
 			return;
 		}
-		if( this.want_hdr == want_hdr ) {
+		if( this.want_expo_bracketing == want_expo_bracketing ) {
 			return;
 		}
 		if( captureSession != null ) {
@@ -1628,7 +1627,7 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "can't set hdr when captureSession running!");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
-		this.want_hdr = want_hdr;
+		this.want_expo_bracketing = want_expo_bracketing;
 		camera_settings.setAEMode(previewBuilder, false); // need to set the ae mode, as flash is disabled for HDR mode
 	}
 	
@@ -1694,7 +1693,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "read " + bytes.length + " bytes");
 		            buffer.get(bytes);
 		            image.close();
-		            if( want_hdr && n_burst > 1 ) {
+		            if( want_expo_bracketing && n_burst > 1 ) {
 		            	pending_burst_images.add(bytes);
 		            	if( pending_burst_images.size() == n_burst ) {
 							if( MyDebug.LOG )
@@ -2814,7 +2813,7 @@ public class CameraController2 extends CameraController {
 		// Camera2Basic sets a trigger with capture
 		// Google Camera sets to idle with a repeating request, then sets af trigger to start with a capture
 		try {
-			if( use_fake_precapture && !want_hdr && !camera_settings.has_iso ) {
+			if( use_fake_precapture && !want_expo_bracketing && !camera_settings.has_iso ) {
 				boolean want_flash = false;
 				if( camera_settings.flash_value.equals("flash_auto") ) {
 					// calling fireAutoFlash() also caches the decision on whether to flash - otherwise if the flash fires now, we'll then think the scene is bright enough to not need the flash!
@@ -2956,9 +2955,9 @@ public class CameraController2 extends CameraController {
 		}
 	}
 
-	private void takePictureBurstHdr() {
+	private void takePictureBurstExpoBracketing() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "takePictureBurstHdr");
+			Log.d(TAG, "takePictureBurstExpBracketing");
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no camera or capture session");
@@ -3024,7 +3023,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "taking HDR with:");
+				Log.d(TAG, "taking expo bracketing with:");
 				Log.d(TAG, "ISO: " + stillBuilder.get(CaptureRequest.SENSOR_SENSITIVITY));
 				Log.d(TAG, "Frame duration: " + stillBuilder.get(CaptureRequest.SENSOR_FRAME_DURATION));
 				Log.d(TAG, "Dark exposure time: " + dark_exposure_time);
@@ -3184,8 +3183,8 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "takePicture: not ready for capture!");
 			//throw new RuntimeException(); // debugging
 		}
-		if( want_hdr ) {
-			takePictureBurstHdr();
+		if( want_expo_bracketing ) {
+			takePictureBurstExpoBracketing();
 		}
 		else {
 			// Don't need precapture if flash off or torch

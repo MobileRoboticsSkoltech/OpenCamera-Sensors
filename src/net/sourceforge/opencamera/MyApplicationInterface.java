@@ -669,6 +669,12 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
     
     @Override
+	public boolean isExpoBracketingPref() {
+    	if( isHDRPref() )
+			return true;
+		return false;
+    }
+
 	public boolean isHDRPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		boolean hdr = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");

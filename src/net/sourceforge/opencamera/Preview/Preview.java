@@ -180,7 +180,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int min_exposure = 0;
 	private int max_exposure = 0;
 	private float exposure_step = 0.0f;
-	private boolean supports_hdr = false;
+	private boolean supports_expo_bracketing = false;
 	private boolean supports_raw = false;
 
 	private List<CameraController.Size> supported_preview_sizes = null;
@@ -1056,7 +1056,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		min_exposure = 0;
 		max_exposure = 0;
 		exposure_step = 0.0f;
-		supports_hdr = false;
+		supports_expo_bracketing = false;
 		supports_raw = false;
 		sizes = null;
 		current_size_index = -1;
@@ -1285,11 +1285,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			camera_controller.setRaw(false);
 		}
 
-		if( this.supports_hdr && applicationInterface.isHDRPref() ) {
-			camera_controller.setHDR(true);
+		if( this.supports_expo_bracketing && applicationInterface.isExpoBracketingPref() ) {
+			camera_controller.setExpoBracketing(true);
 		}
 		else {
-			camera_controller.setHDR(false);
+			camera_controller.setExpoBracketing(false);
 		}
 		
 		// Must set preview size before starting camera preview
@@ -1422,7 +1422,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.min_exposure = camera_features.min_exposure;
 			this.max_exposure = camera_features.max_exposure;
 			this.exposure_step = camera_features.exposure_step;
-			this.supports_hdr = camera_features.supports_hdr;
+			this.supports_expo_bracketing = camera_features.supports_expo_bracketing;
 			this.supports_raw = camera_features.supports_raw;
 			this.video_sizes = camera_features.video_sizes;
 	        this.supported_preview_sizes = camera_features.preview_sizes;
@@ -4786,10 +4786,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.exposures;
     }
 
-    public boolean supportsHDR() {
+    public boolean supportsExpoBracketing() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "supportsHDR");
-    	return this.supports_hdr;
+			Log.d(TAG, "supportsExpoBracketing");
+    	return this.supports_expo_bracketing;
     }
     
     public boolean supportsRaw() {

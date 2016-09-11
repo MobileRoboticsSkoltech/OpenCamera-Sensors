@@ -2269,7 +2269,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
     public boolean supportsHDR() {
     	// we also require the device have sufficient memory to do the processing, simplest to use the same test as we do for auto-stabilise...
-		if( this.supportsAutoStabilise() && preview.supportsHDR() )
+		if( this.supportsAutoStabilise() && preview.supportsExpoBracketing() )
 			return true;
 		return false;
     }
