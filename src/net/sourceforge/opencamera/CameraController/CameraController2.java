@@ -103,8 +103,9 @@ public class CameraController2 extends CameraController {
 
 	private boolean use_fake_precapture = false; // see CameraController.setUseCamera2FakeFlash() for details
 	//private boolean use_fake_precapture = true;
-	private boolean fake_precapture_performed = false; // whether we turned on torch to do a fake precapture
-	private boolean fake_precapture_focus_performed = false; // whether we turned on torch to do an autofocus, in fake precapture mode
+	private boolean use_fake_precapture_mode = false; // true if either use_fake_precapture is true, or we're temporarily using fake precapture mode (e.g., for front screen flash)
+	private boolean fake_precapture_torch_performed = false; // whether we turned on torch to do a fake precapture
+	private boolean fake_precapture_torch_focus_performed = false; // whether we turned on torch to do an autofocus, in fake precapture mode
 	private boolean fake_precapture_use_flash = false; // whether we decide to use flash in auto mode (if fake_precapture_use_autoflash_time_ms != -1)
 	private long fake_precapture_use_flash_time_ms = -1; // when we last checked to use flash in auto mode
 
@@ -335,6 +336,10 @@ public class CameraController2 extends CameraController {
 		    	}
 		    	else if( flash_value.equals("flash_red_eye") ) {
 					builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE);
+					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+		    	}
+		    	else if( flash_value.equals("flash_frontscreen_auto") || flash_value.equals("flash_frontscreen_on") ) {
+		    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 		    	}
 			}
@@ -977,6 +982,12 @@ public class CameraController2 extends CameraController {
 			if( !use_fake_precapture ) {
 				camera_features.supported_flash_values.add("flash_red_eye");
 			}
+		}
+		else if( isFrontFacing() ) {
+			camera_features.supported_flash_values = new ArrayList<String>();
+			camera_features.supported_flash_values.add("flash_off");
+			camera_features.supported_flash_values.add("flash_frontscreen_auto");
+			camera_features.supported_flash_values.add("flash_frontscreen_on");
 		}
 
 		camera_features.minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
@@ -1670,6 +1681,7 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 		this.use_fake_precapture = use_fake_precapture;
+		this.use_fake_precapture_mode = use_fake_precapture;
 	}
 	
 	@Override
@@ -2087,14 +2099,23 @@ public class CameraController2 extends CameraController {
 	public void setFlashValue(String flash_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFlashValue: " + flash_value);
-		if( !characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ) {
-			return;
-		}
-		else if( camera_settings.flash_value.equals(flash_value) ) {
+		if( camera_settings.flash_value.equals(flash_value) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "flash value already set");
 			return;
 		}
 
 		try {
+			boolean frontscreen_flash = flash_value.equals("flash_frontscreen_auto") || flash_value.equals("flash_frontscreen_on");
+	    	if( frontscreen_flash ) {
+	    		use_fake_precapture_mode = true;
+	    	}
+	    	else {
+	    		use_fake_precapture_mode = use_fake_precapture;
+	    	}
+			if( MyDebug.LOG )
+				Log.d(TAG, "use_fake_precapture_mode set to: " + use_fake_precapture_mode);
+			
 			if( camera_settings.flash_value.equals("flash_torch") && !flash_value.equals("flash_off") ) {
 				// hack - if switching to something other than flash_off, we first need to turn torch off, otherwise torch remains on (at least on Nexus 6)
 				camera_settings.flash_value = "flash_off";
@@ -2784,7 +2805,7 @@ public class CameraController2 extends CameraController {
 	public void autoFocus(final AutoFocusCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoFocus");
-		fake_precapture_focus_performed = false;
+		fake_precapture_torch_focus_performed = false;
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no camera or capture session");
@@ -2854,7 +2875,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "turn on torch for fake flash");
 					//afBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
 					afBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-					fake_precapture_focus_performed = true;
+					fake_precapture_torch_focus_performed = true;
 				}
 				// CONTROL_AE_MODE is set back to flash auto after the capture is completed
 			}
@@ -2947,7 +2968,7 @@ public class CameraController2 extends CameraController {
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			camera_settings.setupBuilder(stillBuilder, true);
-			if( use_fake_precapture && fake_precapture_performed ) {
+			if( use_fake_precapture && fake_precapture_torch_performed ) {
 				stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 			}
@@ -3166,11 +3187,29 @@ public class CameraController2 extends CameraController {
 	private void runFakePrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "runFakePrecapture");
-		previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-		previewBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+		if( camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_on") ) {
+			previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+			previewBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+			fake_precapture_torch_performed = true;
+		}
+		else if( camera_settings.flash_value.equals("flash_frontscreen_auto") || camera_settings.flash_value.equals("flash_frontscreen_on") ) {
+			if( jpeg_cb != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "request screen turn on for frontscreen flash");
+				jpeg_cb.onFrontScreenTurnOn();
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.e(TAG, "can't request screen turn on for frontscreen flash, as no jpeg_cb");
+			}
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.e(TAG, "runFakePrecapture called with unexpected flash value: " + camera_settings.flash_value);
+			
+		}
     	state = STATE_WAITING_FAKE_PRECAPTURE_START;
     	precapture_state_change_time_ms = System.currentTimeMillis();
-		fake_precapture_performed = true;
 		try {
 			setRepeatingRequest();
 		}
@@ -3208,7 +3247,10 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG && fake_precapture_use_flash_time_ms != -1 )
 			Log.d(TAG, "time since last flash auto decision: " + (time_now - fake_precapture_use_flash_time_ms));
 		fake_precapture_use_flash_time_ms = time_now;
-		fake_precapture_use_flash = capture_result_has_iso && capture_result_iso >= 1000;
+		/** iso_threshold fine-tuned for Nexus 6 - front camera ISO never goes above 805, but a threshold of 700 is too low
+		 */
+		int iso_threshold = camera_settings.flash_value.equals("flash_frontscreen_auto") ? 750 : 1000;
+		fake_precapture_use_flash = capture_result_has_iso && capture_result_iso >= iso_threshold;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "fake_precapture_use_flash: " + fake_precapture_use_flash);
 			Log.d(TAG, "    ISO was: " + capture_result_iso);
@@ -3233,7 +3275,7 @@ public class CameraController2 extends CameraController {
 		else
 			this.raw_cb = null;
 		this.take_picture_error_cb = error;
-		this.fake_precapture_performed = false; // just in case still on?
+		this.fake_precapture_torch_performed = false; // just in case still on?
 		if( !ready_for_capture ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "takePicture: not ready for capture!");
@@ -3243,15 +3285,20 @@ public class CameraController2 extends CameraController {
 			takePictureBurstExpoBracketing();
 		}
 		else {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "current flash value: " + camera_settings.flash_value);
+				Log.d(TAG, "use_fake_precapture_mode: " + use_fake_precapture_mode);
+			}
 			// Don't need precapture if flash off or torch
 			// And currently has_iso manual mode doesn't support flash - but just in case that's changed later, we still probably don't want to be doing a precapture...
 			if( camera_settings.has_iso || camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_torch") ) {
 				takePictureAfterPrecapture();
 			}
-			else if( use_fake_precapture ) {
-				// fake precapture works by turning on torch, so we can't use the camera's own decision for flash auto
+			else if( use_fake_precapture_mode ) {
+				// fake precapture works by turning on torch (or using a "front screen flash"), so we can't use the camera's own decision for flash auto
 				// instead we check the current ISO value
-				if( camera_settings.flash_value.equals("flash_auto") && !fireAutoFlash() ) {
+				boolean auto_flash = camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto");
+				if( auto_flash && !fireAutoFlash() ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "fake precapture flash auto: seems bright enough to not need flash");
 					takePictureAfterPrecapture();
@@ -3549,10 +3596,10 @@ public class CameraController2 extends CameraController {
 						}
 						state = STATE_NORMAL;
 				    	precapture_state_change_time_ms = -1;
-						if( use_fake_precapture && fake_precapture_focus_performed ) {
+						if( use_fake_precapture && fake_precapture_torch_focus_performed ) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "turn off torch after focus (fake precapture code)");
-							fake_precapture_focus_performed = false;
+							fake_precapture_torch_focus_performed = false;
 							camera_settings.setAEMode(previewBuilder, false);
 							try {
 								setRepeatingRequest();
@@ -3867,7 +3914,7 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.e(TAG, "### reset ae mode");
 				String saved_flash_value = camera_settings.flash_value;
-				if( use_fake_precapture && fake_precapture_performed ) {
+				if( use_fake_precapture && fake_precapture_torch_performed ) {
 					// same hack as in setFlashValue() - for fake precapture we need to turn off the torch mode that was set, but
 					// at least on Nexus 6, we need to turn to flash_off to turn off the torch!
 					camera_settings.flash_value = "flash_off";
@@ -3886,7 +3933,7 @@ public class CameraController2 extends CameraController {
 					}
 					e.printStackTrace();
 				}
-				if( use_fake_precapture && fake_precapture_performed ) {
+				if( use_fake_precapture && fake_precapture_torch_performed ) {
 					// now set up the request to switch to the correct flash value
 			    	camera_settings.flash_value = saved_flash_value;
 					camera_settings.setAEMode(previewBuilder, false);
@@ -3904,7 +3951,7 @@ public class CameraController2 extends CameraController {
 					e.printStackTrace();
 					preview_error_cb.onError();
 				}
-				fake_precapture_performed = false;
+				fake_precapture_torch_performed = false;
 			}
 		}
 	};

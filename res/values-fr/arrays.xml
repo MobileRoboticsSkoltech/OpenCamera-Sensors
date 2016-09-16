@@ -6,6 +6,8 @@
         <item>drawable/flash_on</item>
         <item>drawable/flash_torch</item>
         <item>drawable/flash_red_eye</item>
+        <item>drawable/flash_auto</item>
+        <item>drawable/flash_on</item>
     </string-array>
     <string-array name="flash_entries">
         <item>Flash Off</item>
@@ -13,6 +15,8 @@
         <item>Flash On</item>
         <item>Torche</item>
         <item>Yeux rouges</item>
+        <item>Screen Flash Auto</item>
+        <item>Screen Flash On</item>
     </string-array>
     <string-array name="flash_values">
         <item>flash_off</item>
@@ -20,6 +24,8 @@
         <item>flash_on</item>
         <item>flash_torch</item>
         <item>flash_red_eye</item>
+        <item>flash_frontscreen_auto</item>
+        <item>flash_frontscreen_on</item>
     </string-array>
     <string-array name="focus_mode_icons">
         <item>drawable/focus_mode_auto</item>

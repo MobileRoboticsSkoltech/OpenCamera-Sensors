@@ -4254,6 +4254,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					success = false;
 				}
     	    }
+
+			public void onFrontScreenTurnOn() {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onFrontScreenTurnOn");
+				applicationInterface.turnFrontScreenFlashOn();
+			}
     	};
 		CameraController.ErrorCallback errorCallback = new CameraController.ErrorCallback() {
 			public void onError() {

@@ -1069,6 +1069,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     	drawPreview.cameraInOperation(in_operation);
     	main_activity.getMainUI().showGUI(!in_operation);
     }
+    
+    @Override
+    public void turnFrontScreenFlashOn() {
+    	drawPreview.turnFrontScreenFlashOn();
+    }
 
     @Override
 	public void onPictureCompleted() {

@@ -66,6 +66,7 @@ public class DrawPreview {
 	private long ae_started_scanning_ms = -1; // time when ae started scanning
 
     private boolean taking_picture = false;
+    private boolean front_screen_flash = false;
     
 	private boolean continuous_focus_moving = false;
 	private long continuous_focus_moving_ms = 0;
@@ -131,8 +132,13 @@ public class DrawPreview {
     	}
     	else {
     		taking_picture = false;
+    		front_screen_flash = false;
     	}
     }
+	
+	public void turnFrontScreenFlashOn() {
+		front_screen_flash = true;
+	}
 
 	public void onContinuousFocusMove(boolean start) {
 		if( MyDebug.LOG )
@@ -194,7 +200,11 @@ public class DrawPreview {
 		}
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 		String preference_grid = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
-		if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
+		if( camera_controller!= null && front_screen_flash ) {
+			p.setColor(Color.WHITE);
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+		}
+		else if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			float this_stroke_width = (float) (5.0f * scale + 0.5f); // convert dps to pixels

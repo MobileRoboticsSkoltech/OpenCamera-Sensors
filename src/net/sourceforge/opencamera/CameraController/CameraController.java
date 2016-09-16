@@ -117,6 +117,11 @@ public abstract class CameraController {
 		/** Only called if burst is requested.
 		 */
 		public abstract void onBurstPictureTaken(List<byte[]> images);
+		/* This is called for flash_frontscreen_auto or flash_frontscreen_on mode to indicate the caller should light up the screen
+		 * (for flash_frontscreen_auto it will only be called if the scene is considered dark enough to require the screen flash).
+		 * The screen flash can be removed when or after onCompleted() is called.
+		 */
+		public abstract void onFrontScreenTurnOn();
 	}
 	
 	public static interface AutoFocusCallback {

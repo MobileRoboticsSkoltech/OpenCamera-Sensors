@@ -726,10 +726,10 @@ public class MainUI {
     	else if( flash_value != null && flash_value.equals("flash_torch") ) {
     		popup.setImageResource(R.drawable.popup_flash_torch);
     	}
-		else if( flash_value != null && flash_value.equals("flash_auto") ) {
+		else if( flash_value != null && ( flash_value.equals("flash_auto") || flash_value.equals("flash_frontscreen_auto") ) ) {
     		popup.setImageResource(R.drawable.popup_flash_auto);
     	}
-    	else if( flash_value != null && flash_value.equals("flash_on") ) {
+		else if( flash_value != null && ( flash_value.equals("flash_on") || flash_value.equals("flash_frontscreen_on") ) ) {
     		popup.setImageResource(R.drawable.popup_flash_on);
     	}
     	else if( flash_value != null && flash_value.equals("flash_red_eye") ) {
