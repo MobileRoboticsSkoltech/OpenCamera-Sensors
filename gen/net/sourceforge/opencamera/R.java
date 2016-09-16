@@ -207,17 +207,18 @@ public final class R {
         public static final int answer_no=0x7f080006;
         public static final int answer_yes=0x7f080005;
         public static final int app_name=0x7f080000;
-        /**  symbol short for megabytes 
+        /**  symbol short for gigabytes 
  symbol short for megabytes 
+ symbol short for gigabytes 
  symbol short for megabytes 
  symbol short for megabytes 
  symbol short for megabytes 
          */
-        public static final int audio_control_start=0x7f080114;
-        public static final int audio_control_stop=0x7f080115;
+        public static final int audio_control_start=0x7f080115;
+        public static final int audio_control_stop=0x7f080116;
         public static final int audio_disabled=0x7f080034;
-        public static final int audio_listener_started=0x7f080117;
-        public static final int auto_stabilise_info=0x7f080118;
+        public static final int audio_listener_started=0x7f080118;
+        public static final int auto_stabilise_info=0x7f080119;
         public static final int auto_stabilise_not_supported=0x7f080033;
         public static final int back_camera=0x7f08001c;
         public static final int cancelled_burst_mode=0x7f080022;
@@ -246,7 +247,7 @@ public final class R {
         public static final int clear_folder_history_question=0x7f08000b;
         public static final int color_effect=0x7f080036;
         public static final int direction=0x7f08003a;
-        public static final int dont_show_again=0x7f08011b;
+        public static final int dont_show_again=0x7f08011c;
         public static final int enter_new_folder=0x7f080109;
         public static final int exposure=0x7f0800fa;
         public static final int exposure_compensation=0x7f080017;
@@ -290,8 +291,12 @@ public final class R {
         public static final int free_memory=0x7f080040;
         public static final int front_camera=0x7f08001b;
         public static final int gallery=0x7f0800f9;
+        /**  symbol short for megabytes 
+ symbol short for megabytes 
+         */
+        public static final int gb_abbreviation=0x7f080114;
         public static final int grid=0x7f08009f;
-        public static final int hdr_info=0x7f08011a;
+        public static final int hdr_info=0x7f08011b;
         public static final int infinite=0x7f08001a;
         public static final int intro_ok=0x7f080004;
         public static final int intro_text=0x7f080003;
@@ -303,7 +308,7 @@ public final class R {
         public static final int metres_abbreviation=0x7f080044;
         public static final int new_folder=0x7f080106;
         public static final int no_gallery_app=0x7f080030;
-        public static final int no_permission=0x7f080124;
+        public static final int no_permission=0x7f080125;
         public static final int not_supported=0x7f080012;
         /**  whether a setting is turned on, e.g., "Auto-stabilise: On" 
  whether a setting is turned on, e.g., "Auto-stabilise: On" 
@@ -324,12 +329,13 @@ public final class R {
         public static final int on=0x7f080007;
         public static final int parent_folder=0x7f080104;
         public static final int permission_location_not_available=0x7f08010f;
-        public static final int permission_rationale_camera=0x7f080126;
-        public static final int permission_rationale_location=0x7f080129;
-        public static final int permission_rationale_record_audio=0x7f080128;
-        public static final int permission_rationale_storage=0x7f080127;
-        public static final int permission_rationale_title=0x7f080125;
+        public static final int permission_rationale_camera=0x7f080127;
+        public static final int permission_rationale_location=0x7f08012a;
+        public static final int permission_rationale_record_audio=0x7f080129;
+        public static final int permission_rationale_storage=0x7f080128;
+        public static final int permission_rationale_title=0x7f080126;
         /**  the permission names such as Microphone should match what Android calls them in the App permission settings 
+ the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
  the permission names such as Microphone should match what Android calls them in the App permission settings 
@@ -342,11 +348,11 @@ public final class R {
         public static final int permission_record_audio_not_available=0x7f08010e;
         public static final int photo=0x7f08001d;
         public static final int photo_deleted=0x7f08002f;
-        public static final int photo_mode=0x7f08011c;
-        public static final int photo_mode_expo_bracketing=0x7f08011f;
-        public static final int photo_mode_expo_bracketing_full=0x7f080120;
-        public static final int photo_mode_hdr=0x7f08011e;
-        public static final int photo_mode_standard=0x7f08011d;
+        public static final int photo_mode=0x7f08011d;
+        public static final int photo_mode_expo_bracketing=0x7f080120;
+        public static final int photo_mode_expo_bracketing_full=0x7f080121;
+        public static final int photo_mode_hdr=0x7f08011f;
+        public static final int photo_mode_standard=0x7f08011e;
         public static final int preference_about=0x7f0800ef;
         public static final int preference_about_summary=0x7f0800f0;
         public static final int preference_angle_highlight_color=0x7f080095;
@@ -365,8 +371,8 @@ public final class R {
         public static final int preference_burst_interval_summary=0x7f080060;
         public static final int preference_burst_mode=0x7f08005d;
         public static final int preference_burst_mode_summary=0x7f08005e;
-        public static final int preference_camera2_fake_flash=0x7f08012b;
-        public static final int preference_camera2_fake_flash_summary=0x7f08012c;
+        public static final int preference_camera2_fake_flash=0x7f08012c;
+        public static final int preference_camera2_fake_flash_summary=0x7f08012d;
         public static final int preference_category_camera_controls=0x7f080056;
         /**  symbol short for metres 
  symbol short for metres 
@@ -385,8 +391,8 @@ public final class R {
         public static final int preference_category_camera_effects=0x7f080045;
         public static final int preference_category_camera_quality=0x7f0800ac;
         public static final int preference_category_online=0x7f0800e8;
-        public static final int preference_category_photo_debugging=0x7f08012a;
-        public static final int preference_category_stamp=0x7f080121;
+        public static final int preference_category_photo_debugging=0x7f08012b;
+        public static final int preference_category_stamp=0x7f080122;
         /**  @TODO PER FAVORE RIGUARDARE "livellate" PERCHÈ SECONDO ME NON HA SENSO! 
          */
         public static final int preference_color_effect=0x7f080048;
@@ -410,10 +416,10 @@ public final class R {
         public static final int preference_crop_guide_summary=0x7f0800a1;
         public static final int preference_donate=0x7f0800eb;
         public static final int preference_donate_summary=0x7f0800ec;
-        public static final int preference_expo_bracketing_n_images=0x7f08012d;
-        public static final int preference_expo_bracketing_n_images_summary=0x7f08012e;
-        public static final int preference_expo_bracketing_stops=0x7f08012f;
-        public static final int preference_expo_bracketing_stops_summary=0x7f080130;
+        public static final int preference_expo_bracketing_n_images=0x7f08012e;
+        public static final int preference_expo_bracketing_n_images_summary=0x7f08012f;
+        public static final int preference_expo_bracketing_stops=0x7f080130;
+        public static final int preference_expo_bracketing_stops_summary=0x7f080131;
         public static final int preference_exposure=0x7f080050;
         public static final int preference_exposure_summary=0x7f080051;
         public static final int preference_face_detection=0x7f080054;
@@ -426,8 +432,8 @@ public final class R {
         public static final int preference_gps_direction_summary=0x7f0800b9;
         public static final int preference_grid=0x7f08009d;
         public static final int preference_grid_summary=0x7f08009e;
-        public static final int preference_hdr_save_expo=0x7f080122;
-        public static final int preference_hdr_save_expo_summary=0x7f080123;
+        public static final int preference_hdr_save_expo=0x7f080123;
+        public static final int preference_hdr_save_expo_summary=0x7f080124;
         public static final int preference_immersive_mode=0x7f080085;
         public static final int preference_immersive_mode_summary=0x7f080086;
         public static final int preference_iso=0x7f08004e;
@@ -566,7 +572,7 @@ public final class R {
         public static final int preference_volume_keys_summary=0x7f080069;
         public static final int preference_white_balance=0x7f08004c;
         public static final int preference_white_balance_summary=0x7f08004d;
-        public static final int raw_info=0x7f080119;
+        public static final int raw_info=0x7f08011a;
         public static final int repeats_to_go=0x7f08000f;
         public static final int saf_cancelled=0x7f08010d;
         public static final int saf_select_save_location=0x7f08010c;
@@ -576,7 +582,7 @@ public final class R {
         public static final int screen_lock_message_2=0x7f080042;
         public static final int share=0x7f080103;
         public static final int sorry=0x7f080027;
-        public static final int speech_recognizer_started=0x7f080116;
+        public static final int speech_recognizer_started=0x7f080117;
         public static final int start_video=0x7f080110;
         public static final int started_recording_video=0x7f080026;
         public static final int started_timer=0x7f080023;

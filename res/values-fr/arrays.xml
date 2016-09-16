@@ -10,9 +10,9 @@
         <item>drawable/flash_on</item>
     </string-array>
     <string-array name="flash_entries">
-        <item>Flash Off</item>
-        <item>Flash Auto</item>
-        <item>Flash On</item>
+        <item>Flash éteint</item>
+        <item>Flash auto</item>
+        <item>Flash forcé</item>
         <item>Torche</item>
         <item>Yeux rouges</item>
         <item>Screen Flash Auto</item>
@@ -46,8 +46,8 @@
         <item>Focus Manuel</item>
         <item>Focus Fixe</item>
         <item>Focus EDOF</item>
-        <item>Focus Continue</item>
-        <item>Focus Continue</item>
+        <item>Focus Continu</item>
+        <item>Focus Continu</item>
     </string-array>
     <string-array name="focus_mode_values">
         <item>focus_mode_auto</item>
@@ -61,9 +61,9 @@
         <item>focus_mode_continuous_video</item>
     </string-array>
     <string-array name="preference_lock_orientation_entries">
-        <item>Non vérouillé</item>
-        <item>Vérouillé en paysage</item>
-        <item>Verouillé en portrait</item>
+        <item>Non verrouillé</item>
+        <item>Verrouillé en paysage</item>
+        <item>Verrouillé en portrait</item>
     </string-array>
     <string-array name="preference_lock_orientation_values">
         <item>none</item>
@@ -163,9 +163,9 @@
         <item>preference_preview_size_wysiwyg</item>
     </string-array>
     <string-array name="preference_touch_capture_entries">
-        <item>Aucun</item>
-        <item>Appuie simple</item>
-        <item>Tapez 2 fois</item>
+        <item>Désactivé</item>
+        <item>Tape simple</item>
+        <item>Tape double</item>
         </string-array>
     <string-array name="preference_touch_capture_values">
         <item>none</item>
@@ -179,7 +179,7 @@
         <item>Modifier le niveau d\'exposition</item>
         <item>Auto-stabilisateur on/off</item>
         <item>Modifier le volume de l\'appareil</item>
-        <item>Rien faire</item>
+        <item>Ne rien faire</item>
         </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
@@ -239,14 +239,14 @@
         <item>Grille 3x3</item>
 		<item>Phi 3x3</item>
         <item>Grille 4x2 </item>
-        <item>Crosshair</item>
+        <item>Réticule</item>
         <item>D\'or (1)</item>
         <item>D\'or (2)</item>
         <item>D\'or (3)</item>
         <item>D\'or (4)</item>
         <item>Triangle (1)</item>
         <item>Triangle (2)</item>
-        <item>Diagonals</item>
+        <item>Diagonales</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
@@ -290,7 +290,7 @@
     </string-array>
     <string-array name="preference_stamp_entries">
         <item>Pas d\'incrustation</item>
-        <item>Incrustation des photos</item>
+        <item>Incrustations sur les photos</item>
     </string-array>
     <string-array name="preference_stamp_values">
         <item>preference_stamp_no</item>
@@ -324,7 +324,7 @@
     </string-array>
     <string-array name="preference_stamp_gpsformat_entries">
         <item>Par défaut</item>
-        <item>Degré/minute/second</item>
+        <item>Degré/minute/seconde</item>
         <item>Aucun</item>
     </string-array>
     <string-array name="preference_stamp_gpsformat_values">
@@ -522,7 +522,7 @@
         <item>Caméscope</item>
         <item>Micro externe (si présent)</item>
         <item>Source audio par défaut</item>
-        <item>Optimisé pour la voie</item>
+        <item>Optimisé pour la voix</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>
@@ -533,11 +533,53 @@
     <string-array name="preference_record_audio_channels_entries">
         <item>Par défaut</item>
         <item>Mono</item>
-        <item>Stéréo (sur certain appareil uniquement)</item>
+        <item>Stéréo (sur certains appareils uniquement)</item>
     </string-array>
     <string-array name="preference_record_audio_channels_values">
         <item>audio_default</item>
         <item>audio_mono</item>
         <item>audio_stereo</item>
+    </string-array>
+    <string-array name="preference_audio_control_entries">
+        <item>Aucun</item>
+        <item>Bruit fort</item>
+        <item>Commande vocale : « cheese »</item>
+    </string-array>
+    <string-array name="preference_audio_control_values">
+        <item>none</item>
+        <item>noise</item>
+        <item>voice</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_entries">
+        <item>+3 (très sensible)</item>
+        <item>+2</item>
+        <item>+1</item>
+        <item>0 (par défaut)</item>
+        <item>-1</item>
+        <item>-2 (peu sensible)</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_values">
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+        <item>-2</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_entries">
+        <item>Par défaut</item>
+        <item>100Mo</item>
+        <item>200Mo</item>
+        <item>300Mo</item>
+        <item>500Mo</item>
+        <item>1Go</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_values">
+        <item>0</item>
+        <item>104857600</item>
+        <item>209715200</item>
+        <item>314572800</item>
+        <item>524288000</item>
+        <item>1073741824</item>
     </string-array>
 </resources>
