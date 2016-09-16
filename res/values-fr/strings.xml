@@ -4,14 +4,14 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Paramètres</string>
     <string name="action_popup">Fenêtre de paramètres</string>
-    <string name="intro_text">Touchez pour faire la mise au point, et appuyez sur le bouton bleu Appareil photo pour faire des photos. Pour de l\'aide supplémentaire, cliquez sur «\u00A0Aide en ligne\u00A0» dans les paramètres. Open Camera est totalement gratuit. Si vous aimez cette application, n\'hésitez pas à me faire un don\u00A0:) (voir le lien dans «\u00A0Paramètres\u00A0», ou «\u00A0Aide en ligne\u00A0».\nPolitique de confidentialité\u00A0: la permission «\u00A0Position\u00A0» est requise pour géolocaliser la photo, mais le paramètre est désactivé par défaut. Si vous l\'activez, votre position est encodée dans les photos (et n\'est utilisée qu\'à cet effet).</string>
+    <string name="intro_text">Touchez pour faire la mise au point, et appuyez sur le bouton bleu «\u00A0Appareil photo\u00A0» pour faire des photos. Pour de l\'aide supplémentaire, cliquez sur «\u00A0Aide en ligne\u00A0» dans les paramètres. Open Camera est totalement gratuit. Si vous aimez cette application, n\'hésitez pas à me faire un don\u00A0:) (voir le lien dans «\u00A0Paramètres\u00A0», ou «\u00A0Aide en ligne\u00A0».\nPolitique de confidentialité\u00A0: la permission «\u00A0Position\u00A0» est requise pour géolocaliser la photo, mais le paramètre est désactivé par défaut. Si vous l\'activez, votre position est encodée dans les photos (et n\'est utilisée qu\'à cet effet).</string>
     <string name="intro_ok">OK (ce message ne s\'affichera plus)</string>
     
     <string name="answer_yes">Oui</string>
     <string name="answer_no">Non</string>
 
-    <string name="on">On</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
-    <string name="off">Off</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->
+    <string name="on">Actif</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
+    <string name="off">Inactif</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->
     
     <string name="choose_save_location">Sélectionnez le dossier d\'enregistrement\u00A0: </string>
     <string name="clear_folder_history">Effacer l\'historique des dossiers</string>
@@ -28,7 +28,7 @@
     <string name="video_max_duration">La vidéo a atteint la durée max</string>
     <string name="video_max_filesize">La vidéo a atteint la taille max</string>
     <string name="exposure_compensation">Compensation d\'exposition</string>
-    <string name="fps">IPS</string>
+    <string name="fps">Images/seconde</string>
     <string name="focus_distance">Distance de focus</string>
     <string name="infinite">Infinie</string>
     <string name="front_camera">Caméra frontale</string>
@@ -164,7 +164,7 @@
     <string name="preference_show_battery_summary">Affiche le niveau actuel de la batterie à l\'écran</string>
     <string name="preference_grid">Afficher une grille</string>
     <string name="preference_grid_summary">Affiche l\'une des différentes grilles</string>
-    <string name="grid">La grille</string> <!-- short form of Show a grid -->
+    <string name="grid">Grille</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Afficher un guide de recadrage</string>
     <string name="preference_crop_guide_summary">Un guide de recadrage affiche un rectangle montrant à quoi le rapport d\'aspect spécifié ressemble - utile si vous prévoyez de recadrer la photo/vidéo après un ratio d\'aspect différent. Nécessite le mode photo WYSIWYG, ou d\'être en mode vidéo.</string>
     <string name="preference_show_toasts">Afficher les messages d\'information</string>
@@ -240,14 +240,14 @@
     <string name="preference_online_help">Aide en ligne</string>
     <string name="preference_online_help_summary">Ouvre le site web de Open Camera dans votre navigateur</string>
     <string name="preference_donate">Faire un don pour soutenir le développement</string>
-    <string name="preference_donate_summary">Si vous aimez ce soft, n\'hésitez pas à faire un don. Vous pouvez le faire via l\'achat de mon «\u00A0application de don\u00A0» - cliquer sur cette option va ouvrir la page de l\'application de don. Merci\u00A0!</string>
+    <string name="preference_donate_summary">Si vous aimez ce logiciel, n\'hésitez pas à faire un don. Vous pouvez le faire via l\'achat de mon «\u00A0application de don\u00A0» - Cliquer sur cette option va ouvrir la page de l\'application de don. Merci\u00A0!</string>
     <string name="preference_use_camera2">Utiliser l\'API Camera2</string>
     <string name="preference_use_camera2_summary">Active l\'API Camera2 d\'Android 5 - permet d\'utiliser des fonctionnalités supplémentaires, mais reste encore expérimental (peut provoquer un redémarrage)</string>
     <string name="preference_about">À propos</string>
     <string name="preference_about_summary">Informations de l\'application et de debug</string>
     <string name="preference_reset">Réinitialiser les paramètres</string>
-    <string name="preference_reset_summary">Réinitialise tous les paramètres aux valeurs par défaut d\'Open Camera</string>
-    <string name="preference_reset_question">Êtes-vous sûr de vouloir réinitialiser tous les réglages d\'Open Camera par défaut\u00A0?</string>
+    <string name="preference_reset_summary">Réinitialise tout les paramètres aux valeurs par défaut d\'Open Camera</string>
+    <string name="preference_reset_question">Êtes-vous sûr de vouloir réinitialiser tout les réglages d\'Open Camera par défaut\u00A0?</string>
 
     <string name="about_ok">OK</string>
     <string name="about_available">Disponible</string>
@@ -294,4 +294,43 @@
     <string name="audio_control_stop">Arrêter l\'écoute de l\'audio</string>
     <string name="speech_recognizer_started">Dire «\u00A0cheese\u00A0»</string>
     <string name="audio_listener_started">Faire un bruit fort</string>
+    <string name="auto_stabilise_info">L\'auto-stabilisateur va automatiquement faire pivoter les photos pour qu\'elles
+        apparaîssent de niveau.\n\nNotez que cela implique que les images apparaîtront avec une résolution légèrement
+        inférieure (en relation avec la rotation et le rognage qui est nécessaire).
+    </string>
+    <string name="dont_show_again">Ne plus montrer</string>
+    <string name="failed_to_save_photo_raw">Impossible d\'enregistrer la photo RAW</string>
+    <string name="hdr_info">Le mode HDR est utile pour les prises de vue avec une grande variation de luminosité. Il
+        fonctionne en prenant plusieurs prises avec des expositions différentes, puis en les combinant pour produire
+        l\'image finale\nNotez que HDR n\'est pas approprié pour les scènes de mouvements et peut réduire la précision
+        de la reproduction des couleurs. Le flash est également désactivé pour HDR.\n\nPrendre des photos en mode HDR
+        sera également plus lent.
+    </string>
+    <string name="photo_mode">Mode photo</string>
+    <string name="photo_mode_hdr">HDR</string>
+    <string name="photo_mode_standard">Standard</string>
+    <string name="preference_background_photo_saving">Utiliser une tâche de fond</string>
+    <string name="preference_background_photo_saving_summary">Permettre d\'enregistrer les photos dans une tâche de fond
+        (opération plus rapide)
+    </string>
+    <string name="preference_category_stamp">Incrustations photo</string>
+    <string name="preference_hdr_save_expo">Enregistrer toutes les images en mode HDR</string>
+    <string name="preference_hdr_save_expo_summary">Si vous l\'activez, en mode photo HDR les trois images utilisées
+        seront enregistrées en supplément de la photo finale HDR. Notez que ceci ralentira l\'enregistrement, plus
+        particulièrement si les options «\u00A0Incrustation photo\u00A0» ou «\u00A0Auto-stabilisateur\u00A0» sont
+        utilisées.
+    </string>
+    <string name="preference_raw">RAW</string>
+    <string name="preference_raw_summary">Choisissez d\'enregistrer au format RAW (DNG)</string>
+    <string name="preference_save_zulu_time">Format de l\'heure pour le nom de fichier</string>
+    <string name="preference_save_zulu_time_summary">Utiliser l\'heure locale ou l\'heure UTC pour nommer les photos ou
+        les vidéos
+    </string>
+    <string name="raw_info">Les fichiers DNG contiennent toutes les informations non compressées ni traitées de votre
+        caméra.\n\nLa plupart des applications d\'affichage d\'image ne reconnaissent pas le DNG. Vous devrez utiliser une app
+        spécialisée comme Snapseed ou Lightroom\n\nNotez que certaines options comme «\u00A0Incrustation photo\u00A0» ou
+        «\u00A0Auto-stabilisateur\u00A0» ne s\'appliquent que pour des images JPEG et pas DNG.\n\nLes fichiers DNG
+        utilisent beaucoup d\'espace disque, un explorateur de fichiers peut être utilise pour faire le ménage.\n\nLes
+        fichiers DNG ne sont enregistrés que dans le mode photo standard.
+    </string>
 </resources>
