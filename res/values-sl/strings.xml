@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">Open Camera</string>
@@ -45,6 +45,7 @@
     <string name="started_recording_video">Snemanje videoposnetka se je začelo</string>
     <string name="sorry">Oprostite</string>
     <string name="failed_to_save_photo">Shranjevanje fotografije je spodletelo</string>
+	<string name="failed_to_save_photo_raw">Shranjevanje fotografije v obliki RAW je spodletelo</string>
     <string name="failed_to_auto_stabilise">Samodejna ustalitev je spodletela</string>
     <string name="failed_to_start_camera_preview">Zagon predogleda fotoaparata je spodletel</string>
     <string name="taking_photo">Snemanje fotografije</string>
@@ -68,7 +69,7 @@
     <string name="failed_to_open_camera_3">DRUG PROGRAM?</string>
     <string name="iso">ISO</string>
     <string name="zoom">Povečava</string>
-    <string name="free_memory">Nezasedenega</string>
+    <string name="free_memory">Nezased.</string>
     <string name="screen_lock_message_1">[ZAKLENJENO:</string>
     <string name="screen_lock_message_2">povlecite za odklepanje]</string>
     
@@ -99,8 +100,13 @@
     <string name="preference_timer_beep">Pisk samosprožilca</string>
     <string name="preference_timer_beep_summary">Zapiskaj ob odštevanju samosprožilca ali zakasnitvi zaporednega načina</string>
     <string name="preference_timer_speak">Glasovno odštevanje samosprožilca</string>
+<<<<<<< HEAD
+    <string name="preference_timer_speak_summary">Glasovno odštevanje samosprožilca ali zakasnitve zaporednega načina (od 60-ih s naprej)</string>
+    <string name="preference_burst_mode">Zaporedje</string>
+=======
     <string name="preference_timer_speak_summary">Glasovno odštevanje samosprožilca ali zakasnitev zaporednega načina (od 60-ih s naprej)</string>
-    <string name="preference_burst_mode">Zaporedni</string>
+    <string name="preference_burst_mode">Zaporedje</string>
+>>>>>>> 7e37663a898eff34f4fbc1f2f70f127a998094c9
     <string name="preference_burst_mode_summary">Posnemi več fotografij v zaporedju</string>
     <string name="preference_burst_interval">Razmik zaporednega načina</string>
     <string name="preference_burst_interval_summary">Zakasnitev (če obstaja) med fotografjami v zaporednem načinu</string>
@@ -110,7 +116,7 @@
     <string name="preference_pause_preview">Premor po snemanju fotografije</string>
     <string name="preference_pause_preview_summary">Premor zaslona po snemanju fotografje z možnostjo deljenja ali izbrisa fotografije</string>
     <string name="preference_shutter_sound">Zvok zaslonke</string>
-    <string name="preference_shutter_sound_summary">Predvajaj zvok ob snemanju fotografije (zahteva Android 4.2 ali višjega za onemogočanje)</string>
+    <string name="preference_shutter_sound_summary">Predvajaj zvok ob snemanju fotografije</string>
     <string name="preference_volume_keys">Gumba za glasnost</string>
     <string name="preference_volume_keys_summary">Nastavite vedenje ob pritisku na gumba za glasnost</string>
     <string name="preference_audio_control">Možnosti nadzora zvoka</string>
@@ -125,6 +131,8 @@
     <string name="preference_save_photo_prefix_summary">Predpona imena datotek fotografij</string>
     <string name="preference_save_video_prefix">Predpona shranjenih videoposnetkov</string>
     <string name="preference_save_video_prefix_summary">Predpona imena datotek videoposnetkov</string>
+	<string name="preference_save_zulu_time">Oblika časa za ime datoteke</string>
+    <string name="preference_save_zulu_time_summary">Ali naj se uporabi krajevni čas ali čas UTC (Coordinated Universal Time) za poimenovanje fotografij in videoposnetkov</string>
     <string name="preference_show_when_locked">Prikaži fotoaparat, ko je zaklenjeno</string>
     <string name="preference_show_when_locked_summary">Če je omogočeno, se bo Open Camera še vedno prikazoval nad zaklenjenim zaslonom (še vedno boste morali odkleniti za dostop do nastavitev, galerije itd.)</string>
     <string name="preference_startup_focus">Izvedi samodejno ostrenje ob zagonu</string>
@@ -164,6 +172,7 @@
     <string name="preference_show_battery_summary">Na zaslonu prikaži trenutno raven baterije</string>
     <string name="preference_grid">Prikaži mrežo</string>
     <string name="preference_grid_summary">Prikaži eno od raznih mrež</string>
+	<string name="grid">Mreža</string>
     <string name="preference_crop_guide">Prikaži vodnik za obrezovanje</string>
     <string name="preference_crop_guide_summary">Vodnik za obrezovanje prikazuje pravokotnik določenega razmerja slike - uporabno, če boste kasneje obrezali fotografijo/videoposnetek na drugo razmerje. Zahteva način za fotografije WYSIWYG ali način za videoposnetke.</string>
     <string name="preference_show_toasts">Prikaži \"pojavna\" sporočila</string>
@@ -185,6 +194,8 @@
     <string name="preference_resolution_summary">Nastavite ločljivost fotografij</string>
     <string name="preference_quality">Kakovost slik</string>
     <string name="preference_quality_summary">Nastavite kakovost shranjenih slik JPEG (priporočljiva vrednost je 90 %%)</string>
+	<string name="preference_raw">RAW</string>
+    <string name="preference_raw_summary">Ali naj se slike shranjuje v obliki RAW (DNG)</string>
     <string name="preference_location">Shrani podatke o lokaciji (označevanje z zemljepisnim položajem)</string>
     <string name="preference_location_summary">Shrani podatke o lokaicji GPS v fotografijah/videoposnetkih</string>
     <string name="preference_gps_direction">Shrani smer kompasa</string>
@@ -218,13 +229,13 @@
     <string name="preference_video_bitrate">Bitna hitrost videoposnetkov (pribl.)</string>
     <string name="preference_video_bitrate_summary">Nastavite pribl. hitrost videoposnetkov (višje vrednosti pomenijo boljšo kakovost, vendar zavzamejo več prostora na disku; snemanje videoposnetkov lahko spodleti, če bitna hitrost ni podprta)</string>
     <string name="preference_video_fps">Hitrost sličic videoposnetkov (pribl.)</string>
-    <string name="preference_video_fps_summary">Nastavite hitrost sličic (sl./s) videoposnetkov (je lahko približna, doseganje nastavljene vrednosti ni zagotovljeno in snemanje videoposnetkov lahko spodleti, če hitrost sličic ni podprta)</string>
+    <string name="preference_video_fps_summary">Nastavite hitrost sličic (sl./s) videoposnetkov (je lahko približna. Doseganje nastavljene vrednosti ni zagotovljeno in snemanje videoposnetkov lahko spodleti, če hitrost sličic ni podprta)</string>
     <string name="preference_video_max_duration">Najdaljše trajanje videoposnetkov</string>
     <string name="preference_video_max_duration_summary">Snemanje videoposnetkov se bo ustavilo po tem času</string>
     <string name="preference_video_restart">Ponovno zaženi videoposnetek po najdaljšem trajanju</string>
     <string name="preference_video_restart_summary">Če se je videoposnetek ustavil, ko je bilo doseženo najdaljše trajanje (če je nastavljeno), bo ta možnost povzročila ponovni zagon videoposnetka do določenega števila ponovitev</string>
     <string name="preference_video_max_filesize">Največja velikost videoposnetkov</string>
-    <string name="preference_video_max_filesize_summary">Snemanje videoposnetkov se bo ustavilo in/ali ponovno zagnalo (glejte spodnjo možnost), ko je dosežena (pribl.) največja velikost datoteke. Upoštevajte, da imajo skoraj vse naprave Android največjo velikost datoteke za videoposnetke (običajno okoli 2 ali 4 GB), vendar ta možnost omogoča nastavitev določene vrednosti</string>
+    <string name="preference_video_max_filesize_summary">Snemanje videoposnetkov se bo ustavilo in/ali ponovno zagnalo (glejte spodnjo možnost), ko je dosežena (pribl.) največja velikost datoteke. Upoštevajte, da imajo skoraj vse naprave Android zgornjo omejitev velikosti datoteke za videoposnetke (običajno okoli 2 ali 4 GB), vendar ta možnost omogoča nastavitev določene vrednosti</string>
     <string name="preference_video_restart_max_filesize">Ponovno zaženi ob največji velikosti datoteke</string>
     <string name="preference_video_restart_max_filesize_summary">Ali naj se videoposnetek ponovno zažene, ko je dosežena (privzeta ali uporabniško določena) največja velikost datoteke</string>
     <string name="preference_record_audio">Snemaj zvok</string>
@@ -293,4 +304,23 @@
     <string name="audio_control_stop">Ustavi poslušanje zvoka</string>
     <string name="speech_recognizer_started">Recite \"cheese\"</string>
     <string name="audio_listener_started">Naredite glasen zvok</string>
+	<string name="auto_stabilise_info">Samodejna ustalitev bo zavrtela fotografije, da bodo videti poravnane.\n\nUpoštevajte, da se bo ločljivost slik rahlo zmanjšala (zaradi zahtevanega vrtenja in obrezovanja).</string>
+    <string name="raw_info">Datoteke DNG vsebujejo nestisnjene in neobdelane podatke iz fotoaparata.\n\nVečina programov za galerijo ne prepozna oblike DNG. Uporabite jo s posebnimi programi, kot je Snapseed ali Lightroom.\n\nUpoštevajte, da se bodo razne možnosti obdelave, kot sta "Dodaj žig" in "Samodejna ustalitev", uporabile samo za slike JPEG in ne za slike DNG.\n\nDatoteke DNG zavzamejo veliko prosotra; za njihov izbris ali prenos lahko uporabite raziskovalca datotek.\n\nDatoteke DNG se shranjujejo samo … (prirezano)…
+    <string name="hdr_info">Način HDR je uporaben za posnetke z velikimi odstopanji v svetlosti. Deluje tako, da zajame več posnetkov z različnimi osvetlitvami in jih potem združi v končno sliko.\n\nUpoštevajte, da HDR ni primeren za hitro gibajoče prizore in lahko povzroči barvna odstopanja. V načinu HDR se prav tako onemogoči bliskavica.\n\nSnemanje fotografij v načinu HDR je počasnejše.</string>
+
+    <string name="dont_show_again">Ne prikazuj več</string>
+
+    <string name="photo_mode">Način za fotografije</string>
+    <string name="photo_mode_standard">Običajni</string>
+    <string name="photo_mode_hdr">HDR</string>
+    <string name="preference_category_stamp">Dodaj žig</string>
+    <string name="preference_hdr_save_expo">Shrani vse slike za način HDR</string>
+    <string name="preference_hdr_save_expo_summary">Če je omogočeno, bodo ob uporabi načina HDR posnete tri osnovne slike kot tudi končna slika HDR. Upoštevajte, da bo shranevanje počasnejše, posebno, če uporabljate možnosti, kot sta \"Dodaj žig\" ali samodejno ustalitev.</string>
+
+    <string name="no_permission">DOVOLJENJA NISO NA VOLJO</string>
+    <string name="permission_rationale_title">Zahtevano je dovoljenje</string>
+    <string name="permission_rationale_camera">Za omogočanje fotoaparata je zahtevano dovoljenje za fotoaparat</string>
+    <string name="permission_rationale_storage">Za shranjevanje fotografij je zahtevano dovoljenje za branje/pisanje na pomnilniško napravo</string>
+    <string name="permission_rationale_record_audio">Za snemanje videoposnetkov z zvokom je zahtevano dovoljenje za mikrofon</string>
+    <string name="permission_rationale_location">Za označevanje z lokacjo je zahtevano dovoljenje za lokacijo</string>
 </resources>
