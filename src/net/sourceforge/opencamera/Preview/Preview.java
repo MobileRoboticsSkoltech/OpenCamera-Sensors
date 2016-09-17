@@ -324,6 +324,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return cameraSurface.getView();
 	}
 
+	// If this code is changed, important to test that face detection and touch to focus still works as expected, for front and back
+	// cameras, for old and new API, including with zoom. Also test with MainActivity.setWindowFlagsForCamera() setting orientation as SCREEN_ORIENTATION_REVERSE_LANDSCAPE,
+	// and/or set "Rotate preview" option to 180 degrees.
 	private void calculateCameraToPreviewMatrix() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "calculateCameraToPreviewMatrix");
