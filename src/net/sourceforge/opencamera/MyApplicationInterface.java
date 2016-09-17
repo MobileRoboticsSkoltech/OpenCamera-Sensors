@@ -31,6 +31,7 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
@@ -440,9 +441,10 @@ public class MyApplicationInterface implements ApplicationInterface {
         }
 		return remaining_restart_video;
     }
-    
-    @Override
-	public long getVideoMaxFileSizePref() {
+
+	long getVideoMaxFileSizeUserPref() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getVideoMaxFileSizeUserPref");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String video_max_filesize_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "0");
 		long video_max_filesize = 0;
@@ -455,13 +457,78 @@ public class MyApplicationInterface implements ApplicationInterface {
     		e.printStackTrace();
     		video_max_filesize = 0;
         }
+		if( MyDebug.LOG )
+			Log.d(TAG, "video_max_filesize: " + video_max_filesize);
 		return video_max_filesize;
 	}
 
-    @Override
-	public boolean getVideoRestartMaxFileSizePref() {
+	private boolean getVideoRestartMaxFileSizeUserPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getVideoRestartMaxFileSizePreferenceKey(), true);
+	}
+
+    @Override
+	public VideoMaxFileSize getVideoMaxFileSizePref() throws NoFreeStorageException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getVideoMaxFileSizePref");
+		VideoMaxFileSize video_max_filesize = new VideoMaxFileSize();
+		video_max_filesize.max_filesize = getVideoMaxFileSizeUserPref();
+		video_max_filesize.auto_restart = getVideoRestartMaxFileSizeUserPref();
+		
+		/* Also if using internal memory without storage access framework, try to set the max filesize so we don't run out of space.
+		   This is the only way to avoid the problem where videos become corrupt when run out of space - MediaRecorder doesn't stop on
+		   its own, and no error is given!
+		   If using SD card, it's not reliable to get the free storage (see https://sourceforge.net/p/opencamera/tickets/153/ ).
+		   If using storage access framework, in theory we could check if this was on internal storage, but risk of getting it wrong...
+		   so seems safest to leave (the main reason for using SAF is for SD cards, anyway).
+		   */
+		if( !storageUtils.isUsingSAF() ) {
+    		String folder_name = storageUtils.getSaveLocation();
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "saving to: " + folder_name);
+    		boolean is_internal = false;
+    		if( !folder_name.startsWith("/") ) {
+    			is_internal = true;
+    		}
+    		else {
+    			// if save folder path is a full path, see if it matches the "external" storage (which actually means "primary", which typically isn't an SD card these days)
+    			File storage = Environment.getExternalStorageDirectory();
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "compare to: " + storage.getAbsolutePath());
+    			if( folder_name.startsWith( storage.getAbsolutePath() ) )
+    				is_internal = true;
+    		}
+    		if( is_internal ) {
+        		if( MyDebug.LOG )
+        			Log.d(TAG, "using internal storage");
+        		long free_memory = main_activity.freeMemory() * 1024 * 1024;
+        		final long min_free_memory = 50000000; // how much free space to leave after video
+        		//final long min_free_memory = 500000000; // test
+        		// min_free_filesize is the minimum value to set for max file size:
+        		//   - no point trying to create a really short video
+        		//   - too short videos can end up being corrupted
+        		final long min_free_filesize = 10000000;
+        		long available = free_memory - min_free_memory;
+        		if( MyDebug.LOG ) {
+        			Log.d(TAG, "free_memory: " + free_memory);
+        		}
+        		if( available > min_free_filesize ) {
+        			if( video_max_filesize.max_filesize == 0 || video_max_filesize.max_filesize > available ) {
+        				video_max_filesize.max_filesize = available;
+        				video_max_filesize.auto_restart = false; // don't auto-restart if the limit is to avoid running out of memory
+        				if( MyDebug.LOG )
+        					Log.d(TAG, "set video_max_filesize to avoid running out of space: " + video_max_filesize);
+        			}
+        		}
+        		else {
+    				if( MyDebug.LOG )
+    					Log.e(TAG, "not enough free storage to record video");
+        			throw new NoFreeStorageException();
+        		}
+    		}
+		}
+		
+		return video_max_filesize;
 	}
 
     @Override

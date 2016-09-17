@@ -2302,6 +2302,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	this.supports_force_video_4k = false;
     }
 
+    /** Return free memory in MB.
+     */
     @SuppressWarnings("deprecation")
 	public long freeMemory() { // return free memory in MB
     	try {
@@ -2430,7 +2432,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					simple = false;
 				}
 			}
-			long max_filesize = applicationInterface.getVideoMaxFileSizePref();
+			long max_filesize = applicationInterface.getVideoMaxFileSizeUserPref();
 			if( max_filesize != 0 ) {
 				long max_filesize_mb = max_filesize/(1024*1024);
 				toast_string += "\n" + getResources().getString(R.string.max_filesize) +": " + max_filesize_mb + getResources().getString(R.string.mb_abbreviation);

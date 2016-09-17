@@ -11,6 +11,7 @@ import net.sourceforge.opencamera.CameraController.CameraControllerException;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager1;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
+import net.sourceforge.opencamera.Preview.ApplicationInterface.NoFreeStorageException;
 import net.sourceforge.opencamera.Preview.CameraSurface.CameraSurface;
 import net.sourceforge.opencamera.Preview.CameraSurface.MySurfaceView;
 import net.sourceforge.opencamera.Preview.CameraSurface.MyTextureView;
@@ -115,6 +116,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean video_start_time_set = false;
 	private long video_start_time = 0;
 	private long video_accumulated_time = 0;
+	private boolean video_restart_on_max_filesize = false;
 	private static final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
 	private int video_method = ApplicationInterface.VIDEOMETHOD_FILE;
 	private Uri video_uri = null; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
@@ -3611,8 +3613,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void onVideoInfo(int what, int extra) {
-		boolean restart_on_max_filesize = applicationInterface.getVideoRestartMaxFileSizePref();
-		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && restart_on_max_filesize ) {
+		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && video_restart_on_max_filesize ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "restart due to max filesize reached");
 			Activity activity = (Activity)Preview.this.getContext();
@@ -3859,21 +3860,32 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			Log.d(TAG, "video bitrate: " + profile.videoBitRate);
     			Log.d(TAG, "video codec: " + profile.videoCodec);
     		}
-    		//video_recorder.setMaxFileSize(15*1024*1024); // test
-			long video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
-			if( video_max_filesize > 0 ) {
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "set max file size of: " + video_max_filesize);
-	    		video_recorder.setMaxFileSize(video_max_filesize);
-			}
-
-    		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
-    			video_recorder.setOutputFile(video_filename);
-    		}
-    		else {
-    			video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
-    		}
         	try {
+        		//video_recorder.setMaxFileSize(15*1024*1024); // test
+    			ApplicationInterface.VideoMaxFileSize video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
+    			long max_filesize = video_max_filesize.max_filesize;
+    			if( max_filesize > 0 ) {
+    	    		if( MyDebug.LOG )
+    	    			Log.d(TAG, "set max file size of: " + max_filesize);
+    	    		try {
+    	    			video_recorder.setMaxFileSize(max_filesize);
+    	    		}
+    	    		catch(RuntimeException e) {
+    	    			// Google Camera warns this can happen - for example, if 64-bit filesizes not supported
+        	    		if( MyDebug.LOG )
+        	    			Log.e(TAG, "failed to set max filesize of: " + max_filesize);
+        	    		e.printStackTrace();
+    	    		}
+    			}
+        		video_restart_on_max_filesize = video_max_filesize.auto_restart; // note, we set this even if max_filesize==0, as it will still apply when hitting device max filesize limit
+
+        		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+        			video_recorder.setOutputFile(video_filename);
+        		}
+        		else {
+        			video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
+        		}
+
         		applicationInterface.cameraInOperation(true);
         		applicationInterface.startingVideo();
         		/*if( true ) // test
@@ -3995,6 +4007,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    			Log.e(TAG, "camera exception starting video recorder");
 				e.printStackTrace();
 				failedToStartVideoRecorder(profile);
+			}
+        	catch(NoFreeStorageException e) {
+	    		if( MyDebug.LOG )
+	    			Log.e(TAG, "nofreestorageexception starting video recorder");
+				e.printStackTrace();
+	    		video_recorder.reset();
+	    		video_recorder.release(); 
+	    		video_recorder = null;
+				this.phase = PHASE_NORMAL;
+				applicationInterface.cameraInOperation(false);
+				this.reconnectCamera(true);
+				this.showToast(null, R.string.video_no_free_space);
 			}
 		}
 	}

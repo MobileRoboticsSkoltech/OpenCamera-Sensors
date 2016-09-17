@@ -21,6 +21,14 @@ import android.view.MotionEvent;
  *  ApplicationInterface.
  */
 public interface ApplicationInterface {
+	class NoFreeStorageException extends Exception {
+		private static final long serialVersionUID = -2021932609486148748L;
+	}
+	class VideoMaxFileSize {
+		public long max_filesize = 0; // maximum file size in bytes for video (return 0 for device default - typically this is ~2GB)
+		public boolean auto_restart = false; // whether to automatically restart on hitting max filesize (this setting is still relevant for max_filesize==0, as typically there will still be a device max filesize)
+	};
+
 	final int VIDEOMETHOD_FILE = 0; // video will be saved to a file
 	final int VIDEOMETHOD_SAF = 1; // video will be saved using Android 5's Storage Access Framework
 	final int VIDEOMETHOD_URI = 2; // video will be written to the supplied Uri
@@ -55,8 +63,7 @@ public interface ApplicationInterface {
 	String getVideoFPSPref(); // return "default" to let Preview choose
 	long getVideoMaxDurationPref(); // time in ms after which to automatically stop video recording (return 0 for off)
 	int getVideoRestartTimesPref(); // number of times to restart video recording after hitting max duration (return 0 for never auto-restarting)
-	long getVideoMaxFileSizePref(); // maximum file size in bytes for video (return 0 for device default)
-	boolean getVideoRestartMaxFileSizePref(); // whether to restart on hitting max file size
+	VideoMaxFileSize getVideoMaxFileSizePref() throws NoFreeStorageException; // see VideoMaxFileSize class for details
 	boolean getVideoFlashPref(); // option to switch flash on/off while recording video (should be false in most cases!)
 	String getPreviewSizePref(); // "preference_preview_size_wysiwyg" is recommended (preview matches aspect ratio of photo resolution as close as possible), but can also be "preference_preview_size_display" to maximise the preview size
 	String getPreviewRotationPref(); // return "0" for default; use "180" to rotate the preview 180 degrees

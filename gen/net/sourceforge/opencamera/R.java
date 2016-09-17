@@ -620,6 +620,9 @@ public final class R {
         public static final int video_max_duration=0x7f080015;
         public static final int video_max_filesize=0x7f080016;
         public static final int video_may_be_corrupted=0x7f080011;
+        /**  short for seconds 
+         */
+        public static final int video_no_free_space=0x7f080133;
         public static final int video_quality=0x7f0800ce;
         public static final int video_quality_summary=0x7f0800cf;
         public static final int white_balance=0x7f080038;
