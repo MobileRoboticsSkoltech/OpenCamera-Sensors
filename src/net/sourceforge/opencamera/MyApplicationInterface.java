@@ -61,7 +61,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private ImageSaver imageSaver = null;
 
 	private Rect text_bounds = new Rect();
-
+    private boolean used_front_screen_flash = false;
+	
 	private boolean last_images_saf = false; // whether the last images array are using SAF or not
 	/** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
 	 */
@@ -1063,15 +1064,25 @@ public class MyApplicationInterface implements ApplicationInterface {
 		    this.clearLastImages();
 	    }
 	}
-	
+    
     @Override
     public void cameraInOperation(boolean in_operation) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraInOperation: " + in_operation);
+    	if( !in_operation && used_front_screen_flash ) {
+    		main_activity.setBrightnessForCamera(false); // ensure screen brightness matches user preference, after using front screen flash
+    		used_front_screen_flash = false;
+    	}
     	drawPreview.cameraInOperation(in_operation);
     	main_activity.getMainUI().showGUI(!in_operation);
     }
     
     @Override
     public void turnFrontScreenFlashOn() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "turnFrontScreenFlashOn");
+		used_front_screen_flash = true;
+    	main_activity.setBrightnessForCamera(true); // ensure we have max screen brightness, even if user preference not set for max brightness
     	drawPreview.turnFrontScreenFlashOn();
     }
 
