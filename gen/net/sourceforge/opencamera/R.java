@@ -208,7 +208,7 @@ public final class R {
         public static final int answer_yes=0x7f080005;
         public static final int app_name=0x7f080000;
         /**  symbol short for gigabytes 
- symbol short for megabytes 
+ symbol short for gigabytes 
  symbol short for gigabytes 
  symbol short for megabytes 
  symbol short for megabytes 
@@ -292,6 +292,7 @@ public final class R {
         public static final int front_camera=0x7f08001b;
         public static final int gallery=0x7f0800f9;
         /**  symbol short for megabytes 
+ symbol short for megabytes 
  symbol short for megabytes 
          */
         public static final int gb_abbreviation=0x7f080114;
