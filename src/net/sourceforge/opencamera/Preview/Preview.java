@@ -325,6 +325,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void calculateCameraToPreviewMatrix() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "calculateCameraToPreviewMatrix");
 		if( camera_controller == null )
 			return;
 		camera_to_preview_matrix.reset();
@@ -334,14 +336,28 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			boolean mirror = camera_controller.isFrontFacing();
 			camera_to_preview_matrix.setScale(mirror ? -1 : 1, 1);
 			// This is the value for android.hardware.Camera.setDisplayOrientation.
-			camera_to_preview_matrix.postRotate(camera_controller.getDisplayOrientation());
+			int display_orientation = camera_controller.getDisplayOrientation();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "orientation of display relative to camera orientaton: " + display_orientation);
+			}
+			camera_to_preview_matrix.postRotate(display_orientation);
 	    }
 	    else {
-	    	// unfortunately the transformation for Android L API isn't documented, but this seems to work for Nexus 6
+	    	// Unfortunately the transformation for Android L API isn't documented, but this seems to work for Nexus 6.
+			// This is the equivalent code for android.hardware.Camera.setDisplayOrientation, but we don't actually use setDisplayOrientation()
+			// for CameraController2, so instead this is the equivalent code to https://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int),
+			// except testing on Nexus 6 shows that we shouldn't change "result" for front facing camera.
 			boolean mirror = camera_controller.isFrontFacing();
 			camera_to_preview_matrix.setScale(1, mirror ? -1 : 1);
+	    	int degrees = getDisplayRotationDegrees();
+            int result = (camera_controller.getCameraOrientation() - degrees + 360) % 360;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "orientation of display relative to natural orientaton: " + degrees);
+				Log.d(TAG, "orientation of display relative to camera orientaton: " + result);
+			}
+			camera_to_preview_matrix.postRotate(result);
 	    }
-		// Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
+	    // Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
 		// UI coordinates range from (0, 0) to (width, height).
 		camera_to_preview_matrix.postScale(cameraSurface.getView().getWidth() / 2000f, cameraSurface.getView().getHeight() / 2000f);
 		camera_to_preview_matrix.postTranslate(cameraSurface.getView().getWidth() / 2f, cameraSurface.getView().getHeight() / 2f);
@@ -2405,6 +2421,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return aspect_ratio;
     }
 
+    /** Returns the ROTATION_* enum of the display relative to the natural device orientation.
+     */
     public int getDisplayRotation() {
     	// gets the display rotation (as a Surface.ROTATION_* constant), taking into account the getRotatePreviewPreferenceKey() setting
 		Activity activity = (Activity)this.getContext();
@@ -2427,6 +2445,26 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return rotation;
     }
     
+    /** Returns the rotation in degrees of the display relative to the natural device orientation.
+     */
+	private int getDisplayRotationDegrees() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getDisplayRotationDegrees");
+	    int rotation = getDisplayRotation();
+	    int degrees = 0;
+	    switch (rotation) {
+	    	case Surface.ROTATION_0: degrees = 0; break;
+	        case Surface.ROTATION_90: degrees = 90; break;
+	        case Surface.ROTATION_180: degrees = 180; break;
+	        case Surface.ROTATION_270: degrees = 270; break;
+    		default:
+    			break;
+	    }
+		if( MyDebug.LOG )
+			Log.d(TAG, "    degrees = " + degrees);
+		return degrees;
+	}
+	
     // for the Preview - from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
 	// note, if orientation is locked to landscape this is only called when setting up the activity, and will always have the same orientation
 	public void setCameraDisplayOrientation() {
@@ -2442,19 +2480,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			configureTransform();
 	    }
 	    else {
-		    int rotation = getDisplayRotation();
-		    int degrees = 0;
-		    switch (rotation) {
-		    	case Surface.ROTATION_0: degrees = 0; break;
-		        case Surface.ROTATION_90: degrees = 90; break;
-		        case Surface.ROTATION_180: degrees = 180; break;
-		        case Surface.ROTATION_270: degrees = 270; break;
-	    		default:
-	    			break;
-		    }
+	    	int degrees = getDisplayRotationDegrees();
 			if( MyDebug.LOG )
 				Log.d(TAG, "    degrees = " + degrees);
-
+			// note the code to make the rotation relative to the camera sensor is done in camera_controller.setDisplayOrientation()
 			camera_controller.setDisplayOrientation(degrees);
 	    }
 	}
