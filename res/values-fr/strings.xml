@@ -303,7 +303,7 @@
     <string name="hdr_info">Le mode HDR est utile pour les prises de vue avec une grande variation de luminosité. Il
         fonctionne en prenant plusieurs prises avec des expositions différentes, puis en les combinant pour produire
         l\'image finale\nNotez que HDR n\'est pas approprié pour les scènes de mouvements et peut réduire la précision
-        de la reproduction des couleurs. Le flash est également désactivé pour HDR.\n\nPrendre des photos en mode HDR
+        de la reproduction des couleurs.\n\nPrendre des photos en mode HDR
         sera également plus lent.
     </string>
     <string name="photo_mode">Mode photo</string>
