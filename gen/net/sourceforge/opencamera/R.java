@@ -581,6 +581,7 @@ public final class R {
         public static final int screen_is_locked=0x7f080031;
         public static final int screen_lock_message_1=0x7f080041;
         public static final int screen_lock_message_2=0x7f080042;
+        public static final int seconds_abbreviation=0x7f080132;
         public static final int share=0x7f080103;
         public static final int sorry=0x7f080027;
         public static final int speech_recognizer_started=0x7f080117;

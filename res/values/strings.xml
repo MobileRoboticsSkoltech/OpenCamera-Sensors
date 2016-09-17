@@ -331,4 +331,6 @@
     <string name="preference_expo_bracketing_n_images_summary">Number of images for exposure bracketing mode</string>
     <string name="preference_expo_bracketing_stops">Exposure Bracketing Stops</string>
     <string name="preference_expo_bracketing_stops_summary">Number of stops for each image</string>
+
+    <string name="seconds_abbreviation">s</string> <!-- short for seconds -->
 </resources>

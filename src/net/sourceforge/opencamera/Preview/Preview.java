@@ -2739,8 +2739,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	public String getExposureTimeString(long exposure_time) {
 		double exposure_time_s = exposure_time/1000000000.0;
-		double exposure_time_r = 1.0/exposure_time_s;
-		return " 1/" + decimal_format_1dp.format(exposure_time_r);
+		String string = "";
+		if( exposure_time >= 1000000000 ) {
+			// show exposure times of more than 1s directly
+			string = decimal_format_1dp.format(exposure_time_s) + getResources().getString(R.string.seconds_abbreviation);
+		}
+		else {
+			double exposure_time_r = 1.0/exposure_time_s;
+			string = " 1/" + decimal_format_1dp.format(exposure_time_r) + getResources().getString(R.string.seconds_abbreviation);
+		}
+		return string;
 	}
 
 	/*public String getFrameDurationString(long frame_duration) {
