@@ -61,7 +61,7 @@
         <item>focus_mode_continuous_video</item>
     </string-array>
     <string-array name="preference_lock_orientation_entries">
-        <item>Ni zaklenjeno</item>
+        <item>Brez zaklepanja</item>
         <item>Zakleni na ležeče</item>
         <item>Zakleni na pokončno</item>
     </string-array>
@@ -71,7 +71,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Off</item>
+        <item>Izk.</item>
         <item>1 s</item>
         <item>2 s</item>
         <item>3 s</item>
@@ -287,6 +287,14 @@
         <item>crop_guide_2.33</item>
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>
+    </string-array>
+	<string-array name="preference_raw_entries">
+        <item>Samo JPEG</item>
+        <item>JPEG in DNG (RAW)</item>
+    </string-array>
+    <string-array name="preference_raw_values">
+        <item>preference_raw_no</item>
+        <item>preference_raw_yes</item>
     </string-array>
     <string-array name="preference_stamp_entries">
         <item>Brez žiga</item>
@@ -581,5 +589,33 @@
         <item>314572800</item>
         <item>524288000</item>
         <item>1073741824</item>
+    </string-array>
+	<string-array name="preference_save_zulu_time_entries">
+        <item>Krajevni čas</item>
+        <item>UTC (Zulu)</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_values">
+        <item>local</item>
+        <item>zulu</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_entries">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_values">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_entries">
+        <item>0,5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_values">
+        <item>0,5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
 </resources>
