@@ -68,12 +68,7 @@ public class PopupView extends LinearLayout {
 
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
-		if( main_activity.getApplicationInterface().isExpoBracketingPref() ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "flash not supported for expo bracketing");
-			// expo bracketing doesn't support flash, so don't show the options
-		}
-		else {
+		{
 	        List<String> supported_flash_values = preview.getSupportedFlashValues();
 	    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
 				@Override

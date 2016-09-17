@@ -1,7 +1,6 @@
 package net.sourceforge.opencamera.UI;
 
 import net.sourceforge.opencamera.MainActivity;
-import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
@@ -713,11 +712,7 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPopupIcon");
 		ImageButton popup = (ImageButton)main_activity.findViewById(R.id.popup);
-		String flash_value = null;
-		// flash not supported for HDR, so don't show the popup flash icon
-		MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
-		if( photo_mode != MyApplicationInterface.PhotoMode.HDR )
-			flash_value = main_activity.getPreview().getCurrentFlashValue();
+		String flash_value = main_activity.getPreview().getCurrentFlashValue();
 		if( MyDebug.LOG )
 			Log.d(TAG, "flash_value: " + flash_value);
     	if( flash_value != null && flash_value.equals("flash_off") ) {
