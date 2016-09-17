@@ -313,8 +313,20 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting immersive mode listener: " + (System.currentTimeMillis() - debug_time));
 
-		// show "about" dialog for first time use
+		// show "about" dialog for first time use; also set some per-device defaults
 		boolean has_done_first_time = sharedPreferences.contains(PreferenceKeys.getFirstTimePreferenceKey());
+		if( !has_done_first_time ) {
+			boolean is_samsung = Build.MANUFACTURER.toLowerCase(Locale.US).contains("samsung");
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "running for first time");
+				Log.d(TAG, "is_samsung? " + is_samsung);
+			}
+			if( is_samsung ) {
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), true);
+				editor.apply();
+			}
+		}
         if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle(R.string.app_name);
@@ -1042,6 +1054,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putBoolean("supports_face_detection", this.preview.supportsFaceDetection());
 		bundle.putBoolean("supports_raw", this.preview.supportsRaw());
 		bundle.putBoolean("supports_hdr", this.supportsHDR());
+		bundle.putBoolean("supports_expo_bracketing", this.supportsExpoBracketing());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
 		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
 
@@ -1166,16 +1179,27 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
 		boolean need_reopen = false;
 		if( preview.getCameraController() != null ) {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			String scene_mode = preview.getCameraController().getSceneMode();
 			if( MyDebug.LOG )
 				Log.d(TAG, "scene mode was: " + scene_mode);
 			String key = PreferenceKeys.getSceneModePreferenceKey();
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			String value = sharedPreferences.getString(key, preview.getCameraController().getDefaultSceneMode());
 			if( !value.equals(scene_mode) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "scene mode changed to: " + value);
 				need_reopen = true;
+			}
+			else {
+				// need to reopen if fake flash mode changed, as it changes the available camera features, and we can only set this after opening the camera
+				boolean camera2_fake_flash = preview.getCameraController().getUseCamera2FakeFlash();
+				if( MyDebug.LOG )
+					Log.d(TAG, "camera2_fake_flash was: " + camera2_fake_flash);
+				if( applicationInterface.useCamera2FakeFlash() != camera2_fake_flash ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "camera2_fake_flash changed");
+					need_reopen = true;
+				}
 			}
 		}
 
@@ -2246,7 +2270,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
     public boolean supportsHDR() {
     	// we also require the device have sufficient memory to do the processing, simplest to use the same test as we do for auto-stabilise...
-		if( this.supportsAutoStabilise() && preview.supportsHDR() )
+		if( this.supportsAutoStabilise() && preview.supportsExpoBracketing() )
+			return true;
+		return false;
+    }
+    
+    public boolean supportsExpoBracketing() {
+		if( preview.supportsExpoBracketing() )
 			return true;
 		return false;
     }
@@ -2420,8 +2450,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				toast_string += "\n" + getResources().getString(R.string.preference_auto_stabilise);
 				simple = false;
 			}
-			if( applicationInterface.isHDRPref() ) {
-				toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + getResources().getString(R.string.photo_mode_hdr);
+			String photo_mode_string = null;
+			MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
+			if( photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
+				photo_mode_string = getResources().getString(R.string.photo_mode_hdr);
+			}
+			else if( photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
+				photo_mode_string = getResources().getString(R.string.photo_mode_expo_bracketing_full);
+			}
+			if( photo_mode_string != null ) {
+				toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + photo_mode_string;
 				simple = false;
 			}
 		}

@@ -495,7 +495,7 @@ public class CameraController1 extends CameraController {
 		// not supported for CameraController1
 		return false;
 	}
-
+	
 	@Override
     public CameraController.Size getPictureSize() {
     	Camera.Parameters parameters = this.getParameters();
@@ -531,10 +531,20 @@ public class CameraController1 extends CameraController {
     }
 	
 	@Override
-	public void setHDR(boolean want_hdr) {
+	public void setExpoBracketing(boolean want_expo_bracketing) {
 		// not supported for CameraController1
 	}
 	
+	@Override
+	public void setExpoBracketingNImages(int n_images) {
+		// not supported for CameraController1
+	}
+	
+	@Override
+	public void setExpoBracketingStops(double stops) {
+		// not supported for CameraController1
+	}
+
 	@Override
 	public void setRaw(boolean want_raw) {
 		// not supported for CameraController1

@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera.UI;
 
 import net.sourceforge.opencamera.MainActivity;
+import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
@@ -46,6 +47,24 @@ public class MainUI {
 		this.main_activity = main_activity;
 		
 		this.setSeekbarColors();
+
+		this.setIcon(R.id.gallery);
+		this.setIcon(R.id.settings);
+		this.setIcon(R.id.popup);
+		this.setIcon(R.id.exposure_lock);
+		this.setIcon(R.id.exposure);
+		this.setIcon(R.id.switch_video);
+		this.setIcon(R.id.switch_camera);
+		this.setIcon(R.id.audio_control);
+		this.setIcon(R.id.trash);
+		this.setIcon(R.id.share);
+	}
+	
+	private void setIcon(int id) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setIcon: " + id);
+	    ImageButton button = (ImageButton)main_activity.findViewById(id);
+	    button.setBackgroundColor(Color.argb(63, 255, 0, 0));
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -696,7 +715,8 @@ public class MainUI {
 		ImageButton popup = (ImageButton)main_activity.findViewById(R.id.popup);
 		String flash_value = null;
 		// flash not supported for HDR, so don't show the popup flash icon
-		if( !main_activity.getApplicationInterface().isHDRPref() )
+		MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
+		if( photo_mode != MyApplicationInterface.PhotoMode.HDR )
 			flash_value = main_activity.getPreview().getCurrentFlashValue();
 		if( MyDebug.LOG )
 			Log.d(TAG, "flash_value: " + flash_value);
@@ -706,10 +726,10 @@ public class MainUI {
     	else if( flash_value != null && flash_value.equals("flash_torch") ) {
     		popup.setImageResource(R.drawable.popup_flash_torch);
     	}
-		else if( flash_value != null && flash_value.equals("flash_auto") ) {
+		else if( flash_value != null && ( flash_value.equals("flash_auto") || flash_value.equals("flash_frontscreen_auto") ) ) {
     		popup.setImageResource(R.drawable.popup_flash_auto);
     	}
-    	else if( flash_value != null && flash_value.equals("flash_on") ) {
+		else if( flash_value != null && ( flash_value.equals("flash_on") || flash_value.equals("flash_frontscreen_on") ) ) {
     		popup.setImageResource(R.drawable.popup_flash_on);
     	}
     	else if( flash_value != null && flash_value.equals("flash_red_eye") ) {

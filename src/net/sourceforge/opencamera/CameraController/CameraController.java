@@ -58,7 +58,7 @@ public abstract class CameraController {
 		public int max_exposure = 0;
 		public float exposure_step = 0.0f;
 		public boolean can_disable_shutter_sound = false;
-		public boolean supports_hdr = false;
+		public boolean supports_expo_bracketing = false;
 		public boolean supports_raw = false;
 	}
 
@@ -117,6 +117,11 @@ public abstract class CameraController {
 		/** Only called if burst is requested.
 		 */
 		public abstract void onBurstPictureTaken(List<byte[]> images);
+		/* This is called for flash_frontscreen_auto or flash_frontscreen_on mode to indicate the caller should light up the screen
+		 * (for flash_frontscreen_auto it will only be called if the scene is considered dark enough to require the screen flash).
+		 * The screen flash can be removed when or after onCompleted() is called.
+		 */
+		public abstract void onFrontScreenTurnOn();
 	}
 	
 	public static interface AutoFocusCallback {
@@ -179,8 +184,31 @@ public abstract class CameraController {
     public abstract void setPictureSize(int width, int height);
     public abstract CameraController.Size getPreviewSize();
     public abstract void setPreviewSize(int width, int height);
-	public abstract void setHDR(boolean want_hdr);
+	public abstract void setExpoBracketing(boolean want_expo_bracketing);
+	/** n_images must be an odd number greater than 1.
+	 */
+	public abstract void setExpoBracketingNImages(int n_images);
+	public abstract void setExpoBracketingStops(double stops);
 	public abstract void setRaw(boolean want_raw);
+	/**
+	 * setUseCamera2FakeFlash() should be called after creating the CameraController, and before calling getCameraFeatures() or
+	 * starting the preview (as it changes the available flash modes).
+	 * "Fake flash" is an alternative mode for handling flash, for devices that have poor Camera2 support - typical symptoms
+	 * include precapture never starting, flash not firing, photos being over or under exposed.
+	 * Instead, we fake the precapture and flash simply by turning on the torch. After turning on torch, we wait for ae to stop
+	 * scanning (and af too, as it can start scanning in continuous mode) - this is effectively the equivalent of precapture -
+	 * before taking the photo. 
+	 * In auto-focus mode, we make the decision ourselves based on the current ISO.
+	 * We also handle the flash firing for autofocus by turning the torch on and off too. Advantages are:
+	 *   - The flash tends to be brighter, and the photo can end up overexposed as a result if capture follows the autofocus.
+	 *   - Some devices also don't seem to fire flash for autofocus in Camera2 mode (e.g., Samsung S7)
+	 *   - When capture follows autofocus, we need to make the same decision for firing flash for both the autofocus and the capture.
+	 */
+	public void setUseCamera2FakeFlash(boolean use_fake_precapture) {
+	}
+	public boolean getUseCamera2FakeFlash() {
+		return false;
+	}
 	public abstract void setVideoStabilization(boolean enabled);
 	public abstract boolean getVideoStabilization();
 	public abstract int getJpegQuality();
@@ -245,6 +273,9 @@ public abstract class CameraController {
 	public abstract void initVideoRecorderPrePrepare(MediaRecorder video_recorder);
 	public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException;
 	public abstract String getParametersString();
+	public boolean captureResultIsAEScanning() {
+		return false;
+	}
 	public boolean captureResultHasIso() {
 		return false;
 	}

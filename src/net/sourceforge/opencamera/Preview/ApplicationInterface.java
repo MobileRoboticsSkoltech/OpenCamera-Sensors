@@ -79,8 +79,12 @@ public interface ApplicationInterface {
 	// Camera2 only modes:
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
 	float getFocusDistancePref();
-	boolean isHDRPref(); // whether to enable HDR photos
+	boolean isExpoBracketingPref(); // whether to enable burst photos with expo bracketing
+    int getExpoBracketingNImagesPref(); // how many images to take for exposure bracketing
+    double getExpoBracketingStopsPref(); // stops per image for exposure bracketing
 	boolean isRawPref(); // whether to enable RAW photos
+	boolean useCamera2FakeFlash(); // whether to enable CameraController.setUseCamera2FakeFlash() for Camera2 API
+
 	// for testing purposes:
 	boolean isTestAlwaysFocus(); // if true, pretend autofocus always successful
 
@@ -100,6 +104,7 @@ public interface ApplicationInterface {
 	void onFailedCreateVideoFileError(); // callback if unable to create file for recording video
 	void hasPausedPreview(boolean paused); // called when the preview is paused or unpaused (due to getPausePreviewPref())
 	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video, including if preview is paused after taking a photo), use to disable GUI elements during camera operation
+	void turnFrontScreenFlashOn(); // called when front-screen "flash" required (for modes flash_frontscreen_auto, flash_frontscreen_on); the application should light up the screen, until cameraInOperation(false) is called
 	void cameraClosed();
 	void timerBeep(long remaining_time); // n.b., called once per second on timer countdown - so application can beep, or do whatever it likes
 

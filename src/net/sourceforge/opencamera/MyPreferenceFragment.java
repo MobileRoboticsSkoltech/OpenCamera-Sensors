@@ -187,6 +187,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 
+		final boolean supports_expo_bracketing = bundle.getBoolean("supports_expo_bracketing");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_expo_bracketing: " + supports_expo_bracketing);
+
+		if( !supports_expo_bracketing ) {
+			Preference pref = findPreference("preference_expo_bracketing_n_images");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+        	pg.removePreference(pref);
+			pref = findPreference("preference_expo_bracketing_stops");
+			pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+        	pg.removePreference(pref);
+		}
+
 		final String [] video_quality = bundle.getStringArray("video_quality");
 		final String [] video_quality_string = bundle.getStringArray("video_quality_string");
 		if( video_quality != null && video_quality_string != null ) {
@@ -257,6 +270,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         if( !using_android_l ) {
         	Preference pref = findPreference("preference_show_iso");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
+        	pg.removePreference(pref);
+        }
+        if( !using_android_l ) {
+        	Preference pref = findPreference("preference_camera2_fake_flash");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
         	pg.removePreference(pref);
         }
 
@@ -413,7 +431,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked about");
             	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
-                        alertDialog.setTitle("About");
+                        alertDialog.setTitle(getContext().getResources().getString(R.string.preference_about));
                         final StringBuilder about_string = new StringBuilder();
                         String version = "UNKNOWN_VERSION";
                         int version_code = -1;

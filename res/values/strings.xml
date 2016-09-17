@@ -294,6 +294,7 @@
 
     <string name="max_filesize">Max file size</string>
     <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
+    <string name="gb_abbreviation">GB</string> <!-- symbol short for gigabytes -->
     
     <string name="audio_control_start">Start audio listening</string>
     <string name="audio_control_stop">Stop audio listening</string>
@@ -309,6 +310,8 @@
     <string name="photo_mode">Photo Mode</string>
     <string name="photo_mode_standard">Standard</string>
     <string name="photo_mode_hdr">HDR</string>
+    <string name="photo_mode_expo_bracketing">Expo {}</string>
+    <string name="photo_mode_expo_bracketing_full">Exposure Bracketing</string>
     <string name="preference_category_stamp">Photo Stamp</string>
     <string name="preference_hdr_save_expo">Save all images for HDR mode</string>
     <string name="preference_hdr_save_expo_summary">If enabled, when using HDR photo mode, the three base exposure images will be saved as well as the final HDR photo. Note this will make saving slower, especially if options like \"Stamp photos\" or Auto-stabilise are also used.</string>
@@ -319,4 +322,13 @@
     <string name="permission_rationale_storage">Storage read/write permission is required to save photos</string>
     <string name="permission_rationale_record_audio">Microphone permission is required to record video with audio</string>
     <string name="permission_rationale_location">Location permission is required for geotagging</string>
+
+    <string name="preference_category_photo_debugging">Debugging options</string>
+    <string name="preference_camera2_fake_flash">Use alternative flash method</string>
+    <string name="preference_camera2_fake_flash_summary">Enable this if your device has buggy flash behaviour with Camera2 API</string>
+
+    <string name="preference_expo_bracketing_n_images">Exposure Bracketing</string>
+    <string name="preference_expo_bracketing_n_images_summary">Number of images for exposure bracketing mode</string>
+    <string name="preference_expo_bracketing_stops">Exposure Bracketing Stops</string>
+    <string name="preference_expo_bracketing_stops_summary">Number of stops for each image</string>
 </resources>

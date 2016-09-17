@@ -48,6 +48,12 @@ import android.widget.SeekBar;
 public class MyApplicationInterface implements ApplicationInterface {
 	private static final String TAG = "MyApplicationInterface";
 	
+    public static enum PhotoMode {
+    	Standard,
+    	HDR,
+    	ExpoBracketing
+    }
+    
 	private MainActivity main_activity = null;
 	private LocationSupplier locationSupplier = null;
 	private StorageUtils storageUtils = null;
@@ -669,12 +675,77 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
     
     @Override
-	public boolean isHDRPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		boolean hdr = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		if( hdr && main_activity.supportsHDR() )
+	public boolean isExpoBracketingPref() {
+    	PhotoMode photo_mode = getPhotoMode();
+    	if( photo_mode == PhotoMode.HDR || photo_mode == PhotoMode.ExpoBracketing )
 			return true;
 		return false;
+    }
+
+    @Override
+    public int getExpoBracketingNImagesPref() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getExpoBracketingNImagesPref");
+		int n_images = 0;
+    	PhotoMode photo_mode = getPhotoMode();
+    	if( photo_mode == PhotoMode.HDR ) {
+    		// always set 3 images for HDR
+    		n_images = 3;
+    	}
+    	else {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+			String n_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
+			try {
+				n_images = Integer.parseInt(n_images_s);
+			}
+			catch(NumberFormatException exception) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "n_images_s invalid format: " + n_images_s);
+				n_images = 3;
+			}
+    	}
+		if( MyDebug.LOG )
+			Log.d(TAG, "n_images = " + n_images);
+		return n_images;
+    }
+
+    @Override
+    public double getExpoBracketingStopsPref() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getExpoBracketingStopsPref");
+		double n_stops = 0.0;
+    	PhotoMode photo_mode = getPhotoMode();
+    	if( photo_mode == PhotoMode.HDR ) {
+    		// always set 2 stops for HDR
+    		n_stops = 2.0;
+    	}
+    	else {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+			String n_stops_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingStopsPreferenceKey(), "2");
+			try {
+				n_stops = Double.parseDouble(n_stops_s);
+			}
+			catch(NumberFormatException exception) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "n_stops_s invalid format: " + n_stops_s);
+				n_stops = 2.0;
+			}
+    	}
+		if( MyDebug.LOG )
+			Log.d(TAG, "n_stops = " + n_stops);
+		return n_stops;
+    }
+
+    public PhotoMode getPhotoMode() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+		boolean hdr = photo_mode_pref.equals("preference_photo_mode_hdr");
+		if( hdr && main_activity.supportsHDR() )
+			return PhotoMode.HDR;
+		boolean expo_bracketing = photo_mode_pref.equals("preference_photo_mode_expo_bracketing");
+		if( expo_bracketing && main_activity.supportsExpoBracketing() )
+			return PhotoMode.ExpoBracketing;
+		return PhotoMode.Standard;
     }
 
     @Override
@@ -684,6 +755,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_no").equals("preference_raw_yes");
     }
+
+    @Override
+	public boolean useCamera2FakeFlash() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return sharedPreferences.getBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), false);
+	}
 
     @Override
     public boolean isTestAlwaysFocus() {
@@ -991,6 +1068,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     public void cameraInOperation(boolean in_operation) {
     	drawPreview.cameraInOperation(in_operation);
     	main_activity.getMainUI().showGUI(!in_operation);
+    }
+    
+    @Override
+    public void turnFrontScreenFlashOn() {
+    	drawPreview.turnFrontScreenFlashOn();
     }
 
     @Override
@@ -1401,13 +1483,27 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onBurstPictureTaken: received " + images.size() + " images");
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		boolean save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
-		if( MyDebug.LOG )
-			Log.d(TAG, "save_expo: " + save_expo);
+		boolean success = false;
+		PhotoMode photo_mode = getPhotoMode();
+		if( photo_mode == PhotoMode.HDR ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "HDR mode");
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+			boolean save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
+			if( MyDebug.LOG )
+				Log.d(TAG, "save_expo: " + save_expo);
 
-		boolean success = saveImage(true, save_expo, images, current_date);
-
+			success = saveImage(true, save_expo, images, current_date);
+		}
+		else {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "exposure bracketing mode mode");
+				if( photo_mode != PhotoMode.ExpoBracketing )
+					Log.e(TAG, "onBurstPictureTaken called with unexpected photo mode?!: " + photo_mode);
+			}
+			
+			success = saveImage(false, true, images, current_date);
+		}
 		return success;
     }
 

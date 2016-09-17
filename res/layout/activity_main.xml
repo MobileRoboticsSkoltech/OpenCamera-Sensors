@@ -113,7 +113,7 @@
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/exposure"
-        android:src="@drawable/exposure"
+        android:src="@drawable/ic_exposure_white_48dp"
         android:onClick="clickedExposure"
         />
 

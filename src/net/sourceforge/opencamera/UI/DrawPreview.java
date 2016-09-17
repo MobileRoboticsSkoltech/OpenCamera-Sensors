@@ -62,8 +62,11 @@ public class DrawPreview {
 	private RectF thumbnail_anim_src_rect = new RectF();
 	private RectF thumbnail_anim_dst_rect = new RectF();
 	private Matrix thumbnail_anim_matrix = new Matrix();
+	
+	private long ae_started_scanning_ms = -1; // time when ae started scanning
 
     private boolean taking_picture = false;
+    private boolean front_screen_flash = false;
     
 	private boolean continuous_focus_moving = false;
 	private long continuous_focus_moving_ms = 0;
@@ -77,7 +80,7 @@ public class DrawPreview {
 		p.setAntiAlias(true);
         p.setStrokeCap(Paint.Cap.ROUND);
 		final float scale = getContext().getResources().getDisplayMetrics().density;
-		this.stroke_width = (float) (0.5f * scale + 0.5f); // convert dps to pixels
+		this.stroke_width = (float) (1.0f * scale + 0.5f); // convert dps to pixels
 		p.setStrokeWidth(stroke_width);
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth);
@@ -129,8 +132,13 @@ public class DrawPreview {
     	}
     	else {
     		taking_picture = false;
+    		front_screen_flash = false;
     	}
     }
+	
+	public void turnFrontScreenFlashOn() {
+		front_screen_flash = true;
+	}
 
 	public void onContinuousFocusMove(boolean start) {
 		if( MyDebug.LOG )
@@ -192,7 +200,11 @@ public class DrawPreview {
 		}
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 		String preference_grid = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
-		if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
+		if( camera_controller!= null && front_screen_flash ) {
+			p.setColor(Color.WHITE);
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+		}
+		else if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			float this_stroke_width = (float) (5.0f * scale + 0.5f); // convert dps to pixels
@@ -652,7 +664,20 @@ public class DrawPreview {
 				string += preview.getFrameDurationString(frame_duration);
 			}*/
 			if( string.length() > 0 ) {
-				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y, true, ybounds_text, true); // Yellow 500
+				int text_color = Color.rgb(255, 235, 59); // Yellow 500
+				if( camera_controller.captureResultIsAEScanning() ) {
+					// we only change the color if ae scanning is at least a certain time, otherwise we get a lot of flickering of the color
+					if( ae_started_scanning_ms == -1 ) {
+						ae_started_scanning_ms = System.currentTimeMillis();
+					}
+					else if( System.currentTimeMillis() - ae_started_scanning_ms > 500 ) {
+						text_color = Color.rgb(244, 67, 54); // Red 500
+					}
+				}
+				else {
+					ae_started_scanning_ms = -1;
+				}
+				applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, true, ybounds_text, true);
 			}
 			/*if( camera_controller.captureResultHasFocusDistance() ) {
 				float dist_min = camera_controller.captureResultFocusDistanceMin();
@@ -794,7 +819,7 @@ public class DrawPreview {
 				last_free_memory_time = time_now; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
 			}
 			if( free_memory_gb >= 0.0f ) {
-				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, location_x, location_y, true);
+				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation), Color.WHITE, Color.BLACK, location_x, location_y, true);
 			}
 		}
 
