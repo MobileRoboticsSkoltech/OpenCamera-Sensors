@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">Open Camera</string>
@@ -100,6 +100,7 @@
     <string name="preference_timer_beep">Pisk samosprožilca</string>
     <string name="preference_timer_beep_summary">Zapiskaj ob odštevanju samosprožilca ali zakasnitvi zaporednega načina</string>
     <string name="preference_timer_speak">Glasovno odštevanje samosprožilca</string>
+    <string name="preference_timer_speak_summary">Glasovno odštevanje samosprožilca ali zakasnitve zaporednega načina (od 60-ih s naprej)</string>
     <string name="preference_burst_mode">Zaporedje</string>
     <string name="preference_burst_mode_summary">Posnemi več fotografij v zaporedju</string>
     <string name="preference_burst_interval">Razmik zaporednega načina</string>
@@ -293,12 +294,15 @@
 
     <string name="max_filesize">Največja velikost datoteke</string>
     <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
+	<string name="gb_abbreviation">GB</string> <!-- symbol short for gigabytes -->
     
     <string name="audio_control_start">Začni poslušati zvok</string>
     <string name="audio_control_stop">Ustavi poslušanje zvoka</string>
     <string name="speech_recognizer_started">Recite \"cheese\"</string>
     <string name="audio_listener_started">Naredite glasen zvok</string>
+	
 	<string name="auto_stabilise_info">Samodejna ustalitev bo zavrtela fotografije, da bodo videti poravnane.\n\nUpoštevajte, da se bo ločljivost slik rahlo zmanjšala (zaradi zahtevanega vrtenja in obrezovanja).</string>
+    <string name="raw_info">Datoteke DNG vsebujejo nestisnjene in neobdelane podatke iz fotoaparata.\n\nVečina programov za galerijo ne prepozna oblike DNG, zato jo uporabljajte s posebnimi programi, kot je Snapseed ali Lightroom.\n\nUpoštevajte, da se bodo razne možnosti obdelave, kot sta "Dodaj žig" in "Samodejna ustalitev", uporabile samo za slike JPEG in ne za slike DNG.\n\nDatoteke DNG zavzamejo veliko prosotra; za njihov izbris ali prenos lahko uporabite raziskovalca datotek.\n\nDatoteke DNG se shranjujejo samo v običajnem načinu za fotografije.</string>
     <string name="hdr_info">Način HDR je uporaben za posnetke z velikimi odstopanji v svetlosti. Deluje tako, da zajame več posnetkov z različnimi osvetlitvami in jih potem združi v končno sliko.\n\nUpoštevajte, da HDR ni primeren za hitro gibajoče prizore in lahko povzroči barvna odstopanja. V načinu HDR se prav tako onemogoči bliskavica.\n\nSnemanje fotografij v načinu HDR je počasnejše.</string>
 
     <string name="dont_show_again">Ne prikazuj več</string>
@@ -306,6 +310,8 @@
     <string name="photo_mode">Način za fotografije</string>
     <string name="photo_mode_standard">Običajni</string>
     <string name="photo_mode_hdr">HDR</string>
+	<string name="photo_mode_expo_bracketing">Expo {}</string>
+    <string name="photo_mode_expo_bracketing_full">Korektura sam. osvetlitve</string>
     <string name="preference_category_stamp">Dodaj žig</string>
     <string name="preference_hdr_save_expo">Shrani vse slike za način HDR</string>
     <string name="preference_hdr_save_expo_summary">Če je omogočeno, bodo ob uporabi načina HDR posnete tri osnovne slike kot tudi končna slika HDR. Upoštevajte, da bo shranevanje počasnejše, posebno, če uporabljate možnosti, kot sta \"Dodaj žig\" ali samodejno ustalitev.</string>
@@ -315,5 +321,14 @@
     <string name="permission_rationale_camera">Za omogočanje fotoaparata je zahtevano dovoljenje za fotoaparat</string>
     <string name="permission_rationale_storage">Za shranjevanje fotografij je zahtevano dovoljenje za branje/pisanje na pomnilniško napravo</string>
     <string name="permission_rationale_record_audio">Za snemanje videoposnetkov z zvokom je zahtevano dovoljenje za mikrofon</string>
-    <string name="permission_rationale_location">Za označevanje z lokacjo je zahtevano dovoljenje za lokacijo</string>
+    <string name="permission_rationale_location">Za označevanje z lokacijo je zahtevano dovoljenje za lokacijo</string>
+	
+	<string name="preference_category_photo_debugging">Možnosti razhroščevanja</string>
+    <string name="preference_camera2_fake_flash">Uporabi nadomestni način bliskavice</string>
+    <string name="preference_camera2_fake_flash_summary">Omogočite, če se vaša naprava neobičajno vede z API-jem Camera2</string>
+
+    <string name="preference_expo_bracketing_n_images">Korektura sam. osvetlitve</string>
+    <string name="preference_expo_bracketing_n_images_summary">Število slik za način korekture samodejne osvetlitve</string>
+    <string name="preference_expo_bracketing_stops">Ustavitve kor. sam. osvetlitve</string>
+    <string name="preference_expo_bracketing_stops_summary">Število ustavitev vsake slike</string>
 </resources>
