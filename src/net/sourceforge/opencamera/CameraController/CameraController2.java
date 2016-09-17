@@ -404,6 +404,8 @@ public class CameraController2 extends CameraController {
 		private void setFaceDetectMode(CaptureRequest.Builder builder) {
 			if( has_face_detect_mode )
 				builder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, face_detect_mode);
+			else
+				builder.set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF);
 		}
 		
 		private void setRawMode(CaptureRequest.Builder builder) {
@@ -2785,6 +2787,14 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "message: " + e.getMessage());
 			}
 			e.printStackTrace();
+		}
+		// simulate CameraController1 behaviour where face detection is stopped when we stop preview
+		if( camera_settings.has_face_detect_mode ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "cancel face detection");
+			camera_settings.has_face_detect_mode = false;
+	    	camera_settings.setFaceDetectMode(previewBuilder);
+			// no need to call setRepeatingRequest(), we're just setting the camera_settings for when we restart the preview
 		}
 	}
 
