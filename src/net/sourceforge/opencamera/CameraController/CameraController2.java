@@ -333,7 +333,7 @@ public class CameraController2 extends CameraController {
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 		    	}
 		    	else if( flash_value.equals("flash_red_eye") ) {
-		    		// shouldn't really use flash_red_eye with expo bracketing, but just in case...
+		    		// not supported for expo bracketing
 		    		if( CameraController2.this.want_expo_bracketing )
 			    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 		    		else
