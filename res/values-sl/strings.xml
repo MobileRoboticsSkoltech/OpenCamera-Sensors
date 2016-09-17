@@ -325,7 +325,7 @@
 	
 	<string name="preference_category_photo_debugging">Možnosti razhroščevanja</string>
     <string name="preference_camera2_fake_flash">Uporabi nadomestni način bliskavice</string>
-    <string name="preference_camera2_fake_flash_summary">Omogočite to, če se vaša naprava neobičajno vede z API-jem Camera2</string>
+    <string name="preference_camera2_fake_flash_summary">Omogočite, če se vaša naprava neobičajno vede z API-jem Camera2</string>
 
     <string name="preference_expo_bracketing_n_images">Korektura sam. osvetlitve</string>
     <string name="preference_expo_bracketing_n_images_summary">Število slik za način korekture samodejne osvetlitve</string>
