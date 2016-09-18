@@ -63,7 +63,7 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setIcon: " + id);
 	    ImageButton button = (ImageButton)main_activity.findViewById(id);
-	    button.setBackgroundColor(Color.argb(63, 255, 0, 0));
+	    button.setBackgroundColor(Color.argb(63, 63, 63, 63)); // n.b., rgb color seems to be ignored for Android 6 onwards, but still relevant for older versions
 	}
 	
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
