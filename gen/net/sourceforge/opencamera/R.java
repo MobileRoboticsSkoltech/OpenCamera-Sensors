@@ -560,6 +560,8 @@ public final class R {
         public static final int preference_video_flash_summary=0x7f0800e7;
         public static final int preference_video_fps=0x7f0800d6;
         public static final int preference_video_fps_summary=0x7f0800d7;
+        public static final int preference_video_low_power_check=0x7f080136;
+        public static final int preference_video_low_power_check_summary=0x7f080137;
         public static final int preference_video_max_duration=0x7f0800d8;
         public static final int preference_video_max_duration_summary=0x7f0800d9;
         public static final int preference_video_max_filesize=0x7f0800dc;
@@ -624,6 +626,7 @@ public final class R {
         /**  short for seconds 
          */
         public static final int video_no_free_space=0x7f080134;
+        public static final int video_power_critical=0x7f080135;
         public static final int video_quality=0x7f0800ce;
         public static final int video_quality_summary=0x7f0800cf;
         public static final int white_balance=0x7f080038;

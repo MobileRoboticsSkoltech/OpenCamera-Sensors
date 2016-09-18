@@ -539,6 +539,12 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
     
     @Override
+    public boolean getVideoLowPowerCheckPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    	return sharedPreferences.getBoolean(PreferenceKeys.getVideoLowPowerCheckPreferenceKey(), true);
+    }
+    
+    @Override
 	public String getPreviewSizePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg");

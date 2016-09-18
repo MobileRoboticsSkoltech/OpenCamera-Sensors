@@ -327,6 +327,10 @@ public class PreferenceKeys {
     	return "preference_video_flash";
     }
 
+    public static String getVideoLowPowerCheckPreferenceKey() {
+    	return "preference_video_low_power_check";
+    }
+
     public static String getLockVideoPreferenceKey() {
     	return "preference_lock_video";
     }

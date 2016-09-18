@@ -65,6 +65,7 @@ public interface ApplicationInterface {
 	int getVideoRestartTimesPref(); // number of times to restart video recording after hitting max duration (return 0 for never auto-restarting)
 	VideoMaxFileSize getVideoMaxFileSizePref() throws NoFreeStorageException; // see VideoMaxFileSize class for details
 	boolean getVideoFlashPref(); // option to switch flash on/off while recording video (should be false in most cases!)
+	boolean getVideoLowPowerCheckPref(); // whether to stop video automatically on critically low battery
 	String getPreviewSizePref(); // "preference_preview_size_wysiwyg" is recommended (preview matches aspect ratio of photo resolution as close as possible), but can also be "preference_preview_size_display" to maximise the preview size
 	String getPreviewRotationPref(); // return "0" for default; use "180" to rotate the preview 180 degrees
 	String getLockOrientationPref(); // return "none" for default; use "portrait" or "landscape" to lock photos/videos to that orientation
