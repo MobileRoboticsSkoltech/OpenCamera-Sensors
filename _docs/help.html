@@ -531,8 +531,8 @@ as a workaround). Note that this is enabled by default for Samsung devices.</p>
 
 <p><b>Video resolution</b> - Select the resolution of videos taken by the camera.</p>
 
-<p><b>Force 4K UHD video (experimental)</b> - Enable recording in 4K UHD (3840x2160) on the back camera (if ticked, this overrides the setting in
-"Video resolution"). This is provided for some phones that don't properly expose their 4K video resolution to 3rd party camera apps
+<p><b>Force 4K UHD video (may not work on all devices)</b> - Enable recording in 4K UHD (3840x2160) on the back camera (if ticked,
+this overrides the setting in "Video resolution"). This is provided for some phones that don't properly expose their 4K video resolution to 3rd party camera apps
 (and so 4K resolution doesn't show in the Video resolution option above).
 It turns out that some such devices can be made to record in 4K resolution if it's requested, but on other devices this won't work.
 If you enable this on a device that doesn't support it, you may either get an error
@@ -627,7 +627,7 @@ in Android 5. Turning this option on or off will cause Open Camera to restart. T
 (including manual ISO/exposure, manual focus, front camera screen "flash", HDR, exposure bracketing).
 Note that not all Android 5 devices have full support for the Camera2 API (Open Camera will only show this
 option if all cameras report either "LIMITED" or "FULL" support for the API; "LEGACY" devices are not supported).
-Supported devices include the Nexus 5 and Nexus 6. Also note that even if devices support Camera2 API, many
+Supported devices include the Nexuses 5/6 onwards. Also note that even if devices support Camera2 API, many
 devices have extremely poor support, leading to bugs such as poor flash behaviour, or video recording not working.
 These are not necessarily bugs in Open Camera, but problems with manufacturer support for Camera2 API. If you have
 problems with flash behaviour, try the "Use alternative flash method" setting under "Photo Settings".</p>
