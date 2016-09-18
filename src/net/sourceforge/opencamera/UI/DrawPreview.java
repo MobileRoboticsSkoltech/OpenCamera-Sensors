@@ -701,6 +701,7 @@ public class DrawPreview {
 		if( sharedPreferences.getBoolean(PreferenceKeys.getShowBatteryPreferenceKey(), true) ) {
 			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
+				// note that it's fine to call registerReceiver repeatedly - we pass a null receiver, so this is fine as a "one shot" use
 				Intent batteryStatus = main_activity.registerReceiver(null, battery_ifilter);
 				int battery_level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
 				int battery_scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
