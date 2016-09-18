@@ -236,7 +236,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Log.d(TAG, "supports_force_video_4k: " + supports_force_video_4k);
 		if( !supports_force_video_4k || video_quality == null || video_quality_string == null ) {
 			Preference pref = findPreference("preference_force_video_4k");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_video_debugging");
         	pg.removePreference(pref);
 		}
 		

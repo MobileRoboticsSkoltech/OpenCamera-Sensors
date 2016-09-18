@@ -372,8 +372,8 @@ public final class R {
         public static final int preference_burst_interval_summary=0x7f080060;
         public static final int preference_burst_mode=0x7f08005d;
         public static final int preference_burst_mode_summary=0x7f08005e;
-        public static final int preference_camera2_fake_flash=0x7f08012c;
-        public static final int preference_camera2_fake_flash_summary=0x7f08012d;
+        public static final int preference_camera2_fake_flash=0x7f08012d;
+        public static final int preference_camera2_fake_flash_summary=0x7f08012e;
         public static final int preference_category_camera_controls=0x7f080056;
         /**  symbol short for metres 
  symbol short for metres 
@@ -394,6 +394,7 @@ public final class R {
         public static final int preference_category_online=0x7f0800e8;
         public static final int preference_category_photo_debugging=0x7f08012b;
         public static final int preference_category_stamp=0x7f080122;
+        public static final int preference_category_video_debugging=0x7f08012c;
         /**  @TODO PER FAVORE RIGUARDARE "livellate" PERCHÈ SECONDO ME NON HA SENSO! 
          */
         public static final int preference_color_effect=0x7f080048;
@@ -417,10 +418,10 @@ public final class R {
         public static final int preference_crop_guide_summary=0x7f0800a1;
         public static final int preference_donate=0x7f0800eb;
         public static final int preference_donate_summary=0x7f0800ec;
-        public static final int preference_expo_bracketing_n_images=0x7f08012e;
-        public static final int preference_expo_bracketing_n_images_summary=0x7f08012f;
-        public static final int preference_expo_bracketing_stops=0x7f080130;
-        public static final int preference_expo_bracketing_stops_summary=0x7f080131;
+        public static final int preference_expo_bracketing_n_images=0x7f08012f;
+        public static final int preference_expo_bracketing_n_images_summary=0x7f080130;
+        public static final int preference_expo_bracketing_stops=0x7f080131;
+        public static final int preference_expo_bracketing_stops_summary=0x7f080132;
         public static final int preference_exposure=0x7f080050;
         public static final int preference_exposure_summary=0x7f080051;
         public static final int preference_face_detection=0x7f080054;
@@ -581,7 +582,7 @@ public final class R {
         public static final int screen_is_locked=0x7f080031;
         public static final int screen_lock_message_1=0x7f080041;
         public static final int screen_lock_message_2=0x7f080042;
-        public static final int seconds_abbreviation=0x7f080132;
+        public static final int seconds_abbreviation=0x7f080133;
         public static final int share=0x7f080103;
         public static final int sorry=0x7f080027;
         public static final int speech_recognizer_started=0x7f080117;
@@ -622,7 +623,7 @@ public final class R {
         public static final int video_may_be_corrupted=0x7f080011;
         /**  short for seconds 
          */
-        public static final int video_no_free_space=0x7f080133;
+        public static final int video_no_free_space=0x7f080134;
         public static final int video_quality=0x7f0800ce;
         public static final int video_quality_summary=0x7f0800cf;
         public static final int white_balance=0x7f080038;
