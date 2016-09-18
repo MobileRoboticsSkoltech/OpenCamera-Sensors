@@ -503,11 +503,12 @@ public class MyApplicationInterface implements ApplicationInterface {
         			Log.d(TAG, "using internal storage");
         		long free_memory = main_activity.freeMemory() * 1024 * 1024;
         		final long min_free_memory = 50000000; // how much free space to leave after video
-        		//final long min_free_memory = 500000000; // test
+        		//final long min_free_memory = 2200L * 1024L * 1024L; // test
         		// min_free_filesize is the minimum value to set for max file size:
         		//   - no point trying to create a really short video
         		//   - too short videos can end up being corrupted
-        		final long min_free_filesize = 10000000;
+        		//   - also with auto-restart, if this is too small we'll end up repeatedly restarting and creating shorter and shorter videos
+        		final long min_free_filesize = 20000000;
         		long available = free_memory - min_free_memory;
         		if( MyDebug.LOG ) {
         			Log.d(TAG, "free_memory: " + free_memory);
@@ -515,7 +516,7 @@ public class MyApplicationInterface implements ApplicationInterface {
         		if( available > min_free_filesize ) {
         			if( video_max_filesize.max_filesize == 0 || video_max_filesize.max_filesize > available ) {
         				video_max_filesize.max_filesize = available;
-        				video_max_filesize.auto_restart = false; // don't auto-restart if the limit is to avoid running out of memory
+        				// still leave auto_restart set to true - because even if we set a max filesize for running out of storage, the video may still hit a maximum limit before hand, if there's a device max limit set (typically ~2GB)
         				if( MyDebug.LOG )
         					Log.d(TAG, "set video_max_filesize to avoid running out of space: " + video_max_filesize);
         			}
