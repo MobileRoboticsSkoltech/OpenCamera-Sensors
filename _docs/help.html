@@ -598,6 +598,12 @@ variants of those devices. If this doesn't work, it isn't a bug in Open Camera, 
 for third party camera apps. (If this option doesn't show up at all, it's either because your device already lists 4K in the Video
 resolutions options above, or because Open Camera thinks this is a device that probably doesn't support 4K video.)</p>
 
+<p><b>Critical battery check</b> - If a device runs out of power while recording video, in theory the video should safely stop in time.
+However in some cases this doesn't happen in time (if the video file is large, post-processing may still be occurring when the device
+switches off), causing the entire video file to be corrupted! To reduce this risk, Open Camera will stop video recording when the
+battery level is low (3%), but before the device is about to shut off. If for some reason you don't want this behaviour, you can
+switch this option off.</p>
+
 <p><b>Flash while recording video</b> - If enabled, the camera flash will flash every second while recording video. This
 isn't something most people will need, but it can be useful if the phone is being operated remotely, as a signal that the
 video is still recording.</p>
@@ -811,6 +817,12 @@ isn't an Open Camera bug - it's an Android issue that the video recording API do
 runs out. As a workaround, Open Camera does try to stop videos when storage space is low, but due to Android limitations this
 isn't possible when using SD cards or Storage Access Framework. In order to recover a file, you can try
 <a href="https://play.google.com/store/apps/details?id=com.smamolot.mp4fix">MP4Fix Video Repair Tool</a>.</p>
+
+<p><b>My device ran out of power while recording video, and the video is corrupt! How can I get it back?</b> - This can happen if
+the device is very slow at processing the video file after stopping, and this doesn't finishing when the device powers off. Open
+Camera will stop the video in advance of the device shutting down to help reduce this risk (see "Critical battery check" option),
+but if this still happens, the best hope is to try MP4Fix, see the previous question. Note that if this happens, it isn't an
+Open Camera bug - it's a problem that will happen on any device where the device shuts off before the video can be processed.</p>
 
 <p><b>My save folder is on the SD card, so why does the free storage still show for internal memory?</b> - Open Camera tries
 to obtain the space of the drive being used, but there are no reliable ways to do this (especially Android 4.4 onwards), so
