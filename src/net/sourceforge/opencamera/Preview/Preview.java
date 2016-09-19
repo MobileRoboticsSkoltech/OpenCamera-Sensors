@@ -3618,6 +3618,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void onVideoInfo(int what, int extra) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onVideoInfo: " + what + " extra: " + extra);
 		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && video_restart_on_max_filesize ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "restart due to max filesize reached");
@@ -3642,6 +3644,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	private void onVideoError(int what, int extra) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onVideoError: " + what + " extra: " + extra);
 		stopVideo(false);
 		applicationInterface.onVideoError(what, extra); // call this last, so that toasts show up properly (as we're hogging the UI thread here, and mediarecorder takes time to stop)
 	}
