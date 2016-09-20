@@ -217,7 +217,7 @@
     <string name="preference_background_photo_saving_summary">Ali naj se fotografije shranjujejo z uporabo niti v ozadju (za hitrejše delovanje)</string>
     <string name="video_quality">Ločljivost videoposnetkov</string>
     <string name="video_quality_summary">Nastavite ločljivost videoposnetkov</string>
-    <string name="preference_force_video_4k">Vsili vidosposnetke 4K UHD (preizkusno)</string>
+    <string name="preference_force_video_4k">Vsili vidosposnetke 4K UHD (deluje samo na nekaterih napravah)</string>
     <string name="preference_force_video_4k_summary">Omogoči ločljivost 3840x2160 za snemanje videoposnetkov z zadnjo kamero - ta možnost je zaobidenje, ki bo morda omogočila naprave 4K s kamerami 4K, ki te možnosti ne razkrijejo programom za kamero tretjih oseb. Za delovanje tega ni nobenega zagotovila, preizkusite pred uporabo.</string>
     <string name="preference_video_stabilization">Omogoči ustalitev videoposnetkov</string>
     <string name="preference_video_stabilization_summary">Ustaltev videoposnetkov zmanjša tresenje zaradi gibanja kamere tako v predogledu, kot v posnetku.</string>
@@ -248,7 +248,7 @@
     <string name="preference_donate">Daruj za podporo razvoju</string>
     <string name="preference_donate_summary">Če vam je ta program všeč, razmislite o darovanju, da podprete razvoj. To lahko naredite z nakupom mojega "programa za darovanje" - kliknite na to možnost za odpiranje strani z mojim programom. Hvala!</string>
     <string name="preference_use_camera2">Uporabi API Camera2</string>
-    <string name="preference_use_camera2_summary">Omogoči API Camera2 Androida 5 - ponuja dodatne značilnosti, vendar je trenutno preizkusen (povzroča ponovne zagone)</string>
+    <string name="preference_use_camera2_summary">Omogoči API Camera2 Androida 5 - ponuja dodatne značilnosti, vendar morda ne bo pravilno deloval na vseh napravah (lahko povzroči ponovni zagon)</string>
     <string name="preference_about">O programu</string>
     <string name="preference_about_summary">Program in podatki za razhroščevanje</string>
     <string name="preference_reset">Ponastavi nastavitve</string>
@@ -324,6 +324,7 @@
     <string name="permission_rationale_location">Za označevanje z lokacijo je zahtevano dovoljenje za lokacijo</string>
 	
 	<string name="preference_category_photo_debugging">Možnosti razhroščevanja</string>
+	<string name="preference_category_video_debugging">Možnosti razhroščevanja</string>
     <string name="preference_camera2_fake_flash">Uporabi nadomestni način bliskavice</string>
     <string name="preference_camera2_fake_flash_summary">Omogočite, če se vaša naprava neobičajno vede z API-jem Camera2</string>
 
@@ -331,4 +332,11 @@
     <string name="preference_expo_bracketing_n_images_summary">Število slik za način korekture samodejne osvetlitve</string>
     <string name="preference_expo_bracketing_stops">Ustavitve kor. sam. osvetlitve</string>
     <string name="preference_expo_bracketing_stops_summary">Število ustavitev vsake slike</string>
+	
+	<string name="seconds_abbreviation">s</string> <!-- short for seconds -->
+
+    <string name="video_no_free_space">Ni dovolj nezasedenega prostora za snemanje videoposnetka</string>
+	<string name="video_power_critical">Videoposnetek se je ustavil\nRaven baterije je kritično nizka</string>
+    <string name="preference_video_low_power_check">Preveri za kritično stanje baterije</string>
+    <string name="preference_video_low_power_check_summary">Ustavi snemanje videoposnetka, če je raven baterije kritično nizka. Zmanjša tveganje okvare videoposnetka, če se naprava izklopi zaradi pomanjkanja energije.</string>
 </resources>
