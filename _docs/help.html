@@ -118,8 +118,8 @@ compensation). Note that this isn't guaranteed to work on all devices (doesn't s
 
 <p><img src="popup.png" alt="Popup icon" width="32" height="32"><b>Popop menu</b> - Opens the popup menu for quick access to changing
 flash, focus, ISO, white balance, scene mode, color effect, camera/video resolution, timer, burst mode, grid:</p><ul>
-<li><b>Flash</b> - Typical options are off, auto, on and torch mode. For front cameras without a real flash, if Camera2 API is enabled, flash options
-will be available which instead work by making the screen flash.</li>
+<li><b>Flash</b> - Typical options are off, auto, on and torch mode. For front cameras without a real flash, flash options
+will be available which instead work by making the screen flash (note, front screen flash "auto" is only available with Camera2 API).</li>
 <li><b>Focus</b> - Default is "auto" (camera will focus before taking a photo or when you touch to focus). Other options include
 infinity and macro. "Focus Locked" mode means focus will only occur when you touch to focus.
 If Camera2 API is used, then "Focus Manual" will display an on-screen slider, allowing
@@ -630,7 +630,7 @@ have location data in them).</p>
 
 <p><b>Use Camera2 API</b> - If selected, this enables support for the Camera2 API that was introduced
 in Android 5. Turning this option on or off will cause Open Camera to restart. This enables some new features
-(including manual ISO/exposure, manual focus, front camera screen "flash", HDR, exposure bracketing).
+(including manual ISO/exposure, manual focus, HDR, exposure bracketing).
 Note that not all Android 5 devices have full support for the Camera2 API (Open Camera will only show this
 option if all cameras report either "LIMITED" or "FULL" support for the API; "LEGACY" devices are not supported).
 Supported devices include the Nexuses 5/6 onwards. Also note that even if devices support Camera2 API, many

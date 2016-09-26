@@ -1782,7 +1782,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				else {
 					if( MyDebug.LOG )
 						Log.d(TAG, "found no existing flash_value");
-					updateFlash("flash_auto", true);
+					// whilst devices with flash should support flash_auto, we'll also be in this codepath for front cameras with
+					// no flash, as instead the available options will be flash_off, flash_frontscreen_auto, flash_frontscreen_on
+					// see testTakePhotoFrontCameraScreenFlash
+					if( supported_flash_values.contains("flash_auto") )
+						updateFlash("flash_auto", true);
+					else
+						updateFlash("flash_off", true);
 				}
 			}
 			else {
@@ -3618,6 +3624,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private void onVideoInfo(int what, int extra) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onVideoInfo: " + what + " extra: " + extra);
 		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED && video_restart_on_max_filesize ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "restart due to max filesize reached");
@@ -3642,6 +3650,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	private void onVideoError(int what, int extra) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onVideoError: " + what + " extra: " + extra);
 		stopVideo(false);
 		applicationInterface.onVideoError(what, extra); // call this last, so that toasts show up properly (as we're hogging the UI thread here, and mediarecorder takes time to stop)
 	}

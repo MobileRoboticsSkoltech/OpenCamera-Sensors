@@ -28,6 +28,7 @@ public class CameraController1 extends CameraController {
     private int display_orientation = 0;
     private Camera.CameraInfo camera_info = new Camera.CameraInfo();
 	private String iso_key = null;
+	private boolean frontscreen_flash = false;
 
 	public CameraController1(int cameraId) throws CameraControllerException {
 		super(cameraId);
@@ -149,6 +150,10 @@ public class CameraController1 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, " supports flash_red_eye");
 			}
+		}
+		else if( isFrontFacing() ) {
+			output_modes.add("flash_off");
+			output_modes.add("flash_frontscreen_on");
 		}
 		return output_modes;
 	}
@@ -733,6 +738,9 @@ public class CameraController1 extends CameraController {
     	else if( flash_value.equals("flash_red_eye") ) {
     		flash_mode = Camera.Parameters.FLASH_MODE_RED_EYE;
     	}
+    	else if( flash_value.equals("flash_frontscreen_on") ) {
+    		flash_mode = Camera.Parameters.FLASH_MODE_OFF;
+    	}
     	return flash_mode;
 	}
 	
@@ -740,8 +748,20 @@ public class CameraController1 extends CameraController {
 		Camera.Parameters parameters = this.getParameters();
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFlashValue: " + flash_value);
-		if( parameters.getFlashMode() == null )
-			return; // flash mode not supported
+
+    	if( parameters.getFlashMode() == null ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "flash mode not supported");
+        	if( flash_value.equals("flash_frontscreen_on") ) {
+        		this.frontscreen_flash = true;
+        	}
+        	else {
+        		this.frontscreen_flash = false;
+        	}
+			return;
+    	}
+		this.frontscreen_flash = false;
+
 		final String flash_mode = convertFlashValueToMode(flash_value);
     	if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
     		if( parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH) && !flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
@@ -1170,9 +1190,9 @@ public class CameraController1 extends CameraController {
         }
 	}
 	
-	public void takePicture(final CameraController.PictureCallback picture, final ErrorCallback error) {
+	private void takePictureNow(final CameraController.PictureCallback picture, final ErrorCallback error) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "takePicture");
+			Log.d(TAG, "takePictureNow");
     	Camera.ShutterCallback shutter = new TakePictureShutterCallback();
         Camera.PictureCallback camera_jpeg = picture == null ? null : new Camera.PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
@@ -1192,6 +1212,30 @@ public class CameraController1 extends CameraController {
 			e.printStackTrace();
 			error.onError();
 		}
+	}
+
+	public void takePicture(final CameraController.PictureCallback picture, final ErrorCallback error) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicture");
+		if( frontscreen_flash ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "front screen flash");
+			picture.onFrontScreenTurnOn();
+			// take picture after a delay, to allow autoexposure and autofocus to update (unlike CameraController2, we can't tell when this happens, so we just wait for a fixed delay)
+        	Handler handler = new Handler();
+        	handler.postDelayed(new Runnable(){
+        		@Override
+        	    public void run(){
+        			if( MyDebug.LOG )
+        				Log.d(TAG, "take picture after delay for front screen flash");
+        			if( camera != null ) { // make sure camera wasn't released in the meantime
+        				takePictureNow(picture, error);
+        			}
+        	   }
+        	}, 1000);
+			return;
+		}
+		takePictureNow(picture, error);
 	}
 	
 	public void setDisplayOrientation(int degrees) {

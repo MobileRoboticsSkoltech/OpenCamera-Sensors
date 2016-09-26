@@ -727,12 +727,19 @@ public class DrawPreview {
 			if( ui_rotation == 180 ) {
 				battery_x = canvas.getWidth() - battery_x - battery_width;
 			}
-			p.setColor(Color.WHITE);
-			p.setStyle(Paint.Style.STROKE);
-			canvas.drawRect(battery_x, battery_y, battery_x+battery_width, battery_y+battery_height, p);
-			p.setColor(battery_frac >= 0.3f ? Color.rgb(37, 155, 36) : Color.rgb(244, 67, 54)); // Green 500 or Red 500
-			p.setStyle(Paint.Style.FILL);
-			canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
+			boolean draw_battery = true;
+			if( battery_frac <= 0.05f ) {
+				// flash icon at this low level
+				draw_battery = (((long)( System.currentTimeMillis() / 1000 )) % 2) == 0;
+			}
+			if( draw_battery ) {
+				p.setColor(Color.WHITE);
+				p.setStyle(Paint.Style.STROKE);
+				canvas.drawRect(battery_x, battery_y, battery_x+battery_width, battery_y+battery_height, p);
+				p.setColor(battery_frac > 0.15f ? Color.rgb(37, 155, 36) : Color.rgb(244, 67, 54)); // Green 500 or Red 500
+				p.setStyle(Paint.Style.FILL);
+				canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
+			}
 		}
 		
 		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
