@@ -832,7 +832,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			debug_time = System.currentTimeMillis();
 		}
 		waitUntilImageQueueEmpty(); // so we don't risk losing any images
-        super.onPause();
+        super.onPause(); // docs say to call this before freeing other things
         mainUI.destroyPopup();
         mSensorManager.unregisterListener(accelerometerListener);
         mSensorManager.unregisterListener(magneticListener);
