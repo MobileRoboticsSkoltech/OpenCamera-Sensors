@@ -69,7 +69,7 @@ public class ImageSaver extends Thread {
 		Type type = Type.JPEG;
 		boolean is_hdr = false; // for jpeg
 		boolean save_expo = false; // for is_hdr
-		List<byte []> jpeg_images = null; // for jpeg
+		List<byte []> jpeg_images = null; // for jpeg (may be null otherwise)
 		DngCreator dngCreator = null; // for raw
 		Image image = null; // for raw
 		boolean image_capture_intent = false;
@@ -322,7 +322,7 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
 			addRequest(request);
-			if( request.is_hdr || request.jpeg_images.size() > 1 ) {
+			if( request.is_hdr || ( !is_raw && request.jpeg_images.size() > 1 ) ) {
 				// For HDR, we also add a dummy request, effectively giving it a cost of 2 - to reflect the fact that HDR is more memory intensive
 				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
 				// of 2, due to RAW and JPEG each needing their own request).
