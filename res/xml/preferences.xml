@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     
-    <PreferenceCategory
+    <!--<PreferenceCategory
         android:key="preference_category_camera_effects"
         android:title="@string/preference_category_camera_effects"
         >
+        -->
 
         <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
         <!--
@@ -61,14 +62,11 @@
             />
         -->
 
-        <ListPreference 
-            android:key="preference_lock_orientation"
-            android:title="@string/preference_lock_orientation"
-            android:summary="@string/preference_lock_orientation_summary"
-            android:entries="@array/preference_lock_orientation_entries"
-            android:entryValues="@array/preference_lock_orientation_values"
-            android:defaultValue="none"
-            />
+	<!-- </PreferenceCategory> -->
+
+    <PreferenceCategory
+        android:key="preference_category_camera_controls"
+        android:title="@string/preference_category_camera_controls">
 
         <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
         <SwitchPreference
@@ -77,12 +75,6 @@
             android:summary="@string/preference_face_detection_summary"
             android:defaultValue="false"
             />
-
-	</PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="preference_category_camera_controls"
-        android:title="@string/preference_category_camera_controls">
 
 	    <ListPreference
 	        android:key="preference_timer"
@@ -180,7 +172,16 @@
 	            android:entryValues="@array/preference_audio_noise_control_sensitivity_values"
 	            android:defaultValue="0"
 	            />
-	        
+
+	        <ListPreference 
+	            android:key="preference_lock_orientation"
+	            android:title="@string/preference_lock_orientation"
+	            android:summary="@string/preference_lock_orientation_summary"
+	            android:entries="@array/preference_lock_orientation_entries"
+	            android:entryValues="@array/preference_lock_orientation_values"
+	            android:defaultValue="none"
+	            />
+
 			<Preference
 	            android:key="preference_save_location"
 	            android:title="@string/preference_save_location"
