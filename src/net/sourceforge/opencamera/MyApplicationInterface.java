@@ -1183,6 +1183,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "updateThumbnail");
 		main_activity.updateGalleryIcon(thumbnail);
 		drawPreview.updateThumbnail(thumbnail);
+		if( this.getPausePreviewPref() ) {
+			drawPreview.showLastImage();
+		}
 	}
 	
 	@Override
@@ -1533,6 +1536,19 @@ public class MyApplicationInterface implements ApplicationInterface {
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
 		boolean do_in_background = saveInBackground(image_capture_intent);
+		
+		int sample_factor = 1;
+		if( !this.getPausePreviewPref() ) {
+			// if pausing the preview, we use the thumbnail also for the preview, so don't downsample
+			// otherwise, we can downsample by 4 to increase performance, without noticeable loss in visual quality (even for the thumbnail animation)
+			sample_factor *= 4;
+			if( !has_thumbnail_animation ) {
+				// can use even lower resolution if we don't have the thumbnail animation
+				sample_factor *= 4;
+			}
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "sample_factor: " + sample_factor);
 
 		boolean success = imageSaver.saveImageJpeg(do_in_background, is_hdr, save_expo, images,
 				image_capture_intent, image_capture_intent_uri,
@@ -1542,7 +1558,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
-				has_thumbnail_animation);
+				sample_factor);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImage complete, success: " + success);
@@ -1635,6 +1651,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "clearLastImages");
 		last_images_saf = false;
 		last_images.clear();
+		drawPreview.clearLastImage();
 	}
 
 	void shareLastImage() {
