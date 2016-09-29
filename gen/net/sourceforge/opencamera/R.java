@@ -154,13 +154,15 @@ public final class R {
         public static final int switch_camera=0x7f020029;
         public static final int switch_video=0x7f02002a;
         public static final int take_photo=0x7f02002b;
-        public static final int take_photo_pressed=0x7f02002c;
-        public static final int take_photo_selector=0x7f02002d;
-        public static final int take_video=0x7f02002e;
-        public static final int take_video_pressed=0x7f02002f;
-        public static final int take_video_recording=0x7f020030;
-        public static final int take_video_selector=0x7f020031;
-        public static final int trash=0x7f020032;
+        public static final int take_photo_pref=0x7f02002c;
+        public static final int take_photo_pressed=0x7f02002d;
+        public static final int take_photo_selector=0x7f02002e;
+        public static final int take_video=0x7f02002f;
+        public static final int take_video_pref=0x7f020030;
+        public static final int take_video_pressed=0x7f020031;
+        public static final int take_video_recording=0x7f020032;
+        public static final int take_video_selector=0x7f020033;
+        public static final int trash=0x7f020034;
     }
     public static final class id {
         public static final int action_settings=0x7f0b001a;

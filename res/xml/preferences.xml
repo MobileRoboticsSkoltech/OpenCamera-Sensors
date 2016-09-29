@@ -437,7 +437,7 @@
 	    <PreferenceScreen
 	        android:key="preference_screen_photo_settings"
 	        android:title="@string/preference_screen_photo_settings"
-	        android:icon="@drawable/take_photo"
+	        android:icon="@drawable/take_photo_pref"
 	        android:persistent="false">
 	
 	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
@@ -600,7 +600,7 @@
 	    <PreferenceScreen
 	        android:key="preference_screen_video_settings"
 	        android:title="@string/preference_screen_video_settings"
-	        android:icon="@drawable/take_video"
+	        android:icon="@drawable/take_video_pref"
 	        android:persistent="false">
 
 	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
