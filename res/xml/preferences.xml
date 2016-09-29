@@ -578,13 +578,6 @@
 		        android:title="@string/preference_category_photo_debugging"
 		        >
 
-		        <SwitchPreference
-		            android:key="preference_background_photo_saving"
-		            android:title="@string/preference_background_photo_saving"
-		            android:summary="@string/preference_background_photo_saving_summary"
-		            android:defaultValue="true"
-		            />
-
 		        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
 		        <SwitchPreference
 		            android:key="preference_camera2_fake_flash"
@@ -592,7 +585,14 @@
 		            android:summary="@string/preference_camera2_fake_flash_summary"
 		            android:defaultValue="false"
 		            />
-	
+
+		        <SwitchPreference
+		            android:key="preference_background_photo_saving"
+		            android:title="@string/preference_background_photo_saving"
+		            android:summary="@string/preference_background_photo_saving_summary"
+		            android:defaultValue="true"
+		            />
+
 	        </PreferenceCategory>
 
         </PreferenceScreen>
