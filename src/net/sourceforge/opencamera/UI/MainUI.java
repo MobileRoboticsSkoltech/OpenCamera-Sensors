@@ -17,6 +17,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageButton;
@@ -96,6 +97,20 @@ public class MainUI {
 		}
 	}
 
+	/** Similar view.setRotation(ui_rotation), but achieves this via an animation.
+	 */
+	private void setViewRotation(View view, float ui_rotation) {
+		//view.setRotation(ui_rotation);
+		float rotate_by = ui_rotation - view.getRotation();
+		if( rotate_by > 181.0f )
+			rotate_by -= 360.0f;
+		else if( rotate_by < -181.0f )
+			rotate_by += 360.0f;
+		// view.animate() modifies the view's rotation attribute, so it ends up equivalent to view.setRotation()
+		// we use rotationBy() instead of rotation(), so we get the minimal rotation for clockwise vs anti-clockwise
+		view.animate().rotationBy(rotate_by).setDuration(100).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+	}
+
     public void layoutUI() {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
@@ -163,7 +178,7 @@ public class MainUI {
 			layoutParams.addRule(left_of, 0);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.gallery);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -172,7 +187,7 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.gui_anchor);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.settings);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -181,7 +196,7 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.gallery);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.popup);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -190,7 +205,7 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.settings);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.exposure_lock);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -199,7 +214,7 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.popup);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.exposure);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -208,7 +223,7 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.exposure_lock);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.switch_video);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -217,7 +232,7 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.exposure);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.switch_camera);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -228,8 +243,8 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.switch_video);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
+			setViewRotation(view, ui_rotation);
+
 			view = main_activity.findViewById(R.id.audio_control);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
@@ -239,8 +254,8 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.switch_camera);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
+			setViewRotation(view, ui_rotation);
+
 			view = main_activity.findViewById(R.id.trash);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
@@ -248,7 +263,7 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.audio_control);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.share);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -257,14 +272,14 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.trash);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.take_photo);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
 			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 	
 			view = main_activity.findViewById(R.id.zoom);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -328,14 +343,14 @@ public class MainUI {
 			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
 
 			View view = main_activity.findViewById(R.id.exposure_seekbar);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
 			view.setLayoutParams(lp);
 
 			view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 			view.setAlpha(0.5f);
 
 			// n.b., using left_of etc doesn't work properly when using rotation (as the amount of space reserved is based on the UI elements before being rotated)
@@ -357,14 +372,14 @@ public class MainUI {
 			}
 
 			view = main_activity.findViewById(R.id.iso_seekbar);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
 			view.setLayoutParams(lp);
 
 			view = main_activity.findViewById(R.id.exposure_time_seekbar);
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
@@ -399,7 +414,7 @@ public class MainUI {
 			layoutParams.addRule(align_parent_top, 0);
 			view.setLayoutParams(layoutParams);
 
-			view.setRotation(ui_rotation);
+			setViewRotation(view, ui_rotation);
 			// reset:
 			view.setTranslationX(0.0f);
 			view.setTranslationY(0.0f);
@@ -516,8 +531,8 @@ public class MainUI {
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "current_orientation is now: " + current_orientation);
 				}
-				layoutUI();
-		    }
+			    layoutUI();
+			}
 		}
 	}
 
