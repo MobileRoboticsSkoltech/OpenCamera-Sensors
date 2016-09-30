@@ -503,19 +503,22 @@ public class MyApplicationInterface implements ApplicationInterface {
         			Log.d(TAG, "using internal storage");
         		long free_memory = main_activity.freeMemory() * 1024 * 1024;
         		final long min_free_memory = 50000000; // how much free space to leave after video
-        		//final long min_free_memory = 2200L * 1024L * 1024L; // test
         		// min_free_filesize is the minimum value to set for max file size:
         		//   - no point trying to create a really short video
         		//   - too short videos can end up being corrupted
         		//   - also with auto-restart, if this is too small we'll end up repeatedly restarting and creating shorter and shorter videos
         		final long min_free_filesize = 20000000;
-        		long available = free_memory - min_free_memory;
+        		long available_memory = free_memory - min_free_memory;
+        		if( test_set_available_memory ) {
+        			available_memory = test_available_memory;
+        		}
         		if( MyDebug.LOG ) {
         			Log.d(TAG, "free_memory: " + free_memory);
+        			Log.d(TAG, "available_memory: " + available_memory);
         		}
-        		if( available > min_free_filesize ) {
-        			if( video_max_filesize.max_filesize == 0 || video_max_filesize.max_filesize > available ) {
-        				video_max_filesize.max_filesize = available;
+        		if( available_memory > min_free_filesize ) {
+        			if( video_max_filesize.max_filesize == 0 || video_max_filesize.max_filesize > available_memory ) {
+        				video_max_filesize.max_filesize = available_memory;
         				// still leave auto_restart set to true - because even if we set a max filesize for running out of storage, the video may still hit a maximum limit before hand, if there's a device max limit set (typically ~2GB)
         				if( MyDebug.LOG )
         					Log.d(TAG, "set video_max_filesize to avoid running out of space: " + video_max_filesize);
@@ -1180,6 +1183,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "updateThumbnail");
 		main_activity.updateGalleryIcon(thumbnail);
 		drawPreview.updateThumbnail(thumbnail);
+		if( this.getPausePreviewPref() ) {
+			drawPreview.showLastImage();
+		}
 	}
 	
 	@Override
@@ -1530,6 +1536,19 @@ public class MyApplicationInterface implements ApplicationInterface {
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
 		boolean do_in_background = saveInBackground(image_capture_intent);
+		
+		int sample_factor = 1;
+		if( !this.getPausePreviewPref() ) {
+			// if pausing the preview, we use the thumbnail also for the preview, so don't downsample
+			// otherwise, we can downsample by 4 to increase performance, without noticeable loss in visual quality (even for the thumbnail animation)
+			sample_factor *= 4;
+			if( !has_thumbnail_animation ) {
+				// can use even lower resolution if we don't have the thumbnail animation
+				sample_factor *= 4;
+			}
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "sample_factor: " + sample_factor);
 
 		boolean success = imageSaver.saveImageJpeg(do_in_background, is_hdr, save_expo, images,
 				image_capture_intent, image_capture_intent_uri,
@@ -1539,7 +1558,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
-				has_thumbnail_animation);
+				sample_factor);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImage complete, success: " + success);
@@ -1632,6 +1651,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "clearLastImages");
 		last_images_saf = false;
 		last_images.clear();
+		drawPreview.clearLastImage();
 	}
 
 	void shareLastImage() {
@@ -1732,4 +1752,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public HDRProcessor getHDRProcessor() {
 		return imageSaver.getHDRProcessor();
 	}
+	
+	public boolean test_set_available_memory = false;
+	public long test_available_memory = 0;
 }

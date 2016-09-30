@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     
-    <PreferenceCategory
+    <!--<PreferenceCategory
         android:key="preference_category_camera_effects"
         android:title="@string/preference_category_camera_effects"
         >
+        -->
 
         <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
         <!--
@@ -61,14 +62,11 @@
             />
         -->
 
-        <ListPreference 
-            android:key="preference_lock_orientation"
-            android:title="@string/preference_lock_orientation"
-            android:summary="@string/preference_lock_orientation_summary"
-            android:entries="@array/preference_lock_orientation_entries"
-            android:entryValues="@array/preference_lock_orientation_values"
-            android:defaultValue="none"
-            />
+	<!-- </PreferenceCategory> -->
+
+    <PreferenceCategory
+        android:key="preference_category_camera_controls"
+        android:title="@string/preference_category_camera_controls">
 
         <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
         <SwitchPreference
@@ -78,16 +76,11 @@
             android:defaultValue="false"
             />
 
-	</PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="preference_category_camera_controls"
-        android:title="@string/preference_category_camera_controls">
-
 	    <ListPreference
 	        android:key="preference_timer"
 	        android:title="@string/preference_timer"
 	        android:summary="@string/preference_timer_summary"
+	        android:icon="@drawable/ic_timer_white_48dp"
 	        android:entries="@array/preference_timer_entries"
 	        android:entryValues="@array/preference_timer_values"
 	        android:defaultValue="0"
@@ -97,6 +90,7 @@
             android:key="preference_burst_mode"
             android:title="@string/preference_burst_mode"
             android:summary="@string/preference_burst_mode_summary"
+            android:icon="@drawable/ic_burst_mode_white_48dp"
             android:entries="@array/preference_burst_mode_entries"
             android:entryValues="@array/preference_burst_mode_values"
             android:defaultValue="1"
@@ -114,12 +108,14 @@
 	    <PreferenceScreen
 	        android:key="preference_screen_camera_controls_more"
 	        android:title="@string/preference_screen_camera_controls_more"
+	        android:icon="@drawable/ic_more_horiz_white_48dp"
 	        android:persistent="false">
 
 		    <ListPreference
 		        android:key="preference_touch_capture"
 		        android:title="@string/preference_touch_capture"
 		        android:summary="@string/preference_touch_capture_summary"
+		        android:icon="@drawable/ic_touch_app_white_48dp"
 	            android:entries="@array/preference_touch_capture_entries"
 	            android:entryValues="@array/preference_touch_capture_values"
 		        android:defaultValue="none"
@@ -167,6 +163,7 @@
 	            android:key="preference_audio_control"
 	            android:title="@string/preference_audio_control"
 	            android:summary="@string/preference_audio_control_summary"
+	            android:icon="@drawable/ic_mic_white_48dp"
 	            android:entries="@array/preference_audio_control_entries"
 	            android:entryValues="@array/preference_audio_control_values"
 	            android:defaultValue="none"
@@ -180,11 +177,21 @@
 	            android:entryValues="@array/preference_audio_noise_control_sensitivity_values"
 	            android:defaultValue="0"
 	            />
-	        
+
+	        <ListPreference 
+	            android:key="preference_lock_orientation"
+	            android:title="@string/preference_lock_orientation"
+	            android:summary="@string/preference_lock_orientation_summary"
+	            android:entries="@array/preference_lock_orientation_entries"
+	            android:entryValues="@array/preference_lock_orientation_values"
+	            android:defaultValue="none"
+	            />
+
 			<Preference
 	            android:key="preference_save_location"
 	            android:title="@string/preference_save_location"
 	            android:summary="@string/preference_save_location_summary"
+	            android:icon="@drawable/ic_save_white_48dp"
 		        android:dialogTitle="@string/preference_save_location"
 		        android:dialogMessage="@string/preference_save_location_summary"
 		        android:inputType="text"
@@ -247,6 +254,7 @@
 	    <PreferenceScreen
             android:key="preference_screen_gui"
             android:title="@string/preference_screen_gui"
+	        android:icon="@drawable/ic_more_horiz_white_48dp"
             android:persistent="false">
 
             <ListPreference 
@@ -340,7 +348,7 @@
                 android:key="preference_show_geo_direction"
                 android:title="@string/preference_show_geo_direction"
                 android:summary="@string/preference_show_geo_direction_summary"
-                android:defaultValue="true"
+                android:defaultValue="false"
                 />
 
             <CheckBoxPreference
@@ -429,6 +437,7 @@
 	    <PreferenceScreen
 	        android:key="preference_screen_photo_settings"
 	        android:title="@string/preference_screen_photo_settings"
+	        android:icon="@drawable/take_photo_pref"
 	        android:persistent="false">
 	
 	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
@@ -436,6 +445,7 @@
 		        android:key="preference_resolution"
 		        android:title="@string/preference_resolution"
 		        android:summary="@string/preference_resolution_summary"
+		        android:icon="@drawable/ic_photo_size_select_large_white_48dp"
 		        />
 		
 		    <ListPreference 
@@ -568,13 +578,6 @@
 		        android:title="@string/preference_category_photo_debugging"
 		        >
 
-		        <SwitchPreference
-		            android:key="preference_background_photo_saving"
-		            android:title="@string/preference_background_photo_saving"
-		            android:summary="@string/preference_background_photo_saving_summary"
-		            android:defaultValue="true"
-		            />
-
 		        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
 		        <SwitchPreference
 		            android:key="preference_camera2_fake_flash"
@@ -582,7 +585,14 @@
 		            android:summary="@string/preference_camera2_fake_flash_summary"
 		            android:defaultValue="false"
 		            />
-	
+
+		        <SwitchPreference
+		            android:key="preference_background_photo_saving"
+		            android:title="@string/preference_background_photo_saving"
+		            android:summary="@string/preference_background_photo_saving_summary"
+		            android:defaultValue="true"
+		            />
+
 	        </PreferenceCategory>
 
         </PreferenceScreen>
@@ -590,6 +600,7 @@
 	    <PreferenceScreen
 	        android:key="preference_screen_video_settings"
 	        android:title="@string/preference_screen_video_settings"
+	        android:icon="@drawable/take_video_pref"
 	        android:persistent="false">
 
 	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
@@ -725,12 +736,14 @@
 		<PreferenceScreen
 	        android:key="preference_screen_location_settings"
 	        android:title="@string/preference_screen_location_settings"
+	        android:icon="@drawable/earth"
 	        android:persistent="false">
 
 	        <CheckBoxPreference
 	            android:key="preference_location"
 	            android:title="@string/preference_location"
 	            android:summary="@string/preference_location_summary"
+		        android:icon="@drawable/earth"
 	            android:defaultValue="false"
 	            />
 		    
@@ -761,6 +774,7 @@
 		    android:key="preference_online_help"  
 		    android:title="@string/preference_online_help"
             android:summary="@string/preference_online_help_summary"  
+            android:icon="@drawable/ic_help_outline_white_48dp"
 		    />  
 
         <Preference
@@ -781,12 +795,14 @@
             android:key="preference_about"  
             android:title="@string/preference_about"
             android:summary="@string/preference_about_summary"  
+            android:icon="@drawable/ic_info_outline_white_48dp"
             />  
         
         <Preference
             android:key="preference_reset"  
             android:title="@string/preference_reset"
             android:summary="@string/preference_reset_summary"  
+            android:icon="@drawable/ic_power_settings_new_white_48dp"
             />
         
         </PreferenceCategory>

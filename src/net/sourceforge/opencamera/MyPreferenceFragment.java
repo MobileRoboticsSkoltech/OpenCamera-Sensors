@@ -83,7 +83,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 		if( !supports_face_detection ) {
 			Preference pref = findPreference("preference_face_detection");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_effects");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_controls");
         	pg.removePreference(pref);
 		}
 

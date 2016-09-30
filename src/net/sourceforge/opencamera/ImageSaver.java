@@ -69,7 +69,7 @@ public class ImageSaver extends Thread {
 		Type type = Type.JPEG;
 		boolean is_hdr = false; // for jpeg
 		boolean save_expo = false; // for is_hdr
-		List<byte []> jpeg_images = null; // for jpeg
+		List<byte []> jpeg_images = null; // for jpeg (may be null otherwise)
 		DngCreator dngCreator = null; // for raw
 		Image image = null; // for raw
 		boolean image_capture_intent = false;
@@ -92,7 +92,7 @@ public class ImageSaver extends Thread {
 		Location location = null;
 		boolean store_geo_direction = false;
 		double geo_direction = 0.0;
-		boolean has_thumbnail_animation = false;
+		int sample_factor = 1; // sampling factor for thumbnail, higher means lower quality
 		
 		Request(Type type,
 			boolean is_hdr,
@@ -106,7 +106,7 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
-			boolean has_thumbnail_animation) {
+			int sample_factor) {
 			this.type = type;
 			this.is_hdr = is_hdr;
 			this.save_expo = save_expo;
@@ -133,7 +133,7 @@ public class ImageSaver extends Thread {
 			this.location = location;
 			this.store_geo_direction = store_geo_direction;
 			this.geo_direction = geo_direction;
-			this.has_thumbnail_animation = has_thumbnail_animation;
+			this.sample_factor = sample_factor;
 		}
 	}
 
@@ -229,7 +229,7 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
-			boolean has_thumbnail_animation) {
+			int sample_factor) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saveImageJpeg");
 			Log.d(TAG, "do_in_background? " + do_in_background);
@@ -248,7 +248,7 @@ public class ImageSaver extends Thread {
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
-				has_thumbnail_animation);
+				sample_factor);
 	}
 
 	/** Saves a RAW photo.
@@ -277,7 +277,7 @@ public class ImageSaver extends Thread {
 				current_date,
 				null, null, 0, 0, null, null, null, null,
 				false, null, false, 0.0,
-				false);
+				1);
 	}
 
 	/** Internal saveImage method to handle both JPEG and RAW.
@@ -295,7 +295,7 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
-			boolean has_thumbnail_animation) {
+			int sample_factor) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saveImage");
 			Log.d(TAG, "do_in_background? " + do_in_background);
@@ -316,13 +316,13 @@ public class ImageSaver extends Thread {
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
-				has_thumbnail_animation);
+				sample_factor);
 
 		if( do_in_background ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
 			addRequest(request);
-			if( request.is_hdr || request.jpeg_images.size() > 1 ) {
+			if( request.is_hdr || ( !is_raw && request.jpeg_images.size() > 1 ) ) {
 				// For HDR, we also add a dummy request, effectively giving it a cost of 2 - to reflect the fact that HDR is more memory intensive
 				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
 				// of 2, due to RAW and JPEG each needing their own request).
@@ -339,7 +339,7 @@ public class ImageSaver extends Thread {
 					null,
 					null, null, 0, 0, null, null, null, null,
 					false, null, false, 0.0,
-					false);
+					1);
 				if( MyDebug.LOG )
 					Log.d(TAG, "add dummy request");
 				addRequest(dummy_request);
@@ -1258,11 +1258,8 @@ public class ImageSaver extends Thread {
         	// update thumbnail - this should be done after restarting preview, so that the preview is started asap
         	CameraController.Size size = main_activity.getPreview().getCameraController().getPictureSize();
     		int ratio = (int) Math.ceil((double) size.width / main_activity.getPreview().getView().getWidth());
-    		int sample_size = Integer.highestOneBit(ratio) * 4; // * 4 to increase performance, without noticeable loss in visual quality
-			if( !request.has_thumbnail_animation ) {
-				// can use lower resolution if we don't have the thumbnail animation
-				sample_size *= 4;
-			}
+    		int sample_size = Integer.highestOneBit(ratio);
+    		sample_size *= request.sample_factor;
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "    picture width: " + size.width);
     			Log.d(TAG, "    preview width: " + main_activity.getPreview().getView().getWidth());

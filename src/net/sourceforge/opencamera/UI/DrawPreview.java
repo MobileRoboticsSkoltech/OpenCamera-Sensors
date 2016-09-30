@@ -62,7 +62,12 @@ public class DrawPreview {
 	private RectF thumbnail_anim_src_rect = new RectF();
 	private RectF thumbnail_anim_dst_rect = new RectF();
 	private Matrix thumbnail_anim_matrix = new Matrix();
-	
+
+	private boolean show_last_image = false;
+	private RectF last_image_src_rect = new RectF();
+	private RectF last_image_dst_rect = new RectF();
+	private Matrix last_image_matrix = new Matrix();
+
 	private long ae_started_scanning_ms = -1; // time when ae started scanning
 
     private boolean taking_picture = false;
@@ -124,6 +129,20 @@ public class DrawPreview {
     
 	public boolean hasThumbnailAnimation() {
 		return this.thumbnail_anim;
+	}
+	
+	/** Displays the thumbnail as a fullscreen image (used for pause preview option).
+	 */
+	public void showLastImage() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "showLastImage");
+		this.show_last_image = true;
+	}
+	
+	public void clearLastImage() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearLastImage");
+		this.show_last_image = false;
 	}
 
 	public void cameraInOperation(boolean in_operation) {
@@ -432,6 +451,25 @@ public class DrawPreview {
 			}
 		}
 
+		if( show_last_image && last_thumbnail != null ) {
+			last_image_src_rect.left = 0;
+			last_image_src_rect.top = 0;
+			last_image_src_rect.right = last_thumbnail.getWidth();
+			last_image_src_rect.bottom = last_thumbnail.getHeight();
+			last_image_dst_rect.left = 0;
+			last_image_dst_rect.top = 0;
+			last_image_dst_rect.right = canvas.getWidth();
+			last_image_dst_rect.bottom = canvas.getHeight();
+			//canvas.drawBitmap(last_image, null, last_image_dst_rect, p);
+			last_image_matrix.setRectToRect(last_image_src_rect, last_image_dst_rect, Matrix.ScaleToFit.FILL);
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				float ratio = ((float)last_thumbnail.getWidth())/(float)last_thumbnail.getHeight();
+				last_image_matrix.preScale(ratio, 1.0f/ratio, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+			}
+			last_image_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+			canvas.drawBitmap(last_thumbnail, last_image_matrix, p);
+		}
+		
 		// note, no need to check preferences here, as we do that when setting thumbnail_anim
 		if( camera_controller != null && this.thumbnail_anim && last_thumbnail != null ) {
 			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
@@ -528,7 +566,7 @@ public class DrawPreview {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
 			boolean draw_angle = has_level_angle && sharedPreferences.getBoolean(PreferenceKeys.getShowAnglePreferenceKey(), true);
-			boolean draw_geo_direction = has_geo_direction && sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionPreferenceKey(), true);
+			boolean draw_geo_direction = has_geo_direction && sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionPreferenceKey(), false);
 			if( draw_angle ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels

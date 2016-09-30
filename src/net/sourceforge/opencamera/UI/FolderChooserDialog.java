@@ -200,20 +200,17 @@ public class FolderChooserDialog extends DialogFragment {
     			Log.d(TAG, "exception reading folder");
 			e.printStackTrace();
 		}
-		if( files == null ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "couldn't read folder");
-    		String toast_message = getResources().getString(R.string.cant_access_folder) + ":\n" + new_folder.getAbsolutePath();
-			Toast.makeText(getActivity(), toast_message, Toast.LENGTH_SHORT).show();
-			return;
-		}
+		// n.b., files may be null if no files could be found in the folder (or we can't read) - but should still allow the user
+		// to view this folder (so the user can go to parent folders which might be readable again)
 		List<FileWrapper> listed_files = new ArrayList<FileWrapper>();
 		if( new_folder.getParentFile() != null )
 			listed_files.add(new FileWrapper(new_folder.getParentFile(), true));
-		for(int i=0;i<files.length;i++) {
-			File file = files[i];
-			if( file.isDirectory() ) {
-				listed_files.add(new FileWrapper(file, false));
+		if( files != null ) {
+			for(int i=0;i<files.length;i++) {
+				File file = files[i];
+				if( file.isDirectory() ) {
+					listed_files.add(new FileWrapper(file, false));
+				}
 			}
 		}
 		Collections.sort(listed_files);
