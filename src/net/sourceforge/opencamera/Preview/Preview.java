@@ -534,6 +534,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	//@SuppressLint("ClickableViewAccessibility") @Override
 
+	/** Handle multitouch zoom.
+	 */
 	private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
     	@Override
     	public boolean onScale(ScaleGestureDetector detector) {
