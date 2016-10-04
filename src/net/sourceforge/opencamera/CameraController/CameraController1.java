@@ -120,8 +120,10 @@ public class CameraController1 extends CameraController {
 	}
 	
 	private List<String> convertFlashModesToValues(List<String> supported_flash_modes) {
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "convertFlashModesToValues()");
+			Log.d(TAG, "supported_flash_modes: " + supported_flash_modes);
+		}
 		List<String> output_modes = new ArrayList<String>();
 		if( supported_flash_modes != null ) {
 			// also resort as well as converting
@@ -151,10 +153,31 @@ public class CameraController1 extends CameraController {
 					Log.d(TAG, " supports flash_red_eye");
 			}
 		}
-		else if( isFrontFacing() ) {
-			output_modes.add("flash_off");
-			output_modes.add("flash_frontscreen_on");
+		
+		// Samsung Galaxy S7 at least for front camera has supported_flash_modes: auto, beach, portrait?!
+		// so rather than checking supported_flash_modes, we should check output_modes here
+		// this is always why we check whether the size is greater than 1, rather than 0 (this also matches
+		// the check we do in Preview.setupCameraParameters()).
+		if( output_modes.size() > 1 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "flash supported");
 		}
+		else {
+			if( isFrontFacing() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "front-screen with no flash");
+				output_modes.clear(); // clear any pre-existing mode (see note above about Samsung Galaxy S7)
+				output_modes.add("flash_off");
+				output_modes.add("flash_frontscreen_on");
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no flash");
+				// probably best to not return any modes, rather than one mode (see note about about Samsung Galaxy S7)
+				output_modes.clear();
+			}
+		}
+
 		return output_modes;
 	}
 
@@ -749,18 +772,18 @@ public class CameraController1 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFlashValue: " + flash_value);
 
+		this.frontscreen_flash = false;
+    	if( flash_value.equals("flash_frontscreen_on") ) {
+    		// we do this check first due to weird behaviour on Samsung Galaxy S7 front camera where parameters.getFlashMode() returns values (auto, beach, portrait)
+    		this.frontscreen_flash = true;
+    		return;
+    	}
+		
     	if( parameters.getFlashMode() == null ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "flash mode not supported");
-        	if( flash_value.equals("flash_frontscreen_on") ) {
-        		this.frontscreen_flash = true;
-        	}
-        	else {
-        		this.frontscreen_flash = false;
-        	}
 			return;
     	}
-		this.frontscreen_flash = false;
 
 		final String flash_mode = convertFlashValueToMode(flash_value);
     	if( flash_mode.length() > 0 && !flash_mode.equals(parameters.getFlashMode()) ) {
