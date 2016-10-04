@@ -1764,12 +1764,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
 		{
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "set up flash");
+				Log.d(TAG, "flash values: " + supported_flash_values);
+			}
 			current_flash_index = -1;
 			if( supported_flash_values != null && supported_flash_values.size() > 1 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "flash values: " + supported_flash_values);
 
 				String flash_value = applicationInterface.getFlashPref();
 				if( flash_value.length() > 0 ) {
