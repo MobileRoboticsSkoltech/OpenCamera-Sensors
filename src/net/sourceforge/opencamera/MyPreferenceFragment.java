@@ -431,7 +431,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked about");
             	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
-                        alertDialog.setTitle(getContext().getResources().getString(R.string.preference_about));
+                        alertDialog.setTitle(getActivity().getResources().getString(R.string.preference_about));
                         final StringBuilder about_string = new StringBuilder();
                         String version = "UNKNOWN_VERSION";
                         int version_code = -1;
