@@ -1653,7 +1653,7 @@ public class CameraController2 extends CameraController {
 	public void setExpoBracketingNImages(int n_images) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExpoBracketingNImages: " + n_images);
-		if( n_images <= 1 || (n_images % 2) != 1 ) {
+		if( n_images <= 1 || (n_images % 2) == 0 ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "n_images should be an odd number greater than 1");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error

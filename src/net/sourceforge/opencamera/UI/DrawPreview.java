@@ -452,19 +452,32 @@ public class DrawPreview {
 		}
 
 		if( show_last_image && last_thumbnail != null ) {
+			// If changing this code, ensure that pause preview still works when:
+			// - Taking a photo in portrait or landscape - and check rotating the device while preview paused
+			// - Taking a photo with lock to portrait/landscape options still shows the thumbnail with aspect ratio preserved
+			p.setColor(Color.rgb(0, 0, 0)); // in case image doesn't cover the canvas (due to different aspect ratios)
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p); // in case
 			last_image_src_rect.left = 0;
 			last_image_src_rect.top = 0;
 			last_image_src_rect.right = last_thumbnail.getWidth();
 			last_image_src_rect.bottom = last_thumbnail.getHeight();
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				last_image_src_rect.right = last_thumbnail.getHeight();
+				last_image_src_rect.bottom = last_thumbnail.getWidth();
+			}
 			last_image_dst_rect.left = 0;
 			last_image_dst_rect.top = 0;
 			last_image_dst_rect.right = canvas.getWidth();
 			last_image_dst_rect.bottom = canvas.getHeight();
-			//canvas.drawBitmap(last_image, null, last_image_dst_rect, p);
-			last_image_matrix.setRectToRect(last_image_src_rect, last_image_dst_rect, Matrix.ScaleToFit.FILL);
+			/*if( MyDebug.LOG ) {
+				Log.d(TAG, "thumbnail: " + last_thumbnail.getWidth() + " x " + last_thumbnail.getHeight());
+				Log.d(TAG, "canvas: " + canvas.getWidth() + " x " + canvas.getHeight());
+			}*/
+			last_image_matrix.setRectToRect(last_image_src_rect, last_image_dst_rect, Matrix.ScaleToFit.CENTER); // use CENTER to preserve aspect ratio
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				float ratio = ((float)last_thumbnail.getWidth())/(float)last_thumbnail.getHeight();
-				last_image_matrix.preScale(ratio, 1.0f/ratio, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+				// the rotation maps (0, 0) to (tw/2 - th/2, th/2 - tw/2), so we translate to undo this
+				float diff = last_thumbnail.getHeight() - last_thumbnail.getWidth();
+				last_image_matrix.preTranslate(diff/2.0f, -diff/2.0f);
 			}
 			last_image_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
 			canvas.drawBitmap(last_thumbnail, last_image_matrix, p);

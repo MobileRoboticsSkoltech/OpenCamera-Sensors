@@ -168,7 +168,8 @@ public class FolderChooserDialog extends DialogFragment {
 			}
 		}
 		refreshList(new_folder);
-		if( current_folder == null ) {
+		if( !canWrite() ) {
+			// see testFolderChooserInvalid()
 			if( MyDebug.LOG )
 				Log.d(TAG, "failed to read folder");
 			// note that we reset to DCIM rather than DCIM/OpenCamera, just to increase likelihood of getting back to a valid state
