@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -1151,7 +1153,7 @@ public class ImageSaver extends Thread {
         	            setGPSDirectionExif(exif_new, store_geo_direction, request.geo_direction);
         	            setDateTimeExif(exif_new);
         	            if( needGPSTimestampHack(using_camera2, store_location) ) {
-        	            	fixGPSTimestamp(exif_new);
+        	            	fixGPSTimestamp(exif_new, current_date);
         	            }
     	            	exif_new.saveAttributes();
         	    		if( MyDebug.LOG )
@@ -1167,7 +1169,7 @@ public class ImageSaver extends Thread {
         	            setGPSDirectionExif(exif, store_geo_direction, request.geo_direction);
         	            setDateTimeExif(exif);
         	            if( needGPSTimestampHack(using_camera2, store_location) ) {
-        	            	fixGPSTimestamp(exif);
+        	            	fixGPSTimestamp(exif, current_date);
         	            }
     	            	exif.saveAttributes();
     	        		if( MyDebug.LOG ) {
@@ -1178,7 +1180,7 @@ public class ImageSaver extends Thread {
     	            	if( MyDebug.LOG )
         	    			Log.d(TAG, "remove GPS timestamp hack");
     	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
-    	            	fixGPSTimestamp(exif);
+    	            	fixGPSTimestamp(exif, current_date);
     	            	exif.saveAttributes();
     	        		if( MyDebug.LOG ) {
     	        			Log.d(TAG, "Save single image performance: time after removing GPS timestamp hack: " + (System.currentTimeMillis() - time_s));
@@ -1547,14 +1549,38 @@ public class ImageSaver extends Thread {
     	}
 	}
 	
-	private void fixGPSTimestamp(ExifInterface exif) {
-		if( MyDebug.LOG )
+	private void fixGPSTimestamp(ExifInterface exif, Date current_date) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "fixGPSTimestamp");
-		// hack: problem on Camera2 API (at least on Nexus 6) that if geotagging is enabled, then the resultant image has incorrect Exif TAG_GPS_DATESTAMP (GPSDateStamp) set (tends to be around 2038 - possibly a driver bug of casting long to int?)
-		// whilst we don't yet correct for that bug, the more immediate problem is that it also messes up the DATE_TAKEN field in the media store, which messes up Gallery apps
-		// so for now, we correct it based on the DATE_ADDED value.
-    	// see http://stackoverflow.com/questions/4879435/android-put-gpstimestamp-into-jpg-exif-tags
-    	exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, Long.toString(System.currentTimeMillis()));
+			Log.d(TAG, "current datestamp: " + exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP));
+			Log.d(TAG, "current timestamp: " + exif.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP));
+			Log.d(TAG, "current datetime: " + exif.getAttribute(ExifInterface.TAG_DATETIME));
+		}
+		// Hack: Problem on Camera2 API (at least on Nexus 6) that if geotagging is enabled, then the resultant image has incorrect Exif TAG_GPS_DATESTAMP and TAG_GPS_TIMESTAMP (GPSDateStamp) set (date tends to be around 2038 - possibly a driver bug of casting long to int?).
+		// This causes problems when viewing with Gallery apps, as they show this incorrect date.
+		// Update: Before v1.34 this was "fixed" by calling: exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, Long.toString(System.currentTimeMillis()));
+		// However this stopped working on or before 20161006. This wasn't a change in Open Camera (whilst this was working fine in
+		// 1.33 when I released it, the bug had come back when I retested that version) and I'm not sure how this ever worked, since
+		// TAG_GPS_TIMESTAMP is meant to be a string such "21:45:23", and not the number of ms since 1970 - possibly it wasn't really
+		// working , and was simply invalidating it such that Gallery then fell back to looking elsewhere for the datetime?
+		// So now hopefully fixed properly...
+		SimpleDateFormat date_fmt = new SimpleDateFormat("yyyy:MM:dd", Locale.US);
+		date_fmt.setTimeZone(TimeZone.getTimeZone("UTC")); // needs to be UTC time
+		String datestamp = date_fmt.format(current_date);
+
+		SimpleDateFormat time_fmt = new SimpleDateFormat("HH:mm:ss", Locale.US);
+		time_fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+		String timestamp = time_fmt.format(current_date);
+
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "datestamp: " + datestamp);
+			Log.d(TAG, "timestamp: " + timestamp);
+		}
+		exif.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, datestamp);
+    	exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, timestamp);
+	
+		if( MyDebug.LOG )
+			Log.d(TAG, "fixGPSTimestamp exit");
 	}
 	
 	private boolean needGPSTimestampHack(boolean using_camera2, boolean store_location) {
