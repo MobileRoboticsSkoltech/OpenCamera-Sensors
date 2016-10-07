@@ -1191,14 +1191,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				need_reopen = true;
 			}
 			else {
-				// need to reopen if fake flash mode changed, as it changes the available camera features, and we can only set this after opening the camera
-				boolean camera2_fake_flash = preview.getCameraController().getUseCamera2FakeFlash();
-				if( MyDebug.LOG )
-					Log.d(TAG, "camera2_fake_flash was: " + camera2_fake_flash);
-				if( applicationInterface.useCamera2FakeFlash() != camera2_fake_flash ) {
+				if( applicationInterface.useCamera2() ) {
+					// need to reopen if fake flash mode changed, as it changes the available camera features, and we can only set this after opening the camera
+					boolean camera2_fake_flash = preview.getCameraController().getUseCamera2FakeFlash();
 					if( MyDebug.LOG )
-						Log.d(TAG, "camera2_fake_flash changed");
-					need_reopen = true;
+						Log.d(TAG, "camera2_fake_flash was: " + camera2_fake_flash);
+					if( applicationInterface.useCamera2FakeFlash() != camera2_fake_flash ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "camera2_fake_flash changed");
+						need_reopen = true;
+					}
 				}
 			}
 		}
