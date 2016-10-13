@@ -33,7 +33,9 @@
             android:label="@string/app_name"
             android:screenOrientation="landscape"
 			android:configChanges="orientation|screenSize|keyboardHidden"
+			android:clearTaskOnLaunch="true"
             >
+            <!-- clearTaskOnLaunch set to true, so if user goes to gallery then returns to home, we return to the camera rather than remaining in gallery if user relaunches Open Camera -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
