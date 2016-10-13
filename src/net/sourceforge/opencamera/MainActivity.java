@@ -1476,11 +1476,19 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					Log.d(TAG, "is_locked?: " + is_locked);
 		    	if( media != null && getContentResolver() != null && !is_locked ) {
 		    		// check for getContentResolver() != null, as have had reported Google Play crashes
-		    		if( media.video ) {
-		    			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
+		    		try {
+			    		if( media.video ) {
+			    			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
+			    		}
+			    		else {
+			    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+			    		}
 		    		}
-		    		else {
-		    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+		    		catch(NoClassDefFoundError exception) {
+		    			// have had Google Play crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn)
+		    			if( MyDebug.LOG )
+		    				Log.e(TAG, "exif orientation NoClassDefFoundError");
+		    			exception.printStackTrace();
 		    		}
 		    		if( thumbnail != null ) {
 			    		if( media.orientation != 0 ) {
