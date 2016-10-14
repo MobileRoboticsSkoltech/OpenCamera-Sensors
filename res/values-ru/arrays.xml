@@ -131,9 +131,9 @@
         <item>5 минут</item>
         <item>10 минут</item>
         <item>20 минут</item>
-		<item>30 минут</item>
-		<item>1 час</item>
-		<item>2 часа</item>
+        <item>30 минут</item>
+        <item>1 час</item>
+        <item>2 часа</item>
     </string-array>
     <string-array name="preference_burst_interval_values">
         <item>0</item>
@@ -177,10 +177,10 @@
         <item>Фокус</item>
         <item>Увеличить/уменьшить масштаб</item>
         <item>Изменить уровень экспозиции</item>
-        <item>Авто стабилизация вкл/выкл</item>
+        <item>Автоматическая стабилизация вкл/выкл</item>
         <item>Изменить громкость</item>
         <item>Ничего</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
         <item>volume_focus</item>
@@ -209,7 +209,7 @@
     <string-array name="preference_immersive_mode_entries">
         <item>Выключить</item>
         <item>Скрыть кнопки навигации</item>
-        <item>Скрыть GUI</item>
+        <item>Скрыть интерфейс</item>
         <item>Скрыть все</item>
     </string-array>
     <string-array name="preference_immersive_mode_values">
@@ -288,6 +288,14 @@
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>
     </string-array>
+    <string-array name="preference_raw_entries">
+        <item>Только JPEG</item>
+        <item>JPEG и DNG (RAW)</item>
+    </string-array>
+    <string-array name="preference_raw_values">
+        <item>preference_raw_no</item>
+        <item>preference_raw_yes</item>
+    </string-array>
     <string-array name="preference_stamp_entries">
         <item>Без штампа</item>
         <item>Со штампом</item>
@@ -302,7 +310,7 @@
         <item>дд/мм/гггг</item>
         <item>мм/дд/гггг</item>
         <item>Нет</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_stamp_dateformat_values">
         <item>preference_stamp_dateformat_default</item>
         <item>preference_stamp_dateformat_yyyymmdd</item>
@@ -450,7 +458,7 @@
         <item>30 секунд</item>
         <item>1 минута</item>
         <item>2 минуты</item>
-        <item>3 минут</item>
+        <item>3 минуты</item>
         <item>4 минуты</item>
         <item>5 минут</item>
         <item>6 минут</item>
@@ -522,7 +530,7 @@
         <item>Микрофон видеокамеры</item>
         <item>Внешний микрофон (если есть)</item>
         <item>По умолчанию</item>
-        <item>Оптимизированно для голоса</item>
+        <item>Оптимизировано для голоса</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>
@@ -581,5 +589,33 @@
         <item>314572800</item>
         <item>524288000</item>
         <item>1073741824</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_entries">
+        <item>Местное время</item>
+        <item>UTC (Zulu)</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_values">
+        <item>local</item>
+        <item>zulu</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_entries">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_values">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_entries">
+        <item>0.5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_values">
+        <item>0.5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
 </resources>
