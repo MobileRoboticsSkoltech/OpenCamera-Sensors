@@ -5066,6 +5066,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 				this.lines = text.split("\n");
 			}
+			
+			void setText(String text) {
+				this.lines = text.split("\n");
+			}
 
 			@Override 
 			protected void onDraw(Canvas canvas) {
@@ -5142,6 +5146,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					if( MyDebug.LOG )
 						Log.d(TAG, "reuse last toast: " + last_toast);
 					toast = clear_toast.toast;
+					// for performance, important to reuse the same view, instead of creating a new one (otherwise we get jerky preview update e.g. for changing manual focus slider)
+					RotatedTextView view = (RotatedTextView)toast.getView();
+					view.setText(message);
+					view.invalidate(); // make sure the toast is redrawn
+					toast.setView(view);
 				}
 				else {
 					if( clear_toast != null && clear_toast.toast != null ) {
@@ -5154,9 +5163,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Log.d(TAG, "created new toast: " + toast);
 					if( clear_toast != null )
 						clear_toast.toast = toast;
+					View text = new RotatedTextView(message, activity);
+					toast.setView(text);
 				}
-				View text = new RotatedTextView(message, activity);
-				toast.setView(text);
 				toast.setDuration(Toast.LENGTH_SHORT);
 				toast.show();
 				last_toast = toast;
