@@ -221,7 +221,7 @@ public final class R {
         /**  symbol short for gigabytes 
  symbol short for gigabytes 
  symbol short for gigabytes 
- symbol short for megabytes 
+ symbol short for gigabytes 
  symbol short for megabytes 
  symbol short for megabytes 
          */
@@ -303,6 +303,7 @@ public final class R {
         public static final int front_camera=0x7f08001b;
         public static final int gallery=0x7f0800f9;
         /**  symbol short for megabytes 
+ symbol short for megabytes 
  symbol short for megabytes 
  symbol short for megabytes 
          */
@@ -635,6 +636,7 @@ public final class R {
         public static final int video_max_filesize=0x7f080016;
         public static final int video_may_be_corrupted=0x7f080011;
         /**  short for seconds 
+ short for seconds 
  short for seconds 
          */
         public static final int video_no_free_space=0x7f080134;
