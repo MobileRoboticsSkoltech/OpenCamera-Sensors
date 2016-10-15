@@ -15,7 +15,9 @@ float parameter_B2 = 0.0f;
 const float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
 float tonemap_scale = 1.0f;
 
-/*const float W = 11.2f;
+/*
+// functions for Filmic Uncharted 2:
+const float W = 11.2f;
 
 static float Uncharted2Tonemap(float x) {
 	const float A = 0.15f;
@@ -128,9 +130,9 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	{
 		/*
 		// Simple clamp
-		int r = (int)hdr_r;
-		int g = (int)hdr_g;
-		int b = (int)hdr_b;
+		int r = (int)hdr.r;
+		int g = (int)hdr.g;
+		int b = (int)hdr.b;
 		r = min(r, 255);
 		g = min(g, 255);
 		b = min(b, 255);
@@ -151,9 +153,9 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		// Filmic Uncharted 2
 		const float exposure_bias = 8.0f / 255.0f;
 		float white_scale = 255.0f / Uncharted2Tonemap(W);
-		float curr_r = Uncharted2Tonemap(exposure_bias * hdr_r);
-		float curr_g = Uncharted2Tonemap(exposure_bias * hdr_g);
-		float curr_b = Uncharted2Tonemap(exposure_bias * hdr_b);
+		float curr_r = Uncharted2Tonemap(exposure_bias * hdr.r);
+		float curr_g = Uncharted2Tonemap(exposure_bias * hdr.g);
+		float curr_b = Uncharted2Tonemap(exposure_bias * hdr.b);
 		out.r = (uchar)(curr_r * white_scale);
 		out.g = (uchar)(curr_g * white_scale);
 		out.b = (uchar)(curr_b * white_scale);
