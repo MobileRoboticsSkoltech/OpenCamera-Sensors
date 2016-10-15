@@ -19,6 +19,7 @@ uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t 
 	int equal_value = (int)( 255.0f * (num/den) ); // value that we should choose to fully equalise the histogram
 	
 	const float alpha = 0.5f; // 0.0 means no change, 1.0 means fully equalise
+	//const float alpha = 1.0f; // 0.0 means no change, 1.0 means fully equalise
 	int new_value = (int)( (1.0f-alpha) * value + alpha * equal_value );
 	
 	float scale = ((float)new_value) / (float)value;
