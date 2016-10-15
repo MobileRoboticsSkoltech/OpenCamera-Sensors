@@ -655,7 +655,9 @@ public class HDRProcessor {
 							float r = (float)((color & 0xFF0000) >> 16);
 							float g = (float)((color & 0xFF00) >> 8);
 							float b = (float)(color & 0xFF);
-							float value = 0.299f*r + 0.587f*g + 0.114f*b; // matches ScriptIntrinsicHistogram default behaviour
+							//float value = 0.299f*r + 0.587f*g + 0.114f*b; // matches ScriptIntrinsicHistogram default behaviour
+							float value = Math.max(r, g);
+							value = Math.max(value, b);
 							int i_value = (int)value;
 							i_value = Math.min(255, i_value); // just in case
 							debug_histogram[i_value]++;
