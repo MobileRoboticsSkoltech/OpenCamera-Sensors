@@ -610,6 +610,11 @@ public class HDRProcessor {
 			// set globals
 			//final float tonemap_scale_c = avg_luminance / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
 			final float tonemap_scale_c = 255.0f;
+			// Higher tonemap_scale_c values means darker results from the Reinhard tonemapping.
+			// Colours brighter than 255-tonemap_scale_c will be made darker, colours darker than 255-tonemap_scale_c will be made brighter
+			// (tonemap_scale_c==255 means therefore that colours will only be made darker).
+			if( MyDebug.LOG )
+				Log.d(TAG, "tonemap_scale_c: " + tonemap_scale_c);
 			processHDRScript.set_tonemap_scale(tonemap_scale_c);
 
 			if( MyDebug.LOG )
@@ -627,7 +632,7 @@ public class HDRProcessor {
 				//Allocation histogramAllocation = Allocation.createSized(rs, Element.I32_3(rs), 256);
 				Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
 				histogramScript.setOutput(histogramAllocation);
-				histogramScript.forEach(allocations[0]);
+				histogramScript.forEach_Dot(allocations[0]); // use forEach_dot(); using forEach would simply compute a histogram for red values!
 				if( MyDebug.LOG )
 					Log.d(TAG, "time after creating histogram: " + (System.currentTimeMillis() - time_s));
 	
@@ -635,6 +640,33 @@ public class HDRProcessor {
 				//histogramAllocation.setAutoPadding(true);
 				histogramAllocation.copyTo(histogram);
 	
+				/*if( MyDebug.LOG ) {
+					// compare/adjust
+					allocations[0].copyTo(bm);
+					int [] debug_histogram = new int[256];
+					for(int i=0;i<256;i++) {
+						debug_histogram[i] = 0;
+					}
+					int [] debug_buffer = new int[bm.getWidth()];
+					for(int y=0;y<bm.getHeight();y++) {
+						bm.getPixels(debug_buffer, 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
+						for(int x=0;x<bm.getWidth();x++) {
+							int color = debug_buffer[x];
+							float r = (float)((color & 0xFF0000) >> 16);
+							float g = (float)((color & 0xFF00) >> 8);
+							float b = (float)(color & 0xFF);
+							float value = 0.299f*r + 0.587f*g + 0.114f*b; // matches ScriptIntrinsicHistogram default behaviour
+							int i_value = (int)value;
+							i_value = Math.min(255, i_value); // just in case
+							debug_histogram[i_value]++;
+						}
+					}
+					for(int x=0;x<256;x++) {
+						Log.d(TAG, "histogram[" + x + "] = " + histogram[x] + " debug_histogram: " + debug_histogram[x]);
+						//histogram[x] = debug_histogram[x];
+					}
+				}*/
+
 				int [] c_histogram = new int[256];
 				c_histogram[0] = histogram[0];
 				for(int x=1;x<256;x++) {
