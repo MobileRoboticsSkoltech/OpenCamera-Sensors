@@ -625,8 +625,8 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after processHDRScript: " + (System.currentTimeMillis() - time_s));
 			
-			//final boolean adjust_histogram = false;
-			final boolean adjust_histogram = true;
+			final boolean adjust_histogram = false;
+			//final boolean adjust_histogram = true;
 
 			if( adjust_histogram ) {
 				// create histogram
@@ -694,11 +694,11 @@ public class HDRProcessor {
 				for(int x=1;x<256;x++) {
 					c_histogram[x] = c_histogram[x-1] + histogram[x];
 				}
-				if( MyDebug.LOG ) {
+				/*if( MyDebug.LOG ) {
 					for(int x=0;x<256;x++) {
 						Log.d(TAG, "histogram[" + x + "] = " + histogram[x] + " cumulative: " + c_histogram[x]);
 					}
-				}
+				}*/
 				histogramAllocation.copyFrom(c_histogram);
 	
 				ScriptC_histogram_adjust histogramAdjustScript = new ScriptC_histogram_adjust(rs);
@@ -711,10 +711,16 @@ public class HDRProcessor {
 					Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
 			}
 
-			final boolean adjust_histogram_local = false;
-			//final boolean adjust_histogram_local = true;
+			//final boolean adjust_histogram_local = false;
+			final boolean adjust_histogram_local = true;
 
 			if( adjust_histogram_local ) {
+				// Contrast Limited Adaptive Histogram Equalisation
+				// Note we don't fully equalise the histogram, rather the resultant image is the mid-point of the non-equalised and fully-equalised images
+				// See https://en.wikipedia.org/wiki/Adaptive_histogram_equalization#Contrast_Limited_AHE
+				// Also see "Adaptive Histogram Equalization and its Variations" ( http://www.cs.unc.edu/Research/MIDAG/pubs/papers/Adaptive%20Histogram%20Equalization%20and%20Its%20Variations.pdf ),
+				// Pizer, Amburn, Austin, Cromartie, Geselowitz, Greer, ter Haar Romeny, Zimmerman, Zuiderveld (1987).
+
 				// create histograms
 				Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
 				if( MyDebug.LOG )
@@ -742,14 +748,14 @@ public class HDRProcessor {
 						int stop_y = (int)(b1 * bm.getHeight());
 						if( stop_y == start_y )
 							continue;
-						if( MyDebug.LOG )
-							Log.d(TAG, i + " , " + j + " : " + start_x + " , " + start_y + " to " + stop_x + " , " + stop_y);
+						/*if( MyDebug.LOG )
+							Log.d(TAG, i + " , " + j + " : " + start_x + " , " + start_y + " to " + stop_x + " , " + stop_y);*/
 						Script.LaunchOptions launch_options = new Script.LaunchOptions();
 						launch_options.setX(start_x, stop_x);
 						launch_options.setY(start_y, stop_y);
 
-						if( MyDebug.LOG )
-							Log.d(TAG, "call histogramScript");
+						/*if( MyDebug.LOG )
+							Log.d(TAG, "call histogramScript");*/
 						histogramScript.invoke_init_histogram();
 						histogramScript.forEach_histogram_compute(allocations[0], launch_options);
 
@@ -788,8 +794,8 @@ public class HDRProcessor {
 						// clip histogram, for Contrast Limited AHE algorithm
 						int n_pixels = (stop_x - start_x) * (stop_y - start_y);
 						int clip_limit = (10 * n_pixels) / 256;
-						if( MyDebug.LOG )
-							Log.d(TAG, "clip_limit: " + clip_limit);
+						/*if( MyDebug.LOG )
+							Log.d(TAG, "clip_limit: " + clip_limit);*/
 						{
 							// find real clip limit
 							int bottom = 0, top = clip_limit;
@@ -807,8 +813,8 @@ public class HDRProcessor {
 									bottom = middle;
 							}
 							clip_limit = (top + bottom)/2;
-							if( MyDebug.LOG )
-								Log.d(TAG, "update clip_limit: " + clip_limit);
+							/*if( MyDebug.LOG )
+								Log.d(TAG, "updated clip_limit: " + clip_limit);*/
 						}
 						int n_clipped = 0;
 						for(int x=0;x<256;x++) {
@@ -818,10 +824,10 @@ public class HDRProcessor {
 							}
 						}
 						int n_clipped_per_bucket = n_clipped / 256;
-						if( MyDebug.LOG ) {
+						/*if( MyDebug.LOG ) {
 							Log.d(TAG, "n_clipped: " + n_clipped);
 							Log.d(TAG, "n_clipped_per_bucket: " + n_clipped_per_bucket);
-						}
+						}*/
 						for(int x=0;x<256;x++) {
 							histogram[x] += n_clipped_per_bucket;
 						}
