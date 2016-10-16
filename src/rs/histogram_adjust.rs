@@ -4,6 +4,8 @@
 
 rs_allocation c_histogram;
 
+// Global histogram equalisation:
+
 uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t y) {
 	float in_r = in.r;
 	float in_g = in.g;
@@ -30,6 +32,8 @@ uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t 
 	
 	return out;
 }
+
+// Local histogram equalisation:
 
 int n_tiles = 0;
 int width = 0;
@@ -73,6 +77,30 @@ uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t 
 		float equal_value0 = (1.0f-alpha)*equal_value00 + alpha*equal_value10;
 		float equal_value1 = (1.0f-alpha)*equal_value01 + alpha*equal_value11;
 		equal_value = (1.0f-beta)*equal_value0 + beta*equal_value1;
+	}
+	else if( ix >= 0 && ix < n_tiles-1 ) {
+		int this_y = (iy<0) ? iy+1 : iy;
+		int histogram_offset0 = 256*(ix*n_tiles+this_y);
+		int histogram_offset1 = 256*((ix+1)*n_tiles+this_y);
+		int equal_value0 = getEqualValue(histogram_offset0, value);
+		int equal_value1 = getEqualValue(histogram_offset1, value);
+		float alpha = tx - ix;
+		equal_value = (1.0f-alpha)*equal_value0 + alpha*equal_value1;
+	}
+	else if( iy >= 0 && iy < n_tiles-1 ) {
+		int this_x = (ix<0) ? ix+1 : ix;
+		int histogram_offset0 = 256*(this_x*n_tiles+iy);
+		int histogram_offset1 = 256*(this_x*n_tiles+iy+1);
+		int equal_value0 = getEqualValue(histogram_offset0, value);
+		int equal_value1 = getEqualValue(histogram_offset1, value);
+		float beta = ty - iy;
+		equal_value = (1.0f-beta)*equal_value0 + beta*equal_value1;
+	}
+	else {
+		int this_x = (ix<0) ? ix+1 : ix;
+		int this_y = (iy<0) ? iy+1 : iy;
+		int histogram_offset = 256*(this_x*n_tiles+this_y);
+		equal_value = getEqualValue(histogram_offset, value);
 	}
 	
 	const float alpha = 0.5f; // 0.0 means no change, 1.0 means fully equalise

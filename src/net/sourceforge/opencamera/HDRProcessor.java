@@ -716,9 +716,13 @@ public class HDRProcessor {
 
 			if( adjust_histogram_local ) {
 				// create histograms
-				ScriptIntrinsicHistogram histogramScript = ScriptIntrinsicHistogram.create(rs, Element.U8_4(rs));
 				Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
-				histogramScript.setOutput(histogramAllocation);
+				if( MyDebug.LOG )
+					Log.d(TAG, "create histogramScript");
+				ScriptC_histogram_compute histogramScript = new ScriptC_histogram_compute(rs);
+				if( MyDebug.LOG )
+					Log.d(TAG, "bind histogram allocation");
+				histogramScript.bind_histogram(histogramAllocation);
 				
 				//final int n_tiles_c = 8;
 				final int n_tiles_c = 4;
@@ -744,13 +748,15 @@ public class HDRProcessor {
 						launch_options.setX(start_x, stop_x);
 						launch_options.setY(start_y, stop_y);
 
-						histogramScript.forEach_Dot(allocations[0], launch_options); // use forEach_dot(); using forEach would simply compute a histogram for red values!
-						//histogramScript.forEach_Dot(allocations[0]); // use forEach_dot(); using forEach would simply compute a histogram for red values!
+						if( MyDebug.LOG )
+							Log.d(TAG, "call histogramScript");
+						histogramScript.invoke_init_histogram();
+						histogramScript.forEach_histogram_compute(allocations[0], launch_options);
 
 						int [] histogram = new int[256];
 						histogramAllocation.copyTo(histogram);
 			
-						if( MyDebug.LOG ) {
+						/*if( MyDebug.LOG ) {
 							// compare/adjust
 							allocations[0].copyTo(bm);
 							int [] debug_histogram = new int[256];
@@ -775,50 +781,61 @@ public class HDRProcessor {
 							}
 							for(int x=0;x<256;x++) {
 								Log.d(TAG, "histogram[" + x + "] = " + histogram[x] + " debug_histogram: " + debug_histogram[x]);
-								histogram[x] = debug_histogram[x];
+								//histogram[x] = debug_histogram[x];
 							}
-						}
+						}*/
 						
 						// clip histogram, for Contrast Limited AHE algorithm
 						int n_pixels = (stop_x - start_x) * (stop_y - start_y);
-						int clip_limit = (3 * n_pixels) / 256;
+						int clip_limit = (10 * n_pixels) / 256;
 						if( MyDebug.LOG )
 							Log.d(TAG, "clip_limit: " + clip_limit);
+						{
+							// find real clip limit
+							int bottom = 0, top = clip_limit;
+							while( top - bottom > 1 ) {
+								int middle = (top + bottom)/2;
+								int sum = 0;
+								for(int x=0;x<256;x++) {
+									if( histogram[x] > middle ) {
+										sum += (histogram[x] - clip_limit);
+									}
+								}
+								if( sum > (clip_limit - middle) * 256 )
+									top = middle;
+								else
+									bottom = middle;
+							}
+							clip_limit = (top + bottom)/2;
+							if( MyDebug.LOG )
+								Log.d(TAG, "update clip_limit: " + clip_limit);
+						}
+						int n_clipped = 0;
 						for(int x=0;x<256;x++) {
-							histogram[x] = Math.min(histogram[x], clip_limit);
-						}
-
-						/*int [] c_histogram = new int[256];
-						c_histogram[0] = histogram[0];
-						for(int x=1;x<256;x++) {
-							c_histogram[x] = c_histogram[x-1] + histogram[x];
-						}
-						if( MyDebug.LOG ) {
-							for(int x=0;x<256;x++) {
-								Log.d(TAG, "histogram[" + x + "] = " + histogram[x] + " cumulative: " + c_histogram[x]);
+							if( histogram[x] > clip_limit ) {
+								n_clipped += (histogram[x] - clip_limit);
+								histogram[x] = clip_limit;
 							}
 						}
-						histogramAllocation.copyFrom(c_histogram);
-			
-						ScriptC_histogram_adjust histogramAdjustScript = new ScriptC_histogram_adjust(rs);
-						histogramAdjustScript.set_c_histogram(histogramAllocation);
-			
-						if( MyDebug.LOG )
-							Log.d(TAG, "call histogramAdjustScript");
-						histogramAdjustScript.forEach_histogram_adjust(allocations[0], allocations[0], launch_options);
-						if( MyDebug.LOG )
-							Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
-							*/
+						int n_clipped_per_bucket = n_clipped / 256;
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "n_clipped: " + n_clipped);
+							Log.d(TAG, "n_clipped_per_bucket: " + n_clipped_per_bucket);
+						}
+						for(int x=0;x<256;x++) {
+							histogram[x] += n_clipped_per_bucket;
+						}
+
 						int histogram_offset = 256*(i*n_tiles_c+j);
 						c_histogram[histogram_offset] = histogram[0];
 						for(int x=1;x<256;x++) {
 							c_histogram[histogram_offset+x] = c_histogram[histogram_offset+x-1] + histogram[x];
 						}
-						if( MyDebug.LOG ) {
+						/*if( MyDebug.LOG ) {
 							for(int x=0;x<256;x++) {
 								Log.d(TAG, "histogram[" + x + "] = " + histogram[x] + " cumulative: " + c_histogram[histogram_offset+x]);
 							}
-						}
+						}*/
 					}
 				}
 
