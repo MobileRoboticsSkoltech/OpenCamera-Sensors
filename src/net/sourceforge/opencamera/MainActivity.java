@@ -317,11 +317,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		boolean has_done_first_time = sharedPreferences.contains(PreferenceKeys.getFirstTimePreferenceKey());
 		if( !has_done_first_time ) {
 			boolean is_samsung = Build.MANUFACTURER.toLowerCase(Locale.US).contains("samsung");
+			boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "running for first time");
 				Log.d(TAG, "is_samsung? " + is_samsung);
+				Log.d(TAG, "is_oneplus? " + is_oneplus);
 			}
-			if( is_samsung ) {
+			if( is_samsung || is_oneplus ) {
+				// workaround needed for Samsung S7 at least (tested on Samsung RTL)
+				// workaround needed for OnePlus 3 at least (see http://forum.xda-developers.com/oneplus-3/help/camera2-support-t3453103 )
 				SharedPreferences.Editor editor = sharedPreferences.edit();
 				editor.putBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), true);
 				editor.apply();
