@@ -630,15 +630,33 @@ public class HDRProcessor {
 
 			if( adjust_histogram ) {
 				// create histogram
-				ScriptIntrinsicHistogram histogramScript = ScriptIntrinsicHistogram.create(rs, Element.U8_4(rs));
-				//Allocation histogramAllocation = Allocation.createSized(rs, Element.I32_3(rs), 256);
+				int [] histogram = new int[256];
 				Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
-				histogramScript.setOutput(histogramAllocation);
-				histogramScript.forEach_Dot(allocations[0]); // use forEach_dot(); using forEach would simply compute a histogram for red values!
+				//final boolean use_custom_histogram = false;
+				final boolean use_custom_histogram = true;
+				if( MyDebug.LOG )
+					Log.d(TAG, "time before creating histogram: " + (System.currentTimeMillis() - time_s));
+				if( use_custom_histogram ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "create histogramScript");
+					ScriptC_histogram_compute histogramScript = new ScriptC_histogram_compute(rs);
+					if( MyDebug.LOG )
+						Log.d(TAG, "bind histogram allocation");
+					histogramScript.bind_histogram(histogramAllocation);
+					if( MyDebug.LOG )
+						Log.d(TAG, "call histogramScript");
+					histogramScript.forEach_histogram_compute(allocations[0]);
+				}
+				else {
+					ScriptIntrinsicHistogram histogramScript = ScriptIntrinsicHistogram.create(rs, Element.U8_4(rs));
+					histogramScript.setOutput(histogramAllocation);
+					if( MyDebug.LOG )
+						Log.d(TAG, "call histogramScript");
+					histogramScript.forEach_Dot(allocations[0]); // use forEach_dot(); using forEach would simply compute a histogram for red values!
+				}
 				if( MyDebug.LOG )
 					Log.d(TAG, "time after creating histogram: " + (System.currentTimeMillis() - time_s));
-	
-				int [] histogram = new int[256];
+
 				//histogramAllocation.setAutoPadding(true);
 				histogramAllocation.copyTo(histogram);
 	
