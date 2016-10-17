@@ -6,7 +6,7 @@ rs_allocation c_histogram;
 
 // Global histogram equalisation:
 
-uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t y) {
+/*uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t y) {
 	float in_r = in.r;
 	float in_g = in.g;
 	float in_b = in.b;
@@ -31,7 +31,7 @@ uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t 
 	out.b = min(255, (int)(in.b * scale));
 	
 	return out;
-}
+}*/
 
 // Local histogram equalisation:
 
@@ -39,7 +39,7 @@ int n_tiles = 0;
 int width = 0;
 int height = 0;
 
-/*static int getEqualValue(int histogram_offset, float value) {
+static int getEqualValue(int histogram_offset, float value) {
 	int cdf_v = rsGetElementAt_int(c_histogram, histogram_offset+value);
 	int cdf_0 = rsGetElementAt_int(c_histogram, histogram_offset);
 	int n_pixels = rsGetElementAt_int(c_histogram, histogram_offset+255);
@@ -115,4 +115,4 @@ uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t 
 	out.b = min(255, (int)(in.b * scale));
 	
 	return out;
-}*/
+}
