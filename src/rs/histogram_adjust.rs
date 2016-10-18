@@ -39,7 +39,7 @@ int n_tiles = 0;
 int width = 0;
 int height = 0;
 
-static int getEqualValue(int histogram_offset, float value) {
+static int getEqualValue(int histogram_offset, int value) {
 	int cdf_v = rsGetElementAt_int(c_histogram, histogram_offset+value);
 	int cdf_0 = rsGetElementAt_int(c_histogram, histogram_offset);
 	int n_pixels = rsGetElementAt_int(c_histogram, histogram_offset+255);
@@ -50,11 +50,8 @@ static int getEqualValue(int histogram_offset, float value) {
 }
 
 uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t y) {
-	float in_r = in.r;
-	float in_g = in.g;
-	float in_b = in.b;
-	float value = fmax(in_r, in_g);
-	value = fmax(value, in_b);
+	uchar value = max(in.r, in.g);
+	value = max(value, in.b);
 
 	float tx = ((float)x*n_tiles)/(float)width - 0.5f;
 	float ty = ((float)y*n_tiles)/(float)height - 0.5f;
