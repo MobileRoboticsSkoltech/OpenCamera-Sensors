@@ -793,7 +793,7 @@ public class HDRProcessor {
 						
 						// clip histogram, for Contrast Limited AHE algorithm
 						int n_pixels = (stop_x - start_x) * (stop_y - start_y);
-						int clip_limit = (10 * n_pixels) / 256;
+						int clip_limit = (5 * n_pixels) / 256;
 						/*if( MyDebug.LOG )
 							Log.d(TAG, "clip_limit: " + clip_limit);*/
 						{
