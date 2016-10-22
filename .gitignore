@@ -3,8 +3,17 @@ _devdocs/
 _docs/*.jpg
 _other/
 
+.gradle/
+.idea/
+build/
 bin/
 gen/
 gfx/
+testdata/
 
 *.db
+*.iml
+*.apk
+*.ap_
+
+local.properties
