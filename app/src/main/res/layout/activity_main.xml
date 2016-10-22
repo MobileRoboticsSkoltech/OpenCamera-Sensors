@@ -42,7 +42,7 @@
         android:layout_marginTop="0dp"
         android:layout_marginBottom="0dp"
         />
-    
+
     <SeekBar
         android:id="@+id/focus_seekbar"
         android:contentDescription="@string/focus_distance"
@@ -175,6 +175,7 @@
         android:visibility="gone"
         />
 
+    <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
     <SeekBar
         android:id="@+id/exposure_seekbar"
         android:contentDescription="@string/exposure_compensation"
@@ -182,6 +183,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:alpha="0.9"
         />
 
     <ZoomControls
@@ -193,6 +195,7 @@
         android:layout_centerVertical="true"
         />
 
+    <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
     <SeekBar
         android:id="@+id/iso_seekbar"
         android:contentDescription="@string/iso"
@@ -200,8 +203,10 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:alpha="0.9"
         />
 
+    <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
     <SeekBar
         android:id="@+id/exposure_time_seekbar"
         android:contentDescription="@string/exposure"
@@ -209,6 +214,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:alpha="0.9"
         />
 
     <FrameLayout
