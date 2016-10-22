@@ -32,9 +32,10 @@ public class VideoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize3"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoForceFailure"));
 		// put tests which change bitrate, fps or test 4K at end
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoBitrate"));
+		// update: now deprecating these tests, as setting these settings can be dodgy on some devices
+		/*suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoBitrate"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFPS"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideo4K"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideo4K"));*/
         return suite;
     }
 }

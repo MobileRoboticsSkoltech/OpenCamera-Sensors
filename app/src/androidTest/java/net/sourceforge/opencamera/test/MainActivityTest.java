@@ -4142,6 +4142,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakeVideo(false, false, true, false, null, 5000, false);
 	}
 
+	/* Test can be reliable on some devices, test no longer run as part of test suites.
+	 */
 	public void testTakeVideo4K() throws InterruptedException {
 		Log.d(TAG, "testTakeVideo4K");
 		
@@ -4159,6 +4161,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakeVideo(false, false, true, false, null, 5000, false);
 	}
 
+	/* Test can be reliable on some devices, test no longer run as part of test suites.
+	 */
 	public void testTakeVideoFPS() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoFPS");
 		
@@ -4177,6 +4181,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
+	/* Test can be reliable on some devices, test no longer run as part of test suites.
+	 */
 	public void testTakeVideoBitrate() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoBitrate");
 		
