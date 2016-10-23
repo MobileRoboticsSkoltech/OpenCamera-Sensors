@@ -1,3 +1,8 @@
+Compiling
+=========
+
+Open Camera is compiled using Android Studio. (Versions 1.34 or earlier were compiled using Eclipse.)
+
 Source Control
 ==============
 
