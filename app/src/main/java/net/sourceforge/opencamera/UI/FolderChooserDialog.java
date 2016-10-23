@@ -43,29 +43,29 @@ public class FolderChooserDialog extends DialogFragment {
 	
 	private class FileWrapper implements Comparable<FileWrapper> {
 		private File file = null;
-		private boolean is_parent = false;
+		private String override_name; // if non-null, use this as the display name instead
+		private int sort_order; // items are sorted first by sort_order, then alphabetically
 		
-		FileWrapper(File file, boolean is_parent) {
+		FileWrapper(File file, String override_name, int sort_order) {
 			this.file = file;
-			this.is_parent = is_parent;
+			this.override_name = override_name;
+			this.sort_order = sort_order;
 		}
 		
 		@Override
 		public String toString() {
-			if( this.is_parent )
-				return getResources().getString(R.string.parent_folder);
+			if( override_name != null )
+				return override_name;
 			return file.getName();
 		}
 		
 		@Override
         public int compareTo(FileWrapper o) {
-        	if( this.is_parent && o.isParent() )
-        		return 0;
-        	else if( this.is_parent )
-        		return -1;
-        	else if( o.isParent() )
-        		return 1;
-	        return this.file.getName().toLowerCase(Locale.US).compareTo(o.getFile().getName().toLowerCase(Locale.US)); 
+			if( this.sort_order < o.sort_order )
+				return -1;
+			else if( this.sort_order > o.sort_order )
+				return 1;
+	        return this.file.getName().toLowerCase(Locale.US).compareTo(o.getFile().getName().toLowerCase(Locale.US));
         }
         
         @Override
@@ -74,28 +74,20 @@ public class FolderChooserDialog extends DialogFragment {
 			if( !(o instanceof FileWrapper) )
 				return false;
 			FileWrapper that = (FileWrapper)o;
-        	if( this.is_parent && that.isParent() )
-        		return true;
-        	else if( this.is_parent != that.isParent() )
-        		return false;
-	        return this.file.getName().toLowerCase(Locale.US).equals(that.getFile().getName().toLowerCase(Locale.US)); 
+			if( this.sort_order != that.sort_order )
+				return false;
+	        return this.file.getName().toLowerCase(Locale.US).equals(that.getFile().getName().toLowerCase(Locale.US));
         }
 
 		@Override
 		public int hashCode() {
 			// must override this, as we override equals()
-			if( this.is_parent )
-				return 31;
 			return this.file.getName().toLowerCase(Locale.US).hashCode();
 		}
 
 		File getFile() {
 			return file;
 		}
-        
-        private boolean isParent() {
-        	return is_parent;
-        }
 	}
 
     @Override
@@ -205,12 +197,15 @@ public class FolderChooserDialog extends DialogFragment {
 		// to view this folder (so the user can go to parent folders which might be readable again)
 		List<FileWrapper> listed_files = new ArrayList<FileWrapper>();
 		if( new_folder.getParentFile() != null )
-			listed_files.add(new FileWrapper(new_folder.getParentFile(), true));
+			listed_files.add(new FileWrapper(new_folder.getParentFile(), getResources().getString(R.string.parent_folder), 0));
+		File default_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+		if( !default_folder.equals(new_folder) && !default_folder.equals(new_folder.getParentFile()) )
+			listed_files.add(new FileWrapper(default_folder, null, 1));
 		if( files != null ) {
 			for(int i=0;i<files.length;i++) {
 				File file = files[i];
 				if( file.isDirectory() ) {
-					listed_files.add(new FileWrapper(file, false));
+					listed_files.add(new FileWrapper(file, null, 2));
 				}
 			}
 		}
