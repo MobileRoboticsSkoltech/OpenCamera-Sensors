@@ -341,9 +341,11 @@ public class MainUI {
 			final float scale = main_activity.getResources().getDisplayMetrics().density;
 			int width_pixels = (int) (width_dp * scale + 0.5f); // convert dps to pixels
 			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
+			int exposure_zoom_gap = (int) (4 * scale + 0.5f); // convert dps to pixels
 
-			View view = main_activity.findViewById(R.id.exposure_seekbar);
+			View view = main_activity.findViewById(R.id.exposure_container);
 			setViewRotation(view, ui_rotation);
+			view = main_activity.findViewById(R.id.exposure_seekbar);
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
@@ -356,51 +358,35 @@ public class MainUI {
 			// n.b., using left_of etc doesn't work properly when using rotation (as the amount of space reserved is based on the UI elements before being rotated)
 			if( ui_rotation == 0 ) {
 				view.setTranslationX(0);
-				view.setTranslationY(height_pixels);
+				view.setTranslationY(height_pixels+exposure_zoom_gap);
 			}
 			else if( ui_rotation == 90 ) {
-				view.setTranslationX(-height_pixels);
+				view.setTranslationX(-height_pixels-exposure_zoom_gap);
 				view.setTranslationY(0);
 			}
 			else if( ui_rotation == 180 ) {
 				view.setTranslationX(0);
-				view.setTranslationY(-height_pixels);
+				view.setTranslationY(-height_pixels-exposure_zoom_gap);
 			}
 			else if( ui_rotation == 270 ) {
-				view.setTranslationX(height_pixels);
+				view.setTranslationX(height_pixels+exposure_zoom_gap);
 				view.setTranslationY(0);
 			}
 
-			view = main_activity.findViewById(R.id.iso_seekbar);
+			view = main_activity.findViewById(R.id.manual_exposure_container);
 			setViewRotation(view, ui_rotation);
+
+			view = main_activity.findViewById(R.id.iso_seekbar);
 			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
 			view.setLayoutParams(lp);
 
 			view = main_activity.findViewById(R.id.exposure_time_seekbar);
-			setViewRotation(view, ui_rotation);
 			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
 			view.setLayoutParams(lp);
-			if( ui_rotation == 0 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(height_pixels);
-			}
-			else if( ui_rotation == 90 ) {
-				view.setTranslationX(-height_pixels);
-				view.setTranslationY(0);
-			}
-			else if( ui_rotation == 180 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(-height_pixels);
-			}
-			else if( ui_rotation == 270 ) {
-				view.setTranslationX(height_pixels);
-				view.setTranslationY(0);
-			}
-
 		}
 
 		{
@@ -651,13 +637,11 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "toggleExposureUI");
 		closePopup();
-		SeekBar exposure_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_seekbar));
+		View exposure_seek_bar = main_activity.findViewById(R.id.exposure_container);
 		int exposure_visibility = exposure_seek_bar.getVisibility();
-		SeekBar iso_seek_bar = ((SeekBar)main_activity.findViewById(R.id.iso_seekbar));
-		int iso_visibility = iso_seek_bar.getVisibility();
-		SeekBar exposure_time_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar));
-		int exposure_time_visibility = iso_seek_bar.getVisibility();
-		boolean is_open = exposure_visibility == View.VISIBLE || iso_visibility == View.VISIBLE || exposure_time_visibility == View.VISIBLE;
+		View manual_exposure_seek_bar = main_activity.findViewById(R.id.manual_exposure_container);
+		int manual_exposure_visibility = manual_exposure_seek_bar.getVisibility();
+		boolean is_open = exposure_visibility == View.VISIBLE || manual_exposure_visibility == View.VISIBLE;
 		if( is_open ) {
 			clearSeekBar();
 		}
@@ -667,9 +651,13 @@ public class MainUI {
 			if( main_activity.getPreview().usingCamera2API() && !value.equals(main_activity.getPreview().getCameraController().getDefaultISO()) ) {
 				// with Camera2 API, when using non-default ISO we instead show sliders for ISO range and exposure time
 				if( main_activity.getPreview().supportsISORange()) {
-					iso_seek_bar.setVisibility(View.VISIBLE);
+					manual_exposure_seek_bar.setVisibility(View.VISIBLE);
+					SeekBar exposure_time_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar));
 					if( main_activity.getPreview().supportsExposureTime() ) {
 						exposure_time_seek_bar.setVisibility(View.VISIBLE);
+					}
+					else {
+						exposure_time_seek_bar.setVisibility(View.GONE);
 					}
 				}
 			}
@@ -713,13 +701,11 @@ public class MainUI {
 	}
 
     public void clearSeekBar() {
-		View view = main_activity.findViewById(R.id.exposure_seekbar);
-		view.setVisibility(View.GONE);
-		view = main_activity.findViewById(R.id.iso_seekbar);
-		view.setVisibility(View.GONE);
-		view = main_activity.findViewById(R.id.exposure_time_seekbar);
+		View view = main_activity.findViewById(R.id.exposure_container);
 		view.setVisibility(View.GONE);
 		view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
+		view.setVisibility(View.GONE);
+		view = main_activity.findViewById(R.id.manual_exposure_container);
 		view.setVisibility(View.GONE);
     }
     
