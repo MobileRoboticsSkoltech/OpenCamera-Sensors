@@ -56,17 +56,28 @@ public class StorageUtils {
 	Uri getLastMediaScanned() {
 		return last_media_scanned;
 	}
+
 	void clearLastMediaScanned() {
 		last_media_scanned = null;
 	}
 
 	/** Sends the intents to announce the new file to other Android applications. E.g., cloud storage applications like
 	 *  OwnCloud use this to listen for new photos/videos to automatically upload.
+	 *  Note that on Android 7 onwards, these broadcasts are deprecated and won't have any effect - see:
+	 *  https://developer.android.com/reference/android/hardware/Camera.html#ACTION_NEW_PICTURE
+	 *  Listeners like OwnCloud should instead be using
+	 *  https://developer.android.com/reference/android/app/job/JobInfo.Builder.html#addTriggerContentUri(android.app.job.JobInfo.TriggerContentUri)
+	 *  See https://github.com/owncloud/android/issues/1675 for OwnCloud's discussion on this.
 	 */
 	void announceUri(Uri uri, boolean is_new_picture, boolean is_new_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "announceUri: " + uri);
-    	if( is_new_picture ) {
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "broadcasts deprecated on Android 7 onwards, so don't send them");
+			// see note above; the intents won't be delivered, so might as well save the trouble of trying to send them
+		}
+    	else if( is_new_picture ) {
     		// note, we reference the string directly rather than via Camera.ACTION_NEW_PICTURE, as the latter class is now deprecated - but we still need to broadcast the string for other apps
     		context.sendBroadcast(new Intent( "android.hardware.action.NEW_PICTURE" , uri));
     		// for compatibility with some apps - apparently this is what used to be broadcast on Android?
