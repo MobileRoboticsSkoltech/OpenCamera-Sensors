@@ -626,17 +626,17 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after processHDRScript: " + (System.currentTimeMillis() - time_s));
 
+			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
+			for(int i=1;i<bitmaps.size();i++) {
+				Bitmap bitmap = bitmaps.get(i);
+				bitmap.recycle();
+			}
+
 			adjustHistogram(allocations[0], bm.getWidth(), bm.getHeight(), time_s);
 
 			allocations[0].copyTo(bm);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
-
-			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap:
-			for(int i=1;i<bitmaps.size();i++) {
-				Bitmap bitmap = bitmaps.get(i);
-				bitmap.recycle();
-			}
 		}
 		else {
 			if( MyDebug.LOG )
