@@ -339,4 +339,8 @@
 	<string name="video_power_critical">Videoposnetek se je ustavil\nRaven baterije je kritično nizka</string>
     <string name="preference_video_low_power_check">Preveri za kritično stanje baterije</string>
     <string name="preference_video_low_power_check_summary">Ustavi snemanje videoposnetka, če je raven baterije kritično nizka. Zmanjša tveganje okvare videoposnetka, če se naprava izklopi zaradi pomanjkanja energije.</string>
+	
+	<string name="dark">Temna</string> <!-- exposure compensation dark -->
+    <string name="bright">Svetla</string> <!-- exposure compensation bright -->
+    <string name="exposure_shutter_speed">Hitrost zaslonke</string>
 </resources>
