@@ -6809,6 +6809,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
         outputStream.close();
         mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+		inputs.get(0).recycle();
+		inputs.clear();
         Thread.sleep(1000);
 	}
 	
