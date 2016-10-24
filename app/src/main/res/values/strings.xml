@@ -339,4 +339,8 @@
     <string name="video_power_critical">Video stopped\nBattery level critically low</string>
     <string name="preference_video_low_power_check">Critical battery check</string>
     <string name="preference_video_low_power_check_summary">Stop video recording if battery level is critically low. This helps reduce the risk of videos being corrupted if your device suddenly switches off due to running out of power.</string>
+
+    <string name="dark">Dark</string> <!-- exposure compensation dark -->
+    <string name="bright">Bright</string> <!-- exposure compensation bright -->
+    <string name="exposure_shutter_speed">Shutter speed</string>
 </resources>

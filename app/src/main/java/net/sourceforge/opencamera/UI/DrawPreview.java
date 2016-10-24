@@ -715,8 +715,18 @@ public class DrawPreview {
 				string += preview.getFrameDurationString(frame_duration);
 			}*/
 			if( string.length() > 0 ) {
-				int text_color = Color.rgb(255, 235, 59); // Yellow 500
+				boolean is_scanning = false;
 				if( camera_controller.captureResultIsAEScanning() ) {
+					// only show as scanning if in auto ISO mode (problem on Nexus 6 at least that if we're in manual ISO mode, after pausing and
+					// resuming, the camera driver continually reports CONTROL_AE_STATE_SEARCHING)
+					String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
+					if( value.equals(main_activity.getPreview().getCameraController().getDefaultISO()) ) {
+						is_scanning = true;
+					}
+				}
+
+				int text_color = Color.rgb(255, 235, 59); // Yellow 500
+				if( is_scanning ) {
 					// we only change the color if ae scanning is at least a certain time, otherwise we get a lot of flickering of the color
 					if( ae_started_scanning_ms == -1 ) {
 						ae_started_scanning_ms = System.currentTimeMillis();
