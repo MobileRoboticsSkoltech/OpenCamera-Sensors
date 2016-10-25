@@ -1056,6 +1056,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
+	public void onCameraError() {
+		main_activity.getPreview().showToast(null, R.string.camera_error);
+	}
+
+	@Override
 	public void onPhotoError() {
 	    main_activity.getPreview().showToast(null, R.string.failed_to_take_picture);
 	}

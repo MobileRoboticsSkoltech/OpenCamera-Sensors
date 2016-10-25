@@ -525,9 +525,10 @@ public class CameraController2 extends CameraController {
 	 * @param context Application context.
 	 * @param cameraId Which camera to open (must be between 0 and CameraControllerManager2.getNumberOfCameras()-1).
 	 * @param preview_error_cb onError() will be called if the preview stops due to error.
+	 * @param camera_error_cb onError() will be called if the camera closes due to serious error. No more calls to the CameraController2 object should be made (though a new one can be created, to try reopening the camera).
 	 * @throws CameraControllerException if the camera device fails to open.
      */
-	public CameraController2(Context context, int cameraId, ErrorCallback preview_error_cb) throws CameraControllerException {
+	public CameraController2(Context context, int cameraId, final ErrorCallback preview_error_cb, final ErrorCallback camera_error_cb) throws CameraControllerException {
 		super(cameraId);
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController2: " + cameraId);
@@ -626,11 +627,16 @@ public class CameraController2 extends CameraController {
 
 			@Override
 			public void onError(CameraDevice cam, int error) {
+				// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
+				Log.e(TAG, "camera error: " + error);
 				if( MyDebug.LOG ) {
-					Log.d(TAG, "camera error: " + error);
 					Log.d(TAG, "received camera: " + cam);
 					Log.d(TAG, "actual camera: " + CameraController2.this.camera);
 					Log.d(TAG, "first_callback? " + first_callback);
+				}
+				boolean camera_already_opened = camera != null;
+				if( first_callback ) {
+					first_callback = false;
 				}
 				// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
 				CameraController2.this.camera = null;
@@ -640,15 +646,12 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onError: camera is now closed");
 
-				if( first_callback ) {
-					first_callback = false;
+				if( camera_already_opened ) {
+					// need to communicate the problem to the application
+					// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
+					Log.e(TAG, "error occurred after camera was opened: " + error);
+					camera_error_cb.onError();
 				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "error occurred after camera was opened");
-					//CameraController2.this.preview_error_cb.onError();
-				}
-
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to synchronize to say callback done");
 			    synchronized( this ) {
@@ -661,7 +664,7 @@ public class CameraController2 extends CameraController {
 			    }
 			}
 		}
-		MyStateCallback myStateCallback = new MyStateCallback();
+		final MyStateCallback myStateCallback = new MyStateCallback();
 
 		try {
 			if( MyDebug.LOG )
@@ -718,12 +721,25 @@ public class CameraController2 extends CameraController {
 			}
 		}
 		if( camera == null ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "camera failed to open");
+			// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
+			Log.e(TAG, "camera failed to open");
 			throw new CameraControllerException();
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "camera now opened: " + camera);
+
+		/*{
+			// test error handling
+			final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "test camera error");
+					myStateCallback.onError(camera, CameraDevice.StateCallback.ERROR_CAMERA_DEVICE);
+				}
+			}, 5000);
+		}*/
 
 		/*CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
 	    StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);

@@ -1161,21 +1161,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "test failing to open camera");
 				throw new CameraControllerException();
 			}
+			CameraController.ErrorCallback cameraErrorCallback = new CameraController.ErrorCallback() {
+				public void onError() {
+					if( MyDebug.LOG )
+						Log.e(TAG, "error from CameraController: camera device failed");
+					if( camera_controller != null ) {
+						camera_controller = null;
+						applicationInterface.onCameraError();
+					}
+				}
+			};
 	        if( using_android_l ) {
-	    		CameraController.ErrorCallback previewErrorCallback = new CameraController.ErrorCallback() {
-	    			public void onError() {
-	        			if( MyDebug.LOG )
-	    					Log.e(TAG, "error from CameraController: preview failed to start");
-	        			applicationInterface.onFailedStartPreview();
-	        	    }
-	    		};
-	        	camera_controller = new CameraController2(this.getContext(), cameraId, previewErrorCallback);
+				CameraController.ErrorCallback previewErrorCallback = new CameraController.ErrorCallback() {
+					public void onError() {
+						if( MyDebug.LOG )
+							Log.e(TAG, "error from CameraController: preview failed to start");
+						applicationInterface.onFailedStartPreview();
+					}
+				};
+	        	camera_controller = new CameraController2(this.getContext(), cameraId, previewErrorCallback, cameraErrorCallback);
 	    		if( applicationInterface.useCamera2FakeFlash() ) {
 	    			camera_controller.setUseCamera2FakeFlash(true);
 	    		}
 	        }
 	        else
-				camera_controller = new CameraController1(cameraId);
+				camera_controller = new CameraController1(cameraId, cameraErrorCallback);
 			//throw new CameraControllerException(); // uncomment to test camera not opening
 		}
 		catch(CameraControllerException e) {

@@ -29,11 +29,18 @@ public class CameraController1 extends CameraController {
     private Camera.CameraInfo camera_info = new Camera.CameraInfo();
 	private String iso_key = null;
 	private boolean frontscreen_flash = false;
+	private ErrorCallback camera_error_cb = null;
 
-	public CameraController1(int cameraId) throws CameraControllerException {
+	/** Opens the camera device.
+	 * @param cameraId Which camera to open (must be between 0 and CameraControllerManager1.getNumberOfCameras()-1).
+	 * @param camera_error_cb onError() will be called if the camera closes due to serious error. No more calls to the CameraController1 object should be made (though a new one can be created, to try reopening the camera).
+	 * @throws CameraControllerException if the camera device fails to open.
+     */
+	public CameraController1(int cameraId, final ErrorCallback camera_error_cb) throws CameraControllerException {
 		super(cameraId);
 		if( MyDebug.LOG )
 			Log.d(TAG, "create new CameraController1: " + cameraId);
+		this.camera_error_cb = camera_error_cb;
 		try {
 			camera = Camera.open(cameraId);
 		}
@@ -71,19 +78,37 @@ public class CameraController1 extends CameraController {
 	    	parameters.set("cam_mode", 1);
 	    	setCameraParameters(parameters);
 		}*/
-		
-		camera.setErrorCallback(new CameraErrorCallback());
+
+		final CameraErrorCallback camera_error_callback = new CameraErrorCallback();
+		camera.setErrorCallback(camera_error_callback);
+
+		/*{
+			// test error handling
+			final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "test camera error");
+					camera_error_callback.onError(Camera.CAMERA_ERROR_SERVER_DIED, camera);
+				}
+			}, 5000);
+		}*/
 	}
 	
-	private static class CameraErrorCallback implements Camera.ErrorCallback {
+	private class CameraErrorCallback implements Camera.ErrorCallback {
 		@Override
-		public void onError(int error, Camera camera) {
+		public void onError(int error, Camera cam) {
 			// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
 			Log.e(TAG, "camera onError: " + error);
-			if( error == android.hardware.Camera.CAMERA_ERROR_SERVER_DIED ) {
+			if( error == Camera.CAMERA_ERROR_SERVER_DIED ) {
 				Log.e(TAG, "    CAMERA_ERROR_SERVER_DIED");
+				CameraController1.this.camera.release();
+				CameraController1.this.camera = null;
+				// need to communicate the problem to the application
+				CameraController1.this.camera_error_cb.onError();
 			}
-			else if( error == android.hardware.Camera.CAMERA_ERROR_UNKNOWN  ) {
+			else if( error == Camera.CAMERA_ERROR_UNKNOWN  ) {
 				Log.e(TAG, "    CAMERA_ERROR_UNKNOWN ");
 			}
 		}

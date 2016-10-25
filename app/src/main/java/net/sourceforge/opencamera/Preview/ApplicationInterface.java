@@ -103,6 +103,7 @@ public interface ApplicationInterface {
 	void stoppingVideo(); // called just before video recording stops
 	void stoppedVideo(final int video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created)
 	void onFailedStartPreview(); // called if failed to start camera preview
+	void onCameraError(); // called if the camera closes due to serious error.
 	void onPhotoError(); // callback for failing to take a photo
 	void onVideoInfo(int what, int extra); // callback for info when recording video (see MediaRecorder.OnInfoListener)
 	void onVideoError(int what, int extra); // callback for errors when recording video (see MediaRecorder.OnErrorListener)
