@@ -9,7 +9,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.media.MediaRecorder;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TextureView;
@@ -23,7 +22,7 @@ public class MyTextureView extends TextureView implements CameraSurface {
 	private Preview preview = null;
 	private int [] measure_spec = new int[2];
 	
-	public MyTextureView(Context context, Bundle savedInstanceState, Preview preview) {
+	public MyTextureView(Context context, Preview preview) {
 		super(context);
 		this.preview = preview;
 		if( MyDebug.LOG ) {

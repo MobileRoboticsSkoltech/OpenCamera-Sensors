@@ -16,7 +16,7 @@ import android.util.Log;
  */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class CameraControllerManager2 extends CameraControllerManager {
-	private static final String TAG = "CameraControllerManager2";
+	private static final String TAG = "CControllerManager2";
 
 	private Context context = null;
 
@@ -94,18 +94,11 @@ public class CameraControllerManager2 extends CameraControllerManager {
 		try {
 			String cameraIdS = manager.getCameraIdList()[cameraId];
 			CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
-			boolean supported = isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
-			return supported;
+			return isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
 		}
-		catch(CameraAccessException e) {
+		catch(CameraAccessException | NumberFormatException e) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "exception trying to get camera characteristics");
-			e.printStackTrace();
-		}
-		catch(NumberFormatException e) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "exception trying to get camera characteristics");
-			// I've seen Google Play NumberFormatException crashes from CameraManager.getCameraCharacteristics on Asus ZenFones with Android 5.0
 			e.printStackTrace();
 		}
 		return false;

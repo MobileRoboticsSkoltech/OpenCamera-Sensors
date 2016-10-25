@@ -124,7 +124,7 @@ public class CameraController1 extends CameraController {
 			Log.d(TAG, "convertFlashModesToValues()");
 			Log.d(TAG, "supported_flash_modes: " + supported_flash_modes);
 		}
-		List<String> output_modes = new ArrayList<String>();
+		List<String> output_modes = new ArrayList<>();
 		if( supported_flash_modes != null ) {
 			// also resort as well as converting
 			if( supported_flash_modes.contains(Camera.Parameters.FLASH_MODE_OFF) ) {
@@ -184,7 +184,7 @@ public class CameraController1 extends CameraController {
 	private List<String> convertFocusModesToValues(List<String> supported_focus_modes) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFocusModesToValues()");
-		List<String> output_modes = new ArrayList<String>();
+		List<String> output_modes = new ArrayList<>();
 		if( supported_focus_modes != null ) {
 			// also resort as well as converting
 			if( supported_focus_modes.contains(Camera.Parameters.FOCUS_MODE_AUTO) ) {
@@ -265,7 +265,7 @@ public class CameraController1 extends CameraController {
 
 		// get available sizes
 		List<Camera.Size> camera_picture_sizes = parameters.getSupportedPictureSizes();
-		camera_features.picture_sizes = new ArrayList<CameraController.Size>();
+		camera_features.picture_sizes = new ArrayList<>();
 		//camera_features.picture_sizes.add(new CameraController.Size(1920, 1080)); // test
 		for(Camera.Size camera_size : camera_picture_sizes) {
 			camera_features.picture_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
@@ -303,14 +303,14 @@ public class CameraController1 extends CameraController {
     			Log.d(TAG, "take video_sizes from preview sizes");
     		camera_video_sizes = parameters.getSupportedPreviewSizes();
     	}
-		camera_features.video_sizes = new ArrayList<CameraController.Size>();
+		camera_features.video_sizes = new ArrayList<>();
 		//camera_features.video_sizes.add(new CameraController.Size(1920, 1080)); // test
 		for(Camera.Size camera_size : camera_video_sizes) {
 			camera_features.video_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
 
 		List<Camera.Size> camera_preview_sizes = parameters.getSupportedPreviewSizes();
-		camera_features.preview_sizes = new ArrayList<CameraController.Size>();
+		camera_features.preview_sizes = new ArrayList<>();
 		for(Camera.Size camera_size : camera_preview_sizes) {
 			camera_features.preview_sizes.add(new CameraController.Size(camera_size.width, camera_size.height));
 		}
@@ -331,7 +331,7 @@ public class CameraController1 extends CameraController {
 	
 	public long getDefaultExposureTime() {
 		// not supported for CameraController1
-		return 0l;
+		return 0L;
 	}
 
 	// important, from docs:
@@ -345,7 +345,7 @@ public class CameraController1 extends CameraController {
 		List<String> values = parameters.getSupportedSceneModes();
 		/*{
 			// test
-			values = new ArrayList<String>();
+			values = new ArrayList<>();
 			values.add("auto");
 		}*/
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
@@ -422,7 +422,7 @@ public class CameraController1 extends CameraController {
 			String [] isos_array = iso_values.split(",");
 			// split shouldn't return null
 			if( isos_array.length > 0 ) {
-				values = new ArrayList<String>();				
+				values = new ArrayList<>();
 				for(int i=0;i< isos_array.length;i++) {
 					values.add(isos_array[i]);
 				}
@@ -442,7 +442,7 @@ public class CameraController1 extends CameraController {
 				}
 			}
 		}
-		/*values = new ArrayList<String>();
+		/*values = new ArrayList<>();
 		//values.add("auto");
 		//values.add("ISO_HJR");
 		values.add("ISO50");
@@ -472,7 +472,7 @@ public class CameraController1 extends CameraController {
 		if( iso_key != null ){
 			if( values == null ) {
 				// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
-				values = new ArrayList<String>();
+				values = new ArrayList<>();
 				values.add("auto");
 				values.add("50");
 				values.add("100");
@@ -515,7 +515,7 @@ public class CameraController1 extends CameraController {
 	@Override
 	public long getExposureTime() {
 		// not supported for CameraController1
-		return 0l;
+		return 0L;
 	}
 
 	@Override
@@ -644,8 +644,7 @@ public class CameraController1 extends CameraController {
 	public List<int []> getSupportedPreviewFpsRange() {
 		Camera.Parameters parameters = this.getParameters();
 		try {
-			List<int []> fps_ranges = parameters.getSupportedPreviewFpsRange();
-			return fps_ranges;
+			return parameters.getSupportedPreviewFpsRange();
 		}
 		catch(StringIndexOutOfBoundsException e) {
 			/* Have had reports of StringIndexOutOfBoundsException on Google Play on Sony Xperia M devices
@@ -821,7 +820,7 @@ public class CameraController1 extends CameraController {
 			Log.d(TAG, "convertFlashModeToValue: " + flash_mode);
 		String flash_value = "";
 		if( flash_mode == null ) {
-			// ignore, leave flash_value at null
+			// ignore, leave focus_value at ""
 		}
 		else if( flash_mode.equals(Camera.Parameters.FLASH_MODE_OFF) ) {
     		flash_value = "flash_off";
@@ -923,7 +922,7 @@ public class CameraController1 extends CameraController {
 	}
 	
 	public boolean setFocusAndMeteringArea(List<CameraController.Area> areas) {
-		List<Camera.Area> camera_areas = new ArrayList<Camera.Area>();
+		List<Camera.Area> camera_areas = new ArrayList<>();
 		for(CameraController.Area area : areas) {
 			camera_areas.add(new Camera.Area(area.rect, area.weight));
 		}
@@ -975,7 +974,7 @@ public class CameraController1 extends CameraController {
 		List<Camera.Area> camera_areas = parameters.getFocusAreas();
 		if( camera_areas == null )
 			return null;
-		List<CameraController.Area> areas = new ArrayList<CameraController.Area>();
+		List<CameraController.Area> areas = new ArrayList<>();
 		for(Camera.Area camera_area : camera_areas) {
 			areas.add(new CameraController.Area(camera_area.rect, camera_area.weight));
 		}
@@ -987,7 +986,7 @@ public class CameraController1 extends CameraController {
 		List<Camera.Area> camera_areas = parameters.getMeteringAreas();
 		if( camera_areas == null )
 			return null;
-		List<CameraController.Area> areas = new ArrayList<CameraController.Area>();
+		List<CameraController.Area> areas = new ArrayList<>();
 		for(Camera.Area camera_area : camera_areas) {
 			areas.add(new CameraController.Area(camera_area.rect, camera_area.weight));
 		}

@@ -90,7 +90,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final String TAG = "Preview";
 
 	private boolean using_android_l = false;
-	private boolean using_texture_view = false;
 
 	private ApplicationInterface applicationInterface = null;
 	private CameraSurface cameraSurface = null;
@@ -182,8 +181,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int min_iso = 0;
 	private int max_iso = 0;
 	private boolean supports_exposure_time = false;
-	private long min_exposure_time = 0l;
-	private long max_exposure_time = 0l;
+	private long min_exposure_time = 0L;
+	private long max_exposure_time = 0L;
 	private List<String> exposures = null;
 	private int min_exposure = 0;
 	private int max_exposure = 0;
@@ -266,7 +265,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public boolean test_fail_open_camera = false;
 	public boolean test_video_failure = false;
 
-	public Preview(ApplicationInterface applicationInterface, Bundle savedInstanceState, ViewGroup parent) {
+	public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "new Preview");
 		}
@@ -277,21 +276,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "using_android_l?: " + using_android_l);
 		}
-		
+
+		boolean using_texture_view = false;
 		if( using_android_l ) {
         	// use a TextureView for Android L - had bugs with SurfaceView not resizing properly on Nexus 7; and good to use a TextureView anyway
         	// ideally we'd use a TextureView for older camera API too, but sticking with SurfaceView to avoid risk of breaking behaviour
-			this.using_texture_view = true;
+			using_texture_view = true;
 		}
 
         if( using_texture_view ) {
-    		this.cameraSurface = new MyTextureView(getContext(), savedInstanceState, this);
+    		this.cameraSurface = new MyTextureView(getContext(), this);
     		// a TextureView can't be used both as a camera preview, and used for drawing on, so we use a separate CanvasView
-    		this.canvasView = new CanvasView(getContext(), savedInstanceState, this);
+    		this.canvasView = new CanvasView(getContext(), this);
     		camera_controller_manager = new CameraControllerManager2(getContext());
         }
         else {
-    		this.cameraSurface = new MySurfaceView(getContext(), savedInstanceState, this);
+    		this.cameraSurface = new MySurfaceView(getContext(), this);
     		camera_controller_manager = new CameraControllerManager1();
         }
 
@@ -384,10 +384,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return camera_to_preview_matrix;
 	}
 
-	Matrix getPreviewToCameraMatrix() {
+	/*Matrix getPreviewToCameraMatrix() {
 		calculatePreviewToCameraMatrix();
 		return preview_to_camera_matrix;
-	}
+	}*/
 
 	private ArrayList<CameraController.Area> getAreas(float x, float y) {
 		float [] coords = {x, y};
@@ -423,7 +423,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			rect.top = rect.bottom - 2*focus_size;
 		}
 
-	    ArrayList<CameraController.Area> areas = new ArrayList<CameraController.Area>();
+	    ArrayList<CameraController.Area> areas = new ArrayList<>();
 	    areas.add(new CameraController.Area(rect, 1000));
 	    return areas;
 	}
@@ -804,9 +804,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    				}
 		    		}
 	    		}
-	    		else {
-	    			// don't delete if a plain Uri
-	    		}
+				// else don't delete if a plain Uri
+
 	    		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
 	    		video_uri = null;
     			video_filename = null;
@@ -1078,8 +1077,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		min_iso = 0;
 		max_iso = 0;
 		supports_exposure_time = false;
-		min_exposure_time = 0l;
-		max_exposure_time = 0l;
+		min_exposure_time = 0L;
+		max_exposure_time = 0L;
 		exposures = null;
 		min_exposure = 0;
 		max_exposure = 0;
@@ -1616,7 +1615,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// get min/max exposure
 			exposures = null;
 			if( min_exposure != 0 || max_exposure != 0 ) {
-				exposures = new ArrayList<String>();
+				exposures = new ArrayList<>();
 				for(int i=min_exposure;i<=max_exposure;i++) {
 					exposures.add("" + i);
 				}
@@ -1818,7 +1817,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "focus not supported");
 				supported_focus_values = null;
 			}
-			/*supported_focus_values = new ArrayList<String>();
+			/*supported_focus_values = new ArrayList<>();
 			supported_focus_values.add("focus_mode_auto");
 			supported_focus_values.add("focus_mode_infinity");
 			supported_focus_values.add("focus_mode_macro");
@@ -1957,7 +1956,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initialiseVideoQuality() {
 		int cameraId = camera_controller.getCameraId();
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<Pair<Integer, Integer>>();
+		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
         	profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
@@ -1965,36 +1964,36 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
 	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_2160P) ) {
 	    		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_2160P);
-	        	profiles.put(CamcorderProfile.QUALITY_2160P, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+	        	profiles.put(CamcorderProfile.QUALITY_2160P, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
 	        }
 		}
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_1080P);
-        	profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_720P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_720P);
-        	profiles.put(CamcorderProfile.QUALITY_720P, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_720P, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_480P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_480P);
-        	profiles.put(CamcorderProfile.QUALITY_480P, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_480P, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_CIF) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_CIF);
-        	profiles.put(CamcorderProfile.QUALITY_CIF, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_CIF, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QVGA) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_QVGA);
-        	profiles.put(CamcorderProfile.QUALITY_QVGA, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_QVGA, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QCIF) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_QCIF);
-        	profiles.put(CamcorderProfile.QUALITY_QCIF, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_QCIF, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_LOW) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_LOW);
-        	profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         initialiseVideoQualityFromProfiles(profiles);
 	}
@@ -2029,7 +2028,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public void initialiseVideoQualityFromProfiles(SparseArray<Pair<Integer, Integer>> profiles) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initialiseVideoQualityFromProfiles()");
-        video_quality = new ArrayList<String>();
+        video_quality = new ArrayList<>();
         boolean done_video_size[] = null;
         if( video_sizes != null ) {
         	done_video_size = new boolean[video_sizes.size()];
@@ -4917,15 +4916,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
     		return 0;
     	}
-		int current_exposure = camera_controller.getExposureCompensation();
-		return current_exposure;
+		return camera_controller.getExposureCompensation();
     }
     
-    List<String> getSupportedExposures() {
+    /*List<String> getSupportedExposures() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedExposures");
     	return this.exposures;
-    }
+    }*/
 
     public boolean supportsExpoBracketing() {
 		if( MyDebug.LOG )
@@ -5049,7 +5047,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	showToast(clear_toast, message, 32);
     }
 
-    public void showToast(final ToastBoxer clear_toast, final String message, final int offset_y_dp) {
+    private void showToast(final ToastBoxer clear_toast, final String message, final int offset_y_dp) {
 		if( !applicationInterface.getShowToastsPref() ) {
 			return;
 		}
@@ -5274,7 +5272,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
     
     public Pair<Integer, Integer> getFocusPos() {
-    	return new Pair<Integer, Integer>(focus_screen_x, focus_screen_y);
+    	return new Pair<>(focus_screen_x, focus_screen_y);
     }
     
     public int getMaxNumFocusAreas() {
@@ -5334,7 +5332,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     
 	public float getZoomRatio() {
 		int zoom_factor = camera_controller.getZoom();
-		float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
-		return zoom_ratio;
+		return this.zoom_ratios.get(zoom_factor)/100.0f;
 	}
 }

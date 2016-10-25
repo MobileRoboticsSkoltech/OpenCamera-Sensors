@@ -10,7 +10,7 @@ import android.util.Log;
  */
 @SuppressWarnings("deprecation")
 public class CameraControllerManager1 extends CameraControllerManager {
-	private static final String TAG = "CameraControllerManager1";
+	private static final String TAG = "CControllerManager1";
 	public int getNumberOfCameras() {
 		return Camera.getNumberOfCameras();
 	}

@@ -25,16 +25,16 @@ public class HDRProcessor {
 	private Context context = null;
 	private RenderScript rs = null; // lazily created, so we don't take up resources if application isn't using HDR
 
-	enum HDRAlgorithm {
+	private enum HDRAlgorithm {
 		HDRALGORITHM_AVERAGE,
 		HDRALGORITHM_STANDARD
-	};
+	}
 	
 	HDRProcessor(Context context) {
 		this.context = context;
 	}
 
-	protected void onDestroy() {
+	void onDestroy() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onDestroy");
 		if( rs != null ) {
@@ -55,7 +55,7 @@ public class HDRProcessor {
 		float parameter_B = 0.0f;
 
 		/** Computes the response function.
-		 * @param We pass the context, so this inner class can be made static.
+		 * We pass the context, so this inner class can be made static.
 		 * @param x_samples List of Xi samples. Must be at least 3 samples.
 		 * @param y_samples List of Yi samples. Must be same length as x_samples.
 		 * @param weights List of weights. Must be same length as x_samples.
@@ -281,9 +281,9 @@ public class HDRProcessor {
 	private ResponseFunction createFunctionFromBitmaps(int id, Bitmap in_bitmap, Bitmap out_bitmap) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createFunctionFromBitmaps");
-		List<Double> x_samples = new ArrayList<Double>();
-		List<Double> y_samples = new ArrayList<Double>();
-		List<Double> weights = new ArrayList<Double>();
+		List<Double> x_samples = new ArrayList<>();
+		List<Double> y_samples = new ArrayList<>();
+		List<Double> weights = new ArrayList<>();
 
 		final int n_samples_c = 100;
 		final int n_w_samples = (int)Math.sqrt(n_samples_c);
@@ -367,8 +367,7 @@ public class HDRProcessor {
 			}
 		}
 		
-		ResponseFunction function = new ResponseFunction(context, id, x_samples, y_samples, weights);
-		return function;
+		return new ResponseFunction(context, id, x_samples, y_samples, weights);
 	}
 
 	/** Calculates average of RGB values for the supplied color.
@@ -377,9 +376,8 @@ public class HDRProcessor {
 		int r = (color & 0xFF0000) >> 16;
 		int g = (color & 0xFF00) >> 8;
 		int b = (color & 0xFF);
-		double value = (r + g + b)/3.0;
-		//double value = 0.27*r + 0.67*g + 0.06*b;
-		return value;
+		return (r + g + b)/3.0;
+		//return 0.27*r + 0.67*g + 0.06*b;
 	}
 	
 	/** Calculates the luminance for an RGB colour.
@@ -403,7 +401,7 @@ public class HDRProcessor {
 
 	/** Converts a HDR brightness to a 0-255 value.
 	 * @param hdr The input HDR brightness.
-	 * @param l_avg The log average luminance of the HDR image. That is, exp( sum{log(Li)}/N ).
+	 * //@param l_avg The log average luminance of the HDR image. That is, exp( sum{log(Li)}/N ).
 	 */
 	private void tonemap(int [] rgb, float [] hdr/*, float l_avg*/) {
 		// simple clamp:
@@ -444,7 +442,7 @@ public class HDRProcessor {
 		}*/
 	}
 	
-	class HDRWriterThread extends Thread {
+	private class HDRWriterThread extends Thread {
 		int y_start = 0, y_stop = 0;
 		List<Bitmap> bitmaps;
 		ResponseFunction [] response_functions;
@@ -666,7 +664,8 @@ public class HDRProcessor {
 				}
 			}
 			catch(InterruptedException e) {
-				// TODO Auto-generated catch block
+				if( MyDebug.LOG )
+					Log.e(TAG, "exception waiting for threads to complete");
 				e.printStackTrace();
 			}
 			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap:
@@ -921,7 +920,7 @@ public class HDRProcessor {
 		}
 	}
 	
-	final static float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
+	private final static float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
 
 	// If this algorithm is changed, also update the Renderscript version in process_hdr.rs
 	private void calculateHDR(float [] hdr, int n_bitmaps, int [][] buffers, int x, ResponseFunction [] response_functions) {

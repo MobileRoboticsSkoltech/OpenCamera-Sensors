@@ -25,9 +25,9 @@ import android.view.SurfaceHolder;
  */
 public abstract class CameraController {
 	private static final String TAG = "CameraController";
-	int cameraId = 0;
+	private int cameraId = 0;
 
-	public static final long EXPOSURE_TIME_DEFAULT = 1000000000l/30;
+	public static final long EXPOSURE_TIME_DEFAULT = 1000000000L/30;
 
 	// for testing:
 	public int count_camera_parameters_exception = 0;
@@ -52,8 +52,8 @@ public abstract class CameraController {
 		public int min_iso = 0;
 		public int max_iso = 0;
 		public boolean supports_exposure_time = false;
-		public long min_exposure_time = 0l;
-		public long max_exposure_time = 0l;
+		public long min_exposure_time = 0L;
+		public long max_exposure_time = 0L;
 		public int min_exposure = 0;
 		public int max_exposure = 0;
 		public float exposure_step = 0.0f;
@@ -94,8 +94,8 @@ public abstract class CameraController {
 	 * the current field of view (i.e., taking zoom into account).
 	 */
 	public static class Area {
-		public Rect rect = null;
-		public int weight = 0;
+		Rect rect = null;
+		int weight = 0;
 		
 		public Area(Rect rect, int weight) {
 			this.rect = rect;
@@ -103,37 +103,37 @@ public abstract class CameraController {
 		}
 	}
 	
-	public static interface FaceDetectionListener {
-		public abstract void onFaceDetection(Face[] faces);
+	public interface FaceDetectionListener {
+		void onFaceDetection(Face[] faces);
 	}
 	
-	public static interface PictureCallback {
-		public abstract void onCompleted(); // called after all relevant on*PictureTaken() callbacks have been called and returned
-		public abstract void onPictureTaken(byte[] data);
+	public interface PictureCallback {
+		void onCompleted(); // called after all relevant on*PictureTaken() callbacks have been called and returned
+		void onPictureTaken(byte[] data);
 		/** Only called if RAW is requested.
 		 *  Caller should call image.close() and dngCreator.close() when done with the image.
 		 */
-		public abstract void onRawPictureTaken(DngCreator dngCreator, Image image);
+		void onRawPictureTaken(DngCreator dngCreator, Image image);
 		/** Only called if burst is requested.
 		 */
-		public abstract void onBurstPictureTaken(List<byte[]> images);
+		void onBurstPictureTaken(List<byte[]> images);
 		/* This is called for flash_frontscreen_auto or flash_frontscreen_on mode to indicate the caller should light up the screen
 		 * (for flash_frontscreen_auto it will only be called if the scene is considered dark enough to require the screen flash).
 		 * The screen flash can be removed when or after onCompleted() is called.
 		 */
-		public abstract void onFrontScreenTurnOn();
+		void onFrontScreenTurnOn();
 	}
 	
-	public static interface AutoFocusCallback {
-		public abstract void onAutoFocus(boolean success);
+	public interface AutoFocusCallback {
+		void onAutoFocus(boolean success);
 	}
 	
-	public static interface ContinuousFocusMoveCallback {
-		public abstract void onContinuousFocusMove(boolean start);
+	public interface ContinuousFocusMoveCallback {
+		void onContinuousFocusMove(boolean start);
 	}
 	
-	public static interface ErrorCallback {
-		public abstract void onError();
+	public interface ErrorCallback {
+		void onError();
 	}
 	
 	public static class Face {
@@ -288,24 +288,24 @@ public abstract class CameraController {
 	public long captureResultExposureTime() {
 		return 0;
 	}
-	public boolean captureResultHasFrameDuration() {
+	/*public boolean captureResultHasFrameDuration() {
 		return false;
-	}
-	public long captureResultFrameDuration() {
+	}*/
+	/*public long captureResultFrameDuration() {
 		return 0;
-	}
-	public boolean captureResultHasFocusDistance() {
+	}*/
+	/*public boolean captureResultHasFocusDistance() {
 		return false;
-	}
-	public float captureResultFocusDistanceMin() {
+	}*/
+	/*public float captureResultFocusDistanceMin() {
 		return 0.0f;
-	}
-	public float captureResultFocusDistanceMax() {
+	}*/
+	/*public float captureResultFocusDistanceMax() {
 		return 0.0f;
-	}
+	}*/
 
 	// gets the available values of a generic mode, e.g., scene, color etc, and makes sure the requested mode is available
-	protected SupportedValues checkModeIsSupported(List<String> values, String value, String default_value) {
+	SupportedValues checkModeIsSupported(List<String> values, String value, String default_value) {
 		if( values != null && values.size() > 1 ) { // n.b., if there is only 1 supported value, we also return null, as no point offering the choice to the user (there are some devices, e.g., Samsung, that only have a scene mode of "auto")
 			if( MyDebug.LOG ) {
 				for(int i=0;i<values.size();i++) {

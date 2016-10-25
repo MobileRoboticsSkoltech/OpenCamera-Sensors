@@ -3,7 +3,6 @@ package net.sourceforge.opencamera.Preview;
 import net.sourceforge.opencamera.MyDebug;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -19,7 +18,7 @@ public class CanvasView extends View {
 	private Preview preview = null;
 	private int [] measure_spec = new int[2];
 	
-	CanvasView(Context context, Bundle savedInstanceState, Preview preview) {
+	CanvasView(Context context, Preview preview) {
 		super(context);
 		this.preview = preview;
 		if( MyDebug.LOG ) {
