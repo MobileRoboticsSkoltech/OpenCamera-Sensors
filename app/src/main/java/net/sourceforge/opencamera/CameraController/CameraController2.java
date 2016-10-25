@@ -549,6 +549,8 @@ public class CameraController2 extends CameraController {
 			public void onOpened(CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera opened, first_callback? " + first_callback);
+				/*if( true ) // uncomment to test timeout code
+					return;*/
 				if( first_callback ) {
 					first_callback = false;
 
@@ -703,6 +705,24 @@ public class CameraController2 extends CameraController {
 			e.printStackTrace();
 			throw new CameraControllerException();
 		}
+
+		// set up a timeout - sometimes if the camera has got in a state where it can't be opened until after a reboot, we'll never even get a myStateCallback callback called
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				if( MyDebug.LOG )
+					Log.d(TAG, "check if camera has opened in reasonable time");
+				synchronized( myStateCallback ) {
+					if( !myStateCallback.callback_done ) {
+						// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
+						Log.e(TAG, "timeout waiting for camera callback");
+						myStateCallback.first_callback = true;
+						myStateCallback.callback_done = true;
+						myStateCallback.notifyAll();
+					}
+				}
+			}
+		}, 10000);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "wait until camera opened...");
