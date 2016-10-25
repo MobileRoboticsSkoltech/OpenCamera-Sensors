@@ -257,6 +257,9 @@ public abstract class CameraController {
 	public abstract void reconnect() throws CameraControllerException;
 	public abstract void setPreviewDisplay(SurfaceHolder holder) throws CameraControllerException;
 	public abstract void setPreviewTexture(SurfaceTexture texture) throws CameraControllerException;
+	/** Starts the camera preview.
+	 *  @throws CameraControllerException if the camera preview fails to start.
+     */
 	public abstract void startPreview() throws CameraControllerException;
 	public abstract void stopPreview();
 	public abstract boolean startFaceDetection();
