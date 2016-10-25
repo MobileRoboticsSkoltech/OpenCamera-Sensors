@@ -465,8 +465,10 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "don't have image?!");
 				return;
 			}
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "now have all info to process raw image");
+				Log.d(TAG, "image timestamp: " + image.getTimestamp());
+			}
             DngCreator dngCreator = new DngCreator(characteristics, capture_result);
             // set fields
             dngCreator.setOrientation(camera_settings.getExifOrientation());
@@ -519,6 +521,12 @@ public class CameraController2 extends CameraController {
 	/*private boolean push_set_ae_lock = false;
 	private CaptureRequest push_set_ae_lock_id = null;*/
 
+	/** Opens the camera device.
+	 * @param context Application context.
+	 * @param cameraId Which camera to open (must be between 0 and CameraControllerManager2.getNumberOfCameras()-1).
+	 * @param preview_error_cb onError() will be called if the preview stops due to error.
+	 * @throws CameraControllerException if the camera device fails to open.
+     */
 	public CameraController2(Context context, int cameraId, ErrorCallback preview_error_cb) throws CameraControllerException {
 		super(cameraId);
 		if( MyDebug.LOG )
@@ -624,13 +632,6 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "actual camera: " + CameraController2.this.camera);
 					Log.d(TAG, "first_callback? " + first_callback);
 				}
-				if( first_callback ) {
-					first_callback = false;
-				}
-				else {
-					if( MyDebug.LOG )
-						Log.d(TAG, "error occurred after camera was opened");
-				}
 				// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
 				CameraController2.this.camera = null;
 				if( MyDebug.LOG )
@@ -638,6 +639,16 @@ public class CameraController2 extends CameraController {
 				cam.close();
 				if( MyDebug.LOG )
 					Log.d(TAG, "onError: camera is now closed");
+
+				if( first_callback ) {
+					first_callback = false;
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "error occurred after camera was opened");
+					//CameraController2.this.preview_error_cb.onError();
+				}
+
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to synchronize to say callback done");
 			    synchronized( this ) {
@@ -1725,7 +1736,9 @@ public class CameraController2 extends CameraController {
 					 * OnRawImageAvailableListener.setCaptureResult()), which may be in a separate thread.
 					 */
 					Image image = reader.acquireNextImage();
-		            ByteBuffer buffer = image.getPlanes()[0].getBuffer(); 
+					if( MyDebug.LOG )
+						Log.d(TAG, "image timestamp: " + image.getTimestamp());
+		            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
 		            byte [] bytes = new byte[buffer.remaining()]; 
 					if( MyDebug.LOG )
 						Log.d(TAG, "read " + bytes.length + " bytes");
@@ -2641,8 +2654,10 @@ public class CameraController2 extends CameraController {
 							Log.e(TAG, "message: " + e.getMessage());
 						}
 						e.printStackTrace();
-						preview_error_cb.onError();
-					} 
+						// we indicate that we failed to start the preview by setting captureSession back to null
+						// this will cause a CameraControllerException to be thrown below
+						captureSession = null;
+					}
 				    synchronized( this ) {
 				    	callback_done = true;
 				    	this.notifyAll();
