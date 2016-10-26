@@ -343,4 +343,6 @@
 	<string name="dark">Temna</string> <!-- exposure compensation dark -->
     <string name="bright">Svetla</string> <!-- exposure compensation bright -->
     <string name="exposure_shutter_speed">Hitrost zaslonke</string>
+	
+	<string name="camera_error">Resna napaka fotoaparata</string>
 </resources>
