@@ -343,4 +343,6 @@
     <string name="dark">Dark</string> <!-- exposure compensation dark -->
     <string name="bright">Bright</string> <!-- exposure compensation bright -->
     <string name="exposure_shutter_speed">Shutter speed</string>
+
+    <string name="camera_error">Serious camera error</string>
 </resources>

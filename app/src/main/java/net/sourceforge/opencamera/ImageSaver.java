@@ -578,15 +578,10 @@ public class ImageSaver extends Thread {
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after decompressing base exposures: " + (System.currentTimeMillis() - time_s));
     		}
-			hdrProcessor.processHDR(bitmaps);
+			hdrProcessor.processHDR(bitmaps); // this will recycle all the bitmaps except bitmaps.get(0), which will contain the hdr image
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after creating HDR image: " + (System.currentTimeMillis() - time_s));
     		}
-			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap:
-			for(int i=1;i<bitmaps.size();i++) {
-				Bitmap bitmap = bitmaps.get(i);
-				bitmap.recycle();
-			}
 			Bitmap hdr_bitmap = bitmaps.get(0);
 			bitmaps.clear();
 	        System.gc();

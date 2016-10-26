@@ -27,11 +27,11 @@ public interface ApplicationInterface {
 	class VideoMaxFileSize {
 		public long max_filesize = 0; // maximum file size in bytes for video (return 0 for device default - typically this is ~2GB)
 		public boolean auto_restart = false; // whether to automatically restart on hitting max filesize (this setting is still relevant for max_filesize==0, as typically there will still be a device max filesize)
-	};
+	}
 
-	final int VIDEOMETHOD_FILE = 0; // video will be saved to a file
-	final int VIDEOMETHOD_SAF = 1; // video will be saved using Android 5's Storage Access Framework
-	final int VIDEOMETHOD_URI = 2; // video will be written to the supplied Uri
+	int VIDEOMETHOD_FILE = 0; // video will be saved to a file
+	int VIDEOMETHOD_SAF = 1; // video will be saved using Android 5's Storage Access Framework
+	int VIDEOMETHOD_URI = 2; // video will be written to the supplied Uri
 	
 	// methods that request information
 	Context getContext(); // get the application context
@@ -103,6 +103,7 @@ public interface ApplicationInterface {
 	void stoppingVideo(); // called just before video recording stops
 	void stoppedVideo(final int video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created)
 	void onFailedStartPreview(); // called if failed to start camera preview
+	void onCameraError(); // called if the camera closes due to serious error.
 	void onPhotoError(); // callback for failing to take a photo
 	void onVideoInfo(int what, int extra); // callback for info when recording video (see MediaRecorder.OnInfoListener)
 	void onVideoError(int what, int extra); // callback for errors when recording video (see MediaRecorder.OnErrorListener)

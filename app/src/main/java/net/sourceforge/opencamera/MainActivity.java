@@ -239,7 +239,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		mainUI.clearSeekBar();
 
 		// set up the camera and its preview
-        preview = new Preview(applicationInterface, savedInstanceState, ((ViewGroup) this.findViewById(R.id.preview)));
+        preview = new Preview(applicationInterface, ((ViewGroup) this.findViewById(R.id.preview)));
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after creating preview: " + (System.currentTimeMillis() - debug_time));
 

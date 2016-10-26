@@ -85,7 +85,7 @@ public class DrawPreview {
 		p.setAntiAlias(true);
         p.setStrokeCap(Paint.Cap.ROUND);
 		final float scale = getContext().getResources().getDisplayMetrics().density;
-		this.stroke_width = (float) (1.0f * scale + 0.5f); // convert dps to pixels
+		this.stroke_width = (1.0f * scale + 0.5f); // convert dps to pixels
 		p.setStrokeWidth(stroke_width);
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth);
@@ -196,8 +196,7 @@ public class DrawPreview {
     	time /= 60;
     	long hours = time;
     	//String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs) + ":" + String.format("%03d", ms);
-    	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
-    	return time_s;
+    	return hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
     }
 
 	public void onDrawPreview(Canvas canvas) {
@@ -226,7 +225,7 @@ public class DrawPreview {
 		else if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
-			float this_stroke_width = (float) (5.0f * scale + 0.5f); // convert dps to pixels
+			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels
 			p.setStrokeWidth(this_stroke_width);
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 			p.setStyle(Paint.Style.FILL); // reset
@@ -436,14 +435,14 @@ public class DrawPreview {
 					if( crop_ratio > preview.getTargetRatio() ) {
 						// crop ratio is wider, so we have to crop top/bottom
 						double new_hheight = ((double)canvas.getWidth()) / (2.0f*crop_ratio);
-						top = (int)(canvas.getHeight()/2 - (int)new_hheight);
-						bottom = (int)(canvas.getHeight()/2 + (int)new_hheight);
+						top = (canvas.getHeight()/2 - (int)new_hheight);
+						bottom = (canvas.getHeight()/2 + (int)new_hheight);
 					}
 					else {
 						// crop ratio is taller, so we have to crop left/right
 						double new_hwidth = (((double)canvas.getHeight()) * crop_ratio) / 2.0f;
-						left = (int)(canvas.getWidth()/2 - (int)new_hwidth);
-						right = (int)(canvas.getWidth()/2 + (int)new_hwidth);
+						left = (canvas.getWidth()/2 - (int)new_hwidth);
+						right = (canvas.getWidth()/2 + (int)new_hwidth);
 					}
 					canvas.drawRect(left, top, right, bottom, p);
 				}
@@ -497,7 +496,7 @@ public class DrawPreview {
 				thumbnail_anim_src_rect.top = 0;
 				thumbnail_anim_src_rect.right = last_thumbnail.getWidth();
 				thumbnail_anim_src_rect.bottom = last_thumbnail.getHeight();
-			    View galleryButton = (View) main_activity.findViewById(R.id.gallery);
+			    View galleryButton = main_activity.findViewById(R.id.gallery);
 				float alpha = ((float)time)/(float)duration;
 
 				int st_x = canvas.getWidth()/2;
@@ -752,10 +751,9 @@ public class DrawPreview {
 			// only show when actually zoomed in
 			if( zoom_ratio > 1.0f + 1.0e-5f ) {
 				// Convert the dps to pixels, based on density scale
-				int pixels_offset_y = text_y;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				p.setTextAlign(Paint.Align.CENTER);
-				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text, true);
+				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - text_y, false, ybounds_text, true);
 			}
 		}
 
@@ -791,7 +789,7 @@ public class DrawPreview {
 			boolean draw_battery = true;
 			if( battery_frac <= 0.05f ) {
 				// flash icon at this low level
-				draw_battery = (((long)( System.currentTimeMillis() / 1000 )) % 2) == 0;
+				draw_battery = ((( System.currentTimeMillis() / 1000 )) % 2) == 0;
 			}
 			if( draw_battery ) {
 				p.setColor(Color.WHITE);
@@ -906,6 +904,8 @@ public class DrawPreview {
 	    	case Surface.ROTATION_270:
 	    		angle += 90.0;
 	    		break;
+			case Surface.ROTATION_0:
+			case Surface.ROTATION_180:
     		default:
     			break;
 		    }
@@ -981,8 +981,8 @@ public class DrawPreview {
 				float frac = ((float)dt) / (float)length;
 				float pos_x = canvas.getWidth()/2.0f;
 				float pos_y = canvas.getHeight()/2.0f;
-				float min_radius = (float) (40 * scale + 0.5f); // convert dps to pixels
-				float max_radius = (float) (60 * scale + 0.5f); // convert dps to pixels
+				float min_radius = (40 * scale + 0.5f); // convert dps to pixels
+				float max_radius = (60 * scale + 0.5f); // convert dps to pixels
 				float radius = 0.0f;
 				if( frac < 0.5f ) {
 					float alpha = frac*2.0f;
@@ -1007,8 +1007,8 @@ public class DrawPreview {
 
 		if( preview.isFocusWaiting() || preview.isFocusRecentSuccess() || preview.isFocusRecentFailure() ) {
 			long time_since_focus_started = preview.timeSinceStartedAutoFocus();
-			float min_radius = (float) (40 * scale + 0.5f); // convert dps to pixels
-			float max_radius = (float) (45 * scale + 0.5f); // convert dps to pixels
+			float min_radius = (40 * scale + 0.5f); // convert dps to pixels
+			float max_radius = (45 * scale + 0.5f); // convert dps to pixels
 			float radius = min_radius;
 			if( time_since_focus_started > 0 ) {
 				final long length = 500;
