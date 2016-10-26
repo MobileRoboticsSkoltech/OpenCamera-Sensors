@@ -636,7 +636,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "actual camera: " + CameraController2.this.camera);
 					Log.d(TAG, "first_callback? " + first_callback);
 				}
-				boolean camera_already_opened = camera != null;
+				boolean camera_already_opened = CameraController2.this.camera != null;
 				if( first_callback ) {
 					first_callback = false;
 				}
