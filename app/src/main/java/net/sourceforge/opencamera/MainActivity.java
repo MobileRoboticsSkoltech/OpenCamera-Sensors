@@ -99,7 +99,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
     private GestureDetector gestureDetector;
     private boolean screen_is_locked = false; // whether screen is "locked" - this is Open Camera's own lock to guard against accidental presses, not the standard Android lock
-    private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<Integer, Bitmap>();
+    private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<>();
 	private ValueAnimator gallery_save_anim = null;
 
     private SoundPool sound_pool = null;
@@ -244,9 +244,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onCreate: time after creating preview: " + (System.currentTimeMillis() - debug_time));
 
 		// initialise on-screen button visibility
-	    View switchCameraButton = (View) findViewById(R.id.switch_camera);
+	    View switchCameraButton = findViewById(R.id.switch_camera);
 	    switchCameraButton.setVisibility(preview.getCameraControllerManager().getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
-	    View speechRecognizerButton = (View) findViewById(R.id.audio_control);
+	    View speechRecognizerButton = findViewById(R.id.audio_control);
 	    speechRecognizerButton.setVisibility(View.GONE); // disabled by default, until the speech recognizer is created
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting button visibility: " + (System.currentTimeMillis() - debug_time));
@@ -262,7 +262,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onCreate: time after setting orientation event listener: " + (System.currentTimeMillis() - debug_time));
 
 		// set up gallery button long click
-        View galleryButton = (View)findViewById(R.id.gallery);
+        View galleryButton = findViewById(R.id.gallery);
         galleryButton.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
@@ -409,8 +409,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			debug_time = System.currentTimeMillis();
 		}
     	String [] icons = getResources().getStringArray(icons_id);
-    	for(int i=0;i<icons.length;i++) {
-    		int resource = getResources().getIdentifier(icons[i], null, this.getApplicationContext().getPackageName());
+		for(String icon : icons) {
+    		int resource = getResources().getIdentifier(icon, null, this.getApplicationContext().getPackageName());
     		if( MyDebug.LOG )
     			Log.d(TAG, "load resource: " + resource);
     		Bitmap bm = BitmapFactory.decodeResource(getResources(), resource);
@@ -947,7 +947,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		this.closePopup();
 		if( this.preview.canSwitchCamera() ) {
 			int cameraId = getNextCameraId();
-		    View switchCameraButton = (View) findViewById(R.id.switch_camera);
+		    View switchCameraButton = findViewById(R.id.switch_camera);
 		    switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
 			this.preview.setCamera(cameraId);
 		    switchCameraButton.setEnabled(true);
@@ -959,7 +959,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchVideo");
 		this.closePopup();
-	    View switchVideoButton = (View) findViewById(R.id.switch_video);
+	    View switchVideoButton = findViewById(R.id.switch_video);
 	    switchVideoButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
 		this.preview.switchVideo(false);
 		switchVideoButton.setEnabled(true);
@@ -979,13 +979,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     
     private static double seekbarScaling(double frac) {
     	// For various seekbars, we want to use a non-linear scaling, so user has more control over smaller values
-    	double scaling = (Math.pow(100.0, frac) - 1.0) / 99.0;
-    	return scaling;
+    	return (Math.pow(100.0, frac) - 1.0) / 99.0;
     }
 
     private static double seekbarScalingInverse(double scaling) {
-    	double frac = Math.log(99.0*scaling + 1.0) / Math.log(100.0);
-    	return frac;
+    	return Math.log(99.0*scaling + 1.0) / Math.log(100.0);
     }
     
 	private void setProgressSeekbarScaled(SeekBar seekBar, double min_value, double max_value, double value) {
@@ -1029,8 +1027,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     }
 
     public Bitmap getPreloadedBitmap(int resource) {
-		Bitmap bm = this.preloaded_bitmap_resources.get(resource);
-		return bm;
+		return this.preloaded_bitmap_resources.get(resource);
     }
 
     public void clickedPopupSettings(View view) {
@@ -1214,7 +1211,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none") ) {
 			// ensure icon is invisible if switching from audio control enabled to disabled
 			// (if enabling it, we'll make the icon visible later on)
-			View speechRecognizerButton = (View) findViewById(R.id.audio_control);
+			View speechRecognizerButton = findViewById(R.id.audio_control);
 			speechRecognizerButton.setVisibility(View.GONE);
 		}
         initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
@@ -1242,8 +1239,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     }
     
     MyPreferenceFragment getPreferenceFragment() {
-        MyPreferenceFragment fragment = (MyPreferenceFragment)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
-        return fragment;
+        return (MyPreferenceFragment)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
     }
     
     @Override
@@ -1465,7 +1461,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 
 		new AsyncTask<Void, Void, Bitmap>() {
-			private String TAG = "MainActivity/updateGalleryIcon()/AsyncTask";
+			private String TAG = "MainActivity/AsyncTask";
 
 			/** The system calls this to perform work in a worker thread and
 		      * delivers it the parameters given to AsyncTask.execute() */
@@ -1941,7 +1937,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
      *  not the standard Android lock.
      */
     void lockScreen() {
-		((ViewGroup) findViewById(R.id.locker)).setOnTouchListener(new View.OnTouchListener() {
+		findViewById(R.id.locker).setOnTouchListener(new View.OnTouchListener() {
             @SuppressLint("ClickableViewAccessibility") @Override
             public boolean onTouch(View arg0, MotionEvent event) {
                 return gestureDetector.onTouchEvent(event);
@@ -1954,7 +1950,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     /** Unlock the screen (see lockScreen()).
      */
     void unlockScreen() {
-		((ViewGroup) findViewById(R.id.locker)).setOnTouchListener(null);
+		findViewById(R.id.locker).setOnTouchListener(null);
 		screen_is_locked = false;
     }
     
@@ -1992,6 +1988,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
                 }
             }
             catch(Exception e) {
+				e.printStackTrace();
             }
             return false;
         }
@@ -2022,8 +2019,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
 		boolean manual_iso = !iso_value.equals(preview.getCameraController().getDefaultISO());
-		boolean supports_exposure = preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
-		return supports_exposure;
+		return preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
 	}
 
     void cameraSetup() {
@@ -2127,7 +2123,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		    focusSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-					double frac = progress/(double)100.0;
+					double frac = progress/100.0;
 					double scaling = MainActivity.seekbarScaling(frac);
 					float focus_distance = (float)(scaling * preview.getMinimumFocusDistance());
 					preview.setFocusDistance(focus_distance);
@@ -2158,7 +2154,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "iso seekbar onProgressChanged: " + progress);
-						double frac = progress/(double)100.0;
+						double frac = progress/100.0;
 						if( MyDebug.LOG )
 							Log.d(TAG, "exposure_time frac: " + frac);
 						double scaling = MainActivity.seekbarScaling(frac);
@@ -2189,7 +2185,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure_time seekbar onProgressChanged: " + progress);
-							double frac = progress/(double)100.0;
+							double frac = progress/100.0;
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure_time frac: " + frac);
 							//long exposure_time = min_exposure_time + (long)(frac * (max_exposure_time - min_exposure_time));
@@ -2260,7 +2256,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: time after setting up exposure: " + (System.currentTimeMillis() - debug_time));
 
-		View exposureButton = (View) findViewById(R.id.exposure);
+		View exposureButton = findViewById(R.id.exposure);
 	    exposureButton.setVisibility(supportsExposureButton() && !mainUI.inImmersiveMode() ? View.VISIBLE : View.GONE);
 
 	    ImageButton exposureLockButton = (ImageButton) findViewById(R.id.exposure_lock);
@@ -2329,11 +2325,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	        // cast to long to avoid overflow!
 	        long blocks = statFs.getAvailableBlocks();
 	        long size = statFs.getBlockSize();
-	        long free  = (blocks*size) / 1048576;
-			/*if( MyDebug.LOG ) {
-				Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
-			}*/
-	        return free;
+	        return (blocks*size) / 1048576;
     	}
     	catch(IllegalArgumentException e) {
     		// this can happen if folder doesn't exist, or don't have read access
@@ -2348,11 +2340,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
             	        // cast to long to avoid overflow!
             	        long blocks = statFs.getAvailableBlocks();
             	        long size = statFs.getBlockSize();
-            	        long free  = (blocks*size) / 1048576;
-            			/*if( MyDebug.LOG ) {
-            				Log.d(TAG, "freeMemory blocks: " + blocks + " size: " + size + " free: " + free);
-            			}*/
-            	        return free;
+            	        return (blocks*size) / 1048576;
             		}
         		}
         	}
@@ -2712,7 +2700,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					}
 	        	});
 				if( !mainUI.inImmersiveMode() ) {
-		    	    View speechRecognizerButton = (View) findViewById(R.id.audio_control);
+		    	    View speechRecognizerButton = findViewById(R.id.audio_control);
 		    	    speechRecognizerButton.setVisibility(View.VISIBLE);
 				}
 	        }
@@ -2729,7 +2717,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "freeSpeechRecognizer");
 		if( speechRecognizer != null ) {
         	speechRecognizerStopped();
-    	    View speechRecognizerButton = (View) findViewById(R.id.audio_control);
+    	    View speechRecognizerButton = findViewById(R.id.audio_control);
     	    speechRecognizerButton.setVisibility(View.GONE);
 			speechRecognizer.destroy();
 			speechRecognizer = null;

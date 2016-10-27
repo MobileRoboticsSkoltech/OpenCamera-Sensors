@@ -33,8 +33,8 @@ public class LocationSupplier {
 		if( locationListeners == null )
 			return null;
 		// location listeners should be stored in order best to worst
-		for(int i=0;i<locationListeners.length;i++) {
-			Location location = locationListeners[i].getLocation();
+		for(MyLocationListener locationListener : locationListeners) {
+			Location location = locationListener.getLocation();
 			if( location != null )
 				return location;
 		}
@@ -43,7 +43,7 @@ public class LocationSupplier {
 	
 	private static class MyLocationListener implements LocationListener {
 		private Location location = null;
-		public boolean test_has_received_location = false;
+		boolean test_has_received_location = false;
 		
 		Location getLocation() {
 			return location;
@@ -174,8 +174,8 @@ public class LocationSupplier {
 	public boolean testHasReceivedLocation() {
 		if( locationListeners == null )
 			return false;
-		for(int i=0;i<locationListeners.length;i++) {
-			if( locationListeners[i].test_has_received_location )
+		for(MyLocationListener locationListener : locationListeners) {
+			if( locationListener.test_has_received_location )
 				return true;
 		}
 		return false;
@@ -186,8 +186,8 @@ public class LocationSupplier {
 			return false;
 		if( this.locationListeners.length != 2 )
 			return false;
-		for(int i=0;i<this.locationListeners.length;i++) {
-			if( this.locationListeners[i] == null )
+		for(MyLocationListener locationListener : locationListeners) {
+			if( locationListener == null )
 				return false;
 		}
 		return true;
@@ -195,10 +195,9 @@ public class LocationSupplier {
 
 	public static String locationToDMS(double coord) {
 		String sign = (coord < 0.0) ? "-" : "";
-		boolean is_zero = true;
 		coord = Math.abs(coord);
 	    int intPart = (int)coord;
-	    is_zero = is_zero && (intPart==0);
+	    boolean is_zero = (intPart==0);
 	    String degrees = String.valueOf(intPart);
 	    double mod = coord - intPart;
 

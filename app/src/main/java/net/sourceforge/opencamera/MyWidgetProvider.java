@@ -24,13 +24,11 @@ public class MyWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
     	if( MyDebug.LOG )
     		Log.d(TAG, "onUpdate");
-        final int N = appWidgetIds.length;
     	if( MyDebug.LOG )
-    		Log.d(TAG, "N = " + N);
+    		Log.d(TAG, "length = " + appWidgetIds.length);
 
         // Perform this loop procedure for each App Widget that belongs to this provider
-        for (int i=0; i<N; i++) {
-            int appWidgetId = appWidgetIds[i];
+		for(int appWidgetId : appWidgetIds) {
         	if( MyDebug.LOG )
         		Log.d(TAG, "appWidgetId: " + appWidgetId);
 
