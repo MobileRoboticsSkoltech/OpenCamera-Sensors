@@ -171,6 +171,10 @@ public class PreferenceKeys {
     	return "preference_camera2_fake_flash";
     }
 
+    public static String getCamera2FastBurstPreferenceKey() {
+        return "preference_camera2_fast_burst";
+    }
+
     public static String getUIPlacementPreferenceKey() {
     	return "preference_ui_placement";
     }

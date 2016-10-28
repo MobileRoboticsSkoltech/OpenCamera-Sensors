@@ -92,6 +92,7 @@ public interface ApplicationInterface {
     double getExpoBracketingStopsPref(); // stops per image for exposure bracketing
 	boolean isRawPref(); // whether to enable RAW photos
 	boolean useCamera2FakeFlash(); // whether to enable CameraController.setUseCamera2FakeFlash() for Camera2 API
+	boolean useCamera2FastBurst(); // whether to enable Camera2's captureBurst() for faster taking of expo-bracketing photos (generally should be true, but some devices have problems with captureBurst())
 
 	// for testing purposes:
 	boolean isTestAlwaysFocus(); // if true, pretend autofocus always successful

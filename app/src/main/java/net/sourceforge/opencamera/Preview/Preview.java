@@ -1326,6 +1326,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			camera_controller.setExpoBracketing(true);
 			camera_controller.setExpoBracketingNImages( applicationInterface.getExpoBracketingNImagesPref() );
 			camera_controller.setExpoBracketingStops( applicationInterface.getExpoBracketingStopsPref() );
+			// setUseExpoFastBurst called when taking a photo
 		}
 		else {
 			camera_controller.setExpoBracketing(false);
@@ -4421,6 +4422,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
     			Log.d(TAG, "enable_sound? " + enable_sound);
         	camera_controller.enableShutterSound(enable_sound);
+			if( using_android_l ) {
+				boolean use_camera2_fast_burst = applicationInterface.useCamera2FastBurst();
+				if( MyDebug.LOG )
+					Log.d(TAG, "use_camera2_fast_burst? " + use_camera2_fast_burst);
+				camera_controller.setUseExpoFastBurst( use_camera2_fast_burst );
+			}
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
 			camera_controller.takePicture(pictureCallback, errorCallback);

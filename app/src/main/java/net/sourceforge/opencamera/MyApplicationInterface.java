@@ -839,7 +839,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return sharedPreferences.getBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), false);
 	}
 
-    @Override
+	@Override
+	public boolean useCamera2FastBurst() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return sharedPreferences.getBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), true);
+	}
+
+	@Override
     public boolean isTestAlwaysFocus() {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "isTestAlwaysFocus: " + main_activity.is_test);

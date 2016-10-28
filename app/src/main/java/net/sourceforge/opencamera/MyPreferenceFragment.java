@@ -276,6 +276,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	Preference pref = findPreference("preference_camera2_fake_flash");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
         	pg.removePreference(pref);
+
+			pref = findPreference("preference_camera2_fast_burst");
+			pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
+			pg.removePreference(pref);
         }
 
 		final boolean supports_camera2 = bundle.getBoolean("supports_camera2");

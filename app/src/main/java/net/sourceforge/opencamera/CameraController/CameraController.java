@@ -189,6 +189,7 @@ public abstract class CameraController {
 	 */
 	public abstract void setExpoBracketingNImages(int n_images);
 	public abstract void setExpoBracketingStops(double stops);
+	public abstract void setUseExpoFastBurst(boolean use_expo_fast_burst);
 	public abstract void setRaw(boolean want_raw);
 	/**
 	 * setUseCamera2FakeFlash() should be called after creating the CameraController, and before calling getCameraFeatures() or

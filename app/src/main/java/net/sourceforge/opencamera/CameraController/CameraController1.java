@@ -599,6 +599,11 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public void setUseExpoFastBurst(boolean use_expo_fast_burst) {
+		// not supported for CameraController1
+	}
+
+	@Override
 	public void setRaw(boolean want_raw) {
 		// not supported for CameraController1
 	}

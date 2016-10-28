@@ -586,7 +586,15 @@
 		            android:defaultValue="false"
 		            />
 
-		        <SwitchPreference
+				<!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+				<SwitchPreference
+					android:key="preference_camera2_fast_burst"
+					android:title="@string/preference_camera2_fast_burst"
+					android:summary="@string/preference_camera2_fast_burst_summary"
+					android:defaultValue="true"
+					/>
+
+				<SwitchPreference
 		            android:key="preference_background_photo_saving"
 		            android:title="@string/preference_background_photo_saving"
 		            android:summary="@string/preference_background_photo_saving_summary"
