@@ -708,6 +708,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		                		editor.clear();
 		                		editor.putBoolean(PreferenceKeys.getFirstTimePreferenceKey(), true);
 		                		editor.apply();
+								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+								main_activity.setDeviceDefaults();
 		                		if( MyDebug.LOG )
 		                			Log.d(TAG, "user clicked reset - need to restart");
 		                		// see http://stackoverflow.com/questions/2470870/force-application-to-restart-on-first-activity

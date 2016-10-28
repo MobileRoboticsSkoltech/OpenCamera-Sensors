@@ -316,29 +316,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		// show "about" dialog for first time use; also set some per-device defaults
 		boolean has_done_first_time = sharedPreferences.contains(PreferenceKeys.getFirstTimePreferenceKey());
 		if( !has_done_first_time ) {
-			boolean is_samsung = Build.MANUFACTURER.toLowerCase(Locale.US).contains("samsung");
-			boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
-			boolean is_nexus6 = Build.MODEL.toLowerCase(Locale.US).contains("nexus 6");
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "running for first time");
-				Log.d(TAG, "is_samsung? " + is_samsung);
-				Log.d(TAG, "is_oneplus? " + is_oneplus);
-				Log.d(TAG, "is_nexus6? " + is_nexus6);
-			}
-			if( is_samsung || is_oneplus ) {
-				// workaround needed for Samsung S7 at least (tested on Samsung RTL)
-				// workaround needed for OnePlus 3 at least (see http://forum.xda-developers.com/oneplus-3/help/camera2-support-t3453103 )
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), true);
-				editor.apply();
-			}
-			if( is_nexus6 ) {
-				// Nexus 6 captureBurst() started having problems with Android 7 upgrade - images appeared in wrong order (and with wrong order of shutter speeds in exif info), as well as problems with the camera failing with serious errors
-				// we set this even for Nexus 6 devices not on Android 7, as at some point they'll likely be upgraded to Android 7
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), false);
-				editor.apply();
-			}
+			setDeviceDefaults();
 		}
         if( !has_done_first_time && !is_test ) {
 	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
@@ -382,6 +360,38 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: total time for Activity startup: " + (System.currentTimeMillis() - debug_time));
+	}
+
+	/* This method sets the preference defaults which are set specific for a particular device.
+	 * This method should be called when Open Camera is run for the very first time after installation,
+	 * or when the user has requested to "Reset settings".
+	 */
+	void setDeviceDefaults() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setDeviceDefaults");
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean is_samsung = Build.MANUFACTURER.toLowerCase(Locale.US).contains("samsung");
+		boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
+		boolean is_nexus6 = Build.MODEL.toLowerCase(Locale.US).contains("nexus 6");
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "is_samsung? " + is_samsung);
+			Log.d(TAG, "is_oneplus? " + is_oneplus);
+			Log.d(TAG, "is_nexus6? " + is_nexus6);
+		}
+		if( is_samsung || is_oneplus ) {
+			// workaround needed for Samsung S7 at least (tested on Samsung RTL)
+			// workaround needed for OnePlus 3 at least (see http://forum.xda-developers.com/oneplus-3/help/camera2-support-t3453103 )
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), true);
+			editor.apply();
+		}
+		if( is_nexus6 ) {
+			// Nexus 6 captureBurst() started having problems with Android 7 upgrade - images appeared in wrong order (and with wrong order of shutter speeds in exif info), as well as problems with the camera failing with serious errors
+			// we set this even for Nexus 6 devices not on Android 7, as at some point they'll likely be upgraded to Android 7
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), false);
+			editor.apply();
+		}
 	}
 
 	/** Determine whether we support Camera2 API.
