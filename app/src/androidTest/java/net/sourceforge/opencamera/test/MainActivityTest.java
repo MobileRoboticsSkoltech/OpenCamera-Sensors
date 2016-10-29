@@ -1825,16 +1825,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		switchToISO(100);
 
-		View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    SeekBar isoSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.iso_seekbar);
+		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.manual_exposure_container);
+		SeekBar isoSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.iso_seekbar);
 	    SeekBar exposureTimeSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_time_seekbar);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(isoSeekBar.getVisibility() == View.GONE);
-	    assertTrue(exposureTimeSeekBar.getVisibility() == View.GONE);
-	    
+	    assertTrue(exposureContainer.getVisibility() == View.GONE);
+
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
+		assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
+		assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 
 	    assertTrue( isoSeekBar.getMax() == 100 );
@@ -1870,11 +1871,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // test the exposure button clears and reopens without changing exposure level
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(isoSeekBar.getVisibility() == View.GONE);
-	    assertTrue(exposureTimeSeekBar.getVisibility() == View.GONE);
+	    assertTrue(exposureContainer.getVisibility() == View.GONE);
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
+	    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
+		assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 	    if( mPreview.supportsExposureTime() )
@@ -1887,11 +1888,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		final int step_count_c = 10;
 	    TouchUtils.drag(MainActivityTest.this, gui_location[0]+step_dist_c, gui_location[0], gui_location[1]+step_dist_c, gui_location[1], step_count_c);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(isoSeekBar.getVisibility() == View.GONE);
-	    assertTrue(exposureTimeSeekBar.getVisibility() == View.GONE);
+	    assertTrue(exposureContainer.getVisibility() == View.GONE);
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
+	    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
+		assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 	    if( mPreview.supportsExposureTime() )
@@ -1900,8 +1901,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // clear again so as to not interfere with take photo routine
 	    TouchUtils.drag(MainActivityTest.this, gui_location[0]+step_dist_c, gui_location[0], gui_location[1]+step_dist_c, gui_location[1], step_count_c);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(isoSeekBar.getVisibility() == View.GONE);
-	    assertTrue(exposureTimeSeekBar.getVisibility() == View.GONE);
+	    assertTrue(exposureContainer.getVisibility() == View.GONE);
 
 	    subTestTakePhoto(false, false, true, true, false, false, false, false);
 
@@ -1911,15 +1911,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    clickView(switchCameraButton);
 
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-		    assertTrue(isoSeekBar.getVisibility() == View.GONE);
-		    assertTrue(exposureTimeSeekBar.getVisibility() == View.GONE);
+		    assertTrue(exposureContainer.getVisibility() == View.GONE);
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 		    if( mPreview.supportsExposureTime() )
 				assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
 
 		    clickView(exposureButton);
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-		    assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
+		    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
+			assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
 		    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 		    if( mPreview.supportsExposureTime() )
@@ -2478,6 +2478,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Thread.sleep(2000); // wait so we don't take the photo immediately, to be more realistic
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
+
+		mPreview.getCameraController().count_precapture_timeout = 0; // hack - precapture timeouts are more common with fake flash precapture mode, especially when phone is face down during testing
 	}
 
 	public void testTakePhotoSingleTap() throws InterruptedException {
