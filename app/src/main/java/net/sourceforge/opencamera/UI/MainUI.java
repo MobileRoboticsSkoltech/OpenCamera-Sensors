@@ -535,16 +535,16 @@ public class MainUI {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setImmersiveMode: set visibility: " + visibility);
 		    	// n.b., don't hide share and trash buttons, as they require immediate user input for us to continue
-			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
-			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
-			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
-			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
-			    View audioControlButton = (View) main_activity.findViewById(R.id.audio_control);
-			    View popupButton = (View) main_activity.findViewById(R.id.popup);
-			    View galleryButton = (View) main_activity.findViewById(R.id.gallery);
-			    View settingsButton = (View) main_activity.findViewById(R.id.settings);
-			    View zoomControls = (View) main_activity.findViewById(R.id.zoom);
-			    View zoomSeekBar = (View) main_activity.findViewById(R.id.zoom_seekbar);
+			    View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
+			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
+			    View exposureButton = main_activity.findViewById(R.id.exposure);
+			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
+			    View audioControlButton = main_activity.findViewById(R.id.audio_control);
+			    View popupButton = main_activity.findViewById(R.id.popup);
+			    View galleryButton = main_activity.findViewById(R.id.gallery);
+			    View settingsButton = main_activity.findViewById(R.id.settings);
+			    View zoomControls = main_activity.findViewById(R.id.zoom);
+			    View zoomSeekBar = main_activity.findViewById(R.id.zoom_seekbar);
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 		    	switchVideoButton.setVisibility(visibility);
@@ -568,7 +568,7 @@ public class MainUI {
 				}
         		String pref_immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
         		if( pref_immersive_mode.equals("immersive_mode_everything") ) {
-    			    View takePhotoButton = (View) main_activity.findViewById(R.id.take_photo);
+    			    View takePhotoButton = main_activity.findViewById(R.id.take_photo);
     			    takePhotoButton.setVisibility(visibility);
         		}
 				if( !immersive_mode ) {
@@ -596,12 +596,12 @@ public class MainUI {
 		main_activity.runOnUiThread(new Runnable() {
 			public void run() {
 		    	final int visibility = show ? View.VISIBLE : View.GONE;
-			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
-			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
-			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
-			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
-			    View audioControlButton = (View) main_activity.findViewById(R.id.audio_control);
-			    View popupButton = (View) main_activity.findViewById(R.id.popup);
+			    View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
+			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
+			    View exposureButton = main_activity.findViewById(R.id.exposure);
+			    View exposureLockButton = main_activity.findViewById(R.id.exposure_lock);
+			    View audioControlButton = main_activity.findViewById(R.id.audio_control);
+			    View popupButton = main_activity.findViewById(R.id.popup);
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 			    if( !main_activity.getPreview().isVideo() )
