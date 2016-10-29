@@ -14,13 +14,13 @@ public class AudioListener {
 	private AudioRecord ar = null;
 	private Thread thread = null;
 
-	public static interface AudioListenerCallback {
-		public abstract void onAudio(int level);
+	public interface AudioListenerCallback {
+		void onAudio(int level);
 	}
 
 	/** Create a new AudioListener. The caller should call the start() method to start listening.
 	 */
-	public AudioListener(final AudioListenerCallback cb) {
+	AudioListener(final AudioListenerCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "new AudioListener");
 		final int sample_rate = 8000;

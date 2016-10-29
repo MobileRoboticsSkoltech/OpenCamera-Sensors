@@ -64,6 +64,7 @@ public class CameraController2 extends CameraController {
 	private boolean want_expo_bracketing = false;
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
+	private boolean use_expo_fast_burst = true;
 	private boolean want_raw = false;
 	//private boolean want_raw = true;
 	private android.util.Size raw_size = null;
@@ -71,8 +72,10 @@ public class CameraController2 extends CameraController {
 	private OnRawImageAvailableListener onRawImageAvailableListener = null;
 	private PictureCallback jpeg_cb = null;
 	private PictureCallback raw_cb = null;
-	private int n_burst = 0;
-	private List<byte []> pending_burst_images = new ArrayList<>();
+	private int n_burst = 0; // number of expected burst images in this capture
+	private List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
+	private List<CaptureRequest> burst_capture_requests = new ArrayList<>(); // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
+	private long burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using fast burst)
 	private DngCreator pending_dngCreator = null;
 	private Image pending_image = null;
 	private ErrorCallback take_picture_error_cb = null;
@@ -636,7 +639,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "actual camera: " + CameraController2.this.camera);
 					Log.d(TAG, "first_callback? " + first_callback);
 				}
-				boolean camera_already_opened = camera != null;
+				boolean camera_already_opened = CameraController2.this.camera != null;
 				if( first_callback ) {
 					first_callback = false;
 				}
@@ -1715,6 +1718,13 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public void setUseExpoFastBurst(boolean use_expo_fast_burst) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setUseExpoFastBurst: " + use_expo_fast_burst);
+		this.use_expo_fast_burst = use_expo_fast_burst;
+	}
+
+	@Override
 	public void setUseCamera2FakeFlash(boolean use_fake_precapture) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setUseCamera2FakeFlash: " + use_fake_precapture);
@@ -1782,9 +1792,12 @@ public class CameraController2 extends CameraController {
 		            image.close();
 		            if( want_expo_bracketing && n_burst > 1 ) {
 		            	pending_burst_images.add(bytes);
-		            	if( pending_burst_images.size() == n_burst ) {
+		            	if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
 							if( MyDebug.LOG )
 								Log.d(TAG, "all burst images available");
+							if( pending_burst_images.size() > n_burst ) {
+								Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than n_burst " + n_burst);
+							}
 				            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
 				            PictureCallback cb = jpeg_cb;
 				            jpeg_cb = null;
@@ -1797,6 +1810,28 @@ public class CameraController2 extends CameraController {
 		            	else {
 							if( MyDebug.LOG )
 								Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
+							if( burst_capture_requests != null ) {
+								if( MyDebug.LOG ) {
+									Log.d(TAG, "need to execute the next capture");
+									Log.d(TAG, "time since start: " + (System.currentTimeMillis() - burst_start_ms));
+								}
+								try {
+									captureSession.capture(burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+								}
+								catch(CameraAccessException e) {
+									if( MyDebug.LOG ) {
+										Log.e(TAG, "failed to take next burst");
+										Log.e(TAG, "reason: " + e.getReason());
+										Log.e(TAG, "message: " + e.getMessage());
+									}
+									e.printStackTrace();
+									jpeg_cb = null;
+									if( take_picture_error_cb != null ) {
+										take_picture_error_cb.onError();
+										take_picture_error_cb = null;
+									}
+								}
+							}
 		            	}
 		            }
 		            else {
@@ -1842,7 +1877,9 @@ public class CameraController2 extends CameraController {
 		if( onRawImageAvailableListener != null ) {
 			onRawImageAvailableListener.clear();
 		}
+		burst_capture_requests = null;
 		n_burst = 0;
+		burst_start_ms = 0;
 	}
 	
 	private void takePendingRaw() {
@@ -3195,7 +3232,20 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "n_burst: " + n_burst);
 
 			captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
-			captureSession.captureBurst(requests, previewCaptureCallback, handler);
+
+			if( use_expo_fast_burst ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "using fast burst");
+				captureSession.captureBurst(requests, previewCaptureCallback, handler);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "using slow burst");
+				burst_capture_requests = requests;
+				burst_start_ms = System.currentTimeMillis();
+				captureSession.capture(requests.get(0), previewCaptureCallback, handler);
+			}
+
 			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
 				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
 		}

@@ -60,7 +60,7 @@ public class ImageSaver extends Thread {
 	 * Therefore we should always have n_images_to_save >= queue.size().
 	 */
 	private int n_images_to_save = 0;
-	private BlockingQueue<Request> queue = new ArrayBlockingQueue<Request>(1); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
+	private BlockingQueue<Request> queue = new ArrayBlockingQueue<>(1); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
 	
 	private static class Request {
 		enum Type {
@@ -148,7 +148,7 @@ public class ImageSaver extends Thread {
 		p.setAntiAlias(true);
 	}
 	
-	protected void onDestroy() {
+	void onDestroy() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onDestroy");
 		if( hdrProcessor != null ) {
@@ -220,7 +220,7 @@ public class ImageSaver extends Thread {
 	 *  If do_in_background is false, the photo is saved on the current thread, and the function returns whether the photo was saved
 	 *  successfully.
 	 */
-	public boolean saveImageJpeg(boolean do_in_background,
+	boolean saveImageJpeg(boolean do_in_background,
 			boolean is_hdr,
 			boolean save_expo,
 			List<byte []> images,
@@ -259,7 +259,7 @@ public class ImageSaver extends Thread {
 	 *  If do_in_background is false, the photo is saved on the current thread, and the function returns whether the photo was saved
 	 *  successfully.
 	 */
-	public boolean saveImageRaw(boolean do_in_background,
+	boolean saveImageRaw(boolean do_in_background,
 			DngCreator dngCreator, Image image,
 			Date current_date) {
 		if( MyDebug.LOG ) {
@@ -485,7 +485,7 @@ public class ImageSaver extends Thread {
 			ok = false;
 		}
 
-		List<Bitmap> bitmaps = new ArrayList<Bitmap>();
+		List<Bitmap> bitmaps = new ArrayList<>();
 		for(int i=0;i<jpeg_images.size() && ok;i++) {
 			Bitmap bitmap = threads[i].bitmap;
 			if( bitmap == null ) {
@@ -752,8 +752,8 @@ public class ImageSaver extends Thread {
     			}
     			double tan_theta = Math.tan(level_angle_rad_abs);
     			double sin_theta = Math.sin(level_angle_rad_abs);
-    			double denom = (double)( h0/w0 + tan_theta );
-    			double alt_denom = (double)( w0/h0 + tan_theta );
+    			double denom = ( h0/w0 + tan_theta );
+    			double alt_denom = ( w0/h0 + tan_theta );
     			if( denom == 0.0 || denom < 1.0e-14 ) {
     	    		if( MyDebug.LOG )
     	    			Log.d(TAG, "zero denominator?!");
@@ -764,9 +764,9 @@ public class ImageSaver extends Thread {
     			}
     			else {
         			int w2 = (int)(( h0 + 2.0*h1*sin_theta*tan_theta - w0*tan_theta ) / denom);
-        			int h2 = (int)(w2*h0/(double)w0);
+        			int h2 = (int)(w2*h0/w0);
         			int alt_h2 = (int)(( w0 + 2.0*w1*sin_theta*tan_theta - h0*tan_theta ) / alt_denom);
-        			int alt_w2 = (int)(alt_h2*w0/(double)h0);
+        			int alt_w2 = (int)(alt_h2*w0/h0);
         			if( MyDebug.LOG ) {
         				//Log.d(TAG, "h0 " + h0 + " 2.0*h1*sin_theta*tan_theta " + 2.0*h1*sin_theta*tan_theta + " w0*tan_theta " + w0*tan_theta + " / h0/w0 " + h0/w0 + " tan_theta " + tan_theta);
         				Log.d(TAG, "w2 = " + w2 + " , h2 = " + h2);
@@ -1361,14 +1361,14 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImageNowRaw");
 
-		boolean success = false;
 		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "RAW requires LOLLIPOP or higher");
-			return success;
+			return false;
 		}
 		StorageUtils storageUtils = main_activity.getStorageUtils();
-		
+		boolean success = false;
+
 		main_activity.savingImage(true);
 
         OutputStream output = null;
@@ -1649,7 +1649,7 @@ public class ImageSaver extends Thread {
 	
 	// for testing:
 	
-	public HDRProcessor getHDRProcessor() {
+	HDRProcessor getHDRProcessor() {
 		return hdrProcessor;
 	}
 }

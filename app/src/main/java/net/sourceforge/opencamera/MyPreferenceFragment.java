@@ -276,6 +276,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	Preference pref = findPreference("preference_camera2_fake_flash");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
         	pg.removePreference(pref);
+
+			pref = findPreference("preference_camera2_fast_burst");
+			pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
+			pg.removePreference(pref);
         }
 
 		final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
@@ -503,7 +507,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 				about_string.append(preview_heights[i]);
                 			}
                         }
-                        about_string.append("\nPreview resolution: " + preview_width + "x" + preview_height);
+						about_string.append("\nPreview resolution: ");
+						about_string.append(preview_width);
+						about_string.append("x");
+						about_string.append(preview_height);
                         if( widths != null && heights != null ) {
                             about_string.append("\nPhoto resolutions: ");
                 			for(int i=0;i<widths.length;i++) {
@@ -515,7 +522,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 				about_string.append(heights[i]);
                 			}
                         }
-                        about_string.append("\nPhoto resolution: " + resolution_width + "x" + resolution_height);
+						about_string.append("\nPhoto resolution: ");
+						about_string.append(resolution_width);
+						about_string.append("x");
+						about_string.append(resolution_height);
                         if( video_quality != null ) {
                             about_string.append("\nVideo qualities: ");
                 			for(int i=0;i<video_quality.length;i++) {
@@ -536,14 +546,20 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 				about_string.append(video_heights[i]);
                 			}
                         }
-        				about_string.append("\nVideo quality: " + current_video_quality);
-        				about_string.append("\nVideo frame width: " + video_frame_width);
-        				about_string.append("\nVideo frame height: " + video_frame_height);
-        				about_string.append("\nVideo bit rate: " + video_bit_rate);
-        				about_string.append("\nVideo frame rate: " + video_frame_rate);
+						about_string.append("\nVideo quality: ");
+						about_string.append(current_video_quality);
+						about_string.append("\nVideo frame width: ");
+						about_string.append(video_frame_width);
+						about_string.append("\nVideo frame height: ");
+						about_string.append(video_frame_height);
+						about_string.append("\nVideo bit rate: ");
+						about_string.append(video_bit_rate);
+						about_string.append("\nVideo frame rate: ");
+						about_string.append(video_frame_rate);
                         about_string.append("\nAuto-stabilise?: ");
                         about_string.append(getString(supports_auto_stabilise ? R.string.about_available : R.string.about_not_available));
-                        about_string.append("\nAuto-stabilise enabled?: " + sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false));
+						about_string.append("\nAuto-stabilise enabled?: ");
+						about_string.append(sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false));
                         about_string.append("\nFace detection?: ");
                         about_string.append(getString(supports_face_detection ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nRAW?: ");
@@ -630,15 +646,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 		}
                 		String iso_key = bundle.getString("iso_key");
                 		if( iso_key != null ) {
-                			about_string.append("\nISO key: " + iso_key);
+							about_string.append("\nISO key: ");
+							about_string.append(iso_key);
                 		}
 
-                		about_string.append("\nUsing SAF?: " + sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false));
+						about_string.append("\nUsing SAF?: ");
+						about_string.append(sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false));
                 		String save_location = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
-                		about_string.append("\nSave Location: " + save_location);
+						about_string.append("\nSave Location: ");
+						about_string.append(save_location);
                 		String save_location_saf = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
-                		about_string.append("\nSave Location SAF: " + save_location_saf);
-                		
+						about_string.append("\nSave Location SAF: ");
+						about_string.append(save_location_saf);
+
                 		about_string.append("\nParameters: ");
                 		String parameters_string = bundle.getString("parameters_string");
                 		if( parameters_string != null ) {
@@ -688,6 +708,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		                		editor.clear();
 		                		editor.putBoolean(PreferenceKeys.getFirstTimePreferenceKey(), true);
 		                		editor.apply();
+								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+								main_activity.setDeviceDefaults();
 		                		if( MyDebug.LOG )
 		                			Log.d(TAG, "user clicked reset - need to restart");
 		                		// see http://stackoverflow.com/questions/2470870/force-application-to-restart-on-first-activity

@@ -12,7 +12,7 @@ public class SaveLocationHistory {
 	private static final String TAG = "SaveLocationHistory";
 	private MainActivity main_activity = null;
 	private String pref_base = null;
-	private ArrayList<String> save_location_history = new ArrayList<String>();
+	private ArrayList<String> save_location_history = new ArrayList<>();
 
 	/** Creates a new SaveLocationHistory class. This manages a history of save folder locations.
 	 * @param main_activity MainActivity.
@@ -86,7 +86,7 @@ public class SaveLocationHistory {
     /** Clears the folder history, and reinitialise it with the current folder.
      * @param folder_name The current folder name.
      */
-    public void clearFolderHistory(String folder_name) {
+    void clearFolderHistory(String folder_name) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearFolderHistory: " + folder_name);
 		save_location_history.clear();

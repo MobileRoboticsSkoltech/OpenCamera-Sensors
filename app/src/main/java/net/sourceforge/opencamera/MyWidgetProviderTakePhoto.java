@@ -1,8 +1,5 @@
 package net.sourceforge.opencamera;
 
-import net.sourceforge.opencamera.MyDebug;
-import net.sourceforge.opencamera.R;
-
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -15,19 +12,17 @@ import android.widget.RemoteViews;
  *  Camera, and immediately takes a photo.
  */
 public class MyWidgetProviderTakePhoto extends AppWidgetProvider {
-	private static final String TAG = "MyWidgetProviderTakePhoto";
+	private static final String TAG = "MyWidgetProviderTakePho";
 	
 	// from http://developer.android.com/guide/topics/appwidgets/index.html
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
     	if( MyDebug.LOG )
     		Log.d(TAG, "onUpdate");
-        final int N = appWidgetIds.length;
     	if( MyDebug.LOG )
-    		Log.d(TAG, "N = " + N);
+            Log.d(TAG, "length = " + appWidgetIds.length);
 
         // Perform this loop procedure for each App Widget that belongs to this provider
-        for (int i=0; i<N; i++) {
-            int appWidgetId = appWidgetIds[i];
+        for(int appWidgetId : appWidgetIds) {
         	if( MyDebug.LOG )
         		Log.d(TAG, "appWidgetId: " + appWidgetId);
 

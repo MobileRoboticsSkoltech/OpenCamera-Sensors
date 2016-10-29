@@ -40,10 +40,10 @@ import android.util.Log;
 public class StorageUtils {
 	private static final String TAG = "StorageUtils";
 
-    public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final int MEDIA_TYPE_VIDEO = 2;
+    static final int MEDIA_TYPE_IMAGE = 1;
+    static final int MEDIA_TYPE_VIDEO = 2;
 
-	Context context = null;
+	private Context context = null;
     private Uri last_media_scanned = null;
 
 	// for testing:
@@ -264,8 +264,7 @@ public class StorageUtils {
     // only valid if !isUsingSAF()
     String getSaveLocation() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-		String folder_name = sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
-		return folder_name;
+		return sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
     }
     
     public static File getBaseFolder() {
@@ -291,15 +290,13 @@ public class StorageUtils {
     // only valid if isUsingSAF()
     String getSaveLocationSAF() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-		String folder_name = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
-		return folder_name;
+		return sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
     }
 
     // only valid if isUsingSAF()
-    Uri getTreeUriSAF() {
+    private Uri getTreeUriSAF() {
     	String folder_name = getSaveLocationSAF();
-		Uri treeUri = Uri.parse(folder_name);
-		return treeUri;
+		return Uri.parse(folder_name);
     }
 
 	/** Returns a human readable name for the current SAF save folder location.

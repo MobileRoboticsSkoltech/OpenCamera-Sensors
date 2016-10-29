@@ -49,7 +49,7 @@ import android.widget.SeekBar;
 public class MyApplicationInterface implements ApplicationInterface {
 	private static final String TAG = "MyApplicationInterface";
 	
-    public static enum PhotoMode {
+    public enum PhotoMode {
     	Standard,
     	HDR,
     	ExpoBracketing
@@ -70,7 +70,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private static class LastImage {
 		public boolean share = false; // one of the images in the list should have share set to true, to indicate which image to share
 		public String name = null;
-		public Uri uri = null;
+		Uri uri = null;
 
 		LastImage(Uri uri, boolean share) {
 			this.name = null;
@@ -84,7 +84,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			this.share = share;
 		}
 	}
-	private List<LastImage> last_images = new ArrayList<LastImage>();
+	private List<LastImage> last_images = new ArrayList<>();
 	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
@@ -139,7 +139,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	state.putFloat("focus_distance", focus_distance);
 	}
 	
-	protected void onDestroy() {
+	void onDestroy() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onDestroy");
 		if( drawPreview != null ) {
@@ -189,7 +189,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				Log.d(TAG, "from video capture intent");
 	        Bundle myExtras = main_activity.getIntent().getExtras();
 	        if (myExtras != null) {
-	        	Uri intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
+	        	Uri intent_uri = myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
 	        	if( intent_uri != null ) {
 	    			if( MyDebug.LOG )
 	    				Log.d(TAG, "save to: " + intent_uri);
@@ -272,8 +272,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public String getSceneModePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String value = sharedPreferences.getString(PreferenceKeys.getSceneModePreferenceKey(), "auto");
-		return value;
+		return sharedPreferences.getString(PreferenceKeys.getSceneModePreferenceKey(), "auto");
     }
     
     @Override
@@ -340,7 +339,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					int resolution_h = Integer.parseInt(resolution_h_s);
 					if( MyDebug.LOG )
 						Log.d(TAG, "resolution_h: " + resolution_h);
-					return new Pair<Integer, Integer>(resolution_w, resolution_h);
+					return new Pair<>(resolution_w, resolution_h);
 				}
 				catch(NumberFormatException exception) {
 					if( MyDebug.LOG )
@@ -840,7 +839,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return sharedPreferences.getBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), false);
 	}
 
-    @Override
+	@Override
+	public boolean useCamera2FastBurst() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return sharedPreferences.getBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), true);
+	}
+
+	@Override
     public boolean isTestAlwaysFocus() {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "isTestAlwaysFocus: " + main_activity.is_test);
@@ -924,18 +929,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 				}
 				thumbnail = retriever.getFrameAtTime(-1);
 			}
-		    catch(FileNotFoundException e) {
-		    	// video file wasn't saved?
-				Log.d(TAG, "failed to find thumbnail");
-		    	e.printStackTrace();
-		    }
-		    catch(IllegalArgumentException e) {
-		    	// corrupt video file?
-				Log.d(TAG, "failed to find thumbnail");
-		    	e.printStackTrace();
-		    }
-		    catch(RuntimeException e) {
-		    	// corrupt video file?
+		    catch(FileNotFoundException | /*IllegalArgumentException |*/ RuntimeException e) {
+		    	// video file wasn't saved or corrupt video file?
 				Log.d(TAG, "failed to find thumbnail");
 		    	e.printStackTrace();
 		    }
@@ -1134,8 +1129,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public void hasPausedPreview(boolean paused) {
-	    View shareButton = (View) main_activity.findViewById(R.id.share);
-	    View trashButton = (View) main_activity.findViewById(R.id.trash);
+	    View shareButton = main_activity.findViewById(R.id.share);
+	    View trashButton = main_activity.findViewById(R.id.trash);
 	    if( paused ) {
 		    shareButton.setVisibility(View.VISIBLE);
 		    trashButton.setVisibility(View.VISIBLE);
@@ -1246,7 +1241,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		editor.apply();
 		// focus may be updated by preview (e.g., when switching to/from video mode)
     	final int visibility = main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
-	    View focusSeekBar = (SeekBar) main_activity.findViewById(R.id.focus_seekbar);
+	    View focusSeekBar = main_activity.findViewById(R.id.focus_seekbar);
 	    focusSeekBar.setVisibility(visibility);
     }
 
@@ -1509,7 +1504,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				Log.d(TAG, "from image capture intent");
 	        Bundle myExtras = main_activity.getIntent().getExtras();
 	        if (myExtras != null) {
-	        	image_capture_intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
+	        	image_capture_intent_uri = myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
     			if( MyDebug.LOG )
     				Log.d(TAG, "save to: " + image_capture_intent_uri);
 	        }
@@ -1576,7 +1571,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken");
 
-		List<byte []> images = new ArrayList<byte []>();
+		List<byte []> images = new ArrayList<>();
 		images.add(data);
 
 		boolean success = saveImage(false, false, images, current_date);
@@ -1750,7 +1745,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	// for testing
 
-	public boolean hasThumbnailAnimation() {
+	boolean hasThumbnailAnimation() {
 		return this.drawPreview.hasThumbnailAnimation();
 	}
 	

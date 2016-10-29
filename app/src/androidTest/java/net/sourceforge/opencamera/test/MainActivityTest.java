@@ -1694,11 +1694,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakePhotoExposureCompensation");
 		setToDefault();
 		
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_container);
+		SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
 	    ZoomControls seekBarZoom = (ZoomControls) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar_zoom);
 	    assertTrue(exposureButton.getVisibility() == (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
-	    assertTrue(seekBar.getVisibility() == View.GONE);
+	    assertTrue(exposureContainer.getVisibility() == View.GONE);
 	    assertTrue(seekBarZoom.getVisibility() == View.GONE);
 	    
 	    if( !mPreview.supportsExposures() ) {
@@ -1707,7 +1708,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(seekBar.getVisibility() == View.VISIBLE);
+	    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
 	    assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
 
 	    assertTrue( mPreview.getMaximumExposure() - mPreview.getMinimumExposure() == seekBar.getMax() );
@@ -1728,11 +1729,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // test the exposure button clears and reopens without changing exposure level
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(seekBar.getVisibility() == View.GONE);
+	    assertTrue(exposureContainer.getVisibility() == View.GONE);
 	    assertTrue(seekBarZoom.getVisibility() == View.GONE);
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(seekBar.getVisibility() == View.VISIBLE);
+	    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
 	    assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
 	    assertTrue( mPreview.getCurrentExposure() == mPreview.getMinimumExposure() );
 	    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
@@ -1744,11 +1745,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		final int step_count_c = 10;
 	    TouchUtils.drag(MainActivityTest.this, gui_location[0]+step_dist_c, gui_location[0], gui_location[1]+step_dist_c, gui_location[1], step_count_c);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(seekBar.getVisibility() == View.GONE);
+	    assertTrue(exposureContainer.getVisibility() == View.GONE);
 	    assertTrue(seekBarZoom.getVisibility() == View.GONE);
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(seekBar.getVisibility() == View.VISIBLE);
+	    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
 	    assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
 	    assertTrue( mPreview.getCurrentExposure() == mPreview.getMinimumExposure() );
 	    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
@@ -1762,7 +1763,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // clear again so as to not interfere with take photo routine
 	    TouchUtils.drag(MainActivityTest.this, gui_location[0]+step_dist_c, gui_location[0], gui_location[1]+step_dist_c, gui_location[1], step_count_c);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-	    assertTrue(seekBar.getVisibility() == View.GONE);
+	    assertTrue(exposureContainer.getVisibility() == View.GONE);
 	    assertTrue(seekBarZoom.getVisibility() == View.GONE);
 
 	    subTestTakePhoto(false, false, true, true, false, false, false, false);
@@ -1773,14 +1774,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    clickView(switchCameraButton);
 
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-		    assertTrue(seekBar.getVisibility() == View.GONE);
+		    assertTrue(exposureContainer.getVisibility() == View.GONE);
 		    assertTrue(seekBarZoom.getVisibility() == View.GONE);
 		    assertTrue( mPreview.getCurrentExposure() == -1 );
 		    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
 
 		    clickView(exposureButton);
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
-		    assertTrue(seekBar.getVisibility() == View.VISIBLE);
+		    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
 		    assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
 		    assertTrue( mPreview.getCurrentExposure() == -1 );
 		    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
@@ -5250,7 +5251,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		Log.d(TAG, "wait until finished taking photo");
 	    while( mPreview.isTakingPhoto() ) {
-			Log.d(TAG, "waiting until finished taking photo");
 	    }
 		this.getInstrumentation().waitForIdleSync();
 		assertTrue(mPreview.count_cameraTakePicture==1);
