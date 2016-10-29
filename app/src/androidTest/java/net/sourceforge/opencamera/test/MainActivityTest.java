@@ -169,7 +169,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "start flash_value: "+ flash_value);
 			if( !flash_value.equals(required_flash_value) ) {
 				assertFalse( mActivity.popupIsOpen() );
-			    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+			    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 			    clickView(popupButton);
 			    while( !mActivity.popupIsOpen() ) {
 			    }
@@ -205,7 +205,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "start focus_value: "+ focus_value);
 			if( !focus_value.equals(required_focus_value) ) {
 				assertFalse( mActivity.popupIsOpen() );
-			    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+			    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 			    clickView(popupButton);
 			    while( !mActivity.popupIsOpen() ) {
 			    }
@@ -234,7 +234,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "start iso: "+ iso);
 			if( iso != required_iso ) {
 				assertFalse( mActivity.popupIsOpen() );
-			    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+			    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 			    clickView(popupButton);
 			    while( !mActivity.popupIsOpen() ) {
 			    }
@@ -258,7 +258,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	private void setToDefault() {
 		if( mPreview.isVideo() ) {
 			Log.d(TAG, "turn off video mode");
-		    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		    clickView(switchVideoButton);
 		}
 		assertTrue(!mPreview.isVideo());
@@ -267,7 +267,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			int cameraId = mPreview.getCameraId();
 			Log.d(TAG, "start cameraId: "+ cameraId);
 			while( cameraId != 0 ) {
-			    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+			    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 			    clickView(switchCameraButton);
 			    // camera becomes invalid when switching cameras
 				cameraId = mPreview.getCameraId();
@@ -324,8 +324,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testSaveVideoMode");
 		setToDefault();
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 
 	    assertTrue(!mPreview.isVideo());
 		assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.take_photo) ) );
@@ -390,7 +390,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		switchToFlashValue("flash_torch");
 
 		int cameraId = mPreview.getCameraId();
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
 		int new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId != new_cameraId);
@@ -426,7 +426,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // though note that sometimes we might not be quick enough here!
 		// don't use switchToFlashValue here, it'll get confused due to the autofocus changing the parameters flash mode
 		// update: now okay to use it, now we have the popup UI
-	    //View flashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
 	    //clickView(flashButton);
 		switchToFlashValue("flash_torch");
 
@@ -531,7 +531,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			Log.d(TAG, "switch camera");
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 
 	        //targetRatio = mPreview.getTargetRatioForPreview(display_size);
@@ -572,7 +572,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		checkSquareAspectRatio();
 
 		Log.d(TAG, "switch to video");
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
 	    assertTrue(mPreview.isVideo());
     	CamcorderProfile profile = mPreview.getCamcorderProfile();
@@ -600,7 +600,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			Log.d(TAG, "switch camera");
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 
 	        picture_size = mPreview.getCameraController().getPictureSize();
@@ -729,7 +729,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "supported_focus_value: " + supported_focus_value);
 		    saved_count = mPreview.count_cameraAutoFocus;
 			Log.d(TAG, "saved autofocus count: " + saved_count);
-		    //View focusModeButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+		    //View focusModeButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
 		    //clickView(focusModeButton);
 		    switchToFocusValue(supported_focus_value);
 		    // test that switching focus mode resets the focus area
@@ -950,7 +950,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
 
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 		    face_detection_started = false;
 		    if( !mPreview.getCameraController().startFaceDetection() ) {
@@ -1023,11 +1023,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 	
 	private void subTestFocusFlashAvailability() {
-	    //View focusModeButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
-	    //View flashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    //View focusModeButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 	    /*boolean focus_visible = focusModeButton.getVisibility() == View.VISIBLE;
 		Log.d(TAG, "focus_visible? "+ focus_visible);
 	    boolean flash_visible = flashButton.getVisibility() == View.VISIBLE;
@@ -1071,7 +1071,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			int cameraId = mPreview.getCameraId();
 			Log.d(TAG, "cameraId? "+ cameraId);
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    //mActivity.clickedSwitchCamera(switchCameraButton);
 		    clickView(switchCameraButton);
 			int new_cameraId = mPreview.getCameraId();
@@ -1089,7 +1089,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "video focus_value: "+ focus_value);
@@ -1112,7 +1112,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			int cameraId = mPreview.getCameraId();
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 			int new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId != new_cameraId);
@@ -1159,7 +1159,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( new_count_cameraContinuousFocusMoving > saved_count_cameraContinuousFocusMoving );
 
 		// switch to video
-		View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "video focus_value: "+ focus_value);
@@ -1198,14 +1198,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		Thread.sleep(1000);
 
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 	    clickView(popupButton);
 	    while( !mActivity.popupIsOpen() ) {
 	    }
 
 		Thread.sleep(1000);
 
-		View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		clickView(switchVideoButton);
 	}
 
@@ -1234,7 +1234,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		assertTrue(mPreview.count_cameraTakePicture==0);
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -1296,7 +1296,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(mPreview.getCurrentFocusValue().equals(focus_value_ui));
 		assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -1372,7 +1372,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "2 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
 		assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -1527,13 +1527,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "video focus_value: "+ focus_value);
 	    assertTrue(focus_value.equals("focus_mode_continuous_video"));
 
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
 	    // camera becomes invalid when switching cameras
 	    focus_value = mPreview.getCameraController().getFocusValue();
@@ -1572,7 +1572,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		switchToFocusValue("focus_mode_macro");
 
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    // n.b., call twice, to switch to front then to back
 	    clickView(switchCameraButton);
 	    clickView(switchCameraButton);
@@ -1598,7 +1598,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "focus_value after switching to video mode: "+ focus_value);
@@ -1631,7 +1631,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		switchToFocusValue("focus_mode_macro");
 
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "focus_value after switching to video mode: "+ focus_value);
@@ -1662,7 +1662,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 	    assertTrue(focus_value.equals("focus_mode_continuous_video"));
@@ -1770,7 +1770,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			Log.d(TAG, "switch camera");
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
@@ -1797,7 +1797,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
 	    clickView(exposureLockButton);
 	    assertTrue(mPreview.getCameraController().getAutoExposureLock());
 
@@ -1907,7 +1907,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			Log.d(TAG, "switch camera");
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
@@ -1934,7 +1934,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-	    View audioControlButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
 	    assertTrue( audioControlButton.getVisibility() == View.GONE );
 
 	    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -1948,7 +1948,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // reset due to restarting!
 	    settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		editor = settings.edit();
-	    audioControlButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
 
 		assertTrue( audioControlButton.getVisibility() == View.VISIBLE );
 
@@ -1994,16 +1994,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int n_files = files.length;
 		Log.d(TAG, "n_files at start: " + n_files);
 		
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
-	    //View flashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
-	    //View focusButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View audioControlButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-	    View trashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
-	    View shareButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+	    //View focusButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 	    assertTrue(switchCameraButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 	    assertTrue(switchVideoButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 	    int exposureVisibility = exposureButton.getVisibility();
@@ -2085,7 +2085,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "saved count_cameraAutoFocus: " + saved_count);
 
 		if( !single_tap_photo && !double_tap_photo ) {
-			View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+			View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 			assertFalse( mActivity.hasThumbnailAnimation() );
 			Log.d(TAG, "about to click take photo");
 		    clickView(takePhotoButton);
@@ -2166,8 +2166,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// check files have names as expected
 		String filename_jpeg = null;
 		String filename_dng = null;
-		for(int i=0;i<files2.length;i++) {
-			File file = files2[i];
+		for(File file : files2) {
 			Log.d(TAG, "file: " + file);
 			boolean is_new = true;
 			for(int j=0;j<n_files && is_new;j++) {
@@ -2345,7 +2344,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int start_count = mPreview.count_cameraTakePicture;
 		final int n_photos = 5;
 		for(int i=0;i<n_photos;i++) {
-		    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 			Log.d(TAG, "about to click take photo count: " + i);
 		    clickView(takePhotoButton);
 			Log.d(TAG, "wait until finished taking photo count: " + i);
@@ -2555,7 +2554,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int cameraId = mPreview.getCameraId();
 		boolean is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(cameraId);
 
-		View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    CharSequence contentDescription = switchCameraButton.getContentDescription();
 	    clickView(switchCameraButton);
 
@@ -2597,7 +2596,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		int cameraId = mPreview.getCameraId();
 
-		View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
 		this.getInstrumentation().waitForIdleSync();
 
@@ -2707,16 +2706,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		boolean has_audio_control_button = true;
 
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View audioControlButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-	    View trashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
-	    View shareButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
-	    View zoomSeekBar = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+	    View zoomSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 	    int exposureVisibility = exposureButton.getVisibility();
@@ -2866,15 +2865,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-	    View trashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
-	    View shareButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
-	    View zoomSeekBar = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View zoomSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
 	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 	    int exposureVisibility = exposureButton.getVisibility();
@@ -2944,16 +2943,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "check if preview is started");
 		assertTrue(mPreview.isPreviewStarted());
 		
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
-	    //View flashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
-	    //View focusButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View audioControlButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-	    View trashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
-	    View shareButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+	    //View focusButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 	    assertTrue(switchCameraButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 	    assertTrue(switchVideoButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 	    // store status to compare with later
@@ -2964,7 +2963,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(trashButton.getVisibility() == View.GONE);
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -3094,16 +3093,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    assertTrue(mPreview.isPreviewStarted());
 		
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
-	    //View flashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
-	    //View focusButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View audioControlButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-	    View trashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
-	    View shareButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+	    //View focusButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 	    // flash and focus etc default visibility tested in another test
@@ -3117,7 +3116,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(trashButton.getVisibility() == View.GONE);
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -3303,7 +3302,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // wait 3s for auto-focus to complete
 		Thread.sleep(3000);
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -3351,7 +3350,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // wait 3s for auto-focus to complete, and 5s to require additional auto-focus when taking a photo
 		Thread.sleep(8000);
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -3410,16 +3409,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int n_files = folder.listFiles().length;
 		Log.d(TAG, "n_files at start: " + n_files);
 		
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
-	    //View flashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
-	    //View focusButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View audioControlButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-	    View trashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
-	    View shareButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+	    //View focusButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 	    // flash and focus etc default visibility tested in another test
@@ -3437,7 +3436,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Thread.sleep(2000);
 	    int saved_count = mPreview.count_cameraAutoFocus;
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -3497,7 +3496,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		int start_count = mPreview.count_cameraTakePicture;
 		for(int i=0;i<count;i++) {
-		    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 			Log.d(TAG, "about to click take photo");
 		    clickView(takePhotoButton);
 			Log.d(TAG, "wait until finished taking photo");
@@ -3536,7 +3535,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		takePhotoLoop(n_photos_c);
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			int cameraId = mPreview.getCameraId();
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    while( switchCameraButton.getVisibility() != View.VISIBLE ) {
 		    	// wait until photo is taken and button is visible again
 		    }
@@ -3557,7 +3556,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		takePhotoLoop(n_photos_c);
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			int cameraId = mPreview.getCameraId();
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    while( switchCameraButton.getVisibility() != View.VISIBLE ) {
 		    	// wait until photo is taken and button is visible again
 		    }
@@ -3584,7 +3583,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int start_count = mPreview.count_cameraTakePicture;
 		for(int i=0;i<angles.length;i++) {
 			mActivity.test_angle = angles[mPreview.count_cameraTakePicture - start_count];
-		    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 			Log.d(TAG, "about to click take photo count: " + i);
 		    clickView(takePhotoButton);
 			Log.d(TAG, "wait until finished taking photo count: " + i);
@@ -3625,7 +3624,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		takePhotoLoopAngles(angles);
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			int cameraId = mPreview.getCameraId();
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    while( switchCameraButton.getVisibility() != View.VISIBLE ) {
 		    	// wait until photo is taken and button is visible again
 		    }
@@ -3646,7 +3645,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		takePhotoLoopAngles(angles);
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			int cameraId = mPreview.getCameraId();
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    while( switchCameraButton.getVisibility() != View.VISIBLE ) {
 		    	// wait until photo is taken and button is visible again
 		    }
@@ -3674,8 +3673,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( mPreview.isVideo() ) {
 			assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_selector );
 			assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video) ) );
@@ -3703,15 +3702,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
 
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-	    //View flashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
-	    //View focusButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View audioControlButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-	    View trashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
-	    View shareButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+	    //View focusButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 	    assertTrue(switchCameraButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 	    assertTrue(switchVideoButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 	    // but store status to compare with later
@@ -4171,15 +4170,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		setToDefault();
 		final String [] fps_values = new String[]{"15", "24", "25", "30", "60"};
-		for(int i=0;i<fps_values.length;i++) {
+		for(String fps_value : fps_values) {
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(), fps_values[i]);
+			editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(), fps_value);
 			editor.apply();
 			restart(); // should restart to emulate what happens in real app
 
-			Log.d(TAG, "test video with fps: " + fps_values[i]);
-			boolean allow_failure = fps_values[i].equals("24") || fps_values[i].equals("25") || fps_values[i].equals("60");
+			Log.d(TAG, "test video with fps: " + fps_value);
+			boolean allow_failure = fps_value.equals("24") || fps_value.equals("25") || fps_value.equals("60");
 			subTestTakeVideo(false, false, allow_failure, false, null, 5000, false);
 		}
 	}
@@ -4192,15 +4191,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		final String [] bitrate_values = new String[]{"1000000", "10000000", "20000000", "50000000"};
 		//final String [] bitrate_values = new String[]{"1000000", "10000000", "20000000", "30000000"};
-		for(int i=0;i<bitrate_values.length;i++) {
+		for(String bitrate_value : bitrate_values) {
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getVideoBitratePreferenceKey(), bitrate_values[i]);
+			editor.putString(PreferenceKeys.getVideoBitratePreferenceKey(), bitrate_value);
 			editor.apply();
 			restart(); // should restart to emulate what happens in real app
 
-			Log.d(TAG, "test video with bitrate: " + bitrate_values[i]);
-			boolean allow_failure = bitrate_values[i].equals("30000000") || bitrate_values[i].equals("50000000");
+			Log.d(TAG, "test video with bitrate: " + bitrate_value);
+			boolean allow_failure = bitrate_value.equals("30000000") || bitrate_value.equals("50000000");
 			subTestTakeVideo(false, false, allow_failure, false, null, 5000, false);
 		}
 	}
@@ -4218,7 +4217,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		assertTrue(mPreview.isPreviewStarted());
 
-		View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
 		}
@@ -4233,15 +4232,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
 
-		View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-	    //View flashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
-	    //View focusButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
-	    View exposureButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View audioControlButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-	    View trashButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
-	    View shareButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+	    //View focusButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 	    // flash and focus etc default visibility tested in another test
@@ -4255,7 +4254,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(trashButton.getVisibility() == View.GONE);
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take video");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take video");
@@ -4361,7 +4360,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		assertTrue(mPreview.isPreviewStarted());
 
-		View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
 		}
@@ -4375,7 +4374,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take video");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take video");
@@ -4393,7 +4392,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(n_new_files == 1);
 
 		// now go to settings
-	    View settingsButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
+	    View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
 		Log.d(TAG, "about to click settings");
 	    clickView(settingsButton);
 		Log.d(TAG, "done clicking settings");
@@ -4445,7 +4444,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		assertTrue(mPreview.isPreviewStarted());
 
-		View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
 		}
@@ -4455,7 +4454,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		switchToFocusValue("focus_mode_macro");
 
 		// now go to settings
-	    View settingsButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
+	    View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
 		Log.d(TAG, "about to click settings");
 	    clickView(settingsButton);
 		Log.d(TAG, "done clicking settings");
@@ -4484,7 +4483,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take video");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take video");
@@ -4519,14 +4518,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		assertTrue(mPreview.isPreviewStarted());
 
-		View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
 		
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take video");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take video");
@@ -4600,7 +4599,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int n_files = folder.listFiles().length;
 		Log.d(TAG, "n_files at start: " + n_files);
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -4616,7 +4615,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			if( type == 0 )
 				restart();
 			else if( type == 1 ) {
-			    View settingsButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
+			    View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
 				Log.d(TAG, "about to click settings");
 			    clickView(settingsButton);
 				Log.d(TAG, "done clicking settings");
@@ -4634,12 +4633,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			    Thread.sleep(500);
 			}
 			else {
-			    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+			    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 			    clickView(popupButton);
 			    while( !mActivity.popupIsOpen() ) {
 			    }
 			}
-			takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+			takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		    // check timer cancelled, and not yet taken a photo
 			assertTrue(!mPreview.isOnTimer());
 			assertTrue(mPreview.count_cameraTakePicture==0);
@@ -4779,11 +4778,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int n_files = folder.listFiles().length;
 		Log.d(TAG, "n_files at start: " + n_files);
 
-	    View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
 	    assertTrue(mPreview.isVideo());
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -4827,10 +4826,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		assertTrue(!mPreview.isOnTimer());
 		assertTrue(!mActivity.popupIsOpen());
-	    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 
 	    if( !mPreview.isVideo() ) {
-			View switchVideoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+			View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		    clickView(switchVideoButton);
 		    assertTrue(mPreview.isVideo());
 	    }
@@ -4842,7 +4841,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    }
 	    }
 	    
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -4949,7 +4948,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			Log.d(TAG, "switch camera");
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 			subTestVideoPopup(false);
 	    }
@@ -4971,7 +4970,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			Log.d(TAG, "switch camera");
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 			subTestVideoPopup(true);
 	    }
@@ -4997,7 +4996,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		assertTrue(mPreview.count_cameraTakePicture==0);
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -5126,7 +5125,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    // switch camera to front
 		int cameraId = mPreview.getCameraId();
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
 		int new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId != new_cameraId);
@@ -5247,7 +5246,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(mActivity.getLocationSupplier().getLocation() != null);
 	    assertTrue(mPreview.count_cameraTakePicture==0);
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		mActivity.test_last_saved_image = null;
 	    clickView(takePhotoButton);
 
@@ -5281,7 +5280,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// switch to front camera
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 			assertTrue(mActivity.getLocationSupplier().hasLocationListeners());
 			// shouldn't need to wait for test_has_received_location to be true, as should remember from before switching camera
@@ -5322,7 +5321,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(mActivity.getLocationSupplier().getLocation() == null);
 	    assertTrue(mPreview.count_cameraTakePicture==0);
 
-		View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		mActivity.test_last_saved_image = null;
 	    clickView(takePhotoButton);
 
@@ -5356,7 +5355,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// switch to front camera
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 			this.getInstrumentation().waitForIdleSync();
 		    assertTrue(mActivity.getLocationSupplier().getLocation() == null);
@@ -5389,7 +5388,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// switch to front camera
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 			// shouldn't need to wait for test_has_received_location to be true, as should remember from before switching camera
 		    assertTrue(mActivity.getLocationSupplier().getLocation() != null);
@@ -5430,7 +5429,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    assertTrue(mPreview.count_cameraTakePicture==0);
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 	    clickView(takePhotoButton);
 
 		Log.d(TAG, "wait until finished taking photo");
@@ -5530,7 +5529,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    assertTrue(mPreview.count_cameraTakePicture==0);
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 	    clickView(takePhotoButton);
 
 		Log.d(TAG, "wait until finished taking photo");
@@ -5735,7 +5734,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
 
 	    int cameraId = mPreview.getCameraId();
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
 		int new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId != new_cameraId);
@@ -5757,7 +5756,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 	    int cameraId = mPreview.getCameraId();
-	    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
 		int new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId != new_cameraId);
@@ -5775,7 +5774,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testGallery");
 		setToDefault();
 
-	    View galleryButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.gallery);
+	    View galleryButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.gallery);
 	    clickView(galleryButton);
 	    
 	}
@@ -5786,7 +5785,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testSettings");
 		setToDefault();
 
-	    View settingsButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
+	    View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
 	    clickView(settingsButton);
 	    
 	}
@@ -5823,8 +5822,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			// delete folder - need to delete contents first
 			if( folder.isDirectory() ) {
 		        String [] children = folder.list();
-		        for (int i = 0; i < children.length; i++) {
-		            File file = new File(folder, children[i]);
+				for(String child : children) {
+		            File file = new File(folder, child);
 		            file.delete();
 		        	MediaScannerConnection.scanFile(mActivity, new String[] { file.getAbsolutePath() }, null, null);
 		        }
@@ -5837,7 +5836,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 		Log.d(TAG, "n_old_files: " + n_old_files);
 
-	    View takePhotoButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
@@ -5947,8 +5946,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			// delete folder - need to delete contents first
 			if( folder.isDirectory() ) {
 		        String [] children = folder.list();
-		        for (int i = 0; i < children.length; i++) {
-		            File file = new File(folder, children[i]);
+				for(String child : children) {
+					File file = new File(folder, child);
 		            file.delete();
 		        	MediaScannerConnection.scanFile(mActivity, new String[] { file.getAbsolutePath() }, null, null);
 		        }
@@ -6135,21 +6134,21 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	/* Tests for setting correct video resolutions and profiles.
 	 */
 	public void testVideoResolutions1() {
-		List<CameraController.Size> video_sizes = new ArrayList<CameraController.Size>();
+		List<CameraController.Size> video_sizes = new ArrayList<>();
 		video_sizes.add(new CameraController.Size(1920, 1080));
 		video_sizes.add(new CameraController.Size(1280, 720));
 		video_sizes.add(new CameraController.Size(1600, 900));
 		mPreview.setVideoSizes(video_sizes);
 
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<Pair<Integer, Integer>>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<Integer, Integer>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<Integer, Integer>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_720P, new Pair<Integer, Integer>(1280, 720));
-		profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<Integer, Integer>(1280, 720));
+		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
+		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(1920, 1080));
+		profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<>(1920, 1080));
+		profiles.put(CamcorderProfile.QUALITY_720P, new Pair<>(1280, 720));
+		profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<>(1280, 720));
 		mPreview.initialiseVideoQualityFromProfiles(profiles);
 
 		List<String> video_quality = mPreview.getSupportedVideoQuality();
-		List<String> exp_video_quality = new ArrayList<String>();
+		List<String> exp_video_quality = new ArrayList<>();
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P + "_r1600x900");
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P);
@@ -6157,20 +6156,20 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	public void testVideoResolutions2() {
-		List<CameraController.Size> video_sizes = new ArrayList<CameraController.Size>();
+		List<CameraController.Size> video_sizes = new ArrayList<>();
 		video_sizes.add(new CameraController.Size(1920, 1080));
 		video_sizes.add(new CameraController.Size(1280, 720));
 		video_sizes.add(new CameraController.Size(1600, 900));
 		mPreview.setVideoSizes(video_sizes);
 
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<Pair<Integer, Integer>>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<Integer, Integer>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_720P, new Pair<Integer, Integer>(1280, 720));
-		profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<Integer, Integer>(1280, 720));
+		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
+		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(1920, 1080));
+		profiles.put(CamcorderProfile.QUALITY_720P, new Pair<>(1280, 720));
+		profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<>(1280, 720));
 		mPreview.initialiseVideoQualityFromProfiles(profiles);
 
 		List<String> video_quality = mPreview.getSupportedVideoQuality();
-		List<String> exp_video_quality = new ArrayList<String>();
+		List<String> exp_video_quality = new ArrayList<>();
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P + "_r1600x900");
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P);
@@ -6178,7 +6177,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	public void testVideoResolutions3() {
-		List<CameraController.Size> video_sizes = new ArrayList<CameraController.Size>();
+		List<CameraController.Size> video_sizes = new ArrayList<>();
 		video_sizes.add(new CameraController.Size(1920, 1080));
 		video_sizes.add(new CameraController.Size(1280, 720));
 		video_sizes.add(new CameraController.Size(960, 720));
@@ -6194,18 +6193,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		video_sizes.add(new CameraController.Size(128, 96));
 		mPreview.setVideoSizes(video_sizes);
 
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<Pair<Integer, Integer>>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<Integer, Integer>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<Integer, Integer>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_720P, new Pair<Integer, Integer>(1280, 720));
-		profiles.put(CamcorderProfile.QUALITY_480P, new Pair<Integer, Integer>(720, 480));
-		profiles.put(CamcorderProfile.QUALITY_CIF, new Pair<Integer, Integer>(352, 288));
-		profiles.put(CamcorderProfile.QUALITY_QVGA, new Pair<Integer, Integer>(320, 240));
-		profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<Integer, Integer>(320, 240));
+		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
+		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(1920, 1080));
+		profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<>(1920, 1080));
+		profiles.put(CamcorderProfile.QUALITY_720P, new Pair<>(1280, 720));
+		profiles.put(CamcorderProfile.QUALITY_480P, new Pair<>(720, 480));
+		profiles.put(CamcorderProfile.QUALITY_CIF, new Pair<>(352, 288));
+		profiles.put(CamcorderProfile.QUALITY_QVGA, new Pair<>(320, 240));
+		profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<>(320, 240));
 		mPreview.initialiseVideoQualityFromProfiles(profiles);
 
 		List<String> video_quality = mPreview.getSupportedVideoQuality();
-		List<String> exp_video_quality = new ArrayList<String>();
+		List<String> exp_video_quality = new ArrayList<>();
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P);
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P + "_r960x720");
@@ -6226,7 +6225,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testVideoResolutions4() {
 		// Video quality: 4_r864x480, 4, 2
 		// Video resolutions: 176x144, 480x320, 640x480, 864x480, 1280x720, 1920x1080
-		List<CameraController.Size> video_sizes = new ArrayList<CameraController.Size>();
+		List<CameraController.Size> video_sizes = new ArrayList<>();
 		video_sizes.add(new CameraController.Size(176, 144));
 		video_sizes.add(new CameraController.Size(480, 320));
 		video_sizes.add(new CameraController.Size(640, 480));
@@ -6235,14 +6234,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		video_sizes.add(new CameraController.Size(1920, 1080));
 		mPreview.setVideoSizes(video_sizes);
 
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<Pair<Integer, Integer>>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<Integer, Integer>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_480P, new Pair<Integer, Integer>(640, 480));
-		profiles.put(CamcorderProfile.QUALITY_QCIF, new Pair<Integer, Integer>(176, 144));
+		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
+		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(1920, 1080));
+		profiles.put(CamcorderProfile.QUALITY_480P, new Pair<>(640, 480));
+		profiles.put(CamcorderProfile.QUALITY_QCIF, new Pair<>(176, 144));
 		mPreview.initialiseVideoQualityFromProfiles(profiles);
 
 		List<String> video_quality = mPreview.getSupportedVideoQuality();
-		List<String> exp_video_quality = new ArrayList<String>();
+		List<String> exp_video_quality = new ArrayList<>();
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P + "_r1280x720");
 		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P + "_r864x480");
@@ -6400,7 +6399,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testSwitchResolution() throws InterruptedException {
 		Log.d(TAG, "testSwitchResolution");
 
-		View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
         CameraController.Size old_picture_size = mPreview.getCameraController().getPictureSize();
 
         // open popup
@@ -6463,14 +6462,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// can't test on startup, as camera is created when we create activity, so instead test by switching camera
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 			Log.d(TAG, "switch camera");
-		    View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 			assertTrue(mPreview.getCameraControllerManager() != null);
 			assertTrue(mPreview.getCameraController() == null);
 			this.getInstrumentation().waitForIdleSync();
 		
 			assertFalse( mActivity.popupIsOpen() );
-		    View popupButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 			Log.d(TAG, "about to click popup");
 		    clickView(popupButton);
 			Log.d(TAG, "done clicking popup");
@@ -6478,7 +6477,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			// if camera isn't opened, popup shouldn't open
 			assertFalse( mActivity.popupIsOpen() );
 
-		    View settingsButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
+		    View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
 			Log.d(TAG, "about to click settings");
 		    clickView(settingsButton);
 			Log.d(TAG, "done clicking settings");
@@ -6498,7 +6497,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 		
-		List<int []> list0 = new ArrayList<int []>();
+		List<int []> list0 = new ArrayList<>();
 		list0.add(new int[]{15000, 15000});
 		list0.add(new int[]{15000, 30000});
 		list0.add(new int[]{7000, 30000});
@@ -6506,7 +6505,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int [] best_fps0 = mPreview.chooseBestPreviewFps(list0);
 		assertTrue(best_fps0[0] == 7000 && best_fps0[1] == 30000);
 
-		List<int []> list1 = new ArrayList<int []>();
+		List<int []> list1 = new ArrayList<>();
 		list1.add(new int[]{15000, 15000});
 		list1.add(new int[]{7000, 60000});
 		list1.add(new int[]{15000, 30000});
@@ -6515,7 +6514,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int [] best_fps1 = mPreview.chooseBestPreviewFps(list1);
 		assertTrue(best_fps1[0] == 7000 && best_fps1[1] == 60000);
 
-		List<int []> list2 = new ArrayList<int []>();
+		List<int []> list2 = new ArrayList<>();
 		list2.add(new int[]{15000, 15000});
 		list2.add(new int[]{7000, 15000});
 		list2.add(new int[]{7000, 10000});
@@ -6529,7 +6528,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 		
-		List<int []> list0 = new ArrayList<int []>();
+		List<int []> list0 = new ArrayList<>();
 		list0.add(new int[]{15000, 15000});
 		list0.add(new int[]{15000, 30000});
 		list0.add(new int[]{7000, 30000});
@@ -6537,7 +6536,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int [] best_fps0 = mPreview.matchPreviewFpsToVideo(list0, 30000);
 		assertTrue(best_fps0[0] == 30000 && best_fps0[1] == 30000);
 
-		List<int []> list1 = new ArrayList<int []>();
+		List<int []> list1 = new ArrayList<>();
 		list1.add(new int[]{15000, 15000});
 		list1.add(new int[]{7000, 60000});
 		list1.add(new int[]{15000, 30000});
@@ -6546,7 +6545,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int [] best_fps1 = mPreview.matchPreviewFpsToVideo(list1, 15000);
 		assertTrue(best_fps1[0] == 15000 && best_fps1[1] == 15000);
 
-		List<int []> list2 = new ArrayList<int []>();
+		List<int []> list2 = new ArrayList<>();
 		list2.add(new int[]{15000, 15000});
 		list2.add(new int[]{7000, 15000});
 		list2.add(new int[]{7000, 10000});
@@ -6675,7 +6674,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		int cameraId = mPreview.getCameraId();
 
-		View switchCameraButton = (View) mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
 
 	    int new_cameraId = mPreview.getCameraId();
@@ -6828,7 +6827,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "saintpaul/input2.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "saintpaul/input3.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "saintpaul/input4.jpg") );
@@ -6846,7 +6845,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "stlouis/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "stlouis/input2.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "stlouis/input3.jpg") );
@@ -6864,7 +6863,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR3/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR3/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR3/input2.jpg") );
@@ -6882,7 +6881,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR4/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR4/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR4/input2.jpg") );
@@ -6900,7 +6899,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR5/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR5/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR5/input2.jpg") );
@@ -6918,7 +6917,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR6/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR6/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR6/input2.jpg") );
@@ -6936,7 +6935,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR7/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR7/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR7/input2.jpg") );
@@ -6954,7 +6953,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR8/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR8/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR8/input2.jpg") );
@@ -6972,7 +6971,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR9/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR9/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR9/input2.jpg") );
@@ -6990,7 +6989,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR10/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR10/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR10/input2.jpg") );
@@ -7008,7 +7007,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR11/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR11/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR11/input2.jpg") );
@@ -7026,7 +7025,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR12/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR12/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR12/input2.jpg") );
@@ -7044,7 +7043,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR13/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR13/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR13/input2.jpg") );
@@ -7062,7 +7061,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR14/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR14/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR14/input2.jpg") );
@@ -7080,7 +7079,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR15/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR15/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR15/input2.jpg") );
@@ -7098,7 +7097,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR16/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR16/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR16/input2.jpg") );
@@ -7116,7 +7115,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR17/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR17/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR17/input2.jpg") );
@@ -7134,7 +7133,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR18/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR18/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR18/input2.jpg") );
@@ -7152,7 +7151,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR19/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR19/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR19/input2.jpg") );
@@ -7170,7 +7169,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR20/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR20/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR20/input2.jpg") );
@@ -7188,7 +7187,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR21/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR21/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR21/input2.jpg") );
@@ -7206,7 +7205,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR22/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR22/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR22/input2.jpg") );
@@ -7224,7 +7223,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0066.png") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0068.png") );
@@ -7242,7 +7241,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR24/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR24/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR24/input2.jpg") );
@@ -7260,7 +7259,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR25/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR25/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR25/input2.jpg") );
@@ -7278,7 +7277,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR26/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR26/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR26/input2.jpg") );
@@ -7296,7 +7295,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR27/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR27/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR27/input2.jpg") );
@@ -7314,7 +7313,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR28/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR28/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR28/input2.jpg") );
@@ -7332,7 +7331,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR29/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR29/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR29/input2.jpg") );
@@ -7352,7 +7351,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		
 		// list assets
-		List<Bitmap> inputs = new ArrayList<Bitmap>();
+		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDRtemp/input0.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDRtemp/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDRtemp/input2.jpg") );

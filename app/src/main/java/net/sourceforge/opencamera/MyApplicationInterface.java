@@ -42,7 +42,6 @@ import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.SeekBar;
 
 /** Our implementation of ApplicationInterface, see there for details.
  */
@@ -224,7 +223,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				Log.d(TAG, "from video capture intent");
 	        Bundle myExtras = main_activity.getIntent().getExtras();
 	        if (myExtras != null) {
-	        	Uri intent_uri = (Uri) myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
+	        	Uri intent_uri = myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
 	        	if( intent_uri != null ) {
 	    			if( MyDebug.LOG )
 	    				Log.d(TAG, "save to: " + intent_uri);

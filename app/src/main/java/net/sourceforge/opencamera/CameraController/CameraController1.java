@@ -448,8 +448,8 @@ public class CameraController1 extends CameraController {
 			// split shouldn't return null
 			if( isos_array.length > 0 ) {
 				values = new ArrayList<>();
-				for(int i=0;i< isos_array.length;i++) {
-					values.add(isos_array[i]);
+				for(String iso : isos_array) {
+					values.add(iso);
 				}
 			}
 		}

@@ -195,15 +195,14 @@ public class FolderChooserDialog extends DialogFragment {
 		}
 		// n.b., files may be null if no files could be found in the folder (or we can't read) - but should still allow the user
 		// to view this folder (so the user can go to parent folders which might be readable again)
-		List<FileWrapper> listed_files = new ArrayList<FileWrapper>();
+		List<FileWrapper> listed_files = new ArrayList<>();
 		if( new_folder.getParentFile() != null )
 			listed_files.add(new FileWrapper(new_folder.getParentFile(), getResources().getString(R.string.parent_folder), 0));
 		File default_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
 		if( !default_folder.equals(new_folder) && !default_folder.equals(new_folder.getParentFile()) )
 			listed_files.add(new FileWrapper(default_folder, null, 1));
 		if( files != null ) {
-			for(int i=0;i<files.length;i++) {
-				File file = files[i];
+			for(File file : files) {
 				if( file.isDirectory() ) {
 					listed_files.add(new FileWrapper(file, null, 2));
 				}
@@ -211,7 +210,7 @@ public class FolderChooserDialog extends DialogFragment {
 		}
 		Collections.sort(listed_files);
 
-		ArrayAdapter<FileWrapper> adapter = new ArrayAdapter<FileWrapper>(this.getActivity(), android.R.layout.simple_list_item_1, listed_files);
+		ArrayAdapter<FileWrapper> adapter = new ArrayAdapter<>(this.getActivity(), android.R.layout.simple_list_item_1, listed_files);
         list.setAdapter(adapter);
 
         this.current_folder = new_folder;

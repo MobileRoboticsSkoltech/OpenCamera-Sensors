@@ -1970,7 +1970,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
-        	profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<Integer, Integer>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
         }
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
 	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_2160P) ) {
@@ -2252,8 +2252,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( camera_controller == null )
 			return "";
 		CamcorderProfile profile = getCamcorderProfile(quality);
-		String desc = profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getMPString(profile.videoFrameWidth, profile.videoFrameHeight);
-		return desc;
+		return profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getMPString(profile.videoFrameWidth, profile.videoFrameHeight);
 	}
 
 	public String getCamcorderProfileDescription(String quality) {
@@ -2289,8 +2288,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else if( profile.videoFrameWidth == 176 && profile.videoFrameHeight == 144 ) {
 			type = "QCIF ";
 		}
-		String desc = highest + type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(profile.videoFrameWidth, profile.videoFrameHeight);
-		return desc;
+		return highest + type + profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getAspectRatioMPString(profile.videoFrameWidth, profile.videoFrameHeight);
 	}
 
 	public double getTargetRatio() {

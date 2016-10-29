@@ -57,7 +57,7 @@ public class PopupView extends LinearLayout {
 	private int burst_mode_index = -1;
 	private int grid_index = -1;
 
-	private Map<String, View> popup_buttons = new Hashtable<String, View>();
+	private Map<String, View> popup_buttons = new Hashtable<>();
 
 	public PopupView(Context context) {
 		super(context);
@@ -89,7 +89,7 @@ public class PopupView extends LinearLayout {
         	// make a copy of getSupportedFocusValues() so we can modify it
     		List<String> supported_focus_values = preview.getSupportedFocusValues();
     		if( supported_focus_values != null ) {
-            	supported_focus_values = new ArrayList<String>(supported_focus_values);
+            	supported_focus_values = new ArrayList<>(supported_focus_values);
             	// only show appropriate continuous focus mode
             	if( preview.isVideo() ) {
             		supported_focus_values.remove("focus_mode_continuous_picture");
@@ -150,8 +150,8 @@ public class PopupView extends LinearLayout {
     			}
     		});
 
-			final List<String> photo_modes = new ArrayList<String>();
-			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<MyApplicationInterface.PhotoMode>();
+			final List<String> photo_modes = new ArrayList<>();
+			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<>();
 			photo_modes.add( getResources().getString(R.string.photo_mode_standard) );
 			photo_mode_values.add( MyApplicationInterface.PhotoMode.Standard );
     		if( main_activity.supportsHDR() ) {
@@ -288,7 +288,7 @@ public class PopupView extends LinearLayout {
 
     		final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes();
     		picture_size_index = preview.getCurrentPictureSizeIndex();
-    		final List<String> picture_size_strings = new ArrayList<String>();
+    		final List<String> picture_size_strings = new ArrayList<>();
     		for(CameraController.Size picture_size : picture_sizes) {
     			String size_string = picture_size.width + " x " + picture_size.height + " " + Preview.getMPString(picture_size.width, picture_size.height);
     			picture_size_strings.add(size_string);
@@ -340,7 +340,7 @@ public class PopupView extends LinearLayout {
 
     		final List<String> video_sizes = preview.getSupportedVideoQuality();
     		video_size_index = preview.getCurrentVideoQualityIndex();
-    		final List<String> video_size_strings = new ArrayList<String>();
+    		final List<String> video_size_strings = new ArrayList<>();
     		for(String video_size : video_sizes) {
     			String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
     			video_size_strings.add(quality_string);
