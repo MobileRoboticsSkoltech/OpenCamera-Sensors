@@ -114,8 +114,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private CameraController camera_controller = null;
 	private boolean has_permissions = true; // whether we have permissions necessary to operate the camera (camera, storage); assume true until we've been denied one of them
 	private boolean is_video = false;
-	private MediaRecorder video_recorder = null;
-	private boolean video_start_time_set = false;
+	private volatile MediaRecorder video_recorder = null; // must be volatile for test project reading the state
+	private volatile boolean video_start_time_set = false; // must be volatile for test project reading the state
 	private long video_start_time = 0;
 	private long video_accumulated_time = 0;
 	private boolean video_restart_on_max_filesize = false;
@@ -128,7 +128,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final int PHASE_TIMER = 1;
 	private static final int PHASE_TAKING_PHOTO = 2;
 	private static final int PHASE_PREVIEW_PAUSED = 3; // the paused state after taking a photo
-	private int phase = PHASE_NORMAL;
+	private volatile int phase = PHASE_NORMAL; // must be volatile for test project reading the state
 	private Timer takePictureTimer = new Timer();
 	private TimerTask takePictureTimerTask = null;
 	private Timer beepTimer = new Timer();
@@ -257,13 +257,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private Runnable reset_continuous_focus_runnable = null;
 	private boolean autofocus_in_continuous_mode = false;
 
-	// for testing:
-	public int count_cameraStartPreview = 0;
-	public int count_cameraAutoFocus = 0;
-	public int count_cameraTakePicture = 0;
-	public int count_cameraContinuousFocusMoving = 0;
-	public boolean test_fail_open_camera = false;
-	public boolean test_video_failure = false;
+	// for testing; must be volatile for test project reading the state
+	public volatile int count_cameraStartPreview = 0;
+	public volatile int count_cameraAutoFocus = 0;
+	public volatile int count_cameraTakePicture = 0;
+	public volatile int count_cameraContinuousFocusMoving = 0;
+	public volatile boolean test_fail_open_camera = false;
+	public volatile boolean test_video_failure = false;
 
 	public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
 		if( MyDebug.LOG ) {
@@ -5243,8 +5243,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
     public boolean isTakingPhoto() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "isTakingPhoto: phase " + this.phase);
     	return this.phase == PHASE_TAKING_PHOTO;
     }
     

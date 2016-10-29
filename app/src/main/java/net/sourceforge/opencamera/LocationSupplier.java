@@ -43,7 +43,7 @@ public class LocationSupplier {
 	
 	private static class MyLocationListener implements LocationListener {
 		private Location location = null;
-		boolean test_has_received_location = false;
+		volatile boolean test_has_received_location = false; // must be volatile for test project reading the state
 		
 		Location getLocation() {
 			return location;
