@@ -41,7 +41,7 @@ public class FolderChooserDialog extends DialogFragment {
 	private AlertDialog folder_dialog = null;
 	private ListView list = null;
 	
-	private class FileWrapper implements Comparable<FileWrapper> {
+	private static class FileWrapper implements Comparable<FileWrapper> {
 		private File file = null;
 		private String override_name; // if non-null, use this as the display name instead
 		private int sort_order; // items are sorted first by sort_order, then alphabetically

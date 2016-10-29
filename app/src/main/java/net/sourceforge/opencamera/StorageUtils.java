@@ -47,7 +47,7 @@ public class StorageUtils {
     private Uri last_media_scanned = null;
 
 	// for testing:
-	public boolean failed_to_scan = false;
+	public volatile boolean failed_to_scan = false;
 	
 	StorageUtils(Context context) {
 		this.context = context;
@@ -331,10 +331,9 @@ public class StorageUtils {
     			Log.d(TAG, "id: " + id);
             String [] split = id.split(":");
             if( split.length >= 2 ) {
-                String type = split[0];
     		    String path = split[1];
         		if( MyDebug.LOG ) {
-        			Log.d(TAG, "type: " + type);
+        			Log.d(TAG, "type: " + split[0]);
         			Log.d(TAG, "path: " + path);
         		}
         		filename = path;
