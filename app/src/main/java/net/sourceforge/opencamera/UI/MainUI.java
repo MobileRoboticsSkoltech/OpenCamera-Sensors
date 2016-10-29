@@ -32,7 +32,7 @@ public class MainUI {
 
 	private MainActivity main_activity = null;
 
-	private boolean popup_view_is_open = false;
+	private volatile boolean popup_view_is_open = false; // must be volatile for test project reading the state
     private PopupView popup_view = null;
 
     private int current_orientation = 0;

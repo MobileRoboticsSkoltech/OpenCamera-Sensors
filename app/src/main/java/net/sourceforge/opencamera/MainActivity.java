@@ -125,13 +125,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private boolean keydown_volume_up = false;
 	private boolean keydown_volume_down = false;
 	
-	// for testing:
-	public boolean is_test = false; // whether called from OpenCamera.test testing
-	public Bitmap gallery_bitmap = null;
-	public boolean test_low_memory = false;
-	public boolean test_have_angle = false;
-	public float test_angle = 0.0f;
-	public String test_last_saved_image = null;
+	// for testing; must be volatile for test project reading the state
+	public volatile boolean is_test = false; // whether called from OpenCamera.test testing
+	public volatile Bitmap gallery_bitmap = null;
+	public volatile boolean test_low_memory = false;
+	public volatile boolean test_have_angle = false;
+	public volatile float test_angle = 0.0f;
+	public volatile String test_last_saved_image = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -57,7 +57,7 @@ public class DrawPreview {
 	private Rect location_dest = new Rect();
 	
 	private Bitmap last_thumbnail = null; // thumbnail of last picture taken
-	private boolean thumbnail_anim = false; // whether we are displaying the thumbnail animation
+	private volatile boolean thumbnail_anim = false; // whether we are displaying the thumbnail animation; must be volatile for test project reading the state
 	private long thumbnail_anim_start_ms = -1; // time that the thumbnail animation started
 	private RectF thumbnail_anim_src_rect = new RectF();
 	private RectF thumbnail_anim_dst_rect = new RectF();

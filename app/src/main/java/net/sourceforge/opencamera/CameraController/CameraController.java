@@ -25,7 +25,7 @@ import android.view.SurfaceHolder;
  */
 public abstract class CameraController {
 	private static final String TAG = "CameraController";
-	private int cameraId = 0;
+	private volatile int cameraId = 0; // must be volatile for test project reading the state
 
 	public static final long EXPOSURE_TIME_DEFAULT = 1000000000L/30;
 
