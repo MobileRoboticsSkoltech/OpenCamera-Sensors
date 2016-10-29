@@ -2578,14 +2578,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "freeAudioListener");
         if( audio_listener != null ) {
-        	audio_listener.release();
-        	if( wait_until_done ) {
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "wait until audio listener is freed");
-        		while( audio_listener.hasAudioRecorder() ) {
-        		}
-        	}
-        	audio_listener = null;
+        	audio_listener.release(wait_until_done);
+			audio_listener = null;
         }
         mainUI.audioControlStopped();
 	}
