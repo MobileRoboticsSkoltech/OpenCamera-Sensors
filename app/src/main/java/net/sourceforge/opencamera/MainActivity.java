@@ -1480,7 +1480,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 
 		new AsyncTask<Void, Void, Bitmap>() {
-			private String TAG = "MainActivity/AsyncTask";
+			private static final String TAG = "MainActivity/AsyncTask";
 
 			/** The system calls this to perform work in a worker thread and
 		      * delivers it the parameters given to AsyncTask.execute() */
@@ -2578,14 +2578,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "freeAudioListener");
         if( audio_listener != null ) {
-        	audio_listener.release();
-        	if( wait_until_done ) {
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "wait until audio listener is freed");
-        		while( audio_listener.hasAudioRecorder() ) {
-        		}
-        	}
-        	audio_listener = null;
+        	audio_listener.release(wait_until_done);
+			audio_listener = null;
         }
         mainUI.audioControlStopped();
 	}
@@ -2685,17 +2679,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 							Log.d(TAG, "RecognitionListener: onResults");
 			        	speechRecognizerStopped();
 						ArrayList<String> list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-						float [] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
 						boolean found = false;
 						final String trigger = "cheese";
 						//String debug_toast = "";
 						for(int i=0;i<list.size();i++) {
 							String text = list.get(i);
 							if( MyDebug.LOG )
-								Log.d(TAG, "text: " + text + " score: " + scores[i]);
+								Log.d(TAG, "text: " + text + " score: " + results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)[i]);
 							/*if( i > 0 )
 								debug_toast += "\n";
-							debug_toast += text + " : " + scores[i];*/
+							debug_toast += text + " : " + results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)[i];*/
 							if( text.toLowerCase(Locale.US).contains(trigger) ) {
 								found = true;
 							}

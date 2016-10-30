@@ -1403,12 +1403,12 @@ public class ImageSaver extends Thread {
     		output.close();
     		output = null;
 
-    		Location location = null;
+    		/*Location location = null;
     		if( main_activity.getApplicationInterface().getGeotaggingPref() ) {
     			location = main_activity.getApplicationInterface().getLocation();
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "location: " + location);
-    		}
+    		}*/
 
     		if( saveUri == null ) {
     			success = true;

@@ -9,9 +9,9 @@ import android.util.Log;
  */
 public class AudioListener {
 	private static final String TAG = "AudioListener";
-	private boolean is_running = true;
+	private volatile boolean is_running = true; // should be volatile, as used to communicate between threads
 	private int buffer_size = -1;
-	private AudioRecord ar = null;
+	private AudioRecord ar = null; // modification to ar should always be synchronized (on AudioListener.this), as the ar can be released in the AudioListener's own thread
 	private Thread thread = null;
 
 	public interface AudioListenerCallback {
@@ -41,7 +41,10 @@ public class AudioListener {
 				return;
 			}
 
-			ar = new AudioRecord(MediaRecorder.AudioSource.MIC, sample_rate, channel_config, audio_format, buffer_size);
+			synchronized(AudioListener.this) {
+				ar = new AudioRecord(MediaRecorder.AudioSource.MIC, sample_rate, channel_config, audio_format, buffer_size);
+				AudioListener.this.notifyAll(); // probably not needed currently as no thread should be waiting for creation, but just for consistency
+			}
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -101,8 +104,15 @@ public class AudioListener {
 							Log.e(TAG, "failed to read from audiorecord");
 					}
 				}
-				ar.release();
-				ar = null;
+				if( MyDebug.LOG )
+					Log.d(TAG, "stopped running");
+				synchronized(AudioListener.this) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "release ar");
+					ar.release();
+					ar = null;
+					AudioListener.this.notifyAll(); // notify in case release() is waiting
+				}
 			}
 		};
 		// n.b., not good practice to start threads in constructors, so we require the caller to call start() instead
@@ -119,15 +129,34 @@ public class AudioListener {
 	}
 	
 	/** Stop listening and release the resources.
+	 * @param wait_until_done If true, this method will block until the resource is freed.
 	 */
-	void release() {
-		if( MyDebug.LOG )
+	void release(boolean wait_until_done) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "release");
+			Log.d(TAG, "wait_until_done: " + wait_until_done);
+		}
 		is_running = false;
 		thread = null;
-	}
-	
-	boolean hasAudioRecorder() {
-		return ar != null;
+		if( wait_until_done ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "wait until audio listener is freed");
+			synchronized(AudioListener.this) {
+				while( ar != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "ar still not freed, so wait");
+					try {
+						AudioListener.this.wait();
+					}
+					catch(InterruptedException e) {
+						e.printStackTrace();
+						if( MyDebug.LOG )
+							Log.e(TAG, "interrupted while waiting for audio recorder to be freed");
+					}
+				}
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "audio listener is now freed");
+		}
 	}
 }
