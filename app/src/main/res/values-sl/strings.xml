@@ -4,7 +4,7 @@
     <string name="app_name">Open Camera</string>
     <string name="action_settings">Nastavitve</string>
     <string name="action_popup">Nastavitve pojavnih oken</string>
-    <string name="intro_text">Dotaknite se za ostrenje in pritisnite moder gumb za slikanje fotografij. Za več pomoči kliknite Spletna pomoč v nastavitvah. Open Camera je popolnoma brezplačen. Če vam je ta program všeč, prosim razmislite o nakupu mojega programa za darovanje :) (glejte povezavo v nastavitvah ali spletno pomoč).\n\nPravilnik o zasebnosti: za označevanje z zemljepisnim položajem je zahtevano dovoljenje za lokacijo, vendar je to privzeto onemogočeno. Če je omogočeno, se vaša lokacija v shranjenih datotekah kodira (in se uporablja samo za ta namen).</string>
+    <string name="intro_text">Dotaknite se za ostrenje in pritisnite moder gumb za snemanje fotografij. Za več pomoči kliknite Spletna pomoč v nastavitvah. Open Camera je popolnoma brezplačen. Če vam je ta program všeč, prosim razmislite o nakupu mojega programa za darovanje :) (glejte povezavo v nastavitvah ali spletno pomoč).\n\nPravilnik o zasebnosti: za označevanje z zemljepisnim položajem je zahtevano dovoljenje za lokacijo, vendar je to privzeto onemogočeno. Če je omogočeno, se vaša lokacija v shranjenih datotekah kodira (in se uporablja samo za ta namen).</string>
     <string name="intro_ok">V redu (to sporočilo se ne bo več prikazovalo)</string>
     
     <string name="answer_yes">Da</string>
@@ -48,8 +48,8 @@
 	<string name="failed_to_save_photo_raw">Shranjevanje fotografije v obliki RAW je spodletelo</string>
     <string name="failed_to_auto_stabilise">Samodejna ustalitev je spodletela</string>
     <string name="failed_to_start_camera_preview">Zagon predogleda fotoaparata je spodletel</string>
-    <string name="taking_photo">Slikanje fotografije</string>
-    <string name="failed_to_take_picture">Slikanje fotografije je spodletelo</string>
+    <string name="taking_photo">Snemanje fotografije</string>
+    <string name="failed_to_take_picture">Snemanje fotografije je spodletelo</string>
     <string name="location_not_available">Lokacija GPS ni na voljo</string>
     <string name="photo_deleted">Fotografija izbrisana</string>
     <string name="no_gallery_app">Program galerije ni na voljo</string>
@@ -78,7 +78,7 @@
     
     <string name="preference_category_camera_effects">Učinki fotoaparata</string>
     <string name="preference_auto_stabilise">samodejno ustali</string>
-    <string name="preference_auto_stabilise_summary">Slike bodo zavrtene za samodejno vodoravno poravnavo (samo fotografije) (slikanje fotografij je počasnejše in lahko spodleti na napravah s premalo pomnilnika)</string>
+    <string name="preference_auto_stabilise_summary">Slike bodo zavrtene za samodejno vodoravno poravnavo (samo fotografije) (snemanje fotografij je počasnejše in lahko spodleti na napravah s premalo pomnilnika)</string>
     <string name="preference_color_effect">Uporabi barvni učinek</string>
     <string name="preference_color_effect_summary">Uporabi izbrani bavni učinek za fotografije</string>
     <string name="preference_scene_mode">Uporabi način prizora</string>
@@ -108,10 +108,10 @@
     <string name="preference_screen_camera_controls_more">Več nadzora fotoaparata …</string>
     <string name="preference_touch_capture">Dotik za zajem</string>
     <string name="preference_touch_capture_summary">Posnemi fotografijo z dotikom ali dvojnim dotikom predogleda</string>
-    <string name="preference_pause_preview">Premor po slikanju fotografije</string>
-    <string name="preference_pause_preview_summary">Premor zaslona po slikanju fotografje z možnostjo deljenja ali izbrisa fotografije</string>
+    <string name="preference_pause_preview">Premor po snemanju fotografije</string>
+    <string name="preference_pause_preview_summary">Premor zaslona po snemanju fotografje z možnostjo deljenja ali izbrisa fotografije</string>
     <string name="preference_shutter_sound">Zvok zaslonke</string>
-    <string name="preference_shutter_sound_summary">Predvajaj zvok ob slikanju fotografije</string>
+    <string name="preference_shutter_sound_summary">Predvajaj zvok ob snemanju fotografije</string>
     <string name="preference_volume_keys">Gumba za glasnost</string>
     <string name="preference_volume_keys_summary">Nastavite vedenje ob pritisku na gumba za glasnost</string>
     <string name="preference_audio_control">Možnosti nadzora zvoka</string>
@@ -173,9 +173,9 @@
     <string name="preference_show_toasts">Prikaži \"pojavna\" sporočila</string>
     <string name="preference_show_toasts_summary">Ali naj se prikažejo \"pojavna\" sporočila</string>
     <string name="preference_thumbnail_animation">Prikaži animacijo sličice</string>
-    <string name="preference_thumbnail_animation_summary">Prikaži premikajočo animacijo sličice med slikanjem fotografije</string>
-    <string name="preference_take_photo_border">Prikaži obrobo med slikanjem fotografije</string>
-    <string name="preference_take_photo_border_summary">Na zaslonu prikaži obrobo, da se nakaže slikanje fotografije</string>
+    <string name="preference_thumbnail_animation_summary">Prikaži premikajočo animacijo sličice med snemanjem fotografije</string>
+    <string name="preference_take_photo_border">Prikaži obrobo med snemanjem fotografije</string>
+    <string name="preference_take_photo_border_summary">Na zaslonu prikaži obrobo, da se nakaže snemanje fotografije</string>
     <string name="preference_keep_display_on">Pusti zaslon vklopljen</string>
     <string name="preference_keep_display_on_summary">Če je omogočeno, se zaslon ne bo izklopil, ko je glavni up. vmesnik Open Camere dejaven</string>
     <string name="preference_max_brightness">Vsili največjo svetlost</string>
@@ -303,15 +303,15 @@
 	
 	<string name="auto_stabilise_info">Samodejna ustalitev bo zavrtela fotografije, da bodo videti poravnane.\n\nUpoštevajte, da se bo ločljivost slik rahlo zmanjšala (zaradi zahtevanega vrtenja in obrezovanja).</string>
     <string name="raw_info">Datoteke DNG vsebujejo nestisnjene in neobdelane podatke iz fotoaparata.\n\nVečina programov za galerijo ne prepozna oblike DNG, zato jo uporabljajte s posebnimi programi, kot je Snapseed ali Lightroom.\n\nUpoštevajte, da se bodo razne možnosti obdelave, kot sta "Dodaj žig" in "Samodejna ustalitev", uporabile samo za slike JPEG in ne za slike DNG.\n\nDatoteke DNG zavzamejo veliko prosotra; za njihov izbris ali prenos lahko uporabite raziskovalca datotek.\n\nDatoteke DNG se shranjujejo samo v običajnem načinu za fotografije.</string>
-    <string name="hdr_info">Način HDR je uporaben za posnetke z velikimi odstopanji v svetlosti. Deluje tako, da zajame več posnetkov z različnimi osvetlitvami in jih potem združi v končno sliko.\n\nUpoštevajte, da HDR ni primeren za hitro gibajoče prizore in lahko povzroči barvna odstopanja.\n\nSlikanje fotografij v načinu HDR je počasnejše.</string>
+    <string name="hdr_info">Način HDR je uporaben za posnetke z velikimi odstopanji v svetlosti. Deluje tako, da zajame več posnetkov z različnimi osvetlitvami in jih potem združi v končno sliko.\n\nUpoštevajte, da HDR ni primeren za hitro gibajoče prizore in lahko povzroči barvna odstopanja.\n\nSnemanje fotografij v načinu HDR je počasnejše.</string>
 
     <string name="dont_show_again">Ne prikazuj več</string>
 
     <string name="photo_mode">Način za fotografije</string>
     <string name="photo_mode_standard">Običajni</string>
     <string name="photo_mode_hdr">HDR</string>
-	<string name="photo_mode_expo_bracketing">Kor. sam. osvetlitve</string>
-    <string name="photo_mode_expo_bracketing_full">Korektura samodejne osvetlitve</string>
+	<string name="photo_mode_expo_bracketing">Expo {}</string>
+    <string name="photo_mode_expo_bracketing_full">Korektura sam. osvetlitve</string>
     <string name="preference_category_stamp">Dodaj žig</string>
     <string name="preference_hdr_save_expo">Shrani vse slike za način HDR</string>
     <string name="preference_hdr_save_expo_summary">Če je omogočeno, bodo ob uporabi načina HDR posnete tri osnovne slike kot tudi končna slika HDR. Upoštevajte, da bo shranevanje počasnejše, posebno, če uporabljate možnosti, kot sta \"Dodaj žig\" ali samodejno ustalitev.</string>
@@ -345,7 +345,4 @@
     <string name="exposure_shutter_speed">Hitrost zaslonke</string>
 	
 	<string name="camera_error">Resna napaka fotoaparata</string>
-	
-	<string name="preference_camera2_fast_burst">Omogoči hitro zaporedje HDR/kor. sam. osvetlitve</string>
-    <string name="preference_camera2_fast_burst_summary">Omogoča hitrejše slikanje fotografij s HDR-om/kor. sam. osvetlitve. Onemogočite, če ima vaša naprava pri slikanju fotografij z načinoma HDR/kor. sam. osvetlitve težave (fotoaparat preneha delovati ali so fotografije načina kor. sam. osvetlitve v napačnem zaporedju).</string>
 </resources>
