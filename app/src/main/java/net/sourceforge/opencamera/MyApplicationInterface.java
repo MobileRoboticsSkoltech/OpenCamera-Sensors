@@ -264,6 +264,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     			Log.d(TAG, "launching from photo intent");
     		return false;
 		}
+		else if( MyTileService.TILE_ID.equals(action) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "launching from quick settings tile for Open Camera: photo mode");
+			return false;
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), false);
     }
