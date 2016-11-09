@@ -15,13 +15,13 @@ void init_errors() {
 		errors[i] = 0;
 }
 
-void __attribute__((kernel)) align_mtb(uchar4 in, uint32_t x, uint32_t y) {
+void __attribute__((kernel)) align_mtb(uchar in, uint32_t x, uint32_t y) {
     if( x+off_x >= step_size && x+off_x < width-step_size && y+off_y >= step_size && y+off_y < height-step_size ) {
         int c=0;
         for(int dy=-1;dy<=1;dy++) {
             for(int dx=-1;dx<=1;dx++) {
-            	uchar4 pixel1 = rsGetElementAt_uchar4(bitmap1, x+off_x+dx*step_size, y+off_y+dy*step_size);
-            	if( in.r != pixel1.r ) {
+            	uchar pixel1 = rsGetElementAt_uchar(bitmap1, x+off_x+dx*step_size, y+off_y+dy*step_size);
+            	if( in != pixel1 ) {
                 	rsAtomicInc(&errors[c]);
             	}
                 c++;

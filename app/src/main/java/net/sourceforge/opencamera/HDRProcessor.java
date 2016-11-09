@@ -708,7 +708,8 @@ public class HDRProcessor {
 			Log.d(TAG, "### time after creating mtb_allocations: " + (System.currentTimeMillis() - time_s));
 		for(int i=0;i<allocations.length;i++) {
 			//mtb_allocations[i] = Allocation.createSized(rs, Element.U8_4(rs), width*height);
-			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), width, height));
+			//mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), width, height));
+			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
 			int median_value = computeMedianLuminance(bitmaps.get(i));
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
