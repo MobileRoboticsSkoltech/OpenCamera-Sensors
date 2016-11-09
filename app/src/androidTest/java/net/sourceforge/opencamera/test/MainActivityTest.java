@@ -6797,9 +6797,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 *  folder (so you have DCIM/testOpenCamera/testdata/). We don't use assets/ as we'd end up with huge APK sizes which takes
 	 *  time to transfer to the device everytime we run the tests.
 	 */
-
 	private void subTestHDR(List<Bitmap> inputs, String output_name) throws IOException, InterruptedException {
 		Log.d(TAG, "subTestHDR");
+
+		Thread.sleep(1000); // wait for camera to open
 
     	long time_s = System.currentTimeMillis();
 		mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs);
@@ -6813,6 +6814,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.get(0).recycle();
 		inputs.clear();
         Thread.sleep(1000);
+	}
+
+	/** Checks that the HDR offsets used for auto-alignment are as expected.
+     */
+	private void checkHDROffsets(int [] exp_offsets_x, int [] exp_offsets_y) {
+		int [] offsets_x = mActivity.getApplicationInterface().getHDRProcessor().offsets_x;
+		int [] offsets_y = mActivity.getApplicationInterface().getHDRProcessor().offsets_y;
+		for(int i=0;i<3;i++) {
+			Log.d(TAG, "offsets " + i + " ( " + offsets_x[i] + " , " + offsets_y[i] + " ), expected ( " + exp_offsets_x[i] + " , " + exp_offsets_y[i] + ")");
+			assertTrue( offsets_x[i] == exp_offsets_x[i] );
+			assertTrue( offsets_y[i] == exp_offsets_y[i] );
+		}
 	}
 	
 	final private String hdr_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/hdrsamples/";
@@ -7355,6 +7368,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR30/input2.jpg") );
 
 		subTestHDR(inputs, "testHDR30_output.jpg");
+
+		int [] exp_offsets_x = {-6, 0, -1};
+		int [] exp_offsets_y = {23, 0, -13};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR31".
@@ -7373,6 +7390,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR31/input2.jpg") );
 
 		subTestHDR(inputs, "testHDR31_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 4};
+		int [] exp_offsets_y = {21, 0, -11};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDRtemp".
