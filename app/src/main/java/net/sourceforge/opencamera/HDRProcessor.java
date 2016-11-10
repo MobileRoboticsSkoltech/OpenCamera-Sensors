@@ -748,6 +748,19 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after all createMTBScript: " + (System.currentTimeMillis() - time_s));
 
+		//int step_size = 64;
+		// the initial step_size N should be a power of 2; the maximum offset we can achieve by the algorithm is N-1
+		int max_dim = Math.max(width, height);
+		int max_ideal_size = max_dim / 100;
+		int initial_step_size = 1;
+		while( initial_step_size < max_ideal_size ) {
+			initial_step_size *= 2;
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "max_dim: " + max_dim);
+			Log.d(TAG, "max_ideal_size: " + max_ideal_size);
+			Log.d(TAG, "initial_step_size: " + initial_step_size);
+		}
 		for(int i=0;i<3;i++)  {
 			if( i == 1 ) {
 				// don't need to align the "base" reference image
@@ -760,7 +773,7 @@ public class HDRProcessor {
 			alignMTBScript.set_bitmap1(mtb_allocations[i]);
 			alignMTBScript.set_width( width );
 			alignMTBScript.set_height( height );
-			int step_size = 64;
+			int step_size = initial_step_size;
 			while( step_size > 1 ) {
 				step_size /= 2;
 				alignMTBScript.set_off_x( offsets_x[i] );
