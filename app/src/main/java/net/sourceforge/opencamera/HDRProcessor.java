@@ -770,6 +770,7 @@ public class HDRProcessor {
 			ScriptC_align_mtb alignMTBScript = new ScriptC_align_mtb(rs);
 
 			// set parameters
+			alignMTBScript.set_bitmap0(mtb_allocations[1]);
 			alignMTBScript.set_bitmap1(mtb_allocations[i]);
 			alignMTBScript.set_width( width );
 			alignMTBScript.set_height( height );
@@ -787,8 +788,19 @@ public class HDRProcessor {
 				Allocation errorsAllocation = Allocation.createSized(rs, Element.I32(rs), 9);
 				alignMTBScript.bind_errors(errorsAllocation);
 
+				// see note inside align_mtb.rs/align_mtb() for why we sample over a subset of the image
+				Script.LaunchOptions launch_options = new Script.LaunchOptions();
+				int stop_x = width/step_size;
+				int stop_y = height/step_size;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "stop_x: " + stop_x);
+					Log.d(TAG, "stop_y: " + stop_y);
+				}
+				launch_options.setX(0, stop_x);
+				launch_options.setY(0, stop_y);
 				//alignMTBScript.invoke_init_errors();
-				alignMTBScript.forEach_align_mtb(mtb_allocations[1]);
+				//alignMTBScript.forEach_align_mtb(mtb_allocations[1]);
+				alignMTBScript.forEach_align_mtb(mtb_allocations[1], launch_options);
 				if( MyDebug.LOG )
 					Log.d(TAG, "time after alignMTBScript: " + (System.currentTimeMillis() - time_s));
 
