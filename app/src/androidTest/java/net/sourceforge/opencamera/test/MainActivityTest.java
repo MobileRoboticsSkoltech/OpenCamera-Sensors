@@ -5473,7 +5473,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getTextStampPreferenceKey(), "Test stamp!£$");
+			editor.putString(PreferenceKeys.getTextStampPreferenceKey(), "Test stamp!Β£$");
 			editor.apply();
 			updateForSettings();
 		}
@@ -5522,7 +5522,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getTextStampPreferenceKey(), "Test stamp!£$");
+			editor.putString(PreferenceKeys.getTextStampPreferenceKey(), "Test stamp!Β£$");
 			editor.apply();
 			updateForSettings();
 		}
@@ -5903,7 +5903,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testCreateSaveFolderUnicode() {
 		Log.d(TAG, "testCreateSaveFolderUnicode");
-		subTestCreateSaveFolder(false, "ιϊνσα!£$%^&()", true);
+		subTestCreateSaveFolder(false, "Γ©ΓΊΓ­Γ³Γ‘!Β£$%^&()", true);
 	}
 
 	/** Tests taking a photo with a new save folder.
@@ -6561,67 +6561,67 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		String location_string = LocationSupplier.locationToDMS(0.0);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'0\""));
+		assertTrue(location_string.equals("0Β°0'0\""));
 
 		location_string = LocationSupplier.locationToDMS(0.0000306);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'0\""));
+		assertTrue(location_string.equals("0Β°0'0\""));
 
 		location_string = LocationSupplier.locationToDMS(0.000306);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'1\""));
+		assertTrue(location_string.equals("0Β°0'1\""));
 
 		location_string = LocationSupplier.locationToDMS(0.00306);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'11\""));
+		assertTrue(location_string.equals("0Β°0'11\""));
 
 		location_string = LocationSupplier.locationToDMS(0.9999);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°59'59\""));
+		assertTrue(location_string.equals("0Β°59'59\""));
 
 		location_string = LocationSupplier.locationToDMS(1.7438);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("1°44'37\""));
+		assertTrue(location_string.equals("1Β°44'37\""));
 
 		location_string = LocationSupplier.locationToDMS(53.000137);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("53°0'0\""));
+		assertTrue(location_string.equals("53Β°0'0\""));
 
 		location_string = LocationSupplier.locationToDMS(147.00938);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("147°0'33\""));
+		assertTrue(location_string.equals("147Β°0'33\""));
 
 		location_string = LocationSupplier.locationToDMS(-0.0);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'0\""));
+		assertTrue(location_string.equals("0Β°0'0\""));
 
 		location_string = LocationSupplier.locationToDMS(-0.0000306);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'0\""));
+		assertTrue(location_string.equals("0Β°0'0\""));
 
 		location_string = LocationSupplier.locationToDMS(-0.000306);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-0°0'1\""));
+		assertTrue(location_string.equals("-0Β°0'1\""));
 
 		location_string = LocationSupplier.locationToDMS(-0.00306);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-0°0'11\""));
+		assertTrue(location_string.equals("-0Β°0'11\""));
 
 		location_string = LocationSupplier.locationToDMS(-0.9999);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-0°59'59\""));
+		assertTrue(location_string.equals("-0Β°59'59\""));
 
 		location_string = LocationSupplier.locationToDMS(-1.7438);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-1°44'37\""));
+		assertTrue(location_string.equals("-1Β°44'37\""));
 
 		location_string = LocationSupplier.locationToDMS(-53.000137);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-53°0'0\""));
+		assertTrue(location_string.equals("-53Β°0'0\""));
 
 		location_string = LocationSupplier.locationToDMS(-147.00938);
 		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-147°0'33\""));
+		assertTrue(location_string.equals("-147Β°0'33\""));
 	}
 
 	public void testTakePhotoHDR() throws InterruptedException {
