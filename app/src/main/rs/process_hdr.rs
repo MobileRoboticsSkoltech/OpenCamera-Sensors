@@ -2,8 +2,11 @@
 #pragma rs java_package_name(net.sourceforge.opencamera)
 #pragma rs_fp_relaxed
 
-rs_allocation bitmap1;
+rs_allocation bitmap0;
 rs_allocation bitmap2;
+
+int offset_x0 = 0, offset_y0 = 0;
+int offset_x2 = 0, offset_y2 = 0;
 
 float parameter_A0 = 1.0f;
 float parameter_B0 = 0.0f;
@@ -33,10 +36,12 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	// If this algorithm is changed, also update the Java version in HDRProcessor.calculateHDR()
 	const int n_bitmaps = 3;
 	uchar4 pixels[n_bitmaps];
-	pixels[0] = in;
-	pixels[1] = rsGetElementAt_uchar4(bitmap1, x, y);
-	pixels[2] = rsGetElementAt_uchar4(bitmap2, x, y);
-	
+	//pixels[0] = rsGetElementAt_uchar4(bitmap0, x, y);
+	pixels[0] = rsGetElementAt_uchar4(bitmap0, x+offset_x0, y+offset_y0);
+	pixels[1] = in;
+	//pixels[2] = rsGetElementAt_uchar4(bitmap2, x, y);
+	pixels[2] = rsGetElementAt_uchar4(bitmap2, x+offset_x2, y+offset_y2);
+
 	float parameter_A[n_bitmaps];
 	float parameter_B[n_bitmaps];
 	parameter_A[0] = parameter_A0;
@@ -161,6 +166,6 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		out.b = (uchar)(curr_b * white_scale);
 		*/
 	}
-	
+
 	return out;
 }

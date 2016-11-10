@@ -1,8 +1,11 @@
 package net.sourceforge.opencamera;
 
 import java.io.File;
+//import java.io.FileNotFoundException;
+//import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+//import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +20,7 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.Script;
 import android.renderscript.ScriptIntrinsicHistogram;
+import android.renderscript.Type;
 import android.util.Log;
 
 public class HDRProcessor {
@@ -24,6 +28,9 @@ public class HDRProcessor {
 	
 	private Context context = null;
 	private RenderScript rs = null; // lazily created, so we don't take up resources if application isn't using HDR
+
+	public int [] offsets_x = {0, 0, 0};
+	public int [] offsets_y = {0, 0, 0};
 
 	private enum HDRAlgorithm {
 		HDRALGORITHM_AVERAGE,
@@ -586,21 +593,34 @@ public class HDRProcessor {
 				if( MyDebug.LOG )
 					Log.d(TAG, "create renderscript object");
 				if( MyDebug.LOG )
-					Log.d(TAG, "time after creating renderscript: " + (System.currentTimeMillis() - time_s));
+					Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
 			}
 			// create allocations
 	    	Allocation [] allocations = new Allocation[n_bitmaps];
 			for(int i=0;i<n_bitmaps;i++) {
 				allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
 			}
-			
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+
+			autoAlignment(offsets_x, offsets_y, allocations, bm.getWidth(), bm.getHeight(), bitmaps, time_s);
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
+
 			// create RenderScript
 			ScriptC_process_hdr processHDRScript = new ScriptC_process_hdr(rs);
 			
 			// set allocations
-			processHDRScript.set_bitmap1(allocations[1]);
+			processHDRScript.set_bitmap0(allocations[0]);
 			processHDRScript.set_bitmap2(allocations[2]);
-			
+
+			// set offsets
+			processHDRScript.set_offset_x0(offsets_x[0]);
+			processHDRScript.set_offset_y0(offsets_y[0]);
+			// no offset for middle image
+			processHDRScript.set_offset_x2(offsets_x[2]);
+			processHDRScript.set_offset_y2(offsets_y[2]);
+
 			// set response functions
 			processHDRScript.set_parameter_A0( response_functions[0].parameter_A );
 			processHDRScript.set_parameter_B0( response_functions[0].parameter_B );
@@ -620,9 +640,9 @@ public class HDRProcessor {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call processHDRScript");
-			processHDRScript.forEach_hdr(allocations[0], allocations[0]);
+			processHDRScript.forEach_hdr(allocations[1], allocations[0]);
 			if( MyDebug.LOG )
-				Log.d(TAG, "time after processHDRScript: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "### time after processHDRScript: " + (System.currentTimeMillis() - time_s));
 
 			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
 			for(int i=1;i<bitmaps.size();i++) {
@@ -680,7 +700,166 @@ public class HDRProcessor {
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, long time_s) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "autoAlignment");
+		Allocation [] mtb_allocations = new Allocation[allocations.length];
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after creating mtb_allocations: " + (System.currentTimeMillis() - time_s));
+		for(int i=0;i<allocations.length;i++) {
+			//mtb_allocations[i] = Allocation.createSized(rs, Element.U8_4(rs), width*height);
+			//mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), width, height));
+			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
+			int median_value = computeMedianLuminance(bitmaps.get(i));
+			if( MyDebug.LOG )
+				Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
+
+			// create RenderScript
+			ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
+
+			// set parameters
+			createMTBScript.set_median_value(median_value);
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "call createMTBScript");
+			createMTBScript.forEach_create_mtb(allocations[i], mtb_allocations[i]);
+			if( MyDebug.LOG )
+				Log.d(TAG, "time after createMTBScript: " + (System.currentTimeMillis() - time_s));
+
+			/*if( MyDebug.LOG ) {
+				// debugging
+				Bitmap mtb_bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+				mtb_allocations[i].copyTo(mtb_bitmap);
+				File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/mtb_bitmap" + i + ".jpg");
+				try {
+					OutputStream outputStream = new FileOutputStream(file);
+					mtb_bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+					outputStream.close();
+					MainActivity mActivity = (MainActivity) context;
+					mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+				}
+				catch(IOException e) {
+					e.printStackTrace();
+				}
+				mtb_bitmap.recycle();
+				mtb_bitmap = null;
+			}*/
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after all createMTBScript: " + (System.currentTimeMillis() - time_s));
+
+		for(int i=0;i<3;i++)  {
+			if( i == 1 ) {
+				// don't need to align the "base" reference image
+				continue;
+			}
+			// create RenderScript
+			ScriptC_align_mtb alignMTBScript = new ScriptC_align_mtb(rs);
+
+			// set parameters
+			alignMTBScript.set_bitmap1(mtb_allocations[i]);
+			alignMTBScript.set_width( width );
+			alignMTBScript.set_height( height );
+			int step_size = 64;
+			while( step_size > 1 ) {
+				step_size /= 2;
+				alignMTBScript.set_off_x( offsets_x[i] );
+				alignMTBScript.set_off_y( offsets_y[i] );
+				alignMTBScript.set_step_size( step_size );
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "call alignMTBScript for image: " + i);
+					Log.d(TAG, "step_size: " + step_size);
+				}
+				int [] errors = new int[9];
+				Allocation errorsAllocation = Allocation.createSized(rs, Element.I32(rs), 9);
+				alignMTBScript.bind_errors(errorsAllocation);
+
+				//alignMTBScript.invoke_init_errors();
+				alignMTBScript.forEach_align_mtb(mtb_allocations[1]);
+				if( MyDebug.LOG )
+					Log.d(TAG, "time after alignMTBScript: " + (System.currentTimeMillis() - time_s));
+
+				int best_error = -1;
+				int best_id = -1;
+				errorsAllocation.copyTo(errors);
+				for(int j=0;j<9;j++) {
+					int this_error = errors[j];
+					if( MyDebug.LOG )
+						Log.d(TAG, "    errors[" + j + "]: " + this_error);
+					if( best_id==-1 || this_error < best_error ) {
+						best_error = this_error;
+						best_id = j;
+					}
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "    best_id " + best_id + " error: " + best_error);
+				if( best_id != -1 ) {
+					int this_off_x = best_id % 3;
+					int this_off_y = best_id/3;
+					this_off_x--;
+					this_off_y--;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "this_off_x: " + this_off_x);
+						Log.d(TAG, "this_off_y: " + this_off_y);
+					}
+					offsets_x[i] += this_off_x * step_size;
+					offsets_y[i] += this_off_y * step_size;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "offsets_x is now: " + offsets_x[i]);
+						Log.d(TAG, "offsets_y is now: " + offsets_y[i]);
+					}
+				}
+			}
+		}
+	}
+
+	private int computeMedianLuminance(Bitmap bitmap) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "computeMedianLuminance");
+		final int n_samples_c = 100;
+		final int n_w_samples = (int)Math.sqrt(n_samples_c);
+		final int n_h_samples = n_samples_c/n_w_samples;
+
+		int [] histo = new int[256];
+		for(int i=0;i<256;i++)
+			histo[i] = 0;
+		int total = 0;
+		for(int y=0;y<n_h_samples;y++) {
+			double alpha = ((double) y + 1.0) / ((double) n_h_samples + 1.0);
+			int y_coord = (int) (alpha * bitmap.getHeight());
+			for (int x = 0; x < n_w_samples; x++) {
+				double beta = ((double) x + 1.0) / ((double) n_w_samples + 1.0);
+				int x_coord = (int) (beta * bitmap.getWidth());
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "sample value from " + x_coord + " , " + y_coord);*/
+				int color = bitmap.getPixel(x_coord, y_coord);
+				int r = (color & 0xFF0000) >> 16;
+				int g = (color & 0xFF00) >> 8;
+				int b = (color & 0xFF);
+				int luminance = Math.max(r, g);
+				luminance = Math.max(luminance, b);
+				histo[luminance]++;
+				total++;
+			}
+		}
+		int middle = total/2;
+		int count = 0;
+		for(int i=0;i<256;i++) {
+			count += histo[i];
+			if( count >= middle ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "computeMedianLuminance returns " + i);
+				return i;
+			}
+		}
+		Log.e(TAG, "computeMedianLuminance failed");
+		return 255;
+	}
+
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void adjustHistogram(Allocation allocation, int width, int height, long time_s) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "adjustHistogram");
 		final boolean adjust_histogram = false;
 		//final boolean adjust_histogram = true;
 
