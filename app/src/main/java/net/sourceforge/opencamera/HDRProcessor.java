@@ -706,6 +706,10 @@ public class HDRProcessor {
 		Allocation [] mtb_allocations = new Allocation[allocations.length];
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating mtb_allocations: " + (System.currentTimeMillis() - time_s));
+
+		// create RenderScript
+		ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
+
 		for(int i=0;i<allocations.length;i++) {
 			//mtb_allocations[i] = Allocation.createSized(rs, Element.U8_4(rs), width*height);
 			//mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), width, height));
@@ -713,9 +717,6 @@ public class HDRProcessor {
 			int median_value = computeMedianLuminance(bitmaps.get(i));
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
-
-			// create RenderScript
-			ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
 
 			// set parameters
 			createMTBScript.set_median_value(median_value);
@@ -761,19 +762,24 @@ public class HDRProcessor {
 			Log.d(TAG, "max_ideal_size: " + max_ideal_size);
 			Log.d(TAG, "initial_step_size: " + initial_step_size);
 		}
+
+		// create RenderScript
+		ScriptC_align_mtb alignMTBScript = new ScriptC_align_mtb(rs);
+
+		// set parameters
+		alignMTBScript.set_bitmap0(mtb_allocations[1]);
+		// bitmap1 set below
+		alignMTBScript.set_width( width );
+		alignMTBScript.set_height( height );
+
 		for(int i=0;i<3;i++)  {
 			if( i == 1 ) {
 				// don't need to align the "base" reference image
 				continue;
 			}
-			// create RenderScript
-			ScriptC_align_mtb alignMTBScript = new ScriptC_align_mtb(rs);
 
-			// set parameters
-			alignMTBScript.set_bitmap0(mtb_allocations[1]);
 			alignMTBScript.set_bitmap1(mtb_allocations[i]);
-			alignMTBScript.set_width( width );
-			alignMTBScript.set_height( height );
+
 			int step_size = initial_step_size;
 			while( step_size > 1 ) {
 				step_size /= 2;
