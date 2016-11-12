@@ -2,8 +2,9 @@
 #pragma rs java_package_name(net.sourceforge.opencamera)
 #pragma rs_fp_relaxed
 
-rs_allocation bitmap0;
-rs_allocation bitmap1;
+rs_allocation bitmap0; // the bitmap that is fixed
+rs_allocation bitmap1; // the bitmap that we're trying to compute the offsets for, i.e., find offset_x, offset_y such that
+                       // evaluating at (x+offset_x, y+offset_y) on bitmap1 corresponds to (x, y) on bitmap0
 int width, height;
 
 int step_size = 1;
