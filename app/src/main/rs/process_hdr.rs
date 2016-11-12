@@ -34,13 +34,15 @@ static float Uncharted2Tonemap(float x) {
 
 uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	// If this algorithm is changed, also update the Java version in HDRProcessor.calculateHDR()
+    int32_t ix = x;
+    int32_t iy = y;
 	const int n_bitmaps = 3;
 	uchar4 pixels[n_bitmaps];
 
 	float parameter_A[n_bitmaps];
 	float parameter_B[n_bitmaps];
 
-	if( x+offset_x0 >= 0 && y+offset_y0 >= 0 && x+offset_x0 < rsAllocationGetDimX(bitmap0) && y+offset_y0 < rsAllocationGetDimY(bitmap0) ) {
+	if( ix+offset_x0 >= 0 && iy+offset_y0 >= 0 && ix+offset_x0 < rsAllocationGetDimX(bitmap0) && iy+offset_y0 < rsAllocationGetDimY(bitmap0) ) {
     	pixels[0] = rsGetElementAt_uchar4(bitmap0, x+offset_x0, y+offset_y0);
         parameter_A[0] = parameter_A0;
         parameter_B[0] = parameter_B0;
@@ -56,7 +58,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	parameter_A[1] = parameter_A1;
 	parameter_B[1] = parameter_B1;
 
-	if( x+offset_x2 >= 0 && y+offset_y2 >= 0 && x+offset_x2 < rsAllocationGetDimX(bitmap2) && y+offset_y2 < rsAllocationGetDimY(bitmap2) ) {
+ 	if( ix+offset_x2 >= 0 && iy+offset_y2 >= 0 && ix+offset_x2 < rsAllocationGetDimX(bitmap2) && iy+offset_y2 < rsAllocationGetDimY(bitmap2) ) {
     	pixels[2] = rsGetElementAt_uchar4(bitmap2, x+offset_x2, y+offset_y2);
         parameter_A[2] = parameter_A2;
         parameter_B[2] = parameter_B2;
