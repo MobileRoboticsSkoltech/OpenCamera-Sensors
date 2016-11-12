@@ -1,7 +1,6 @@
 package net.sourceforge.opencamera;
 
 import java.io.File;
-//import java.io.FileNotFoundException;
 //import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,6 +11,7 @@ import java.util.List;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
+//import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Environment;
@@ -751,8 +751,14 @@ public class HDRProcessor {
 
 			/*if( MyDebug.LOG ) {
 				// debugging
-				Bitmap mtb_bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-				mtb_allocations[i].copyTo(mtb_bitmap);
+				byte [] mtb_bytes = new byte[width*height];
+				mtb_allocations[i].copyTo(mtb_bytes);
+				int [] pixels = new int[width*height];
+				for(int j=0;j<width*height;j++) {
+					byte b = mtb_bytes[j];
+					pixels[j] = Color.argb(255, b, b, b);
+				}
+				Bitmap mtb_bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
 				File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/mtb_bitmap" + i + ".jpg");
 				try {
 					OutputStream outputStream = new FileOutputStream(file);
