@@ -284,8 +284,12 @@ public class HDRProcessor {
 
 	/** Creates a ResponseFunction to estimate how pixels from the in_bitmap should be adjusted to
 	 *  match the exposure level of out_bitmap.
+	 *  The supplied offsets offset_x, offset_y give the offset for in_bitmap as computed by
+	 *  autoAlignment().
+	 * @param offset_x
+	 * @param offset_y
 	 */
-	private ResponseFunction createFunctionFromBitmaps(int id, Bitmap in_bitmap, Bitmap out_bitmap) {
+	private ResponseFunction createFunctionFromBitmaps(int id, Bitmap in_bitmap, Bitmap out_bitmap, int offset_x, int offset_y) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createFunctionFromBitmaps");
 		List<Double> x_samples = new ArrayList<>();
@@ -306,7 +310,10 @@ public class HDRProcessor {
 				int x_coord = (int)(beta * in_bitmap.getWidth());
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "sample response from " + x_coord + " , " + y_coord);*/
-				int in_col = in_bitmap.getPixel(x_coord, y_coord);
+				if( x_coord + offset_x < 0 || x_coord + offset_x >= in_bitmap.getWidth() || y_coord + offset_y < 0 || y_coord + offset_y >= in_bitmap.getHeight() ) {
+					continue;
+				}
+				int in_col = in_bitmap.getPixel(x_coord + offset_x, y_coord + offset_y);
 				int out_col = out_bitmap.getPixel(x_coord, y_coord);
 				double in_value = averageRGB(in_col);
 				double out_value = averageRGB(out_col);
@@ -315,6 +322,16 @@ public class HDRProcessor {
 				x_samples.add(in_value);
 				y_samples.add(out_value);
 			}
+		}
+		if( x_samples.size() == 0 ) {
+			Log.e(TAG, "no samples for response function!");
+			// shouldn't happen, but could do with a very large offset - just make up a dummy sample
+			double in_value = 255.0;
+			double out_value = 255.0;
+			avg_in += in_value;
+			avg_out += out_value;
+			x_samples.add(in_value);
+			y_samples.add(out_value);
 		}
 		avg_in /= x_samples.size();
 		avg_out /= x_samples.size();
@@ -538,11 +555,40 @@ public class HDRProcessor {
 		//float [] hdr = new float[3];
 		//int [] rgb = new int[3];
 
+		//final boolean use_renderscript = false;
+		final boolean use_renderscript = true;
+
+		Allocation [] allocations = null;
+		if( use_renderscript ) {
+			if (MyDebug.LOG)
+				Log.d(TAG, "use renderscipt");
+			if (rs == null) {
+				// initialise renderscript
+				this.rs = RenderScript.create(context);
+				if (MyDebug.LOG)
+					Log.d(TAG, "create renderscript object");
+				if (MyDebug.LOG)
+					Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
+			}
+			// create allocations
+			allocations = new Allocation[n_bitmaps];
+			for (int i = 0; i < n_bitmaps; i++) {
+				allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
+			}
+			if (MyDebug.LOG)
+				Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+
+			// perform auto-alignment
+			autoAlignment(offsets_x, offsets_y, allocations, bm.getWidth(), bm.getHeight(), bitmaps, time_s);
+			if (MyDebug.LOG)
+				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
+		}
+
 		// compute response_functions
 		for(int i=0;i<n_bitmaps;i++) {
 			ResponseFunction function = null;
 			if( i != base_bitmap ) {
-				function = createFunctionFromBitmaps(i, bitmaps.get(i), bitmaps.get(base_bitmap));
+				function = createFunctionFromBitmaps(i, bitmaps.get(i), bitmaps.get(base_bitmap), offsets_x[i], offsets_y[i]);
 			}
 			response_functions[i] = function;
 		}
@@ -581,32 +627,8 @@ public class HDRProcessor {
 			Log.d(TAG, "time after calculating average luminance: " + (System.currentTimeMillis() - time_s));
 			*/
 
-		//final boolean use_renderscript = false;
-		final boolean use_renderscript = true;
-
 		// write new hdr image
 		if( use_renderscript ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "use renderscipt");
-			if( rs == null ) {
-				this.rs = RenderScript.create(context);
-				if( MyDebug.LOG )
-					Log.d(TAG, "create renderscript object");
-				if( MyDebug.LOG )
-					Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
-			}
-			// create allocations
-	    	Allocation [] allocations = new Allocation[n_bitmaps];
-			for(int i=0;i<n_bitmaps;i++) {
-				allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
-			}
-			if( MyDebug.LOG )
-				Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
-
-			autoAlignment(offsets_x, offsets_y, allocations, bm.getWidth(), bm.getHeight(), bitmaps, time_s);
-			if( MyDebug.LOG )
-				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
-
 			// create RenderScript
 			ScriptC_process_hdr processHDRScript = new ScriptC_process_hdr(rs);
 			
