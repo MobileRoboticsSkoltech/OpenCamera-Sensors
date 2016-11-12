@@ -797,8 +797,6 @@ public class HDRProcessor {
 		// set parameters
 		alignMTBScript.set_bitmap0(mtb_allocations[1]);
 		// bitmap1 set below
-		alignMTBScript.set_width( width );
-		alignMTBScript.set_height( height );
 
 		for(int i=0;i<3;i++)  {
 			if( i == 1 ) {
