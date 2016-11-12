@@ -818,9 +818,9 @@ public class HDRProcessor {
 					Log.d(TAG, "call alignMTBScript for image: " + i);
 					Log.d(TAG, "step_size: " + step_size);
 				}
-				int [] errors = new int[9];
 				Allocation errorsAllocation = Allocation.createSized(rs, Element.I32(rs), 9);
 				alignMTBScript.bind_errors(errorsAllocation);
+				alignMTBScript.invoke_init_errors();
 
 				// see note inside align_mtb.rs/align_mtb() for why we sample over a subset of the image
 				Script.LaunchOptions launch_options = new Script.LaunchOptions();
@@ -840,6 +840,7 @@ public class HDRProcessor {
 
 				int best_error = -1;
 				int best_id = -1;
+				int [] errors = new int[9];
 				errorsAllocation.copyTo(errors);
 				for(int j=0;j<9;j++) {
 					int this_error = errors[j];
@@ -937,6 +938,7 @@ public class HDRProcessor {
 				if( MyDebug.LOG )
 					Log.d(TAG, "bind histogram allocation");
 				histogramScript.bind_histogram(histogramAllocation);
+				histogramScript.invoke_init_histogram();
 				if( MyDebug.LOG )
 					Log.d(TAG, "call histogramScript");
 				histogramScript.forEach_histogram_compute(allocation);
