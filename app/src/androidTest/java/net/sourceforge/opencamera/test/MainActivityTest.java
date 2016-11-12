@@ -167,12 +167,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( mPreview.supportsFlash() ) {
 		    String flash_value = mPreview.getCurrentFlashValue();
 			Log.d(TAG, "start flash_value: "+ flash_value);
+			Log.d(TAG, "required_flash_value: "+ required_flash_value);
 			if( !flash_value.equals(required_flash_value) ) {
 				assertFalse( mActivity.popupIsOpen() );
 			    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 			    clickView(popupButton);
+				Log.d(TAG, "wait for popup to open");
 			    while( !mActivity.popupIsOpen() ) {
 			    }
+				Log.d(TAG, "popup is now open");
 			    View currentFlashButton = mActivity.getPopupButton("TEST_FLASH_" + flash_value);
 			    assertTrue(currentFlashButton != null);
 			    assertTrue(currentFlashButton.getAlpha() == PopupView.ALPHA_BUTTON_SELECTED);
@@ -6838,7 +6841,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testHDR1");
 
 		setToDefault();
-		
+
 		// list assets
 		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(hdr_images_path + "saintpaul/input2.jpg") );
@@ -6846,6 +6849,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "saintpaul/input4.jpg") );
 		
 		subTestHDR(inputs, "testHDR1_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "saintpaul".
@@ -6864,6 +6871,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "stlouis/input3.jpg") );
 		
 		subTestHDR(inputs, "testHDR2_output.jpg");
+
+		int [] exp_offsets_x = {-7, 0, 2};
+		int [] exp_offsets_y = {-1, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR3".
@@ -6882,6 +6893,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR3/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR3_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {1, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR4".
@@ -6900,6 +6915,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR4/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR4_output.jpg");
+
+		int [] exp_offsets_x = {-2, 0, 2};
+		int [] exp_offsets_y = {-1, 0, 1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR5".
@@ -6918,6 +6937,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR5/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR5_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR6".
@@ -6936,6 +6959,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR6/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR6_output.jpg");
+
+		int [] exp_offsets_x = {-1, 0, 0};
+		int [] exp_offsets_y = {1, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR7".
@@ -6954,6 +6981,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR7/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR7_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {0, 0, 1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR8".
@@ -6972,6 +7003,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR8/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR8_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {1, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR9".
@@ -6990,6 +7025,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR9/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR9_output.jpg");
+
+		int [] exp_offsets_x = {-1, 0, 1};
+		int [] exp_offsets_y = {0, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR10".
@@ -7008,6 +7047,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR10/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR10_output.jpg");
+
+		int [] exp_offsets_x = {1, 0, 0};
+		int [] exp_offsets_y = {5, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR11".
@@ -7026,6 +7069,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR11/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR11_output.jpg");
+
+		int [] exp_offsets_x = {-2, 0, 1};
+		int [] exp_offsets_y = {2, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR12".
@@ -7044,6 +7091,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR12/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR12_output.jpg");
+
+		int [] exp_offsets_x = {-1, 0, 7};
+		int [] exp_offsets_y = {-4, 0, 8};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR13".
@@ -7062,6 +7113,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR13/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR13_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 2};
+		int [] exp_offsets_y = {0, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR14".
@@ -7080,6 +7135,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR14/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR14_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 1};
+		int [] exp_offsets_y = {0, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR15".
@@ -7098,6 +7157,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR15/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR15_output.jpg");
+
+		int [] exp_offsets_x = {1, 0, -1};
+		int [] exp_offsets_y = {2, 0, -3};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR16".
@@ -7116,6 +7179,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR16/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR16_output.jpg");
+
+		int [] exp_offsets_x = {-1, 0, 2};
+		int [] exp_offsets_y = {1, 0, -6};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR17".
@@ -7134,6 +7201,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR17/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR17_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, -3};
+		int [] exp_offsets_y = {1, 0, -4};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR18".
@@ -7152,6 +7223,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR18/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR18_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR19".
@@ -7170,6 +7245,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR19/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR19_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR20".
@@ -7188,6 +7267,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR20/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR20_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {-1, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR21".
@@ -7206,6 +7289,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR21/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR21_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR22".
@@ -7224,6 +7311,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR22/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR22_output.jpg");
+
+		int [] exp_offsets_x = {1, 0, -4};
+		int [] exp_offsets_y = {-3, 0, -10};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR23".
@@ -7242,6 +7333,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0068.png") );
 		
 		subTestHDR(inputs, "testHDR23_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR24".
@@ -7260,6 +7355,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR24/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR24_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 1};
+		int [] exp_offsets_y = {0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR25".
@@ -7278,6 +7377,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR25/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR25_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 0};
+		int [] exp_offsets_y = {1, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR26".
@@ -7296,6 +7399,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR26/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR26_output.jpg");
+
+		int [] exp_offsets_x = {-1, 0, 1};
+		int [] exp_offsets_y = {1, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR27".
@@ -7314,6 +7421,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR27/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR27_output.jpg");
+
+		int [] exp_offsets_x = {0, 0, 2};
+		int [] exp_offsets_y = {0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR28".
@@ -7332,6 +7443,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR28/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR28_output.jpg");
+
+		int [] exp_offsets_x = {-63, 0, 1};
+		int [] exp_offsets_y = {-63, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR29".
@@ -7350,6 +7465,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR29/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDR29_output.jpg");
+
+		int [] exp_offsets_x = {-1, 0, 3};
+		int [] exp_offsets_y = {0, 0, -1};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR30".
