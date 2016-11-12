@@ -546,7 +546,7 @@ public class HDRProcessor {
 		
 		int n_bitmaps = bitmaps.size();
 		Bitmap bm = bitmaps.get(0);
-		final int base_bitmap = 1; // index of the bitmap with the base exposure
+		final int base_bitmap = 1; // index of the bitmap with the base exposure and offsets
 		ResponseFunction [] response_functions = new ResponseFunction[n_bitmaps]; // ResponseFunction for each image (the ResponseFunction entry can be left null to indicate the Identity)
 		/*int [][] buffers = new int[n_bitmaps][];
 		for(int i=0;i<n_bitmaps;i++) {
@@ -662,21 +662,30 @@ public class HDRProcessor {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call processHDRScript");
-			processHDRScript.forEach_hdr(allocations[1], allocations[0]);
+			// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset
+			processHDRScript.forEach_hdr(allocations[1], allocations[base_bitmap]);
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after processHDRScript: " + (System.currentTimeMillis() - time_s));
 
-			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
-			for(int i=1;i<bitmaps.size();i++) {
-				Bitmap bitmap = bitmaps.get(i);
-				bitmap.recycle();
+			// bitmaps.get(base_bitmap) now stores the HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
+			for(int i=0;i<bitmaps.size();i++) {
+				if( i != base_bitmap ) {
+					Bitmap bitmap = bitmaps.get(i);
+					bitmap.recycle();
+				}
 			}
 
-			adjustHistogram(allocations[0], bm.getWidth(), bm.getHeight(), time_s);
+			adjustHistogram(allocations[base_bitmap], bm.getWidth(), bm.getHeight(), time_s);
 
-			allocations[0].copyTo(bm);
+			allocations[base_bitmap].copyTo( bitmaps.get(base_bitmap) );
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+
+			// make it so that we store the output bitmap as first in the list
+			bitmaps.set(0, bitmaps.get(base_bitmap));
+			for(int i=1;i<bitmaps.size();i++) {
+				bitmaps.set(i, null);
+			}
 		}
 		else {
 			if( MyDebug.LOG )
@@ -884,6 +893,11 @@ public class HDRProcessor {
 				}
 			}
 		}
+
+		/*for(int i=0;i<3;i++) {
+			offsets_x[i] = 0;
+			offsets_y[i] = 0;
+		}*/
 	}
 
 	private int computeMedianLuminance(Bitmap bitmap, int mtb_x, int mtb_y, int mtb_width, int mtb_height) {
