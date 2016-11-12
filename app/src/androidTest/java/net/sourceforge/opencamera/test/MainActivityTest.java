@@ -7369,8 +7369,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		subTestHDR(inputs, "testHDR30_output.jpg");
 
-		int [] exp_offsets_x = {-6, 0, -1};
-		int [] exp_offsets_y = {23, 0, -13};
+		// offsets for full image
+		//int [] exp_offsets_x = {-6, 0, -1};
+		//int [] exp_offsets_y = {23, 0, -13};
+		// offsets using centre quarter image
+		int [] exp_offsets_x = {-5, 0, 0};
+		int [] exp_offsets_y = {22, 0, -13};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -7391,7 +7395,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		subTestHDR(inputs, "testHDR31_output.jpg");
 
-		int [] exp_offsets_x = {0, 0, 4};
+		// offsets for full image
+		//int [] exp_offsets_x = {0, 0, 4};
+		//int [] exp_offsets_y = {21, 0, -11};
+		// offsets using centre quarter image
+		int [] exp_offsets_x = {0, 0, 3};
 		int [] exp_offsets_y = {21, 0, -11};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}

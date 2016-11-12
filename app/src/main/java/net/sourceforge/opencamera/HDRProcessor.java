@@ -729,36 +729,50 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating mtb_allocations: " + (System.currentTimeMillis() - time_s));
 
+		// Testing shows that in practice we get good results by only aligning the centre quarter of the images. This gives better
+		// performance, and uses less memory.
+		int mtb_width = width/2;
+		int mtb_height = height/2;
+		int mtb_x = mtb_width/2;
+		int mtb_y = mtb_height/2;
+
 		// create RenderScript
 		ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
 
 		for(int i=0;i<allocations.length;i++) {
-			//mtb_allocations[i] = Allocation.createSized(rs, Element.U8_4(rs), width*height);
-			//mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), width, height));
-			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
-			int median_value = computeMedianLuminance(bitmaps.get(i));
+			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), mtb_width, mtb_height));
+			int median_value = computeMedianLuminance(bitmaps.get(i), mtb_x, mtb_y, mtb_width, mtb_height);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
 
 			// set parameters
 			createMTBScript.set_median_value(median_value);
+			createMTBScript.set_start_x(mtb_x);
+			createMTBScript.set_start_y(mtb_y);
+			createMTBScript.set_out_bitmap(mtb_allocations[i]);
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call createMTBScript");
-			createMTBScript.forEach_create_mtb(allocations[i], mtb_allocations[i]);
+			Script.LaunchOptions launch_options = new Script.LaunchOptions();
+			//launch_options.setX((int)(width*0.25), (int)(width*0.75));
+			//launch_options.setY((int)(height*0.25), (int)(height*0.75));
+			//createMTBScript.forEach_create_mtb(allocations[i], mtb_allocations[i], launch_options);
+			launch_options.setX(mtb_x, mtb_x+mtb_width);
+			launch_options.setY(mtb_y, mtb_y+mtb_height);
+			createMTBScript.forEach_create_mtb(allocations[i], launch_options);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after createMTBScript: " + (System.currentTimeMillis() - time_s));
 
 			/*if( MyDebug.LOG ) {
 				// debugging
-				byte [] mtb_bytes = new byte[width*height];
+				byte [] mtb_bytes = new byte[mtb_width*mtb_height];
 				mtb_allocations[i].copyTo(mtb_bytes);
-				int [] pixels = new int[width*height];
-				for(int j=0;j<width*height;j++) {
+				int [] pixels = new int[mtb_width*mtb_height];
+				for(int j=0;j<mtb_width*mtb_height;j++) {
 					byte b = mtb_bytes[j];
 					pixels[j] = Color.argb(255, b, b, b);
 				}
-				Bitmap mtb_bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+				Bitmap mtb_bitmap = Bitmap.createBitmap(pixels, mtb_width, mtb_height, Bitmap.Config.ARGB_8888);
 				File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/mtb_bitmap" + i + ".jpg");
 				try {
 					OutputStream outputStream = new FileOutputStream(file);
@@ -779,7 +793,7 @@ public class HDRProcessor {
 
 		//int step_size = 64;
 		// the initial step_size N should be a power of 2; the maximum offset we can achieve by the algorithm is N-1
-		int max_dim = Math.max(width, height);
+		int max_dim = Math.max(width, height); // n.b., use the full width and height here, not the mtb_width, height
 		int max_ideal_size = max_dim / 100;
 		int initial_step_size = 1;
 		while( initial_step_size < max_ideal_size ) {
@@ -822,15 +836,16 @@ public class HDRProcessor {
 
 				// see note inside align_mtb.rs/align_mtb() for why we sample over a subset of the image
 				Script.LaunchOptions launch_options = new Script.LaunchOptions();
-				int stop_x = width/step_size;
-				int stop_y = height/step_size;
+				int stop_x = mtb_width/step_size;
+				int stop_y = mtb_height/step_size;
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "stop_x: " + stop_x);
 					Log.d(TAG, "stop_y: " + stop_y);
 				}
+				//launch_options.setX((int)(stop_x*0.25), (int)(stop_x*0.75));
+				//launch_options.setY((int)(stop_y*0.25), (int)(stop_y*0.75));
 				launch_options.setX(0, stop_x);
 				launch_options.setY(0, stop_y);
-				//alignMTBScript.invoke_init_errors();
 				//alignMTBScript.forEach_align_mtb(mtb_allocations[1]);
 				alignMTBScript.forEach_align_mtb(mtb_allocations[1], launch_options);
 				if( MyDebug.LOG )
@@ -871,7 +886,7 @@ public class HDRProcessor {
 		}
 	}
 
-	private int computeMedianLuminance(Bitmap bitmap) {
+	private int computeMedianLuminance(Bitmap bitmap, int mtb_x, int mtb_y, int mtb_width, int mtb_height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "computeMedianLuminance");
 		final int n_samples_c = 100;
@@ -884,10 +899,12 @@ public class HDRProcessor {
 		int total = 0;
 		for(int y=0;y<n_h_samples;y++) {
 			double alpha = ((double) y + 1.0) / ((double) n_h_samples + 1.0);
-			int y_coord = (int) (alpha * bitmap.getHeight());
+			//int y_coord = (int) (alpha * bitmap.getHeight());
+			int y_coord = mtb_y + (int) (alpha * mtb_height);
 			for (int x = 0; x < n_w_samples; x++) {
 				double beta = ((double) x + 1.0) / ((double) n_w_samples + 1.0);
-				int x_coord = (int) (beta * bitmap.getWidth());
+				//int x_coord = (int) (beta * bitmap.getWidth());
+				int x_coord = mtb_x + (int) (beta * mtb_width);
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "sample value from " + x_coord + " , " + y_coord);*/
 				int color = bitmap.getPixel(x_coord, y_coord);
