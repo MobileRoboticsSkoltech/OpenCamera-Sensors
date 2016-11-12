@@ -744,15 +744,36 @@ public class HDRProcessor {
 		int mtb_height = height/2;
 		int mtb_x = mtb_width/2;
 		int mtb_y = mtb_height/2;
+		/*int mtb_width = width;
+		int mtb_height = height;
+		int mtb_x = 0;
+		int mtb_y = 0;*/
 
 		// create RenderScript
 		ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
 
 		for(int i=0;i<allocations.length;i++) {
-			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), mtb_width, mtb_height));
 			int median_value = computeMedianLuminance(bitmaps.get(i), mtb_x, mtb_y, mtb_width, mtb_height);
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
+				Log.d(TAG, i + ": median_value: " + median_value);
 				Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
+			}
+
+			/*if( median_value < 16 ) {
+				// needed for testHDR2, testHDR28
+				if( MyDebug.LOG )
+					Log.d(TAG, "image too dark to do alignment");
+				mtb_allocations[i] = null;
+				continue;
+			}*/
+			if( median_value == -1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "unable to compute median luminance safely");
+				mtb_allocations[i] = null;
+				continue;
+			}
+
+			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), mtb_width, mtb_height));
 
 			// set parameters
 			createMTBScript.set_median_value(median_value);
@@ -814,6 +835,12 @@ public class HDRProcessor {
 			Log.d(TAG, "initial_step_size: " + initial_step_size);
 		}
 
+		if( mtb_allocations[1] == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "middle image not suitable for image alignment");
+			return;
+		}
+
 		// create RenderScript
 		ScriptC_align_mtb alignMTBScript = new ScriptC_align_mtb(rs);
 
@@ -824,6 +851,11 @@ public class HDRProcessor {
 		for(int i=0;i<3;i++)  {
 			if( i == 1 ) {
 				// don't need to align the "base" reference image
+				continue;
+			}
+			if( mtb_allocations[i] == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "image " + i + " not suitable for image alignment");
 				continue;
 			}
 
@@ -937,12 +969,36 @@ public class HDRProcessor {
 			count += histo[i];
 			if( count >= middle ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "computeMedianLuminance returns " + i);
+					Log.d(TAG, "median luminance " + i);
+				final int noise_threshold = 4;
+				int n_below = 0, n_above = 0;
+				for(int j=0;j<=i-noise_threshold;j++) {
+					n_below += histo[j];
+				}
+				for(int j=0;j<=i+noise_threshold && j<256;j++) {
+					n_above += histo[j];
+				}
+				double frac_below = n_below / (double)total;
+				double frac_above = 1.0 - n_above / (double)total;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "count: " + count);
+					Log.d(TAG, "n_below: " + n_below);
+					Log.d(TAG, "n_above: " + n_above);
+					Log.d(TAG, "frac_below: " + frac_below);
+					Log.d(TAG, "frac_above: " + frac_above);
+				}
+				if( frac_below < 0.2 ) {
+					// needed for testHDR2, testHDR28
+					// note that we don't exclude cases where frac_above is too small, as this could be an overexposed image - see testHDR31
+					if( MyDebug.LOG )
+						Log.d(TAG, "too dark/noisy");
+					return -1;
+				}
 				return i;
 			}
 		}
 		Log.e(TAG, "computeMedianLuminance failed");
-		return 255;
+		return -1;
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)

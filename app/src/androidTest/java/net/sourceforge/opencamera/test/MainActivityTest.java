@@ -6872,8 +6872,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR2_output.jpg");
 
-		int [] exp_offsets_x = {-7, 0, 2};
-		int [] exp_offsets_y = {-1, 0, 0};
+		int [] exp_offsets_x = {0, 0, 2};
+		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -7092,8 +7092,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR12_output.jpg");
 
-		int [] exp_offsets_x = {-1, 0, 7};
-		int [] exp_offsets_y = {-4, 0, 8};
+		int [] exp_offsets_x = {0, 0, 7};
+		int [] exp_offsets_y = {0, 0, 8};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -7203,7 +7203,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestHDR(inputs, "testHDR17_output.jpg");
 
 		int [] exp_offsets_x = {0, 0, -3};
-		int [] exp_offsets_y = {1, 0, -4};
+		int [] exp_offsets_y = {0, 0, -4};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -7444,8 +7444,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR28_output.jpg");
 
-		int [] exp_offsets_x = {-63, 0, 1};
-		int [] exp_offsets_y = {-63, 0, -1};
+		int [] exp_offsets_x = {0, 0, 1};
+		int [] exp_offsets_y = {0, 0, -1};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
