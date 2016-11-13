@@ -5,8 +5,6 @@
 rs_allocation bitmap0; // the bitmap that is fixed
 rs_allocation bitmap1; // the bitmap that we're trying to compute the offsets for, i.e., find offset_x, offset_y such that
                        // evaluating at (x+offset_x, y+offset_y) on bitmap1 corresponds to (x, y) on bitmap0
-int width, height;
-
 int step_size = 1;
 int off_x = 0, off_y = 0;
 
@@ -27,7 +25,7 @@ void __attribute__((kernel)) align_mtb(uchar in, uint32_t x, uint32_t y) {
        */
     x *= step_size;
     y *= step_size;
-    if( x+off_x >= step_size && x+off_x < width-step_size && y+off_y >= step_size && y+off_y < height-step_size ) {
+    if( x+off_x >= step_size && x+off_x < rsAllocationGetDimX(bitmap1)-step_size && y+off_y >= step_size && y+off_y < rsAllocationGetDimY(bitmap1)-step_size ) {
         uchar pixel0 = rsGetElementAt_uchar(bitmap0, x, y);
         int c=0;
         for(int dy=-1;dy<=1;dy++) {

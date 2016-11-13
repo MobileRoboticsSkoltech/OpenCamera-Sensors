@@ -546,7 +546,7 @@ public class HDRProcessor {
 		
 		int n_bitmaps = bitmaps.size();
 		Bitmap bm = bitmaps.get(0);
-		final int base_bitmap = 1; // index of the bitmap with the base exposure
+		final int base_bitmap = 1; // index of the bitmap with the base exposure and offsets
 		ResponseFunction [] response_functions = new ResponseFunction[n_bitmaps]; // ResponseFunction for each image (the ResponseFunction entry can be left null to indicate the Identity)
 		/*int [][] buffers = new int[n_bitmaps][];
 		for(int i=0;i<n_bitmaps;i++) {
@@ -662,21 +662,30 @@ public class HDRProcessor {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call processHDRScript");
-			processHDRScript.forEach_hdr(allocations[1], allocations[0]);
+			// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset
+			processHDRScript.forEach_hdr(allocations[1], allocations[base_bitmap]);
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after processHDRScript: " + (System.currentTimeMillis() - time_s));
 
-			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
-			for(int i=1;i<bitmaps.size();i++) {
-				Bitmap bitmap = bitmaps.get(i);
-				bitmap.recycle();
+			// bitmaps.get(base_bitmap) now stores the HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
+			for(int i=0;i<bitmaps.size();i++) {
+				if( i != base_bitmap ) {
+					Bitmap bitmap = bitmaps.get(i);
+					bitmap.recycle();
+				}
 			}
 
-			adjustHistogram(allocations[0], bm.getWidth(), bm.getHeight(), time_s);
+			adjustHistogram(allocations[base_bitmap], bm.getWidth(), bm.getHeight(), time_s);
 
-			allocations[0].copyTo(bm);
+			allocations[base_bitmap].copyTo( bitmaps.get(base_bitmap) );
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+
+			// make it so that we store the output bitmap as first in the list
+			bitmaps.set(0, bitmaps.get(base_bitmap));
+			for(int i=1;i<bitmaps.size();i++) {
+				bitmaps.set(i, null);
+			}
 		}
 		else {
 			if( MyDebug.LOG )
@@ -729,36 +738,71 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating mtb_allocations: " + (System.currentTimeMillis() - time_s));
 
+		// Testing shows that in practice we get good results by only aligning the centre quarter of the images. This gives better
+		// performance, and uses less memory.
+		int mtb_width = width/2;
+		int mtb_height = height/2;
+		int mtb_x = mtb_width/2;
+		int mtb_y = mtb_height/2;
+		/*int mtb_width = width;
+		int mtb_height = height;
+		int mtb_x = 0;
+		int mtb_y = 0;*/
+
 		// create RenderScript
 		ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
 
 		for(int i=0;i<allocations.length;i++) {
-			//mtb_allocations[i] = Allocation.createSized(rs, Element.U8_4(rs), width*height);
-			//mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.RGBA_8888(rs), width, height));
-			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), width, height));
-			int median_value = computeMedianLuminance(bitmaps.get(i));
-			if( MyDebug.LOG )
+			int median_value = computeMedianLuminance(bitmaps.get(i), mtb_x, mtb_y, mtb_width, mtb_height);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, i + ": median_value: " + median_value);
 				Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
+			}
+
+			/*if( median_value < 16 ) {
+				// needed for testHDR2, testHDR28
+				if( MyDebug.LOG )
+					Log.d(TAG, "image too dark to do alignment");
+				mtb_allocations[i] = null;
+				continue;
+			}*/
+			if( median_value == -1 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "unable to compute median luminance safely");
+				mtb_allocations[i] = null;
+				continue;
+			}
+
+			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), mtb_width, mtb_height));
 
 			// set parameters
 			createMTBScript.set_median_value(median_value);
+			createMTBScript.set_start_x(mtb_x);
+			createMTBScript.set_start_y(mtb_y);
+			createMTBScript.set_out_bitmap(mtb_allocations[i]);
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call createMTBScript");
-			createMTBScript.forEach_create_mtb(allocations[i], mtb_allocations[i]);
+			Script.LaunchOptions launch_options = new Script.LaunchOptions();
+			//launch_options.setX((int)(width*0.25), (int)(width*0.75));
+			//launch_options.setY((int)(height*0.25), (int)(height*0.75));
+			//createMTBScript.forEach_create_mtb(allocations[i], mtb_allocations[i], launch_options);
+			launch_options.setX(mtb_x, mtb_x+mtb_width);
+			launch_options.setY(mtb_y, mtb_y+mtb_height);
+			createMTBScript.forEach_create_mtb(allocations[i], launch_options);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after createMTBScript: " + (System.currentTimeMillis() - time_s));
 
 			/*if( MyDebug.LOG ) {
 				// debugging
-				byte [] mtb_bytes = new byte[width*height];
+				byte [] mtb_bytes = new byte[mtb_width*mtb_height];
 				mtb_allocations[i].copyTo(mtb_bytes);
-				int [] pixels = new int[width*height];
-				for(int j=0;j<width*height;j++) {
+				int [] pixels = new int[mtb_width*mtb_height];
+				for(int j=0;j<mtb_width*mtb_height;j++) {
 					byte b = mtb_bytes[j];
 					pixels[j] = Color.argb(255, b, b, b);
 				}
-				Bitmap mtb_bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+				Bitmap mtb_bitmap = Bitmap.createBitmap(pixels, mtb_width, mtb_height, Bitmap.Config.ARGB_8888);
 				File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/mtb_bitmap" + i + ".jpg");
 				try {
 					OutputStream outputStream = new FileOutputStream(file);
@@ -779,7 +823,7 @@ public class HDRProcessor {
 
 		//int step_size = 64;
 		// the initial step_size N should be a power of 2; the maximum offset we can achieve by the algorithm is N-1
-		int max_dim = Math.max(width, height);
+		int max_dim = Math.max(width, height); // n.b., use the full width and height here, not the mtb_width, height
 		int max_ideal_size = max_dim / 100;
 		int initial_step_size = 1;
 		while( initial_step_size < max_ideal_size ) {
@@ -791,18 +835,27 @@ public class HDRProcessor {
 			Log.d(TAG, "initial_step_size: " + initial_step_size);
 		}
 
+		if( mtb_allocations[1] == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "middle image not suitable for image alignment");
+			return;
+		}
+
 		// create RenderScript
 		ScriptC_align_mtb alignMTBScript = new ScriptC_align_mtb(rs);
 
 		// set parameters
 		alignMTBScript.set_bitmap0(mtb_allocations[1]);
 		// bitmap1 set below
-		alignMTBScript.set_width( width );
-		alignMTBScript.set_height( height );
 
 		for(int i=0;i<3;i++)  {
 			if( i == 1 ) {
 				// don't need to align the "base" reference image
+				continue;
+			}
+			if( mtb_allocations[i] == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "image " + i + " not suitable for image alignment");
 				continue;
 			}
 
@@ -818,21 +871,22 @@ public class HDRProcessor {
 					Log.d(TAG, "call alignMTBScript for image: " + i);
 					Log.d(TAG, "step_size: " + step_size);
 				}
-				int [] errors = new int[9];
 				Allocation errorsAllocation = Allocation.createSized(rs, Element.I32(rs), 9);
 				alignMTBScript.bind_errors(errorsAllocation);
+				alignMTBScript.invoke_init_errors();
 
 				// see note inside align_mtb.rs/align_mtb() for why we sample over a subset of the image
 				Script.LaunchOptions launch_options = new Script.LaunchOptions();
-				int stop_x = width/step_size;
-				int stop_y = height/step_size;
+				int stop_x = mtb_width/step_size;
+				int stop_y = mtb_height/step_size;
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "stop_x: " + stop_x);
 					Log.d(TAG, "stop_y: " + stop_y);
 				}
+				//launch_options.setX((int)(stop_x*0.25), (int)(stop_x*0.75));
+				//launch_options.setY((int)(stop_y*0.25), (int)(stop_y*0.75));
 				launch_options.setX(0, stop_x);
 				launch_options.setY(0, stop_y);
-				//alignMTBScript.invoke_init_errors();
 				//alignMTBScript.forEach_align_mtb(mtb_allocations[1]);
 				alignMTBScript.forEach_align_mtb(mtb_allocations[1], launch_options);
 				if( MyDebug.LOG )
@@ -840,6 +894,7 @@ public class HDRProcessor {
 
 				int best_error = -1;
 				int best_id = -1;
+				int [] errors = new int[9];
 				errorsAllocation.copyTo(errors);
 				for(int j=0;j<9;j++) {
 					int this_error = errors[j];
@@ -870,9 +925,14 @@ public class HDRProcessor {
 				}
 			}
 		}
+
+		/*for(int i=0;i<3;i++) {
+			offsets_x[i] = 0;
+			offsets_y[i] = 0;
+		}*/
 	}
 
-	private int computeMedianLuminance(Bitmap bitmap) {
+	private int computeMedianLuminance(Bitmap bitmap, int mtb_x, int mtb_y, int mtb_width, int mtb_height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "computeMedianLuminance");
 		final int n_samples_c = 100;
@@ -885,10 +945,12 @@ public class HDRProcessor {
 		int total = 0;
 		for(int y=0;y<n_h_samples;y++) {
 			double alpha = ((double) y + 1.0) / ((double) n_h_samples + 1.0);
-			int y_coord = (int) (alpha * bitmap.getHeight());
+			//int y_coord = (int) (alpha * bitmap.getHeight());
+			int y_coord = mtb_y + (int) (alpha * mtb_height);
 			for (int x = 0; x < n_w_samples; x++) {
 				double beta = ((double) x + 1.0) / ((double) n_w_samples + 1.0);
-				int x_coord = (int) (beta * bitmap.getWidth());
+				//int x_coord = (int) (beta * bitmap.getWidth());
+				int x_coord = mtb_x + (int) (beta * mtb_width);
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "sample value from " + x_coord + " , " + y_coord);*/
 				int color = bitmap.getPixel(x_coord, y_coord);
@@ -907,12 +969,36 @@ public class HDRProcessor {
 			count += histo[i];
 			if( count >= middle ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "computeMedianLuminance returns " + i);
+					Log.d(TAG, "median luminance " + i);
+				final int noise_threshold = 4;
+				int n_below = 0, n_above = 0;
+				for(int j=0;j<=i-noise_threshold;j++) {
+					n_below += histo[j];
+				}
+				for(int j=0;j<=i+noise_threshold && j<256;j++) {
+					n_above += histo[j];
+				}
+				double frac_below = n_below / (double)total;
+				double frac_above = 1.0 - n_above / (double)total;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "count: " + count);
+					Log.d(TAG, "n_below: " + n_below);
+					Log.d(TAG, "n_above: " + n_above);
+					Log.d(TAG, "frac_below: " + frac_below);
+					Log.d(TAG, "frac_above: " + frac_above);
+				}
+				if( frac_below < 0.2 ) {
+					// needed for testHDR2, testHDR28
+					// note that we don't exclude cases where frac_above is too small, as this could be an overexposed image - see testHDR31
+					if( MyDebug.LOG )
+						Log.d(TAG, "too dark/noisy");
+					return -1;
+				}
 				return i;
 			}
 		}
 		Log.e(TAG, "computeMedianLuminance failed");
-		return 255;
+		return -1;
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -937,6 +1023,7 @@ public class HDRProcessor {
 				if( MyDebug.LOG )
 					Log.d(TAG, "bind histogram allocation");
 				histogramScript.bind_histogram(histogramAllocation);
+				histogramScript.invoke_init_histogram();
 				if( MyDebug.LOG )
 					Log.d(TAG, "call histogramScript");
 				histogramScript.forEach_histogram_compute(allocation);
