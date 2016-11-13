@@ -12,7 +12,16 @@ void __attribute__((kernel)) create_mtb(uchar4 in, uint32_t x, uint32_t y) {
 	value = max(value, in.b);
 
     uchar out;
-    if( value <= median_value )
+    // take care of being unsigned!
+    // ignore small differences to reduce effect of noise - this helps testHDR22
+    int diff;
+    if( value > median_value )
+        diff = value - median_value;
+    else
+        diff = median_value - value;
+    if( diff <= 4 )
+        out = 127;
+    else if( value <= median_value )
         out = 0;
     else
         out = 255;
