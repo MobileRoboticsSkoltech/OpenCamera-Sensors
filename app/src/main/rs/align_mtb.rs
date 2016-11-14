@@ -32,7 +32,8 @@ void __attribute__((kernel)) align_mtb(uchar in, uint32_t x, uint32_t y) {
             for(int dx=-1;dx<=1;dx++) {
             	uchar pixel1 = rsGetElementAt_uchar(bitmap1, x+off_x+dx*step_size, y+off_y+dy*step_size);
             	if( pixel0 != pixel1 ) {
-                	rsAtomicInc(&errors[c]);
+            	    if( pixel0 != 127 && pixel1 != 127 ) // ignore noise - see create_mtb.rs
+                    	rsAtomicInc(&errors[c]);
             	}
                 c++;
             }

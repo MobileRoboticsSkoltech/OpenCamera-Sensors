@@ -6939,7 +6939,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestHDR(inputs, "testHDR5_output.jpg");
 
 		int [] exp_offsets_x = {0, 0, 0};
-		int [] exp_offsets_y = {0, 0, 0};
+		int [] exp_offsets_y = {-1, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -6960,7 +6960,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR6_output.jpg");
 
-		int [] exp_offsets_x = {-1, 0, 0};
+		int [] exp_offsets_x = {0, 0, 0};
 		int [] exp_offsets_y = {1, 0, -1};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
@@ -7005,7 +7005,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestHDR(inputs, "testHDR8_output.jpg");
 
 		int [] exp_offsets_x = {0, 0, 0};
-		int [] exp_offsets_y = {1, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -7048,7 +7048,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR10_output.jpg");
 
-		int [] exp_offsets_x = {1, 0, 0};
+		int [] exp_offsets_x = {2, 0, 0};
 		int [] exp_offsets_y = {5, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
@@ -7071,7 +7071,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestHDR(inputs, "testHDR11_output.jpg");
 
 		int [] exp_offsets_x = {-2, 0, 1};
-		int [] exp_offsets_y = {2, 0, -1};
+		int [] exp_offsets_y = {1, 0, -1};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -7312,8 +7312,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR22_output.jpg");
 
-		int [] exp_offsets_x = {1, 0, -4};
-		int [] exp_offsets_y = {-3, 0, -10};
+		int [] exp_offsets_x = {1, 0, -5};
+		int [] exp_offsets_y = {1, 0, -6};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -7444,7 +7444,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR28_output.jpg");
 
-		int [] exp_offsets_x = {0, 0, 1};
+		int [] exp_offsets_x = {0, 0, 2};
 		int [] exp_offsets_y = {0, 0, -1};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
@@ -7520,6 +7520,94 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// offsets using centre quarter image
 		int [] exp_offsets_x = {0, 0, 3};
 		int [] exp_offsets_y = {21, 0, -11};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR32".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR32() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR32");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR32/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR32/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR32/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR32_output.jpg");
+
+		int [] exp_offsets_x = {1, 0, 0};
+		int [] exp_offsets_y = {13, 0, -10};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR33".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR33() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR33");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR33/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR33/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR33/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR33_output.jpg");
+
+		int [] exp_offsets_x = {13, 0, -10};
+		int [] exp_offsets_y = {24, 0, -12};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR34".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR34() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR34");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR34/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR34/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR34/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR34_output.jpg");
+
+		int [] exp_offsets_x = {5, 0, -8};
+		int [] exp_offsets_y = {0, 0, -2};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR35".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR35() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR35");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR35/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR35/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR35/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR35_output.jpg");
+
+		int [] exp_offsets_x = {-10, 0, 3};
+		int [] exp_offsets_y = {7, 0, -3};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 

@@ -821,10 +821,16 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after all createMTBScript: " + (System.currentTimeMillis() - time_s));
 
-		//int step_size = 64;
-		// the initial step_size N should be a power of 2; the maximum offset we can achieve by the algorithm is N-1
+		// The initial step_size N should be a power of 2; the maximum offset we can achieve by the algorithm is N-1.
+		// For pictures resolution 4160x3120, this gives max_ideal_size 27, and initial_step_size 32.
+		// On tests testHDR1 to testHDR35, the max required offset was 24 pixels (for testHDR33) even when using
+		// inital_step_size of 64.
+		// Note, there isn't really a performance cost in allowing higher initial step sizes (as larger sizes have less
+		// sampling - since we sample every step_size pixels - though there might be some overhead for every extra call
+		// to renderscript that we do). But high step sizes have a risk of producing really bad results if we were
+		// to misidentify cases as needing a large offset.
 		int max_dim = Math.max(width, height); // n.b., use the full width and height here, not the mtb_width, height
-		int max_ideal_size = max_dim / 100;
+		int max_ideal_size = max_dim / 150;
 		int initial_step_size = 1;
 		while( initial_step_size < max_ideal_size ) {
 			initial_step_size *= 2;
