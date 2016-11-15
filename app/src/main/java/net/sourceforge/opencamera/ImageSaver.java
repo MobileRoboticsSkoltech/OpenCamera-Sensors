@@ -81,6 +81,7 @@ public class ImageSaver extends Thread {
 		boolean do_auto_stabilise = false;
 		double level_angle = 0.0;
 		boolean is_front_facing = false;
+		boolean mirror = false;
 		Date current_date = null;
 		String preference_stamp = null;
 		String preference_textstamp = null;
@@ -105,6 +106,7 @@ public class ImageSaver extends Thread {
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
+			boolean mirror,
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
@@ -122,6 +124,7 @@ public class ImageSaver extends Thread {
 			this.do_auto_stabilise = do_auto_stabilise;
 			this.level_angle = level_angle;
 			this.is_front_facing = is_front_facing;
+			this.mirror = mirror;
 			this.current_date = current_date;
 			this.preference_stamp = preference_stamp;
 			this.preference_textstamp = preference_textstamp;
@@ -228,6 +231,7 @@ public class ImageSaver extends Thread {
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
+			boolean mirror,
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
@@ -247,6 +251,7 @@ public class ImageSaver extends Thread {
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
+				mirror,
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
@@ -276,6 +281,7 @@ public class ImageSaver extends Thread {
 				false, 0,
 				false, 0.0,
 				false,
+				false,
 				current_date,
 				null, null, 0, 0, null, null, null, null,
 				false, null, false, 0.0,
@@ -294,6 +300,7 @@ public class ImageSaver extends Thread {
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
+			boolean mirror,
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
@@ -315,6 +322,7 @@ public class ImageSaver extends Thread {
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
+				mirror,
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
@@ -337,6 +345,7 @@ public class ImageSaver extends Thread {
 					false, null,
 					false, 0,
 					false, 0.0,
+					false,
 					false,
 					null,
 					null, null, 0, 0, null, null, null, null,
@@ -429,7 +438,35 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "waitUntilDone: images all saved");
 	}
-	
+
+	/** Loads a single jpeg as a Bitmaps.
+	 * @param mutable Whether the bitmap should be mutable. Note that when converting to bitmaps
+	 *                for the image post-processing (auto-stabilise etc), in general we need the
+	 *                bitmap to be mutable (for photostamp to work).
+	 */
+	private Bitmap loadBitmap(byte [] jpeg_image, boolean mutable) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "loadBitmap");
+			Log.d(TAG, "mutable?: " + mutable);
+		}
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		if( MyDebug.LOG )
+			Log.d(TAG, "options.inMutable is: " + options.inMutable);
+		options.inMutable = mutable;
+		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+			// setting is ignored in Android 5 onwards
+			options.inPurgeable = true;
+		}
+		Bitmap bitmap = BitmapFactory.decodeByteArray(jpeg_image, 0, jpeg_image.length, options);
+		if( bitmap == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "failed to decode bitmap");
+		}
+		return bitmap;
+	}
+
+	/** Helper class for loadBitmaps().
+	 */
 	private static class LoadBitmapThread extends Thread {
 		Bitmap bitmap = null;
 		BitmapFactory.Options options = null;
@@ -444,7 +481,7 @@ public class ImageSaver extends Thread {
 		}
 	}
 
-	/** Converts the array of jpegs to Bitmaps.
+	/** Converts the array of jpegs to Bitmaps. The first bitmap will be marked as mutable.
 	 */
 	@SuppressWarnings("deprecation")
 	private List<Bitmap> loadBitmaps(List<byte []> jpeg_images) {
@@ -678,13 +715,8 @@ public class ImageSaver extends Thread {
 			if( bitmap == null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "need to decode bitmap to auto-stabilise");
-				BitmapFactory.Options options = new BitmapFactory.Options();
-				//options.inMutable = true;
-				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-					// setting is ignored in Android 5 onwards
-					options.inPurgeable = true;
-				}
-				bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+				// bitmap doesn't need to be mutable here, as this won't be the final bitmap retured from the auto-stabilise code
+				bitmap = loadBitmap(data, false);
 				if( bitmap == null ) {
 					main_activity.getPreview().showToast(null, R.string.failed_to_auto_stabilise);
 		            System.gc();
@@ -792,11 +824,17 @@ public class ImageSaver extends Thread {
         			if( MyDebug.LOG ) {
         				Log.d(TAG, "x0 = " + x0 + " , y0 = " + y0);
         			}
+					// We need the bitmap to be mutable for photostamp to work - contrary to the documentation for Bitmap.createBitmap
+					// (which says it returns an immutable bitmap), we seem to always get a mutable bitmap anyway. A mutable bitmap
+					// would result in an exception "java.lang.IllegalStateException: Immutable bitmap passed to Canvas constructor"
+					// from the Canvas(bitmap) constructor call in the photostamp code, and I've yet to see this from Google Play.
         			new_bitmap = Bitmap.createBitmap(bitmap, x0, y0, w2, h2);
         		    if( new_bitmap != bitmap ) {
         		    	bitmap.recycle();
         		    	bitmap = new_bitmap;
         		    }
+					if( MyDebug.LOG )
+						Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
     	            System.gc();
     			}
 			}
@@ -810,13 +848,7 @@ public class ImageSaver extends Thread {
 			if( bitmap == null ) {
     			if( MyDebug.LOG )
     				Log.d(TAG, "decode bitmap in order to stamp info");
-				BitmapFactory.Options options = new BitmapFactory.Options();
-				options.inMutable = true;
-				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-					// setting is ignored in Android 5 onwards
-					options.inPurgeable = true;
-				}
-    			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+				bitmap = loadBitmap(data, true);
     			if( bitmap == null ) {
     				main_activity.getPreview().showToast(null, R.string.failed_to_stamp);
     	            System.gc();
@@ -825,6 +857,8 @@ public class ImageSaver extends Thread {
 			if( bitmap != null ) {
     			if( MyDebug.LOG )
     				Log.d(TAG, "stamp info to bitmap");
+				if( MyDebug.LOG )
+					Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
     			int font_size = request.font_size;
     			int color = request.color;
     			String pref_style = request.pref_style;
@@ -968,13 +1002,8 @@ public class ImageSaver extends Thread {
     				if( bitmap == null ) {
 	        			if( MyDebug.LOG )
 	        				Log.d(TAG, "create bitmap");
-	    				BitmapFactory.Options options = new BitmapFactory.Options();
-	    				//options.inMutable = true;
-	    				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-	    					// setting is ignored in Android 5 onwards
-	    					options.inPurgeable = true;
-	    				}
-	        			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+						// bitmap we return doesn't need to be mutable
+						bitmap = loadBitmap(data, false);
     				}
     				if( bitmap != null ) {
 	        			int width = bitmap.getWidth();

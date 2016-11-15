@@ -1559,6 +1559,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
+				false,
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
