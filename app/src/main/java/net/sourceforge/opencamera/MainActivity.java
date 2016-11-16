@@ -328,6 +328,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
             setFirstTimeFlag();
         }
 
+		setModeFromIntents();
+
         // load icons
         preloadIcons(R.array.flash_icons);
         preloadIcons(R.array.focus_mode_icons);
@@ -391,6 +393,41 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), false);
 			editor.apply();
+		}
+	}
+
+	/** Switches modes if required, if called from a relevant intent/tile.
+	 *  This does mean that if the user switches to another mode, then the app is destroyed in background,
+	 *  returning to the app will cause us to switch back to the Intent's mode (since the Intent will
+	 *  still be set). But there seems to be no way to know if the onCreate call is the immediate one from
+	 *  an Intent, or the app is being recreated.
+	 *  Alternative ideas are:
+	 *  - Don't allow the user to change modes: this seems overly restrictive, especially given that the
+	 *    double-power-button method will launch Open Camera via the INTENT_ACTION_STILL_IMAGE_CAMERA.
+	 *  - Don't change mode. Some other third party apps take this approach, but that doesn't seem
+	 *    right either - for specific intents (especially video), the user would expect to be in the
+	 *    correct mode.
+	 *  Potentially for tiles, we could instead set the mode by passing a flag in the Intent extras,
+	 *  which we then remove (similar to what we do for the take photo widget).
+	 */
+	private void setModeFromIntents() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setModeFromIntents");
+        String action = this.getIntent().getAction();
+        if( MediaStore.INTENT_ACTION_VIDEO_CAMERA.equals(action) || MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "launching from video intent");
+			applicationInterface.setVideoPref(true);
+		}
+        else if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) || MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA.equals(action) || MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE.equals(action) ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "launching from photo intent");
+			applicationInterface.setVideoPref(false);
+		}
+		else if( MyTileService.TILE_ID.equals(action) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "launching from quick settings tile for Open Camera: photo mode");
+			applicationInterface.setVideoPref(false);
 		}
 	}
 

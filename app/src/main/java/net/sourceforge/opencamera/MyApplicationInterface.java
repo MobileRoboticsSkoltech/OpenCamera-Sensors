@@ -253,22 +253,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public boolean isVideoPref() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.INTENT_ACTION_VIDEO_CAMERA.equals(action) || MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "launching from video intent");
-    		return true;
-		}
-        else if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) || MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA.equals(action) || MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE.equals(action) ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "launching from photo intent");
-    		return false;
-		}
-		else if( MyTileService.TILE_ID.equals(action) ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "launching from quick settings tile for Open Camera: photo mode");
-			return false;
-		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), false);
     }
