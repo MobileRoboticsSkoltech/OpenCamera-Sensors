@@ -459,8 +459,7 @@ public class ImageSaver extends Thread {
 		}
 		Bitmap bitmap = BitmapFactory.decodeByteArray(jpeg_image, 0, jpeg_image.length, options);
 		if( bitmap == null ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "failed to decode bitmap");
+			Log.e(TAG, "failed to decode bitmap");
 		}
 		return bitmap;
 	}
@@ -526,8 +525,7 @@ public class ImageSaver extends Thread {
 		for(int i=0;i<jpeg_images.size() && ok;i++) {
 			Bitmap bitmap = threads[i].bitmap;
 			if( bitmap == null ) {
-				if( MyDebug.LOG )
-					Log.e(TAG, "failed to decode bitmap in thread: " + i);
+				Log.e(TAG, "failed to decode bitmap in thread: " + i);
 				ok = false;
 			}
 			bitmaps.add(bitmap);
@@ -810,6 +808,42 @@ public class ImageSaver extends Thread {
 		return bitmap;
 	}
 
+	/** Mirrors the image.
+	 * @param data The jpeg data.
+	 * @param bitmap Optional argument - the bitmap if already unpacked from the jpeg data.
+	 * @return A bitmap representing the mirrored jpeg.
+	 */
+	private Bitmap mirrorImage(byte [] data, Bitmap bitmap) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "mirrorImage");
+		}
+		if( bitmap == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "need to decode bitmap to mirror");
+			// bitmap doesn't need to be mutable here, as this won't be the final bitmap retured from the auto-stabilise code
+			bitmap = loadBitmap(data, false);
+			if( bitmap == null ) {
+				// don't bother warning to the user - we simply won't mirror the image
+				System.gc();
+			}
+		}
+		if( bitmap != null ) {
+			Matrix matrix = new Matrix();
+			matrix.preScale(-1.0f, 1.0f);
+			int width = bitmap.getWidth();
+			int height = bitmap.getHeight();
+			Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+			// careful, as new_bitmap is sometimes not a copy!
+			if( new_bitmap != bitmap ) {
+				bitmap.recycle();
+				bitmap = new_bitmap;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
+		}
+		return bitmap;
+	}
+
 	/** May be run in saver thread or picture callback thread (depending on whether running in background).
 	 *  The requests.images field is ignored, instead we save the supplied data or bitmap.
 	 *  If bitmap is null, then the supplied jpeg data is saved. If bitmap is non-null, then the bitmap is
@@ -856,6 +890,9 @@ public class ImageSaver extends Thread {
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "Save single image performance: time after auto-stabilise: " + (System.currentTimeMillis() - time_s));
+		}
+		if( request.mirror ) {
+			bitmap = mirrorImage(data, bitmap);
 		}
 		boolean dategeo_stamp = request.preference_stamp.equals("preference_stamp_yes");
 		boolean text_stamp = request.preference_textstamp.length() > 0;
