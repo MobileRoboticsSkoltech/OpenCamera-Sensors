@@ -2515,7 +2515,7 @@ public class CameraController2 extends CameraController {
 	@Override
 	public boolean supportsAutoFocus() {
 		if( previewBuilder.get(CaptureRequest.CONTROL_AF_MODE) == null )
-			return true;
+			return false;
 		int focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_AUTO || focus_mode == CaptureRequest.CONTROL_AF_MODE_MACRO )
 			return true;
