@@ -1287,11 +1287,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
 			// so to be safe, we always reset to continuous video mode
 			// although I've now fixed this at the level where we close the settings, I've put this guard here, just in case the problem occurs from elsewhere
+			// we'll switch to the user-requested focus by calling setFocusPref() from setupCameraParameters() below
 			this.updateFocusForVideo(false);
 		}
 
 		setupCameraParameters();
-		
+
 		// now switch to video if saved
 		boolean saved_is_video = applicationInterface.isVideoPref();
 		if( MyDebug.LOG ) {
@@ -2843,31 +2844,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return true;
 	}
 	
-	/*public int getNextCameraId() {
-		int n_cameras = camera_controller_manager.getNumberOfCameras();
-		if( n_cameras > 0 ) {
-			return (cameraId+1) % n_cameras;
-		}
-		else
-			return cameraId;
-	}
-
-	public void switchCamera() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "switchCamera()");
-		if( canSwitchCamera() ) {
-			int n_cameras = camera_controller_manager.getNumberOfCameras();
-			if( MyDebug.LOG )
-				Log.d(TAG, "found " + n_cameras + " cameras");
-			closeCamera();
-			cameraId = (cameraId+1) % n_cameras;
-			this.openCamera();
-			
-			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
-			updateFocusForVideo(true);
-		}
-	}*/
-	
 	public void setCamera(int cameraId) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setCamera()");
@@ -3072,7 +3048,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		
 		if( is_video != old_is_video ) {
 			setFocusPref(false); // first restore the saved focus for the new photo/video mode; don't do autofocus, as it'll be cancelled when restarting preview
-			updateFocusForVideo(false); // don't do autofocus, as it'll be cancelled when restarting preview
 			/*if( !is_video ) {
 				// changing from video to photo mode
 				setFocusPref(false); // first restore the saved focus for the new photo/video mode; don't do autofocus, as it'll be cancelled when restarting preview
@@ -3108,7 +3083,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			/*if( is_video ) {
 				// changing from photo to video mode
 				setFocusPref(false);
-				updateFocusForVideo(false);
 			}*/
 			if( is_video ) {
 				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
@@ -3165,7 +3139,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( focus_is_video != is_video ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "need to change focus mode");
-				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true, auto_focus);
+				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, false, auto_focus); // don't save, as we're just changing focus mode temporarily for the Samsung S5 video hack
 			}
 		}
 	}
