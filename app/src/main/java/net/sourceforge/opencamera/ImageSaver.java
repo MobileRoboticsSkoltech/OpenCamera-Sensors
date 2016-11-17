@@ -81,6 +81,7 @@ public class ImageSaver extends Thread {
 		boolean do_auto_stabilise = false;
 		double level_angle = 0.0;
 		boolean is_front_facing = false;
+		boolean mirror = false;
 		Date current_date = null;
 		String preference_stamp = null;
 		String preference_textstamp = null;
@@ -105,6 +106,7 @@ public class ImageSaver extends Thread {
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
+			boolean mirror,
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
@@ -122,6 +124,7 @@ public class ImageSaver extends Thread {
 			this.do_auto_stabilise = do_auto_stabilise;
 			this.level_angle = level_angle;
 			this.is_front_facing = is_front_facing;
+			this.mirror = mirror;
 			this.current_date = current_date;
 			this.preference_stamp = preference_stamp;
 			this.preference_textstamp = preference_textstamp;
@@ -228,6 +231,7 @@ public class ImageSaver extends Thread {
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
+			boolean mirror,
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
@@ -247,6 +251,7 @@ public class ImageSaver extends Thread {
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
+				mirror,
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
@@ -276,6 +281,7 @@ public class ImageSaver extends Thread {
 				false, 0,
 				false, 0.0,
 				false,
+				false,
 				current_date,
 				null, null, 0, 0, null, null, null, null,
 				false, null, false, 0.0,
@@ -294,6 +300,7 @@ public class ImageSaver extends Thread {
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
 			boolean is_front_facing,
+			boolean mirror,
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
@@ -315,6 +322,7 @@ public class ImageSaver extends Thread {
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
+				mirror,
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
@@ -337,6 +345,7 @@ public class ImageSaver extends Thread {
 					false, null,
 					false, 0,
 					false, 0.0,
+					false,
 					false,
 					null,
 					null, null, 0, 0, null, null, null, null,
@@ -429,7 +438,34 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "waitUntilDone: images all saved");
 	}
-	
+
+	/** Loads a single jpeg as a Bitmaps.
+	 * @param mutable Whether the bitmap should be mutable. Note that when converting to bitmaps
+	 *                for the image post-processing (auto-stabilise etc), in general we need the
+	 *                bitmap to be mutable (for photostamp to work).
+	 */
+	private Bitmap loadBitmap(byte [] jpeg_image, boolean mutable) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "loadBitmap");
+			Log.d(TAG, "mutable?: " + mutable);
+		}
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		if( MyDebug.LOG )
+			Log.d(TAG, "options.inMutable is: " + options.inMutable);
+		options.inMutable = mutable;
+		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
+			// setting is ignored in Android 5 onwards
+			options.inPurgeable = true;
+		}
+		Bitmap bitmap = BitmapFactory.decodeByteArray(jpeg_image, 0, jpeg_image.length, options);
+		if( bitmap == null ) {
+			Log.e(TAG, "failed to decode bitmap");
+		}
+		return bitmap;
+	}
+
+	/** Helper class for loadBitmaps().
+	 */
 	private static class LoadBitmapThread extends Thread {
 		Bitmap bitmap = null;
 		BitmapFactory.Options options = null;
@@ -444,7 +480,7 @@ public class ImageSaver extends Thread {
 		}
 	}
 
-	/** Converts the array of jpegs to Bitmaps.
+	/** Converts the array of jpegs to Bitmaps. The first bitmap will be marked as mutable.
 	 */
 	@SuppressWarnings("deprecation")
 	private List<Bitmap> loadBitmaps(List<byte []> jpeg_images) {
@@ -489,8 +525,7 @@ public class ImageSaver extends Thread {
 		for(int i=0;i<jpeg_images.size() && ok;i++) {
 			Bitmap bitmap = threads[i].bitmap;
 			if( bitmap == null ) {
-				if( MyDebug.LOG )
-					Log.e(TAG, "failed to decode bitmap in thread: " + i);
+				Log.e(TAG, "failed to decode bitmap in thread: " + i);
 				ok = false;
 			}
 			bitmaps.add(bitmap);
@@ -625,6 +660,190 @@ public class ImageSaver extends Thread {
 		return success;
 	}
 
+	/** Performs the auto-stabilise algorithm on the image.
+	 * @param data The jpeg data.
+	 * @param bitmap Optional argument - the bitmap if already unpacked from the jpeg data.
+	 * @param level_angle The angle in degrees to rotate the image.
+	 * @param is_front_facing Whether the camera is front-facing.
+     * @return A bitmap representing the auto-stabilised jpeg.
+     */
+	private Bitmap autoStabilise(byte [] data, Bitmap bitmap, double level_angle, boolean is_front_facing) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "autoStabilise");
+			Log.d(TAG, "level_angle: " + level_angle);
+			Log.d(TAG, "is_front_facing: " + is_front_facing);
+		}
+		while( level_angle < -90 )
+			level_angle += 180;
+		while( level_angle > 90 )
+			level_angle -= 180;
+		if( MyDebug.LOG )
+			Log.d(TAG, "auto stabilising... angle: " + level_angle);
+		if( bitmap == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "need to decode bitmap to auto-stabilise");
+			// bitmap doesn't need to be mutable here, as this won't be the final bitmap retured from the auto-stabilise code
+			bitmap = loadBitmap(data, false);
+			if( bitmap == null ) {
+				main_activity.getPreview().showToast(null, R.string.failed_to_auto_stabilise);
+				System.gc();
+			}
+		}
+		if( bitmap != null ) {
+			int width = bitmap.getWidth();
+			int height = bitmap.getHeight();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "level_angle: " + level_angle);
+				Log.d(TAG, "decoded bitmap size " + width + ", " + height);
+				Log.d(TAG, "bitmap size: " + width*height*4);
+			}
+    			/*for(int y=0;y<height;y++) {
+    				for(int x=0;x<width;x++) {
+    					int col = bitmap.getPixel(x, y);
+    					col = col & 0xffff0000; // mask out red component
+    					bitmap.setPixel(x, y, col);
+    				}
+    			}*/
+			Matrix matrix = new Matrix();
+			double level_angle_rad_abs = Math.abs( Math.toRadians(level_angle) );
+			int w1 = width, h1 = height;
+			double w0 = (w1 * Math.cos(level_angle_rad_abs) + h1 * Math.sin(level_angle_rad_abs));
+			double h0 = (w1 * Math.sin(level_angle_rad_abs) + h1 * Math.cos(level_angle_rad_abs));
+			// apply a scale so that the overall image size isn't increased
+			float orig_size = w1*h1;
+			float rotated_size = (float)(w0*h0);
+			float scale = (float)Math.sqrt(orig_size/rotated_size);
+			if( main_activity.test_low_memory ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "TESTING LOW MEMORY");
+				scale *= 2.0f; // test 20MP on Galaxy Nexus or Nexus 7; 52MP on Nexus 6
+			}
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
+				Log.d(TAG, "w1 = " + w1 + " , h1 = " + h1);
+				Log.d(TAG, "scale = sqrt " + orig_size + " / " + rotated_size + " = " + scale);
+			}
+			matrix.postScale(scale, scale);
+			w0 *= scale;
+			h0 *= scale;
+			w1 *= scale;
+			h1 *= scale;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "after scaling: w0 = " + w0 + " , h0 = " + h0);
+				Log.d(TAG, "after scaling: w1 = " + w1 + " , h1 = " + h1);
+			}
+			if( is_front_facing ) {
+				matrix.postRotate((float)-level_angle);
+			}
+			else {
+				matrix.postRotate((float)level_angle);
+			}
+			Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+			// careful, as new_bitmap is sometimes not a copy!
+			if( new_bitmap != bitmap ) {
+				bitmap.recycle();
+				bitmap = new_bitmap;
+			}
+			System.gc();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "rotated and scaled bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
+				Log.d(TAG, "rotated and scaled bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
+			}
+			double tan_theta = Math.tan(level_angle_rad_abs);
+			double sin_theta = Math.sin(level_angle_rad_abs);
+			double denom = ( h0/w0 + tan_theta );
+			double alt_denom = ( w0/h0 + tan_theta );
+			if( denom == 0.0 || denom < 1.0e-14 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "zero denominator?!");
+			}
+			else if( alt_denom == 0.0 || alt_denom < 1.0e-14 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "zero alt denominator?!");
+			}
+			else {
+				int w2 = (int)(( h0 + 2.0*h1*sin_theta*tan_theta - w0*tan_theta ) / denom);
+				int h2 = (int)(w2*h0/w0);
+				int alt_h2 = (int)(( w0 + 2.0*w1*sin_theta*tan_theta - h0*tan_theta ) / alt_denom);
+				int alt_w2 = (int)(alt_h2*w0/h0);
+				if( MyDebug.LOG ) {
+					//Log.d(TAG, "h0 " + h0 + " 2.0*h1*sin_theta*tan_theta " + 2.0*h1*sin_theta*tan_theta + " w0*tan_theta " + w0*tan_theta + " / h0/w0 " + h0/w0 + " tan_theta " + tan_theta);
+					Log.d(TAG, "w2 = " + w2 + " , h2 = " + h2);
+					Log.d(TAG, "alt_w2 = " + alt_w2 + " , alt_h2 = " + alt_h2);
+				}
+				if( alt_w2 < w2 ) {
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "chose alt!");
+					}
+					w2 = alt_w2;
+					h2 = alt_h2;
+				}
+				if( w2 <= 0 )
+					w2 = 1;
+				else if( w2 >= bitmap.getWidth() )
+					w2 = bitmap.getWidth()-1;
+				if( h2 <= 0 )
+					h2 = 1;
+				else if( h2 >= bitmap.getHeight() )
+					h2 = bitmap.getHeight()-1;
+				int x0 = (bitmap.getWidth()-w2)/2;
+				int y0 = (bitmap.getHeight()-h2)/2;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "x0 = " + x0 + " , y0 = " + y0);
+				}
+				// We need the bitmap to be mutable for photostamp to work - contrary to the documentation for Bitmap.createBitmap
+				// (which says it returns an immutable bitmap), we seem to always get a mutable bitmap anyway. A mutable bitmap
+				// would result in an exception "java.lang.IllegalStateException: Immutable bitmap passed to Canvas constructor"
+				// from the Canvas(bitmap) constructor call in the photostamp code, and I've yet to see this from Google Play.
+				new_bitmap = Bitmap.createBitmap(bitmap, x0, y0, w2, h2);
+				if( new_bitmap != bitmap ) {
+					bitmap.recycle();
+					bitmap = new_bitmap;
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
+				System.gc();
+			}
+		}
+		return bitmap;
+	}
+
+	/** Mirrors the image.
+	 * @param data The jpeg data.
+	 * @param bitmap Optional argument - the bitmap if already unpacked from the jpeg data.
+	 * @return A bitmap representing the mirrored jpeg.
+	 */
+	private Bitmap mirrorImage(byte [] data, Bitmap bitmap) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "mirrorImage");
+		}
+		if( bitmap == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "need to decode bitmap to mirror");
+			// bitmap doesn't need to be mutable here, as this won't be the final bitmap retured from the auto-stabilise code
+			bitmap = loadBitmap(data, false);
+			if( bitmap == null ) {
+				// don't bother warning to the user - we simply won't mirror the image
+				System.gc();
+			}
+		}
+		if( bitmap != null ) {
+			Matrix matrix = new Matrix();
+			matrix.preScale(-1.0f, 1.0f);
+			int width = bitmap.getWidth();
+			int height = bitmap.getHeight();
+			Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+			// careful, as new_bitmap is sometimes not a copy!
+			if( new_bitmap != bitmap ) {
+				bitmap.recycle();
+				bitmap = new_bitmap;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
+		}
+		return bitmap;
+	}
+
 	/** May be run in saver thread or picture callback thread (depending on whether running in background).
 	 *  The requests.images field is ignored, instead we save the supplied data or bitmap.
 	 *  If bitmap is null, then the supplied jpeg data is saved. If bitmap is non-null, then the bitmap is
@@ -666,143 +885,14 @@ public class ImageSaver extends Thread {
 		
 		main_activity.savingImage(true);
 
-		if( request.do_auto_stabilise )
-		{
-			double level_angle = request.level_angle;
-			while( level_angle < -90 )
-				level_angle += 180;
-			while( level_angle > 90 )
-				level_angle -= 180;
-			if( MyDebug.LOG )
-				Log.d(TAG, "auto stabilising... angle: " + level_angle);
-			if( bitmap == null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "need to decode bitmap to auto-stabilise");
-				BitmapFactory.Options options = new BitmapFactory.Options();
-				//options.inMutable = true;
-				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-					// setting is ignored in Android 5 onwards
-					options.inPurgeable = true;
-				}
-				bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
-				if( bitmap == null ) {
-					main_activity.getPreview().showToast(null, R.string.failed_to_auto_stabilise);
-		            System.gc();
-				}
-			}
-			if( bitmap != null ) {
-    			int width = bitmap.getWidth();
-    			int height = bitmap.getHeight();
-    			if( MyDebug.LOG ) {
-    				Log.d(TAG, "level_angle: " + level_angle);
-    				Log.d(TAG, "decoded bitmap size " + width + ", " + height);
-    				Log.d(TAG, "bitmap size: " + width*height*4);
-    			}
-    			/*for(int y=0;y<height;y++) {
-    				for(int x=0;x<width;x++) {
-    					int col = bitmap.getPixel(x, y);
-    					col = col & 0xffff0000; // mask out red component
-    					bitmap.setPixel(x, y, col);
-    				}
-    			}*/
-    		    Matrix matrix = new Matrix();
-    		    double level_angle_rad_abs = Math.abs( Math.toRadians(level_angle) );
-    		    int w1 = width, h1 = height;
-    		    double w0 = (w1 * Math.cos(level_angle_rad_abs) + h1 * Math.sin(level_angle_rad_abs));
-    		    double h0 = (w1 * Math.sin(level_angle_rad_abs) + h1 * Math.cos(level_angle_rad_abs));
-    		    // apply a scale so that the overall image size isn't increased
-    		    float orig_size = w1*h1;
-    		    float rotated_size = (float)(w0*h0);
-    		    float scale = (float)Math.sqrt(orig_size/rotated_size);
-    			if( main_activity.test_low_memory ) {
-        			if( MyDebug.LOG )
-        				Log.d(TAG, "TESTING LOW MEMORY");
-    		    	scale *= 2.0f; // test 20MP on Galaxy Nexus or Nexus 7; 52MP on Nexus 6
-    			}
-    			if( MyDebug.LOG ) {
-    				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
-    				Log.d(TAG, "w1 = " + w1 + " , h1 = " + h1);
-    				Log.d(TAG, "scale = sqrt " + orig_size + " / " + rotated_size + " = " + scale);
-    			}
-    		    matrix.postScale(scale, scale);
-    		    w0 *= scale;
-    		    h0 *= scale;
-    		    w1 *= scale;
-    		    h1 *= scale;
-    			if( MyDebug.LOG ) {
-    				Log.d(TAG, "after scaling: w0 = " + w0 + " , h0 = " + h0);
-    				Log.d(TAG, "after scaling: w1 = " + w1 + " , h1 = " + h1);
-    			}
-    		    if( request.is_front_facing ) {
-        		    matrix.postRotate((float)-level_angle);
-    		    }
-    		    else {
-        		    matrix.postRotate((float)level_angle);
-    		    }
-    		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-    		    // careful, as new_bitmap is sometimes not a copy!
-    		    if( new_bitmap != bitmap ) {
-    		    	bitmap.recycle();
-    		    	bitmap = new_bitmap;
-    		    }
-	            System.gc();
-    			if( MyDebug.LOG ) {
-    				Log.d(TAG, "rotated and scaled bitmap size " + bitmap.getWidth() + ", " + bitmap.getHeight());
-    				Log.d(TAG, "rotated and scaled bitmap size: " + bitmap.getWidth()*bitmap.getHeight()*4);
-    			}
-    			double tan_theta = Math.tan(level_angle_rad_abs);
-    			double sin_theta = Math.sin(level_angle_rad_abs);
-    			double denom = ( h0/w0 + tan_theta );
-    			double alt_denom = ( w0/h0 + tan_theta );
-    			if( denom == 0.0 || denom < 1.0e-14 ) {
-    	    		if( MyDebug.LOG )
-    	    			Log.d(TAG, "zero denominator?!");
-    			}
-    			else if( alt_denom == 0.0 || alt_denom < 1.0e-14 ) {
-    	    		if( MyDebug.LOG )
-    	    			Log.d(TAG, "zero alt denominator?!");
-    			}
-    			else {
-        			int w2 = (int)(( h0 + 2.0*h1*sin_theta*tan_theta - w0*tan_theta ) / denom);
-        			int h2 = (int)(w2*h0/w0);
-        			int alt_h2 = (int)(( w0 + 2.0*w1*sin_theta*tan_theta - h0*tan_theta ) / alt_denom);
-        			int alt_w2 = (int)(alt_h2*w0/h0);
-        			if( MyDebug.LOG ) {
-        				//Log.d(TAG, "h0 " + h0 + " 2.0*h1*sin_theta*tan_theta " + 2.0*h1*sin_theta*tan_theta + " w0*tan_theta " + w0*tan_theta + " / h0/w0 " + h0/w0 + " tan_theta " + tan_theta);
-        				Log.d(TAG, "w2 = " + w2 + " , h2 = " + h2);
-        				Log.d(TAG, "alt_w2 = " + alt_w2 + " , alt_h2 = " + alt_h2);
-        			}
-        			if( alt_w2 < w2 ) {
-            			if( MyDebug.LOG ) {
-            				Log.d(TAG, "chose alt!");
-            			}
-        				w2 = alt_w2;
-        				h2 = alt_h2;
-        			}
-        			if( w2 <= 0 )
-        				w2 = 1;
-        			else if( w2 >= bitmap.getWidth() )
-        				w2 = bitmap.getWidth()-1;
-        			if( h2 <= 0 )
-        				h2 = 1;
-        			else if( h2 >= bitmap.getHeight() )
-        				h2 = bitmap.getHeight()-1;
-        			int x0 = (bitmap.getWidth()-w2)/2;
-        			int y0 = (bitmap.getHeight()-h2)/2;
-        			if( MyDebug.LOG ) {
-        				Log.d(TAG, "x0 = " + x0 + " , y0 = " + y0);
-        			}
-        			new_bitmap = Bitmap.createBitmap(bitmap, x0, y0, w2, h2);
-        		    if( new_bitmap != bitmap ) {
-        		    	bitmap.recycle();
-        		    	bitmap = new_bitmap;
-        		    }
-    	            System.gc();
-    			}
-			}
+		if( request.do_auto_stabilise ) {
+			bitmap = autoStabilise(data, bitmap, request.level_angle, request.is_front_facing);
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "Save single image performance: time after auto-stabilise: " + (System.currentTimeMillis() - time_s));
+		}
+		if( request.mirror ) {
+			bitmap = mirrorImage(data, bitmap);
 		}
 		boolean dategeo_stamp = request.preference_stamp.equals("preference_stamp_yes");
 		boolean text_stamp = request.preference_textstamp.length() > 0;
@@ -810,13 +900,7 @@ public class ImageSaver extends Thread {
 			if( bitmap == null ) {
     			if( MyDebug.LOG )
     				Log.d(TAG, "decode bitmap in order to stamp info");
-				BitmapFactory.Options options = new BitmapFactory.Options();
-				options.inMutable = true;
-				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-					// setting is ignored in Android 5 onwards
-					options.inPurgeable = true;
-				}
-    			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+				bitmap = loadBitmap(data, true);
     			if( bitmap == null ) {
     				main_activity.getPreview().showToast(null, R.string.failed_to_stamp);
     	            System.gc();
@@ -825,6 +909,8 @@ public class ImageSaver extends Thread {
 			if( bitmap != null ) {
     			if( MyDebug.LOG )
     				Log.d(TAG, "stamp info to bitmap");
+				if( MyDebug.LOG )
+					Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
     			int font_size = request.font_size;
     			int color = request.color;
     			String pref_style = request.pref_style;
@@ -968,13 +1054,8 @@ public class ImageSaver extends Thread {
     				if( bitmap == null ) {
 	        			if( MyDebug.LOG )
 	        				Log.d(TAG, "create bitmap");
-	    				BitmapFactory.Options options = new BitmapFactory.Options();
-	    				//options.inMutable = true;
-	    				if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
-	    					// setting is ignored in Android 5 onwards
-	    					options.inPurgeable = true;
-	    				}
-	        			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+						// bitmap we return doesn't need to be mutable
+						bitmap = loadBitmap(data, false);
     				}
     				if( bitmap != null ) {
 	        			int width = bitmap.getWidth();

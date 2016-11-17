@@ -493,6 +493,15 @@
 	            android:defaultValue="2"
 	            />
 
+			<ListPreference
+				android:key="preference_front_camera_mirror"
+				android:title="@string/preference_front_camera_mirror"
+				android:summary="@string/preference_front_camera_mirror_summary"
+				android:entries="@array/preference_front_camera_mirror_entries"
+				android:entryValues="@array/preference_front_camera_mirror_values"
+				android:defaultValue="preference_front_camera_mirror_no"
+				/>
+
 			<PreferenceCategory
 		        android:key="preference_category_stamp"
 		        android:title="@string/preference_category_stamp"

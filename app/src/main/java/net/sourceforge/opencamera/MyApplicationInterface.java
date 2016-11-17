@@ -253,22 +253,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public boolean isVideoPref() {
-        String action = main_activity.getIntent().getAction();
-        if( MediaStore.INTENT_ACTION_VIDEO_CAMERA.equals(action) || MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "launching from video intent");
-    		return true;
-		}
-        else if( MediaStore.ACTION_IMAGE_CAPTURE.equals(action) || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action) || MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA.equals(action) || MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE.equals(action) ) {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "launching from photo intent");
-    		return false;
-		}
-		else if( MyTileService.TILE_ID.equals(action) ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "launching from quick settings tile for Open Camera: photo mode");
-			return false;
-		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), false);
     }
@@ -1524,11 +1508,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    	level_angle = 45.0;
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
 		boolean is_front_facing = main_activity.getPreview().getCameraController() != null && main_activity.getPreview().getCameraController().isFrontFacing();
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		boolean mirror = is_front_facing && sharedPreferences.getString(PreferenceKeys.getFrontCameraMirrorKey(), "preference_front_camera_mirror_no").equals("preference_front_camera_mirror_photo");
 		String preference_stamp = this.getStampPref();
 		String preference_textstamp = this.getTextStampPref();
 		int font_size = getTextStampFontSizePref();
         int color = getStampFontColor();
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String pref_style = sharedPreferences.getString(PreferenceKeys.getStampStyleKey(), "preference_stamp_style_shadowed");
 		String preference_stamp_dateformat = this.getStampDateFormatPref();
 		String preference_stamp_timeformat = this.getStampTimeFormatPref();
@@ -1559,6 +1544,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
 				is_front_facing,
+				mirror,
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,

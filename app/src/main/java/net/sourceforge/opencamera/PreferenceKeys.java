@@ -163,6 +163,10 @@ public class PreferenceKeys {
     	return "preference_stamp_style";
     }
 
+    public static String getFrontCameraMirrorKey() {
+        return "preference_front_camera_mirror";
+    }
+
     public static String getBackgroundPhotoSavingPreferenceKey() {
     	return "preference_background_photo_saving";
     }
