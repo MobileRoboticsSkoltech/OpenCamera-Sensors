@@ -961,7 +961,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// make sure we're into continuous video mode for closing
 				// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
 				// so to be safe, we always reset to continuous video mode
-				this.updateFocusForVideo(false);
+				this.updateFocusForVideo();
 			}
 			// need to check for camera being non-null again - if an error occurred stopping the video, we will have closed the camera, and may not be able to reopen
 			if( camera_controller != null ) {
@@ -1016,7 +1016,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
 			// so to be safe, we always reset to continuous video mode
 			// although I've now fixed this at the level where we close the settings, I've put this guard here, just in case the problem occurs from elsewhere
-			this.updateFocusForVideo(false);
+			this.updateFocusForVideo();
 		}
 		this.setPreviewPaused(false);
 		if( MyDebug.LOG ) {
@@ -1288,7 +1288,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// so to be safe, we always reset to continuous video mode
 			// although I've now fixed this at the level where we close the settings, I've put this guard here, just in case the problem occurs from elsewhere
 			// we'll switch to the user-requested focus by calling setFocusPref() from setupCameraParameters() below
-			this.updateFocusForVideo(false);
+			this.updateFocusForVideo();
 		}
 
 		setupCameraParameters();
@@ -3128,7 +3128,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
-	public void updateFocusForVideo(boolean auto_focus) {
+	public void updateFocusForVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocusForVideo()");
 		if( this.supported_focus_values != null && camera_controller != null && is_video ) { // originally we reset focus mode for photo mode too, but now we only do this for video mode (so if user wants to use continuous video mode for photo mode, that's fine, and we don't reset it)
@@ -3139,7 +3139,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( focus_is_video != is_video ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "need to change focus mode");
-				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, false, auto_focus); // don't save, as we're just changing focus mode temporarily for the Samsung S5 video hack
+				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, false, false); // don't save, as we're just changing focus mode temporarily for the Samsung S5 video hack
 			}
 		}
 	}

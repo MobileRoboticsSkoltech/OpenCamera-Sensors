@@ -1239,7 +1239,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			// make sure we're into continuous video mode
 			// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
 			// so to be safe, we always reset to continuous video mode, and then reset it afterwards
-			preview.updateFocusForVideo(false);
+			preview.updateFocusForVideo();
     	}
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved_focus_value: " + saved_focus_value);
