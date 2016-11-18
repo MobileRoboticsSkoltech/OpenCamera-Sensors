@@ -239,18 +239,6 @@ public class PopupView extends LinearLayout {
         		});
     		}
         	
-        	// popup should only be opened if we have a camera controller, but check just to be safe
-    		if( preview.getCameraController() != null ) {
-	        	List<String> supported_white_balances = preview.getSupportedWhiteBalances();
-	        	addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE");
-	
-	        	List<String> supported_scene_modes = preview.getSupportedSceneModes();
-	        	addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE");
-	
-	        	List<String> supported_color_effects = preview.getSupportedColorEffects();
-	        	addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT");
-    		}
-    		
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
@@ -509,7 +497,20 @@ public class PopupView extends LinearLayout {
 					return -1;
 				}
     		});
-    	}
+
+			// popup should only be opened if we have a camera controller, but check just to be safe
+			if( preview.getCameraController() != null ) {
+				List<String> supported_white_balances = preview.getSupportedWhiteBalances();
+				addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE");
+
+				List<String> supported_scene_modes = preview.getSupportedSceneModes();
+				addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE");
+
+				List<String> supported_color_effects = preview.getSupportedColorEffects();
+				addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT");
+			}
+
+		}
 	}
 
     private abstract class ButtonOptionsPopupListener {
