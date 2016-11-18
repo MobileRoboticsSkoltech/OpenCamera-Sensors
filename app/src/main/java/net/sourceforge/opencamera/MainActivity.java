@@ -1794,7 +1794,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "openFolderChooserDialog");
 		showPreview(false);
 		setWindowFlagsForSettings();
-		final String orig_save_location = applicationInterface.getStorageUtils().getSaveLocation();
 		FolderChooserDialog fragment = new FolderChooserDialog() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
@@ -1802,13 +1801,23 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					Log.d(TAG, "FolderChooserDialog dismissed");
 				setWindowFlagsForCamera();
 				showPreview(true);
-				final String new_save_location = applicationInterface.getStorageUtils().getSaveLocation();
-				if( !orig_save_location.equals(new_save_location) ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "changed save_folder to: " + applicationInterface.getStorageUtils().getSaveLocation());
-					save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true);
-					preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + applicationInterface.getStorageUtils().getSaveLocation());
+				String new_save_location = this.getChosenFolder();
+				if( new_save_location != null ) {
+					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+					String orig_save_location = applicationInterface.getStorageUtils().getSaveLocation();
+
+					if( !orig_save_location.equals(new_save_location) ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "changed save_folder to: " + applicationInterface.getStorageUtils().getSaveLocation());
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), new_save_location);
+						editor.apply();
+
+						save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true);
+						preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + applicationInterface.getStorageUtils().getSaveLocation());
+					}
 				}
+
 				super.onDismiss(dialog);
 			}
 		};
