@@ -444,6 +444,7 @@ public class ImageSaver extends Thread {
 	 *                for the image post-processing (auto-stabilise etc), in general we need the
 	 *                bitmap to be mutable (for photostamp to work).
 	 */
+	@SuppressWarnings("deprecation")
 	private Bitmap loadBitmap(byte [] jpeg_image, boolean mutable) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "loadBitmap");
@@ -1110,12 +1111,8 @@ public class ImageSaver extends Thread {
 	    			Log.d(TAG, "temp picFile: " + picFile.getAbsolutePath());
 			}
 			
-			OutputStream outputStream = null;
 			if( picFile != null ) {
-	            outputStream = new FileOutputStream(picFile);
-			}
-
-			if( outputStream != null ) {
+				OutputStream outputStream = new FileOutputStream(picFile);
 				try {
 		            if( bitmap != null ) {
 	    	            bitmap.compress(Bitmap.CompressFormat.JPEG, request.image_quality, outputStream);
