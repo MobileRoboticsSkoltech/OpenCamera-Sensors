@@ -117,6 +117,7 @@ public class LocationSupplier {
 					Log.d(TAG, "has_coarse_location_permission? " + has_coarse_location_permission);
 					Log.d(TAG, "has_fine_location_permission? " + has_fine_location_permission);
 				}
+				// require both permissions to be present
 				if( !has_coarse_location_permission || !has_fine_location_permission ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "location permission not available");
@@ -161,6 +162,24 @@ public class LocationSupplier {
 		if( MyDebug.LOG )
 			Log.d(TAG, "freeLocationListeners");
 		if( locationListeners != null ) {
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+				// Android Lint claims we need location permission for LocationManager.removeUpdates().
+				// also see http://stackoverflow.com/questions/32715189/location-manager-remove-updates-permission
+				if( MyDebug.LOG )
+					Log.d(TAG, "check for location permissions");
+				boolean has_coarse_location_permission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+				boolean has_fine_location_permission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "has_coarse_location_permission? " + has_coarse_location_permission);
+					Log.d(TAG, "has_fine_location_permission? " + has_fine_location_permission);
+				}
+				// require at least one permission to be present
+				if( !has_coarse_location_permission && !has_fine_location_permission ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "location permission not available");
+					return;
+				}
+			}
 			for(int i=0;i<locationListeners.length;i++) {
 				locationManager.removeUpdates(locationListeners[i]);
 	            locationListeners[i] = null;
