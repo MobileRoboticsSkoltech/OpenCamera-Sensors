@@ -1787,6 +1787,37 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         }
     }
 
+	public static class MyFolderChooserDialog extends FolderChooserDialog {
+		@Override
+		public void onDismiss(DialogInterface dialog) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "FolderChooserDialog dismissed");
+			// n.b., fragments have to be static (as they might be inserted into a new Activity - see http://stackoverflow.com/questions/15571010/fragment-inner-class-should-be-static),
+			// so we access the MainActivity via the fragment's getActivity().
+			MainActivity main_activity = (MainActivity)this.getActivity();
+			main_activity.setWindowFlagsForCamera();
+			main_activity.showPreview(true);
+			String new_save_location = this.getChosenFolder();
+			if( new_save_location != null ) {
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+				String orig_save_location = main_activity.applicationInterface.getStorageUtils().getSaveLocation();
+
+				if( !orig_save_location.equals(new_save_location) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "changed save_folder to: " + main_activity.applicationInterface.getStorageUtils().getSaveLocation());
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), new_save_location);
+					editor.apply();
+
+					main_activity.save_location_history.updateFolderHistory(main_activity.getStorageUtils().getSaveLocation(), true);
+					main_activity.preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + main_activity.applicationInterface.getStorageUtils().getSaveLocation());
+				}
+			}
+
+			super.onDismiss(dialog);
+		}
+	}
+
     /** Opens Open Camera's own (non-Storage Access Framework) dialog to select a folder.
      */
     private void openFolderChooserDialog() {
@@ -1794,33 +1825,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "openFolderChooserDialog");
 		showPreview(false);
 		setWindowFlagsForSettings();
-		FolderChooserDialog fragment = new FolderChooserDialog() {
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "FolderChooserDialog dismissed");
-				setWindowFlagsForCamera();
-				showPreview(true);
-				String new_save_location = this.getChosenFolder();
-				if( new_save_location != null ) {
-					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-					String orig_save_location = applicationInterface.getStorageUtils().getSaveLocation();
-
-					if( !orig_save_location.equals(new_save_location) ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "changed save_folder to: " + applicationInterface.getStorageUtils().getSaveLocation());
-						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), new_save_location);
-						editor.apply();
-
-						save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true);
-						preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + applicationInterface.getStorageUtils().getSaveLocation());
-					}
-				}
-
-				super.onDismiss(dialog);
-			}
-		};
+		FolderChooserDialog fragment = new MyFolderChooserDialog();
 		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
     }
 
