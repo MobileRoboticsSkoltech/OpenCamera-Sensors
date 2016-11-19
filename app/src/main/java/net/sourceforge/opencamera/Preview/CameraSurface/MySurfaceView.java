@@ -22,7 +22,7 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 	private static final String TAG = "MySurfaceView";
 
 	private Preview preview = null;
-	private int [] measure_spec = new int[2];
+	private final int [] measure_spec = new int[2];
 	
 	@SuppressWarnings("deprecation")
 	public

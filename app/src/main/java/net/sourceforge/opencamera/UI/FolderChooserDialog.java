@@ -40,11 +40,12 @@ public class FolderChooserDialog extends DialogFragment {
 	private File current_folder = null;
 	private AlertDialog folder_dialog = null;
 	private ListView list = null;
-	
+	private String chosen_folder = null;
+
 	private static class FileWrapper implements Comparable<FileWrapper> {
 		private File file = null;
 		private String override_name; // if non-null, use this as the display name instead
-		private int sort_order; // items are sorted first by sort_order, then alphabetically
+		private int sort_order = 0; // items are sorted first by sort_order, then alphabetically
 		
 		FileWrapper(File file, String override_name, int sort_order) {
 			this.file = file;
@@ -224,6 +225,8 @@ public class FolderChooserDialog extends DialogFragment {
     			return true;
     	}
     	catch(Exception e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "exception in canWrite()");
     	}
     	return false;
     }
@@ -243,10 +246,7 @@ public class FolderChooserDialog extends DialogFragment {
         	}
 			if( MyDebug.LOG )
 				Log.d(TAG, "new_save_location: " + new_save_location);
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), new_save_location);
-			editor.apply();
+			chosen_folder = new_save_location;
 			return true;
 		}
 		else {
@@ -254,10 +254,16 @@ public class FolderChooserDialog extends DialogFragment {
 		}
 		return false;
     }
+
+	/** Returns the folder selected by the user. Returns null if the dialog was cancelled.
+     */
+	public String getChosenFolder() {
+		return this.chosen_folder;
+	}
     
     private static class NewFolderInputFilter implements InputFilter {
 		// whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
-		String disallowed = "|\\?*<\":>";
+		final String disallowed = "|\\?*<\":>";
 		
 		@Override
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) { 

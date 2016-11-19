@@ -26,7 +26,7 @@ public class CameraController1 extends CameraController {
 
 	private Camera camera = null;
     private int display_orientation = 0;
-    private Camera.CameraInfo camera_info = new Camera.CameraInfo();
+    private final Camera.CameraInfo camera_info = new Camera.CameraInfo();
 	private String iso_key = null;
 	private boolean frontscreen_flash = false;
 	private ErrorCallback camera_error_cb = null;
@@ -119,10 +119,6 @@ public class CameraController1 extends CameraController {
 		camera = null;
 	}
 
-	public Camera getCamera() {
-		return camera;
-	}
-	
 	private Camera.Parameters getParameters() {
 		return camera.getParameters();
 	}

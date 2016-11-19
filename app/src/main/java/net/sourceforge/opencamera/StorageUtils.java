@@ -534,11 +534,11 @@ public class StorageUtils {
     }
 
     static class Media {
-    	long id;
-    	boolean video;
-    	Uri uri;
-    	long date;
-    	int orientation;
+    	long id = 0;
+    	boolean video = false;
+    	Uri uri = null;
+    	long date = 0;
+    	int orientation = 0;
 
     	Media(long id, boolean video, Uri uri, long date, int orientation) {
     		this.id = id;

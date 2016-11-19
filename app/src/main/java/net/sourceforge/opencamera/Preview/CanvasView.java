@@ -16,7 +16,7 @@ public class CanvasView extends View {
 	private static final String TAG = "CanvasView";
 
 	private Preview preview = null;
-	private int [] measure_spec = new int[2];
+	private final int [] measure_spec = new int[2];
 	
 	CanvasView(Context context, Preview preview) {
 		super(context);

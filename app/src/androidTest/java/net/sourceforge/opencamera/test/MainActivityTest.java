@@ -3328,7 +3328,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
 	}
 
-	public void takePhotoRepeatFocus(boolean locked) throws InterruptedException {
+	private void takePhotoRepeatFocus(boolean locked) throws InterruptedException {
 		Log.d(TAG, "takePhotoRepeatFocus");
 		setToDefault();
 		if( locked ) {
@@ -3665,8 +3665,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
-	private static interface VideoTestCallback {
-		public abstract int doTest(); // return expected number of new files
+	private interface VideoTestCallback {
+		int doTest(); // return expected number of new files
 	}
 	
 	private void subTestTakeVideo(boolean test_exposure_lock, boolean test_focus_area, boolean allow_failure, boolean immersive_mode, VideoTestCallback test_cb, long time_ms, boolean max_filesize) throws InterruptedException {

@@ -7,7 +7,7 @@ import android.util.Log;
 
 /** Sets up a listener to listen for noise level.
  */
-public class AudioListener {
+class AudioListener {
 	private static final String TAG = "AudioListener";
 	private volatile boolean is_running = true; // should be volatile, as used to communicate between threads
 	private int buffer_size = -1;

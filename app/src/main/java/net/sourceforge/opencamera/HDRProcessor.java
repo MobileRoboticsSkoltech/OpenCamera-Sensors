@@ -29,8 +29,8 @@ public class HDRProcessor {
 	private Context context = null;
 	private RenderScript rs = null; // lazily created, so we don't take up resources if application isn't using HDR
 
-	public int [] offsets_x = {0, 0, 0};
-	public int [] offsets_y = {0, 0, 0};
+	public final int [] offsets_x = {0, 0, 0};
+	public final int [] offsets_y = {0, 0, 0};
 
 	private enum HDRAlgorithm {
 		HDRALGORITHM_AVERAGE,
@@ -468,8 +468,8 @@ public class HDRProcessor {
 	
 	private class HDRWriterThread extends Thread {
 		int y_start = 0, y_stop = 0;
-		List<Bitmap> bitmaps;
-		ResponseFunction [] response_functions;
+		List<Bitmap> bitmaps = null;
+		ResponseFunction [] response_functions = null;
 		//float avg_luminance = 0.0f;
 
 		int n_bitmaps = 0;

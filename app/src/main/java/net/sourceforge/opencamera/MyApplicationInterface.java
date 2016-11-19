@@ -60,7 +60,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private DrawPreview drawPreview = null;
 	private ImageSaver imageSaver = null;
 
-	private Rect text_bounds = new Rect();
+	private final Rect text_bounds = new Rect();
     private boolean used_front_screen_flash = false;
 	
 	private boolean last_images_saf = false; // whether the last images array are using SAF or not
@@ -83,7 +83,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			this.share = share;
 		}
 	}
-	private List<LastImage> last_images = new ArrayList<>();
+	private final List<LastImage> last_images = new ArrayList<>();
 	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
@@ -216,7 +216,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
-	public Uri createOutputVideoUri() throws IOException {
+	public Uri createOutputVideoUri() {
         String action = main_activity.getIntent().getAction();
         if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
 			if( MyDebug.LOG )

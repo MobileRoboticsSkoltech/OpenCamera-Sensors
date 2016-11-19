@@ -20,7 +20,7 @@ public class MyTextureView extends TextureView implements CameraSurface {
 	private static final String TAG = "MyTextureView";
 
 	private Preview preview = null;
-	private int [] measure_spec = new int[2];
+	private final int [] measure_spec = new int[2];
 	
 	public MyTextureView(Context context, Preview preview) {
 		super(context);

@@ -73,7 +73,7 @@ public class CameraController2 extends CameraController {
 	private PictureCallback jpeg_cb = null;
 	private PictureCallback raw_cb = null;
 	private int n_burst = 0; // number of expected burst images in this capture
-	private List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
+	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
 	private List<CaptureRequest> burst_capture_requests = new ArrayList<>(); // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
 	private long burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using fast burst)
 	private DngCreator pending_dngCreator = null;
@@ -112,7 +112,7 @@ public class CameraController2 extends CameraController {
 
 	private ContinuousFocusMoveCallback continuous_focus_move_callback = null;
 	
-	private MediaActionSound media_action_sound = new MediaActionSound();
+	private final MediaActionSound media_action_sound = new MediaActionSound();
 	private boolean sounds_enabled = true;
 
 	private boolean capture_result_is_ae_scanning = false;
@@ -518,7 +518,7 @@ public class CameraController2 extends CameraController {
 		}
 	}
 	
-	private CameraSettings camera_settings = new CameraSettings();
+	private final CameraSettings camera_settings = new CameraSettings();
 	private boolean push_repeating_request_when_torch_off = false;
 	private CaptureRequest push_repeating_request_when_torch_off_id = null;
 	/*private boolean push_set_ae_lock = false;
@@ -3579,7 +3579,7 @@ public class CameraController2 extends CameraController {
 	}
 	*/
 
-	private CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+	private final CameraCaptureSession.CaptureCallback previewCaptureCallback = new CameraCaptureSession.CaptureCallback() {
 		private long last_process_frame_number = 0;
 		private int last_af_state = -1;
 
