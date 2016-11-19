@@ -12,7 +12,7 @@ public class SaveLocationHistory {
 	private static final String TAG = "SaveLocationHistory";
 	private MainActivity main_activity = null;
 	private String pref_base = null;
-	private ArrayList<String> save_location_history = new ArrayList<>();
+	private final ArrayList<String> save_location_history = new ArrayList<>();
 
 	/** Creates a new SaveLocationHistory class. This manages a history of save folder locations.
 	 * @param main_activity MainActivity.

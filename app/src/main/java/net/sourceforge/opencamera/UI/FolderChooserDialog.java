@@ -45,7 +45,7 @@ public class FolderChooserDialog extends DialogFragment {
 	private static class FileWrapper implements Comparable<FileWrapper> {
 		private File file = null;
 		private String override_name; // if non-null, use this as the display name instead
-		private int sort_order; // items are sorted first by sort_order, then alphabetically
+		private int sort_order = 0; // items are sorted first by sort_order, then alphabetically
 		
 		FileWrapper(File file, String override_name, int sort_order) {
 			this.file = file;
@@ -225,6 +225,8 @@ public class FolderChooserDialog extends DialogFragment {
     			return true;
     	}
     	catch(Exception e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "exception in canWrite()");
     	}
     	return false;
     }
@@ -261,7 +263,7 @@ public class FolderChooserDialog extends DialogFragment {
     
     private static class NewFolderInputFilter implements InputFilter {
 		// whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
-		String disallowed = "|\\?*<\":>";
+		final String disallowed = "|\\?*<\":>";
 		
 		@Override
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) { 

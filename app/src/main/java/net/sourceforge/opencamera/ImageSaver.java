@@ -48,8 +48,8 @@ public class ImageSaver extends Thread {
 	private static final String TAG_GPS_IMG_DIRECTION = "GPSImgDirection";
 	private static final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
 
-	private Paint p = new Paint();
-	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+	private final Paint p = new Paint();
+	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	
 	private MainActivity main_activity = null;
 	private HDRProcessor hdrProcessor = null;
@@ -60,7 +60,7 @@ public class ImageSaver extends Thread {
 	 * Therefore we should always have n_images_to_save >= queue.size().
 	 */
 	private int n_images_to_save = 0;
-	private BlockingQueue<Request> queue = new ArrayBlockingQueue<>(1); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
+	private final BlockingQueue<Request> queue = new ArrayBlockingQueue<>(1); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
 	
 	private static class Request {
 		enum Type {
@@ -1695,7 +1695,7 @@ public class ImageSaver extends Thread {
 
 	/** Reads from picFile and writes the contents to saveUri.
 	 */
-	private void copyFileToUri(Context context, Uri saveUri, File picFile) throws FileNotFoundException, IOException {
+	private void copyFileToUri(Context context, Uri saveUri, File picFile) throws IOException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "copyFileToUri");
 			Log.d(TAG, "saveUri: " + saveUri);

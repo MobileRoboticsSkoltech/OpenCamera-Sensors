@@ -40,7 +40,7 @@ public interface ApplicationInterface {
 	int createOutputVideoMethod(); // return a VIDEOMETHOD_* value to specify how to create a video file
 	File createOutputVideoFile() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_FILE
 	Uri createOutputVideoSAF() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_SAF
-	Uri createOutputVideoUri() throws IOException; // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_URI
+	Uri createOutputVideoUri(); // will be called if createOutputVideoUsingSAF() returns VIDEOMETHOD_URI
 	// for all of the get*Pref() methods, you can use Preview methods to get the supported values (e.g., getSupportedSceneModes())
 	// if you just want a default or don't really care, see the comments for each method for a default or possible options
 	// if Preview doesn't support the requested setting, it will check this, and choose its own

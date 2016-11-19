@@ -61,6 +61,7 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -99,7 +100,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
     private GestureDetector gestureDetector;
     private boolean screen_is_locked = false; // whether screen is "locked" - this is Open Camera's own lock to guard against accidental presses, not the standard Android lock
-    private Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<>();
+    private final Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<>();
 	private ValueAnimator gallery_save_anim = null;
 
     private SoundPool sound_pool = null;
@@ -115,11 +116,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	
 	//private boolean ui_placement_right = true;
 
-	private ToastBoxer switch_video_toast = new ToastBoxer();
-    private ToastBoxer screen_locked_toast = new ToastBoxer();
-    private ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
-	private ToastBoxer exposure_lock_toast = new ToastBoxer();
-	private ToastBoxer audio_control_toast = new ToastBoxer();
+	private final ToastBoxer switch_video_toast = new ToastBoxer();
+    private final ToastBoxer screen_locked_toast = new ToastBoxer();
+    private final ToastBoxer changed_auto_stabilise_toast = new ToastBoxer();
+	private final ToastBoxer exposure_lock_toast = new ToastBoxer();
+	private final ToastBoxer audio_control_toast = new ToastBoxer();
 	private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
     
 	private boolean keydown_volume_up = false;
@@ -824,15 +825,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		mainUI.changeSeekbar(R.id.exposure_seekbar, change);
 	}
 
-	public void changeISO(int change) {
+	private void changeISO(int change) {
 		mainUI.changeSeekbar(R.id.iso_seekbar, change);
 	}
-	
-	void changeFocusDistance(int change) {
+
+	private void changeFocusDistance(int change) {
 		mainUI.changeSeekbar(R.id.focus_seekbar, change);
 	}
 	
-	private SensorEventListener accelerometerListener = new SensorEventListener() {
+	private final SensorEventListener accelerometerListener = new SensorEventListener() {
 		@Override
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		}
@@ -843,7 +844,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 	};
 	
-	private SensorEventListener magneticListener = new SensorEventListener() {
+	private final SensorEventListener magneticListener = new SensorEventListener() {
 		@Override
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		}
@@ -1306,8 +1307,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     		preview.updateFocus(saved_focus_value, true, false);
     	}
     }
-    
-    MyPreferenceFragment getPreferenceFragment() {
+
+	private MyPreferenceFragment getPreferenceFragment() {
         return (MyPreferenceFragment)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
     }
     
@@ -1492,7 +1493,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     
     /** Shows the default "blank" gallery icon, when we don't have a thumbnail available.
      */
-    public void updateGalleryIconToBlank() {
+	private void updateGalleryIconToBlank() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateGalleryIconToBlank");
     	ImageButton galleryButton = (ImageButton) this.findViewById(R.id.gallery);
@@ -2046,7 +2047,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     /** Listen for gestures.
      *  Doing a swipe will unlock the screen (see lockScreen()).
      */
-    class MyGestureDetector extends SimpleOnGestureListener {
+	private class MyGestureDetector extends SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             try {
@@ -2390,8 +2391,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public boolean supportsCamera2() {
     	return this.supports_camera2;
     }
-    
-    void disableForceVideo4K() {
+
+	private void disableForceVideo4K() {
     	this.supports_force_video_4k = false;
     }
 
@@ -2746,10 +2747,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						boolean found = false;
 						final String trigger = "cheese";
 						//String debug_toast = "";
-						for(int i=0;i<list.size();i++) {
+						for(int i=0;list != null && i<list.size();i++) {
 							String text = list.get(i);
-							if( MyDebug.LOG )
-								Log.d(TAG, "text: " + text + " score: " + results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)[i]);
+							if( MyDebug.LOG ) {
+								float [] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
+								if( scores != null )
+									Log.d(TAG, "text: " + text + " score: " + scores[i]);
+							}
 							/*if( i > 0 )
 								debug_toast += "\n";
 							debug_toast += text + " : " + results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)[i];*/
@@ -2763,7 +2767,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 								Log.d(TAG, "audio trigger from speech recognition");
 							audioTrigger();
 						}
-						else if( list.size() > 0 ) {
+						else if( list != null && list.size() > 0 ) {
 							String toast = list.get(0) + "?";
 							if( MyDebug.LOG )
 								Log.d(TAG, "unrecognised: " + toast);
@@ -2870,7 +2874,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 	
 	// must be called before playSound (allowing enough time to load the sound)
-	void loadSound(int resource_id) {
+	private void loadSound(int resource_id) {
 		if( sound_pool != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "loading sound resource: " + resource_id);
@@ -3043,7 +3047,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         }
     }
 
-	void requestLocationPermission() {
+	private void requestLocationPermission() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "requestLocationPermission");
 		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {
@@ -3068,7 +3072,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     }
 
 	@Override
-	public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+	public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRequestPermissionsResult: requestCode " + requestCode);
 		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M ) {

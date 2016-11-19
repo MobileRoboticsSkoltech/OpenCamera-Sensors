@@ -99,8 +99,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean set_textureview_size = false;
 	private int textureview_w = 0, textureview_h = 0;
 
-    private Matrix camera_to_preview_matrix = new Matrix();
-    private Matrix preview_to_camera_matrix = new Matrix();
+    private final Matrix camera_to_preview_matrix = new Matrix();
+    private final Matrix preview_to_camera_matrix = new Matrix();
 	//private RectF face_rect = new RectF();
     private double preview_targetRatio = 0.0;
 
@@ -129,16 +129,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final int PHASE_TAKING_PHOTO = 2;
 	private static final int PHASE_PREVIEW_PAUSED = 3; // the paused state after taking a photo
 	private volatile int phase = PHASE_NORMAL; // must be volatile for test project reading the state
-	private Timer takePictureTimer = new Timer();
+	private final Timer takePictureTimer = new Timer();
 	private TimerTask takePictureTimerTask = null;
-	private Timer beepTimer = new Timer();
+	private final Timer beepTimer = new Timer();
 	private TimerTask beepTimerTask = null;
-	private Timer restartVideoTimer = new Timer();
+	private final Timer restartVideoTimer = new Timer();
 	private TimerTask restartVideoTimerTask = null;
-	private Timer flashVideoTimer = new Timer();
+	private final Timer flashVideoTimer = new Timer();
 	private TimerTask flashVideoTimerTask = null;
-	private IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-	private Timer batteryCheckVideoTimer = new Timer();
+	private final IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+	private final Timer batteryCheckVideoTimer = new Timer();
 	private TimerTask batteryCheckVideoTimerTask = null;
 	private long take_photo_time = 0;
 	private int remaining_burst_photos = 0;
@@ -207,10 +207,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private Rect location_dest = new Rect();*/
 
 	private Toast last_toast = null;
-	private ToastBoxer flash_toast = new ToastBoxer();
-	private ToastBoxer focus_toast = new ToastBoxer();
-	private ToastBoxer take_photo_toast = new ToastBoxer();
-	private ToastBoxer seekbar_toast = new ToastBoxer();
+	private final ToastBoxer flash_toast = new ToastBoxer();
+	private final ToastBoxer focus_toast = new ToastBoxer();
+	private final ToastBoxer take_photo_toast = new ToastBoxer();
+	private final ToastBoxer seekbar_toast = new ToastBoxer();
 	
 	private int ui_rotation = 0;
 
@@ -237,14 +237,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	// accelerometer and geomagnetic sensor info
 	private static final float sensor_alpha = 0.8f; // for filter
     private boolean has_gravity = false;
-    private float [] gravity = new float[3];
+    private final float [] gravity = new float[3];
     private boolean has_geomagnetic = false;
-    private float [] geomagnetic = new float[3];
-    private float [] deviceRotation = new float[9];
-    private float [] cameraRotation = new float[9];
-    private float [] deviceInclination = new float[9];
+    private final float [] geomagnetic = new float[3];
+    private final float [] deviceRotation = new float[9];
+    private final float [] cameraRotation = new float[9];
+    private final float [] deviceInclination = new float[9];
     private boolean has_geo_direction = false;
-    private float [] geo_direction = new float[3];
+    private final float [] geo_direction = new float[3];
 
 	private final DecimalFormat decimal_format_1dp = new DecimalFormat("#.#");
 	private final DecimalFormat decimal_format_2dp = new DecimalFormat("#.##");
@@ -253,7 +253,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 * autofocus_in_continuous_mode is set to true when this happens; the runnable reset_continuous_focus_runnable
 	 * switches back to continuous mode.
 	 */
-	private Handler reset_continuous_focus_handler = new Handler();
+	private final Handler reset_continuous_focus_handler = new Handler();
 	private Runnable reset_continuous_focus_runnable = null;
 	private boolean autofocus_in_continuous_mode = false;
 
@@ -2326,7 +2326,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return targetRatio;
 	}
 
-	public CameraController.Size getClosestSize(List<CameraController.Size> sizes, double targetRatio) {
+	private CameraController.Size getClosestSize(List<CameraController.Size> sizes, double targetRatio) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getClosestSize()");
 		CameraController.Size optimalSize = null;
@@ -4990,10 +4990,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return supported_focus_values;
 	}
 	
-	public List<Integer> getSupportedZoomRatios() {
-		return zoom_ratios;
-	}
-
     public int getCameraId() {
         if( camera_controller == null )
             return 0;
@@ -5047,10 +5043,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	
 		class RotatedTextView extends View {
 			private String [] lines = null;
-			private Paint paint = new Paint();
-			private Rect bounds = new Rect();
-			private Rect sub_bounds = new Rect();
-			private RectF rect = new RectF();
+			private final Paint paint = new Paint();
+			private final Rect bounds = new Rect();
+			private final Rect sub_bounds = new Rect();
+			private final RectF rect = new RectF();
 
 			public RotatedTextView(String text, Context context) {
 				super(context);
@@ -5203,10 +5199,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	public boolean isVideoRecording() {
 		return video_recorder != null && video_start_time_set;
-	}
-	
-	public int getRemainingRestartVideo() {
-		return remaining_restart_video;
 	}
 	
 	public long getVideoTime() {

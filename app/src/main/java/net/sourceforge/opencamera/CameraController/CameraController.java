@@ -160,7 +160,7 @@ public abstract class CameraController {
 
 	public abstract void release();
 
-	public CameraController(int cameraId) {
+	CameraController(int cameraId) {
 		this.cameraId = cameraId;
 	}
 	public abstract String getAPI();

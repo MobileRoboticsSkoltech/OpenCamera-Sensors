@@ -57,7 +57,7 @@ public class PopupView extends LinearLayout {
 	private int burst_mode_index = -1;
 	private int grid_index = -1;
 
-	private Map<String, View> popup_buttons = new Hashtable<>();
+	private final Map<String, View> popup_buttons = new Hashtable<>();
 
 	public PopupView(Context context) {
 		super(context);
@@ -283,7 +283,7 @@ public class PopupView extends LinearLayout {
     		}
     		addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), false, picture_size_index, false, "PHOTO_RESOLUTIONS", new ArrayOptionsPopupListener() {
 		    	final Handler handler = new Handler();
-				Runnable update_runnable = new Runnable() {
+				final Runnable update_runnable = new Runnable() {
 					@Override
 					public void run() {
 						if( MyDebug.LOG )
@@ -335,7 +335,7 @@ public class PopupView extends LinearLayout {
     		}
     		addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), false, video_size_index, false, "VIDEO_RESOLUTIONS", new ArrayOptionsPopupListener() {
 		    	final Handler handler = new Handler();
-				Runnable update_runnable = new Runnable() {
+				final Runnable update_runnable = new Runnable() {
 					@Override
 					public void run() {
 						if( MyDebug.LOG )

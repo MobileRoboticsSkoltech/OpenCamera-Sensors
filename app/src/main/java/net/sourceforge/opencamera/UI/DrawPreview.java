@@ -37,36 +37,36 @@ public class DrawPreview {
 	private MainActivity main_activity = null;
 	private MyApplicationInterface applicationInterface = null;
 
-	private Paint p = new Paint();
-	private RectF face_rect = new RectF();
-	private RectF draw_rect = new RectF();
-	private int [] gui_location = new int[2];
-	private DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+	private final Paint p = new Paint();
+	private final RectF face_rect = new RectF();
+	private final RectF draw_rect = new RectF();
+	private final int [] gui_location = new int[2];
+	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	private float stroke_width = 0.0f;
 
 	private float free_memory_gb = -1.0f;
 	private long last_free_memory_time = 0;
 
-	private IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+	private final IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 	private boolean has_battery_frac = false;
 	private float battery_frac = 0.0f;
 	private long last_battery_time = 0;
 
 	private Bitmap location_bitmap = null;
 	private Bitmap location_off_bitmap = null;
-	private Rect location_dest = new Rect();
+	private final Rect location_dest = new Rect();
 	
 	private Bitmap last_thumbnail = null; // thumbnail of last picture taken
 	private volatile boolean thumbnail_anim = false; // whether we are displaying the thumbnail animation; must be volatile for test project reading the state
 	private long thumbnail_anim_start_ms = -1; // time that the thumbnail animation started
-	private RectF thumbnail_anim_src_rect = new RectF();
-	private RectF thumbnail_anim_dst_rect = new RectF();
-	private Matrix thumbnail_anim_matrix = new Matrix();
+	private final RectF thumbnail_anim_src_rect = new RectF();
+	private final RectF thumbnail_anim_dst_rect = new RectF();
+	private final Matrix thumbnail_anim_matrix = new Matrix();
 
 	private boolean show_last_image = false;
-	private RectF last_image_src_rect = new RectF();
-	private RectF last_image_dst_rect = new RectF();
-	private Matrix last_image_matrix = new Matrix();
+	private final RectF last_image_src_rect = new RectF();
+	private final RectF last_image_dst_rect = new RectF();
+	private final Matrix last_image_matrix = new Matrix();
 
 	private long ae_started_scanning_ms = -1; // time when ae started scanning
 
