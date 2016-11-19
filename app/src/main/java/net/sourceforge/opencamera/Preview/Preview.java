@@ -149,8 +149,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int current_orientation; // orientation received by onOrientationChanged
 	private int current_rotation; // orientation relative to camera's orientation (used for parameters.setRotation())
 	private boolean has_level_angle;
-	private double level_angle;
-	private double orig_level_angle;
+	private double natural_level_angle; // "level" angle of device, before applying any calibration and without accounting for screen orientation
+	private double level_angle; // "level" angle of device, including calibration
+	private double orig_level_angle; // "level" angle of device, including calibration, but without accounting for screen orientation
 	
 	private boolean has_zoom;
 	private int max_zoom_factor;
@@ -4734,27 +4735,45 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		double x = gravity[0];
 		double y = gravity[1];
 		this.has_level_angle = true;
-		this.level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
-		if( this.level_angle < -0.0 ) {
-			this.level_angle += 360.0;
-		}
-		this.orig_level_angle = this.level_angle;
-		this.level_angle -= (float)this.current_orientation;
-		if( this.level_angle < -180.0 ) {
-			this.level_angle += 360.0;
-		}
-		else if( this.level_angle > 180.0 ) {
-			this.level_angle -= 360.0;
+		this.natural_level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
+		if( this.natural_level_angle < -0.0 ) {
+			this.natural_level_angle += 360.0;
 		}
 
-		cameraSurface.getView().invalidate();
+		updateLevelAngles();
+	}
+
+	/** This method should be called when the natural level angle, or the calibration angle, has been updated, to update the other level angle variables.
+	 *
+	 */
+	public void updateLevelAngles() {
+		if( has_level_angle ) {
+			this.level_angle = this.natural_level_angle;
+			double calibrated_level_angle = applicationInterface.getCalibratedLevelAngle();
+			this.level_angle -= calibrated_level_angle;
+			this.orig_level_angle = this.level_angle;
+			this.level_angle -= (float) this.current_orientation;
+			if (this.level_angle < -180.0) {
+				this.level_angle += 360.0;
+			} else if (this.level_angle > 180.0) {
+				this.level_angle -= 360.0;
+			}
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "level_angle is now: " + level_angle);*/
+
+			cameraSurface.getView().invalidate();
+		}
 	}
     
     public boolean hasLevelAngle() {
     	return this.has_level_angle;
     }
-    
-    public double getLevelAngle() {
+
+	public double getLevelAngleUncalibrated() {
+		return this.natural_level_angle - this.current_orientation;
+	}
+
+	public double getLevelAngle() {
     	return this.level_angle;
     }
     

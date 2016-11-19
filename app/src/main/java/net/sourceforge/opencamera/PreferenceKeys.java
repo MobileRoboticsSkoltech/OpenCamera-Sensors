@@ -271,6 +271,10 @@ public class PreferenceKeys {
     	return "preference_angle_highlight_color";
     }
 
+    public static String getCalibratedLevelAnglePreferenceKey() {
+        return "preference_calibrate_level_angle";
+    }
+
     public static String getShowGeoDirectionPreferenceKey() {
     	return "preference_show_geo_direction";
     }

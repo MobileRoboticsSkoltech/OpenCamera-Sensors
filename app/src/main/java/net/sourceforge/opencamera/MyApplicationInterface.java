@@ -728,7 +728,13 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return zoom_factor;
     }
 
-    @Override
+	@Override
+	public double getCalibratedLevelAngle() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return sharedPreferences.getFloat(PreferenceKeys.getCalibratedLevelAnglePreferenceKey(), 0.0f);
+	}
+
+	@Override
     public long getExposureTimePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);

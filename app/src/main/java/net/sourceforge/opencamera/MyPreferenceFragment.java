@@ -398,6 +398,52 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             });
         }
 
+		{
+			final Preference pref = findPreference("preference_calibrate_level");
+			pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+				@Override
+				public boolean onPreferenceClick(Preference arg0) {
+					if( pref.getKey().equals("preference_calibrate_level") ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "user clicked calibrate level option");
+						AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
+						alertDialog.setTitle(getActivity().getResources().getString(R.string.preference_about));
+						alertDialog.setMessage(R.string.preference_calibrate_level_dialog);
+						alertDialog.setPositiveButton(R.string.preference_calibrate_level_calibrate, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "user clicked calibrate level");
+								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+								if( main_activity.getPreview().hasLevelAngle() ) {
+									double current_level_angle = main_activity.getPreview().getLevelAngleUncalibrated();
+									SharedPreferences.Editor editor = sharedPreferences.edit();
+									editor.putFloat(PreferenceKeys.getCalibratedLevelAnglePreferenceKey(), (float)current_level_angle);
+									editor.apply();
+									main_activity.getPreview().updateLevelAngles();
+									Toast.makeText(main_activity, R.string.preference_calibrate_level_calibrated, Toast.LENGTH_SHORT).show();
+								}
+							}
+						});
+						alertDialog.setNegativeButton(R.string.preference_calibrate_level_reset, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "user clicked reset calibration level");
+								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+								SharedPreferences.Editor editor = sharedPreferences.edit();
+								editor.putFloat(PreferenceKeys.getCalibratedLevelAnglePreferenceKey(), 0.0f);
+								editor.apply();
+								main_activity.getPreview().updateLevelAngles();
+								Toast.makeText(main_activity, R.string.preference_calibrate_level_calibration_reset, Toast.LENGTH_SHORT).show();
+							}
+						});
+						alertDialog.show();
+						return false;
+					}
+					return false;
+				}
+			});
+		}
+
         {
             final Preference pref = findPreference("preference_donate");
             pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {

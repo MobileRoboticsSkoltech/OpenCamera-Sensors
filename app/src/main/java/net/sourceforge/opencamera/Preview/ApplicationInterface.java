@@ -84,6 +84,7 @@ public interface ApplicationInterface {
 	String getRecordAudioChannelsPref(); // either "audio_default", "audio_mono" or "audio_stereo"
 	String getRecordAudioSourcePref(); // "audio_src_camcorder" is recommended, but other options are: "audio_src_mic", "audio_src_default", "audio_src_voice_communication"; see corresponding values in android.media.MediaRecorder.AudioSource
 	int getZoomPref(); // index into Preview.getSupportedZoomRatios() array (each entry is the zoom factor, scaled by 100; array is sorted from min to max zoom)
+	double getCalibratedLevelAngle(); // set to non-zero to calibrate the accelerometer used for the level angles
 	// Camera2 only modes:
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
 	float getFocusDistancePref();
