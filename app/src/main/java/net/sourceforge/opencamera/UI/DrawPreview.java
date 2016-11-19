@@ -996,6 +996,7 @@ public class DrawPreview {
 					Log.d(TAG, "dt: " + dt);
 					Log.d(TAG, "radius: " + radius);
 				}*/
+				p.setColor(Color.WHITE);
 				p.setStyle(Paint.Style.STROKE);
 				canvas.drawCircle(pos_x, pos_y, radius, p);
 				p.setStyle(Paint.Style.FILL); // reset
