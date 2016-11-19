@@ -35,6 +35,7 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Range;
 import android.view.Display;
@@ -549,7 +550,7 @@ public class CameraController2 extends CameraController {
 			boolean callback_done = false; // must sychronize on this and notifyAll when setting to true
 			boolean first_callback = true; // Google Camera says we may get multiple callbacks, but only the first indicates the status of the camera opening operation
 			@Override
-			public void onOpened(CameraDevice cam) {
+			public void onOpened(@NonNull CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera opened, first_callback? " + first_callback);
 				/*if( true ) // uncomment to test timeout code
@@ -594,7 +595,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			@Override
-			public void onClosed(CameraDevice cam) {
+			public void onClosed(@NonNull CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera closed, first_callback? " + first_callback);
 				// caller should ensure camera variables are set to null
@@ -604,7 +605,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			@Override
-			public void onDisconnected(CameraDevice cam) {
+			public void onDisconnected(@NonNull CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera disconnected, first_callback? " + first_callback);
 				if( first_callback ) {
@@ -631,7 +632,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			@Override
-			public void onError(CameraDevice cam, int error) {
+			public void onError(@NonNull CameraDevice cam, int error) {
 				// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
 				Log.e(TAG, "camera error: " + error);
 				if( MyDebug.LOG ) {
@@ -2697,7 +2698,7 @@ public class CameraController2 extends CameraController {
 			class MyStateCallback extends CameraCaptureSession.StateCallback {
 				private boolean callback_done = false; // must sychronize on this and notifyAll when setting to true
 				@Override
-				public void onConfigured(CameraCaptureSession session) {
+				public void onConfigured(@NonNull CameraCaptureSession session) {
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "onConfigured: " + session);
 						Log.d(TAG, "captureSession was: " + captureSession);
@@ -2738,7 +2739,7 @@ public class CameraController2 extends CameraController {
 				}
 
 				@Override
-				public void onConfigureFailed(CameraCaptureSession session) {
+				public void onConfigureFailed(@NonNull CameraCaptureSession session) {
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "onConfigureFailed: " + session);
 						Log.d(TAG, "captureSession was: " + captureSession);
@@ -3583,7 +3584,7 @@ public class CameraController2 extends CameraController {
 		private long last_process_frame_number = 0;
 		private int last_af_state = -1;
 
-		public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long frameNumber) {
+		public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onCaptureStarted: capture");
@@ -3591,14 +3592,14 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
-		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
+		public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureProgressed");*/
 			process(partialResult);
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
-		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+		public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureCompleted");*/
 			process(result);

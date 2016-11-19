@@ -286,8 +286,6 @@ public class HDRProcessor {
 	 *  match the exposure level of out_bitmap.
 	 *  The supplied offsets offset_x, offset_y give the offset for in_bitmap as computed by
 	 *  autoAlignment().
-	 * @param offset_x
-	 * @param offset_y
 	 */
 	private ResponseFunction createFunctionFromBitmaps(int id, Bitmap in_bitmap, Bitmap out_bitmap, int offset_x, int offset_y) {
 		if( MyDebug.LOG )

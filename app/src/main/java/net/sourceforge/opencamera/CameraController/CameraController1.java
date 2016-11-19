@@ -4,6 +4,7 @@ import net.sourceforge.opencamera.MyDebug;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.annotation.TargetApi;
@@ -444,9 +445,7 @@ public class CameraController1 extends CameraController {
 			// split shouldn't return null
 			if( isos_array.length > 0 ) {
 				values = new ArrayList<>();
-				for(String iso : isos_array) {
-					values.add(iso);
-				}
+				Collections.addAll(values, isos_array);
 			}
 		}
 
