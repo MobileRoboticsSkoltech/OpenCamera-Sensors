@@ -30,15 +30,15 @@ import android.widget.ZoomControls;
 public class MainUI {
 	private static final String TAG = "MainUI";
 
-	private MainActivity main_activity = null;
+	private final MainActivity main_activity;
 
-	private volatile boolean popup_view_is_open = false; // must be volatile for test project reading the state
-    private PopupView popup_view = null;
+	private volatile boolean popup_view_is_open; // must be volatile for test project reading the state
+    private PopupView popup_view;
 
-    private int current_orientation = 0;
+    private int current_orientation;
 	private boolean ui_placement_right = true;
 
-	private boolean immersive_mode = false;
+	private boolean immersive_mode;
     private boolean show_gui = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
 
 	public MainUI(MainActivity main_activity) {

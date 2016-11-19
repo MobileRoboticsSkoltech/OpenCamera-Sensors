@@ -25,12 +25,12 @@ import android.view.SurfaceHolder;
 public class CameraController1 extends CameraController {
 	private static final String TAG = "CameraController1";
 
-	private Camera camera = null;
-    private int display_orientation = 0;
+	private Camera camera;
+    private int display_orientation;
     private final Camera.CameraInfo camera_info = new Camera.CameraInfo();
-	private String iso_key = null;
-	private boolean frontscreen_flash = false;
-	private ErrorCallback camera_error_cb = null;
+	private String iso_key;
+	private boolean frontscreen_flash;
+	private final ErrorCallback camera_error_cb;
 
 	/** Opens the camera device.
 	 * @param cameraId Which camera to open (must be between 0 and CameraControllerManager1.getNumberOfCameras()-1).

@@ -19,7 +19,7 @@ import android.view.View;
 public class MyTextureView extends TextureView implements CameraSurface {
 	private static final String TAG = "MyTextureView";
 
-	private Preview preview = null;
+	private final Preview preview;
 	private final int [] measure_spec = new int[2];
 	
 	public MyTextureView(Context context, Preview preview) {

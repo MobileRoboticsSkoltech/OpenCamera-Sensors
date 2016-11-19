@@ -43,11 +43,11 @@ public class StorageUtils {
     static final int MEDIA_TYPE_IMAGE = 1;
     static final int MEDIA_TYPE_VIDEO = 2;
 
-	private Context context = null;
-    private Uri last_media_scanned = null;
+	private final Context context;
+    private Uri last_media_scanned;
 
 	// for testing:
-	public volatile boolean failed_to_scan = false;
+	public volatile boolean failed_to_scan;
 	
 	StorageUtils(Context context) {
 		this.context = context;
@@ -534,11 +534,11 @@ public class StorageUtils {
     }
 
     static class Media {
-    	long id = 0;
-    	boolean video = false;
-    	Uri uri = null;
-    	long date = 0;
-    	int orientation = 0;
+		final long id;
+		final boolean video;
+		final Uri uri;
+		final long date;
+		final int orientation;
 
     	Media(long id, boolean video, Uri uri, long date, int orientation) {
     		this.id = id;

@@ -11,8 +11,8 @@ class AudioListener {
 	private static final String TAG = "AudioListener";
 	private volatile boolean is_running = true; // should be volatile, as used to communicate between threads
 	private int buffer_size = -1;
-	private AudioRecord ar = null; // modification to ar should always be synchronized (on AudioListener.this), as the ar can be released in the AudioListener's own thread
-	private Thread thread = null;
+	private AudioRecord ar; // modification to ar should always be synchronized (on AudioListener.this), as the ar can be released in the AudioListener's own thread
+	private Thread thread;
 
 	public interface AudioListenerCallback {
 		void onAudio(int level);

@@ -25,46 +25,46 @@ import android.view.SurfaceHolder;
  */
 public abstract class CameraController {
 	private static final String TAG = "CameraController";
-	private volatile int cameraId = 0; // must be volatile for test project reading the state
+	private final int cameraId;
 
 	public static final long EXPOSURE_TIME_DEFAULT = 1000000000L/30;
 
 	// for testing:
-	public int count_camera_parameters_exception = 0;
-	public int count_precapture_timeout = 0;
-	public boolean test_wait_capture_result = false; // whether to test delayed capture result in Camera2 API
+	public int count_camera_parameters_exception;
+	public int count_precapture_timeout;
+	public boolean test_wait_capture_result; // whether to test delayed capture result in Camera2 API
 
 	public static class CameraFeatures {
-		public boolean is_zoom_supported = false;
-		public int max_zoom = 0;
-		public List<Integer> zoom_ratios = null;
-		public boolean supports_face_detection = false;
-		public List<CameraController.Size> picture_sizes = null;
-		public List<CameraController.Size> video_sizes = null;
-		public List<CameraController.Size> preview_sizes = null;
-		public List<String> supported_flash_values = null;
-		public List<String> supported_focus_values = null;
-		public int max_num_focus_areas = 0;
-		public float minimum_focus_distance = 0.0f;
-		public boolean is_exposure_lock_supported = false;
-		public boolean is_video_stabilization_supported = false;
-		public boolean supports_iso_range = false;
-		public int min_iso = 0;
-		public int max_iso = 0;
-		public boolean supports_exposure_time = false;
-		public long min_exposure_time = 0L;
-		public long max_exposure_time = 0L;
-		public int min_exposure = 0;
-		public int max_exposure = 0;
-		public float exposure_step = 0.0f;
-		public boolean can_disable_shutter_sound = false;
-		public boolean supports_expo_bracketing = false;
-		public boolean supports_raw = false;
+		public boolean is_zoom_supported;
+		public int max_zoom;
+		public List<Integer> zoom_ratios;
+		public boolean supports_face_detection;
+		public List<CameraController.Size> picture_sizes;
+		public List<CameraController.Size> video_sizes;
+		public List<CameraController.Size> preview_sizes;
+		public List<String> supported_flash_values;
+		public List<String> supported_focus_values;
+		public int max_num_focus_areas;
+		public float minimum_focus_distance;
+		public boolean is_exposure_lock_supported;
+		public boolean is_video_stabilization_supported;
+		public boolean supports_iso_range;
+		public int min_iso;
+		public int max_iso;
+		public boolean supports_exposure_time;
+		public long min_exposure_time;
+		public long max_exposure_time;
+		public int min_exposure;
+		public int max_exposure;
+		public float exposure_step;
+		public boolean can_disable_shutter_sound;
+		public boolean supports_expo_bracketing;
+		public boolean supports_raw;
 	}
 
 	public static class Size {
-		public int width = 0;
-		public int height = 0;
+		public final int width;
+		public final int height;
 		
 		public Size(int width, int height) {
 			this.width = width;
@@ -94,8 +94,8 @@ public abstract class CameraController {
 	 * the current field of view (i.e., taking zoom into account).
 	 */
 	public static class Area {
-		Rect rect = null;
-		int weight = 0;
+		final Rect rect;
+		final int weight;
 		
 		public Area(Rect rect, int weight) {
 			this.rect = rect;
@@ -137,11 +137,11 @@ public abstract class CameraController {
 	}
 	
 	public static class Face {
-		public int score = 0;
+		public final int score;
 		/* The has values from [-1000,-1000] (for top-left) to [1000,1000] (for bottom-right) for whatever is
 		 * the current field of view (i.e., taking zoom into account).
 		 */
-		public Rect rect = null;
+		public final Rect rect;
 
 		Face(int score, Rect rect) {
 			this.score = score;
@@ -150,8 +150,8 @@ public abstract class CameraController {
 	}
 	
 	public static class SupportedValues {
-		public List<String> values = null;
-		public String selected_value = null;
+		public final List<String> values;
+		public final String selected_value;
 		SupportedValues(List<String> values, String selected_value) {
 			this.values = values;
 			this.selected_value = selected_value;

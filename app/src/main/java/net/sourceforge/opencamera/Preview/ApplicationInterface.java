@@ -25,8 +25,8 @@ public interface ApplicationInterface {
 		private static final long serialVersionUID = -2021932609486148748L;
 	}
 	class VideoMaxFileSize {
-		public long max_filesize = 0; // maximum file size in bytes for video (return 0 for device default - typically this is ~2GB)
-		public boolean auto_restart = false; // whether to automatically restart on hitting max filesize (this setting is still relevant for max_filesize==0, as typically there will still be a device max filesize)
+		public long max_filesize; // maximum file size in bytes for video (return 0 for device default - typically this is ~2GB)
+		public boolean auto_restart; // whether to automatically restart on hitting max filesize (this setting is still relevant for max_filesize==0, as typically there will still be a device max filesize)
 	}
 
 	int VIDEOMETHOD_FILE = 0; // video will be saved to a file

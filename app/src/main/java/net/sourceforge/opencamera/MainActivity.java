@@ -84,35 +84,35 @@ import android.widget.ZoomControls;
  */
 public class MainActivity extends Activity implements AudioListener.AudioListenerCallback {
 	private static final String TAG = "MainActivity";
-	private SensorManager mSensorManager = null;
-	private Sensor mSensorAccelerometer = null;
-	private Sensor mSensorMagnetic = null;
-	private MainUI mainUI = null;
-	private MyApplicationInterface applicationInterface = null;
-	private Preview preview = null;
-	private OrientationEventListener orientationEventListener = null;
-	private boolean supports_auto_stabilise = false;
-	private boolean supports_force_video_4k = false;
-	private boolean supports_camera2 = false;
-	private SaveLocationHistory save_location_history = null; // save location for non-SAF
-	private SaveLocationHistory save_location_history_saf = null; // save location for SAF (only initialised when SAF is used)
-    private boolean saf_dialog_from_preferences = false; // if a SAF dialog is opened, this records whether we opened it from the Preferences
-	private boolean camera_in_background = false; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
+	private SensorManager mSensorManager;
+	private Sensor mSensorAccelerometer;
+	private Sensor mSensorMagnetic;
+	private MainUI mainUI;
+	private MyApplicationInterface applicationInterface;
+	private Preview preview;
+	private OrientationEventListener orientationEventListener;
+	private boolean supports_auto_stabilise;
+	private boolean supports_force_video_4k;
+	private boolean supports_camera2;
+	private SaveLocationHistory save_location_history; // save location for non-SAF
+	private SaveLocationHistory save_location_history_saf; // save location for SAF (only initialised when SAF is used)
+    private boolean saf_dialog_from_preferences; // if a SAF dialog is opened, this records whether we opened it from the Preferences
+	private boolean camera_in_background; // whether the camera is covered by a fragment/dialog (such as settings or folder picker)
     private GestureDetector gestureDetector;
-    private boolean screen_is_locked = false; // whether screen is "locked" - this is Open Camera's own lock to guard against accidental presses, not the standard Android lock
+    private boolean screen_is_locked; // whether screen is "locked" - this is Open Camera's own lock to guard against accidental presses, not the standard Android lock
     private final Map<Integer, Bitmap> preloaded_bitmap_resources = new Hashtable<>();
-	private ValueAnimator gallery_save_anim = null;
+	private ValueAnimator gallery_save_anim;
 
-    private SoundPool sound_pool = null;
-	private SparseIntArray sound_ids = null;
+    private SoundPool sound_pool;
+	private SparseIntArray sound_ids;
 	
-	private TextToSpeech textToSpeech = null;
-	private boolean textToSpeechSuccess = false;
+	private TextToSpeech textToSpeech;
+	private boolean textToSpeechSuccess;
 	
-	private AudioListener audio_listener = null;
+	private AudioListener audio_listener;
 	private int audio_noise_sensitivity = -1;
-	private SpeechRecognizer speechRecognizer = null;
-	private boolean speechRecognizerIsStarted = false;
+	private SpeechRecognizer speechRecognizer;
+	private boolean speechRecognizerIsStarted;
 	
 	//private boolean ui_placement_right = true;
 
@@ -123,16 +123,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private final ToastBoxer audio_control_toast = new ToastBoxer();
 	private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
     
-	private boolean keydown_volume_up = false;
-	private boolean keydown_volume_down = false;
+	private boolean keydown_volume_up;
+	private boolean keydown_volume_down;
 	
 	// for testing; must be volatile for test project reading the state
-	public volatile boolean is_test = false; // whether called from OpenCamera.test testing
-	public volatile Bitmap gallery_bitmap = null;
-	public volatile boolean test_low_memory = false;
-	public volatile boolean test_have_angle = false;
-	public volatile float test_angle = 0.0f;
-	public volatile String test_last_saved_image = null;
+	public volatile boolean is_test; // whether called from OpenCamera.test testing
+	public volatile Bitmap gallery_bitmap;
+	public volatile boolean test_low_memory;
+	public volatile boolean test_have_angle;
+	public volatile float test_angle;
+	public volatile String test_last_saved_image;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
