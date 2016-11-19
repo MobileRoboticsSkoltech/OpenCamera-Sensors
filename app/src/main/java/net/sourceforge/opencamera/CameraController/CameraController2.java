@@ -61,6 +61,8 @@ public class CameraController2 extends CameraController {
 	private AutoFocusCallback autofocus_cb;
 	private FaceDetectionListener face_detection_listener;
 	private final Object image_reader_lock = new Object(); // lock to make sure we only handle one image being available at a time
+	private final Object open_camera_lock = new Object(); // lock to wait for camera to be opened from CameraDevice.StateCallback
+	private final Object create_capture_session_lock = new Object(); // lock to wait for capture session to be created from CameraCaptureSession.StateCallback
 	private ImageReader imageReader;
 	private boolean want_expo_bracketing;
 	private int expo_bracketing_n_images = 3;
@@ -583,11 +585,11 @@ public class CameraController2 extends CameraController {
 
 					if( MyDebug.LOG )
 						Log.d(TAG, "about to synchronize to say callback done");
-				    synchronized( this ) {
+				    synchronized( open_camera_lock ) {
 				    	callback_done = true;
 						if( MyDebug.LOG )
 							Log.d(TAG, "callback done, about to notify");
-				    	this.notifyAll();
+						open_camera_lock.notifyAll();
 						if( MyDebug.LOG )
 							Log.d(TAG, "callback done, notification done");
 				    }
@@ -620,11 +622,11 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "onDisconnected: camera is now closed");
 					if( MyDebug.LOG )
 						Log.d(TAG, "about to synchronize to say callback done");
-				    synchronized( this ) {
+				    synchronized( open_camera_lock ) {
 				    	callback_done = true;
 						if( MyDebug.LOG )
 							Log.d(TAG, "callback done, about to notify");
-				    	this.notifyAll();
+						open_camera_lock.notifyAll();
 						if( MyDebug.LOG )
 							Log.d(TAG, "callback done, notification done");
 				    }
@@ -660,11 +662,11 @@ public class CameraController2 extends CameraController {
 				}
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to synchronize to say callback done");
-			    synchronized( this ) {
+			    synchronized( open_camera_lock ) {
 			    	callback_done = true;
 					if( MyDebug.LOG )
 						Log.d(TAG, "callback done, about to notify");
-			    	this.notifyAll();
+					open_camera_lock.notifyAll();
 					if( MyDebug.LOG )
 						Log.d(TAG, "callback done, notification done");
 			    }
@@ -716,13 +718,13 @@ public class CameraController2 extends CameraController {
 			public void run() {
 				if( MyDebug.LOG )
 					Log.d(TAG, "check if camera has opened in reasonable time");
-				synchronized( myStateCallback ) {
+				synchronized( open_camera_lock ) {
 					if( !myStateCallback.callback_done ) {
 						// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
 						Log.e(TAG, "timeout waiting for camera callback");
 						myStateCallback.first_callback = true;
 						myStateCallback.callback_done = true;
-						myStateCallback.notifyAll();
+						open_camera_lock.notifyAll();
 					}
 				}
 			}
@@ -731,11 +733,11 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "wait until camera opened...");
 		// need to wait until camera is opened
-		synchronized( myStateCallback ) {
+		synchronized( open_camera_lock ) {
 			while( !myStateCallback.callback_done ) {
 				try {
-					// release the myStateCallback lock, and wait until myStateCallback calls notifyAll()
-					myStateCallback.wait();
+					// release the lock, and wait until myStateCallback calls notifyAll()
+					open_camera_lock.wait();
 				}
 				catch(InterruptedException e) {
 					if( MyDebug.LOG )
@@ -2707,9 +2709,9 @@ public class CameraController2 extends CameraController {
 						if( MyDebug.LOG ) {
 							Log.d(TAG, "camera is closed");
 						}
-					    synchronized( this ) {
+					    synchronized( create_capture_session_lock ) {
 					    	callback_done = true;
-					    	this.notifyAll();
+							create_capture_session_lock.notifyAll();
 					    }
 						return;
 					}
@@ -2732,9 +2734,9 @@ public class CameraController2 extends CameraController {
 						// this will cause a CameraControllerException to be thrown below
 						captureSession = null;
 					}
-				    synchronized( this ) {
+				    synchronized( create_capture_session_lock ) {
 				    	callback_done = true;
-				    	this.notifyAll();
+						create_capture_session_lock.notifyAll();
 				    }
 				}
 
@@ -2744,14 +2746,14 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "onConfigureFailed: " + session);
 						Log.d(TAG, "captureSession was: " + captureSession);
 					}
-				    synchronized( this ) {
+				    synchronized( create_capture_session_lock ) {
 				    	callback_done = true;
-				    	this.notifyAll();
+						create_capture_session_lock.notifyAll();
 				    }
 					// don't throw CameraControllerException here, as won't be caught - instead we throw CameraControllerException below
 				}
 			}
-			MyStateCallback myStateCallback = new MyStateCallback();
+			final MyStateCallback myStateCallback = new MyStateCallback();
 
         	Surface preview_surface = getPreviewSurface();
         	List<Surface> surfaces = null;
@@ -2787,11 +2789,11 @@ public class CameraController2 extends CameraController {
 		 		handler);
 			if( MyDebug.LOG )
 				Log.d(TAG, "wait until session created...");
-			synchronized( myStateCallback ) {
+			synchronized( create_capture_session_lock ) {
 				while( !myStateCallback.callback_done ) {
 					try {
-						// release the myStateCallback lock, and wait until myStateCallback calls notifyAll()
-						myStateCallback.wait();
+						// release the lock, and wait until myStateCallback calls notifyAll()
+						create_capture_session_lock.wait();
 					}
 					catch(InterruptedException e) {
 						e.printStackTrace();
