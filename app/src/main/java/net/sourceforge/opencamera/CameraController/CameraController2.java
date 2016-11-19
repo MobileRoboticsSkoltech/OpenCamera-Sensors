@@ -75,7 +75,7 @@ public class CameraController2 extends CameraController {
 	private PictureCallback raw_cb;
 	private int n_burst; // number of expected burst images in this capture
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
-	private List<CaptureRequest> burst_capture_requests = new ArrayList<>(); // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
+	private List<CaptureRequest> burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
 	private long burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using fast burst)
 	private DngCreator pending_dngCreator;
 	private Image pending_image;
