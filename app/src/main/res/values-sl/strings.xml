@@ -348,4 +348,19 @@
 	
 	<string name="preference_camera2_fast_burst">Omogoči hitro zaporedje HDR/kor. sam. osvetlitve</string>
     <string name="preference_camera2_fast_burst_summary">Omogoča hitrejše slikanje fotografij s HDR-om/kor. sam. osvetlitve. Onemogočite, če ima vaša naprava pri slikanju fotografij z načinoma HDR/kor. sam. osvetlitve težave (fotoaparat preneha delovati ali so fotografije načina kor. sam. osvetlitve v napačnem zaporedju).</string>
+	
+	<string name="camera">Fotoaparat</string>
+	<string name="record_video">Posnemi videoposnetek</string>
+    <string name="selfie">Samoposnetek</string>
+
+    <string name="preference_front_camera_mirror">Zrcaljenje sprednjega fotoaparata</string>
+    <string name="preference_front_camera_mirror_summary">Ali naj se ob uporabi sprednjega fotoaparata slike zrcalijo.</string>
+	
+	<string name="preference_calibrate_level">Kot ravni umerjanja</string>
+    <string name="preference_calibrate_level_summary">Ta možnost umeri pospeškomer naprave za pravilno delovanje samodejne ustalitve in prikaza ravni/kota na zaslonu.</string>
+    <string name="preference_calibrate_level_dialog">Napravo postavite na ravno vodoravno površino in izberite Umeri.\n\nPritisnite Ponastavi za odstranitev umerjanja iz naprave.\n\nPritisnite gumb Nazaj za preklic.</string>
+    <string name="preference_calibrate_level_calibrate">Umeri</string>
+    <string name="preference_calibrate_level_reset">Ponastavi</string>
+    <string name="preference_calibrate_level_calibrated">Raven umerjena</string>
+    <string name="preference_calibrate_level_calibration_reset">Ponastavitev ravni umerjanja</string>
 </resources>
