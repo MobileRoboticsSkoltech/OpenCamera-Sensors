@@ -19,6 +19,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.util.Log;
@@ -37,15 +38,15 @@ import android.widget.Toast;
 public class FolderChooserDialog extends DialogFragment {
 	private static final String TAG = "FolderChooserFragment";
 
-	private File current_folder = null;
-	private AlertDialog folder_dialog = null;
-	private ListView list = null;
-	private String chosen_folder = null;
+	private File current_folder;
+	private AlertDialog folder_dialog;
+	private ListView list;
+	private String chosen_folder;
 
 	private static class FileWrapper implements Comparable<FileWrapper> {
-		private File file = null;
-		private String override_name; // if non-null, use this as the display name instead
-		private int sort_order = 0; // items are sorted first by sort_order, then alphabetically
+		private final File file;
+		private final String override_name; // if non-null, use this as the display name instead
+		private final int sort_order; // items are sorted first by sort_order, then alphabetically
 		
 		FileWrapper(File file, String override_name, int sort_order) {
 			this.file = file;
@@ -61,7 +62,7 @@ public class FolderChooserDialog extends DialogFragment {
 		}
 		
 		@Override
-        public int compareTo(FileWrapper o) {
+        public int compareTo(@NonNull FileWrapper o) {
 			if( this.sort_order < o.sort_order )
 				return -1;
 			else if( this.sort_order > o.sort_order )

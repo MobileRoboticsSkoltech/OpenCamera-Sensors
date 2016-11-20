@@ -249,7 +249,13 @@
                 android:defaultValue="true"
                 />
 
-            </PreferenceScreen>
+			<Preference
+				android:key="preference_calibrate_level"
+				android:title="@string/preference_calibrate_level"
+				android:summary="@string/preference_calibrate_level_summary"
+				/>
+
+		</PreferenceScreen>
 
 	    <PreferenceScreen
             android:key="preference_screen_gui"
@@ -328,14 +334,14 @@
                 android:defaultValue="true"
                 />
 
-            <CheckBoxPreference
+			<CheckBoxPreference
                 android:key="preference_show_angle_line"
                 android:title="@string/preference_show_angle_line"
                 android:summary="@string/preference_show_angle_line_summary"
                 android:defaultValue="false"
                 />
 
-            <ListPreference 
+            <ListPreference
                 android:key="preference_angle_highlight_color"
                 android:title="@string/preference_angle_highlight_color"
                 android:summary="@string/preference_angle_highlight_color_summary"
@@ -344,7 +350,7 @@
                 android:defaultValue="#14e715"
                 />
 
-            <CheckBoxPreference
+			<CheckBoxPreference
                 android:key="preference_show_geo_direction"
                 android:title="@string/preference_show_geo_direction"
                 android:summary="@string/preference_show_geo_direction_summary"

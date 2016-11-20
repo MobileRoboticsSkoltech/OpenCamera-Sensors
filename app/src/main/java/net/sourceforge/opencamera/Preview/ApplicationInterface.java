@@ -25,8 +25,8 @@ public interface ApplicationInterface {
 		private static final long serialVersionUID = -2021932609486148748L;
 	}
 	class VideoMaxFileSize {
-		public long max_filesize = 0; // maximum file size in bytes for video (return 0 for device default - typically this is ~2GB)
-		public boolean auto_restart = false; // whether to automatically restart on hitting max filesize (this setting is still relevant for max_filesize==0, as typically there will still be a device max filesize)
+		public long max_filesize; // maximum file size in bytes for video (return 0 for device default - typically this is ~2GB)
+		public boolean auto_restart; // whether to automatically restart on hitting max filesize (this setting is still relevant for max_filesize==0, as typically there will still be a device max filesize)
 	}
 
 	int VIDEOMETHOD_FILE = 0; // video will be saved to a file
@@ -84,6 +84,7 @@ public interface ApplicationInterface {
 	String getRecordAudioChannelsPref(); // either "audio_default", "audio_mono" or "audio_stereo"
 	String getRecordAudioSourcePref(); // "audio_src_camcorder" is recommended, but other options are: "audio_src_mic", "audio_src_default", "audio_src_voice_communication"; see corresponding values in android.media.MediaRecorder.AudioSource
 	int getZoomPref(); // index into Preview.getSupportedZoomRatios() array (each entry is the zoom factor, scaled by 100; array is sorted from min to max zoom)
+	double getCalibratedLevelAngle(); // set to non-zero to calibrate the accelerometer used for the level angles
 	// Camera2 only modes:
 	long getExposureTimePref(); // only called if getISOPref() is not "default"
 	float getFocusDistancePref();

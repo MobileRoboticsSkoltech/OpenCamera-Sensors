@@ -54,22 +54,22 @@ public class MyApplicationInterface implements ApplicationInterface {
     	ExpoBracketing
     }
     
-	private MainActivity main_activity = null;
-	private LocationSupplier locationSupplier = null;
-	private StorageUtils storageUtils = null;
-	private DrawPreview drawPreview = null;
-	private ImageSaver imageSaver = null;
+	private final MainActivity main_activity;
+	private final LocationSupplier locationSupplier;
+	private final StorageUtils storageUtils;
+	private final DrawPreview drawPreview;
+	private final ImageSaver imageSaver;
 
 	private final Rect text_bounds = new Rect();
-    private boolean used_front_screen_flash = false;
+    private boolean used_front_screen_flash ;
 	
-	private boolean last_images_saf = false; // whether the last images array are using SAF or not
+	private boolean last_images_saf; // whether the last images array are using SAF or not
 	/** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
 	 */
 	private static class LastImage {
-		public boolean share = false; // one of the images in the list should have share set to true, to indicate which image to share
-		public String name = null;
-		Uri uri = null;
+		public final boolean share; // one of the images in the list should have share set to true, to indicate which image to share
+		public final String name;
+		final Uri uri;
 
 		LastImage(Uri uri, boolean share) {
 			this.name = null;
@@ -728,7 +728,13 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return zoom_factor;
     }
 
-    @Override
+	@Override
+	public double getCalibratedLevelAngle() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return sharedPreferences.getFloat(PreferenceKeys.getCalibratedLevelAnglePreferenceKey(), 0.0f);
+	}
+
+	@Override
     public long getExposureTimePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);

@@ -355,4 +355,12 @@
 
     <string name="preference_front_camera_mirror">Front camera mirror</string>
     <string name="preference_front_camera_mirror_summary">Whether to mirror images when using the front camera.</string>
+
+    <string name="preference_calibrate_level">Calibrate level angle</string>
+    <string name="preference_calibrate_level_summary">This option calibrates your device\'s accelerometer, so the auto-stabilise and on-screen level/angle options work correctly.</string>
+    <string name="preference_calibrate_level_dialog">Please place your device on a flat horizontal surface so that it is level (either in portrait or landscape orientation), and then select Calibrate.\n\nPress Reset to remove the calibration from your device.\n\nPress back button to cancel.</string>
+    <string name="preference_calibrate_level_calibrate">Calibrate</string>
+    <string name="preference_calibrate_level_reset">Reset</string>
+    <string name="preference_calibrate_level_calibrated">Level calibrated</string>
+    <string name="preference_calibrate_level_calibration_reset">Level calibration reset</string>
 </resources>

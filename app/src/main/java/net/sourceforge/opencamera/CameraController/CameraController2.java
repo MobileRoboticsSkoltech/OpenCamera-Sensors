@@ -35,6 +35,7 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Range;
 import android.view.Display;
@@ -48,48 +49,50 @@ import android.view.SurfaceHolder;
 public class CameraController2 extends CameraController {
 	private static final String TAG = "CameraController2";
 
-	private Context context = null;
-	private CameraDevice camera = null;
-	private String cameraIdS = null;
-	private CameraCharacteristics characteristics = null;
-	private List<Integer> zoom_ratios = null;
-	private int current_zoom_value = 0;
-	private ErrorCallback preview_error_cb = null;
-	private CameraCaptureSession captureSession = null;
-	private CaptureRequest.Builder previewBuilder = null;
-	private AutoFocusCallback autofocus_cb = null;
-	private FaceDetectionListener face_detection_listener = null;
+	private final Context context;
+	private CameraDevice camera;
+	private String cameraIdS;
+	private CameraCharacteristics characteristics;
+	private List<Integer> zoom_ratios;
+	private int current_zoom_value;
+	private final ErrorCallback preview_error_cb;
+	private CameraCaptureSession captureSession;
+	private CaptureRequest.Builder previewBuilder;
+	private AutoFocusCallback autofocus_cb;
+	private FaceDetectionListener face_detection_listener;
 	private final Object image_reader_lock = new Object(); // lock to make sure we only handle one image being available at a time
-	private ImageReader imageReader = null;
-	private boolean want_expo_bracketing = false;
+	private final Object open_camera_lock = new Object(); // lock to wait for camera to be opened from CameraDevice.StateCallback
+	private final Object create_capture_session_lock = new Object(); // lock to wait for capture session to be created from CameraCaptureSession.StateCallback
+	private ImageReader imageReader;
+	private boolean want_expo_bracketing;
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
 	private boolean use_expo_fast_burst = true;
-	private boolean want_raw = false;
+	private boolean want_raw;
 	//private boolean want_raw = true;
-	private android.util.Size raw_size = null;
-	private ImageReader imageReaderRaw = null;
-	private OnRawImageAvailableListener onRawImageAvailableListener = null;
-	private PictureCallback jpeg_cb = null;
-	private PictureCallback raw_cb = null;
-	private int n_burst = 0; // number of expected burst images in this capture
+	private android.util.Size raw_size;
+	private ImageReader imageReaderRaw;
+	private OnRawImageAvailableListener onRawImageAvailableListener;
+	private PictureCallback jpeg_cb;
+	private PictureCallback raw_cb;
+	private int n_burst; // number of expected burst images in this capture
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
-	private List<CaptureRequest> burst_capture_requests = new ArrayList<>(); // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
+	private List<CaptureRequest> burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
 	private long burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using fast burst)
-	private DngCreator pending_dngCreator = null;
-	private Image pending_image = null;
-	private ErrorCallback take_picture_error_cb = null;
-	//private ImageReader previewImageReader = null;
-	private SurfaceTexture texture = null;
-	private Surface surface_texture = null;
-	private HandlerThread thread = null; 
-	private Handler handler = null;
+	private DngCreator pending_dngCreator;
+	private Image pending_image;
+	private ErrorCallback take_picture_error_cb;
+	//private ImageReader previewImageReader;
+	private SurfaceTexture texture;
+	private Surface surface_texture;
+	private HandlerThread thread;
+	private Handler handler;
 	
-	private int preview_width = 0;
-	private int preview_height = 0;
+	private int preview_width;
+	private int preview_height;
 	
-	private int picture_width = 0;
-	private int picture_height = 0;
+	private int picture_width;
+	private int picture_height;
 	
 	private static final int STATE_NORMAL = 0;
 	private static final int STATE_WAITING_AUTOFOCUS = 1;
@@ -101,30 +104,30 @@ public class CameraController2 extends CameraController {
 	private long precapture_state_change_time_ms = -1; // time we changed state for precapture modes
 	private static final long precapture_start_timeout_c = 2000;
 	private static final long precapture_done_timeout_c = 3000;
-	private boolean ready_for_capture = false;
+	private boolean ready_for_capture;
 
-	private boolean use_fake_precapture = false; // see CameraController.setUseCamera2FakeFlash() for details - this is the user/application setting, see use_fake_precapture_mode for whether fake precapture is enabled (as we may do this for other purposes, e.g., front screen flash)
-	private boolean use_fake_precapture_mode = false; // true if either use_fake_precapture is true, or we're temporarily using fake precapture mode (e.g., for front screen flash or exposure bracketing)
-	private boolean fake_precapture_torch_performed = false; // whether we turned on torch to do a fake precapture
-	private boolean fake_precapture_torch_focus_performed = false; // whether we turned on torch to do an autofocus, in fake precapture mode
-	private boolean fake_precapture_use_flash = false; // whether we decide to use flash in auto mode (if fake_precapture_use_autoflash_time_ms != -1)
+	private boolean use_fake_precapture; // see CameraController.setUseCamera2FakeFlash() for details - this is the user/application setting, see use_fake_precapture_mode for whether fake precapture is enabled (as we may do this for other purposes, e.g., front screen flash)
+	private boolean use_fake_precapture_mode; // true if either use_fake_precapture is true, or we're temporarily using fake precapture mode (e.g., for front screen flash or exposure bracketing)
+	private boolean fake_precapture_torch_performed; // whether we turned on torch to do a fake precapture
+	private boolean fake_precapture_torch_focus_performed; // whether we turned on torch to do an autofocus, in fake precapture mode
+	private boolean fake_precapture_use_flash; // whether we decide to use flash in auto mode (if fake_precapture_use_autoflash_time_ms != -1)
 	private long fake_precapture_use_flash_time_ms = -1; // when we last checked to use flash in auto mode
 
-	private ContinuousFocusMoveCallback continuous_focus_move_callback = null;
+	private ContinuousFocusMoveCallback continuous_focus_move_callback;
 	
 	private final MediaActionSound media_action_sound = new MediaActionSound();
 	private boolean sounds_enabled = true;
 
-	private boolean capture_result_is_ae_scanning = false;
-	private boolean capture_result_has_iso = false;
-	private int capture_result_iso = 0;
-	private boolean capture_result_has_exposure_time = false;
-	private long capture_result_exposure_time = 0;
-	private boolean capture_result_has_frame_duration = false;
-	private long capture_result_frame_duration = 0;
-	/*private boolean capture_result_has_focus_distance = false;
-	private float capture_result_focus_distance_min = 0.0f;
-	private float capture_result_focus_distance_max = 0.0f;*/
+	private boolean capture_result_is_ae_scanning;
+	private boolean capture_result_has_iso;
+	private int capture_result_iso;
+	private boolean capture_result_has_exposure_time;
+	private long capture_result_exposure_time;
+	private boolean capture_result_has_frame_duration;
+	private long capture_result_frame_duration ;
+	/*private boolean capture_result_has_focus_distance;
+	private float capture_result_focus_distance_min;
+	private float capture_result_focus_distance_max;*/
 	
 	private enum RequestTag {
 		CAPTURE
@@ -132,8 +135,8 @@ public class CameraController2 extends CameraController {
 	
 	private class CameraSettings {
 		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
-		private int rotation = 0;
-		private Location location = null;
+		private int rotation;
+		private Location location;
 		private byte jpeg_quality = 90;
 
 		// keys that we have passed to the previewBuilder, that we need to store to also pass to the stillBuilder (should set sensible defaults, or use a has_ boolean if we don't want to set a default)
@@ -141,24 +144,24 @@ public class CameraController2 extends CameraController {
 		private int color_effect = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
 		private int white_balance = CameraMetadata.CONTROL_AWB_MODE_AUTO;
 		private String flash_value = "flash_off";
-		private boolean has_iso = false;
+		private boolean has_iso;
 		//private int ae_mode = CameraMetadata.CONTROL_AE_MODE_ON;
 		//private int flash_mode = CameraMetadata.FLASH_MODE_OFF;
-		private int iso = 0;
+		private int iso;
 		private long exposure_time = EXPOSURE_TIME_DEFAULT;
-		private Rect scalar_crop_region = null; // no need for has_scalar_crop_region, as we can set to null instead
-		private boolean has_ae_exposure_compensation = false;
-		private int ae_exposure_compensation = 0;
-		private boolean has_af_mode = false;
+		private Rect scalar_crop_region; // no need for has_scalar_crop_region, as we can set to null instead
+		private boolean has_ae_exposure_compensation;
+		private int ae_exposure_compensation;
+		private boolean has_af_mode;
 		private int af_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
-		private float focus_distance = 0.0f; // actual value passed to camera device (set to 0.0 if in infinity mode)
-		private float focus_distance_manual = 0.0f; // saved setting when in manual mode
-		private boolean ae_lock = false;
-		private MeteringRectangle [] af_regions = null; // no need for has_scalar_crop_region, as we can set to null instead
-		private MeteringRectangle [] ae_regions = null; // no need for has_scalar_crop_region, as we can set to null instead
-		private boolean has_face_detect_mode = false;
+		private float focus_distance; // actual value passed to camera device (set to 0.0 if in infinity mode)
+		private float focus_distance_manual; // saved setting when in manual mode
+		private boolean ae_lock;
+		private MeteringRectangle [] af_regions; // no need for has_scalar_crop_region, as we can set to null instead
+		private MeteringRectangle [] ae_regions; // no need for has_scalar_crop_region, as we can set to null instead
+		private boolean has_face_detect_mode;
 		private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
-		private boolean video_stabilization = false;
+		private boolean video_stabilization;
 		
 		private int getExifOrientation() {
 			int exif_orientation = ExifInterface.ORIENTATION_NORMAL;
@@ -426,8 +429,8 @@ public class CameraController2 extends CameraController {
 	}
 
 	private class OnRawImageAvailableListener implements ImageReader.OnImageAvailableListener {
-		private CaptureResult capture_result = null;
-		private Image image = null;
+		private CaptureResult capture_result;
+		private Image image;
 		
 		void setCaptureResult(CaptureResult capture_result) {
 			if( MyDebug.LOG )
@@ -546,10 +549,10 @@ public class CameraController2 extends CameraController {
 		final CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 
 		class MyStateCallback extends CameraDevice.StateCallback {
-			boolean callback_done = false; // must sychronize on this and notifyAll when setting to true
+			boolean callback_done; // must sychronize on this and notifyAll when setting to true
 			boolean first_callback = true; // Google Camera says we may get multiple callbacks, but only the first indicates the status of the camera opening operation
 			@Override
-			public void onOpened(CameraDevice cam) {
+			public void onOpened(@NonNull CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera opened, first_callback? " + first_callback);
 				/*if( true ) // uncomment to test timeout code
@@ -582,11 +585,11 @@ public class CameraController2 extends CameraController {
 
 					if( MyDebug.LOG )
 						Log.d(TAG, "about to synchronize to say callback done");
-				    synchronized( this ) {
+				    synchronized( open_camera_lock ) {
 				    	callback_done = true;
 						if( MyDebug.LOG )
 							Log.d(TAG, "callback done, about to notify");
-				    	this.notifyAll();
+						open_camera_lock.notifyAll();
 						if( MyDebug.LOG )
 							Log.d(TAG, "callback done, notification done");
 				    }
@@ -594,7 +597,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			@Override
-			public void onClosed(CameraDevice cam) {
+			public void onClosed(@NonNull CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera closed, first_callback? " + first_callback);
 				// caller should ensure camera variables are set to null
@@ -604,7 +607,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			@Override
-			public void onDisconnected(CameraDevice cam) {
+			public void onDisconnected(@NonNull CameraDevice cam) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "camera disconnected, first_callback? " + first_callback);
 				if( first_callback ) {
@@ -619,11 +622,11 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "onDisconnected: camera is now closed");
 					if( MyDebug.LOG )
 						Log.d(TAG, "about to synchronize to say callback done");
-				    synchronized( this ) {
+				    synchronized( open_camera_lock ) {
 				    	callback_done = true;
 						if( MyDebug.LOG )
 							Log.d(TAG, "callback done, about to notify");
-				    	this.notifyAll();
+						open_camera_lock.notifyAll();
 						if( MyDebug.LOG )
 							Log.d(TAG, "callback done, notification done");
 				    }
@@ -631,7 +634,7 @@ public class CameraController2 extends CameraController {
 			}
 
 			@Override
-			public void onError(CameraDevice cam, int error) {
+			public void onError(@NonNull CameraDevice cam, int error) {
 				// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
 				Log.e(TAG, "camera error: " + error);
 				if( MyDebug.LOG ) {
@@ -659,11 +662,11 @@ public class CameraController2 extends CameraController {
 				}
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to synchronize to say callback done");
-			    synchronized( this ) {
+			    synchronized( open_camera_lock ) {
 			    	callback_done = true;
 					if( MyDebug.LOG )
 						Log.d(TAG, "callback done, about to notify");
-			    	this.notifyAll();
+					open_camera_lock.notifyAll();
 					if( MyDebug.LOG )
 						Log.d(TAG, "callback done, notification done");
 			    }
@@ -715,13 +718,13 @@ public class CameraController2 extends CameraController {
 			public void run() {
 				if( MyDebug.LOG )
 					Log.d(TAG, "check if camera has opened in reasonable time");
-				synchronized( myStateCallback ) {
+				synchronized( open_camera_lock ) {
 					if( !myStateCallback.callback_done ) {
 						// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
 						Log.e(TAG, "timeout waiting for camera callback");
 						myStateCallback.first_callback = true;
 						myStateCallback.callback_done = true;
-						myStateCallback.notifyAll();
+						open_camera_lock.notifyAll();
 					}
 				}
 			}
@@ -730,11 +733,11 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "wait until camera opened...");
 		// need to wait until camera is opened
-		synchronized( myStateCallback ) {
+		synchronized( open_camera_lock ) {
 			while( !myStateCallback.callback_done ) {
 				try {
-					// release the myStateCallback lock, and wait until myStateCallback calls notifyAll()
-					myStateCallback.wait();
+					// release the lock, and wait until myStateCallback calls notifyAll()
+					open_camera_lock.wait();
 				}
 				catch(InterruptedException e) {
 					if( MyDebug.LOG )
@@ -2695,9 +2698,9 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "preview size: " + this.preview_width + " x " + this.preview_height);
 
 			class MyStateCallback extends CameraCaptureSession.StateCallback {
-				private boolean callback_done = false; // must sychronize on this and notifyAll when setting to true
+				private boolean callback_done; // must sychronize on this and notifyAll when setting to true
 				@Override
-				public void onConfigured(CameraCaptureSession session) {
+				public void onConfigured(@NonNull CameraCaptureSession session) {
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "onConfigured: " + session);
 						Log.d(TAG, "captureSession was: " + captureSession);
@@ -2706,9 +2709,9 @@ public class CameraController2 extends CameraController {
 						if( MyDebug.LOG ) {
 							Log.d(TAG, "camera is closed");
 						}
-					    synchronized( this ) {
+					    synchronized( create_capture_session_lock ) {
 					    	callback_done = true;
-					    	this.notifyAll();
+							create_capture_session_lock.notifyAll();
 					    }
 						return;
 					}
@@ -2731,26 +2734,26 @@ public class CameraController2 extends CameraController {
 						// this will cause a CameraControllerException to be thrown below
 						captureSession = null;
 					}
-				    synchronized( this ) {
+				    synchronized( create_capture_session_lock ) {
 				    	callback_done = true;
-				    	this.notifyAll();
+						create_capture_session_lock.notifyAll();
 				    }
 				}
 
 				@Override
-				public void onConfigureFailed(CameraCaptureSession session) {
+				public void onConfigureFailed(@NonNull CameraCaptureSession session) {
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "onConfigureFailed: " + session);
 						Log.d(TAG, "captureSession was: " + captureSession);
 					}
-				    synchronized( this ) {
+				    synchronized( create_capture_session_lock ) {
 				    	callback_done = true;
-				    	this.notifyAll();
+						create_capture_session_lock.notifyAll();
 				    }
 					// don't throw CameraControllerException here, as won't be caught - instead we throw CameraControllerException below
 				}
 			}
-			MyStateCallback myStateCallback = new MyStateCallback();
+			final MyStateCallback myStateCallback = new MyStateCallback();
 
         	Surface preview_surface = getPreviewSurface();
         	List<Surface> surfaces = null;
@@ -2786,11 +2789,11 @@ public class CameraController2 extends CameraController {
 		 		handler);
 			if( MyDebug.LOG )
 				Log.d(TAG, "wait until session created...");
-			synchronized( myStateCallback ) {
+			synchronized( create_capture_session_lock ) {
 				while( !myStateCallback.callback_done ) {
 					try {
-						// release the myStateCallback lock, and wait until myStateCallback calls notifyAll()
-						myStateCallback.wait();
+						// release the lock, and wait until myStateCallback calls notifyAll()
+						create_capture_session_lock.wait();
 					}
 					catch(InterruptedException e) {
 						e.printStackTrace();
@@ -3583,7 +3586,7 @@ public class CameraController2 extends CameraController {
 		private long last_process_frame_number = 0;
 		private int last_af_state = -1;
 
-		public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long frameNumber) {
+		public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onCaptureStarted: capture");
@@ -3591,14 +3594,14 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
-		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult) {
+		public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureProgressed");*/
 			process(partialResult);
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
-		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+		public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureCompleted");*/
 			process(result);

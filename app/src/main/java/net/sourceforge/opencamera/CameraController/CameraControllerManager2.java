@@ -18,7 +18,7 @@ import android.util.Log;
 public class CameraControllerManager2 extends CameraControllerManager {
 	private static final String TAG = "CControllerManager2";
 
-	private Context context = null;
+	private final Context context;
 
 	public CameraControllerManager2(Context context) {
 		this.context = context;

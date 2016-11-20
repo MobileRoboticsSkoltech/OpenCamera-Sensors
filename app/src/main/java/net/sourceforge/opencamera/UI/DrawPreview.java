@@ -34,47 +34,47 @@ import android.widget.ImageButton;
 public class DrawPreview {
 	private static final String TAG = "DrawPreview";
 
-	private MainActivity main_activity = null;
-	private MyApplicationInterface applicationInterface = null;
+	private final MainActivity main_activity;
+	private final MyApplicationInterface applicationInterface;
 
 	private final Paint p = new Paint();
 	private final RectF face_rect = new RectF();
 	private final RectF draw_rect = new RectF();
 	private final int [] gui_location = new int[2];
 	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
-	private float stroke_width = 0.0f;
+	private final float stroke_width;
 
 	private float free_memory_gb = -1.0f;
-	private long last_free_memory_time = 0;
+	private long last_free_memory_time;
 
 	private final IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-	private boolean has_battery_frac = false;
-	private float battery_frac = 0.0f;
-	private long last_battery_time = 0;
+	private boolean has_battery_frac;
+	private float battery_frac;
+	private long last_battery_time;
 
-	private Bitmap location_bitmap = null;
-	private Bitmap location_off_bitmap = null;
+	private Bitmap location_bitmap;
+	private Bitmap location_off_bitmap;
 	private final Rect location_dest = new Rect();
 	
-	private Bitmap last_thumbnail = null; // thumbnail of last picture taken
-	private volatile boolean thumbnail_anim = false; // whether we are displaying the thumbnail animation; must be volatile for test project reading the state
+	private Bitmap last_thumbnail; // thumbnail of last picture taken
+	private volatile boolean thumbnail_anim; // whether we are displaying the thumbnail animation; must be volatile for test project reading the state
 	private long thumbnail_anim_start_ms = -1; // time that the thumbnail animation started
 	private final RectF thumbnail_anim_src_rect = new RectF();
 	private final RectF thumbnail_anim_dst_rect = new RectF();
 	private final Matrix thumbnail_anim_matrix = new Matrix();
 
-	private boolean show_last_image = false;
+	private boolean show_last_image;
 	private final RectF last_image_src_rect = new RectF();
 	private final RectF last_image_dst_rect = new RectF();
 	private final Matrix last_image_matrix = new Matrix();
 
 	private long ae_started_scanning_ms = -1; // time when ae started scanning
 
-    private boolean taking_picture = false;
-    private boolean front_screen_flash = false;
+    private boolean taking_picture;
+    private boolean front_screen_flash;
     
-	private boolean continuous_focus_moving = false;
-	private long continuous_focus_moving_ms = 0;
+	private boolean continuous_focus_moving;
+	private long continuous_focus_moving_ms;
 
 	public DrawPreview(MainActivity main_activity, MyApplicationInterface applicationInterface) {
 		if( MyDebug.LOG )
@@ -996,6 +996,7 @@ public class DrawPreview {
 					Log.d(TAG, "dt: " + dt);
 					Log.d(TAG, "radius: " + radius);
 				}*/
+				p.setColor(Color.WHITE);
 				p.setStyle(Paint.Style.STROKE);
 				canvas.drawCircle(pos_x, pos_y, radius, p);
 				p.setStyle(Paint.Style.FILL); // reset

@@ -21,7 +21,7 @@ import android.view.View;
 public class MySurfaceView extends SurfaceView implements CameraSurface {
 	private static final String TAG = "MySurfaceView";
 
-	private Preview preview = null;
+	private final Preview preview;
 	private final int [] measure_spec = new int[2];
 	
 	@SuppressWarnings("deprecation")

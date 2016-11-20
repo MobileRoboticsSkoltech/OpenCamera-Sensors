@@ -89,40 +89,40 @@ import android.widget.Toast;
 public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextureListener {
 	private static final String TAG = "Preview";
 
-	private boolean using_android_l = false;
+	private final boolean using_android_l;
 
-	private ApplicationInterface applicationInterface = null;
-	private CameraSurface cameraSurface = null;
-	private CanvasView canvasView = null;
-	private boolean set_preview_size = false;
-	private int preview_w = 0, preview_h = 0;
-	private boolean set_textureview_size = false;
-	private int textureview_w = 0, textureview_h = 0;
+	private final ApplicationInterface applicationInterface;
+	private final CameraSurface cameraSurface;
+	private CanvasView canvasView;
+	private boolean set_preview_size;
+	private int preview_w, preview_h;
+	private boolean set_textureview_size;
+	private int textureview_w, textureview_h;
 
     private final Matrix camera_to_preview_matrix = new Matrix();
     private final Matrix preview_to_camera_matrix = new Matrix();
 	//private RectF face_rect = new RectF();
-    private double preview_targetRatio = 0.0;
+    private double preview_targetRatio;
 
 	//private boolean ui_placement_right = true;
 
 	private boolean app_is_paused = true;
-	private boolean has_surface = false;
-	private boolean has_aspect_ratio = false;
-	private double aspect_ratio = 0.0f;
-	private CameraControllerManager camera_controller_manager = null;
-	private CameraController camera_controller = null;
+	private boolean has_surface;
+	private boolean has_aspect_ratio;
+	private double aspect_ratio;
+	private final CameraControllerManager camera_controller_manager;
+	private CameraController camera_controller;
 	private boolean has_permissions = true; // whether we have permissions necessary to operate the camera (camera, storage); assume true until we've been denied one of them
-	private boolean is_video = false;
-	private volatile MediaRecorder video_recorder = null; // must be volatile for test project reading the state
-	private volatile boolean video_start_time_set = false; // must be volatile for test project reading the state
-	private long video_start_time = 0;
-	private long video_accumulated_time = 0;
-	private boolean video_restart_on_max_filesize = false;
+	private boolean is_video;
+	private volatile MediaRecorder video_recorder; // must be volatile for test project reading the state
+	private volatile boolean video_start_time_set; // must be volatile for test project reading the state
+	private long video_start_time;
+	private long video_accumulated_time;
+	private boolean video_restart_on_max_filesize;
 	private static final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
 	private int video_method = ApplicationInterface.VIDEOMETHOD_FILE;
-	private Uri video_uri = null; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
-	private String video_filename = null; // for VIDEOMETHOD_FILE
+	private Uri video_uri; // for VIDEOMETHOD_SAF or VIDEOMETHOD_URI
+	private String video_filename; // for VIDEOMETHOD_FILE
 
 	private static final int PHASE_NORMAL = 0;
 	private static final int PHASE_TIMER = 1;
@@ -130,98 +130,99 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final int PHASE_PREVIEW_PAUSED = 3; // the paused state after taking a photo
 	private volatile int phase = PHASE_NORMAL; // must be volatile for test project reading the state
 	private final Timer takePictureTimer = new Timer();
-	private TimerTask takePictureTimerTask = null;
+	private TimerTask takePictureTimerTask;
 	private final Timer beepTimer = new Timer();
-	private TimerTask beepTimerTask = null;
+	private TimerTask beepTimerTask;
 	private final Timer restartVideoTimer = new Timer();
-	private TimerTask restartVideoTimerTask = null;
+	private TimerTask restartVideoTimerTask;
 	private final Timer flashVideoTimer = new Timer();
-	private TimerTask flashVideoTimerTask = null;
+	private TimerTask flashVideoTimerTask;
 	private final IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 	private final Timer batteryCheckVideoTimer = new Timer();
-	private TimerTask batteryCheckVideoTimerTask = null;
-	private long take_photo_time = 0;
-	private int remaining_burst_photos = 0;
-	private int remaining_restart_video = 0;
+	private TimerTask batteryCheckVideoTimerTask;
+	private long take_photo_time;
+	private int remaining_burst_photos;
+	private int remaining_restart_video;
 
-	private boolean is_preview_started = false;
+	private boolean is_preview_started;
 
-	private int current_orientation = 0; // orientation received by onOrientationChanged
-	private int current_rotation = 0; // orientation relative to camera's orientation (used for parameters.setRotation())
-	private boolean has_level_angle = false;
-	private double level_angle = 0.0f;
-	private double orig_level_angle = 0.0f;
+	private int current_orientation; // orientation received by onOrientationChanged
+	private int current_rotation; // orientation relative to camera's orientation (used for parameters.setRotation())
+	private boolean has_level_angle;
+	private double natural_level_angle; // "level" angle of device, before applying any calibration and without accounting for screen orientation
+	private double level_angle; // "level" angle of device, including calibration
+	private double orig_level_angle; // "level" angle of device, including calibration, but without accounting for screen orientation
 	
-	private boolean has_zoom = false;
-	private int max_zoom_factor = 0;
-	private GestureDetector gestureDetector = null;
-	private ScaleGestureDetector scaleGestureDetector = null;
-	private List<Integer> zoom_ratios = null;
-	private float minimum_focus_distance = 0.0f;
-	private boolean touch_was_multitouch = false;
-	private float touch_orig_x = 0.0f;
-	private float touch_orig_y = 0.0f;
+	private boolean has_zoom;
+	private int max_zoom_factor;
+	private final GestureDetector gestureDetector;
+	private final ScaleGestureDetector scaleGestureDetector;
+	private List<Integer> zoom_ratios;
+	private float minimum_focus_distance;
+	private boolean touch_was_multitouch;
+	private float touch_orig_x;
+	private float touch_orig_y;
 
-	private List<String> supported_flash_values = null; // our "values" format
+	private List<String> supported_flash_values; // our "values" format
 	private int current_flash_index = -1; // this is an index into the supported_flash_values array, or -1 if no flash modes available
 
-	private List<String> supported_focus_values = null; // our "values" format
+	private List<String> supported_focus_values; // our "values" format
 	private int current_focus_index = -1; // this is an index into the supported_focus_values array, or -1 if no focus modes available
-	private int max_num_focus_areas = 0;
-	private boolean continuous_focus_move_is_started = false;
+	private int max_num_focus_areas;
+	private boolean continuous_focus_move_is_started;
 	
-	private boolean is_exposure_lock_supported = false;
-	private boolean is_exposure_locked = false;
+	private boolean is_exposure_lock_supported;
+	private boolean is_exposure_locked;
 
-	private List<String> color_effects = null;
-	private List<String> scene_modes = null;
-	private List<String> white_balances = null;
-	private List<String> isos = null;
-	private boolean supports_iso_range = false;
-	private int min_iso = 0;
-	private int max_iso = 0;
-	private boolean supports_exposure_time = false;
-	private long min_exposure_time = 0L;
-	private long max_exposure_time = 0L;
-	private List<String> exposures = null;
-	private int min_exposure = 0;
-	private int max_exposure = 0;
-	private float exposure_step = 0.0f;
-	private boolean supports_expo_bracketing = false;
-	private boolean supports_raw = false;
+	private List<String> color_effects;
+	private List<String> scene_modes;
+	private List<String> white_balances;
+	private List<String> isos;
+	private boolean supports_iso_range;
+	private int min_iso;
+	private int max_iso;
+	private boolean supports_exposure_time;
+	private long min_exposure_time;
+	private long max_exposure_time;
+	private List<String> exposures;
+	private int min_exposure;
+	private int max_exposure;
+	private float exposure_step;
+	private boolean supports_expo_bracketing;
+	private boolean supports_raw;
 
-	private List<CameraController.Size> supported_preview_sizes = null;
+	private List<CameraController.Size> supported_preview_sizes;
 	
-	private List<CameraController.Size> sizes = null;
+	private List<CameraController.Size> sizes;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
 	// video_quality can either be:
 	// - an int, in which case it refers to a CamcorderProfile
 	// - of the form [CamcorderProfile]_r[width]x[height] - we use the CamcorderProfile as a base, and override the video resolution - this is needed to support resolutions which don't have corresponding camcorder profiles
-	private List<String> video_quality = null;
+	private List<String> video_quality;
 	private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
-	private List<CameraController.Size> video_sizes = null;
+	private List<CameraController.Size> video_sizes;
 	
-	/*private Bitmap location_bitmap = null;
-	private Bitmap location_off_bitmap = null;
+	/*private Bitmap location_bitmap;
+	private Bitmap location_off_bitmap;
 	private Rect location_dest = new Rect();*/
 
-	private Toast last_toast = null;
+	private Toast last_toast;
 	private final ToastBoxer flash_toast = new ToastBoxer();
 	private final ToastBoxer focus_toast = new ToastBoxer();
 	private final ToastBoxer take_photo_toast = new ToastBoxer();
 	private final ToastBoxer seekbar_toast = new ToastBoxer();
 	
-	private int ui_rotation = 0;
+	private int ui_rotation;
 
-	private boolean supports_face_detection = false;
-	private boolean using_face_detection = false;
-	private CameraController.Face [] faces_detected = null;
-	private boolean supports_video_stabilization = false;
-	private boolean can_disable_shutter_sound = false;
-	private boolean has_focus_area = false;
-	private int focus_screen_x = 0;
-	private int focus_screen_y = 0;
+	private boolean supports_face_detection;
+	private boolean using_face_detection;
+	private CameraController.Face [] faces_detected;
+	private boolean supports_video_stabilization;
+	private boolean can_disable_shutter_sound;
+	private boolean has_focus_area;
+	private int focus_screen_x;
+	private int focus_screen_y;
 	private long focus_complete_time = -1;
 	private long focus_started_time = -1;
 	private int focus_success = FOCUS_DONE;
@@ -230,20 +231,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
 	private String set_flash_value_after_autofocus = "";
-	private boolean take_photo_after_autofocus = false; // set to take a photo when the in-progress autofocus has completed
-	private boolean successfully_focused = false;
+	private boolean take_photo_after_autofocus; // set to take a photo when the in-progress autofocus has completed
+	private boolean successfully_focused;
 	private long successfully_focused_time = -1;
 
 	// accelerometer and geomagnetic sensor info
 	private static final float sensor_alpha = 0.8f; // for filter
-    private boolean has_gravity = false;
+    private boolean has_gravity;
     private final float [] gravity = new float[3];
-    private boolean has_geomagnetic = false;
+    private boolean has_geomagnetic;
     private final float [] geomagnetic = new float[3];
     private final float [] deviceRotation = new float[9];
     private final float [] cameraRotation = new float[9];
     private final float [] deviceInclination = new float[9];
-    private boolean has_geo_direction = false;
+    private boolean has_geo_direction;
     private final float [] geo_direction = new float[3];
 
 	private final DecimalFormat decimal_format_1dp = new DecimalFormat("#.#");
@@ -254,16 +255,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 * switches back to continuous mode.
 	 */
 	private final Handler reset_continuous_focus_handler = new Handler();
-	private Runnable reset_continuous_focus_runnable = null;
-	private boolean autofocus_in_continuous_mode = false;
+	private Runnable reset_continuous_focus_runnable;
+	private boolean autofocus_in_continuous_mode;
 
 	// for testing; must be volatile for test project reading the state
-	public volatile int count_cameraStartPreview = 0;
-	public volatile int count_cameraAutoFocus = 0;
-	public volatile int count_cameraTakePicture = 0;
-	public volatile int count_cameraContinuousFocusMoving = 0;
-	public volatile boolean test_fail_open_camera = false;
-	public volatile boolean test_video_failure = false;
+	public volatile int count_cameraStartPreview;
+	public volatile int count_cameraAutoFocus;
+	public volatile int count_cameraTakePicture;
+	public volatile int count_cameraContinuousFocusMoving;
+	public volatile boolean test_fail_open_camera;
+	public volatile boolean test_video_failure;
 
 	public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
 		if( MyDebug.LOG ) {
@@ -4734,27 +4735,45 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		double x = gravity[0];
 		double y = gravity[1];
 		this.has_level_angle = true;
-		this.level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
-		if( this.level_angle < -0.0 ) {
-			this.level_angle += 360.0;
-		}
-		this.orig_level_angle = this.level_angle;
-		this.level_angle -= (float)this.current_orientation;
-		if( this.level_angle < -180.0 ) {
-			this.level_angle += 360.0;
-		}
-		else if( this.level_angle > 180.0 ) {
-			this.level_angle -= 360.0;
+		this.natural_level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
+		if( this.natural_level_angle < -0.0 ) {
+			this.natural_level_angle += 360.0;
 		}
 
-		cameraSurface.getView().invalidate();
+		updateLevelAngles();
+	}
+
+	/** This method should be called when the natural level angle, or the calibration angle, has been updated, to update the other level angle variables.
+	 *
+	 */
+	public void updateLevelAngles() {
+		if( has_level_angle ) {
+			this.level_angle = this.natural_level_angle;
+			double calibrated_level_angle = applicationInterface.getCalibratedLevelAngle();
+			this.level_angle -= calibrated_level_angle;
+			this.orig_level_angle = this.level_angle;
+			this.level_angle -= (float) this.current_orientation;
+			if (this.level_angle < -180.0) {
+				this.level_angle += 360.0;
+			} else if (this.level_angle > 180.0) {
+				this.level_angle -= 360.0;
+			}
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "level_angle is now: " + level_angle);*/
+
+			cameraSurface.getView().invalidate();
+		}
 	}
     
     public boolean hasLevelAngle() {
     	return this.has_level_angle;
     }
-    
-    public double getLevelAngle() {
+
+	public double getLevelAngleUncalibrated() {
+		return this.natural_level_angle - this.current_orientation;
+	}
+
+	public double getLevelAngle() {
     	return this.level_angle;
     }
     
@@ -5042,7 +5061,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
     	
 		class RotatedTextView extends View {
-			private String [] lines = null;
+			private String [] lines;
 			private final Paint paint = new Paint();
 			private final Rect bounds = new Rect();
 			private final Rect sub_bounds = new Rect();

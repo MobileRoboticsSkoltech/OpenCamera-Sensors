@@ -19,9 +19,9 @@ import android.util.Log;
 public class LocationSupplier {
 	private static final String TAG = "LocationSupplier";
 
-	private Context context = null;
-	private LocationManager locationManager = null;
-	private MyLocationListener [] locationListeners = null;
+	private final Context context;
+	private final LocationManager locationManager;
+	private MyLocationListener [] locationListeners;
 
 	LocationSupplier(Context context) {
 		this.context = context;
@@ -42,8 +42,8 @@ public class LocationSupplier {
 	}
 	
 	private static class MyLocationListener implements LocationListener {
-		private Location location = null;
-		volatile boolean test_has_received_location = false; // must be volatile for test project reading the state
+		private Location location;
+		volatile boolean test_has_received_location; // must be volatile for test project reading the state
 		
 		Location getLocation() {
 			return location;

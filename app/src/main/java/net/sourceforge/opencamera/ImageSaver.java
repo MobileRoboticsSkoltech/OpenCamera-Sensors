@@ -51,8 +51,8 @@ public class ImageSaver extends Thread {
 	private final Paint p = new Paint();
 	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	
-	private MainActivity main_activity = null;
-	private HDRProcessor hdrProcessor = null;
+	private final MainActivity main_activity;
+	private final HDRProcessor hdrProcessor;
 
 	/* We use a separate count n_images_to_save, rather than just relying on the queue size, so we can take() an image from queue,
 	 * but only decrement the count when we've finished saving the image.
@@ -69,32 +69,32 @@ public class ImageSaver extends Thread {
 			DUMMY
 		}
 		Type type = Type.JPEG;
-		boolean is_hdr = false; // for jpeg
-		boolean save_expo = false; // for is_hdr
-		List<byte []> jpeg_images = null; // for jpeg (may be null otherwise)
-		DngCreator dngCreator = null; // for raw
-		Image image = null; // for raw
-		boolean image_capture_intent = false;
-		Uri image_capture_intent_uri = null;
-		boolean using_camera2 = false;
-		int image_quality = 0;
-		boolean do_auto_stabilise = false;
-		double level_angle = 0.0;
-		boolean is_front_facing = false;
-		boolean mirror = false;
-		Date current_date = null;
-		String preference_stamp = null;
-		String preference_textstamp = null;
-		int font_size = 0;
-		int color = 0;
-		String pref_style = null;
-		String preference_stamp_dateformat = null;
-		String preference_stamp_timeformat = null;
-		String preference_stamp_gpsformat = null;
-		boolean store_location = false;
-		Location location = null;
-		boolean store_geo_direction = false;
-		double geo_direction = 0.0;
+		final boolean is_hdr; // for jpeg
+		final boolean save_expo; // for is_hdr
+		final List<byte []> jpeg_images; // for jpeg (may be null otherwise)
+		final DngCreator dngCreator; // for raw
+		final Image image; // for raw
+		final boolean image_capture_intent;
+		final Uri image_capture_intent_uri;
+		final boolean using_camera2;
+		final int image_quality;
+		final boolean do_auto_stabilise;
+		final double level_angle;
+		final boolean is_front_facing;
+		final boolean mirror;
+		final Date current_date;
+		final String preference_stamp;
+		final String preference_textstamp;
+		final int font_size;
+		final int color;
+		final String pref_style;
+		final String preference_stamp_dateformat;
+		final String preference_stamp_timeformat;
+		final String preference_stamp_gpsformat;
+		final boolean store_location;
+		final Location location;
+		final boolean store_geo_direction;
+		final double geo_direction;
 		int sample_factor = 1; // sampling factor for thumbnail, higher means lower quality
 		
 		Request(Type type,
@@ -468,9 +468,9 @@ public class ImageSaver extends Thread {
 	/** Helper class for loadBitmaps().
 	 */
 	private static class LoadBitmapThread extends Thread {
-		Bitmap bitmap = null;
-		BitmapFactory.Options options = null;
-		byte [] jpeg = null;
+		Bitmap bitmap;
+		final BitmapFactory.Options options;
+		final byte [] jpeg;
 		LoadBitmapThread(BitmapFactory.Options options, byte [] jpeg) {
 			this.options = options;
 			this.jpeg = jpeg;

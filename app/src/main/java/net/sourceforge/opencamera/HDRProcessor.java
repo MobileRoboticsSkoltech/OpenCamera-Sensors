@@ -26,8 +26,8 @@ import android.util.Log;
 public class HDRProcessor {
 	private static final String TAG = "HDRProcessor";
 	
-	private Context context = null;
-	private RenderScript rs = null; // lazily created, so we don't take up resources if application isn't using HDR
+	private final Context context;
+	private RenderScript rs; // lazily created, so we don't take up resources if application isn't using HDR
 
 	public final int [] offsets_x = {0, 0, 0};
 	public final int [] offsets_y = {0, 0, 0};
@@ -58,8 +58,8 @@ public class HDRProcessor {
 	 *  levels, to estimate what the pixel should be at the "base" exposure.
 	 */
 	private static class ResponseFunction {
-		float parameter_A = 0.0f;
-		float parameter_B = 0.0f;
+		float parameter_A;
+		float parameter_B;
 
 		/** Computes the response function.
 		 * We pass the context, so this inner class can be made static.
@@ -286,8 +286,6 @@ public class HDRProcessor {
 	 *  match the exposure level of out_bitmap.
 	 *  The supplied offsets offset_x, offset_y give the offset for in_bitmap as computed by
 	 *  autoAlignment().
-	 * @param offset_x
-	 * @param offset_y
 	 */
 	private ResponseFunction createFunctionFromBitmaps(int id, Bitmap in_bitmap, Bitmap out_bitmap, int offset_x, int offset_y) {
 		if( MyDebug.LOG )
@@ -467,10 +465,10 @@ public class HDRProcessor {
 	}
 	
 	private class HDRWriterThread extends Thread {
-		int y_start = 0, y_stop = 0;
-		List<Bitmap> bitmaps = null;
-		ResponseFunction [] response_functions = null;
-		//float avg_luminance = 0.0f;
+		final int y_start, y_stop;
+		final List<Bitmap> bitmaps;
+		final ResponseFunction [] response_functions;
+		//float avg_luminance;
 
 		int n_bitmaps = 0;
 		Bitmap bm = null;
