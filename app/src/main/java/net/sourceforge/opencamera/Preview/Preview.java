@@ -259,6 +259,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean autofocus_in_continuous_mode;
 
 	// for testing; must be volatile for test project reading the state
+	public boolean is_test; // whether called from OpenCamera.test testing
 	public volatile int count_cameraStartPreview;
 	public volatile int count_cameraAutoFocus;
 	public volatile int count_cameraTakePicture;
@@ -270,9 +271,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "new Preview");
 		}
-		
+
 		this.applicationInterface = applicationInterface;
-		
+
+		Activity activity = (Activity)this.getContext();
+		if( activity.getIntent() != null && activity.getIntent().getExtras() != null ) {
+			// whether called from testing
+			is_test = activity.getIntent().getExtras().getBoolean("test_project");
+			if( MyDebug.LOG )
+				Log.d(TAG, "is_test: " + is_test);
+		}
+
 		this.using_android_l = applicationInterface.useCamera2();
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "using_android_l?: " + using_android_l);
@@ -4723,7 +4732,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     public void onAccelerometerSensorChanged(SensorEvent event) {
 		/*if( MyDebug.LOG )
-    	Log.d(TAG, "onAccelerometerSensorChanged: " + event.values[0] + ", " + event.values[1] + ", " + event.values[2]);*/
+    		Log.d(TAG, "onAccelerometerSensorChanged: " + event.values[0] + ", " + event.values[1] + ", " + event.values[2]);*/
 
     	this.has_gravity = true;
     	for(int i=0;i<3;i++) {
@@ -4734,13 +4743,36 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	
 		double x = gravity[0];
 		double y = gravity[1];
-		this.has_level_angle = true;
-		this.natural_level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
-		if( this.natural_level_angle < -0.0 ) {
-			this.natural_level_angle += 360.0;
+		double z = gravity[2];
+		double mag = Math.sqrt(x*x + y*y + z*z);
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "xyz: " + x + ", " + y + ", " + z);*/
+
+		if( mag > 1.0e-8 ) {
+			double pitch = Math.asin(- z / mag) * 180.0 / Math.PI;
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "pitch: " + pitch);*/
+
+			if( !is_test && Math.abs(pitch) > 70.0 ) {
+				// level angle becomes unstable when device is near vertical
+				// note that if is_test, we always set the level angle - since the device typically lies face down when running tests...
+				this.has_level_angle = false;
+			}
+			else {
+				this.has_level_angle = true;
+				this.natural_level_angle = Math.atan2(-x, y) * 180.0 / Math.PI;
+				if( this.natural_level_angle < -0.0 ) {
+					this.natural_level_angle += 360.0;
+				}
+
+				updateLevelAngles();
+			}
+		}
+		else {
+			Log.e(TAG, "accel sensor has zero mag: " + mag);
+			this.has_level_angle = false;
 		}
 
-		updateLevelAngles();
 	}
 
 	/** This method should be called when the natural level angle, or the calibration angle, has been updated, to update the other level angle variables.
