@@ -33,7 +33,6 @@ public class HDRProcessor {
 	public final int [] offsets_y = {0, 0, 0};
 
 	private enum HDRAlgorithm {
-		HDRALGORITHM_AVERAGE,
 		HDRALGORITHM_STANDARD
 	}
 	
@@ -264,13 +263,9 @@ public class HDRProcessor {
 			}
 		}
 		
-		//final HDRAlgorithm algorithm = HDRAlgorithm.HDRALGORITHM_AVERAGE;
 		final HDRAlgorithm algorithm = HDRAlgorithm.HDRALGORITHM_STANDARD;
 		
 		switch( algorithm ) {
-		case HDRALGORITHM_AVERAGE:
-			processHDRAverage(bitmaps);
-			break;
 		case HDRALGORITHM_STANDARD:
 			processHDRCore(bitmaps);
 			break;
@@ -402,124 +397,6 @@ public class HDRProcessor {
 		//return 0.27*r + 0.67*g + 0.06*b;
 	}
 	
-	/** Calculates the luminance for an RGB colour.
-	 */
-	/*private double calculateLuminance(double r, double g, double b) {
-		double value = 0.27*r + 0.67*g + 0.06*b;
-		return value;
-	}*/
-	
-	/*final float A = 0.15f;
-	final float B = 0.50f;
-	final float C = 0.10f;
-	final float D = 0.20f;
-	final float E = 0.02f;
-	final float F = 0.30f;
-	final float W = 11.2f;
-	
-	float Uncharted2Tonemap(float x) {
-		return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
-	}*/
-
-	/** Converts a HDR brightness to a 0-255 value.
-	 * @param hdr The input HDR brightness.
-	 * //@param l_avg The log average luminance of the HDR image. That is, exp( sum{log(Li)}/N ).
-	 */
-	private void tonemap(int [] rgb, float [] hdr/*, float l_avg*/) {
-		// simple clamp:
-		/*for(int i=0;i<3;i++) {
-			rgb[i] = (int)hdr[i];
-			if( rgb[i] > 255 )
-				rgb[i] = 255;
-		}*/
-		/*
-		// exponential:
-		final double exposure_c = 1.2 / 255.0;
-		int rgb = (int)(255.0*(1.0 - Math.exp(- hdr * exposure_c)));
-		*/
-		// Reinhard (Global):
-		//final float scale_c = l_avg / 0.5f;
-		//final float scale_c = l_avg / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
-		//final float scale_c = l_avg / 1.0f;
-		final float scale_c = 255.0f;
-		//for(int i=0;i<3;i++)
-		//	rgb[i] = (int)(255.0 * ( hdr[i] / (scale_c + hdr[i]) ));
-		float max_hdr = hdr[0];
-		if( hdr[1] > max_hdr )
-			max_hdr = hdr[1];
-		if( hdr[2] > max_hdr )
-			max_hdr = hdr[2];
-		float scale = 255.0f / ( scale_c + max_hdr );
-		for(int i=0;i<3;i++) {
-			//float ref_hdr = 0.5f * ( hdr[i] + max_hdr );
-			//float scale = 255.0f / ( scale_c + ref_hdr );
-			rgb[i] = (int)(scale * hdr[i]);
-		}
-		// Uncharted 2 Hable
-		/*final float exposure_bias = 2.0f / 255.0f;
-		final float white_scale = 255.0f / Uncharted2Tonemap(W);
-		for(int i=0;i<3;i++) {
-			float curr = Uncharted2Tonemap(exposure_bias * hdr[i]);
-			rgb[i] = (int)(curr * white_scale);
-		}*/
-	}
-	
-	private class HDRWriterThread extends Thread {
-		final int y_start, y_stop;
-		final List<Bitmap> bitmaps;
-		final ResponseFunction [] response_functions;
-		//float avg_luminance;
-
-		int n_bitmaps = 0;
-		Bitmap bm = null;
-		int [][] buffers = null;
-		
-		HDRWriterThread(int y_start, int y_stop, List<Bitmap> bitmaps, ResponseFunction [] response_functions
-			//, float avg_luminance
-			) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "thread " + this.getId() + " will process " + y_start + " to " + y_stop);
-			this.y_start = y_start;
-			this.y_stop = y_stop;
-			this.bitmaps = bitmaps;
-			this.response_functions = response_functions;
-			//this.avg_luminance = avg_luminance;
-
-			this.n_bitmaps = bitmaps.size();
-			this.bm = bitmaps.get(0);
-			this.buffers = new int[n_bitmaps][];
-			for(int i=0;i<n_bitmaps;i++) {
-				buffers[i] = new int[bm.getWidth()];
-			}
-		}
-		
-		public void run() {
-			float [] hdr = new float[3];
-			int [] rgb = new int[3];
-
-			for(int y=y_start;y<y_stop;y++) {
-				if( MyDebug.LOG ) {
-					if( y % 100 == 0 )
-						Log.d(TAG, "thread " + this.getId() + ": process: " + (y - y_start) + " / " + (y_stop - y_start));
-				}
-				// read out this row for each bitmap
-				for(int i=0;i<n_bitmaps;i++) {
-					bitmaps.get(i).getPixels(buffers[i], 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
-				}
-				for(int x=0;x<bm.getWidth();x++) {
-					//int this_col = buffer[c];
-					calculateHDR(hdr, n_bitmaps, buffers, x, response_functions);
-					tonemap(rgb, hdr
-							//, avg_luminance
-					);
-					int new_col = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
-					buffers[0][x] = new_col;
-				}
-				bm.setPixels(buffers[0], 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
-			}
-		}
-	}
-	
 	/** Core implementation of HDR algorithm.
 	 *  Requires Android 4.4 (API level 19, Kitkat), due to using Renderscript without the support libraries.
 	 *  And we now need Android 5.0 (API level 21, Lollipop) for forEach_Dot with LaunchOptions.
@@ -553,34 +430,26 @@ public class HDRProcessor {
 		//float [] hdr = new float[3];
 		//int [] rgb = new int[3];
 
-		//final boolean use_renderscript = false;
-		final boolean use_renderscript = true;
-
-		Allocation [] allocations = null;
-		if( use_renderscript ) {
+		if (rs == null) {
+			// initialise renderscript
+			this.rs = RenderScript.create(context);
 			if (MyDebug.LOG)
-				Log.d(TAG, "use renderscipt");
-			if (rs == null) {
-				// initialise renderscript
-				this.rs = RenderScript.create(context);
-				if (MyDebug.LOG)
-					Log.d(TAG, "create renderscript object");
-				if (MyDebug.LOG)
-					Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
-			}
-			// create allocations
-			allocations = new Allocation[n_bitmaps];
-			for (int i = 0; i < n_bitmaps; i++) {
-				allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
-			}
+				Log.d(TAG, "create renderscript object");
 			if (MyDebug.LOG)
-				Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
-
-			// perform auto-alignment
-			autoAlignment(offsets_x, offsets_y, allocations, bm.getWidth(), bm.getHeight(), bitmaps, time_s);
-			if (MyDebug.LOG)
-				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
 		}
+		// create allocations
+		Allocation [] allocations = new Allocation[n_bitmaps];
+		for (int i = 0; i < n_bitmaps; i++) {
+			allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
+		}
+		if (MyDebug.LOG)
+			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+
+		// perform auto-alignment
+		autoAlignment(offsets_x, offsets_y, allocations, bm.getWidth(), bm.getHeight(), bitmaps, time_s);
+		if (MyDebug.LOG)
+			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
 
 		// compute response_functions
 		for(int i=0;i<n_bitmaps;i++) {
@@ -626,102 +495,63 @@ public class HDRProcessor {
 			*/
 
 		// write new hdr image
-		if( use_renderscript ) {
-			// create RenderScript
-			ScriptC_process_hdr processHDRScript = new ScriptC_process_hdr(rs);
-			
-			// set allocations
-			processHDRScript.set_bitmap0(allocations[0]);
-			processHDRScript.set_bitmap2(allocations[2]);
 
-			// set offsets
-			processHDRScript.set_offset_x0(offsets_x[0]);
-			processHDRScript.set_offset_y0(offsets_y[0]);
-			// no offset for middle image
-			processHDRScript.set_offset_x2(offsets_x[2]);
-			processHDRScript.set_offset_y2(offsets_y[2]);
+		// create RenderScript
+		ScriptC_process_hdr processHDRScript = new ScriptC_process_hdr(rs);
 
-			// set response functions
-			processHDRScript.set_parameter_A0( response_functions[0].parameter_A );
-			processHDRScript.set_parameter_B0( response_functions[0].parameter_B );
-			// no response function for middle image
-			processHDRScript.set_parameter_A2( response_functions[2].parameter_A );
-			processHDRScript.set_parameter_B2( response_functions[2].parameter_B );
+		// set allocations
+		processHDRScript.set_bitmap0(allocations[0]);
+		processHDRScript.set_bitmap2(allocations[2]);
 
-			// set globals
-			//final float tonemap_scale_c = avg_luminance / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
-			final float tonemap_scale_c = 255.0f;
-			// Higher tonemap_scale_c values means darker results from the Reinhard tonemapping.
-			// Colours brighter than 255-tonemap_scale_c will be made darker, colours darker than 255-tonemap_scale_c will be made brighter
-			// (tonemap_scale_c==255 means therefore that colours will only be made darker).
-			if( MyDebug.LOG )
-				Log.d(TAG, "tonemap_scale_c: " + tonemap_scale_c);
-			processHDRScript.set_tonemap_scale(tonemap_scale_c);
+		// set offsets
+		processHDRScript.set_offset_x0(offsets_x[0]);
+		processHDRScript.set_offset_y0(offsets_y[0]);
+		// no offset for middle image
+		processHDRScript.set_offset_x2(offsets_x[2]);
+		processHDRScript.set_offset_y2(offsets_y[2]);
 
-			if( MyDebug.LOG )
-				Log.d(TAG, "call processHDRScript");
-			// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset
-			processHDRScript.forEach_hdr(allocations[1], allocations[base_bitmap]);
-			if( MyDebug.LOG )
-				Log.d(TAG, "### time after processHDRScript: " + (System.currentTimeMillis() - time_s));
+		// set response functions
+		processHDRScript.set_parameter_A0( response_functions[0].parameter_A );
+		processHDRScript.set_parameter_B0( response_functions[0].parameter_B );
+		// no response function for middle image
+		processHDRScript.set_parameter_A2( response_functions[2].parameter_A );
+		processHDRScript.set_parameter_B2( response_functions[2].parameter_B );
 
-			// bitmaps.get(base_bitmap) now stores the HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
-			for(int i=0;i<bitmaps.size();i++) {
-				if( i != base_bitmap ) {
-					Bitmap bitmap = bitmaps.get(i);
-					bitmap.recycle();
-				}
-			}
+		// set globals
+		//final float tonemap_scale_c = avg_luminance / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
+		final float tonemap_scale_c = 255.0f;
+		// Higher tonemap_scale_c values means darker results from the Reinhard tonemapping.
+		// Colours brighter than 255-tonemap_scale_c will be made darker, colours darker than 255-tonemap_scale_c will be made brighter
+		// (tonemap_scale_c==255 means therefore that colours will only be made darker).
+		if( MyDebug.LOG )
+			Log.d(TAG, "tonemap_scale_c: " + tonemap_scale_c);
+		processHDRScript.set_tonemap_scale(tonemap_scale_c);
 
-			adjustHistogram(allocations[base_bitmap], bm.getWidth(), bm.getHeight(), time_s);
+		if( MyDebug.LOG )
+			Log.d(TAG, "call processHDRScript");
+		// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset
+		processHDRScript.forEach_hdr(allocations[1], allocations[base_bitmap]);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after processHDRScript: " + (System.currentTimeMillis() - time_s));
 
-			allocations[base_bitmap].copyTo( bitmaps.get(base_bitmap) );
-			if( MyDebug.LOG )
-				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
-
-			// make it so that we store the output bitmap as first in the list
-			bitmaps.set(0, bitmaps.get(base_bitmap));
-			for(int i=1;i<bitmaps.size();i++) {
-				bitmaps.set(i, null);
-			}
-		}
-		else {
-			if( MyDebug.LOG )
-				Log.d(TAG, "use java");
-			final int n_threads = Runtime.getRuntime().availableProcessors();
-			if( MyDebug.LOG )
-				Log.d(TAG, "create n_threads: " + n_threads);
-			// create threads
-			HDRWriterThread [] threads = new HDRWriterThread[n_threads];
-			for(int i=0;i<n_threads;i++) {
-				int y_start = (i*bm.getHeight()) / n_threads;
-				int y_stop = ((i+1)*bm.getHeight()) / n_threads;
-				threads[i] = new HDRWriterThread(y_start, y_stop, bitmaps, response_functions/*, avg_luminance*/);
-			}
-			// start threads
-			if( MyDebug.LOG )
-				Log.d(TAG, "start threads");
-			for(int i=0;i<n_threads;i++) {
-				threads[i].start();
-			}
-			// wait for threads to complete
-			if( MyDebug.LOG )
-				Log.d(TAG, "wait for threads to complete");
-			try {
-				for(int i=0;i<n_threads;i++) {
-					threads[i].join();
-				}
-			}
-			catch(InterruptedException e) {
-				if( MyDebug.LOG )
-					Log.e(TAG, "exception waiting for threads to complete");
-				e.printStackTrace();
-			}
-			// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap:
-			for(int i=1;i<bitmaps.size();i++) {
+		// bitmaps.get(base_bitmap) now stores the HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
+		for(int i=0;i<bitmaps.size();i++) {
+			if( i != base_bitmap ) {
 				Bitmap bitmap = bitmaps.get(i);
 				bitmap.recycle();
 			}
+		}
+
+		adjustHistogram(allocations[base_bitmap], bm.getWidth(), bm.getHeight(), time_s);
+
+		allocations[base_bitmap].copyTo( bitmaps.get(base_bitmap) );
+		if( MyDebug.LOG )
+			Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+
+		// make it so that we store the output bitmap as first in the list
+		bitmaps.set(0, bitmaps.get(base_bitmap));
+		for(int i=1;i<bitmaps.size();i++) {
+			bitmaps.set(i, null);
 		}
 
 		if( MyDebug.LOG )
@@ -1246,113 +1076,6 @@ public class HDRProcessor {
 			histogramAdjustScript.forEach_histogram_adjust(allocation, allocation);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
-		}
-	}
-	
-	private final static float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
-
-	// If this algorithm is changed, also update the Renderscript version in process_hdr.rs
-	private void calculateHDR(float [] hdr, int n_bitmaps, int [][] buffers, int x, ResponseFunction [] response_functions) {
-		float hdr_r = 0.0f, hdr_g = 0.0f, hdr_b = 0.0f;
-		float sum_weight = 0.0f;
-		for(int i=0;i<n_bitmaps;i++) {
-			int color = buffers[i][x];
-			float r = (float)((color & 0xFF0000) >> 16);
-			float g = (float)((color & 0xFF00) >> 8);
-			float b = (float)(color & 0xFF);
-			float avg = (r+g+b) / 3.0f;
-			// weight_scale_c chosen so that 0 and 255 map to a non-zero weight of 1.0/127.5
-			float weight = 1.0f - weight_scale_c * Math.abs( 127.5f - avg );
-			//double weight = 1.0;
-			/*if( MyDebug.LOG && x == 1547 && y == 1547 )
-				Log.d(TAG, "" + x + "," + y + ":" + i + ":" + r + "," + g + "," + b + " weight: " + weight);*/
-			if( response_functions[i] != null ) {
-				// faster to access the parameters directly
-				/*float parameter = response_functions[i].parameter;
-				r *= parameter;
-				g *= parameter;
-				b *= parameter;*/
-				float parameter_A = response_functions[i].parameter_A;
-				float parameter_B = response_functions[i].parameter_B;
-				r = parameter_A * r + parameter_B;
-				g = parameter_A * g + parameter_B;
-				b = parameter_A * b + parameter_B;
-			}
-			hdr_r += weight * r;
-			hdr_g += weight * g;
-			hdr_b += weight * b;
-			sum_weight += weight;
-		}
-		hdr_r /= sum_weight;
-		hdr_g /= sum_weight;
-		hdr_b /= sum_weight;
-		hdr[0] = hdr_r;
-		hdr[1] = hdr_g;
-		hdr[2] = hdr_b;
-	}
-
-	/* Initial test implementation - for now just doing an average, rather than HDR.
-	 */
-	private void processHDRAverage(List<Bitmap> bitmaps) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "processHDRAverage");
-    	long time_s = System.currentTimeMillis();
-		
-		Bitmap bm = bitmaps.get(0);
-		int n_bitmaps = bitmaps.size();
-		int [] total_r = new int[bm.getWidth()*bm.getHeight()];
-		int [] total_g = new int[bm.getWidth()*bm.getHeight()];
-		int [] total_b = new int[bm.getWidth()*bm.getHeight()];
-		for(int i=0;i<bm.getWidth()*bm.getHeight();i++) {
-			total_r[i] = 0;
-			total_g[i] = 0;
-			total_b[i] = 0;
-		}
-		//int [] buffer = new int[bm.getWidth()*bm.getHeight()];
-		int [] buffer = new int[bm.getWidth()];
-		for(int i=0;i<n_bitmaps;i++) {
-			//bitmaps.get(i).getPixels(buffer, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
-			for(int y=0,c=0;y<bm.getHeight();y++) {
-				if( MyDebug.LOG ) {
-					if( y % 100 == 0 )
-						Log.d(TAG, "process " + i + ": " + y + " / " + bm.getHeight());
-				}
-				bitmaps.get(i).getPixels(buffer, 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
-				for(int x=0;x<bm.getWidth();x++,c++) {
-					//int this_col = buffer[c];
-					int this_col = buffer[x];
-					total_r[c] += this_col & 0xFF0000;
-					total_g[c] += this_col & 0xFF00;
-					total_b[c] += this_col & 0xFF;
-				}
-			}
-		}
-		if( MyDebug.LOG )
-			Log.d(TAG, "time before write: " + (System.currentTimeMillis() - time_s));
-		// write:
-		for(int y=0,c=0;y<bm.getHeight();y++) {
-			if( MyDebug.LOG ) {
-				if( y % 100 == 0 )
-					Log.d(TAG, "write: " + y + " / " + bm.getHeight());
-			}
-			for(int x=0;x<bm.getWidth();x++,c++) {
-				total_r[c] /= n_bitmaps;
-				total_g[c] /= n_bitmaps;
-				total_b[c] /= n_bitmaps;
-				//int col = Color.rgb(total_r[c] >> 16, total_g[c] >> 8, total_b[c]);
-				int col = (total_r[c] & 0xFF0000) | (total_g[c] & 0xFF00) | total_b[c];
-				buffer[x] = col;
-			}
-			bm.setPixels(buffer, 0, bm.getWidth(), 0, y, bm.getWidth(), 1);
-		}
-
-		if( MyDebug.LOG )
-			Log.d(TAG, "time for processHDRAverage: " + (System.currentTimeMillis() - time_s));
-
-		// bitmaps.get(0) now stores the HDR image, so free up the rest of the memory asap:
-		for(int i=1;i<bitmaps.size();i++) {
-			Bitmap bitmap = bitmaps.get(i);
-			bitmap.recycle();
 		}
 	}
 }
