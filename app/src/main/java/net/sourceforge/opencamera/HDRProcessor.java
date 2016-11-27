@@ -29,6 +29,7 @@ public class HDRProcessor {
 	private final Context context;
 	private RenderScript rs; // lazily created, so we don't take up resources if application isn't using HDR
 
+	// public for access by testing
 	public final int [] offsets_x = {0, 0, 0};
 	public final int [] offsets_y = {0, 0, 0};
 
@@ -238,13 +239,16 @@ public class HDRProcessor {
 
 	/** Converts a list of bitmaps into a HDR image, which is then tonemapped to a final RGB image.
 	 * @param bitmaps The list of bitmaps, which should be in order of increasing brightness (exposure).
-	 *                The resultant image is stored in the first bitmap. The remainder bitmaps will have
-	 *                recycle() called on them.
 	 *                Currently only supports a list of 3 images, the 2nd should be at the desired exposure
 	 *                level for the resultant image.
 	 *                The bitmaps must all be the same resolution.
+	 * @param release_bitmaps If true, the resultant image is returned in the first bitmap in bitmaps. The
+	 *                        remainder bitmaps will have recycle() called on them, and set to null.
+	 *                        If false, the resultant image is copied to output_bitmap.
+	 * @param output_bitmap If release_bitmaps is false, the resultant image is stored in the first copied
+	 *                      to output_bitmap. If release_bitmaps is true, this parameter is ignored.
 	 */
-	public void processHDR(List<Bitmap> bitmaps) {
+	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
 		int n_bitmaps = bitmaps.size();
@@ -267,7 +271,7 @@ public class HDRProcessor {
 		
 		switch( algorithm ) {
 		case HDRALGORITHM_STANDARD:
-			processHDRCore(bitmaps);
+			processHDRCore(bitmaps, release_bitmaps, output_bitmap);
 			break;
 		default:
 			if( MyDebug.LOG )
@@ -406,7 +410,7 @@ public class HDRProcessor {
 	 *  Android 5.0).
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void processHDRCore(List<Bitmap> bitmaps) {
+	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
 		
@@ -529,29 +533,47 @@ public class HDRProcessor {
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "call processHDRScript");
-		// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset
-		processHDRScript.forEach_hdr(allocations[1], allocations[base_bitmap]);
+		Allocation output_allocation = null;
+		if( release_bitmaps ) {
+			// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset
+			output_allocation = allocations[base_bitmap];
+		}
+		else {
+			output_allocation = Allocation.createFromBitmap(rs, output_bitmap);
+		}
+		processHDRScript.forEach_hdr(allocations[1], output_allocation);
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after processHDRScript: " + (System.currentTimeMillis() - time_s));
 
-		// bitmaps.get(base_bitmap) now stores the HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
-		for(int i=0;i<bitmaps.size();i++) {
-			if( i != base_bitmap ) {
-				Bitmap bitmap = bitmaps.get(i);
-				bitmap.recycle();
+		if( release_bitmaps ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "release bitmaps");
+			// bitmaps.get(base_bitmap) will store HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
+			for (int i = 0; i < bitmaps.size(); i++) {
+				if (i != base_bitmap) {
+					Bitmap bitmap = bitmaps.get(i);
+					bitmap.recycle();
+				}
 			}
 		}
 
-		adjustHistogram(allocations[base_bitmap], bm.getWidth(), bm.getHeight(), time_s);
+		adjustHistogram(output_allocation, bm.getWidth(), bm.getHeight(), time_s);
 
-		allocations[base_bitmap].copyTo( bitmaps.get(base_bitmap) );
-		if( MyDebug.LOG )
-			Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+		if( release_bitmaps ) {
+			allocations[base_bitmap].copyTo(bitmaps.get(base_bitmap));
+			if (MyDebug.LOG)
+				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 
-		// make it so that we store the output bitmap as first in the list
-		bitmaps.set(0, bitmaps.get(base_bitmap));
-		for(int i=1;i<bitmaps.size();i++) {
-			bitmaps.set(i, null);
+			// make it so that we store the output bitmap as first in the list
+			bitmaps.set(0, bitmaps.get(base_bitmap));
+			for (int i = 1; i < bitmaps.size(); i++) {
+				bitmaps.set(i, null);
+			}
+		}
+		else {
+			output_allocation.copyTo(output_bitmap);
+			if (MyDebug.LOG)
+				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 		}
 
 		if( MyDebug.LOG )
