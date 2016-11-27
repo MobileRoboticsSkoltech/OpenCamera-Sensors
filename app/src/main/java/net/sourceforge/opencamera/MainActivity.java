@@ -127,7 +127,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private boolean keydown_volume_down;
 	
 	// for testing; must be volatile for test project reading the state
-	public volatile boolean is_test; // whether called from OpenCamera.test testing
+	public boolean is_test; // whether called from OpenCamera.test testing
 	public volatile Bitmap gallery_bitmap;
 	public volatile boolean test_low_memory;
 	public volatile boolean test_have_angle;

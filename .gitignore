@@ -6,8 +6,6 @@ _other/
 .gradle/
 .idea/
 build/
-bin/
-gen/
 gfx/
 testdata/
 
