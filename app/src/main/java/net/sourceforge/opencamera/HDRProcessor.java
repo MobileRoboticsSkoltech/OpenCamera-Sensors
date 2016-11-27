@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 //import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.annotation.TargetApi;
@@ -247,8 +249,10 @@ public class HDRProcessor {
 	 *                        If false, the resultant image is copied to output_bitmap.
 	 * @param output_bitmap If release_bitmaps is false, the resultant image is stored in the first copied
 	 *                      to output_bitmap. If release_bitmaps is true, this parameter is ignored.
+	 * @param assume_sorted If true, the input bitmaps should be sorted in order from darkest to brightest
+	 *                      exposure. If false, the function will automatically resort.
 	 */
-	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap) {
+	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
 		int n_bitmaps = bitmaps.size();
@@ -271,7 +275,7 @@ public class HDRProcessor {
 		
 		switch( algorithm ) {
 		case HDRALGORITHM_STANDARD:
-			processHDRCore(bitmaps, release_bitmaps, output_bitmap);
+			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted);
 			break;
 		default:
 			if( MyDebug.LOG )
@@ -410,7 +414,7 @@ public class HDRProcessor {
 	 *  Android 5.0).
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap) {
+	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
 		
@@ -424,8 +428,8 @@ public class HDRProcessor {
     	long time_s = System.currentTimeMillis();
 		
 		int n_bitmaps = bitmaps.size();
-		Bitmap bm = bitmaps.get(0);
-		final int base_bitmap = 1; // index of the bitmap with the base exposure and offsets
+		int width = bitmaps.get(0).getWidth();
+		int height = bitmaps.get(0).getHeight();
 		ResponseFunction [] response_functions = new ResponseFunction[n_bitmaps]; // ResponseFunction for each image (the ResponseFunction entry can be left null to indicate the Identity)
 		/*int [][] buffers = new int[n_bitmaps][];
 		for(int i=0;i<n_bitmaps;i++) {
@@ -444,18 +448,20 @@ public class HDRProcessor {
 		}
 		// create allocations
 		Allocation [] allocations = new Allocation[n_bitmaps];
-		for (int i = 0; i < n_bitmaps; i++) {
+		for(int i=0;i<n_bitmaps;i++) {
 			allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
 		}
 		if (MyDebug.LOG)
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
 
 		// perform auto-alignment
-		autoAlignment(offsets_x, offsets_y, allocations, bm.getWidth(), bm.getHeight(), bitmaps, time_s);
+		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
+		autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, assume_sorted, time_s);
 		if (MyDebug.LOG)
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
 
 		// compute response_functions
+		final int base_bitmap = 1; // index of the bitmap with the base exposure and offsets
 		for(int i=0;i<n_bitmaps;i++) {
 			ResponseFunction function = null;
 			if( i != base_bitmap ) {
@@ -549,7 +555,7 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "release bitmaps");
 			// bitmaps.get(base_bitmap) will store HDR image, so free up the rest of the memory asap - we no longer need the remaining bitmaps
-			for (int i = 0; i < bitmaps.size(); i++) {
+			for(int i=0;i<bitmaps.size();i++) {
 				if (i != base_bitmap) {
 					Bitmap bitmap = bitmaps.get(i);
 					bitmap.recycle();
@@ -557,7 +563,7 @@ public class HDRProcessor {
 			}
 		}
 
-		adjustHistogram(output_allocation, bm.getWidth(), bm.getHeight(), time_s);
+		adjustHistogram(output_allocation, width, height, time_s);
 
 		if( release_bitmaps ) {
 			allocations[base_bitmap].copyTo(bitmaps.get(base_bitmap));
@@ -566,7 +572,7 @@ public class HDRProcessor {
 
 			// make it so that we store the output bitmap as first in the list
 			bitmaps.set(0, bitmaps.get(base_bitmap));
-			for (int i = 1; i < bitmaps.size(); i++) {
+			for(int i=1;i<bitmaps.size();i++) {
 				bitmaps.set(i, null);
 			}
 		}
@@ -580,8 +586,11 @@ public class HDRProcessor {
 			Log.d(TAG, "time for processHDRCore: " + (System.currentTimeMillis() - time_s));
 	}
 
+	/**
+	 * If assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
+     */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, long time_s) {
+	private void autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, boolean assume_sorted, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoAlignment");
 		Allocation [] mtb_allocations = new Allocation[allocations.length];
@@ -602,12 +611,59 @@ public class HDRProcessor {
 		// create RenderScript
 		ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
 
+		LuminanceInfo [] luminanceInfos = new LuminanceInfo[allocations.length];
 		for(int i=0;i<allocations.length;i++) {
-			int median_value = computeMedianLuminance(bitmaps.get(i), mtb_x, mtb_y, mtb_width, mtb_height);
-			if( MyDebug.LOG ) {
-				Log.d(TAG, i + ": median_value: " + median_value);
-				Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
+			luminanceInfos[i] = computeMedianLuminance(bitmaps.get(i), mtb_x, mtb_y, mtb_width, mtb_height);
+			if( MyDebug.LOG )
+				Log.d(TAG, i + ": median_value: " + luminanceInfos[i].median_value);
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
+
+		if( !assume_sorted ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "sort bitmaps");
+			class BitmapInfo {
+				final LuminanceInfo luminanceInfo;
+				final Bitmap bitmap;
+				final Allocation allocation;
+
+				BitmapInfo(LuminanceInfo luminanceInfo, Bitmap bitmap, Allocation allocation) {
+					this.luminanceInfo = luminanceInfo;
+					this.bitmap = bitmap;
+					this.allocation = allocation;
+				}
+
 			}
+
+			List<BitmapInfo> bitmapInfos = new ArrayList<>(bitmaps.size());
+			for(int i=0;i<bitmaps.size();i++) {
+				BitmapInfo bitmapInfo = new BitmapInfo(luminanceInfos[i], bitmaps.get(i), allocations[i]);
+				bitmapInfos.add(bitmapInfo);
+			}
+			Collections.sort(bitmapInfos, new Comparator<BitmapInfo>() {
+				@Override
+				public int compare(BitmapInfo o1, BitmapInfo o2) {
+					return o1.luminanceInfo.median_value - o2.luminanceInfo.median_value;
+				}
+			});
+			bitmaps.clear();
+			for(int i=0;i<bitmapInfos.size();i++) {
+				bitmaps.add(bitmapInfos.get(i).bitmap);
+				luminanceInfos[i] = bitmapInfos.get(i).luminanceInfo;
+				allocations[i] = bitmapInfos.get(i).allocation;
+			}
+			if( MyDebug.LOG ) {
+				for(int i=0;i<allocations.length;i++) {
+					Log.d(TAG, i + ": median_value: " + luminanceInfos[i].median_value);
+				}
+			}
+		}
+
+		for(int i=0;i<allocations.length;i++) {
+			int median_value = luminanceInfos[i].median_value;
+			if( MyDebug.LOG )
+				Log.d(TAG, i + ": median_value: " + median_value);
 
 			/*if( median_value < 16 ) {
 				// needed for testHDR2, testHDR28
@@ -616,7 +672,7 @@ public class HDRProcessor {
 				mtb_allocations[i] = null;
 				continue;
 			}*/
-			if( median_value == -1 ) {
+			if( luminanceInfos[i].noisy ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "unable to compute median luminance safely");
 				mtb_allocations[i] = null;
@@ -788,7 +844,17 @@ public class HDRProcessor {
 		}*/
 	}
 
-	private int computeMedianLuminance(Bitmap bitmap, int mtb_x, int mtb_y, int mtb_width, int mtb_height) {
+	private class LuminanceInfo {
+		final int median_value;
+		final boolean noisy;
+
+		LuminanceInfo(int median_value, boolean noisy) {
+			this.median_value = median_value;
+			this.noisy = noisy;
+		}
+	}
+
+	private LuminanceInfo computeMedianLuminance(Bitmap bitmap, int mtb_x, int mtb_y, int mtb_width, int mtb_height) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "computeMedianLuminance");
 		final int n_samples_c = 100;
@@ -803,7 +869,7 @@ public class HDRProcessor {
 			double alpha = ((double) y + 1.0) / ((double) n_h_samples + 1.0);
 			//int y_coord = (int) (alpha * bitmap.getHeight());
 			int y_coord = mtb_y + (int) (alpha * mtb_height);
-			for (int x = 0; x < n_w_samples; x++) {
+			for(int x=0;x<n_w_samples;x++) {
 				double beta = ((double) x + 1.0) / ((double) n_w_samples + 1.0);
 				//int x_coord = (int) (beta * bitmap.getWidth());
 				int x_coord = mtb_x + (int) (beta * mtb_width);
@@ -821,11 +887,14 @@ public class HDRProcessor {
 		}
 		int middle = total/2;
 		int count = 0;
+		int median_value = 0;
+		boolean noisy = false;
 		for(int i=0;i<256;i++) {
 			count += histo[i];
 			if( count >= middle ) {
+				median_value = i;
 				if( MyDebug.LOG )
-					Log.d(TAG, "median luminance " + i);
+					Log.d(TAG, "median luminance " + median_value);
 				final int noise_threshold = 4;
 				int n_below = 0, n_above = 0;
 				for(int j=0;j<=i-noise_threshold;j++) {
@@ -848,13 +917,13 @@ public class HDRProcessor {
 					// note that we don't exclude cases where frac_above is too small, as this could be an overexposed image - see testHDR31
 					if( MyDebug.LOG )
 						Log.d(TAG, "too dark/noisy");
-					return -1;
+					noisy = true;
 				}
-				return i;
+				return new LuminanceInfo(median_value, noisy);
 			}
 		}
 		Log.e(TAG, "computeMedianLuminance failed");
-		return -1;
+		return new LuminanceInfo(127, true);
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)

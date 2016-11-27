@@ -614,7 +614,7 @@ public class ImageSaver extends Thread {
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after decompressing base exposures: " + (System.currentTimeMillis() - time_s));
     		}
-			hdrProcessor.processHDR(bitmaps, true, null); // this will recycle all the bitmaps except bitmaps.get(0), which will contain the hdr image
+			hdrProcessor.processHDR(bitmaps, true, null, true); // this will recycle all the bitmaps except bitmaps.get(0), which will contain the hdr image
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after creating HDR image: " + (System.currentTimeMillis() - time_s));
     		}
