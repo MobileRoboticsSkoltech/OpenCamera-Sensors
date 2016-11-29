@@ -6806,7 +6806,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Thread.sleep(1000); // wait for camera to open
 
     	long time_s = System.currentTimeMillis();
-		mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs);
+		mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true);
 		Log.d(TAG, "HDR time: " + (System.currentTimeMillis() - time_s));
 		
 		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
