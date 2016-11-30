@@ -6557,76 +6557,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(best_fps2[0] == 7000 && best_fps2[1] == 10000);
 	}
 
-	public void testLocationToDMS() {
-		Log.d(TAG, "testLocationToDMS");
-
-		setToDefault();
-		
-		String location_string = LocationSupplier.locationToDMS(0.0);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'0\""));
-
-		location_string = LocationSupplier.locationToDMS(0.0000306);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'0\""));
-
-		location_string = LocationSupplier.locationToDMS(0.000306);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'1\""));
-
-		location_string = LocationSupplier.locationToDMS(0.00306);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'11\""));
-
-		location_string = LocationSupplier.locationToDMS(0.9999);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°59'59\""));
-
-		location_string = LocationSupplier.locationToDMS(1.7438);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("1°44'37\""));
-
-		location_string = LocationSupplier.locationToDMS(53.000137);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("53°0'0\""));
-
-		location_string = LocationSupplier.locationToDMS(147.00938);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("147°0'33\""));
-
-		location_string = LocationSupplier.locationToDMS(-0.0);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'0\""));
-
-		location_string = LocationSupplier.locationToDMS(-0.0000306);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("0°0'0\""));
-
-		location_string = LocationSupplier.locationToDMS(-0.000306);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-0°0'1\""));
-
-		location_string = LocationSupplier.locationToDMS(-0.00306);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-0°0'11\""));
-
-		location_string = LocationSupplier.locationToDMS(-0.9999);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-0°59'59\""));
-
-		location_string = LocationSupplier.locationToDMS(-1.7438);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-1°44'37\""));
-
-		location_string = LocationSupplier.locationToDMS(-53.000137);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-53°0'0\""));
-
-		location_string = LocationSupplier.locationToDMS(-147.00938);
-		Log.d(TAG, "location_string: " + location_string);
-		assertTrue(location_string.equals("-147°0'33\""));
-	}
-
 	public void testTakePhotoHDR() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDR");
 		if( !mActivity.supportsHDR() ) {
@@ -6806,7 +6736,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Thread.sleep(1000); // wait for camera to open
 
     	long time_s = System.currentTimeMillis();
-		mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs);
+		mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true);
 		Log.d(TAG, "HDR time: " + (System.currentTimeMillis() - time_s));
 		
 		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
