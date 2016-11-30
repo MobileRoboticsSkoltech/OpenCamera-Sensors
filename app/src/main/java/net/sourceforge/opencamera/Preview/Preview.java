@@ -2863,7 +2863,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	public int [] matchPreviewFpsToVideo(List<int []> fps_ranges, int video_frame_rate) {
+	public static int [] matchPreviewFpsToVideo(List<int []> fps_ranges, int video_frame_rate) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "matchPreviewFpsToVideo()");
 		int selected_min_fps = -1, selected_max_fps = -1, selected_diff = -1;
@@ -2915,7 +2915,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return new int[]{selected_min_fps, selected_max_fps};
 	}
 
-	public int [] chooseBestPreviewFps(List<int []> fps_ranges) {
+	public static int [] chooseBestPreviewFps(List<int []> fps_ranges) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "chooseBestPreviewFps()");
 

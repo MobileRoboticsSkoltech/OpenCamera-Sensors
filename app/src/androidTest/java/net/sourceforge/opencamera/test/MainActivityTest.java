@@ -6495,68 +6495,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_VOLUME_UP);
 	}
 	
-	public void testBestPreviewFps() {
-		Log.d(TAG, "testBestPreviewFps");
-
-		setToDefault();
-		
-		List<int []> list0 = new ArrayList<>();
-		list0.add(new int[]{15000, 15000});
-		list0.add(new int[]{15000, 30000});
-		list0.add(new int[]{7000, 30000});
-		list0.add(new int[]{30000, 30000});
-		int [] best_fps0 = mPreview.chooseBestPreviewFps(list0);
-		assertTrue(best_fps0[0] == 7000 && best_fps0[1] == 30000);
-
-		List<int []> list1 = new ArrayList<>();
-		list1.add(new int[]{15000, 15000});
-		list1.add(new int[]{7000, 60000});
-		list1.add(new int[]{15000, 30000});
-		list1.add(new int[]{7000, 30000});
-		list1.add(new int[]{30000, 30000});
-		int [] best_fps1 = mPreview.chooseBestPreviewFps(list1);
-		assertTrue(best_fps1[0] == 7000 && best_fps1[1] == 60000);
-
-		List<int []> list2 = new ArrayList<>();
-		list2.add(new int[]{15000, 15000});
-		list2.add(new int[]{7000, 15000});
-		list2.add(new int[]{7000, 10000});
-		list2.add(new int[]{8000, 19000});
-		int [] best_fps2 = mPreview.chooseBestPreviewFps(list2);
-		assertTrue(best_fps2[0] == 8000 && best_fps2[1] == 19000);
-	}
-
-	public void testMatchPreviewFpsToVideo() {
-		Log.d(TAG, "matchPreviewFpsToVideo");
-
-		setToDefault();
-		
-		List<int []> list0 = new ArrayList<>();
-		list0.add(new int[]{15000, 15000});
-		list0.add(new int[]{15000, 30000});
-		list0.add(new int[]{7000, 30000});
-		list0.add(new int[]{30000, 30000});
-		int [] best_fps0 = mPreview.matchPreviewFpsToVideo(list0, 30000);
-		assertTrue(best_fps0[0] == 30000 && best_fps0[1] == 30000);
-
-		List<int []> list1 = new ArrayList<>();
-		list1.add(new int[]{15000, 15000});
-		list1.add(new int[]{7000, 60000});
-		list1.add(new int[]{15000, 30000});
-		list1.add(new int[]{7000, 30000});
-		list1.add(new int[]{30000, 30000});
-		int [] best_fps1 = mPreview.matchPreviewFpsToVideo(list1, 15000);
-		assertTrue(best_fps1[0] == 15000 && best_fps1[1] == 15000);
-
-		List<int []> list2 = new ArrayList<>();
-		list2.add(new int[]{15000, 15000});
-		list2.add(new int[]{7000, 15000});
-		list2.add(new int[]{7000, 10000});
-		list2.add(new int[]{8000, 19000});
-		int [] best_fps2 = mPreview.matchPreviewFpsToVideo(list2, 7000);
-		assertTrue(best_fps2[0] == 7000 && best_fps2[1] == 10000);
-	}
-
 	public void testTakePhotoHDR() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDR");
 		if( !mActivity.supportsHDR() ) {

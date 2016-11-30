@@ -57,8 +57,6 @@ public class MainTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testWhiteBalance"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImageQuality"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFailOpenCamera"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testBestPreviewFps"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testMatchPreviewFpsToVideo"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAudioControlIcon"));
         return suite;
     }
