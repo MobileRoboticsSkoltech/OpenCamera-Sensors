@@ -1176,7 +1176,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			bundle.putInt("resolution_height", preview.getCurrentPictureSize().height);
 		}
 		
-		List<String> video_quality = this.preview.getSupportedVideoQuality();
+		List<String> video_quality = this.preview.getVideoQualityHander().getSupportedVideoQuality();
 		if( video_quality != null && this.preview.getCameraController() != null ) {
 			String [] video_quality_arr = new String[video_quality.size()];
 			String [] video_quality_string_arr = new String[video_quality.size()];
@@ -1189,8 +1189,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			bundle.putStringArray("video_quality", video_quality_arr);
 			bundle.putStringArray("video_quality_string", video_quality_string_arr);
 		}
-		if( preview.getCurrentVideoQuality() != null ) {
-			bundle.putString("current_video_quality", preview.getCurrentVideoQuality());
+		if( preview.getVideoQualityHander().getCurrentVideoQuality() != null ) {
+			bundle.putString("current_video_quality", preview.getVideoQualityHander().getCurrentVideoQuality());
 		}
 		CamcorderProfile camcorder_profile = preview.getCamcorderProfile();
 		bundle.putInt("video_frame_width", camcorder_profile.videoFrameWidth);
@@ -1198,7 +1198,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putInt("video_bit_rate", camcorder_profile.videoBitRate);
 		bundle.putInt("video_frame_rate", camcorder_profile.videoFrameRate);
 
-		List<CameraController.Size> video_sizes = this.preview.getSupportedVideoSizes();
+		List<CameraController.Size> video_sizes = this.preview.getVideoQualityHander().getSupportedVideoSizes();
 		if( video_sizes != null ) {
 			int [] widths = new int[video_sizes.size()];
 			int [] heights = new int[video_sizes.size()];
@@ -2117,8 +2117,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "using Camera2 API, so can disable the force 4K option");
 			this.disableForceVideo4K();
 		}
-		if( this.supportsForceVideo4K() && preview.getSupportedVideoSizes() != null ) {
-			for(CameraController.Size size : preview.getSupportedVideoSizes()) {
+		if( this.supportsForceVideo4K() && preview.getVideoQualityHander().getSupportedVideoSizes() != null ) {
+			for(CameraController.Size size : preview.getVideoQualityHander().getSupportedVideoSizes()) {
 				if( size.width >= 3840 && size.height >= 2160 ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "camera natively supports 4K, so can disable the force option");

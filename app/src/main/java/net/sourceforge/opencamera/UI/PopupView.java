@@ -326,8 +326,8 @@ public class PopupView extends LinearLayout {
 				}
     		});
 
-    		final List<String> video_sizes = preview.getSupportedVideoQuality();
-    		video_size_index = preview.getCurrentVideoQualityIndex();
+    		final List<String> video_sizes = preview.getVideoQualityHander().getSupportedVideoQuality();
+    		video_size_index = preview.getVideoQualityHander().getCurrentVideoQualityIndex();
     		final List<String> video_size_strings = new ArrayList<>();
     		for(String video_size : video_sizes) {
     			String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
