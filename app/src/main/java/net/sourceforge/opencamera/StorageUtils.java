@@ -268,26 +268,6 @@ public class StorageUtils {
 		return sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
     }
     
-    public static File getBaseFolder() {
-    	return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-    }
-
-    public static File getImageFolder(String folder_name) {
-		File file = null;
-		if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
-			// ignore final '/' character
-			folder_name = folder_name.substring(0, folder_name.length()-1);
-		}
-		//if( folder_name.contains("/") ) {
-		if( folder_name.startsWith("/") ) {
-			file = new File(folder_name);
-		}
-		else {
-	        file = new File(getBaseFolder(), folder_name);
-		}
-        return file;
-    }
-
     // only valid if isUsingSAF()
     String getSaveLocationSAF() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -325,15 +305,10 @@ public class StorageUtils {
 	String getImageFolderNameSAF(Uri uri) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getImageFolderNameSAF: " + uri);
-	    String filename = null;
-		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
-            final String id = DocumentsContract.getTreeDocumentId(uri);
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "id: " + id);
-			File file = getFileFromDocumentIdSAF(id);
-			if( file != null ) {
-				filename = file.getAbsolutePath();
-			}
+		File file = getImageFolderSAF(uri);
+		String filename = null;
+		if( file != null ) {
+			filename = file.getAbsolutePath();
 		}
 		return filename;
 	}
@@ -375,12 +350,7 @@ public class StorageUtils {
     		Uri uri = getTreeUriSAF();
     		/*if( MyDebug.LOG )
     			Log.d(TAG, "uri: " + uri);*/
-    		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
-                final String id = DocumentsContract.getTreeDocumentId(uri);
-        		/*if( MyDebug.LOG )
-        			Log.d(TAG, "id: " + id);*/
-        		file = getFileFromDocumentIdSAF(id);
-    		}
+			file = getImageFolderSAF(uri);
     	}
     	else {
     		String folder_name = getSaveLocation();
@@ -388,6 +358,40 @@ public class StorageUtils {
     	}
     	return file;
     }
+
+	public static File getBaseFolder() {
+		return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+	}
+
+	// only valid if !isUsingSAF()
+	public static File getImageFolder(String folder_name) {
+		File file = null;
+		if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
+			// ignore final '/' character
+			folder_name = folder_name.substring(0, folder_name.length()-1);
+		}
+		//if( folder_name.contains("/") ) {
+		if( folder_name.startsWith("/") ) {
+			file = new File(folder_name);
+		}
+		else {
+			file = new File(getBaseFolder(), folder_name);
+		}
+		return file;
+	}
+
+	// only valid if isUsingSAF()
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private File getImageFolderSAF(Uri uri) {
+		File file = null;
+		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
+			final String id = DocumentsContract.getTreeDocumentId(uri);
+        		/*if( MyDebug.LOG )
+        			Log.d(TAG, "id: " + id);*/
+			file = getFileFromDocumentIdSAF(id);
+		}
+		return file;
+	}
 
 	// only valid if isUsingSAF()
 	// This function should only be used as a last resort - we shouldn't generally assume that a Uri represents an actual File, and instead.
