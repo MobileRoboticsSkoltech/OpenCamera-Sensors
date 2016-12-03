@@ -234,6 +234,7 @@ public class StorageUtils {
     		 			announceUri(uri, is_new_picture, is_new_video);
 
     	    			// it seems caller apps seem to prefer the content:// Uri rather than one based on a File
+						// update for Android 7: seems that passing file uris is now restricted anyway, see https://code.google.com/p/android/issues/detail?id=203555
     		 			Activity activity = (Activity)context;
     		 			String action = activity.getIntent().getAction();
     		 	        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
