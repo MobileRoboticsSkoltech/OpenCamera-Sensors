@@ -47,18 +47,12 @@ public class MainTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFolderChooserInvalid"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFolderHistory"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFolderHistorySAF"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoResolutions1"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoResolutions2"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoResolutions3"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoResolutions4"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPreviewRotation"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSceneMode"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testColorEffect"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testWhiteBalance"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImageQuality"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFailOpenCamera"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testBestPreviewFps"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testMatchPreviewFpsToVideo"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAudioControlIcon"));
         return suite;
     }
