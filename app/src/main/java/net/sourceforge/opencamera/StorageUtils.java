@@ -318,27 +318,22 @@ public class StorageUtils {
 
 	/** Returns a human readable name for a SAF save folder location.
      * Only valid if isUsingSAF().
-	 * @param folder_name The SAF uri for the requested save location.
+	 * @param uri The SAF uri for the requested save location.
 	 * @return The human readable form. This will be null if the Uri is not recognised.
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	String getImageFolderNameSAF(Uri folder_name) {
+	String getImageFolderNameSAF(Uri uri) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "getImageFolderNameSAF: " + folder_name);
+			Log.d(TAG, "getImageFolderNameSAF: " + uri);
 	    String filename = null;
-		if( "com.android.externalstorage.documents".equals(folder_name.getAuthority()) ) {
-            final String id = DocumentsContract.getTreeDocumentId(folder_name);
+		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
+            final String id = DocumentsContract.getTreeDocumentId(uri);
     		if( MyDebug.LOG )
     			Log.d(TAG, "id: " + id);
-            String [] split = id.split(":");
-            if( split.length >= 2 ) {
-    		    String path = split[1];
-        		if( MyDebug.LOG ) {
-        			Log.d(TAG, "type: " + split[0]);
-        			Log.d(TAG, "path: " + path);
-        		}
-        		filename = path;
-            }
+			File file = getFileFromDocumentIdSAF(id);
+			if( file != null ) {
+				filename = file.getAbsolutePath();
+			}
 		}
 		return filename;
 	}
