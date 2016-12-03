@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 
 /** Handles video quality options.
+ *  Note that this class should avoid calls to the Android API, so we can perform local unit testing
+ *  on it.
  */
 public class VideoQualityHandler {
     private static final String TAG = "VideoQualityHandler";
@@ -40,8 +42,13 @@ public class VideoQualityHandler {
         current_video_quality = -1;
     }
 
-    /** Note that a HashMap is used instead of SparseArray (despite Android Studio warning) so that this code can be used in local
+    /** Initialises the class with the available video profiles and resolutions.
+     *  Note that a HashMap is used instead of SparseArray (despite Android Studio warning) so that
+     *  this code can be used in local
      *  unit testing.
+     * @param profiles This is a hashmap where the key is the quality (see CamcorderProfile.QUALITY_*),
+     *                 the Dimension2D is the width/height corresponding to that quality (as given by
+     *                 videoFrameWidth, videoFrameHeight in the profile returned byCamcorderProfile.get().
      */
     public void initialiseVideoQualityFromProfiles(HashMap<Integer, Dimension2D> profiles) {
         if( MyDebug.LOG )
