@@ -1313,7 +1313,7 @@ public class ImageSaver extends Thread {
 	    		           scanner, I've had reports this doesn't happen when saving to external SD cards. So better to explicitly
 	    		           scan.
 	    		    */
-		    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri);
+		    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
 					if( MyDebug.LOG )
 						Log.d(TAG, "real_file: " + real_file);
                     if( real_file != null ) {
@@ -1496,7 +1496,7 @@ public class ImageSaver extends Thread {
     		}
     		else {
     		    success = true;
-	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri);
+	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
 				if( MyDebug.LOG )
 					Log.d(TAG, "real_file: " + real_file);
                 if( real_file != null ) {
