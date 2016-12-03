@@ -357,6 +357,10 @@ public class StorageUtils {
 						file = externalFile;
 					}
 				}
+				if( file == null ) {
+					// just in case?
+					file = new File(path);
+				}
 			}
 		}
 		else if( "com.android.providers.downloads.documents".equals(uri.getAuthority()) ) {
