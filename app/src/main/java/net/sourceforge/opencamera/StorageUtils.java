@@ -280,34 +280,6 @@ public class StorageUtils {
 		return Uri.parse(folder_name);
     }
 
-    // only valid if isUsingSAF()
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private File getFileFromDocumentIdSAF(String id) {
-	    File file = null;
-        String [] split = id.split(":");
-        if( split.length >= 2 ) {
-            String type = split[0];
-		    String path = split[1];
-    		/*if( MyDebug.LOG ) {
-    			Log.d(TAG, "type: " + type);
-    			Log.d(TAG, "path: " + path);
-    		}*/
-		    File [] storagePoints = new File("/storage").listFiles();
-
-            if( "primary".equalsIgnoreCase(type) ) {
-    			final File externalStorage = Environment.getExternalStorageDirectory();
-    			file = new File(externalStorage, path);
-            }
-	        for(int i=0;storagePoints != null && i<storagePoints.length && file==null;i++) {
-	            File externalFile = new File(storagePoints[i], path);
-	            if( externalFile.exists() ) {
-	            	file = externalFile;
-	            }
-	        }
-		}
-		return file;
-	}
-
     // valid if whether or not isUsingSAF()
     // but note that if isUsingSAF(), this may return null - it can't be assumed that there is a File corresponding to the SAF Uri
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -365,7 +337,27 @@ public class StorageUtils {
             final String id = is_folder ? DocumentsContract.getTreeDocumentId(uri) : DocumentsContract.getDocumentId(uri);
     		if( MyDebug.LOG )
     			Log.d(TAG, "id: " + id);
-    		file = getFileFromDocumentIdSAF(id);
+			String [] split = id.split(":");
+			if( split.length >= 2 ) {
+				String type = split[0];
+				String path = split[1];
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "type: " + type);
+					Log.d(TAG, "path: " + path);
+				}*/
+				File [] storagePoints = new File("/storage").listFiles();
+
+				if( "primary".equalsIgnoreCase(type) ) {
+					final File externalStorage = Environment.getExternalStorageDirectory();
+					file = new File(externalStorage, path);
+				}
+				for(int i=0;storagePoints != null && i<storagePoints.length && file==null;i++) {
+					File externalFile = new File(storagePoints[i], path);
+					if( externalFile.exists() ) {
+						file = externalFile;
+					}
+				}
+			}
 		}
 		if( MyDebug.LOG ) {
 			if( file != null )
@@ -373,9 +365,65 @@ public class StorageUtils {
 			else
 				Log.d(TAG, "failed to find file");
 		}
+		else if( "com.android.providers.downloads.documents".equals(uri.getAuthority()) ) {
+			final String id = DocumentsContract.getDocumentId(uri);
+			final Uri contentUri = ContentUris.withAppendedId(
+					Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+			String filename = getDataColumn(contentUri, null, null);
+			if( filename != null )
+				return new File(filename);
+		}
+		else if( "com.android.providers.media.documents".equals(uri.getAuthority()) ) {
+			final String docId = DocumentsContract.getDocumentId(uri);
+			final String[] split = docId.split(":");
+			final String type = split[0];
+
+			Uri contentUri = null;
+			if ("image".equals(type)) {
+				contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+			}
+			else if ("video".equals(type)) {
+				contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+			}
+			else if ("audio".equals(type)) {
+				contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+			}
+
+			final String selection = "_id=?";
+			final String[] selectionArgs = new String[] {
+					split[1]
+			};
+
+			String filename = getDataColumn(contentUri, selection, selectionArgs);
+			if( filename != null )
+				return new File(filename);
+		}
 		return file;
 	}
-	
+
+	private String getDataColumn(Uri uri, String selection, String [] selectionArgs) {
+		final String column = "_data";
+		final String[] projection = {
+				column
+		};
+
+		Cursor cursor = null;
+		try {
+			cursor = this.context.getContentResolver().query(uri, projection, selection, selectionArgs,
+					null);
+			if (cursor != null && cursor.moveToFirst()) {
+				final int column_index = cursor.getColumnIndexOrThrow(column);
+				return cursor.getString(column_index);
+			}
+		}
+		finally {
+			if (cursor != null)
+				cursor.close();
+		}
+		return null;
+	}
+
 	private String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
         String index = "";
         if( count > 0 ) {
