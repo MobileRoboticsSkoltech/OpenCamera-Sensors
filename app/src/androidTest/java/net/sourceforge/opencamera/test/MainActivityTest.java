@@ -11,10 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import net.sourceforge.opencamera.LocationSupplier;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.PreferenceKeys;
-import net.sourceforge.opencamera.Preview.VideoQualityHandler;
 import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.Preview;
@@ -39,8 +37,6 @@ import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
 import android.util.Log;
-import android.util.Pair;
-import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
@@ -6118,153 +6114,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		subTestSaveFolderHistory(true);
-	}
-
-	private void compareVideoQuality(List<String> video_quality, List<String> exp_video_quality) {
-		for(int i=0;i<video_quality.size();i++) {
-        	Log.d(TAG, "supported video quality: " + video_quality.get(i));
-		}
-		for(int i=0;i<exp_video_quality.size();i++) {
-        	Log.d(TAG, "expected video quality: " + exp_video_quality.get(i));
-		}
-		assertTrue( video_quality.size() == exp_video_quality.size() );
-		for(int i=0;i<video_quality.size();i++) {
-			String quality = video_quality.get(i);
-			String exp_quality = exp_video_quality.get(i);
-			assertTrue(quality.equals(exp_quality));
-		}
-	}
-
-	/* Tests for setting correct video resolutions and profiles.
-	 */
-	public void testVideoResolutions1() {
-		VideoQualityHandler video_quality_handler = new VideoQualityHandler();
-
-		List<CameraController.Size> video_sizes = new ArrayList<>();
-		video_sizes.add(new CameraController.Size(1920, 1080));
-		video_sizes.add(new CameraController.Size(1280, 720));
-		video_sizes.add(new CameraController.Size(1600, 900));
-		video_quality_handler.setVideoSizes(video_sizes);
-		video_quality_handler.sortVideoSizes();
-
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_720P, new Pair<>(1280, 720));
-		profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<>(1280, 720));
-		video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
-
-		List<String> video_quality = video_quality_handler.getSupportedVideoQuality();
-		List<String> exp_video_quality = new ArrayList<>();
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P + "_r1600x900");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P);
-		compareVideoQuality(video_quality, exp_video_quality);
-	}
-
-	public void testVideoResolutions2() {
-		VideoQualityHandler video_quality_handler = new VideoQualityHandler();
-
-		List<CameraController.Size> video_sizes = new ArrayList<>();
-		video_sizes.add(new CameraController.Size(1920, 1080));
-		video_sizes.add(new CameraController.Size(1280, 720));
-		video_sizes.add(new CameraController.Size(1600, 900));
-		video_quality_handler.setVideoSizes(video_sizes);
-		video_quality_handler.sortVideoSizes();
-
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_720P, new Pair<>(1280, 720));
-		profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<>(1280, 720));
-		video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
-
-		List<String> video_quality = video_quality_handler.getSupportedVideoQuality();
-		List<String> exp_video_quality = new ArrayList<>();
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P + "_r1600x900");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P);
-		compareVideoQuality(video_quality, exp_video_quality);
-	}
-
-	public void testVideoResolutions3() {
-		VideoQualityHandler video_quality_handler = new VideoQualityHandler();
-
-		List<CameraController.Size> video_sizes = new ArrayList<>();
-		video_sizes.add(new CameraController.Size(1920, 1080));
-		video_sizes.add(new CameraController.Size(1280, 720));
-		video_sizes.add(new CameraController.Size(960, 720));
-		video_sizes.add(new CameraController.Size(800, 480));
-		video_sizes.add(new CameraController.Size(720, 576));
-		video_sizes.add(new CameraController.Size(720, 480));
-		video_sizes.add(new CameraController.Size(768, 576));
-		video_sizes.add(new CameraController.Size(640, 480));
-		video_sizes.add(new CameraController.Size(320, 240));
-		video_sizes.add(new CameraController.Size(352, 288));
-		video_sizes.add(new CameraController.Size(240, 160));
-		video_sizes.add(new CameraController.Size(176, 144));
-		video_sizes.add(new CameraController.Size(128, 96));
-		video_quality_handler.setVideoSizes(video_sizes);
-		video_quality_handler.sortVideoSizes();
-
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_720P, new Pair<>(1280, 720));
-		profiles.put(CamcorderProfile.QUALITY_480P, new Pair<>(720, 480));
-		profiles.put(CamcorderProfile.QUALITY_CIF, new Pair<>(352, 288));
-		profiles.put(CamcorderProfile.QUALITY_QVGA, new Pair<>(320, 240));
-		profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<>(320, 240));
-		video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
-
-		List<String> video_quality = video_quality_handler.getSupportedVideoQuality();
-		List<String> exp_video_quality = new ArrayList<>();
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_720P);
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P + "_r960x720");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P + "_r768x576");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P + "_r720x576");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P + "_r800x480");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P);
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_CIF + "_r640x480");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_CIF);
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_QVGA);
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_LOW + "_r240x160");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_LOW + "_r176x144");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_LOW + "_r128x96");
-		compareVideoQuality(video_quality, exp_video_quality);
-	}
-
-	// case from https://sourceforge.net/p/opencamera/discussion/general/thread/b95bfb83/?limit=25#14ac
-	public void testVideoResolutions4() {
-		VideoQualityHandler video_quality_handler = new VideoQualityHandler();
-
-		// Video quality: 4_r864x480, 4, 2
-		// Video resolutions: 176x144, 480x320, 640x480, 864x480, 1280x720, 1920x1080
-		List<CameraController.Size> video_sizes = new ArrayList<>();
-		video_sizes.add(new CameraController.Size(176, 144));
-		video_sizes.add(new CameraController.Size(480, 320));
-		video_sizes.add(new CameraController.Size(640, 480));
-		video_sizes.add(new CameraController.Size(864, 480));
-		video_sizes.add(new CameraController.Size(1280, 720));
-		video_sizes.add(new CameraController.Size(1920, 1080));
-		video_quality_handler.setVideoSizes(video_sizes);
-		video_quality_handler.sortVideoSizes();
-
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_480P, new Pair<>(640, 480));
-		profiles.put(CamcorderProfile.QUALITY_QCIF, new Pair<>(176, 144));
-		video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
-
-		List<String> video_quality = video_quality_handler.getSupportedVideoQuality();
-		List<String> exp_video_quality = new ArrayList<>();
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_HIGH);
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P + "_r1280x720");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P + "_r864x480");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_480P);
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_QCIF + "_r480x320");
-		exp_video_quality.add("" + CamcorderProfile.QUALITY_QCIF);
-		compareVideoQuality(video_quality, exp_video_quality);
 	}
 
 	public void testPreviewRotation() {

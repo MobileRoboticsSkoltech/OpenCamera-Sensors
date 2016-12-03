@@ -2,8 +2,6 @@ package net.sourceforge.opencamera.Preview;
 
 import android.media.CamcorderProfile;
 import android.util.Log;
-import android.util.Pair;
-import android.util.SparseArray;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.MyDebug;
@@ -12,12 +10,23 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 /** Handles video quality options.
  */
 public class VideoQualityHandler {
     private static final String TAG = "VideoQualityHandler";
+
+    public static class Dimension2D {
+        final int width;
+        final int height;
+
+        public Dimension2D(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+    }
 
     // video_quality can either be:
     // - an int, in which case it refers to a CamcorderProfile
@@ -31,7 +40,10 @@ public class VideoQualityHandler {
         current_video_quality = -1;
     }
 
-    public void initialiseVideoQualityFromProfiles(SparseArray<Pair<Integer, Integer>> profiles) {
+    /** Note that a HashMap is used instead of SparseArray (despite Android Studio warning) so that this code can be used in local
+     *  unit testing.
+     */
+    public void initialiseVideoQualityFromProfiles(HashMap<Integer, Dimension2D> profiles) {
         if( MyDebug.LOG )
             Log.d(TAG, "initialiseVideoQualityFromProfiles()");
         video_quality = new ArrayList<>();
@@ -44,50 +56,50 @@ public class VideoQualityHandler {
         if( profiles.get(CamcorderProfile.QUALITY_HIGH) != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "supports QUALITY_HIGH");
-            Pair<Integer, Integer> pair = profiles.get(CamcorderProfile.QUALITY_HIGH);
-            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_HIGH, pair.first, pair.second);
+            Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_HIGH);
+            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_HIGH, dim.width, dim.height);
         }
         if( profiles.get(CamcorderProfile.QUALITY_1080P) != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "supports QUALITY_1080P");
-            Pair<Integer, Integer> pair = profiles.get(CamcorderProfile.QUALITY_1080P);
-            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_1080P, pair.first, pair.second);
+            Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_1080P);
+            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_1080P, dim.width, dim.height);
         }
         if( profiles.get(CamcorderProfile.QUALITY_720P) != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "supports QUALITY_720P");
-            Pair<Integer, Integer> pair = profiles.get(CamcorderProfile.QUALITY_720P);
-            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_720P, pair.first, pair.second);
+            Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_720P);
+            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_720P, dim.width, dim.height);
         }
         if( profiles.get(CamcorderProfile.QUALITY_480P) != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "supports QUALITY_480P");
-            Pair<Integer, Integer> pair = profiles.get(CamcorderProfile.QUALITY_480P);
-            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_480P, pair.first, pair.second);
+            Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_480P);
+            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_480P, dim.width, dim.height);
         }
         if( profiles.get(CamcorderProfile.QUALITY_CIF) != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "supports QUALITY_CIF");
-            Pair<Integer, Integer> pair = profiles.get(CamcorderProfile.QUALITY_CIF);
-            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_CIF, pair.first, pair.second);
+            Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_CIF);
+            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_CIF, dim.width, dim.height);
         }
         if( profiles.get(CamcorderProfile.QUALITY_QVGA) != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "supports QUALITY_QVGA");
-            Pair<Integer, Integer> pair = profiles.get(CamcorderProfile.QUALITY_QVGA);
-            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_QVGA, pair.first, pair.second);
+            Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_QVGA);
+            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_QVGA, dim.width, dim.height);
         }
         if( profiles.get(CamcorderProfile.QUALITY_QCIF) != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "supports QUALITY_QCIF");
-            Pair<Integer, Integer> pair = profiles.get(CamcorderProfile.QUALITY_QCIF);
-            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_QCIF, pair.first, pair.second);
+            Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_QCIF);
+            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_QCIF, dim.width, dim.height);
         }
         if( profiles.get(CamcorderProfile.QUALITY_LOW) != null ) {
             if( MyDebug.LOG )
                 Log.d(TAG, "supports QUALITY_LOW");
-            Pair<Integer, Integer> pair = profiles.get(CamcorderProfile.QUALITY_LOW);
-            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_LOW, pair.first, pair.second);
+            Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_LOW);
+            addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_LOW, dim.width, dim.height);
         }
         if( MyDebug.LOG ) {
             for(int i=0;i<video_quality.size();i++) {

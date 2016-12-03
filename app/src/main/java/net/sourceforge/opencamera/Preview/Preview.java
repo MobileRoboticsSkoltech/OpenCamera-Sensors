@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -60,7 +61,6 @@ import android.provider.DocumentsContract;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
-import android.util.SparseArray;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -1932,44 +1932,44 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initialiseVideoQuality() {
 		int cameraId = camera_controller.getCameraId();
-		SparseArray<Pair<Integer, Integer>> profiles = new SparseArray<>();
+		HashMap<Integer, VideoQualityHandler.Dimension2D> profiles = new HashMap<>();
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
-        	profiles.put(CamcorderProfile.QUALITY_HIGH, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_HIGH, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
 	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_2160P) ) {
 	    		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_2160P);
-	        	profiles.put(CamcorderProfile.QUALITY_2160P, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
+	        	profiles.put(CamcorderProfile.QUALITY_2160P, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
 	        }
 		}
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_1080P);
-        	profiles.put(CamcorderProfile.QUALITY_1080P, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_1080P, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_720P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_720P);
-        	profiles.put(CamcorderProfile.QUALITY_720P, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_720P, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_480P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_480P);
-        	profiles.put(CamcorderProfile.QUALITY_480P, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_480P, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_CIF) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_CIF);
-        	profiles.put(CamcorderProfile.QUALITY_CIF, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_CIF, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QVGA) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_QVGA);
-        	profiles.put(CamcorderProfile.QUALITY_QVGA, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_QVGA, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QCIF) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_QCIF);
-        	profiles.put(CamcorderProfile.QUALITY_QCIF, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_QCIF, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_LOW) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_LOW);
-        	profiles.put(CamcorderProfile.QUALITY_LOW, new Pair<>(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.put(CamcorderProfile.QUALITY_LOW, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         this.video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
 	}

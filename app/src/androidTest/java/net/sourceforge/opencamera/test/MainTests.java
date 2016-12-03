@@ -47,10 +47,6 @@ public class MainTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFolderChooserInvalid"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFolderHistory"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFolderHistorySAF"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoResolutions1"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoResolutions2"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoResolutions3"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoResolutions4"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPreviewRotation"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSceneMode"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testColorEffect"));
