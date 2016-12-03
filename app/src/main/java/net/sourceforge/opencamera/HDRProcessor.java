@@ -39,11 +39,11 @@ public class HDRProcessor {
 		HDRALGORITHM_STANDARD
 	}
 	
-	HDRProcessor(Context context) {
+	public HDRProcessor(Context context) {
 		this.context = context;
 	}
 
-	void onDestroy() {
+	public void onDestroy() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onDestroy");
 		if( rs != null ) {
@@ -539,7 +539,7 @@ public class HDRProcessor {
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "call processHDRScript");
-		Allocation output_allocation = null;
+		Allocation output_allocation;
 		if( release_bitmaps ) {
 			// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset
 			output_allocation = allocations[base_bitmap];
@@ -887,14 +887,12 @@ public class HDRProcessor {
 		}
 		int middle = total/2;
 		int count = 0;
-		int median_value = 0;
 		boolean noisy = false;
 		for(int i=0;i<256;i++) {
 			count += histo[i];
 			if( count >= middle ) {
-				median_value = i;
 				if( MyDebug.LOG )
-					Log.d(TAG, "median luminance " + median_value);
+					Log.d(TAG, "median luminance " + i);
 				final int noise_threshold = 4;
 				int n_below = 0, n_above = 0;
 				for(int j=0;j<=i-noise_threshold;j++) {
@@ -904,8 +902,8 @@ public class HDRProcessor {
 					n_above += histo[j];
 				}
 				double frac_below = n_below / (double)total;
-				double frac_above = 1.0 - n_above / (double)total;
 				if( MyDebug.LOG ) {
+					double frac_above = 1.0 - n_above / (double)total;
 					Log.d(TAG, "count: " + count);
 					Log.d(TAG, "n_below: " + n_below);
 					Log.d(TAG, "n_above: " + n_above);
@@ -919,7 +917,7 @@ public class HDRProcessor {
 						Log.d(TAG, "too dark/noisy");
 					noisy = true;
 				}
-				return new LuminanceInfo(median_value, noisy);
+				return new LuminanceInfo(i, noisy);
 			}
 		}
 		Log.e(TAG, "computeMedianLuminance failed");
