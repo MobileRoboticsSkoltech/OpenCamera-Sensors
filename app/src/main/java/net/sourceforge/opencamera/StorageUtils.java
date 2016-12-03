@@ -359,12 +359,6 @@ public class StorageUtils {
 				}
 			}
 		}
-		if( MyDebug.LOG ) {
-			if( file != null )
-				Log.d(TAG, "file: " + file.getAbsolutePath());
-			else
-				Log.d(TAG, "failed to find file");
-		}
 		else if( "com.android.providers.downloads.documents".equals(uri.getAuthority()) ) {
 			final String id = DocumentsContract.getDocumentId(uri);
 			final Uri contentUri = ContentUris.withAppendedId(
@@ -372,7 +366,7 @@ public class StorageUtils {
 
 			String filename = getDataColumn(contentUri, null, null);
 			if( filename != null )
-				return new File(filename);
+				file = new File(filename);
 		}
 		else if( "com.android.providers.media.documents".equals(uri.getAuthority()) ) {
 			final String docId = DocumentsContract.getDocumentId(uri);
@@ -397,7 +391,14 @@ public class StorageUtils {
 
 			String filename = getDataColumn(contentUri, selection, selectionArgs);
 			if( filename != null )
-				return new File(filename);
+				file = new File(filename);
+		}
+
+		if( MyDebug.LOG ) {
+			if( file != null )
+				Log.d(TAG, "file: " + file.getAbsolutePath());
+			else
+				Log.d(TAG, "failed to find file");
 		}
 		return file;
 	}
