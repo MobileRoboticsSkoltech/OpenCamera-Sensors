@@ -330,7 +330,7 @@ public class MainUI {
 
 		{
 			// set seekbar info
-			int width_dp = 0;
+			int width_dp;
 			if( ui_rotation == 0 || ui_rotation == 180 ) {
 				width_dp = 300;
 			}
@@ -446,9 +446,9 @@ public class MainUI {
 			Log.d(TAG, "setTakePhotoIcon()");
 		if( main_activity.getPreview() != null ) {
 			ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
-			int resource = 0;
-			int content_description = 0;
-			int switch_video_content_description = 0;
+			int resource;
+			int content_description;
+			int switch_video_content_description;
 			if( main_activity.getPreview().isVideo() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set icon to video");
@@ -479,7 +479,7 @@ public class MainUI {
 			Log.d(TAG, "setSwitchCameraContentDescription()");
 		if( main_activity.getPreview() != null && main_activity.getPreview().canSwitchCamera() ) {
 			ImageButton view = (ImageButton)main_activity.findViewById(R.id.switch_camera);
-			int content_description = 0;
+			int content_description;
 			int cameraId = main_activity.getNextCameraId();
 		    if( main_activity.getPreview().getCameraControllerManager().isFrontFacing( cameraId ) ) {
 				content_description = R.string.switch_to_front_camera;

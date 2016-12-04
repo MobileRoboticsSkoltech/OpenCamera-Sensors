@@ -1287,7 +1287,7 @@ public class CameraController1 extends CameraController {
 	
 	public void setDisplayOrientation(int degrees) {
 		// rest of code from http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
-	    int result = 0;
+	    int result;
 	    if( camera_info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT ) {
 	        result = (camera_info.orientation + degrees) % 360;
 	        result = (360 - result) % 360;  // compensate the mirror

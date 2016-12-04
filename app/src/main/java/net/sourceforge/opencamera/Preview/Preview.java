@@ -2040,7 +2040,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH);
 		}
-		CamcorderProfile profile = null;
+		CamcorderProfile profile;
 		int cameraId = camera_controller.getCameraId();
 		if( applicationInterface.getForce4KPref() ) {
 			if( MyDebug.LOG )
@@ -2169,7 +2169,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 
 	private double calculateTargetRatioForPreview(Point display_size) {
-        double targetRatio = 0.0f;
+        double targetRatio;
 		String preview_size = applicationInterface.getPreviewSizePref();
 		// should always use wysiwig for video mode, otherwise we get incorrect aspect ratio shown when recording video (at least on Galaxy Nexus, e.g., at 640x480)
 		// also not using wysiwyg mode with video caused corruption on Samsung cameras (tested with Samsung S3, Android 4.3, front camera, infinity focus)
@@ -2402,7 +2402,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	    orientation = (orientation + 45) / 90 * 90;
 	    this.current_orientation = orientation % 360;
-	    int new_rotation = 0;
+	    int new_rotation;
 	    int camera_orientation = camera_controller.getCameraOrientation();
 	    if( camera_controller.isFrontFacing() ) {
 	    	new_rotation = (camera_orientation - orientation + 360) % 360;
@@ -2444,7 +2444,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( lock_orientation.equals("landscape") ) {
 			int camera_orientation = camera_controller.getCameraOrientation();
 		    int device_orientation = getDeviceDefaultOrientation();
-		    int result = 0;
+		    int result;
 		    if( device_orientation == Configuration.ORIENTATION_PORTRAIT ) {
 		    	// should be equivalent to onOrientationChanged(270)
 			    if( camera_controller.isFrontFacing() ) {
@@ -2464,7 +2464,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		else if( lock_orientation.equals("portrait") ) {
 			int camera_orientation = camera_controller.getCameraOrientation();
-		    int result = 0;
+		    int result;
 		    int device_orientation = getDeviceDefaultOrientation();
 		    if( device_orientation == Configuration.ORIENTATION_PORTRAIT ) {
 		    	// should be equivalent to onOrientationChanged(0)
@@ -2593,7 +2593,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// now save
 				applicationInterface.setFocusDistancePref(new_focus_distance);
 				{
-					String focus_distance_s = "";
+					String focus_distance_s;
 					if( new_focus_distance > 0.0f ) {
 						float real_focus_distance = 1.0f / new_focus_distance;
 						focus_distance_s = decimal_format_2dp.format(real_focus_distance) + getResources().getString(R.string.metres_abbreviation);
@@ -2667,7 +2667,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	public String getExposureTimeString(long exposure_time) {
 		double exposure_time_s = exposure_time/1000000000.0;
-		String string = "";
+		String string;
 		if( exposure_time >= 1000000000 ) {
 			// show exposure times of more than 1s directly
 			string = decimal_format_1dp.format(exposure_time_s) + getResources().getString(R.string.seconds_abbreviation);
@@ -2762,7 +2762,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			int min_fps = fps_range[0];
     			int max_fps = fps_range[1];
     			int diff = max_fps - min_fps;
-    			int dist = -1;
+    			int dist;
     			if( max_fps < video_frame_rate )
     				dist = video_frame_rate - max_fps;
     			else
@@ -2851,7 +2851,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "fps_ranges not available");
 			return;
 		}
-		int [] selected_fps = null;
+		int [] selected_fps;
 		if( this.is_video ) {
 			// For Nexus 5 and Nexus 6, we need to set the preview fps using matchPreviewFpsToVideo to avoid problem of dark preview in low light, as described above.
 			// When the video recording starts, the preview automatically adjusts, but still good to avoid too-dark preview before the user starts recording.
@@ -3378,14 +3378,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		long timer_delay = applicationInterface.getTimerPref();
 
 		String burst_mode_value = applicationInterface.getRepeatPref();
-		int n_burst = 1;
 		if( burst_mode_value.equals("unlimited") ) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "unlimited burst");
-			n_burst = -1;
 			remaining_burst_photos = -1;
 		}
 		else {
+			int n_burst;
 			try {
 				n_burst = Integer.parseInt(burst_mode_value);
 	    		if( MyDebug.LOG )
@@ -5027,7 +5026,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					clear_toast.toast = toast;*/
 				// This method is better, as otherwise a previous toast (with different or no clear_toast) never seems to clear if we repeatedly issue new toasts - this doesn't happen if we reuse existing toasts if possible
 				// However should only do this if the previous toast was the most recent toast (to avoid messing up ordering)
-				Toast toast = null;
+				Toast toast;
 				if( clear_toast != null && clear_toast.toast != null && clear_toast.toast == last_toast ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "reuse last toast: " + last_toast);

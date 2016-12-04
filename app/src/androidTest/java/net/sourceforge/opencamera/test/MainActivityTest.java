@@ -2151,8 +2151,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		File [] files2 = folder.listFiles();
 		int n_new_files = files2.length - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
-		int exp_n_new_files = 0;
-		
+		int exp_n_new_files;
 		if( is_raw )
 			exp_n_new_files = 2;
 		else if( is_hdr && hdr_save_expo )
@@ -6003,7 +6002,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SaveLocationHistory save_location_history = use_saf ? mActivity.getSaveLocationHistorySAF() : mActivity.getSaveLocationHistory();
 		Log.d(TAG, "save_location_history size: " + save_location_history.size());
 		assertTrue(save_location_history.size() == 1);
-		String current_folder = null;
+		String current_folder;
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			current_folder = use_saf ? settings.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "") : settings.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");

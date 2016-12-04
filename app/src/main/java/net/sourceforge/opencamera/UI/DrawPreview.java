@@ -623,7 +623,7 @@ public class DrawPreview {
 				if( remaining_time > 0 ) {
 					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.CENTER);
-	            	String time_s = "";
+	            	String time_s;
 	            	if( remaining_time < 60 ) {
 	            		// simpler to just show seconds when less than a minute
 	            		time_s = "" + remaining_time;
@@ -983,7 +983,7 @@ public class DrawPreview {
 				float pos_y = canvas.getHeight()/2.0f;
 				float min_radius = (40 * scale + 0.5f); // convert dps to pixels
 				float max_radius = (60 * scale + 0.5f); // convert dps to pixels
-				float radius = 0.0f;
+				float radius;
 				if( frac < 0.5f ) {
 					float alpha = frac*2.0f;
 					radius = (1.0f-alpha) * min_radius + alpha * max_radius;
@@ -1034,8 +1034,8 @@ public class DrawPreview {
 			else
 				p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
-			int pos_x = 0;
-			int pos_y = 0;
+			int pos_x;
+			int pos_y;
 			if( preview.hasFocusArea() ) {
 				Pair<Integer, Integer> focus_pos = preview.getFocusPos();
 				pos_x = focus_pos.first;

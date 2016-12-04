@@ -344,7 +344,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "getImageQualityPref");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String image_quality_s = sharedPreferences.getString(PreferenceKeys.getQualityPreferenceKey(), "90");
-		int image_quality = 0;
+		int image_quality;
 		try {
 			image_quality = Integer.parseInt(image_quality_s);
 		}
@@ -399,7 +399,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public long getVideoMaxDurationPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String video_max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
-		long video_max_duration = 0;
+		long video_max_duration;
 		try {
 			video_max_duration = (long)Integer.parseInt(video_max_duration_value) * 1000;
 		}
@@ -416,7 +416,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public int getVideoRestartTimesPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String restart_value = sharedPreferences.getString(PreferenceKeys.getVideoRestartPreferenceKey(), "0");
-		int remaining_restart_video = 0;
+		int remaining_restart_video;
 		try {
 			remaining_restart_video = Integer.parseInt(restart_value);
 		}
@@ -434,7 +434,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "getVideoMaxFileSizeUserPref");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String video_max_filesize_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "0");
-		long video_max_filesize = 0;
+		long video_max_filesize;
 		try {
 			video_max_filesize = Integer.parseInt(video_max_filesize_value);
 		}
@@ -599,7 +599,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public long getTimerPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
-		long timer_delay = 0;
+		long timer_delay;
 		try {
 			timer_delay = (long)Integer.parseInt(timer_value) * 1000;
 		}
@@ -622,7 +622,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public long getRepeatIntervalPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String timer_value = sharedPreferences.getString(PreferenceKeys.getBurstIntervalPreferenceKey(), "0");
-		long timer_delay = 0;
+		long timer_delay;
 		try {
 			timer_delay = (long)Integer.parseInt(timer_value) * 1000;
 		}
@@ -757,7 +757,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public int getExpoBracketingNImagesPref() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getExpoBracketingNImagesPref");
-		int n_images = 0;
+		int n_images;
     	PhotoMode photo_mode = getPhotoMode();
     	if( photo_mode == PhotoMode.HDR ) {
     		// always set 3 images for HDR
@@ -784,7 +784,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     public double getExpoBracketingStopsPref() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getExpoBracketingStopsPref");
-		double n_stops = 0.0;
+		double n_stops;
     	PhotoMode photo_mode = getPhotoMode();
     	if( photo_mode == PhotoMode.HDR ) {
     		// always set 2 stops for HDR
@@ -909,7 +909,7 @@ public class MyApplicationInterface implements ApplicationInterface {
         }
         else if( done ) {
 			// create thumbnail
-	    	long time_s = System.currentTimeMillis();
+	    	long debug_time = System.currentTimeMillis();
 			Bitmap thumbnail = null;
 		    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 			try {
@@ -963,7 +963,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				});
 		    }
 			if( MyDebug.LOG )
-				Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
 
@@ -1016,7 +1016,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void onVideoInfo(int what, int extra) {
 		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
-			int message_id = 0;
+			int message_id;
 			if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "max duration reached");
@@ -1079,7 +1079,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void onVideoRecordStartError(CamcorderProfile profile) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onVideoRecordStartError");
-		String error_message = "";
+		String error_message;
 		String features = main_activity.getPreview().getErrorFeatures(profile);
 		if( features.length() > 0 ) {
 			error_message = getContext().getResources().getString(R.string.sorry) + ", " + features + " " + getContext().getResources().getString(R.string.not_supported);
@@ -1583,7 +1583,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onBurstPictureTaken: received " + images.size() + " images");
 
-		boolean success = false;
+		boolean success;
 		PhotoMode photo_mode = getPhotoMode();
 		if( photo_mode == PhotoMode.HDR ) {
 			if( MyDebug.LOG )

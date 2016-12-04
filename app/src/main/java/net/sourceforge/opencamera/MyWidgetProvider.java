@@ -32,7 +32,7 @@ public class MyWidgetProvider extends AppWidgetProvider {
         	if( MyDebug.LOG )
         		Log.d(TAG, "appWidgetId: " + appWidgetId);
 
-            PendingIntent pendingIntent = null;
+            PendingIntent pendingIntent;
             // for now, always put up the keyguard if the device is PIN locked etc
 			/*SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 			if( sharedPreferences.getBoolean(MainActivity.getShowWhenLockedPreferenceKey(), true) ) {

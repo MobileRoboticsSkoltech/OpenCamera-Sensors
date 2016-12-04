@@ -1082,7 +1082,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	private String convertSceneMode(int value2) {
-		String value = null;
+		String value;
 		switch( value2 ) {
 		case CameraMetadata.CONTROL_SCENE_MODE_ACTION:
 			value = "action";
@@ -1250,7 +1250,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	private String convertColorEffect(int value2) {
-		String value = null;
+		String value;
 		switch( value2 ) {
 		case CameraMetadata.CONTROL_EFFECT_MODE_AQUA:
 			value = "aqua";
@@ -1364,7 +1364,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	private String convertWhiteBalance(int value2) {
-		String value = null;
+		String value;
 		switch( value2 ) {
 		case CameraMetadata.CONTROL_AWB_MODE_AUTO:
 			value = "auto";
@@ -2075,7 +2075,7 @@ public class CameraController2 extends CameraController {
 	public void setFocusValue(String focus_value) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusValue: " + focus_value);
-		int focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
+		int focus_mode;
     	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_locked") ) {
     		focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
     	}
@@ -2756,7 +2756,7 @@ public class CameraController2 extends CameraController {
 			final MyStateCallback myStateCallback = new MyStateCallback();
 
         	Surface preview_surface = getPreviewSurface();
-        	List<Surface> surfaces = null;
+        	List<Surface> surfaces;
         	if( video_recorder != null ) {
         		surfaces = Arrays.asList(preview_surface, video_recorder.getSurface());
         	}

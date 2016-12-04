@@ -155,9 +155,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		if( getIntent() != null && getIntent().getExtras() != null ) {
 			// whether called from Take Photo widget
-			boolean take_photo = getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO);
 			if( MyDebug.LOG )
-				Log.d(TAG, "take_photo?: " + take_photo);
+				Log.d(TAG, "take_photo?: " + getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO));
 		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -2488,12 +2487,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "camera not open or in background");
 			return;
 		}
-		String toast_string = "";
+		String toast_string;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean simple = true;
 		if( preview.isVideo() ) {
 			CamcorderProfile profile = preview.getCamcorderProfile();
-			String bitrate_string = "";
+			String bitrate_string;
 			if( profile.videoBitRate >= 10000000 )
 				bitrate_string = profile.videoBitRate/1000000 + "Mbps";
 			else if( profile.videoBitRate >= 10000 )

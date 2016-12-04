@@ -172,7 +172,7 @@ public class ImageSaver extends Thread {
 				// even though we still have a last image to be saved.
 				if( MyDebug.LOG )
 					Log.d(TAG, "ImageSaver thread found new request from queue, size is now: " + queue.size());
-				boolean success = false;
+				boolean success;
 				if( request.type == Request.Type.RAW ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "request is raw");
@@ -191,6 +191,7 @@ public class ImageSaver extends Thread {
 				else {
 					if( MyDebug.LOG )
 						Log.e(TAG, "request is unknown type!");
+					success = false;
 				}
 				if( MyDebug.LOG ) {
 					if( success )
@@ -309,7 +310,7 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "saveImage");
 			Log.d(TAG, "do_in_background? " + do_in_background);
 		}
-		boolean success = false;
+		boolean success;
 		
 		//do_in_background = false;
 		
@@ -568,7 +569,7 @@ public class ImageSaver extends Thread {
 			throw new RuntimeException();
 		}
 
-		boolean success = false;
+		boolean success;
 		if( request.is_hdr ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "hdr");
@@ -632,7 +633,6 @@ public class ImageSaver extends Thread {
     			Log.d(TAG, "HDR performance: time after saving HDR image: " + (System.currentTimeMillis() - time_s));
     		}
 			hdr_bitmap.recycle();
-			hdr_bitmap = null;
 	        System.gc();
 		}
 		else {
@@ -1365,7 +1365,7 @@ public class ImageSaver extends Thread {
     			Log.d(TAG, "    ratio        : " + ratio);
     			Log.d(TAG, "    sample_size  : " + sample_size);
     		}
-    		Bitmap thumbnail = null;
+    		Bitmap thumbnail;
 			if( bitmap == null ) {
 				BitmapFactory.Options options = new BitmapFactory.Options();
 				options.inMutable = false;
@@ -1409,7 +1409,6 @@ public class ImageSaver extends Thread {
 
         if( bitmap != null ) {
 		    bitmap.recycle();
-		    bitmap = null;
         }
 
         if( picFile != null && saveUri != null ) {
@@ -1419,7 +1418,6 @@ public class ImageSaver extends Thread {
         		if( MyDebug.LOG )
         			Log.e(TAG, "failed to delete temp picFile: " + picFile);
         	}
-        	picFile = null;
         }
         
         System.gc();
@@ -1547,11 +1545,9 @@ public class ImageSaver extends Thread {
         	}
         	if( image != null ) {
         		image.close();
-        		image = null;
         	}
         	if( dngCreator != null ) {
         		dngCreator.close();
-        		dngCreator = null;
         	}
         }
 
@@ -1708,7 +1704,7 @@ public class ImageSaver extends Thread {
 		    realOutputStream = context.getContentResolver().openOutputStream(saveUri);
 		    // Transfer bytes from in to out
 		    byte [] buffer = new byte[1024];
-		    int len = 0;
+		    int len;
 		    while( (len = inputStream.read(buffer)) > 0 ) {
 		    	realOutputStream.write(buffer, 0, len);
 		    }
@@ -1716,11 +1712,9 @@ public class ImageSaver extends Thread {
 	    finally {
 	    	if( inputStream != null ) {
 	    		inputStream.close();
-	    		inputStream = null;
 	    	}
 	    	if( realOutputStream != null ) {
 	    		realOutputStream.close();
-	    		realOutputStream = null;
 	    	}
 	    }
 	}

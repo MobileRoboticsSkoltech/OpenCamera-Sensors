@@ -521,15 +521,15 @@ public class PopupView extends LinearLayout {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addButtonOptionsToPopup");
     	if( supported_options != null ) {
-	    	final long time_s = System.currentTimeMillis();
+	    	final long debug_time = System.currentTimeMillis();
         	LinearLayout ll2 = new LinearLayout(this.getContext());
             ll2.setOrientation(LinearLayout.HORIZONTAL);
 			if( MyDebug.LOG )
-				Log.d(TAG, "addButtonOptionsToPopup time 1: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "addButtonOptionsToPopup time 1: " + (System.currentTimeMillis() - debug_time));
         	String [] icons = icons_id != -1 ? getResources().getStringArray(icons_id) : null;
         	String [] values = values_id != -1 ? getResources().getStringArray(values_id) : null;
 			if( MyDebug.LOG )
-				Log.d(TAG, "addButtonOptionsToPopup time 2: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "addButtonOptionsToPopup time 2: " + (System.currentTimeMillis() - debug_time));
 
 			final float scale = getResources().getDisplayMetrics().density;
 			int total_width = 280;
@@ -574,9 +574,9 @@ public class PopupView extends LinearLayout {
             		}
         		}
     			if( MyDebug.LOG )
-    				Log.d(TAG, "addButtonOptionsToPopup time 2.1: " + (System.currentTimeMillis() - time_s));
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.1: " + (System.currentTimeMillis() - debug_time));
 
-        		String button_string = "";
+        		String button_string;
     			// hacks for ISO mode ISO_HJR (e.g., on Samsung S5)
     			// also some devices report e.g. "ISO100" etc
         		if( prefix_string.length() == 0 ) {
@@ -593,15 +593,15 @@ public class PopupView extends LinearLayout {
     			}
     			if( MyDebug.LOG )
     				Log.d(TAG, "button_string: " + button_string);
-        		View view = null;
+        		View view;
         		if( resource != -1 ) {
         			ImageButton image_button = new ImageButton(this.getContext());
         			if( MyDebug.LOG )
-        				Log.d(TAG, "addButtonOptionsToPopup time 2.11: " + (System.currentTimeMillis() - time_s));
+        				Log.d(TAG, "addButtonOptionsToPopup time 2.11: " + (System.currentTimeMillis() - debug_time));
         			view = image_button;
         			ll2.addView(view);
         			if( MyDebug.LOG )
-        				Log.d(TAG, "addButtonOptionsToPopup time 2.12: " + (System.currentTimeMillis() - time_s));
+        				Log.d(TAG, "addButtonOptionsToPopup time 2.12: " + (System.currentTimeMillis() - debug_time));
 
         			//image_button.setImageResource(resource);
         			final MainActivity main_activity = (MainActivity)this.getContext();
@@ -613,7 +613,7 @@ public class PopupView extends LinearLayout {
             				Log.d(TAG, "failed to find bitmap for resource " + resource + "!");
         			}
         			if( MyDebug.LOG )
-        				Log.d(TAG, "addButtonOptionsToPopup time 2.13: " + (System.currentTimeMillis() - time_s));
+        				Log.d(TAG, "addButtonOptionsToPopup time 2.13: " + (System.currentTimeMillis() - debug_time));
         			image_button.setScaleType(ScaleType.FIT_CENTER);
         			final int padding = (int) (10 * scale + 0.5f); // convert dps to pixels
         			view.setPadding(padding, padding, padding, padding);
@@ -632,7 +632,7 @@ public class PopupView extends LinearLayout {
         			view.setPadding(padding, padding, padding, padding);
         		}
     			if( MyDebug.LOG )
-    				Log.d(TAG, "addButtonOptionsToPopup time 2.2: " + (System.currentTimeMillis() - time_s));
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.2: " + (System.currentTimeMillis() - debug_time));
 
     			ViewGroup.LayoutParams params = view.getLayoutParams();
     			params.width = (int) (button_width_dp * scale + 0.5f); // convert dps to pixels
@@ -648,7 +648,7 @@ public class PopupView extends LinearLayout {
     				view.setAlpha(ALPHA_BUTTON);
     			}
     			if( MyDebug.LOG )
-    				Log.d(TAG, "addButtonOptionsToPopup time 2.3: " + (System.currentTimeMillis() - time_s));
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.3: " + (System.currentTimeMillis() - debug_time));
     			view.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -659,13 +659,13 @@ public class PopupView extends LinearLayout {
     			});
     			this.popup_buttons.put(test_key + "_" + supported_option, view);
     			if( MyDebug.LOG ) {
-    				Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.currentTimeMillis() - time_s));
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.currentTimeMillis() - debug_time));
     				Log.d(TAG, "added to popup_buttons: " + test_key + "_" + supported_option + " view: " + view);
     				Log.d(TAG, "popup_buttons is now: " + popup_buttons);
     			}
     		}
 			if( MyDebug.LOG )
-				Log.d(TAG, "addButtonOptionsToPopup time 3: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "addButtonOptionsToPopup time 3: " + (System.currentTimeMillis() - debug_time));
 			if( use_scrollview ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "using scrollview");
@@ -699,7 +699,7 @@ public class PopupView extends LinearLayout {
 	    		this.addView(ll2);
 			}
 			if( MyDebug.LOG )
-				Log.d(TAG, "addButtonOptionsToPopup time 4: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "addButtonOptionsToPopup time 4: " + (System.currentTimeMillis() - debug_time));
         }
     }
     

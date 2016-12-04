@@ -284,7 +284,7 @@ public class StorageUtils {
     // but note that if isUsingSAF(), this may return null - it can't be assumed that there is a File corresponding to the SAF Uri
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
     File getImageFolder() {
-		File file = null;
+		File file;
     	if( isUsingSAF() ) {
     		Uri uri = getTreeUriSAF();
     		/*if( MyDebug.LOG )
@@ -304,7 +304,7 @@ public class StorageUtils {
 
 	// only valid if !isUsingSAF()
 	public static File getImageFolder(String folder_name) {
-		File file = null;
+		File file;
 		if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
 			// ignore final '/' character
 			folder_name = folder_name.substring(0, folder_name.length()-1);
@@ -436,7 +436,7 @@ public class StorageUtils {
         }
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		boolean useZuluTime = sharedPreferences.getString(PreferenceKeys.getSaveZuluTimePreferenceKey(), "local").equals("zulu");
-		String timeStamp = null;
+		String timeStamp;
 		if( useZuluTime ) {
 			SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd_HHmmss'Z'", Locale.US);
 			fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -445,7 +445,7 @@ public class StorageUtils {
 		else {
 			timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(current_date);
 		}
-		String mediaFilename = null;
+		String mediaFilename;
         if( type == MEDIA_TYPE_IMAGE ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
     		mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
@@ -506,7 +506,7 @@ public class StorageUtils {
 	        Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
 		    if( MyDebug.LOG )
 		    	Log.d(TAG, "docUri: " + docUri);
-		    String mimeType = "";
+		    String mimeType;
 	        if( type == MEDIA_TYPE_IMAGE ) {
 	        	if( extension.equals("dng") ) {
 	        		mimeType = "image/dng";
