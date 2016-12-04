@@ -268,26 +268,6 @@ public class StorageUtils {
 		return sharedPreferences.getString(PreferenceKeys.getSaveLocationPreferenceKey(), "OpenCamera");
     }
     
-    public static File getBaseFolder() {
-    	return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-    }
-
-    public static File getImageFolder(String folder_name) {
-		File file = null;
-		if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
-			// ignore final '/' character
-			folder_name = folder_name.substring(0, folder_name.length()-1);
-		}
-		//if( folder_name.contains("/") ) {
-		if( folder_name.startsWith("/") ) {
-			file = new File(folder_name);
-		}
-		else {
-	        file = new File(getBaseFolder(), folder_name);
-		}
-        return file;
-    }
-
     // only valid if isUsingSAF()
     String getSaveLocationSAF() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -300,92 +280,16 @@ public class StorageUtils {
 		return Uri.parse(folder_name);
     }
 
-	/** Returns a human readable name for the current SAF save folder location.
-     * Only valid if isUsingSAF().
-	 * @return The human readable form. This will be null if the Uri is not recognised.
-	 */
-    // only valid if isUsingSAF()
-    // return a human readable name for the SAF save folder location
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	String getImageFolderNameSAF() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "getImageFolderNameSAF");
-		Uri uri = getTreeUriSAF();
-		if( MyDebug.LOG )
-			Log.d(TAG, "uri: " + uri);
-		return getImageFolderNameSAF(uri);
-	}
-
-	/** Returns a human readable name for a SAF save folder location.
-     * Only valid if isUsingSAF().
-	 * @param folder_name The SAF uri for the requested save location.
-	 * @return The human readable form. This will be null if the Uri is not recognised.
-	 */
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	String getImageFolderNameSAF(Uri folder_name) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "getImageFolderNameSAF: " + folder_name);
-	    String filename = null;
-		if( "com.android.externalstorage.documents".equals(folder_name.getAuthority()) ) {
-            final String id = DocumentsContract.getTreeDocumentId(folder_name);
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "id: " + id);
-            String [] split = id.split(":");
-            if( split.length >= 2 ) {
-    		    String path = split[1];
-        		if( MyDebug.LOG ) {
-        			Log.d(TAG, "type: " + split[0]);
-        			Log.d(TAG, "path: " + path);
-        		}
-        		filename = path;
-            }
-		}
-		return filename;
-	}
-
-    // only valid if isUsingSAF()
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private File getFileFromDocumentIdSAF(String id) {
-	    File file = null;
-        String [] split = id.split(":");
-        if( split.length >= 2 ) {
-            String type = split[0];
-		    String path = split[1];
-    		/*if( MyDebug.LOG ) {
-    			Log.d(TAG, "type: " + type);
-    			Log.d(TAG, "path: " + path);
-    		}*/
-		    File [] storagePoints = new File("/storage").listFiles();
-
-            if( "primary".equalsIgnoreCase(type) ) {
-    			final File externalStorage = Environment.getExternalStorageDirectory();
-    			file = new File(externalStorage, path);
-            }
-	        for(int i=0;storagePoints != null && i<storagePoints.length && file==null;i++) {
-	            File externalFile = new File(storagePoints[i], path);
-	            if( externalFile.exists() ) {
-	            	file = externalFile;
-	            }
-	        }
-		}
-		return file;
-	}
-
     // valid if whether or not isUsingSAF()
     // but note that if isUsingSAF(), this may return null - it can't be assumed that there is a File corresponding to the SAF Uri
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
     File getImageFolder() {
-		File file = null;
+		File file;
     	if( isUsingSAF() ) {
     		Uri uri = getTreeUriSAF();
     		/*if( MyDebug.LOG )
     			Log.d(TAG, "uri: " + uri);*/
-    		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
-                final String id = DocumentsContract.getTreeDocumentId(uri);
-        		/*if( MyDebug.LOG )
-        			Log.d(TAG, "id: " + id);*/
-        		file = getFileFromDocumentIdSAF(id);
-    		}
+			file = getFileFromDocumentUriSAF(uri, true);
     	}
     	else {
     		String folder_name = getSaveLocation();
@@ -393,6 +297,27 @@ public class StorageUtils {
     	}
     	return file;
     }
+
+	public static File getBaseFolder() {
+		return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+	}
+
+	// only valid if !isUsingSAF()
+	public static File getImageFolder(String folder_name) {
+		File file;
+		if( folder_name.length() > 0 && folder_name.lastIndexOf('/') == folder_name.length()-1 ) {
+			// ignore final '/' character
+			folder_name = folder_name.substring(0, folder_name.length()-1);
+		}
+		//if( folder_name.contains("/") ) {
+		if( folder_name.startsWith("/") ) {
+			file = new File(folder_name);
+		}
+		else {
+			file = new File(getBaseFolder(), folder_name);
+		}
+		return file;
+	}
 
 	// only valid if isUsingSAF()
 	// This function should only be used as a last resort - we shouldn't generally assume that a Uri represents an actual File, and instead.
@@ -402,16 +327,77 @@ public class StorageUtils {
 	// http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework/
     // only valid if isUsingSAF()
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	File getFileFromDocumentUriSAF(Uri uri) {
-		if( MyDebug.LOG )
+	File getFileFromDocumentUriSAF(Uri uri, boolean is_folder) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "getFileFromDocumentUriSAF: " + uri);
+			Log.d(TAG, "is_folder?: " + is_folder);
+		}
 	    File file = null;
 		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
-            final String id = DocumentsContract.getDocumentId(uri);
+            final String id = is_folder ? DocumentsContract.getTreeDocumentId(uri) : DocumentsContract.getDocumentId(uri);
     		if( MyDebug.LOG )
     			Log.d(TAG, "id: " + id);
-    		file = getFileFromDocumentIdSAF(id);
+			String [] split = id.split(":");
+			if( split.length >= 2 ) {
+				String type = split[0];
+				String path = split[1];
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "type: " + type);
+					Log.d(TAG, "path: " + path);
+				}*/
+				File [] storagePoints = new File("/storage").listFiles();
+
+				if( "primary".equalsIgnoreCase(type) ) {
+					final File externalStorage = Environment.getExternalStorageDirectory();
+					file = new File(externalStorage, path);
+				}
+				for(int i=0;storagePoints != null && i<storagePoints.length && file==null;i++) {
+					File externalFile = new File(storagePoints[i], path);
+					if( externalFile.exists() ) {
+						file = externalFile;
+					}
+				}
+				if( file == null ) {
+					// just in case?
+					file = new File(path);
+				}
+			}
 		}
+		else if( "com.android.providers.downloads.documents".equals(uri.getAuthority()) ) {
+			final String id = DocumentsContract.getDocumentId(uri);
+			final Uri contentUri = ContentUris.withAppendedId(
+					Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+			String filename = getDataColumn(contentUri, null, null);
+			if( filename != null )
+				file = new File(filename);
+		}
+		else if( "com.android.providers.media.documents".equals(uri.getAuthority()) ) {
+			final String docId = DocumentsContract.getDocumentId(uri);
+			final String[] split = docId.split(":");
+			final String type = split[0];
+
+			Uri contentUri = null;
+			if ("image".equals(type)) {
+				contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+			}
+			else if ("video".equals(type)) {
+				contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+			}
+			else if ("audio".equals(type)) {
+				contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+			}
+
+			final String selection = "_id=?";
+			final String[] selectionArgs = new String[] {
+					split[1]
+			};
+
+			String filename = getDataColumn(contentUri, selection, selectionArgs);
+			if( filename != null )
+				file = new File(filename);
+		}
+
 		if( MyDebug.LOG ) {
 			if( file != null )
 				Log.d(TAG, "file: " + file.getAbsolutePath());
@@ -420,7 +406,29 @@ public class StorageUtils {
 		}
 		return file;
 	}
-	
+
+	private String getDataColumn(Uri uri, String selection, String [] selectionArgs) {
+		final String column = "_data";
+		final String[] projection = {
+				column
+		};
+
+		Cursor cursor = null;
+		try {
+			cursor = this.context.getContentResolver().query(uri, projection, selection, selectionArgs,
+					null);
+			if (cursor != null && cursor.moveToFirst()) {
+				final int column_index = cursor.getColumnIndexOrThrow(column);
+				return cursor.getString(column_index);
+			}
+		}
+		finally {
+			if (cursor != null)
+				cursor.close();
+		}
+		return null;
+	}
+
 	private String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
         String index = "";
         if( count > 0 ) {
@@ -428,7 +436,7 @@ public class StorageUtils {
         }
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		boolean useZuluTime = sharedPreferences.getString(PreferenceKeys.getSaveZuluTimePreferenceKey(), "local").equals("zulu");
-		String timeStamp = null;
+		String timeStamp;
 		if( useZuluTime ) {
 			SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd_HHmmss'Z'", Locale.US);
 			fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -437,7 +445,7 @@ public class StorageUtils {
 		else {
 			timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(current_date);
 		}
-		String mediaFilename = null;
+		String mediaFilename;
         if( type == MEDIA_TYPE_IMAGE ) {
     		String prefix = sharedPreferences.getString(PreferenceKeys.getSavePhotoPrefixPreferenceKey(), "IMG_");
     		mediaFilename = prefix + timeStamp + suffix + index + "." + extension;
@@ -498,7 +506,7 @@ public class StorageUtils {
 	        Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
 		    if( MyDebug.LOG )
 		    	Log.d(TAG, "docUri: " + docUri);
-		    String mimeType = "";
+		    String mimeType;
 	        if( type == MEDIA_TYPE_IMAGE ) {
 	        	if( extension.equals("dng") ) {
 	        		mimeType = "image/dng";

@@ -155,9 +155,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		if( getIntent() != null && getIntent().getExtras() != null ) {
 			// whether called from Take Photo widget
-			boolean take_photo = getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO);
 			if( MyDebug.LOG )
-				Log.d(TAG, "take_photo?: " + take_photo);
+				Log.d(TAG, "take_photo?: " + getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO));
 		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -1759,10 +1758,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				if( MyDebug.LOG )
 					Log.d(TAG, "update folder history for saf");
 				updateFolderHistorySAF(treeUri.toString());
-	
-				String filename = applicationInterface.getStorageUtils().getImageFolderNameSAF();
-				if( filename != null ) {
-					preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + filename);
+
+				File file = applicationInterface.getStorageUtils().getImageFolder();
+				if( file != null ) {
+					preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + file.getAbsolutePath());
 				}
 	        }
 	        else {
@@ -1864,9 +1863,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         	String folder_name = history.get(history.size() - 1 - i);
     		if( applicationInterface.getStorageUtils().isUsingSAF() ) {
     			// try to get human readable form if possible
-    			String filename = applicationInterface.getStorageUtils().getImageFolderNameSAF(Uri.parse(folder_name));
-    			if( filename != null ) {
-    				folder_name = filename;
+    			File file = applicationInterface.getStorageUtils().getFileFromDocumentUriSAF(Uri.parse(folder_name), true);
+    			if( file != null ) {
+    				folder_name = file.getAbsolutePath();
     			}
     		}
         	items[index++] = folder_name;
@@ -1938,10 +1937,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						String save_folder_name = save_folder;
 			    		if( applicationInterface.getStorageUtils().isUsingSAF() ) {
 			    			// try to get human readable form if possible
-			    			String filename = applicationInterface.getStorageUtils().getImageFolderNameSAF(Uri.parse(save_folder));
-			    			if( filename != null ) {
-			    				save_folder_name = filename;
-			    			}
+							File file = applicationInterface.getStorageUtils().getFileFromDocumentUriSAF(Uri.parse(save_folder), true);
+							if( file != null ) {
+								save_folder_name = file.getAbsolutePath();
+							}
 			    		}
 						preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + save_folder_name);
 						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
@@ -2488,12 +2487,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "camera not open or in background");
 			return;
 		}
-		String toast_string = "";
+		String toast_string;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean simple = true;
 		if( preview.isVideo() ) {
 			CamcorderProfile profile = preview.getCamcorderProfile();
-			String bitrate_string = "";
+			String bitrate_string;
 			if( profile.videoBitRate >= 10000000 )
 				bitrate_string = profile.videoBitRate/1000000 + "Mbps";
 			else if( profile.videoBitRate >= 10000 )
