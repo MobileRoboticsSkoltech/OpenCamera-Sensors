@@ -36,7 +36,8 @@ public class HDRProcessor {
 	public final int [] offsets_y = {0, 0, 0};
 
 	private enum HDRAlgorithm {
-		HDRALGORITHM_STANDARD
+		HDRALGORITHM_STANDARD,
+		HDRALGORITHM_SINGLE_IMAGE
 	}
 	
 	public HDRProcessor(Context context) {
@@ -241,8 +242,8 @@ public class HDRProcessor {
 
 	/** Converts a list of bitmaps into a HDR image, which is then tonemapped to a final RGB image.
 	 * @param bitmaps The list of bitmaps, which should be in order of increasing brightness (exposure).
-	 *                Currently only supports a list of 3 images, the 2nd should be at the desired exposure
-	 *                level for the resultant image.
+	 *                Currently only supports a list of either 1 image, or 3 images (the 2nd should be
+	 *                at the desired exposure level for the resultant image).
 	 *                The bitmaps must all be the same resolution.
 	 * @param release_bitmaps If true, the resultant image is returned in the first bitmap in bitmaps. The
 	 *                        remainder bitmaps will have recycle() called on them, and set to null.
@@ -256,9 +257,9 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
 		int n_bitmaps = bitmaps.size();
-		if( n_bitmaps != 3 ) {
+		if( n_bitmaps != 1 && n_bitmaps != 3 ) {
 			if( MyDebug.LOG )
-				Log.e(TAG, "n_bitmaps should be 3, not " + n_bitmaps);
+				Log.e(TAG, "n_bitmaps should be 1 or 3, not " + n_bitmaps);
 			// throw RuntimeException, as this is a programming error
 			throw new RuntimeException();
 		}
@@ -271,9 +272,12 @@ public class HDRProcessor {
 			}
 		}
 		
-		final HDRAlgorithm algorithm = HDRAlgorithm.HDRALGORITHM_STANDARD;
+		final HDRAlgorithm algorithm = n_bitmaps == 1 ? HDRAlgorithm.HDRALGORITHM_SINGLE_IMAGE : HDRAlgorithm.HDRALGORITHM_STANDARD;
 		
 		switch( algorithm ) {
+		case HDRALGORITHM_SINGLE_IMAGE:
+			processSingleImage(bitmaps, release_bitmaps, output_bitmap);
+			break;
 		case HDRALGORITHM_STANDARD:
 			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted);
 			break;
@@ -418,9 +422,9 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
 		
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT ) {
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
 			if( MyDebug.LOG )
-				Log.e(TAG, "HDR requires at least Android 4.4");
+				Log.e(TAG, "HDR requires at least Android 5.0");
 			// throw runtime exception as this is a programming error - HDR should not be offered as supported on older Android versions
 			// (we require Android 5 for Camera2 API, to offer burst mode, anyway)
 			throw new RuntimeException();
@@ -438,14 +442,9 @@ public class HDRProcessor {
 		//float [] hdr = new float[3];
 		//int [] rgb = new int[3];
 
-		if (rs == null) {
-			// initialise renderscript
-			this.rs = RenderScript.create(context);
-			if (MyDebug.LOG)
-				Log.d(TAG, "create renderscript object");
-			if (MyDebug.LOG)
-				Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
-		}
+		initRenderscript();
+		if (MyDebug.LOG)
+			Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
 		// create allocations
 		Allocation [] allocations = new Allocation[n_bitmaps];
 		for(int i=0;i<n_bitmaps;i++) {
@@ -563,7 +562,7 @@ public class HDRProcessor {
 			}
 		}
 
-		adjustHistogram(output_allocation, width, height, time_s);
+		adjustHistogram(output_allocation, output_allocation, width, height, time_s);
 
 		if( release_bitmaps ) {
 			allocations[base_bitmap].copyTo(bitmaps.get(base_bitmap));
@@ -584,6 +583,65 @@ public class HDRProcessor {
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "time for processHDRCore: " + (System.currentTimeMillis() - time_s));
+	}
+
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap) {
+		if (MyDebug.LOG)
+			Log.d(TAG, "processSingleImage");
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			if (MyDebug.LOG)
+				Log.e(TAG, "HDR requires at least Android 5.0");
+			// throw runtime exception as this is a programming error - HDR should not be offered as supported on older Android versions
+			// (we require Android 5 for Camera2 API, to offer burst mode, anyway)
+			throw new RuntimeException();
+		}
+
+		long time_s = System.currentTimeMillis();
+
+		int width = bitmaps.get(0).getWidth();
+		int height = bitmaps.get(0).getHeight();
+
+		initRenderscript();
+		if (MyDebug.LOG)
+			Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
+
+		// create allocation
+		Allocation allocation = Allocation.createFromBitmap(rs, bitmaps.get(0));
+
+		Allocation output_allocation;
+		if( release_bitmaps ) {
+			output_allocation = allocation;
+		}
+		else {
+			output_allocation = Allocation.createFromBitmap(rs, output_bitmap);
+		}
+
+		adjustHistogram(allocation, output_allocation, width, height, time_s);
+
+		if( release_bitmaps ) {
+			allocation.copyTo(bitmaps.get(0));
+			if (MyDebug.LOG)
+				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+		}
+		else {
+			output_allocation.copyTo(output_bitmap);
+			if (MyDebug.LOG)
+				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+		}
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "time for processSingleImage: " + (System.currentTimeMillis() - time_s));
+	}
+
+	private void initRenderscript() {
+		if (rs == null) {
+			// initialise renderscript
+			this.rs = RenderScript.create(context);
+			if (MyDebug.LOG)
+				Log.d(TAG, "create renderscript object");
+		}
 	}
 
 	/**
@@ -925,7 +983,7 @@ public class HDRProcessor {
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void adjustHistogram(Allocation allocation, int width, int height, long time_s) {
+	private void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "adjustHistogram");
 		final boolean adjust_histogram = false;
@@ -949,14 +1007,14 @@ public class HDRProcessor {
 				histogramScript.invoke_init_histogram();
 				if( MyDebug.LOG )
 					Log.d(TAG, "call histogramScript");
-				histogramScript.forEach_histogram_compute(allocation);
+				histogramScript.forEach_histogram_compute(allocation_in);
 			}
 			else {
 				ScriptIntrinsicHistogram histogramScript = ScriptIntrinsicHistogram.create(rs, Element.U8_4(rs));
 				histogramScript.setOutput(histogramAllocation);
 				if( MyDebug.LOG )
 					Log.d(TAG, "call histogramScript");
-				histogramScript.forEach_Dot(allocation); // use forEach_dot(); using forEach would simply compute a histogram for red values!
+				histogramScript.forEach_Dot(allocation_in); // use forEach_dot(); using forEach would simply compute a histogram for red values!
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after creating histogram: " + (System.currentTimeMillis() - time_s));
@@ -1010,7 +1068,7 @@ public class HDRProcessor {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call histogramAdjustScript");
-			histogramAdjustScript.forEach_histogram_adjust(allocation, allocation);
+			histogramAdjustScript.forEach_histogram_adjust(allocation_in, allocation_out);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
 		}
@@ -1061,7 +1119,7 @@ public class HDRProcessor {
 						/*if( MyDebug.LOG )
 							Log.d(TAG, "call histogramScript");*/
 					histogramScript.invoke_init_histogram();
-					histogramScript.forEach_histogram_compute(allocation, launch_options);
+					histogramScript.forEach_histogram_compute(allocation_in, launch_options);
 
 					int [] histogram = new int[256];
 					histogramAllocation.copyTo(histogram);
@@ -1162,7 +1220,7 @@ public class HDRProcessor {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call histogramAdjustScript");
-			histogramAdjustScript.forEach_histogram_adjust(allocation, allocation);
+			histogramAdjustScript.forEach_histogram_adjust(allocation_in, allocation_out);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
 		}
