@@ -47,11 +47,13 @@ import android.widget.ImageButton;
  */
 public class MyApplicationInterface implements ApplicationInterface {
 	private static final String TAG = "MyApplicationInterface";
-	
+
+	// note, okay to change the order of enums in future versions, as getPhotoMode() does not rely on the order for the saved photo mode
     public enum PhotoMode {
     	Standard,
-    	HDR,
-    	ExpoBracketing
+		DRO, // single image "fake" HDR
+    	HDR, // HDR created from multiple (expo bracketing) images
+    	ExpoBracketing // take multiple expo bracketed images, without combining to a single image
     }
     
 	private final MainActivity main_activity;
@@ -810,6 +812,9 @@ public class MyApplicationInterface implements ApplicationInterface {
     public PhotoMode getPhotoMode() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+		boolean dro = photo_mode_pref.equals("preference_photo_mode_dro");
+		if( dro && main_activity.supportsDRO() )
+			return PhotoMode.DRO;
 		boolean hdr = photo_mode_pref.equals("preference_photo_mode_hdr");
 		if( hdr && main_activity.supportsHDR() )
 			return PhotoMode.HDR;
@@ -1570,7 +1575,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 		List<byte []> images = new ArrayList<>();
 		images.add(data);
 
-		boolean success = saveImage(false, false, images, current_date);
+		boolean is_hdr = false;
+		// note, multi-image HDR and expo is handled under onBurstPictureTaken; here we look for DRO, as that's the photo mode to set
+		// single image HDR
+		PhotoMode photo_mode = getPhotoMode();
+		if( photo_mode == PhotoMode.DRO ) {
+			is_hdr = true;
+		}
+		boolean success = saveImage(is_hdr, false, images, current_date);
         
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken complete, success: " + success);

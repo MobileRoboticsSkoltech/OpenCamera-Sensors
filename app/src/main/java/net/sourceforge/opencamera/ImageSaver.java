@@ -71,7 +71,12 @@ public class ImageSaver extends Thread {
 		Type type = Type.JPEG;
 		final boolean is_hdr; // for jpeg
 		final boolean save_expo; // for is_hdr
-		final List<byte []> jpeg_images; // for jpeg (may be null otherwise)
+		/* jpeg_images: for jpeg (may be null otherwise).
+		 * If is_hdr==true, this should be 1 or 3 images, and the images are combined/converted to a HDR image (if there's only 1
+		 * image, this uses fake HDR or "DRO").
+		 * If is_hdr==false, then multiple images are saved sequentially.
+		 */
+		final List<byte []> jpeg_images;
 		final DngCreator dngCreator; // for raw
 		final Image image; // for raw
 		final boolean image_capture_intent;
@@ -333,8 +338,8 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
 			addRequest(request);
-			if( request.is_hdr || ( !is_raw && request.jpeg_images.size() > 1 ) ) {
-				// For HDR, we also add a dummy request, effectively giving it a cost of 2 - to reflect the fact that HDR is more memory intensive
+			if( ( request.is_hdr && request.jpeg_images.size() > 1 ) || ( !is_raw && request.jpeg_images.size() > 1 ) ) {
+				// For (multi-image) HDR, we also add a dummy request, effectively giving it a cost of 2 - to reflect the fact that HDR is more memory intensive
 				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
 				// of 2, due to RAW and JPEG each needing their own request).
 				// Similarly for saving multiple images (expo-bracketing)
@@ -573,15 +578,15 @@ public class ImageSaver extends Thread {
 		if( request.is_hdr ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "hdr");
-			if( request.jpeg_images.size() != 3 ) {
+			if( request.jpeg_images.size() != 1 && request.jpeg_images.size() != 3 ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "saveImageNow expected 3 images for hdr, not " + request.jpeg_images.size());
+					Log.d(TAG, "saveImageNow expected either 1 or 3 images for hdr, not " + request.jpeg_images.size());
 				// throw runtime exception, as this is a programming error
 				throw new RuntimeException();
 			}
 
         	long time_s = System.currentTimeMillis();
-			if( !request.image_capture_intent && request.save_expo ) {
+			if( request.jpeg_images.size() > 1 && !request.image_capture_intent && request.save_expo ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "save exposures");
 				for(int i=0;i<request.jpeg_images.size();i++) {
@@ -596,10 +601,10 @@ public class ImageSaver extends Thread {
 						// we don't set success to false here - as for deciding whether to pause preview or not (which is all we use the success return for), all that matters is whether we saved the final HDR image
 					}
 				}
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "HDR performance: time after saving base exposures: " + (System.currentTimeMillis() - time_s));
+				}
 			}
-    		if( MyDebug.LOG ) {
-    			Log.d(TAG, "HDR performance: time after saving base exposures: " + (System.currentTimeMillis() - time_s));
-    		}
 
 			// note, even if we failed saving some of the expo images, still try to save the HDR image
 			if( MyDebug.LOG )
@@ -626,7 +631,11 @@ public class ImageSaver extends Thread {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "save HDR image");
-			success = saveSingleImageNow(request, request.jpeg_images.get(1), hdr_bitmap, "_HDR", true, true);
+			int base_image_id = (int)((request.jpeg_images.size()-1)/2);
+			if( MyDebug.LOG )
+				Log.d(TAG, "base_image_id: " + base_image_id);
+			String suffix = request.jpeg_images.size() == 1 ? "_DRO" : "_HDR";
+			success = saveSingleImageNow(request, request.jpeg_images.get(base_image_id), hdr_bitmap, suffix, true, true);
 			if( MyDebug.LOG && !success )
 				Log.e(TAG, "saveSingleImageNow failed for hdr image");
     		if( MyDebug.LOG ) {
