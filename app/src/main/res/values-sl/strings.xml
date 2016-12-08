@@ -363,4 +363,6 @@
     <string name="preference_calibrate_level_reset">Ponastavi</string>
     <string name="preference_calibrate_level_calibrated">Raven umerjena</string>
     <string name="preference_calibrate_level_calibration_reset">Ponastavitev ravni umerjanja</string>
+	
+	<string name="photo_mode_dro">DRO</string>
 </resources>
