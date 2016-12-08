@@ -170,9 +170,9 @@ Thanks! Donations can be used for: purchasing hardware for porting/testing; app 
 
 <p><a name="requirements"></a><b>Requirements</b></p>
 
-<p>Open Camera requires Android 4.0.3 or better. I've tested Open Camera on my Nexus 6 (Android 6), Nexus 7 (2013) (Android 5)
-and Galaxy Nexus (Android 4.3). The auto-stabilise feature may not be available if Open Camera deems
-there is not enough memory (RAM) available (technical explanation: requires 128MB of "large heap").</p>
+<p>Open Camera requires Android 4.0.3 or better. I've tested Open Camera on my Nexus 6 (Android 5.0-7.0),
+Nexus 7 (2013) (Android 5.0-6.0) and Galaxy Nexus (Android 4.0.3-4.3). Some features may only be available
+on some devices (it may depend on Android version, or require specific support from the camera/device).</p>
 
 <p>Note that it's not possible for me to test Open Camera on every Android device out there, let alone in combination with different
 Android versions (or especially alternative ROMs like CyanogenMod). Please test before using Open Camera to photo/video
@@ -262,6 +262,7 @@ FIXED   Improved behaviour for photo/video mode when launched from a take photo
         or record video intent (no longer keeps switching back to photo mode
         when pause/resuming if called from a photo intent; now allows switching
         to photo mode if called from a video intent).
+ADDED   New photo mode "DRO" (dynamic range optimisation) (requires Android 5).
 ADDED   Quick settings tiles to open camera (requires Android 7): tiles for
         photo, video and selfie mode.
 ADDED   New option to mirror photos for front camera (Settings/Photo settings/

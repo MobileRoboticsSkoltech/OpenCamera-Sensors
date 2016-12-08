@@ -363,4 +363,6 @@
     <string name="preference_calibrate_level_reset">Reset</string>
     <string name="preference_calibrate_level_calibrated">Level calibrated</string>
     <string name="preference_calibrate_level_calibration_reset">Level calibration reset</string>
+
+    <string name="photo_mode_dro">DRO</string>
 </resources>

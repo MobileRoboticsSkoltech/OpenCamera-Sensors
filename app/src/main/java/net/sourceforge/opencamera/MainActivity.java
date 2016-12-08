@@ -2370,6 +2370,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	return this.supports_auto_stabilise;
     }
 
+	public boolean supportsDRO() {
+		// require at least Android 5, for the Renderscript support in HDRProcessor
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP )
+			return true;
+		return false;
+	}
+
     public boolean supportsHDR() {
     	// we also require the device have sufficient memory to do the processing, simplest to use the same test as we do for auto-stabilise...
 		if( this.supportsAutoStabilise() && preview.supportsExpoBracketing() )
@@ -2548,7 +2555,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 			String photo_mode_string = null;
 			MyApplicationInterface.PhotoMode photo_mode = applicationInterface.getPhotoMode();
-			if( photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
+			if( photo_mode == MyApplicationInterface.PhotoMode.DRO ) {
+				photo_mode_string = getResources().getString(R.string.photo_mode_dro);
+			}
+			else if( photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
 				photo_mode_string = getResources().getString(R.string.photo_mode_hdr);
 			}
 			else if( photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {

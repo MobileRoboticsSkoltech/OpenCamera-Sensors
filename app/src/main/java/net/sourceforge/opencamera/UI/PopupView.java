@@ -154,6 +154,10 @@ public class PopupView extends LinearLayout {
 			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<>();
 			photo_modes.add( getResources().getString(R.string.photo_mode_standard) );
 			photo_mode_values.add( MyApplicationInterface.PhotoMode.Standard );
+			if( main_activity.supportsDRO() ) {
+				photo_modes.add( getResources().getString(R.string.photo_mode_dro) );
+				photo_mode_values.add( MyApplicationInterface.PhotoMode.DRO );
+			}
     		if( main_activity.supportsHDR() ) {
     			photo_modes.add( getResources().getString(R.string.photo_mode_hdr) );
     			photo_mode_values.add( MyApplicationInterface.PhotoMode.HDR );
@@ -206,9 +210,12 @@ public class PopupView extends LinearLayout {
     						if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard ) {
         						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
     						}
-    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
-        						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
-    						}
+							else if( new_photo_mode == MyApplicationInterface.PhotoMode.DRO ) {
+								editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_dro");
+							}
+							else if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
+								editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
+							}
     						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
         						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_expo_bracketing");
     						}

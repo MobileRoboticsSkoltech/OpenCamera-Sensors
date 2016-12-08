@@ -51,7 +51,9 @@
 <li><a href="#quickstart">Quickstart</a></li>
 <li><a href="#user_interface">On-Screen User Interface</a></li>
 <li><a href="#auto_stabilise">Auto-stabilise feature</a></li>
+<li><a href="#dro">DRO</a></li>
 <li><a href="#hdr">HDR</a></li>
+<li><a href="#dro_vs_hdr">DRO vs HDR</a></li>
 <li><a href="#settings">Settings</a></li>
 <li><a href="#widgets">Widgets and tiles</a></li>
 <li><a href="#faq">FAQ</a></li>
@@ -135,6 +137,7 @@ If Camera2 API is used, then if a non-auto ISO is used, then selecting the expos
 time.</li>
 <li><b>Photo Mode</b> - If Camera2 API is enabled, you can also choose different photo modes:<ul>
 	<li><b>Standard</b> - Ordinary operation: takes a single photo.</li>
+	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode.</li>
 	<li><b>HDR</b> - Enables <a href="#hdr">High Dynamic Range</a> mode.</li>
 	<li><b>Exposure Bracketing</b> - Takes multiple images at different exposure levels (see
 	Settings/"Photo settings" for options to control the number of images and stops.</li>
@@ -207,6 +210,13 @@ feature.</p>
 
 <p>Note that auto-stabilising will not occur if the device is pointing up or down.</p>
 
+<p><a name="dro"></a><b>DRO</b></p>
+
+<p>Dynamic Range Optimisation (DRO) is a technique that optimise the dynamic range available in the image. In particular, dark
+regions will have their brightness boosted to bring out the detail. This mode is useful for capturing scenes with a wide range
+of brightness (e.g., on a bright sunny day) as well as being useful to automatically optimise photos in low light scenes. Also
+see <a href="#dro_vs_hdr">DRO vs HDR</a>.</p>
+
 <p><a name="hdr"></a><b>HDR</b></p>
 
 <p>High Dynamic Range Imaging (HDR) is a technique where the camera takes multiple shots at different exposures, and combines them
@@ -228,8 +238,9 @@ the grass. Meanwhile the tree branches in the foreground is a bit too dark.</p>
 <ul>
 <li>HDR requires Camera2 API to be enabled (under Settings), which is only available on some devices.</li>
 <li>Taking photos with HDR is significantly slower than regular photos.</li>
-<li>HDR isn't suitable for fast moving scenes, due to combining an image from multiple shots.</li>
-<li>Try to hold your device steady while the photo is being taken.</li>
+<li>HDR isn't suitable for scenes with movement, due to combining an image from multiple shots.</li>
+<li>Although Open Camera applies auto-alignment to the images, it's still best to try to hold your device steady while the photo is
+being taken.</li>
 <li>Some devices have problems taking photos in HDR or Exposure Bracketing mode (symptoms include preview freezing, or
 exposure bracketing shots coming out in the wrong order, which will also mess up the HDR algorithm), try disabling
 Settings/Photo settings/"Enable fast HDR/expo burst" if this happens.</li>
@@ -238,6 +249,17 @@ Settings/Photo settings/"Enable fast HDR/expo burst" if this happens.</li>
 unreal or vivid image, for now Open Camera's HDR is more geared towards capturing the range of exposures. Also note that many camera
 apps that advertise "HDR" don't even make use of multiple images - this is more a case of filtering, than HDR.</li>
 <li>See <a href="http://www.androidauthority.com/how-to-use-hdr-android-173210/">this guide</a> for more information on HDR.</li>
+</ul>
+
+<p><a name="dro_vs_hdr"></a><b>DRO vs HDR</b></p>
+
+<p>Both DRO and HDR share in common that they are ways to handle wide ranges of brightness. They each have their pros and cons:</p>
+<ul>
+<li>DRO requires only a single image from the sensor, so shots are fast to take, and fine for scenes with movement, unlike HDR.</li>
+<li>Photos will still take longer to process compared with Standard photo mode, but it will still be faster than HDR.</li>
+<li>HDR will in general be better at scenes with a high range of brightness values. It can take advantage of the information from
+three separate images, rather than reprocessing a single image.</li>
+<li>DRO is available on both old and Camera2 APIs (though it still requires Android 5.0).</li>
 </ul>
 
 <p><a name="settings"></a><b>Settings</b></p>
