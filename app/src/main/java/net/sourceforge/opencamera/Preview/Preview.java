@@ -1710,8 +1710,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up jpeg quality: " + image_quality);
 			camera_controller.setJpegQuality(image_quality);
-			if( MyDebug.LOG )
-				Log.d(TAG, "image quality: " + image_quality);
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setupCameraParameters: time after jpeg quality: " + (System.currentTimeMillis() - debug_time));
