@@ -1979,6 +1979,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean has_thumbnail_anim = sharedPreferences.getBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), true);
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
+		boolean is_dro = mActivity.supportsDRO() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_dro");
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
 		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
 		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
@@ -2110,7 +2111,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Date date = new Date();
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(date);
         String suffix = "";
-		if( is_hdr ) {
+		if( is_dro ) {
+			suffix = "_DRO";
+		}
+		else if( is_hdr ) {
 			suffix = "_HDR";
 		}
 		else if( is_expo ) {
@@ -6355,7 +6359,36 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		this.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_VOLUME_UP);
 	}
-	
+
+	public void testTakePhotoDRO() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoDRO");
+		if( !mActivity.supportsDRO() ) {
+			return;
+		}
+
+		setToDefault();
+
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_dro");
+		editor.apply();
+		updateForSettings();
+
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
+
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
+
+		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+		editor.apply();
+		updateForSettings();
+
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
+	}
+
 	public void testTakePhotoHDR() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDR");
 		if( !mActivity.supportsHDR() ) {
