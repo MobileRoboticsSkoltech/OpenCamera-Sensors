@@ -1104,9 +1104,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testSwitchVideo");
 
 		setToDefault();
+		assertTrue(!mPreview.isVideo());
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
+		assertTrue(mPreview.isVideo());
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "video focus_value: "+ focus_value);
 	    if( mPreview.supportsFocus() ) {
@@ -1116,6 +1118,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    int saved_count = mPreview.count_cameraAutoFocus;
 	    Log.d(TAG, "0 count_cameraAutoFocus: " + saved_count);
 	    clickView(switchVideoButton);
+		assertTrue(!mPreview.isVideo());
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "picture focus_value: "+ focus_value);
 	    if( mPreview.supportsFocus() ) {
@@ -1139,6 +1142,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    }
 
 		    clickView(switchVideoButton);
+			assertTrue(mPreview.isVideo());
 		    focus_value = mPreview.getCameraController().getFocusValue();
 			Log.d(TAG, "front video focus_value: "+ focus_value);
 		    if( mPreview.supportsFocus() ) {
@@ -1146,12 +1150,47 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    }
 
 		    clickView(switchVideoButton);
+			assertTrue(!mPreview.isVideo());
 		    focus_value = mPreview.getCameraController().getFocusValue();
 			Log.d(TAG, "front picture focus_value: "+ focus_value);
 		    if( mPreview.supportsFocus() ) {
 		    	assertTrue(focus_value.equals("focus_mode_auto"));
 		    }
+
+			// now switch back
+			clickView(switchCameraButton);
+			new_cameraId = mPreview.getCameraId();
+			assertTrue(cameraId == new_cameraId);
 	    }
+
+		if( mPreview.supportsFocus() ) {
+			// now test we remember the focus mode for photo and video
+
+			switchToFocusValue("focus_mode_continuous_picture");
+
+			clickView(switchVideoButton);
+			assertTrue(mPreview.isVideo());
+			focus_value = mPreview.getCameraController().getFocusValue();
+			Log.d(TAG, "video focus_value: "+ focus_value);
+			assertTrue(focus_value.equals("focus_mode_continuous_video"));
+
+			switchToFocusValue("focus_mode_macro");
+
+			clickView(switchVideoButton);
+			assertTrue(!mPreview.isVideo());
+			focus_value = mPreview.getCameraController().getFocusValue();
+			Log.d(TAG, "picture focus_value: "+ focus_value);
+			assertTrue(focus_value.equals("focus_mode_continuous_picture"));
+
+			clickView(switchVideoButton);
+			assertTrue(mPreview.isVideo());
+			focus_value = mPreview.getCameraController().getFocusValue();
+			Log.d(TAG, "video focus_value: "+ focus_value);
+			assertTrue(focus_value.equals("focus_mode_macro"));
+		}
+
+
+
 	}
 
 	/* Tests continuous picture focus, including switching to video and back.
