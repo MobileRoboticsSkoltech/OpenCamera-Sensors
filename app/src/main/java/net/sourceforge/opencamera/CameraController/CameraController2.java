@@ -3056,6 +3056,22 @@ public class CameraController2 extends CameraController {
 		this.continuous_focus_move_callback = cb;
 	}
 
+	static public double getScaleForExposureTime(long exposure_time, long fixed_exposure_time, long scaled_exposure_time, double full_exposure_time_scale) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getScaleForExposureTime");
+		double alpha = (exposure_time - fixed_exposure_time) / (double) (scaled_exposure_time - fixed_exposure_time);
+		if( alpha < 0.0 )
+			alpha = 0.0;
+		else if( alpha > 1.0 )
+			alpha = 1.0;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "exposure_time: " + exposure_time);
+			Log.d(TAG, "alpha: " + alpha);
+		}
+		// alpha==0 means exposure_time_scale==1; alpha==1 means exposure_time_scale==full_exposure_time_scale
+		return (1.0 - alpha) + alpha * full_exposure_time_scale;
+	}
+
 	private void takePictureAfterPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureAfterPrecapture");
@@ -3095,16 +3111,9 @@ public class CameraController2 extends CameraController {
 				if( exposure_time <= fixed_exposure_time ) {
 					Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
 					if( exposure_time_range != null ) {
-						double alpha = (exposure_time - fixed_exposure_time) / (double) (scaled_exposure_time - fixed_exposure_time);
-						if (alpha < 0.0)
-							alpha = 0.0;
-						else if (alpha > 1.0)
-							alpha = 1.0;
-						// alpha==0 means exposure_time_scale==1; alpha==1 means exposure_time_scale==full_exposure_time_scale
-						double exposure_time_scale = (1.0 - alpha) + alpha * full_exposure_time_scale;
+						double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
 						if (MyDebug.LOG) {
 							Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
-							Log.d(TAG, "alpha: " + alpha);
 							Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
 						}
 						long min_exposure_time = exposure_time_range.getLower();
