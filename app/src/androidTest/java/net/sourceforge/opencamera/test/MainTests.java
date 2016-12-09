@@ -54,6 +54,7 @@ public class MainTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImageQuality"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFailOpenCamera"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testAudioControlIcon"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testOnError"));
         return suite;
     }
 }
