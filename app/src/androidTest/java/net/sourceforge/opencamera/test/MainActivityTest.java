@@ -2049,7 +2049,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "can_focus_area? " + can_focus_area);
 	    int saved_count = mPreview.count_cameraAutoFocus;
 	    String new_focus_value_ui = mPreview.getCurrentFocusValue();
-		assertTrue(new_focus_value_ui.equals(focus_value_ui));
+		assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
 		assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
 	    if( touch_to_focus ) {
 			// touch to auto-focus with focus area (will also exit immersive mode)
@@ -2081,7 +2081,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			    assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
 			}
 		    new_focus_value_ui = mPreview.getCurrentFocusValue();
-			assertTrue(new_focus_value_ui.equals(focus_value_ui));
+			assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
 			if( focus_value.equals("focus_mode_continuous_picture") )
 				assertTrue(mPreview.getCameraController().getFocusValue().equals("focus_mode_auto")); // continuous focus mode switches to auto focus on touch
 			else
@@ -2162,7 +2162,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// focus should be back to normal now:
 	    new_focus_value_ui = mPreview.getCurrentFocusValue();
-		assertTrue(new_focus_value_ui.equals(focus_value_ui));
+		assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
 		Log.d(TAG, "focus_value: " + focus_value);
 		Log.d(TAG, "new focus_value: " + mPreview.getCameraController().getFocusValue());
 		assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
@@ -2601,6 +2601,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "restart_contentDescription: " + restart_contentDescription);
 		assertTrue(restart_cameraId == new_cameraId);
 		assertTrue( restart_contentDescription.equals( mActivity.getResources().getString(is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera) ) );
+
+		// now test mirror mode
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getFrontCameraMirrorKey(), "preference_front_camera_mirror_photo");
+		editor.apply();
+		updateForSettings();
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
 
 	/* Tests taking a photo with front camera and screen flash.
