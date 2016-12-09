@@ -1501,6 +1501,8 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "iso range from " + iso_range.getLower() + " to " + iso_range.getUpper());
 		List<String> values = new ArrayList<>();
 		values.add(default_value);
+		final String manual_value = "m";
+		values.add(manual_value);
 		int [] iso_values = {50, 100, 200, 400, 800, 1600, 3200, 6400};
 		values.add("" + iso_range.getLower());
 		for(int iso_value : iso_values) {
@@ -1521,6 +1523,19 @@ public class CameraController2 extends CameraController {
 				camera_settings.iso = 0;
 				if( camera_settings.setAEMode(previewBuilder, false) ) {
 			    	setRepeatingRequest();
+				}
+			}
+			else if( value.equals(manual_value) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting manual iso");
+				supported_values = new SupportedValues(values, value);
+				camera_settings.has_iso = true;
+				int iso = 800;
+				iso = Math.max(iso, iso_range.getLower());
+				iso = Math.min(iso, iso_range.getUpper());
+				camera_settings.iso = iso;
+				if( camera_settings.setAEMode(previewBuilder, false) ) {
+					setRepeatingRequest();
 				}
 			}
 			else {

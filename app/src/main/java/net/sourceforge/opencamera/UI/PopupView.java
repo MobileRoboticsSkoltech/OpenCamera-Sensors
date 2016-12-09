@@ -111,6 +111,8 @@ public class PopupView extends LinearLayout {
     		List<String> supported_isos = preview.getSupportedISOs();
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     		String current_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
+			if( !current_iso.equals("auto") && supported_isos.contains("m") && !supported_isos.contains(current_iso) )
+				current_iso = "m";
     		// n.b., we hardcode the string "ISO" as we don't want it translated - firstly more consistent with the ISO values returned by the driver, secondly need to worry about the size of the buttons, so don't want risk of a translated string being too long
         	addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, "TEST_ISO", new ButtonOptionsPopupListener() {
     			@Override
@@ -120,6 +122,7 @@ public class PopupView extends LinearLayout {
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     				SharedPreferences.Editor editor = sharedPreferences.edit();
     				editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
+					String toast_option = option;
     				if( option.equals("auto") ) {
         				if( MyDebug.LOG )
         					Log.d(TAG, "switched from manual to auto iso");
@@ -129,6 +132,20 @@ public class PopupView extends LinearLayout {
     				else {
         				if( MyDebug.LOG )
         					Log.d(TAG, "switched from auto to manual iso");
+						if( option.equals("m") ) {
+							// if we used the generic "manual", then instead try to preserve the current iso if it exists
+							if( preview.getCameraController() != null && preview.getCameraController().captureResultHasIso() ) {
+								int iso = preview.getCameraController().captureResultIso();
+								if( MyDebug.LOG )
+									Log.d(TAG, "apply existing iso of " + iso);
+								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
+								toast_option = "" + iso;
+							}
+							else {
+								if( MyDebug.LOG )
+									Log.d(TAG, "no existing iso available");
+							}
+						}
         				if( preview.usingCamera2API() ) {
         					// if changing from auto to manual, preserve the current exposure time if it exists
         					if( preview.getCameraController() != null && preview.getCameraController().captureResultHasExposureTime() ) {
@@ -145,7 +162,7 @@ public class PopupView extends LinearLayout {
     				}
     				editor.apply();
 
-    				main_activity.updateForSettings("ISO: " + option);
+    				main_activity.updateForSettings("ISO: " + toast_option);
     				main_activity.closePopup();
     			}
     		});
