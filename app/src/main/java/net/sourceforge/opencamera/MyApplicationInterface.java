@@ -339,11 +339,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		return null;
     }
-    
-    @Override
-    public int getImageQualityPref(){
+
+	/** getImageQualityPref() returns the image quality used for the Camera Controller for taking a
+	 *  photo - in some cases, we may set that to a higher value, then perform processing on the
+	 *  resultant JPEG before resaving. This method returns the image quality setting to be used for
+	 *  saving the final image (as specified by the user).
+     */
+	int getSaveImageQualityPref() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "getImageQualityPref");
+			Log.d(TAG, "getSaveImageQualityPref");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String image_quality_s = sharedPreferences.getString(PreferenceKeys.getQualityPreferenceKey(), "90");
 		int image_quality;
@@ -356,6 +360,19 @@ public class MyApplicationInterface implements ApplicationInterface {
 			image_quality = 90;
 		}
 		return image_quality;
+	}
+
+	@Override
+    public int getImageQualityPref(){
+		if( MyDebug.LOG )
+			Log.d(TAG, "getImageQualityPref");
+		// see documentation for getSaveImageQualityPref(): in DRO mode we want to take the photo
+		// at 100% quality for post-processing, the final image will then be saved at the user requested
+		// setting
+		PhotoMode photo_mode = getPhotoMode();
+		if( photo_mode == PhotoMode.DRO )
+			return 100;
+		return getSaveImageQualityPref();
     }
     
 	@Override
@@ -1516,7 +1533,9 @@ public class MyApplicationInterface implements ApplicationInterface {
         }
 
         boolean using_camera2 = main_activity.getPreview().usingCamera2API();
-		int image_quality = getImageQualityPref();
+		int image_quality = getSaveImageQualityPref();
+		if( MyDebug.LOG )
+			Log.d(TAG, "image_quality: " + image_quality);
         boolean do_auto_stabilise = getAutoStabilisePref() && main_activity.getPreview().hasLevelAngle();
 		double level_angle = do_auto_stabilise ? main_activity.getPreview().getLevelAngle() : 0.0;
 		if( do_auto_stabilise && main_activity.test_have_angle )
