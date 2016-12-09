@@ -56,6 +56,7 @@ public class CameraController2 extends CameraController {
 	private List<Integer> zoom_ratios;
 	private int current_zoom_value;
 	private final ErrorCallback preview_error_cb;
+	private final ErrorCallback camera_error_cb;
 	private CameraCaptureSession captureSession;
 	private CaptureRequest.Builder previewBuilder;
 	private AutoFocusCallback autofocus_cb;
@@ -527,6 +528,33 @@ public class CameraController2 extends CameraController {
 	/*private boolean push_set_ae_lock = false;
 	private CaptureRequest push_set_ae_lock_id = null;*/
 
+	@Override
+	public void onError() {
+		Log.e(TAG, "onError");
+		if( camera != null ) {
+			onError(camera);
+		}
+	}
+
+	private void onError(@NonNull CameraDevice cam) {
+		Log.e(TAG, "onError");
+		boolean camera_already_opened = this.camera != null;
+		// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
+		this.camera = null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "onError: camera is now set to null");
+		cam.close();
+		if( MyDebug.LOG )
+			Log.d(TAG, "onError: camera is now closed");
+
+		if( camera_already_opened ) {
+			// need to communicate the problem to the application
+			// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
+			Log.e(TAG, "error occurred after camera was opened");
+			camera_error_cb.onError();
+		}
+	}
+
 	/** Opens the camera device.
 	 * @param context Application context.
 	 * @param cameraId Which camera to open (must be between 0 and CameraControllerManager2.getNumberOfCameras()-1).
@@ -541,6 +569,7 @@ public class CameraController2 extends CameraController {
 
 		this.context = context;
 		this.preview_error_cb = preview_error_cb;
+		this.camera_error_cb = camera_error_cb;
 
 		thread = new HandlerThread("CameraBackground"); 
 		thread.start(); 
@@ -642,24 +671,10 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "actual camera: " + CameraController2.this.camera);
 					Log.d(TAG, "first_callback? " + first_callback);
 				}
-				boolean camera_already_opened = CameraController2.this.camera != null;
 				if( first_callback ) {
 					first_callback = false;
 				}
-				// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
-				CameraController2.this.camera = null;
-				if( MyDebug.LOG )
-					Log.d(TAG, "onError: camera is now set to null");
-				cam.close();
-				if( MyDebug.LOG )
-					Log.d(TAG, "onError: camera is now closed");
-
-				if( camera_already_opened ) {
-					// need to communicate the problem to the application
-					// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
-					Log.e(TAG, "error occurred after camera was opened: " + error);
-					camera_error_cb.onError();
-				}
+				CameraController2.this.onError(cam);
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to synchronize to say callback done");
 			    synchronized( open_camera_lock ) {

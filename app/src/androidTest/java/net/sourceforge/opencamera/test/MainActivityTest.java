@@ -638,6 +638,22 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
+	/* Tests camera error handling.
+	 */
+	public void testOnError() {
+		Log.d(TAG, "testOnError");
+		setToDefault();
+
+		mActivity.runOnUiThread(new Runnable() {
+			public void run() {
+				Log.d(TAG, "onError...");
+				mPreview.getCameraController().onError();
+			}
+		});
+		this.getInstrumentation().waitForIdleSync();
+		assertTrue( mPreview.getCameraController() == null );
+	}
+
 	/* Various tests for auto-focus.
 	 */
 	public void testAutoFocus() throws InterruptedException {
