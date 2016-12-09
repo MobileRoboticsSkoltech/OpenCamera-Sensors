@@ -68,6 +68,7 @@ public class CameraController2 extends CameraController {
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
 	private boolean use_expo_fast_burst = true;
+	private boolean optimise_ae_for_dro = false;
 	private boolean want_raw;
 	//private boolean want_raw = true;
 	private android.util.Size raw_size;
@@ -290,7 +291,6 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
 				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
 				// for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
-				// if we enable this ever, remember to still keep disabled for expo bracketing (unless we've added support for flash with expo by then)
 				builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 				// set flash via CaptureRequest.FLASH
 		    	/*if( flash_value.equals("flash_off") ) {
@@ -1728,6 +1728,13 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
+		if (MyDebug.LOG)
+			Log.d(TAG, "clearCaptureExposureScaleStops");
+		this.optimise_ae_for_dro = optimise_ae_for_dro;
+	}
+
+	@Override
 	public void setUseCamera2FakeFlash(boolean use_fake_precapture) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setUseCamera2FakeFlash: " + use_fake_precapture);
@@ -3079,6 +3086,49 @@ public class CameraController2 extends CameraController {
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 				stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+			}
+			if( !camera_settings.has_iso && this.optimise_ae_for_dro && capture_result_has_exposure_time && (camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) ) {
+				final double full_exposure_time_scale = 0.5f;
+				final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
+				final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
+				long exposure_time = capture_result_exposure_time;
+				if( exposure_time <= fixed_exposure_time ) {
+					Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+					if( exposure_time_range != null ) {
+						double alpha = (exposure_time - fixed_exposure_time) / (double) (scaled_exposure_time - fixed_exposure_time);
+						if (alpha < 0.0)
+							alpha = 0.0;
+						else if (alpha > 1.0)
+							alpha = 1.0;
+						// alpha==0 means exposure_time_scale==1; alpha==1 means exposure_time_scale==full_exposure_time_scale
+						double exposure_time_scale = (1.0 - alpha) + alpha * full_exposure_time_scale;
+						if (MyDebug.LOG) {
+							Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
+							Log.d(TAG, "alpha: " + alpha);
+							Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
+						}
+						long min_exposure_time = exposure_time_range.getLower();
+						long max_exposure_time = exposure_time_range.getUpper();
+						exposure_time *= exposure_time_scale;
+						if( exposure_time < min_exposure_time )
+							exposure_time = min_exposure_time;
+						if( exposure_time > max_exposure_time )
+							exposure_time = max_exposure_time;
+						if (MyDebug.LOG) {
+							Log.d(TAG, "exposure_time: " + exposure_time);
+						}
+						stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
+						if( capture_result_has_iso )
+							stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, capture_result_iso );
+						else
+							stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 800);
+						if( capture_result_has_frame_duration  )
+							stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, capture_result_frame_duration);
+						else
+							stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
+						stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+					}
+				}
 			}
 			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);

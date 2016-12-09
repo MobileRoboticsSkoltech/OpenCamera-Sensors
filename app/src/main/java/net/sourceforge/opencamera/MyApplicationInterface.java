@@ -824,7 +824,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return PhotoMode.Standard;
     }
 
-    @Override
+	@Override
+	public boolean getOptimiseAEForDROPref() {
+		PhotoMode photo_mode = getPhotoMode();
+		return( photo_mode == PhotoMode.DRO );
+	}
+
+	@Override
 	public boolean isRawPref() {
     	if( isImageCaptureIntent() )
     		return false;
