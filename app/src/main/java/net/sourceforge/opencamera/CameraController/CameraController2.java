@@ -56,6 +56,7 @@ public class CameraController2 extends CameraController {
 	private List<Integer> zoom_ratios;
 	private int current_zoom_value;
 	private final ErrorCallback preview_error_cb;
+	private final ErrorCallback camera_error_cb;
 	private CameraCaptureSession captureSession;
 	private CaptureRequest.Builder previewBuilder;
 	private AutoFocusCallback autofocus_cb;
@@ -68,6 +69,7 @@ public class CameraController2 extends CameraController {
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
 	private boolean use_expo_fast_burst = true;
+	private boolean optimise_ae_for_dro = false;
 	private boolean want_raw;
 	//private boolean want_raw = true;
 	private android.util.Size raw_size;
@@ -290,7 +292,6 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
 				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
 				// for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
-				// if we enable this ever, remember to still keep disabled for expo bracketing (unless we've added support for flash with expo by then)
 				builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 				// set flash via CaptureRequest.FLASH
 		    	/*if( flash_value.equals("flash_off") ) {
@@ -527,6 +528,33 @@ public class CameraController2 extends CameraController {
 	/*private boolean push_set_ae_lock = false;
 	private CaptureRequest push_set_ae_lock_id = null;*/
 
+	@Override
+	public void onError() {
+		Log.e(TAG, "onError");
+		if( camera != null ) {
+			onError(camera);
+		}
+	}
+
+	private void onError(@NonNull CameraDevice cam) {
+		Log.e(TAG, "onError");
+		boolean camera_already_opened = this.camera != null;
+		// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
+		this.camera = null;
+		if( MyDebug.LOG )
+			Log.d(TAG, "onError: camera is now set to null");
+		cam.close();
+		if( MyDebug.LOG )
+			Log.d(TAG, "onError: camera is now closed");
+
+		if( camera_already_opened ) {
+			// need to communicate the problem to the application
+			// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
+			Log.e(TAG, "error occurred after camera was opened");
+			camera_error_cb.onError();
+		}
+	}
+
 	/** Opens the camera device.
 	 * @param context Application context.
 	 * @param cameraId Which camera to open (must be between 0 and CameraControllerManager2.getNumberOfCameras()-1).
@@ -541,6 +569,7 @@ public class CameraController2 extends CameraController {
 
 		this.context = context;
 		this.preview_error_cb = preview_error_cb;
+		this.camera_error_cb = camera_error_cb;
 
 		thread = new HandlerThread("CameraBackground"); 
 		thread.start(); 
@@ -642,24 +671,10 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "actual camera: " + CameraController2.this.camera);
 					Log.d(TAG, "first_callback? " + first_callback);
 				}
-				boolean camera_already_opened = CameraController2.this.camera != null;
 				if( first_callback ) {
 					first_callback = false;
 				}
-				// need to set the camera to null first, as closing the camera may take some time, and we don't want any other operations to continue (if called from main thread)
-				CameraController2.this.camera = null;
-				if( MyDebug.LOG )
-					Log.d(TAG, "onError: camera is now set to null");
-				cam.close();
-				if( MyDebug.LOG )
-					Log.d(TAG, "onError: camera is now closed");
-
-				if( camera_already_opened ) {
-					// need to communicate the problem to the application
-					// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
-					Log.e(TAG, "error occurred after camera was opened: " + error);
-					camera_error_cb.onError();
-				}
+				CameraController2.this.onError(cam);
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to synchronize to say callback done");
 			    synchronized( open_camera_lock ) {
@@ -1486,6 +1501,8 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "iso range from " + iso_range.getLower() + " to " + iso_range.getUpper());
 		List<String> values = new ArrayList<>();
 		values.add(default_value);
+		final String manual_value = "m";
+		values.add(manual_value);
 		int [] iso_values = {50, 100, 200, 400, 800, 1600, 3200, 6400};
 		values.add("" + iso_range.getLower());
 		for(int iso_value : iso_values) {
@@ -1506,6 +1523,19 @@ public class CameraController2 extends CameraController {
 				camera_settings.iso = 0;
 				if( camera_settings.setAEMode(previewBuilder, false) ) {
 			    	setRepeatingRequest();
+				}
+			}
+			else if( value.equals(manual_value) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting manual iso");
+				supported_values = new SupportedValues(values, value);
+				camera_settings.has_iso = true;
+				int iso = 800;
+				iso = Math.max(iso, iso_range.getLower());
+				iso = Math.min(iso, iso_range.getUpper());
+				camera_settings.iso = iso;
+				if( camera_settings.setAEMode(previewBuilder, false) ) {
+					setRepeatingRequest();
 				}
 			}
 			else {
@@ -1725,6 +1755,13 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setUseExpoFastBurst: " + use_expo_fast_burst);
 		this.use_expo_fast_burst = use_expo_fast_burst;
+	}
+
+	@Override
+	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
+		if (MyDebug.LOG)
+			Log.d(TAG, "clearCaptureExposureScaleStops");
+		this.optimise_ae_for_dro = optimise_ae_for_dro;
 	}
 
 	@Override
@@ -3049,6 +3086,22 @@ public class CameraController2 extends CameraController {
 		this.continuous_focus_move_callback = cb;
 	}
 
+	static public double getScaleForExposureTime(long exposure_time, long fixed_exposure_time, long scaled_exposure_time, double full_exposure_time_scale) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getScaleForExposureTime");
+		double alpha = (exposure_time - fixed_exposure_time) / (double) (scaled_exposure_time - fixed_exposure_time);
+		if( alpha < 0.0 )
+			alpha = 0.0;
+		else if( alpha > 1.0 )
+			alpha = 1.0;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "exposure_time: " + exposure_time);
+			Log.d(TAG, "alpha: " + alpha);
+		}
+		// alpha==0 means exposure_time_scale==1; alpha==1 means exposure_time_scale==full_exposure_time_scale
+		return (1.0 - alpha) + alpha * full_exposure_time_scale;
+	}
+
 	private void takePictureAfterPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureAfterPrecapture");
@@ -3079,6 +3132,42 @@ public class CameraController2 extends CameraController {
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 				stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+			}
+			if( !camera_settings.has_iso && this.optimise_ae_for_dro && capture_result_has_exposure_time && (camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) ) {
+				final double full_exposure_time_scale = 0.5f;
+				final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
+				final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
+				long exposure_time = capture_result_exposure_time;
+				if( exposure_time <= fixed_exposure_time ) {
+					Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+					if( exposure_time_range != null ) {
+						double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
+						if (MyDebug.LOG) {
+							Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
+							Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
+						}
+						long min_exposure_time = exposure_time_range.getLower();
+						long max_exposure_time = exposure_time_range.getUpper();
+						exposure_time *= exposure_time_scale;
+						if( exposure_time < min_exposure_time )
+							exposure_time = min_exposure_time;
+						if( exposure_time > max_exposure_time )
+							exposure_time = max_exposure_time;
+						if (MyDebug.LOG) {
+							Log.d(TAG, "exposure_time: " + exposure_time);
+						}
+						stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
+						if( capture_result_has_iso )
+							stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, capture_result_iso );
+						else
+							stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 800);
+						if( capture_result_has_frame_duration  )
+							stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, capture_result_frame_duration);
+						else
+							stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
+						stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+					}
+				}
 			}
 			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);

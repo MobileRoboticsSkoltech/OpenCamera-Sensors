@@ -96,6 +96,15 @@ public class CameraController1 extends CameraController {
 			}, 5000);
 		}*/
 	}
+
+	@Override
+	public void onError() {
+		Log.e(TAG, "onError");
+		this.camera.release();
+		this.camera = null;
+		// need to communicate the problem to the application
+		this.camera_error_cb.onError();
+	}
 	
 	private class CameraErrorCallback implements Camera.ErrorCallback {
 		@Override
@@ -104,10 +113,7 @@ public class CameraController1 extends CameraController {
 			Log.e(TAG, "camera onError: " + error);
 			if( error == Camera.CAMERA_ERROR_SERVER_DIED ) {
 				Log.e(TAG, "    CAMERA_ERROR_SERVER_DIED");
-				CameraController1.this.camera.release();
-				CameraController1.this.camera = null;
-				// need to communicate the problem to the application
-				CameraController1.this.camera_error_cb.onError();
+				CameraController1.this.onError();
 			}
 			else if( error == Camera.CAMERA_ERROR_UNKNOWN  ) {
 				Log.e(TAG, "    CAMERA_ERROR_UNKNOWN ");
@@ -595,6 +601,11 @@ public class CameraController1 extends CameraController {
 
 	@Override
 	public void setUseExpoFastBurst(boolean use_expo_fast_burst) {
+		// not supported for CameraController1
+	}
+
+	@Override
+	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
 		// not supported for CameraController1
 	}
 

@@ -129,12 +129,12 @@ you to directly control the focus distance.
 Lastly, continuous focus mode means that the camera will continually focus - this option is generally best for taking photos as
 quickly as possible.</li>
 <li><b>ISO</b> - A higher ISO setting means the camera is more sensitive to light, though may also
-result in more noise. This mimics the film speed on traditional film cameras. Note that this
-setting may not be supported on all cameras. See
+result in more noise. This mimics the film speed on traditional film cameras. Select "AUTO" to switch
+back to automatic ISO mode. Note that this setting may not be supported on all cameras. See
 <a href="http://digital-photography-school.com/iso-settings">here</a> for more details on ISO.
 If Camera2 API is used, then if a non-auto ISO is used, then selecting the exposure compensation icon
 <img src="ic_exposure_white_48dp.png" alt="Exposure Compensation icon" width="32" height="32"> will bring up sliders allowing direct control over the ISO and exposure
-time.</li>
+time. You can also select "M" to switch straight to manual mode, keeping to the current ISO value.</li>
 <li><b>Photo Mode</b> - If Camera2 API is enabled, you can also choose different photo modes:<ul>
 	<li><b>Standard</b> - Ordinary operation: takes a single photo.</li>
 	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode.</li>
@@ -216,6 +216,8 @@ feature.</p>
 regions will have their brightness boosted to bring out the detail. This mode is useful for capturing scenes with a wide range
 of brightness (e.g., on a bright sunny day) as well as being useful to automatically optimise photos in low light scenes. Also
 see <a href="#dro_vs_hdr">DRO vs HDR</a>.</p>
+
+<p>Note that if Camera2 API is used, DRO will give improved performance in bright scenes.</p>
 
 <p><a name="hdr"></a><b>HDR</b></p>
 

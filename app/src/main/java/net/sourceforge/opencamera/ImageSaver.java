@@ -1124,6 +1124,8 @@ public class ImageSaver extends Thread {
 				OutputStream outputStream = new FileOutputStream(picFile);
 				try {
 		            if( bitmap != null ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "compress bitmap, quality " + request.image_quality);
 	    	            bitmap.compress(Bitmap.CompressFormat.JPEG, request.image_quality, outputStream);
 		            }
 		            else {

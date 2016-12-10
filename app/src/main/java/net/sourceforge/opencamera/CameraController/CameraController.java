@@ -159,6 +159,7 @@ public abstract class CameraController {
 	}
 
 	public abstract void release();
+	public abstract void onError(); // triggers error mechanism - should only be called externally for testing purposes
 
 	CameraController(int cameraId) {
 		this.cameraId = cameraId;
@@ -190,6 +191,10 @@ public abstract class CameraController {
 	public abstract void setExpoBracketingNImages(int n_images);
 	public abstract void setExpoBracketingStops(double stops);
 	public abstract void setUseExpoFastBurst(boolean use_expo_fast_burst);
+	/** If optimise_ae_for_dro is true, then this is a hint that if in auto-exposure mode and flash/torch
+	 *  is not on, the CameraController should try to optimise for a DRO (dynamic range optimisation) mode.
+	 */
+	public abstract void setOptimiseAEForDRO(boolean optimise_ae_for_dro);
 	public abstract void setRaw(boolean want_raw);
 	/**
 	 * setUseCamera2FakeFlash() should be called after creating the CameraController, and before calling getCameraFeatures() or

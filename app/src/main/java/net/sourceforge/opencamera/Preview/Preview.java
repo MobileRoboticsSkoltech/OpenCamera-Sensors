@@ -1323,6 +1323,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else {
 			camera_controller.setExpoBracketing(false);
 		}
+
+		camera_controller.setOptimiseAEForDRO( applicationInterface.getOptimiseAEForDROPref() );
 		
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
@@ -1708,8 +1710,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up jpeg quality: " + image_quality);
 			camera_controller.setJpegQuality(image_quality);
-			if( MyDebug.LOG )
-				Log.d(TAG, "image quality: " + image_quality);
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setupCameraParameters: time after jpeg quality: " + (System.currentTimeMillis() - debug_time));
@@ -4979,13 +4979,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						bounds.right = Math.max(sub_bounds.right, bounds.right);
 					}
 				}
+				// above we've worked out the maximum bounds of each line - this is useful for left/right, but for the top/bottom
+				// we would rather use a consistent height no matter what the text is (otherwise we have the problem of varying
+				// gap between lines, depending on what the characters are).
+				final String reference_text = "Ap";
+				paint.getTextBounds(reference_text, 0, reference_text.length(), sub_bounds);
+				bounds.top = sub_bounds.top;
+				bounds.bottom = sub_bounds.bottom;
 				/*if( MyDebug.LOG ) {
 					Log.d(TAG, "bounds: " + bounds);
 				}*/
-				int height = bounds.bottom - bounds.top + 2;
+				int height = bounds.bottom - bounds.top; // height of each line
 				bounds.bottom += ((lines.length-1) * height)/2;
 				bounds.top -= ((lines.length-1) * height)/2;
-				final int padding = (int) (14 * scale + 0.5f); // convert dps to pixels
+				final int padding = (int) (14 * scale + 0.5f); // padding for the shaded rectangle; convert dps to pixels
 				final int offset_y = (int) (offset_y_dp * scale + 0.5f); // convert dps to pixels
 				canvas.save();
 				canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
