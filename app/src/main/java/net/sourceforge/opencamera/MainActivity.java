@@ -581,9 +581,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "stopped being loud - was loud since :" + time_quiet_loud);
 				Log.d(TAG, "    time_now: " + time_now);
 				Log.d(TAG, "    duration: " + duration);
-				if( duration < 1500 ) {
-					audio_trigger = true;
-				}
+			}
+			if( duration < 1500 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "audio_trigger set");
+				audio_trigger = true;
 			}
 			time_quiet_loud = -1;
 		}
