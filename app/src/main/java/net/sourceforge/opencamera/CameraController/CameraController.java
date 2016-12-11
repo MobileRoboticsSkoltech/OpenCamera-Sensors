@@ -178,7 +178,6 @@ public abstract class CameraController {
 	/** Set an ISO value. Only supported if supports_iso_range is false.
 	 */
 	public abstract SupportedValues setISO(String value);
-	public abstract String getISOKey();
 	/** Switch between auto and manual ISO mode. Only supported if supports_iso_range is true.
 	 * @param manual_iso Whether to switch to manual mode or back to auto.
 	 * @param iso If manual_iso is true, this specifies the desired ISO value. If this is outside
@@ -190,6 +189,7 @@ public abstract class CameraController {
 	 *  first switch to manual ISO mode using setManualISO().
 	 */
 	public abstract boolean setISO(int iso);
+    public abstract String getISOKey();
 	/** Returns the manual ISO value. Only supported if supports_iso_range is true.
 	 */
 	public abstract int getISO();
