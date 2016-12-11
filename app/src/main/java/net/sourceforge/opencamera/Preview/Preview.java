@@ -1564,45 +1564,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		boolean is_manual_iso = false;
 		if( supports_iso_range ) {
 			// in this mode, we can set any ISO value from min to max
-
-			// first add some values for supported isos
-			if( MyDebug.LOG )
-				Log.d(TAG, "iso range from " + min_iso + " to " + max_iso);
-			List<String> values = new ArrayList<>();
-			values.add(camera_controller.getDefaultISO());
-			final String manual_value = "m";
-			values.add(manual_value);
-			int [] iso_values = {50, 100, 200, 400, 800, 1600, 3200, 6400};
-			values.add("" + min_iso);
-			for(int iso_value : iso_values) {
-				if( iso_value > min_iso && iso_value < max_iso ) {
-					values.add("" + iso_value);
-				}
-			}
-			values.add("" + max_iso);
-			this.isos = values;
-			if( !value.equals(camera_controller.getDefaultISO()) ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "has manual iso");
-				is_manual_iso = true;
-			}
+			this.isos = null; // if supports_iso_range==true, caller shouldn't be using getSupportedISOs()
 
 			// now set the desired ISO mode/value
-			if( value.equals(camera_controller.getDefaultISO()) ) {
+			if( value.equals("auto") ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setting auto iso");
 				camera_controller.setManualISO(false, 0);
-			}
-			else if( value.equals(manual_value) ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "setting manual iso");
-				camera_controller.setManualISO(true, 800);
 			}
 			else {
 				// try to parse the supplied manual ISO value
 				try {
 					if( MyDebug.LOG )
 						Log.d(TAG, "setting manual iso");
+					is_manual_iso = true;
 					int iso = Integer.parseInt(value);
 					if( MyDebug.LOG )
 						Log.d(TAG, "iso: " + iso);
@@ -4812,25 +4787,40 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "getISOKey");
     	return camera_controller == null ? "" : camera_controller.getISOKey();
     }
-    
+
+	/** Returns whether a range of manual ISO values can be set. If this returns true, use
+	 *  getMinimumISO() and getMaximumISO() to return the valid range of values. If this returns
+	 *  false, getSupportedISOs() to find allowed ISO values.
+     */
+	public boolean supportsISORange() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsISORange");
+		return this.supports_iso_range;
+	}
+
+	/** If supportsISORange() returns false, use this method to return a list of supported ISO values:
+	 *    - If this is null, then manual ISO isn't supported.
+	 *    - If non-null, this will include "auto" to indicate auto-ISO, and one or more numerical ISO
+	 *      values.
+	 *  If supportsISORange() returns true, then this method should not be used (and it will return
+	 *  null). Instead use getMinimumISO() and getMaximumISO().
+     */
     public List<String> getSupportedISOs() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedISOs");
 		return this.isos;
     }
     
-    public boolean supportsISORange() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "supportsISORange");
-    	return this.supports_iso_range;
-    }
-    
+	/** Returns minimum ISO value. Only relevant if supportsISORange() returns true.
+     */
     public int getMinimumISO() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getMinimumISO");
     	return this.min_iso;
     }
-    
+
+	/** Returns maximum ISO value. Only relevant if supportsISORange() returns true.
+	 */
     public int getMaximumISO() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getMaximumISO");
