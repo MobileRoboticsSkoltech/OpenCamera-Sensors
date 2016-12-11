@@ -1556,7 +1556,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		
 		// must be done before setting flash modes, as we may remove flash modes if in manual mode
-		boolean has_manual_iso = false;
+		boolean is_manual_iso = false;
 		{
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up iso");
@@ -1570,12 +1570,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( !supported_values.selected_value.equals(camera_controller.getDefaultISO()) ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "has manual iso");
-					has_manual_iso = true;
+					is_manual_iso = true;
 				}
 	    		// now save, so it's available for PreferenceActivity
 				applicationInterface.setISOPref(supported_values.selected_value);
 				
-				if( has_manual_iso ) {
+				if( is_manual_iso ) {
 					if( supports_exposure_time ) {
 						long exposure_time_value = applicationInterface.getExposureTimePref();
 						if( MyDebug.LOG )
@@ -1594,7 +1594,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					}
 					
 					if( this.using_android_l && supported_flash_values != null ) {
-						// flash modes not supported when using Android L's
+						// flash modes not supported when using Camera2 and manual ISO
 						// (it's unclear flash is useful - ideally we'd at least offer torch, but ISO seems to reset to 100 when flash/torch is on!)
 						supported_flash_values = null;
 						if( MyDebug.LOG )
@@ -1625,7 +1625,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					exposures.add("" + i);
 				}
 				// if in manual ISO mode, we still want to get the valid exposure compensations, but shouldn't set exposure compensation
-				if( !has_manual_iso ) {
+				if( !is_manual_iso ) {
 					int exposure = applicationInterface.getExposureCompensationPref();
 					if( exposure < min_exposure || exposure > max_exposure ) {
 						exposure = 0;
