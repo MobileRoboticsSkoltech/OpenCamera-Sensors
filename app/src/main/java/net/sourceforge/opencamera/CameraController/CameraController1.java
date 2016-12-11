@@ -527,15 +527,20 @@ public class CameraController1 extends CameraController {
     }
 
 	@Override
-	public int getISO() {
+	public void setManualISO(boolean manual_iso, int iso) {
 		// not supported for CameraController1
-		return 0;
 	}
 
 	@Override
 	public boolean setISO(int iso) {
 		// not supported for CameraController1
 		return false;
+	}
+
+	@Override
+	public int getISO() {
+		// not supported for CameraController1
+		return 0;
 	}
 
 	@Override
