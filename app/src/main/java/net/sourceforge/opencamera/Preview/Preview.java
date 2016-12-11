@@ -1587,7 +1587,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					if( MyDebug.LOG )
 						Log.d(TAG, "iso invalid format, can't parse to int");
 					camera_controller.setManualISO(false, 0);
-					value = camera_controller.getDefaultISO(); // so we switch the preferences back to auto mode, rather than the invalid value
+					value = "auto"; // so we switch the preferences back to auto mode, rather than the invalid value
 				}
 
 				// now save, so it's available for PreferenceActivity
@@ -1599,7 +1599,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			CameraController.SupportedValues supported_values = camera_controller.setISO(value);
 			if( supported_values != null ) {
 				isos = supported_values.values;
-				if( !supported_values.selected_value.equals(camera_controller.getDefaultISO()) ) {
+				if( !supported_values.selected_value.equals("auto") ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "has manual iso");
 					is_manual_iso = true;

@@ -719,7 +719,7 @@ public class DrawPreview {
 					// only show as scanning if in auto ISO mode (problem on Nexus 6 at least that if we're in manual ISO mode, after pausing and
 					// resuming, the camera driver continually reports CONTROL_AE_STATE_SEARCHING)
 					String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
-					if( value.equals(main_activity.getPreview().getCameraController().getDefaultISO()) ) {
+					if( value.equals("auto") ) {
 						is_scanning = true;
 					}
 				}

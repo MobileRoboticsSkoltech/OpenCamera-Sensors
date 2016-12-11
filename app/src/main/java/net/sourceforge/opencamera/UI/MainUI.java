@@ -648,8 +648,8 @@ public class MainUI {
 		else if( main_activity.getPreview().getCameraController() != null ) {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
-			if( main_activity.getPreview().usingCamera2API() && !value.equals(main_activity.getPreview().getCameraController().getDefaultISO()) ) {
-				// with Camera2 API, when using non-default ISO we instead show sliders for ISO range and exposure time
+			if( main_activity.getPreview().usingCamera2API() && !value.equals("auto") ) {
+				// with Camera2 API, when using manual ISO we instead show sliders for ISO range and exposure time
 				if( main_activity.getPreview().supportsISORange()) {
 					manual_exposure_seek_bar.setVisibility(View.VISIBLE);
 					SeekBar exposure_time_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar));

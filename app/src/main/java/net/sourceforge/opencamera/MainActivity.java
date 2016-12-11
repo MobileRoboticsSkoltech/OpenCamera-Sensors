@@ -720,7 +720,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    		else if( volume_keys.equals("volume_exposure") ) {
 	    			if( preview.getCameraController() != null ) {
 		    			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
-		    			boolean manual_iso = !value.equals(preview.getCameraController().getDefaultISO());
+		    			boolean manual_iso = !value.equals("auto");
 		    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP ) {
 		    				if( manual_iso ) {
 		    					if( preview.supportsISORange() )
@@ -2103,7 +2103,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			return false;
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
-		boolean manual_iso = !iso_value.equals(preview.getCameraController().getDefaultISO());
+		boolean manual_iso = !iso_value.equals("auto");
 		return preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
 	}
 
