@@ -977,27 +977,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
-	private void subTestPopupButtonAvailability(String test_key, String option, List<String> options) {
-	    View button = mActivity.getPopupButton(test_key + "_" + option);
-	    if( options != null && options.contains(option) ) {
-	    	boolean is_video = mPreview.isVideo();
-	    	if( option.equals("focus_mode_continuous_picture") && is_video ) {
-	    		// not allowed in video mode
-		    	assertTrue(button == null);
-	    	}
-	    	else if( option.equals("focus_mode_continuous_video") && !is_video ) {
-	    		// not allowed in picture mode
-		    	assertTrue(button == null);
-	    	}
-	    	else {
-		    	assertTrue(button != null);
-	    	}
-	    }
-	    else {
+	private void subTestPopupButtonAvailability(String test_key, String option, boolean expected) {
+		View button = mActivity.getPopupButton(test_key + "_" + option);
+		if( expected ) {
+			boolean is_video = mPreview.isVideo();
+			if( option.equals("focus_mode_continuous_picture") && is_video ) {
+				// not allowed in video mode
+				assertTrue(button == null);
+			}
+			else if( option.equals("focus_mode_continuous_video") && !is_video ) {
+				// not allowed in picture mode
+				assertTrue(button == null);
+			}
+			else {
+				assertTrue(button != null);
+			}
+		}
+		else {
 			Log.d(TAG, "option? "+ option);
 			Log.d(TAG, "button? "+ button);
-	    	assertTrue(button == null);
-	    }
+			assertTrue(button == null);
+		}
+	}
+
+	private void subTestPopupButtonAvailability(String test_key, String option, List<String> options) {
+		subTestPopupButtonAvailability(test_key, option, options != null && options.contains(option));
 	}
 	
 	private void subTestPopupButtonAvailability(String option, boolean expected) {
@@ -1026,13 +1030,23 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_edof", supported_focus_values);		
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_continuous_picture", supported_focus_values);
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_continuous_video", supported_focus_values);
-		List<String> supported_iso_values = mPreview.getSupportedISOs();
-		subTestPopupButtonAvailability("TEST_ISO", "auto", supported_iso_values);
-		subTestPopupButtonAvailability("TEST_ISO", "100", supported_iso_values);
-		subTestPopupButtonAvailability("TEST_ISO", "200", supported_iso_values);
-		subTestPopupButtonAvailability("TEST_ISO", "400", supported_iso_values);
-		subTestPopupButtonAvailability("TEST_ISO", "800", supported_iso_values);
-		subTestPopupButtonAvailability("TEST_ISO", "1600", supported_iso_values);
+		if( mPreview.supportsISORange() ) {
+			subTestPopupButtonAvailability("TEST_ISO", "auto", true);
+			subTestPopupButtonAvailability("TEST_ISO", "100", true);
+			subTestPopupButtonAvailability("TEST_ISO", "200", true);
+			subTestPopupButtonAvailability("TEST_ISO", "400", true);
+			subTestPopupButtonAvailability("TEST_ISO", "800", true);
+			subTestPopupButtonAvailability("TEST_ISO", "1600", true);
+		}
+		else {
+			List<String> supported_iso_values = mPreview.getSupportedISOs();
+			subTestPopupButtonAvailability("TEST_ISO", "auto", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "100", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "200", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "400", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "800", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "1600", supported_iso_values);
+		}
 		subTestPopupButtonAvailability("TEST_WHITE_BALANCE", mPreview.getSupportedWhiteBalances() != null);
 		subTestPopupButtonAvailability("TEST_SCENE_MODE", mPreview.getSupportedSceneModes() != null);
 		subTestPopupButtonAvailability("TEST_COLOR_EFFECT", mPreview.getSupportedColorEffects() != null);
