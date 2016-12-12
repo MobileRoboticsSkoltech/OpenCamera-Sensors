@@ -206,6 +206,8 @@ public class DrawPreview {
 		int ui_rotation = preview.getUIRotation();
 		boolean has_level_angle = preview.hasLevelAngle();
 		double level_angle = preview.getLevelAngle();
+		boolean has_pitch_angle = preview.hasPitchAngle();
+		double pitch_angle = preview.getPitchAngle();
 		boolean has_geo_direction = preview.hasGeoDirection();
 		double geo_direction = preview.getGeoDirection();
 		boolean ui_placement_right = main_activity.getMainUI().getUIPlacementRight();
@@ -891,8 +893,10 @@ public class DrawPreview {
 		}
 
 		canvas.restore();
-		
-		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false) ) {
+
+		boolean show_angle_line = sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false);
+		boolean show_pitch_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowAltitudeLinesPreferenceKey(), false);
+		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line || show_pitch_lines ) ) {
 			// n.b., must draw this without the standard canvas rotation
 			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
 			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
@@ -902,7 +906,7 @@ public class DrawPreview {
 		    switch (rotation) {
 	    	case Surface.ROTATION_90:
 	    	case Surface.ROTATION_270:
-	    		angle += 90.0;
+	    		angle -= 90.0;
 	    		break;
 			case Surface.ROTATION_0:
 			case Surface.ROTATION_180:
@@ -910,7 +914,7 @@ public class DrawPreview {
     			break;
 		    }
 			/*if( MyDebug.LOG ) {
-				Log.d(TAG, "orig_level_angle: " + orig_level_angle);
+				Log.d(TAG, "orig_level_angle: " + preview.getOrigLevelAngle());
 				Log.d(TAG, "angle: " + angle);
 			}*/
 			int cx = canvas.getWidth()/2;
@@ -920,7 +924,8 @@ public class DrawPreview {
 			if( Math.abs(level_angle) <= close_angle ) { // n.b., use level_angle, not angle or orig_level_angle
 				is_level = true;
 			}
-			
+
+			int base_radius = radius;
 			if( is_level ) {
 				radius = (int)(radius * 1.2);
 			}
@@ -929,45 +934,80 @@ public class DrawPreview {
 			canvas.rotate((float)angle, cx, cy);
 
 			final int line_alpha = 96;
-			p.setStyle(Paint.Style.FILL);
 			float hthickness = (0.5f * scale + 0.5f); // convert dps to pixels
-			// draw outline
-			p.setColor(Color.BLACK);
-			p.setAlpha(64);
-			// can't use drawRoundRect(left, top, right, bottom, ...) as that requires API 21
-			draw_rect.set(cx - radius - hthickness, cy - 2*hthickness, cx + radius + hthickness, cy + 2*hthickness);
-			canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
-			// draw the vertical crossbar
-			draw_rect.set(cx - 2*hthickness, cy - radius/2 - hthickness, cx + 2*hthickness, cy + radius/2 + hthickness);
-			canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
-			// draw inner portion
-			if( is_level ) {
-				p.setColor(getAngleHighlightColor());
-			}
-			else {
-				p.setColor(Color.WHITE);
-			}
-			p.setAlpha(line_alpha);
-			draw_rect.set(cx - radius, cy - hthickness, cx + radius, cy + hthickness);
-			canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
-			
-			// draw the vertical crossbar
-			draw_rect.set(cx - hthickness, cy - radius/2, cx + hthickness, cy + radius/2);
-			canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
-
-			if( is_level ) {
-				// draw a second line
-
+			p.setStyle(Paint.Style.FILL);
+			if( show_angle_line ) {
+				// draw outline
 				p.setColor(Color.BLACK);
 				p.setAlpha(64);
-				draw_rect.set(cx - radius - hthickness, cy - 7*hthickness, cx + radius + hthickness, cy - 3*hthickness);
-				canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
-
-				p.setColor(getAngleHighlightColor());
-				p.setAlpha(line_alpha);
-				draw_rect.set(cx - radius, cy - 6*hthickness, cx + radius, cy - 4*hthickness);
+				// can't use drawRoundRect(left, top, right, bottom, ...) as that requires API 21
+				draw_rect.set(cx - radius - hthickness, cy - 2 * hthickness, cx + radius + hthickness, cy + 2 * hthickness);
+				canvas.drawRoundRect(draw_rect, 2 * hthickness, 2 * hthickness, p);
+				// draw the vertical crossbar
+				draw_rect.set(cx - 2 * hthickness, cy - radius / 2 - hthickness, cx + 2 * hthickness, cy + radius / 2 + hthickness);
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+				// draw inner portion
+				if (is_level) {
+					p.setColor(getAngleHighlightColor());
+				} else {
+					p.setColor(Color.WHITE);
+				}
+				p.setAlpha(line_alpha);
+				draw_rect.set(cx - radius, cy - hthickness, cx + radius, cy + hthickness);
+				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+
+				// draw the vertical crossbar
+				draw_rect.set(cx - hthickness, cy - radius / 2, cx + hthickness, cy + radius / 2);
+				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+
+				if (is_level) {
+					// draw a second line
+
+					p.setColor(Color.BLACK);
+					p.setAlpha(64);
+					draw_rect.set(cx - radius - hthickness, cy - 7 * hthickness, cx + radius + hthickness, cy - 3 * hthickness);
+					canvas.drawRoundRect(draw_rect, 2 * hthickness, 2 * hthickness, p);
+
+					p.setColor(getAngleHighlightColor());
+					p.setAlpha(line_alpha);
+					draw_rect.set(cx - radius, cy - 6 * hthickness, cx + radius, cy - 4 * hthickness);
+					canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+				}
 			}
+			if( has_pitch_angle && show_pitch_lines ) {
+				int pitch_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 80 : 100;
+				int pitch_radius = (int) (pitch_radius_dps * scale + 0.5f); // convert dps to pixels
+				for(int altitude_angle=-90;altitude_angle<=90;altitude_angle+=10) {
+					double this_angle = pitch_angle - altitude_angle;
+					if( Math.abs(this_angle) < 90.0 ) {
+						float pitch_distance_dp = 300.0f * (float)Math.tan( Math.toRadians(this_angle) );
+						float pitch_distance = (pitch_distance_dp * scale + 0.5f); // convert dps to pixels
+						/*if( MyDebug.LOG ) {
+							Log.d(TAG, "pitch_angle: " + pitch_angle);
+							Log.d(TAG, "pitch_distance_dp: " + pitch_distance_dp);
+						}*/
+						// draw outline
+						p.setColor(Color.BLACK);
+						p.setAlpha(64);
+						// can't use drawRoundRect(left, top, right, bottom, ...) as that requires API 21
+						draw_rect.set(cx - pitch_radius - hthickness, cy + pitch_distance - 2*hthickness, cx + pitch_radius + hthickness, cy + pitch_distance + 2*hthickness);
+						canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
+						// draw inner portion
+						if( altitude_angle == 0 && Math.abs(pitch_angle) < 1.0 ) {
+							p.setColor(getAngleHighlightColor());
+						}
+						else {
+							p.setColor(Color.WHITE);
+						}
+						p.setAlpha(line_alpha);
+						draw_rect.set(cx - pitch_radius, cy + pitch_distance - hthickness, cx + pitch_radius, cy + pitch_distance + hthickness);
+						canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+						// draw pitch angle indicator
+						applicationInterface.drawTextWithBackground(canvas, p, "" + altitude_angle + "\u00B0", p.getColor(), Color.BLACK, (int)(cx + pitch_radius + 4*hthickness), (int)(cy + pitch_distance));
+					}
+				}
+			}
+
 			p.setAlpha(255);
 			p.setStyle(Paint.Style.FILL); // reset
 

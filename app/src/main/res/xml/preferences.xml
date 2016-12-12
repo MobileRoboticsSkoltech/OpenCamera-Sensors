@@ -341,7 +341,14 @@
                 android:defaultValue="false"
                 />
 
-            <ListPreference
+			<CheckBoxPreference
+				android:key="preference_show_altitude_lines"
+				android:title="@string/preference_show_altitude_lines"
+				android:summary="@string/preference_show_altitude_lines_summary"
+				android:defaultValue="false"
+				/>
+
+			<ListPreference
                 android:key="preference_angle_highlight_color"
                 android:title="@string/preference_angle_highlight_color"
                 android:summary="@string/preference_angle_highlight_color_summary"

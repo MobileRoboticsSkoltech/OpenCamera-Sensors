@@ -266,7 +266,11 @@ public class PreferenceKeys {
     public static String getShowAngleLinePreferenceKey() {
     	return "preference_show_angle_line";
     }
-    
+
+    public static String getShowAltitudeLinesPreferenceKey() {
+        return "preference_show_altitude_lines";
+    }
+
     public static String getShowAngleHighlightColorPreferenceKey() {
     	return "preference_angle_highlight_color";
     }
