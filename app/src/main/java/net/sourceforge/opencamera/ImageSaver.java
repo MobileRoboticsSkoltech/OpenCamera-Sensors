@@ -631,7 +631,7 @@ public class ImageSaver extends Thread {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "save HDR image");
-			int base_image_id = (int)((request.jpeg_images.size()-1)/2);
+			int base_image_id = ((request.jpeg_images.size()-1)/2);
 			if( MyDebug.LOG )
 				Log.d(TAG, "base_image_id: " + base_image_id);
 			String suffix = request.jpeg_images.size() == 1 ? "_DRO" : "_HDR";
