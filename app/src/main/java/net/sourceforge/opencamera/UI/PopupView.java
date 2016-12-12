@@ -108,11 +108,34 @@ public class PopupView extends LinearLayout {
     			}
     		});
             
-    		List<String> supported_isos = preview.getSupportedISOs();
+    		List<String> supported_isos = null;
+			final String manual_value = "m";
+			if( preview.supportsISORange() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "supports ISO range");
+				int min_iso = preview.getMinimumISO();
+				int max_iso = preview.getMaximumISO();
+				List<String> values = new ArrayList<>();
+				values.add("auto");
+				values.add(manual_value);
+				int [] iso_values = {50, 100, 200, 400, 800, 1600, 3200, 6400};
+				values.add("" + min_iso);
+				for(int iso_value : iso_values) {
+					if( iso_value > min_iso && iso_value < max_iso ) {
+						values.add("" + iso_value);
+					}
+				}
+				values.add("" + max_iso);
+				supported_isos = values;
+			}
+			else {
+				supported_isos = preview.getSupportedISOs();
+			}
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     		String current_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
-			if( !current_iso.equals("auto") && supported_isos.contains("m") && !supported_isos.contains(current_iso) )
-				current_iso = "m";
+			// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
+			if( !current_iso.equals("auto") && supported_isos != null && supported_isos.contains(manual_value) && !supported_isos.contains(current_iso) )
+				current_iso = manual_value;
     		// n.b., we hardcode the string "ISO" as we don't want it translated - firstly more consistent with the ISO values returned by the driver, secondly need to worry about the size of the buttons, so don't want risk of a translated string being too long
         	addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, "TEST_ISO", new ButtonOptionsPopupListener() {
     			@Override
@@ -144,6 +167,10 @@ public class PopupView extends LinearLayout {
 							else {
 								if( MyDebug.LOG )
 									Log.d(TAG, "no existing iso available");
+								// use a default
+								final int iso = 800;
+								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
+								toast_option = "" + iso;
 							}
 						}
         				if( preview.usingCamera2API() ) {

@@ -51,7 +51,7 @@ public interface ApplicationInterface {
 	String getSceneModePref(); // "auto" for default (strings correspond to Android's scene mode constants in android.hardware.Camera.Parameters)
 	String getColorEffectPref(); // "node" for default (strings correspond to Android's color effect constants in android.hardware.Camera.Parameters)
 	String getWhiteBalancePref(); // "auto" for default (strings correspond to Android's white balance constants in android.hardware.Camera.Parameters)
-	String getISOPref(); // "default" for default
+	String getISOPref(); // "auto" for auto-ISO, otherwise a numerical value; see documentation for Preview.supportsISORange().
 	int getExposureCompensationPref(); // 0 for default
 	Pair<Integer, Integer> getCameraResolutionPref(); // return null to let Preview choose size
 	int getImageQualityPref(); // jpeg quality for taking photos; "90" is a recommended default

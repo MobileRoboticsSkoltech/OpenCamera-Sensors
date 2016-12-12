@@ -431,7 +431,6 @@ public class CameraController1 extends CameraController {
 
 	@Override
 	public SupportedValues setISO(String value) {
-		String default_value = getDefaultISO();
     	Camera.Parameters parameters = this.getParameters();
 		// get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting
 		String iso_values = parameters.get("iso-values");
@@ -507,7 +506,7 @@ public class CameraController1 extends CameraController {
 				values.add("800");
 				values.add("1600");
 			}
-			SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+			SupportedValues supported_values = checkModeIsSupported(values, value, getDefaultISO());
 			if( supported_values != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set: " + iso_key + " to: " + supported_values.selected_value);
@@ -527,15 +526,20 @@ public class CameraController1 extends CameraController {
     }
 
 	@Override
-	public int getISO() {
+	public void setManualISO(boolean manual_iso, int iso) {
 		// not supported for CameraController1
-		return 0;
 	}
 
 	@Override
 	public boolean setISO(int iso) {
 		// not supported for CameraController1
 		return false;
+	}
+
+	@Override
+	public int getISO() {
+		// not supported for CameraController1
+		return 0;
 	}
 
 	@Override

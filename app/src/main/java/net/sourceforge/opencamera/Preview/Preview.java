@@ -1556,55 +1556,88 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		
 		// must be done before setting flash modes, as we may remove flash modes if in manual mode
-		boolean has_manual_iso = false;
-		{
-			if( MyDebug.LOG )
-				Log.d(TAG, "set up iso");
-			String value = applicationInterface.getISOPref();
-			if( MyDebug.LOG )
-				Log.d(TAG, "saved iso: " + value);
+		if( MyDebug.LOG )
+			Log.d(TAG, "set up iso");
+		String value = applicationInterface.getISOPref();
+		if( MyDebug.LOG )
+			Log.d(TAG, "saved iso: " + value);
+		boolean is_manual_iso = false;
+		if( supports_iso_range ) {
+			// in this mode, we can set any ISO value from min to max
+			this.isos = null; // if supports_iso_range==true, caller shouldn't be using getSupportedISOs()
 
+			// now set the desired ISO mode/value
+			if( value.equals("auto") ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting auto iso");
+				camera_controller.setManualISO(false, 0);
+			}
+			else {
+				// try to parse the supplied manual ISO value
+				try {
+					if( MyDebug.LOG )
+						Log.d(TAG, "setting manual iso");
+					is_manual_iso = true;
+					int iso = Integer.parseInt(value);
+					if( MyDebug.LOG )
+						Log.d(TAG, "iso: " + iso);
+					camera_controller.setManualISO(true, iso);
+				}
+				catch(NumberFormatException exception) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "iso invalid format, can't parse to int");
+					camera_controller.setManualISO(false, 0);
+					value = "auto"; // so we switch the preferences back to auto mode, rather than the invalid value
+				}
+
+				// now save, so it's available for PreferenceActivity
+				applicationInterface.setISOPref(value);
+			}
+		}
+		else {
+			// in this mode, any support for ISO is only the specific ISOs offered by the CameraController
 			CameraController.SupportedValues supported_values = camera_controller.setISO(value);
 			if( supported_values != null ) {
 				isos = supported_values.values;
-				if( !supported_values.selected_value.equals(camera_controller.getDefaultISO()) ) {
+				if( !supported_values.selected_value.equals("auto") ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "has manual iso");
-					has_manual_iso = true;
+					is_manual_iso = true;
 				}
-	    		// now save, so it's available for PreferenceActivity
+				// now save, so it's available for PreferenceActivity
 				applicationInterface.setISOPref(supported_values.selected_value);
-				
-				if( has_manual_iso ) {
-					if( supports_exposure_time ) {
-						long exposure_time_value = applicationInterface.getExposureTimePref();
-						if( MyDebug.LOG )
-							Log.d(TAG, "saved exposure_time: " + exposure_time_value);
-						if( exposure_time_value < min_exposure_time )
-							exposure_time_value = min_exposure_time;
-						else if( exposure_time_value > max_exposure_time )
-							exposure_time_value = max_exposure_time;
-						camera_controller.setExposureTime(exposure_time_value);
-						// now save
-						applicationInterface.setExposureTimePref(exposure_time_value);
-					}
-					else {
-						// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
-						applicationInterface.clearExposureTimePref();
-					}
-					
-					if( this.using_android_l && supported_flash_values != null ) {
-						// flash modes not supported when using Android L's
-						// (it's unclear flash is useful - ideally we'd at least offer torch, but ISO seems to reset to 100 when flash/torch is on!)
-						supported_flash_values = null;
-						if( MyDebug.LOG )
-							Log.d(TAG, "flash not supported in Camera2 manual mode");
-					}
-				}
+
 			}
 			else {
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
 				applicationInterface.clearISOPref();
+			}
+		}
+
+		if( is_manual_iso ) {
+			if( supports_exposure_time ) {
+				long exposure_time_value = applicationInterface.getExposureTimePref();
+				if( MyDebug.LOG )
+					Log.d(TAG, "saved exposure_time: " + exposure_time_value);
+				if( exposure_time_value < min_exposure_time )
+					exposure_time_value = min_exposure_time;
+				else if( exposure_time_value > max_exposure_time )
+					exposure_time_value = max_exposure_time;
+				camera_controller.setExposureTime(exposure_time_value);
+				// now save
+				applicationInterface.setExposureTimePref(exposure_time_value);
+			}
+			else {
+				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
+				applicationInterface.clearExposureTimePref();
+			}
+
+			if( this.using_android_l && supported_flash_values != null ) {
+				// flash modes not supported when using Camera2 and manual ISO
+				// (it's unclear flash is useful - ideally we'd at least offer torch, but ISO seems to reset to 100 when flash/torch is on!)
+				supported_flash_values = null;
+				if( MyDebug.LOG )
+					Log.d(TAG, "flash not supported in Camera2 manual mode");
 			}
 		}
 		if( MyDebug.LOG ) {
@@ -1625,7 +1658,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					exposures.add("" + i);
 				}
 				// if in manual ISO mode, we still want to get the valid exposure compensations, but shouldn't set exposure compensation
-				if( !has_manual_iso ) {
+				if( !is_manual_iso ) {
 					int exposure = applicationInterface.getExposureCompensationPref();
 					if( exposure < min_exposure || exposure > max_exposure ) {
 						exposure = 0;
@@ -4754,25 +4787,40 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "getISOKey");
     	return camera_controller == null ? "" : camera_controller.getISOKey();
     }
-    
+
+	/** Returns whether a range of manual ISO values can be set. If this returns true, use
+	 *  getMinimumISO() and getMaximumISO() to return the valid range of values. If this returns
+	 *  false, getSupportedISOs() to find allowed ISO values.
+     */
+	public boolean supportsISORange() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsISORange");
+		return this.supports_iso_range;
+	}
+
+	/** If supportsISORange() returns false, use this method to return a list of supported ISO values:
+	 *    - If this is null, then manual ISO isn't supported.
+	 *    - If non-null, this will include "auto" to indicate auto-ISO, and one or more numerical ISO
+	 *      values.
+	 *  If supportsISORange() returns true, then this method should not be used (and it will return
+	 *  null). Instead use getMinimumISO() and getMaximumISO().
+     */
     public List<String> getSupportedISOs() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedISOs");
 		return this.isos;
     }
     
-    public boolean supportsISORange() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "supportsISORange");
-    	return this.supports_iso_range;
-    }
-    
+	/** Returns minimum ISO value. Only relevant if supportsISORange() returns true.
+     */
     public int getMinimumISO() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getMinimumISO");
     	return this.min_iso;
     }
-    
+
+	/** Returns maximum ISO value. Only relevant if supportsISORange() returns true.
+	 */
     public int getMaximumISO() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getMaximumISO");
