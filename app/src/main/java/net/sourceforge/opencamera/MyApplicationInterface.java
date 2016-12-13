@@ -360,7 +360,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	 *  resultant JPEG before resaving. This method returns the image quality setting to be used for
 	 *  saving the final image (as specified by the user).
      */
-	int getSaveImageQualityPref() {
+	private int getSaveImageQualityPref() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSaveImageQualityPref");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
