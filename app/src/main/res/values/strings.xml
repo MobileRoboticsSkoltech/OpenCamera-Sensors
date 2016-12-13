@@ -157,7 +157,7 @@
     <string name="preference_show_angle_summary">Display the current device orientation angle on screen</string>
     <string name="preference_show_angle_line">Show angle line</string>
     <string name="preference_show_angle_line_summary">Display horizontal level line</string>
-    <string name="preference_angle_highlight_color">Angle highlight color</string>
+    <string name="preference_angle_highlight_color">Angle/altitude highlight color</string>
     <string name="preference_angle_highlight_color_summary">Highlight color for when camera is nearly level</string>
     <string name="preference_show_geo_direction">Show compass direction</string>
     <string name="preference_show_geo_direction_summary">Display the compass direction of the device on screen</string>
@@ -365,4 +365,7 @@
     <string name="preference_calibrate_level_calibration_reset">Level calibration reset</string>
 
     <string name="photo_mode_dro">DRO</string>
+
+    <string name="preference_show_altitude_lines">Show altitude lines</string>
+    <string name="preference_show_altitude_lines_summary">Display horizontal altitude lines</string>
 </resources>

@@ -631,7 +631,7 @@ public class ImageSaver extends Thread {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "save HDR image");
-			int base_image_id = (int)((request.jpeg_images.size()-1)/2);
+			int base_image_id = ((request.jpeg_images.size()-1)/2);
 			if( MyDebug.LOG )
 				Log.d(TAG, "base_image_id: " + base_image_id);
 			String suffix = request.jpeg_images.size() == 1 ? "_DRO" : "_HDR";
@@ -854,6 +854,153 @@ public class ImageSaver extends Thread {
 		return bitmap;
 	}
 
+	/** Applies any photo stamp options (if they exist).
+	 * @param data The jpeg data.
+	 * @param bitmap Optional argument - the bitmap if already unpacked from the jpeg data.
+	 * @return A bitmap representing the stamped jpeg. Will be null if the input bitmap is null and
+	 *         no photo stamp is applied.
+	 */
+	private Bitmap stampImage(final Request request, byte [] data, Bitmap bitmap) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "stampImage");
+		}
+		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
+		boolean dategeo_stamp = request.preference_stamp.equals("preference_stamp_yes");
+		boolean text_stamp = request.preference_textstamp.length() > 0;
+		if( dategeo_stamp || text_stamp ) {
+			if( bitmap == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "decode bitmap in order to stamp info");
+				bitmap = loadBitmap(data, true);
+				if( bitmap == null ) {
+					main_activity.getPreview().showToast(null, R.string.failed_to_stamp);
+					System.gc();
+				}
+			}
+			if( bitmap != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "stamp info to bitmap");
+				if( MyDebug.LOG )
+					Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
+				int font_size = request.font_size;
+				int color = request.color;
+				String pref_style = request.pref_style;
+				String preference_stamp_dateformat = request.preference_stamp_dateformat;
+				String preference_stamp_timeformat = request.preference_stamp_timeformat;
+				String preference_stamp_gpsformat = request.preference_stamp_gpsformat;
+				int width = bitmap.getWidth();
+				int height = bitmap.getHeight();
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "decoded bitmap size " + width + ", " + height);
+					Log.d(TAG, "bitmap size: " + width*height*4);
+				}
+				Canvas canvas = new Canvas(bitmap);
+				p.setColor(Color.WHITE);
+				// we don't use the density of the screen, because we're stamping to the image, not drawing on the screen (we don't want the font height to depend on the device's resolution)
+				// instead we go by 1 pt == 1/72 inch height, and scale for an image height (or width if in portrait) of 4" (this means the font height is also independent of the photo resolution)
+				int smallest_size = (width<height) ? width : height;
+				float scale = ((float)smallest_size) / (72.0f*4.0f);
+				int font_size_pixel = (int)(font_size * scale + 0.5f); // convert pt to pixels
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "scale: " + scale);
+					Log.d(TAG, "font_size: " + font_size);
+					Log.d(TAG, "font_size_pixel: " + font_size_pixel);
+				}
+				p.setTextSize(font_size_pixel);
+				int offset_x = (int)(8 * scale + 0.5f); // convert pt to pixels
+				int offset_y = (int)(8 * scale + 0.5f); // convert pt to pixels
+				int diff_y = (int)((font_size+4) * scale + 0.5f); // convert pt to pixels
+				int ypos = height - offset_y;
+				p.setTextAlign(Align.RIGHT);
+				boolean draw_shadowed = false;
+				if( pref_style.equals("preference_stamp_style_shadowed") ) {
+					draw_shadowed = true;
+				}
+				else if( pref_style.equals("preference_stamp_style_plain") ) {
+					draw_shadowed = false;
+				}
+				if( dategeo_stamp ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "stamp date");
+					// doesn't respect user preferences such as 12/24 hour - see note about in draw() about DateFormat.getTimeInstance()
+					String date_stamp = "", time_stamp = "";
+					if( !preference_stamp_dateformat.equals("preference_stamp_dateformat_none") ) {
+						if( preference_stamp_dateformat.equals("preference_stamp_dateformat_yyyymmdd") )
+							date_stamp = new SimpleDateFormat("yyyy/MM/dd").format(request.current_date);
+						else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_ddmmyyyy") )
+							date_stamp = new SimpleDateFormat("dd/MM/yyyy").format(request.current_date);
+						else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_mmddyyyy") )
+							date_stamp = new SimpleDateFormat("MM/dd/yyyy").format(request.current_date);
+						else // default
+							date_stamp = DateFormat.getDateInstance().format(request.current_date);
+					}
+					if( !preference_stamp_timeformat.equals("preference_stamp_timeformat_none") ) {
+						if( preference_stamp_timeformat.equals("preference_stamp_timeformat_12hour") )
+							time_stamp = new SimpleDateFormat("hh:mm:ss a").format(request.current_date);
+						else if( preference_stamp_timeformat.equals("preference_stamp_timeformat_24hour") )
+							time_stamp = new SimpleDateFormat("HH:mm:ss").format(request.current_date);
+						else // default
+							time_stamp = DateFormat.getTimeInstance().format(request.current_date);
+					}
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "date_stamp: " + date_stamp);
+						Log.d(TAG, "time_stamp: " + time_stamp);
+					}
+					if( date_stamp.length() > 0 || time_stamp.length() > 0 ) {
+						String datetime_stamp = "";
+						if( date_stamp.length() > 0 )
+							datetime_stamp += date_stamp;
+						if( time_stamp.length() > 0 ) {
+							if( date_stamp.length() > 0 )
+								datetime_stamp += " ";
+							datetime_stamp += time_stamp;
+						}
+						applicationInterface.drawTextWithBackground(canvas, p, datetime_stamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
+					}
+					ypos -= diff_y;
+					String gps_stamp = "";
+					if( !preference_stamp_gpsformat.equals("preference_stamp_gpsformat_none") ) {
+						if( request.store_location ) {
+							Location location = request.location;
+							if( preference_stamp_gpsformat.equals("preference_stamp_gpsformat_dms") )
+								gps_stamp += LocationSupplier.locationToDMS(location.getLatitude()) + ", " + LocationSupplier.locationToDMS(location.getLongitude());
+							else
+								gps_stamp += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
+							if( location.hasAltitude() ) {
+								gps_stamp += ", " + decimalFormat.format(location.getAltitude()) + main_activity.getResources().getString(R.string.metres_abbreviation);
+							}
+						}
+						if( request.store_geo_direction ) {
+							double geo_direction = request.geo_direction;
+							float geo_angle = (float)Math.toDegrees(geo_direction);
+							if( geo_angle < 0.0f ) {
+								geo_angle += 360.0f;
+							}
+							if( MyDebug.LOG )
+								Log.d(TAG, "geo_angle: " + geo_angle);
+							if( gps_stamp.length() > 0 )
+								gps_stamp += ", ";
+							gps_stamp += "" + Math.round(geo_angle) + (char)0x00B0;
+						}
+					}
+					if( gps_stamp.length() > 0 ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "stamp with location_string: " + gps_stamp);
+						applicationInterface.drawTextWithBackground(canvas, p, gps_stamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
+						ypos -= diff_y;
+					}
+				}
+				if( text_stamp ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "stamp text");
+					applicationInterface.drawTextWithBackground(canvas, p, request.preference_textstamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
+					ypos -= diff_y;
+				}
+			}
+		}
+		return bitmap;
+	}
+
 	/** May be run in saver thread or picture callback thread (depending on whether running in background).
 	 *  The requests.images field is ignored, instead we save the supplied data or bitmap.
 	 *  If bitmap is null, then the supplied jpeg data is saved. If bitmap is non-null, then the bitmap is
@@ -888,7 +1035,7 @@ public class ImageSaver extends Thread {
 		Date current_date = request.current_date;
 		boolean store_location = request.store_location;
 		boolean store_geo_direction = request.store_geo_direction;
-		
+
         boolean success = false;
 		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
 		StorageUtils storageUtils = main_activity.getStorageUtils();
@@ -904,139 +1051,7 @@ public class ImageSaver extends Thread {
 		if( request.mirror ) {
 			bitmap = mirrorImage(data, bitmap);
 		}
-		boolean dategeo_stamp = request.preference_stamp.equals("preference_stamp_yes");
-		boolean text_stamp = request.preference_textstamp.length() > 0;
-		if( dategeo_stamp || text_stamp ) {
-			if( bitmap == null ) {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "decode bitmap in order to stamp info");
-				bitmap = loadBitmap(data, true);
-    			if( bitmap == null ) {
-    				main_activity.getPreview().showToast(null, R.string.failed_to_stamp);
-    	            System.gc();
-    			}
-			}
-			if( bitmap != null ) {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "stamp info to bitmap");
-				if( MyDebug.LOG )
-					Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
-    			int font_size = request.font_size;
-    			int color = request.color;
-    			String pref_style = request.pref_style;
-    			String preference_stamp_dateformat = request.preference_stamp_dateformat;
-    			String preference_stamp_timeformat = request.preference_stamp_timeformat;
-    			String preference_stamp_gpsformat = request.preference_stamp_gpsformat;
-    			int width = bitmap.getWidth();
-    			int height = bitmap.getHeight();
-    			if( MyDebug.LOG ) {
-    				Log.d(TAG, "decoded bitmap size " + width + ", " + height);
-    				Log.d(TAG, "bitmap size: " + width*height*4);
-    			}
-    			Canvas canvas = new Canvas(bitmap);
-    			p.setColor(Color.WHITE);
-    			// we don't use the density of the screen, because we're stamping to the image, not drawing on the screen (we don't want the font height to depend on the device's resolution)
-    			// instead we go by 1 pt == 1/72 inch height, and scale for an image height (or width if in portrait) of 4" (this means the font height is also independent of the photo resolution)
-    			int smallest_size = (width<height) ? width : height;
-    			float scale = ((float)smallest_size) / (72.0f*4.0f);
-    			int font_size_pixel = (int)(font_size * scale + 0.5f); // convert pt to pixels
-    			if( MyDebug.LOG ) {
-    				Log.d(TAG, "scale: " + scale);
-    				Log.d(TAG, "font_size: " + font_size);
-    				Log.d(TAG, "font_size_pixel: " + font_size_pixel);
-    			}
-    			p.setTextSize(font_size_pixel);
-    	        int offset_x = (int)(8 * scale + 0.5f); // convert pt to pixels
-    	        int offset_y = (int)(8 * scale + 0.5f); // convert pt to pixels
-    	        int diff_y = (int)((font_size+4) * scale + 0.5f); // convert pt to pixels
-    	        int ypos = height - offset_y;
-    	        p.setTextAlign(Align.RIGHT);
-    	        boolean draw_shadowed = false;
-    			if( pref_style.equals("preference_stamp_style_shadowed") ) {
-    				draw_shadowed = true;
-    			}
-    			else if( pref_style.equals("preference_stamp_style_plain") ) {
-    				draw_shadowed = false;
-    			}
-    	        if( dategeo_stamp ) {
-        			if( MyDebug.LOG )
-        				Log.d(TAG, "stamp date");
-        			// doesn't respect user preferences such as 12/24 hour - see note about in draw() about DateFormat.getTimeInstance()
-        			String date_stamp = "", time_stamp = "";
-        			if( !preference_stamp_dateformat.equals("preference_stamp_dateformat_none") ) {
-            			if( preference_stamp_dateformat.equals("preference_stamp_dateformat_yyyymmdd") )
-	        				date_stamp = new SimpleDateFormat("yyyy/MM/dd").format(current_date);
-            			else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_ddmmyyyy") )
-	        				date_stamp = new SimpleDateFormat("dd/MM/yyyy").format(current_date);
-            			else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_mmddyyyy") )
-	        				date_stamp = new SimpleDateFormat("MM/dd/yyyy").format(current_date);
-	        			else // default
-	        				date_stamp = DateFormat.getDateInstance().format(current_date);
-        			}
-        			if( !preference_stamp_timeformat.equals("preference_stamp_timeformat_none") ) {
-            			if( preference_stamp_timeformat.equals("preference_stamp_timeformat_12hour") )
-	        				time_stamp = new SimpleDateFormat("hh:mm:ss a").format(current_date);
-            			else if( preference_stamp_timeformat.equals("preference_stamp_timeformat_24hour") )
-            				time_stamp = new SimpleDateFormat("HH:mm:ss").format(current_date);
-	        			else // default
-	            	        time_stamp = DateFormat.getTimeInstance().format(current_date);
-        			}
-        			if( MyDebug.LOG ) {
-        				Log.d(TAG, "date_stamp: " + date_stamp);
-        				Log.d(TAG, "time_stamp: " + time_stamp);
-        			}
-        			if( date_stamp.length() > 0 || time_stamp.length() > 0 ) {
-        				String datetime_stamp = "";
-        				if( date_stamp.length() > 0 )
-        					datetime_stamp += date_stamp;
-        				if( time_stamp.length() > 0 ) {
-            				if( date_stamp.length() > 0 )
-            					datetime_stamp += " ";
-        					datetime_stamp += time_stamp;
-        				}
-    					applicationInterface.drawTextWithBackground(canvas, p, datetime_stamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
-        			}
-    				ypos -= diff_y;
-    				String gps_stamp = "";
-        			if( !preference_stamp_gpsformat.equals("preference_stamp_gpsformat_none") ) {
-	    				if( store_location ) {
-	    					Location location = request.location;
-	            			if( preference_stamp_gpsformat.equals("preference_stamp_gpsformat_dms") )
-	            				gps_stamp += LocationSupplier.locationToDMS(location.getLatitude()) + ", " + LocationSupplier.locationToDMS(location.getLongitude());
-            				else
-            					gps_stamp += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
-	    					if( location.hasAltitude() ) {
-	    						gps_stamp += ", " + decimalFormat.format(location.getAltitude()) + main_activity.getResources().getString(R.string.metres_abbreviation);
-	    					}
-	    				}
-				    	if( store_geo_direction ) {
-				    		double geo_direction = request.geo_direction;
-							float geo_angle = (float)Math.toDegrees(geo_direction);
-							if( geo_angle < 0.0f ) {
-								geo_angle += 360.0f;
-							}
-		        			if( MyDebug.LOG )
-		        				Log.d(TAG, "geo_angle: " + geo_angle);
-	    			    	if( gps_stamp.length() > 0 )
-	    			    		gps_stamp += ", ";
-	    			    	gps_stamp += "" + Math.round(geo_angle) + (char)0x00B0;
-				    	}
-        			}
-			    	if( gps_stamp.length() > 0 ) {
-	        			if( MyDebug.LOG )
-	        				Log.d(TAG, "stamp with location_string: " + gps_stamp);
-	        			applicationInterface.drawTextWithBackground(canvas, p, gps_stamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
-	    				ypos -= diff_y;
-			    	}
-    	        }
-    	        if( text_stamp ) {
-        			if( MyDebug.LOG )
-        				Log.d(TAG, "stamp text");
-        			applicationInterface.drawTextWithBackground(canvas, p, request.preference_textstamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
-    				ypos -= diff_y;
-    	        }
-			}
-		}
+		bitmap = stampImage(request, data, bitmap);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "Save single image performance: time after photostamp: " + (System.currentTimeMillis() - time_s));
 		}

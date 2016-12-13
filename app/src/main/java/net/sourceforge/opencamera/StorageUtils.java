@@ -496,50 +496,57 @@ public class StorageUtils {
         return mediaFile;
     }
 
+	// only valid if isUsingSAF()
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	Uri createOutputFileSAF(String filename, String mimeType) throws IOException {
+		try {
+			Uri treeUri = getTreeUriSAF();
+			if( MyDebug.LOG )
+				Log.d(TAG, "treeUri: " + treeUri);
+			Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
+			if( MyDebug.LOG )
+				Log.d(TAG, "docUri: " + docUri);
+			// note that DocumentsContract.createDocument will automatically append to the filename if it already exists
+			Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, filename);
+			if( MyDebug.LOG )
+				Log.d(TAG, "returned fileUri: " + fileUri);
+			if( fileUri == null )
+				throw new IOException();
+			return fileUri;
+		}
+		catch(IllegalArgumentException e) {
+			// DocumentsContract.getTreeDocumentId throws this if URI is invalid
+			if( MyDebug.LOG )
+				Log.e(TAG, "createOutputMediaFileSAF failed");
+			e.printStackTrace();
+			throw new IOException();
+		}
+	}
+
     // only valid if isUsingSAF()
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     Uri createOutputMediaFileSAF(int type, String suffix, String extension, Date current_date) throws IOException {
-    	try {
-	    	Uri treeUri = getTreeUriSAF();
-		    if( MyDebug.LOG )
-		    	Log.d(TAG, "treeUri: " + treeUri);
-	        Uri docUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri));
-		    if( MyDebug.LOG )
-		    	Log.d(TAG, "docUri: " + docUri);
-		    String mimeType;
-	        if( type == MEDIA_TYPE_IMAGE ) {
-	        	if( extension.equals("dng") ) {
-	        		mimeType = "image/dng";
-	        		//mimeType = "image/x-adobe-dng";
-	        	}
-	        	else
-	        		mimeType = "image/jpeg";
-	        }
-	        else if( type == MEDIA_TYPE_VIDEO ) {
-	        	mimeType = "video/mp4";
-	        }
-	        else {
-	        	// throw exception as this is a programming error
-	    		if( MyDebug.LOG )
-	    			Log.e(TAG, "unknown type: " + type);
-	        	throw new RuntimeException();
-	        }
-	        // note that DocumentsContract.createDocument will automatically append to the filename if it already exists
-	        String mediaFilename = createMediaFilename(type, suffix, 0, extension, current_date);
-		    Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, mediaFilename);   
-		    if( MyDebug.LOG )
-		    	Log.d(TAG, "returned fileUri: " + fileUri);
-			if( fileUri == null )
-				throw new IOException();
-	    	return fileUri;
-    	}
-    	catch(IllegalArgumentException e) {
-    		// DocumentsContract.getTreeDocumentId throws this if URI is invalid
-		    if( MyDebug.LOG )
-		    	Log.e(TAG, "createOutputMediaFileSAF failed");
-		    e.printStackTrace();
-		    throw new IOException();
-    	}
+		String mimeType;
+		if( type == MEDIA_TYPE_IMAGE ) {
+			if( extension.equals("dng") ) {
+				mimeType = "image/dng";
+				//mimeType = "image/x-adobe-dng";
+			}
+			else
+				mimeType = "image/jpeg";
+		}
+		else if( type == MEDIA_TYPE_VIDEO ) {
+			mimeType = "video/mp4";
+		}
+		else {
+			// throw exception as this is a programming error
+			if( MyDebug.LOG )
+				Log.e(TAG, "unknown type: " + type);
+			throw new RuntimeException();
+		}
+		// note that DocumentsContract.createDocument will automatically append to the filename if it already exists
+		String mediaFilename = createMediaFilename(type, suffix, 0, extension, current_date);
+		return createOutputFileSAF(mediaFilename, mimeType);
     }
 
     static class Media {

@@ -149,6 +149,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private double natural_level_angle; // "level" angle of device, before applying any calibration and without accounting for screen orientation
 	private double level_angle; // "level" angle of device, including calibration
 	private double orig_level_angle; // "level" angle of device, including calibration, but without accounting for screen orientation
+	private boolean has_pitch_angle;
+	private double pitch_angle;
 	
 	private boolean has_zoom;
 	private int max_zoom_factor;
@@ -3773,6 +3775,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			Log.d(TAG, "video bitrate: " + profile.videoBitRate);
     			Log.d(TAG, "video codec: " + profile.videoCodec);
     		}
+			boolean told_app_started = false; // true if we called applicationInterface.startingVideo()
         	try {
         		//video_recorder.setMaxFileSize(15*1024*1024); // test
     			ApplicationInterface.VideoMaxFileSize video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
@@ -3800,6 +3803,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         		}
 
         		applicationInterface.cameraInOperation(true);
+				told_app_started = true;
         		applicationInterface.startingVideo();
         		/*if( true ) // test
         			throw new IOException();*/
@@ -3952,6 +3956,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    		if( MyDebug.LOG )
 	    			Log.e(TAG, "failed to save video");
 				e.printStackTrace();
+				if( told_app_started ) {
+					applicationInterface.stoppingVideo();
+				}
 	    	    applicationInterface.onFailedCreateVideoFileError();
 	    		video_recorder.reset();
 	    		video_recorder.release(); 
@@ -3965,18 +3972,27 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    		if( MyDebug.LOG )
 	    			Log.e(TAG, "runtime exception starting video recorder");
 				e.printStackTrace();
+				if( told_app_started ) {
+					applicationInterface.stoppingVideo();
+				}
 				failedToStartVideoRecorder(profile);
 			}
         	catch(CameraControllerException e) {
 	    		if( MyDebug.LOG )
 	    			Log.e(TAG, "camera exception starting video recorder");
 				e.printStackTrace();
+				if( told_app_started ) {
+					applicationInterface.stoppingVideo();
+				}
 				failedToStartVideoRecorder(profile);
 			}
         	catch(NoFreeStorageException e) {
 	    		if( MyDebug.LOG )
 	    			Log.e(TAG, "nofreestorageexception starting video recorder");
 				e.printStackTrace();
+				if( told_app_started ) {
+					applicationInterface.stoppingVideo();
+				}
 	    		video_recorder.reset();
 	    		video_recorder.release(); 
 	    		video_recorder = null;
@@ -4648,12 +4664,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "xyz: " + x + ", " + y + ", " + z);*/
 
+		this.has_pitch_angle = false;
 		if( mag > 1.0e-8 ) {
-			double pitch = Math.asin(- z / mag) * 180.0 / Math.PI;
+			this.has_pitch_angle = true;
+			this.pitch_angle = Math.asin(- z / mag) * 180.0 / Math.PI;
 			/*if( MyDebug.LOG )
-				Log.d(TAG, "pitch: " + pitch);*/
+				Log.d(TAG, "pitch: " + pitch_angle);*/
 
-			if( !is_test && Math.abs(pitch) > 70.0 ) {
+			if( !is_test && Math.abs(pitch_angle) > 70.0 ) {
 				// level angle becomes unstable when device is near vertical
 				// note that if is_test, we always set the level angle - since the device typically lies face down when running tests...
 				this.has_level_angle = false;
@@ -4713,7 +4731,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.orig_level_angle;
     }
 
-    public void onMagneticSensorChanged(SensorEvent event) {
+	public boolean hasPitchAngle() {
+		return this.has_pitch_angle;
+	}
+
+	public double getPitchAngle() {
+		return this.pitch_angle;
+	}
+
+	public void onMagneticSensorChanged(SensorEvent event) {
     	this.has_geomagnetic = true;
     	for(int i=0;i<3;i++) {
     		//this.geomagnetic[i] = event.values[i];

@@ -328,7 +328,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
             setFirstTimeFlag();
         }
 
-		setModeFromIntents();
+		setModeFromIntents(savedInstanceState);
 
         // load icons
         preloadIcons(R.array.flash_icons);
@@ -397,22 +397,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 
 	/** Switches modes if required, if called from a relevant intent/tile.
-	 *  This does mean that if the user switches to another mode, then the app is destroyed in background,
-	 *  returning to the app will cause us to switch back to the Intent's mode (since the Intent will
-	 *  still be set). But there seems to be no way to know if the onCreate call is the immediate one from
-	 *  an Intent, or the app is being recreated.
-	 *  Alternative ideas are:
-	 *  - Don't allow the user to change modes: this seems overly restrictive, especially given that the
-	 *    double-power-button method will launch Open Camera via the INTENT_ACTION_STILL_IMAGE_CAMERA.
-	 *  - Don't change mode. Some other third party apps take this approach, but that doesn't seem
-	 *    right either - for specific intents (especially video), the user would expect to be in the
-	 *    correct mode.
-	 *  Potentially for tiles, we could instead set the mode by passing a flag in the Intent extras,
-	 *  which we then remove (similar to what we do for the take photo widget).
 	 */
-	private void setModeFromIntents() {
+	private void setModeFromIntents(Bundle savedInstanceState) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setModeFromIntents");
+		if( savedInstanceState != null ) {
+			// If we're restoring from a saved state, we shouldn't be resetting any modes
+			if( MyDebug.LOG )
+				Log.d(TAG, "restoring from saved state");
+			return;
+		}
         String action = this.getIntent().getAction();
         if( MediaStore.INTENT_ACTION_VIDEO_CAMERA.equals(action) || MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
     		if( MyDebug.LOG )
