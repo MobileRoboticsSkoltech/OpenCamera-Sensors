@@ -3088,7 +3088,7 @@ public class CameraController2 extends CameraController {
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 			}
 			if( !camera_settings.has_iso && this.optimise_ae_for_dro && capture_result_has_exposure_time && (camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) ) {
-				final double full_exposure_time_scale = 0.5f;
+				final double full_exposure_time_scale = Math.pow(2.0, -0.5);
 				final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
 				final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
 				long exposure_time = capture_result_exposure_time;
