@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+	<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">Open Camera</string>
@@ -157,7 +157,7 @@
     <string name="preference_show_angle_summary">Na zaslonu prikaži trenutni kot usmerjenosti naprave</string>
     <string name="preference_show_angle_line">Prikaži črto kota</string>
     <string name="preference_show_angle_line_summary">Prikaži črto vodoravne ravni</string>
-    <string name="preference_angle_highlight_color">Barva poudarjanja kota</string>
+    <string name="preference_angle_highlight_color">Barva poudarjanja kota/višine</string>
     <string name="preference_angle_highlight_color_summary">Barva poudarjanja, ko je fotoaparat skoraj vodoraven</string>
     <string name="preference_show_geo_direction">Prikaži kompas</string>
     <string name="preference_show_geo_direction_summary">Na zaslonu prikaži kompas s smerjo naprave</string>
@@ -302,7 +302,7 @@
     <string name="audio_listener_started">Naredite glasen zvok</string>
 	
 	<string name="auto_stabilise_info">Samodejna ustalitev bo zavrtela fotografije, da bodo videti poravnane.\n\nUpoštevajte, da se bo ločljivost slik rahlo zmanjšala (zaradi zahtevanega vrtenja in obrezovanja).</string>
-    <string name="raw_info">Datoteke DNG vsebujejo nestisnjene in neobdelane podatke iz fotoaparata.\n\nVečina programov za galerijo ne prepozna oblike DNG, zato jo uporabljajte s posebnimi programi, kot je Snapseed ali Lightroom.\n\nUpoštevajte, da se bodo razne možnosti obdelave, kot sta "Dodaj žig" in "Samodejna ustalitev", uporabile samo za slike JPEG in ne za slike DNG.\n\nDatoteke DNG zavzamejo veliko prosotra; za njihov izbris ali prenos lahko uporabite raziskovalca datotek.\n\nDatoteke DNG se shranjujejo samo v običajnem načinu za fotografije.</string>
+    <string name="raw_info">Datoteke DNG vsebujejo nestisnjene in neobdelane podatke iz fotoaparata.\n\nVečina programov za galerijo ne prepozna oblike DNG, zato jo uporabljajte s posebnimi programi, kot je Snapseed ali Lightroom.\n\nUpoštevajte, da se bodo razne možnosti obdelave, kot sta "Dodaj žig" in "Samodejna ustalitev", uporabile samo za slike JPEG in ne za slike DNG.\n\nDatoteke DNG zavzamejo veliko prosotra; za njihov izbris ali prenos lahko uporabite raziskovalca datotek.\n\nDatoteke DNG se shranjujejo samo v običajnem načinu ali načinu DRO.</string>
     <string name="hdr_info">Način HDR je uporaben za posnetke z velikimi odstopanji v svetlosti. Deluje tako, da zajame več posnetkov z različnimi osvetlitvami in jih potem združi v končno sliko.\n\nUpoštevajte, da HDR ni primeren za hitro gibajoče prizore in lahko povzroči barvna odstopanja.\n\nSlikanje fotografij v načinu HDR je počasnejše.</string>
 
     <string name="dont_show_again">Ne prikazuj več</string>
@@ -363,4 +363,9 @@
     <string name="preference_calibrate_level_reset">Ponastavi</string>
     <string name="preference_calibrate_level_calibrated">Raven umerjena</string>
     <string name="preference_calibrate_level_calibration_reset">Ponastavitev ravni umerjanja</string>
+	
+	<string name="photo_mode_dro">DRO</string>
+	
+	<string name="preference_show_altitude_lines">Prikaži višinske črte</string>
+    <string name="preference_show_altitude_lines_summary">Prikaži vodoravne višinske črte</string>
 </resources>
