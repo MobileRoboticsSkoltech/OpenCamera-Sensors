@@ -2,10 +2,17 @@ package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
@@ -61,6 +68,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private final StorageUtils storageUtils;
 	private final DrawPreview drawPreview;
 	private final ImageSaver imageSaver;
+
+	private File last_video_file = null;
+	private Uri last_video_file_saf = null;
+
+	private final Timer subtitleVideoTimer = new Timer();
+	private TimerTask subtitleVideoTimerTask;
 
 	private final Rect text_bounds = new Rect();
     private boolean used_front_screen_flash ;
@@ -209,12 +222,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public File createOutputVideoFile() throws IOException {
-		return storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+		last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+		return last_video_file;
 	}
 
 	@Override
 	public Uri createOutputVideoSAF() throws IOException {
-		return storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+		last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+		return last_video_file_saf;
 	}
 
 	@Override
@@ -1028,6 +1043,103 @@ public class MyApplicationInterface implements ApplicationInterface {
 		view.setImageResource(R.drawable.take_video_recording);
 		view.setContentDescription( getContext().getResources().getString(R.string.stop_video) );
 		view.setTag(R.drawable.take_video_recording); // for testing
+
+		final int video_method = this.createOutputVideoMethod();
+		if( false && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
+			class SubtitleVideoTimerTask extends TimerTask {
+				private String subtitle_filename = null;
+				private Uri subtitle_uri = null; // for SAF
+				private int count = 1;
+
+				private String formatTimeMS(long time_ms) {
+					int ms = (int) (time_ms) % 1000 ;
+					int seconds = (int) (time_ms / 1000) % 60 ;
+					int minutes = (int) ((time_ms / (1000*60)) % 60);
+					int hours   = (int) ((time_ms / (1000*60*60)) % 24);
+					return String.format("%02d:%02d:%02d,%03d", hours, minutes, seconds, ms);
+				}
+
+				private String getSubtitleFilename(String video_filename) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "getSubtitleFilename");
+					int indx = video_filename.indexOf('.');
+					if( indx != -1 ) {
+						video_filename = video_filename.substring(0, indx);
+					}
+					video_filename = video_filename + ".srt";
+					if( MyDebug.LOG )
+						Log.d(TAG, "return filename: " + video_filename);
+					return video_filename;
+				}
+
+				public void run() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "SubtitleVideoTimerTask");
+					long video_time = main_activity.getPreview().getVideoTime();
+					if( !main_activity.getPreview().isVideoRecording() ) {
+						return;
+					}
+					Date current_date = new Date();
+					Calendar current_calendar = Calendar.getInstance();
+					int offset_ms = current_calendar.get(Calendar.MILLISECOND);
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "count: " + count);
+						Log.d(TAG, "offset_ms: " + offset_ms);
+						Log.d(TAG, "video_time: " + video_time);
+					}
+					String date_stamp = new SimpleDateFormat("yyyy/MM/dd").format(current_date);
+					String time_stamp = new SimpleDateFormat("HH:mm:ss").format(current_date);
+					String datetime_stamp = date_stamp + " " + time_stamp;
+					long video_time_from = video_time - offset_ms;
+					long video_time_to = video_time_from + 999;
+					if( video_time_from < 0 )
+						video_time_from = 0;
+					String subtitle_time_from = formatTimeMS(video_time_from);
+					String subtitle_time_to = formatTimeMS(video_time_to);
+					try {
+						OutputStreamWriter writer;
+						if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+							if( subtitle_filename == null ) {
+								subtitle_filename = last_video_file.getAbsolutePath();
+								subtitle_filename = getSubtitleFilename(subtitle_filename);
+							}
+							writer = new FileWriter(subtitle_filename, true);
+						}
+						else {
+							if( subtitle_uri == null ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "last_video_file_saf: " + last_video_file_saf);
+								File file = storageUtils.getFileFromDocumentUriSAF(last_video_file_saf, false);
+								subtitle_filename = file.getName();
+								subtitle_filename = getSubtitleFilename(subtitle_filename);
+								subtitle_uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
+							}
+							OutputStream outputStream = main_activity.getContentResolver().openOutputStream(subtitle_uri);
+							writer = new OutputStreamWriter(outputStream);
+						}
+						writer.append(Integer.toString(count));
+						writer.append('\n');
+						writer.append(subtitle_time_from);
+						writer.append(" --> ");
+						writer.append(subtitle_time_to);
+						writer.append('\n');
+						writer.append(datetime_stamp);
+						writer.append('\n');
+						writer.append('\n');
+						writer.close();
+						count++;
+					}
+					catch(IOException e) {
+						if( MyDebug.LOG )
+							Log.e(TAG, "SubtitleVideoTimerTask failed to create or write to: " + subtitle_filename);
+						e.printStackTrace();
+					}
+					if( MyDebug.LOG )
+						Log.d(TAG, "SubtitleVideoTimerTask exit");
+				}
+			}
+			subtitleVideoTimer.schedule(subtitleVideoTimerTask = new SubtitleVideoTimerTask(), 0, 1000);
+		}
 	}
 
 	@Override
@@ -1039,6 +1151,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 		view.setImageResource(R.drawable.take_video_selector);
 		view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
 		view.setTag(R.drawable.take_video_selector); // for testing
+		if( subtitleVideoTimerTask != null ) {
+			subtitleVideoTimerTask.cancel();
+			subtitleVideoTimerTask = null;
+		}
 	}
 
 	@Override
