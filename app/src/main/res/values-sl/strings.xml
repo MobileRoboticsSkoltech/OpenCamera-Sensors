@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+	<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">Open Camera</string>
@@ -157,7 +157,7 @@
     <string name="preference_show_angle_summary">Na zaslonu prikaži trenutni kot usmerjenosti naprave</string>
     <string name="preference_show_angle_line">Prikaži črto kota</string>
     <string name="preference_show_angle_line_summary">Prikaži črto vodoravne ravni</string>
-    <string name="preference_angle_highlight_color">Barva poudarjanja kota</string>
+    <string name="preference_angle_highlight_color">Barva poudarjanja kota/višine</string>
     <string name="preference_angle_highlight_color_summary">Barva poudarjanja, ko je fotoaparat skoraj vodoraven</string>
     <string name="preference_show_geo_direction">Prikaži kompas</string>
     <string name="preference_show_geo_direction_summary">Na zaslonu prikaži kompas s smerjo naprave</string>
@@ -365,4 +365,7 @@
     <string name="preference_calibrate_level_calibration_reset">Ponastavitev ravni umerjanja</string>
 	
 	<string name="photo_mode_dro">DRO</string>
+	
+	<string name="preference_show_altitude_lines">Prikaži višinske črte</string>
+    <string name="preference_show_altitude_lines_summary">Prikaži vodoravne višinske črte</string>
 </resources>
