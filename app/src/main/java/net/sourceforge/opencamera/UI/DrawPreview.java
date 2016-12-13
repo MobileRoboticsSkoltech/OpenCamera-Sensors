@@ -3,6 +3,7 @@ package net.sourceforge.opencamera.UI;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyApplicationInterface;
@@ -195,8 +196,7 @@ public class DrawPreview {
     	int mins = (int)(time % 60);
     	time /= 60;
     	long hours = time;
-    	//String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs) + ":" + String.format("%03d", ms);
-    	return hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
+    	return hours + ":" + String.format(Locale.getDefault(), "%02d", mins) + ":" + String.format(Locale.getDefault(), "%02d", secs);
     }
 
 	public void onDrawPreview(Canvas canvas) {

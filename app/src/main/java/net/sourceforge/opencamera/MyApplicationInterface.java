@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -1056,7 +1057,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					int seconds = (int) (time_ms / 1000) % 60 ;
 					int minutes = (int) ((time_ms / (1000*60)) % 60);
 					int hours   = (int) ((time_ms / (1000*60*60)) % 24);
-					return String.format("%02d:%02d:%02d,%03d", hours, minutes, seconds, ms);
+					return String.format(Locale.getDefault(), "%02d:%02d:%02d,%03d", hours, minutes, seconds, ms);
 				}
 
 				private String getSubtitleFilename(String video_filename) {
@@ -1087,8 +1088,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 						Log.d(TAG, "offset_ms: " + offset_ms);
 						Log.d(TAG, "video_time: " + video_time);
 					}
-					String date_stamp = new SimpleDateFormat("yyyy/MM/dd").format(current_date);
-					String time_stamp = new SimpleDateFormat("HH:mm:ss").format(current_date);
+					String date_stamp = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(current_date);
+					String time_stamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(current_date);
 					String datetime_stamp = date_stamp + " " + time_stamp;
 					long video_time_from = video_time - offset_ms;
 					long video_time_to = video_time_from + 999;

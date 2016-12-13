@@ -926,19 +926,19 @@ public class ImageSaver extends Thread {
 					String date_stamp = "", time_stamp = "";
 					if( !preference_stamp_dateformat.equals("preference_stamp_dateformat_none") ) {
 						if( preference_stamp_dateformat.equals("preference_stamp_dateformat_yyyymmdd") )
-							date_stamp = new SimpleDateFormat("yyyy/MM/dd").format(request.current_date);
+							date_stamp = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(request.current_date);
 						else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_ddmmyyyy") )
-							date_stamp = new SimpleDateFormat("dd/MM/yyyy").format(request.current_date);
+							date_stamp = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(request.current_date);
 						else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_mmddyyyy") )
-							date_stamp = new SimpleDateFormat("MM/dd/yyyy").format(request.current_date);
+							date_stamp = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(request.current_date);
 						else // default
 							date_stamp = DateFormat.getDateInstance().format(request.current_date);
 					}
 					if( !preference_stamp_timeformat.equals("preference_stamp_timeformat_none") ) {
 						if( preference_stamp_timeformat.equals("preference_stamp_timeformat_12hour") )
-							time_stamp = new SimpleDateFormat("hh:mm:ss a").format(request.current_date);
+							time_stamp = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault()).format(request.current_date);
 						else if( preference_stamp_timeformat.equals("preference_stamp_timeformat_24hour") )
-							time_stamp = new SimpleDateFormat("HH:mm:ss").format(request.current_date);
+							time_stamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(request.current_date);
 						else // default
 							time_stamp = DateFormat.getTimeInstance().format(request.current_date);
 					}
