@@ -2,6 +2,7 @@ package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -892,126 +893,6 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
 	@Override
-	public void stoppedVideo(final int video_method, final Uri uri, final String filename) {
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "stoppedVideo");
-			Log.d(TAG, "video_method " + video_method);
-			Log.d(TAG, "uri " + uri);
-			Log.d(TAG, "filename " + filename);
-		}
-		boolean done = false;
-		if( video_method == VIDEOMETHOD_FILE ) {
-			if( filename != null ) {
-				File file = new File(filename);
-				storageUtils.broadcastFile(file, false, true, true);
-				done = true;
-			}
-		}
-		else {
-			if( uri != null ) {
-				// see note in onPictureTaken() for where we call broadcastFile for SAF photos
-	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(uri, false);
-				if( MyDebug.LOG )
-					Log.d(TAG, "real_file: " + real_file);
-                if( real_file != null ) {
-	            	storageUtils.broadcastFile(real_file, false, true, true);
-	            	main_activity.test_last_saved_image = real_file.getAbsolutePath();
-                }
-                else {
-                	// announce the SAF Uri
-	    		    storageUtils.announceUri(uri, false, true);
-                }
-			    done = true;
-			}
-		}
-		if( MyDebug.LOG )
-			Log.d(TAG, "done? " + done);
-
-		String action = main_activity.getIntent().getAction();
-        if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
-    		if( done && video_method == VIDEOMETHOD_FILE ) {
-    			// do nothing here - we end the activity from storageUtils.broadcastFile after the file has been scanned, as it seems caller apps seem to prefer the content:// Uri rather than one based on a File
-    		}
-    		else {
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "from video capture intent");
-    			Intent output = null;
-    			if( done ) {
-    				// may need to pass back the Uri we saved to, if the calling application didn't specify a Uri
-    				// set note above for VIDEOMETHOD_FILE
-    				// n.b., currently this code is not used, as we always switch to VIDEOMETHOD_FILE if the calling application didn't specify a Uri, but I've left this here for possible future behaviour
-    				if( video_method == VIDEOMETHOD_SAF ) {
-    					output = new Intent();
-    					output.setData(uri);
-    					if( MyDebug.LOG )
-    						Log.d(TAG, "pass back output uri [saf]: " + output.getData());
-    				}
-    			}
-            	main_activity.setResult(done ? Activity.RESULT_OK : Activity.RESULT_CANCELED, output);
-            	main_activity.finish();
-    		}
-        }
-        else if( done ) {
-			// create thumbnail
-	    	long debug_time = System.currentTimeMillis();
-			Bitmap thumbnail = null;
-		    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-			try {
-				if( video_method == VIDEOMETHOD_FILE ) {
-					File file = new File(filename);
-					retriever.setDataSource(file.getPath());
-				}
-				else {
-					ParcelFileDescriptor pfd_saf = getContext().getContentResolver().openFileDescriptor(uri, "r");
-					retriever.setDataSource(pfd_saf.getFileDescriptor());
-				}
-				thumbnail = retriever.getFrameAtTime(-1);
-			}
-		    catch(FileNotFoundException | /*IllegalArgumentException |*/ RuntimeException e) {
-		    	// video file wasn't saved or corrupt video file?
-				Log.d(TAG, "failed to find thumbnail");
-		    	e.printStackTrace();
-		    }
-		    finally {
-		    	try {
-		    		retriever.release();
-		    	}
-		    	catch(RuntimeException ex) {
-		    		// ignore
-		    	}
-		    }
-		    if( thumbnail != null ) {
-		    	ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
-		    	int width = thumbnail.getWidth();
-		    	int height = thumbnail.getHeight();
-				if( MyDebug.LOG )
-					Log.d(TAG, "    video thumbnail size " + width + " x " + height);
-		    	if( width > galleryButton.getWidth() ) {
-		    		float scale = (float) galleryButton.getWidth() / width;
-		    		int new_width = Math.round(scale * width);
-		    		int new_height = Math.round(scale * height);
-					if( MyDebug.LOG )
-						Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
-		    		Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
-	    		    // careful, as scaled_thumbnail is sometimes not a copy!
-	    		    if( scaled_thumbnail != thumbnail ) {
-	    		    	thumbnail.recycle();
-	    		    	thumbnail = scaled_thumbnail;
-	    		    }
-		    	}
-		    	final Bitmap thumbnail_f = thumbnail;
-		    	main_activity.runOnUiThread(new Runnable() {
-					public void run() {
-		    	    	updateThumbnail(thumbnail_f);
-					}
-				});
-		    }
-			if( MyDebug.LOG )
-				Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - debug_time));
-		}
-	}
-
-	@Override
 	public void cameraSetup() {
 		main_activity.cameraSetup();
 		drawPreview.clearContinuousFocusMove();
@@ -1044,12 +925,24 @@ public class MyApplicationInterface implements ApplicationInterface {
 		view.setImageResource(R.drawable.take_video_recording);
 		view.setContentDescription( getContext().getResources().getString(R.string.stop_video) );
 		view.setTag(R.drawable.take_video_recording); // for testing
+	}
 
+	@Override
+	public void startedVideo() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startedVideo()");
 		final int video_method = this.createOutputVideoMethod();
-		if( false && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
+		boolean dategeo_stamp = false; // TODO
+		if( dategeo_stamp && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
+			String preference_stamp_dateformat = this.getStampDateFormatPref();
+			String preference_stamp_timeformat = this.getStampTimeFormatPref();
+			String preference_stamp_gpsformat = this.getStampGPSFormatPref();
+			boolean store_location = getGeotaggingPref() && getLocation() != null;
+			Location location = store_location ? getLocation() : null;
+			boolean store_geo_direction = main_activity.getPreview().hasGeoDirection() && getGeodirectionPref();
+			double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
 			class SubtitleVideoTimerTask extends TimerTask {
-				private String subtitle_filename = null;
-				private Uri subtitle_uri = null; // for SAF
+				OutputStreamWriter writer;
 				private int count = 1;
 
 				private String formatTimeMS(long time_ms) {
@@ -1075,7 +968,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 				public void run() {
 					if( MyDebug.LOG )
-						Log.d(TAG, "SubtitleVideoTimerTask");
+						Log.d(TAG, "SubtitleVideoTimerTask run");
 					long video_time = main_activity.getPreview().getVideoTime();
 					if( !main_activity.getPreview().isVideoRecording() ) {
 						return;
@@ -1098,45 +991,66 @@ public class MyApplicationInterface implements ApplicationInterface {
 					String subtitle_time_from = formatTimeMS(video_time_from);
 					String subtitle_time_to = formatTimeMS(video_time_to);
 					try {
-						OutputStreamWriter writer;
-						if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
-							if( subtitle_filename == null ) {
-								subtitle_filename = last_video_file.getAbsolutePath();
-								subtitle_filename = getSubtitleFilename(subtitle_filename);
+						synchronized( this ) {
+							if( writer == null ) {
+								if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
+									String subtitle_filename = last_video_file.getAbsolutePath();
+									subtitle_filename = getSubtitleFilename(subtitle_filename);
+									writer = new FileWriter(subtitle_filename);
+								}
+								else {
+									if( MyDebug.LOG )
+										Log.d(TAG, "last_video_file_saf: " + last_video_file_saf);
+									File file = storageUtils.getFileFromDocumentUriSAF(last_video_file_saf, false);
+									String subtitle_filename = file.getName();
+									subtitle_filename = getSubtitleFilename(subtitle_filename);
+									Uri subtitle_uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
+									ParcelFileDescriptor pfd_saf = getContext().getContentResolver().openFileDescriptor(subtitle_uri, "w");
+									writer = new FileWriter(pfd_saf.getFileDescriptor());
+								}
 							}
-							writer = new FileWriter(subtitle_filename, true);
-						}
-						else {
-							if( subtitle_uri == null ) {
-								if( MyDebug.LOG )
-									Log.d(TAG, "last_video_file_saf: " + last_video_file_saf);
-								File file = storageUtils.getFileFromDocumentUriSAF(last_video_file_saf, false);
-								subtitle_filename = file.getName();
-								subtitle_filename = getSubtitleFilename(subtitle_filename);
-								subtitle_uri = storageUtils.createOutputFileSAF(subtitle_filename, ""); // don't set a mimetype, as we don't want it to append a new extension
+							if( writer != null ) {
+								writer.append(Integer.toString(count));
+								writer.append('\n');
+								writer.append(subtitle_time_from);
+								writer.append(" --> ");
+								writer.append(subtitle_time_to);
+								writer.append('\n');
+								writer.append(datetime_stamp);
+								writer.append('\n');
+								writer.append('\n');
+								writer.flush();
+								// n.b., we flush rather than closing/reopening the writer each time, as appending doesn't seem to work with storage access framework
 							}
-							OutputStream outputStream = main_activity.getContentResolver().openOutputStream(subtitle_uri);
-							writer = new OutputStreamWriter(outputStream);
 						}
-						writer.append(Integer.toString(count));
-						writer.append('\n');
-						writer.append(subtitle_time_from);
-						writer.append(" --> ");
-						writer.append(subtitle_time_to);
-						writer.append('\n');
-						writer.append(datetime_stamp);
-						writer.append('\n');
-						writer.append('\n');
-						writer.close();
 						count++;
 					}
 					catch(IOException e) {
 						if( MyDebug.LOG )
-							Log.e(TAG, "SubtitleVideoTimerTask failed to create or write to: " + subtitle_filename);
+							Log.e(TAG, "SubtitleVideoTimerTask failed to create or write");
 						e.printStackTrace();
 					}
 					if( MyDebug.LOG )
 						Log.d(TAG, "SubtitleVideoTimerTask exit");
+				}
+
+				public boolean cancel() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "SubtitleVideoTimerTask cancel");
+					synchronized( this ) {
+						if( writer != null ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "close writer");
+							try {
+								writer.close();
+							}
+							catch(IOException e) {
+								e.printStackTrace();
+							}
+							writer = null;
+						}
+					}
+					return super.cancel();
 				}
 			}
 			subtitleVideoTimer.schedule(subtitleVideoTimerTask = new SubtitleVideoTimerTask(), 0, 1000);
@@ -1152,9 +1066,130 @@ public class MyApplicationInterface implements ApplicationInterface {
 		view.setImageResource(R.drawable.take_video_selector);
 		view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
 		view.setTag(R.drawable.take_video_selector); // for testing
+	}
+
+	@Override
+	public void stoppedVideo(final int video_method, final Uri uri, final String filename) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "stoppedVideo");
+			Log.d(TAG, "video_method " + video_method);
+			Log.d(TAG, "uri " + uri);
+			Log.d(TAG, "filename " + filename);
+		}
 		if( subtitleVideoTimerTask != null ) {
 			subtitleVideoTimerTask.cancel();
 			subtitleVideoTimerTask = null;
+		}
+
+		boolean done = false;
+		if( video_method == VIDEOMETHOD_FILE ) {
+			if( filename != null ) {
+				File file = new File(filename);
+				storageUtils.broadcastFile(file, false, true, true);
+				done = true;
+			}
+		}
+		else {
+			if( uri != null ) {
+				// see note in onPictureTaken() for where we call broadcastFile for SAF photos
+				File real_file = storageUtils.getFileFromDocumentUriSAF(uri, false);
+				if( MyDebug.LOG )
+					Log.d(TAG, "real_file: " + real_file);
+				if( real_file != null ) {
+					storageUtils.broadcastFile(real_file, false, true, true);
+					main_activity.test_last_saved_image = real_file.getAbsolutePath();
+				}
+				else {
+					// announce the SAF Uri
+					storageUtils.announceUri(uri, false, true);
+				}
+				done = true;
+			}
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "done? " + done);
+
+		String action = main_activity.getIntent().getAction();
+		if( MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
+			if( done && video_method == VIDEOMETHOD_FILE ) {
+				// do nothing here - we end the activity from storageUtils.broadcastFile after the file has been scanned, as it seems caller apps seem to prefer the content:// Uri rather than one based on a File
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "from video capture intent");
+				Intent output = null;
+				if( done ) {
+					// may need to pass back the Uri we saved to, if the calling application didn't specify a Uri
+					// set note above for VIDEOMETHOD_FILE
+					// n.b., currently this code is not used, as we always switch to VIDEOMETHOD_FILE if the calling application didn't specify a Uri, but I've left this here for possible future behaviour
+					if( video_method == VIDEOMETHOD_SAF ) {
+						output = new Intent();
+						output.setData(uri);
+						if( MyDebug.LOG )
+							Log.d(TAG, "pass back output uri [saf]: " + output.getData());
+					}
+				}
+				main_activity.setResult(done ? Activity.RESULT_OK : Activity.RESULT_CANCELED, output);
+				main_activity.finish();
+			}
+		}
+		else if( done ) {
+			// create thumbnail
+			long debug_time = System.currentTimeMillis();
+			Bitmap thumbnail = null;
+			MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+			try {
+				if( video_method == VIDEOMETHOD_FILE ) {
+					File file = new File(filename);
+					retriever.setDataSource(file.getPath());
+				}
+				else {
+					ParcelFileDescriptor pfd_saf = getContext().getContentResolver().openFileDescriptor(uri, "r");
+					retriever.setDataSource(pfd_saf.getFileDescriptor());
+				}
+				thumbnail = retriever.getFrameAtTime(-1);
+			}
+			catch(FileNotFoundException | /*IllegalArgumentException |*/ RuntimeException e) {
+				// video file wasn't saved or corrupt video file?
+				Log.d(TAG, "failed to find thumbnail");
+				e.printStackTrace();
+			}
+			finally {
+				try {
+					retriever.release();
+				}
+				catch(RuntimeException ex) {
+					// ignore
+				}
+			}
+			if( thumbnail != null ) {
+				ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
+				int width = thumbnail.getWidth();
+				int height = thumbnail.getHeight();
+				if( MyDebug.LOG )
+					Log.d(TAG, "    video thumbnail size " + width + " x " + height);
+				if( width > galleryButton.getWidth() ) {
+					float scale = (float) galleryButton.getWidth() / width;
+					int new_width = Math.round(scale * width);
+					int new_height = Math.round(scale * height);
+					if( MyDebug.LOG )
+						Log.d(TAG, "    scale video thumbnail to " + new_width + " x " + new_height);
+					Bitmap scaled_thumbnail = Bitmap.createScaledBitmap(thumbnail, new_width, new_height, true);
+					// careful, as scaled_thumbnail is sometimes not a copy!
+					if( scaled_thumbnail != thumbnail ) {
+						thumbnail.recycle();
+						thumbnail = scaled_thumbnail;
+					}
+				}
+				final Bitmap thumbnail_f = thumbnail;
+				main_activity.runOnUiThread(new Runnable() {
+					public void run() {
+						updateThumbnail(thumbnail_f);
+					}
+				});
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "    time to create thumbnail: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
 

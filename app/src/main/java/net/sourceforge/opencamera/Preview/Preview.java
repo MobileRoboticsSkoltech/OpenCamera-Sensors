@@ -3775,59 +3775,110 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			Log.d(TAG, "video bitrate: " + profile.videoBitRate);
     			Log.d(TAG, "video codec: " + profile.videoCodec);
     		}
-			boolean told_app_started = false; // true if we called applicationInterface.startingVideo()
+			boolean told_app_starting = false; // true if we called applicationInterface.startingVideo()
         	try {
-        		//video_recorder.setMaxFileSize(15*1024*1024); // test
-    			ApplicationInterface.VideoMaxFileSize video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
-    			long max_filesize = video_max_filesize.max_filesize;
-    			if( max_filesize > 0 ) {
-    	    		if( MyDebug.LOG )
-    	    			Log.d(TAG, "set max file size of: " + max_filesize);
-    	    		try {
-    	    			video_recorder.setMaxFileSize(max_filesize);
-    	    		}
-    	    		catch(RuntimeException e) {
-    	    			// Google Camera warns this can happen - for example, if 64-bit filesizes not supported
-        	    		if( MyDebug.LOG )
-        	    			Log.e(TAG, "failed to set max filesize of: " + max_filesize);
-        	    		e.printStackTrace();
-    	    		}
-    			}
-        		video_restart_on_max_filesize = video_max_filesize.auto_restart; // note, we set this even if max_filesize==0, as it will still apply when hitting device max filesize limit
+				//video_recorder.setMaxFileSize(15*1024*1024); // test
+				ApplicationInterface.VideoMaxFileSize video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
+				long max_filesize = video_max_filesize.max_filesize;
+				if (max_filesize > 0) {
+					if (MyDebug.LOG)
+						Log.d(TAG, "set max file size of: " + max_filesize);
+					try {
+						video_recorder.setMaxFileSize(max_filesize);
+					} catch (RuntimeException e) {
+						// Google Camera warns this can happen - for example, if 64-bit filesizes not supported
+						if (MyDebug.LOG)
+							Log.e(TAG, "failed to set max filesize of: " + max_filesize);
+						e.printStackTrace();
+					}
+				}
+				video_restart_on_max_filesize = video_max_filesize.auto_restart; // note, we set this even if max_filesize==0, as it will still apply when hitting device max filesize limit
 
-        		if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
-        			video_recorder.setOutputFile(video_filename);
-        		}
-        		else {
-        			video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
-        		}
+				if (video_method == ApplicationInterface.VIDEOMETHOD_FILE) {
+					video_recorder.setOutputFile(video_filename);
+				} else {
+					video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
+				}
 
-        		applicationInterface.cameraInOperation(true);
-				told_app_started = true;
-        		applicationInterface.startingVideo();
+				applicationInterface.cameraInOperation(true);
+				told_app_starting = true;
+				applicationInterface.startingVideo();
         		/*if( true ) // test
         			throw new IOException();*/
-    			cameraSurface.setVideoRecorder(video_recorder);
-	        	video_recorder.setOrientationHint(getImageVideoRotation());
-				if( MyDebug.LOG )
+				cameraSurface.setVideoRecorder(video_recorder);
+				video_recorder.setOrientationHint(getImageVideoRotation());
+				if (MyDebug.LOG)
 					Log.d(TAG, "about to prepare video recorder");
 				video_recorder.prepare();
-	        	camera_controller.initVideoRecorderPostPrepare(video_recorder);
-				if( MyDebug.LOG )
+				camera_controller.initVideoRecorderPostPrepare(video_recorder);
+				if (MyDebug.LOG)
 					Log.d(TAG, "about to start video recorder");
-            	video_recorder.start();
-				if( MyDebug.LOG )
+				video_recorder.start();
+				if (MyDebug.LOG)
 					Log.d(TAG, "video recorder started");
-				if( test_video_failure ) {
-					if( MyDebug.LOG )
+				if (test_video_failure) {
+					if (MyDebug.LOG)
 						Log.d(TAG, "test_video_failure is true");
 					throw new RuntimeException();
 				}
-            	video_start_time = System.currentTimeMillis();
-            	video_start_time_set = true;
-				//showToast(stopstart_video_toast, R.string.started_recording_video);
-				// don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file
+				video_start_time = System.currentTimeMillis();
+				video_start_time_set = true;
+				applicationInterface.startedVideo();
+				// Don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file.
+				// Don't do any further calls after applicationInterface.startedVideo() that might throw an error - instead video error
+				// should be handled by including a call to stopVideo() (since the video_recorder has started).
+			}
+			catch(IOException e) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to save video");
+				e.printStackTrace();
+				if( told_app_starting ) {
+					applicationInterface.stoppingVideo();
+				}
+				applicationInterface.onFailedCreateVideoFileError();
+				video_recorder.reset();
+				video_recorder.release();
+				video_recorder = null;
+				this.phase = PHASE_NORMAL;
+				applicationInterface.cameraInOperation(false);
+				this.reconnectCamera(true);
+			}
+			catch(RuntimeException e) {
+				// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
+				if( MyDebug.LOG )
+					Log.e(TAG, "runtime exception starting video recorder");
+				e.printStackTrace();
+				if( told_app_starting ) {
+					applicationInterface.stoppingVideo();
+				}
+				failedToStartVideoRecorder(profile);
+			}
+			catch(CameraControllerException e) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "camera exception starting video recorder");
+				e.printStackTrace();
+				if( told_app_starting ) {
+					applicationInterface.stoppingVideo();
+				}
+				failedToStartVideoRecorder(profile);
+			}
+			catch(NoFreeStorageException e) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "nofreestorageexception starting video recorder");
+				e.printStackTrace();
+				if( told_app_starting ) {
+					applicationInterface.stoppingVideo();
+				}
+				video_recorder.reset();
+				video_recorder.release();
+				video_recorder = null;
+				this.phase = PHASE_NORMAL;
+				applicationInterface.cameraInOperation(false);
+				this.reconnectCamera(true);
+				this.showToast(null, R.string.video_no_free_space);
+			}
 
+			{
             	// handle restarts
 				if( remaining_restart_video == 0 && !max_filesize_restart ) {
 					remaining_restart_video = applicationInterface.getVideoRestartTimesPref();
@@ -3951,55 +4002,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					// But this is fine, as typically short videos won't be corrupted if the device shuts off, and good to allow users to try to record a bit more if they want.
 					batteryCheckVideoTimer.schedule(batteryCheckVideoTimerTask = new BatteryCheckVideoTimerTask(), battery_check_interval_ms, battery_check_interval_ms);
 				}
-			}
-        	catch(IOException e) {
-	    		if( MyDebug.LOG )
-	    			Log.e(TAG, "failed to save video");
-				e.printStackTrace();
-				if( told_app_started ) {
-					applicationInterface.stoppingVideo();
-				}
-	    	    applicationInterface.onFailedCreateVideoFileError();
-	    		video_recorder.reset();
-	    		video_recorder.release(); 
-	    		video_recorder = null;
-				this.phase = PHASE_NORMAL;
-				applicationInterface.cameraInOperation(false);
-				this.reconnectCamera(true);
-			}
-        	catch(RuntimeException e) {
-        		// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
-	    		if( MyDebug.LOG )
-	    			Log.e(TAG, "runtime exception starting video recorder");
-				e.printStackTrace();
-				if( told_app_started ) {
-					applicationInterface.stoppingVideo();
-				}
-				failedToStartVideoRecorder(profile);
-			}
-        	catch(CameraControllerException e) {
-	    		if( MyDebug.LOG )
-	    			Log.e(TAG, "camera exception starting video recorder");
-				e.printStackTrace();
-				if( told_app_started ) {
-					applicationInterface.stoppingVideo();
-				}
-				failedToStartVideoRecorder(profile);
-			}
-        	catch(NoFreeStorageException e) {
-	    		if( MyDebug.LOG )
-	    			Log.e(TAG, "nofreestorageexception starting video recorder");
-				e.printStackTrace();
-				if( told_app_started ) {
-					applicationInterface.stoppingVideo();
-				}
-	    		video_recorder.reset();
-	    		video_recorder.release(); 
-	    		video_recorder = null;
-				this.phase = PHASE_NORMAL;
-				applicationInterface.cameraInOperation(false);
-				this.reconnectCamera(true);
-				this.showToast(null, R.string.video_no_free_space);
 			}
 		}
 	}
