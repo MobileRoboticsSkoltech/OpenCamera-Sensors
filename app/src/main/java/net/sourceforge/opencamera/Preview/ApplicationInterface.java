@@ -103,8 +103,9 @@ public interface ApplicationInterface {
     void cameraSetup(); // called when the camera is (re-)set up - should update UI elements/parameters that depend on camera settings
 	void touchEvent(MotionEvent event);
 	void startingVideo(); // called just before video recording starts
-	void stoppingVideo(); // called just before video recording stops
-	void stoppedVideo(final int video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created)
+	void startedVideo(); // called just after video recording starts
+	void stoppingVideo(); // called just before video recording stops; note that if startingVideo() is called but then video recording fails to start, this method will still be called, but startedVideo() and stoppedVideo() won't be called
+	void stoppedVideo(final int video_method, final Uri uri, final String filename); // called after video recording stopped (uri/filename will be null if video is corrupt or not created); will be called iff startedVideo() was called
 	void onFailedStartPreview(); // called if failed to start camera preview
 	void onCameraError(); // called if the camera closes due to serious error.
 	void onPhotoError(); // callback for failing to take a photo

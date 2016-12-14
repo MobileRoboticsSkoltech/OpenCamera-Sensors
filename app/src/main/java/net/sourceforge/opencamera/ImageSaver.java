@@ -9,8 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,8 +47,7 @@ public class ImageSaver extends Thread {
 	private static final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
 
 	private final Paint p = new Paint();
-	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
-	
+
 	private final MainActivity main_activity;
 	private final HDRProcessor hdrProcessor;
 
@@ -923,25 +920,8 @@ public class ImageSaver extends Thread {
 					if( MyDebug.LOG )
 						Log.d(TAG, "stamp date");
 					// doesn't respect user preferences such as 12/24 hour - see note about in draw() about DateFormat.getTimeInstance()
-					String date_stamp = "", time_stamp = "";
-					if( !preference_stamp_dateformat.equals("preference_stamp_dateformat_none") ) {
-						if( preference_stamp_dateformat.equals("preference_stamp_dateformat_yyyymmdd") )
-							date_stamp = new SimpleDateFormat("yyyy/MM/dd").format(request.current_date);
-						else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_ddmmyyyy") )
-							date_stamp = new SimpleDateFormat("dd/MM/yyyy").format(request.current_date);
-						else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_mmddyyyy") )
-							date_stamp = new SimpleDateFormat("MM/dd/yyyy").format(request.current_date);
-						else // default
-							date_stamp = DateFormat.getDateInstance().format(request.current_date);
-					}
-					if( !preference_stamp_timeformat.equals("preference_stamp_timeformat_none") ) {
-						if( preference_stamp_timeformat.equals("preference_stamp_timeformat_12hour") )
-							time_stamp = new SimpleDateFormat("hh:mm:ss a").format(request.current_date);
-						else if( preference_stamp_timeformat.equals("preference_stamp_timeformat_24hour") )
-							time_stamp = new SimpleDateFormat("HH:mm:ss").format(request.current_date);
-						else // default
-							time_stamp = DateFormat.getTimeInstance().format(request.current_date);
-					}
+					String date_stamp = MainActivity.getDateString(preference_stamp_dateformat, request.current_date);
+					String time_stamp = MainActivity.getTimeString(preference_stamp_timeformat, request.current_date);
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "date_stamp: " + date_stamp);
 						Log.d(TAG, "time_stamp: " + time_stamp);
@@ -951,38 +931,14 @@ public class ImageSaver extends Thread {
 						if( date_stamp.length() > 0 )
 							datetime_stamp += date_stamp;
 						if( time_stamp.length() > 0 ) {
-							if( date_stamp.length() > 0 )
+							if( datetime_stamp.length() > 0 )
 								datetime_stamp += " ";
 							datetime_stamp += time_stamp;
 						}
 						applicationInterface.drawTextWithBackground(canvas, p, datetime_stamp, color, Color.BLACK, width - offset_x, ypos, false, null, draw_shadowed);
 					}
 					ypos -= diff_y;
-					String gps_stamp = "";
-					if( !preference_stamp_gpsformat.equals("preference_stamp_gpsformat_none") ) {
-						if( request.store_location ) {
-							Location location = request.location;
-							if( preference_stamp_gpsformat.equals("preference_stamp_gpsformat_dms") )
-								gps_stamp += LocationSupplier.locationToDMS(location.getLatitude()) + ", " + LocationSupplier.locationToDMS(location.getLongitude());
-							else
-								gps_stamp += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
-							if( location.hasAltitude() ) {
-								gps_stamp += ", " + decimalFormat.format(location.getAltitude()) + main_activity.getResources().getString(R.string.metres_abbreviation);
-							}
-						}
-						if( request.store_geo_direction ) {
-							double geo_direction = request.geo_direction;
-							float geo_angle = (float)Math.toDegrees(geo_direction);
-							if( geo_angle < 0.0f ) {
-								geo_angle += 360.0f;
-							}
-							if( MyDebug.LOG )
-								Log.d(TAG, "geo_angle: " + geo_angle);
-							if( gps_stamp.length() > 0 )
-								gps_stamp += ", ";
-							gps_stamp += "" + Math.round(geo_angle) + (char)0x00B0;
-						}
-					}
+					String gps_stamp = main_activity.getGPSString(preference_stamp_gpsformat, request.store_location, request.location, request.store_geo_direction, request.geo_direction);
 					if( gps_stamp.length() > 0 ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "stamp with location_string: " + gps_stamp);
