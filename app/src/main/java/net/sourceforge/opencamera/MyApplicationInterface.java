@@ -932,15 +932,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startedVideo()");
 		final int video_method = this.createOutputVideoMethod();
-		boolean dategeo_stamp = false; // TODO
-		if( dategeo_stamp && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
-			String preference_stamp_dateformat = this.getStampDateFormatPref();
-			String preference_stamp_timeformat = this.getStampTimeFormatPref();
-			String preference_stamp_gpsformat = this.getStampGPSFormatPref();
-			boolean store_location = getGeotaggingPref() && getLocation() != null;
-			Location location = store_location ? getLocation() : null;
-			boolean store_geo_direction = main_activity.getPreview().hasGeoDirection() && getGeodirectionPref();
-			double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
+		boolean dategeo_subtitles = false; // TODO
+		if( dategeo_subtitles && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
+			final String preference_stamp_dateformat = this.getStampDateFormatPref();
+			final String preference_stamp_timeformat = this.getStampTimeFormatPref();
+			final String preference_stamp_gpsformat = this.getStampGPSFormatPref();
+			final boolean store_location = getGeotaggingPref() && getLocation() != null;
+			final Location location = store_location ? getLocation() : null;
+			final boolean store_geo_direction = main_activity.getPreview().hasGeoDirection() && getGeodirectionPref();
+			final double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
 			class SubtitleVideoTimerTask extends TimerTask {
 				OutputStreamWriter writer;
 				private int count = 1;
@@ -981,9 +981,30 @@ public class MyApplicationInterface implements ApplicationInterface {
 						Log.d(TAG, "offset_ms: " + offset_ms);
 						Log.d(TAG, "video_time: " + video_time);
 					}
-					String date_stamp = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(current_date);
-					String time_stamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(current_date);
-					String datetime_stamp = date_stamp + " " + time_stamp;
+					String date_stamp = MainActivity.getDateString(preference_stamp_dateformat, current_date);
+					String time_stamp = MainActivity.getTimeString(preference_stamp_timeformat, current_date);
+					String gps_stamp = main_activity.getGPSString(preference_stamp_gpsformat, store_location, location, store_geo_direction, geo_direction);
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "date_stamp: " + date_stamp);
+						Log.d(TAG, "time_stamp: " + time_stamp);
+						Log.d(TAG, "gps_stamp: " + gps_stamp);
+					}
+					String datetime_stamp = "";
+					if( date_stamp.length() > 0 )
+						datetime_stamp += date_stamp;
+					if( time_stamp.length() > 0 ) {
+						if( datetime_stamp.length() > 0 )
+							datetime_stamp += " ";
+						datetime_stamp += time_stamp;
+					}
+					String subtitles = "";
+					if( datetime_stamp.length() > 0 )
+						subtitles += datetime_stamp + "\n";
+					if( gps_stamp.length() > 0 )
+						subtitles += gps_stamp + "\n";
+					if( subtitles.length() == 0 ) {
+						return;
+					}
 					long video_time_from = video_time - offset_ms;
 					long video_time_to = video_time_from + 999;
 					if( video_time_from < 0 )
@@ -1016,9 +1037,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 								writer.append(" --> ");
 								writer.append(subtitle_time_to);
 								writer.append('\n');
-								writer.append(datetime_stamp);
-								writer.append('\n');
-								writer.append('\n');
+								writer.append(subtitles); // subtitles should include the '\n' at the end
+								writer.append('\n'); // additional newline to indicate end of this subtitle
 								writer.flush();
 								// n.b., we flush rather than closing/reopening the writer each time, as appending doesn't seem to work with storage access framework
 							}

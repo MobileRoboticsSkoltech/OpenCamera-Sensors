@@ -8,8 +8,12 @@ import net.sourceforge.opencamera.UI.MainUI;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -25,6 +29,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.CamcorderProfile;
@@ -122,7 +127,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private final ToastBoxer exposure_lock_toast = new ToastBoxer();
 	private final ToastBoxer audio_control_toast = new ToastBoxer();
 	private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
-    
+
+	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+
 	private boolean keydown_volume_up;
 	private boolean keydown_volume_down;
 	
@@ -3181,6 +3188,71 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    			Log.e(TAG, "unknown requestCode " + requestCode);
 	        }
 	    }
+	}
+
+	/** Formats the date according to the user preference preference_stamp_dateformat.
+	 *  Returns "" if preference_stamp_dateformat is "preference_stamp_dateformat_none".
+	 */
+	public static String getDateString(String preference_stamp_dateformat, Date date) {
+		String date_stamp = "";
+		if( !preference_stamp_dateformat.equals("preference_stamp_dateformat_none") ) {
+			if( preference_stamp_dateformat.equals("preference_stamp_dateformat_yyyymmdd") )
+				date_stamp = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(date);
+			else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_ddmmyyyy") )
+				date_stamp = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date);
+			else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_mmddyyyy") )
+				date_stamp = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(date);
+			else // default
+				date_stamp = DateFormat.getDateInstance().format(date);
+		}
+		return date_stamp;
+	}
+
+	/** Formats the time according to the user preference preference_stamp_timeformat.
+	 *  Returns "" if preference_stamp_timeformat is "preference_stamp_timeformat_none".
+	 */
+	public static String getTimeString(String preference_stamp_timeformat, Date date) {
+		String time_stamp = "";
+		if( !preference_stamp_timeformat.equals("preference_stamp_timeformat_none") ) {
+			if( preference_stamp_timeformat.equals("preference_stamp_timeformat_12hour") )
+				time_stamp = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault()).format(date);
+			else if( preference_stamp_timeformat.equals("preference_stamp_timeformat_24hour") )
+				time_stamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(date);
+			else // default
+				time_stamp = DateFormat.getTimeInstance().format(date);
+		}
+		return time_stamp;
+	}
+
+	/** Formats the GPS information according to the user preference_stamp_gpsformat preference_stamp_timeformat.
+	 *  Returns "" if preference_stamp_gpsformat is "preference_stamp_gpsformat_none", or both store_location and
+	 *  store_geo_direction are false.
+	 */
+	public String getGPSString(String preference_stamp_gpsformat, boolean store_location, Location location, boolean store_geo_direction, double geo_direction) {
+		String gps_stamp = "";
+		if( !preference_stamp_gpsformat.equals("preference_stamp_gpsformat_none") ) {
+			if( store_location ) {
+				if( preference_stamp_gpsformat.equals("preference_stamp_gpsformat_dms") )
+					gps_stamp += LocationSupplier.locationToDMS(location.getLatitude()) + ", " + LocationSupplier.locationToDMS(location.getLongitude());
+				else
+					gps_stamp += Location.convert(location.getLatitude(), Location.FORMAT_DEGREES) + ", " + Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
+				if( location.hasAltitude() ) {
+					gps_stamp += ", " + decimalFormat.format(location.getAltitude()) + this.getResources().getString(R.string.metres_abbreviation);
+				}
+			}
+			if( store_geo_direction ) {
+				float geo_angle = (float)Math.toDegrees(geo_direction);
+				if( geo_angle < 0.0f ) {
+					geo_angle += 360.0f;
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "geo_angle: " + geo_angle);
+				if( gps_stamp.length() > 0 )
+					gps_stamp += ", ";
+				gps_stamp += "" + Math.round(geo_angle) + (char)0x00B0;
+			}
+		}
+		return gps_stamp;
 	}
 
 	// for testing:
