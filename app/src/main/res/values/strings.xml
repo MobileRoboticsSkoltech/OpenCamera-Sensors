@@ -366,6 +366,8 @@
 
     <string name="photo_mode_dro">DRO</string>
 
-    <string name="preference_show_altitude_lines">Show altitude lines</string>
-    <string name="preference_show_altitude_lines_summary">Display horizontal altitude lines</string>
+    <string name="preference_show_pitch_lines">Show pitch lines</string>
+    <string name="preference_show_pitch_lines_summary">Display horizontal pitch lines</string>
+    <string name="preference_show_geo_direction_lines">Show compass direction lines</string>
+    <string name="preference_show_geo_direction_lines_summary">Display compass direction lines</string>
 </resources>

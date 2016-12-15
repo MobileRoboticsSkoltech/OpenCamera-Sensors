@@ -267,8 +267,12 @@ public class PreferenceKeys {
     	return "preference_show_angle_line";
     }
 
-    public static String getShowAltitudeLinesPreferenceKey() {
-        return "preference_show_altitude_lines";
+    public static String getShowPitchLinesPreferenceKey() {
+        return "preference_show_pitch_lines";
+    }
+
+    public static String getShowGeoDirectionLinesPreferenceKey() {
+        return "preference_show_geo_direction_lines";
     }
 
     public static String getShowAngleHighlightColorPreferenceKey() {

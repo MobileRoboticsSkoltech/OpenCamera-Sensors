@@ -895,8 +895,9 @@ public class DrawPreview {
 		canvas.restore();
 
 		boolean show_angle_line = sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false);
-		boolean show_pitch_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowAltitudeLinesPreferenceKey(), false);
-		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line || show_pitch_lines ) ) {
+		boolean show_pitch_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowPitchLinesPreferenceKey(), false);
+		boolean show_geo_direction_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionLinesPreferenceKey(), false);
+		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line || show_pitch_lines || show_geo_direction_lines ) ) {
 			// n.b., must draw this without the standard canvas rotation
 			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
 			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
@@ -974,13 +975,14 @@ public class DrawPreview {
 					canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 				}
 			}
+			final float angle_scale = 500.0f;
 			if( has_pitch_angle && show_pitch_lines ) {
-				int pitch_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 80 : 100;
+				int pitch_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 100 : 80;
 				int pitch_radius = (int) (pitch_radius_dps * scale + 0.5f); // convert dps to pixels
-				for(int altitude_angle=-90;altitude_angle<=90;altitude_angle+=10) {
-					double this_angle = pitch_angle - altitude_angle;
+				for(int latitude_angle=-90;latitude_angle<=90;latitude_angle+=10) {
+					double this_angle = pitch_angle - latitude_angle;
 					if( Math.abs(this_angle) < 90.0 ) {
-						float pitch_distance_dp = 300.0f * (float)Math.tan( Math.toRadians(this_angle) );
+						float pitch_distance_dp = angle_scale * (float)Math.tan( Math.toRadians(this_angle) );
 						float pitch_distance = (pitch_distance_dp * scale + 0.5f); // convert dps to pixels
 						/*if( MyDebug.LOG ) {
 							Log.d(TAG, "pitch_angle: " + pitch_angle);
@@ -994,7 +996,8 @@ public class DrawPreview {
 						canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
 						// draw inner portion
 						p.setColor(Color.WHITE);
-						if( altitude_angle == 0 && Math.abs(pitch_angle) < 1.0 ) {
+						p.setTextAlign(Paint.Align.LEFT);
+						if( latitude_angle == 0 && Math.abs(pitch_angle) < 1.0 ) {
 							p.setAlpha(255);
 						}
 						else {
@@ -1003,7 +1006,54 @@ public class DrawPreview {
 						draw_rect.set(cx - pitch_radius, cy + pitch_distance - hthickness, cx + pitch_radius, cy + pitch_distance + hthickness);
 						canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 						// draw pitch angle indicator
-						applicationInterface.drawTextWithBackground(canvas, p, "" + altitude_angle + "\u00B0", p.getColor(), Color.BLACK, (int)(cx + pitch_radius + 4*hthickness), (int)(cy + pitch_distance - 2*hthickness), MyApplicationInterface.Alignment.ALIGNMENT_CENTRE);
+						applicationInterface.drawTextWithBackground(canvas, p, "" + latitude_angle + "\u00B0", p.getColor(), Color.BLACK, (int)(cx + pitch_radius + 4*hthickness), (int)(cy + pitch_distance - 2*hthickness), MyApplicationInterface.Alignment.ALIGNMENT_CENTRE);
+					}
+				}
+			}
+			if( has_geo_direction && has_pitch_angle && show_geo_direction_lines ) {
+				int geo_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 80 : 100;
+				int geo_radius = (int) (geo_radius_dps * scale + 0.5f); // convert dps to pixels
+				float geo_angle = (float)Math.toDegrees(geo_direction);
+				for(int longitude_angle=0;longitude_angle<360;longitude_angle+=10) {
+					double this_angle = longitude_angle - geo_angle;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "longitude_angle: " + longitude_angle);
+						Log.d(TAG, "geo_angle: " + geo_angle);
+						Log.d(TAG, "this_angle: " + this_angle);
+					}
+					// normalise to be in interval [0, 360)
+					while( this_angle >= 360.0 )
+						this_angle -= 360.0;
+					while( this_angle < -360.0 )
+						this_angle += 360.0;
+					// pick shortest angle
+					if( this_angle > 180.0 )
+						this_angle = - (360.0 - this_angle);
+					if( Math.abs(this_angle) < 90.0 ) {
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "this_angle is now: " + this_angle);
+						}
+						float geo_distance_dp = angle_scale * (float)Math.tan( Math.toRadians(this_angle) );
+						float geo_distance = (geo_distance_dp * scale + 0.5f); // convert dps to pixels
+						// draw outline
+						p.setColor(Color.BLACK);
+						p.setAlpha(64);
+						// can't use drawRoundRect(left, top, right, bottom, ...) as that requires API 21
+						draw_rect.set(cx + geo_distance - 2*hthickness, cy - geo_radius - hthickness, cx + geo_distance + 2*hthickness, cy + geo_radius + hthickness);
+						canvas.drawRoundRect(draw_rect, 2*hthickness, 2*hthickness, p);
+						// draw inner portion
+						p.setColor(Color.WHITE);
+						p.setTextAlign(Paint.Align.CENTER);
+						if( longitude_angle == 0 && Math.abs(geo_angle) < 1.0 ) {
+							p.setAlpha(255);
+						}
+						else {
+							p.setAlpha(line_alpha);
+						}
+						draw_rect.set(cx + geo_distance - hthickness, cy - geo_radius, cx + geo_distance + hthickness, cy + geo_radius);
+						canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
+						// draw geo direction angle indicator
+						applicationInterface.drawTextWithBackground(canvas, p, "" + longitude_angle + "\u00B0", p.getColor(), Color.BLACK, (int)(cx + geo_distance), (int)(cy - geo_radius - 4*hthickness), MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM);
 					}
 				}
 			}
