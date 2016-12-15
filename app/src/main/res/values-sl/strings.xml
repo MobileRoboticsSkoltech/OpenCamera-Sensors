@@ -368,4 +368,7 @@
 	
 	<string name="preference_show_pitch_lines">Prikaži višinske črte</string>
     <string name="preference_show_pitch_lines_summary">Prikaži vodoravne višinske črte</string>
+	
+	<string name="preference_show_geo_direction_lines">Prikaži črte smeri neba</string>
+    <string name="preference_show_geo_direction_lines_summary">Prikaži črte smeri neba</string>
 </resources>
