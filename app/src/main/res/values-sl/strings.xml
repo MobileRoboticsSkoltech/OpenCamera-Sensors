@@ -366,6 +366,6 @@
 	
 	<string name="photo_mode_dro">DRO</string>
 	
-	<string name="preference_show_altitude_lines">Prikaži višinske črte</string>
-    <string name="preference_show_altitude_lines_summary">Prikaži vodoravne višinske črte</string>
+	<string name="preference_show_pitch_lines">Prikaži višinske črte</string>
+    <string name="preference_show_pitch_lines_summary">Prikaži vodoravne višinske črte</string>
 </resources>

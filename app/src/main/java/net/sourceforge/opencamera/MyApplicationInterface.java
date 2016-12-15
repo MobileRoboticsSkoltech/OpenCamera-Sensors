@@ -1607,15 +1607,21 @@ public class MyApplicationInterface implements ApplicationInterface {
     	drawPreview.onDrawPreview(canvas);
     }
 
+	public enum Alignment {
+		ALIGNMENT_TOP,
+		ALIGNMENT_CENTRE,
+		ALIGNMENT_BOTTOM
+	}
+
     public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
-		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, false);
+		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, Alignment.ALIGNMENT_BOTTOM);
 	}
 
-	public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top) {
-		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, align_top, null, true);
+	public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y) {
+		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, true);
 	}
 
-	public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, boolean align_top, String ybounds_text, boolean shadow) {
+	public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow) {
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
@@ -1643,13 +1649,20 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "text_bounds left-right: " + text_bounds.left + " , " + text_bounds.right);*/
 		text_bounds.left += location_x - padding;
 		text_bounds.right += location_x + padding;
-		if( align_top ) {
+		// unclear why we need the offset of -1, but need this to align properly on Galaxy Nexus at least
+		int top_y_diff = - text_bounds.top + padding - 1;
+		if( alignment_y == Alignment.ALIGNMENT_TOP ) {
 			int height = text_bounds.bottom - text_bounds.top + 2*padding;
-			// unclear why we need the offset of -1, but need this to align properly on Galaxy Nexus at least
-			int y_diff = - text_bounds.top + padding - 1;
 			text_bounds.top = location_y - 1;
 			text_bounds.bottom = text_bounds.top + height;
-			location_y += y_diff;
+			location_y += top_y_diff;
+		}
+		else if( alignment_y == Alignment.ALIGNMENT_CENTRE ) {
+			int height = text_bounds.bottom - text_bounds.top + 2*padding;
+			int y_diff = - text_bounds.top + padding - 1;
+			text_bounds.top = (int)(0.5 * ( (location_y - 1) + (text_bounds.top + location_y - padding) )); // average of ALIGNMENT_TOP and ALIGNMENT_BOTTOM
+			text_bounds.bottom = text_bounds.top + height;
+			location_y += (int)(0.5*top_y_diff); // average of ALIGNMENT_TOP and ALIGNMENT_BOTTOM
 		}
 		else {
 			text_bounds.top += location_y - padding;

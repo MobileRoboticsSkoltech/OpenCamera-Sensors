@@ -342,9 +342,9 @@
                 />
 
 			<CheckBoxPreference
-				android:key="preference_show_altitude_lines"
-				android:title="@string/preference_show_altitude_lines"
-				android:summary="@string/preference_show_altitude_lines_summary"
+				android:key="preference_show_pitch_lines"
+				android:title="@string/preference_show_pitch_lines"
+				android:summary="@string/preference_show_pitch_lines_summary"
 				android:defaultValue="false"
 				/>
 
@@ -364,7 +364,14 @@
                 android:defaultValue="false"
                 />
 
-            <CheckBoxPreference
+			<CheckBoxPreference
+				android:key="preference_show_geo_direction_lines"
+				android:title="@string/preference_show_geo_direction_lines"
+				android:summary="@string/preference_show_geo_direction_lines_summary"
+				android:defaultValue="false"
+				/>
+
+			<CheckBoxPreference
                 android:key="preference_show_time"
                 android:title="@string/preference_show_time"
                 android:summary="@string/preference_show_time_summary"
