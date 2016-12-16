@@ -1044,12 +1044,7 @@ public class DrawPreview {
 						// draw inner portion
 						p.setColor(Color.WHITE);
 						p.setTextAlign(Paint.Align.CENTER);
-						if( longitude_angle == 0 && Math.abs(geo_angle) < 1.0 ) {
-							p.setAlpha(255);
-						}
-						else {
-							p.setAlpha(line_alpha);
-						}
+						p.setAlpha(line_alpha);
 						draw_rect.set(cx + geo_distance - hthickness, cy - geo_radius, cx + geo_distance + hthickness, cy + geo_radius);
 						canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 						// draw geo direction angle indicator
