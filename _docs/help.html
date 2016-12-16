@@ -555,7 +555,7 @@ resultant photo, so the resultant photo matches the mirrored image you see on th
 location data" is enabled (see "Location settings" below), then the current location latitude
 and longitude coordinates will also be stamped on the resultant photos (if the location is known).
 Similarly for "Store compass direction". Note that if this option is enabled, then it will take
-longer to save the photo. Also note that this option is only supported for photos, not video.</p>
+longer to save the photo. Also see "Video subtitles".</p>
 
 <p><b>Datestamp format, Timestamp format</b> - If "Stamp photos" is enabled, these options allow
 extra control over the date and time formatting.</p>
@@ -642,11 +642,21 @@ device specific.</p>
 Note that most devices do not support stereo recording. Even for devices that do support this, you may need to modify
 the "Audio source" option to another value for this to work.</p>
 
-<p><b>Lock screen when recording video</b> - if enabled, the GUI will be locked when recording video (i.e., the GUI
+<p><b>Lock screen when recording video</b> - If enabled, the GUI will be locked when recording video (i.e., the GUI
 won't respond to touch presses). You can use this to prevent accidental presses that might change settings or stop
 recording. To unlock the GUI, swipe the screen (in any direction). Note that this won't prevent the video being
 stopped if you press your device's Home, Recent Apps or Power button (it is not possible for apps to override the
 behaviour of these buttons).</p>
+
+<p><b>Video subtitles</b> - This option is analogous to the "Stamp photos" option, but rather than embedding text into
+the video itself, it stores the text in a separate subtitles
+(<a href="https://matroska.org/technical/specs/subtitles/srt.html">".SRT"</a>) file. Most decent video players should support
+SRT files, and use them to display the information as subtitles (for Android,
+<a href="https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad">MX Player</a> will do this; note that Google Photos
+does not seem to support subtitles). The subtitles will record the date and time. If "Store location data" is enabled (see
+"Location settings" below), then the current location latitude and longitude coordinates will also be recorded (if the location is
+known). Similarly for "Store compass direction". Note that you can control the formatting style for date, time and location using
+the options under the "Photo settings" menu (Datestamp format, Timestamp format, GPS stamp format).</p>
 
 <p><b>Force 4K UHD video (may not work on all devices)</b> - Enable recording in 4K UHD (3840x2160) on the back camera (if ticked,
 this overrides the setting in "Video resolution"). This is provided for some phones that don't properly expose their 4K video resolution to 3rd party camera apps

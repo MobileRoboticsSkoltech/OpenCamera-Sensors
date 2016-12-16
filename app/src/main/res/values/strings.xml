@@ -370,4 +370,6 @@
     <string name="preference_show_pitch_lines_summary">Display horizontal pitch lines</string>
     <string name="preference_show_geo_direction_lines">Show compass direction lines</string>
     <string name="preference_show_geo_direction_lines_summary">Display compass direction lines</string>
+    <string name="preference_video_subtitle">Video subtitles</string>
+    <string name="preference_video_subtitle_summary">Create a subtitles (.SRT) file storing date and time; and also GPS info if location/direction data is enabled</string>
 </resources>
