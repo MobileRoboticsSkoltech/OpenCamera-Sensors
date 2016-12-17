@@ -1016,11 +1016,11 @@ public class DrawPreview {
 				float geo_angle = (float)Math.toDegrees(geo_direction);
 				for(int longitude_angle=0;longitude_angle<360;longitude_angle+=10) {
 					double this_angle = longitude_angle - geo_angle;
-					if( MyDebug.LOG ) {
+					/*if( MyDebug.LOG ) {
 						Log.d(TAG, "longitude_angle: " + longitude_angle);
 						Log.d(TAG, "geo_angle: " + geo_angle);
 						Log.d(TAG, "this_angle: " + this_angle);
-					}
+					}*/
 					// normalise to be in interval [0, 360)
 					while( this_angle >= 360.0 )
 						this_angle -= 360.0;
@@ -1030,9 +1030,9 @@ public class DrawPreview {
 					if( this_angle > 180.0 )
 						this_angle = - (360.0 - this_angle);
 					if( Math.abs(this_angle) < 90.0 ) {
-						if( MyDebug.LOG ) {
+						/*if( MyDebug.LOG ) {
 							Log.d(TAG, "this_angle is now: " + this_angle);
-						}
+						}*/
 						float geo_distance_dp = angle_scale * (float)Math.tan( Math.toRadians(this_angle) );
 						float geo_distance = (geo_distance_dp * scale + 0.5f); // convert dps to pixels
 						// draw outline
