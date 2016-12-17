@@ -339,4 +339,37 @@
     <string name="video_power_critical">Запись видео остановлена\nКритически низкий уровень заряда батареи</string>
     <string name="preference_video_low_power_check">Проверка критического состояния батареи</string>
     <string name="preference_video_low_power_check_summary">Остановить запись видео, если уровень заряда батареи критически низок. Это поможет уменьшить риск повреждения видео при внезапном выключении устройства из-за нехватки заряда батареи.</string>
+
+    <string name="dark">Темный</string> <!-- exposure compensation dark -->
+    <string name="bright">Светлый</string> <!-- exposure compensation bright -->
+    <string name="exposure_shutter_speed">Выдержка</string>
+
+    <string name="camera_error">Серьезная ошибка камеры</string>
+
+    <string name="preference_camera2_fast_burst">Включить быструю съемку в режиме HDR/экспозиции</string>
+    <string name="preference_camera2_fast_burst_summary">Позволяет быстрее захватывать снимки в режиме HDR/экспозиции. Отключите, если у вашего устройства проблемы с фотосъемкой в режиме HDR или экспозиции (прекращение работы камеры или неправильный порядок экспозиции фотографий).</string>
+
+    <string name="camera">Камера</string>
+    <string name="record_video">Записать видео</string>
+    <string name="selfie">Селфи</string>
+
+    <string name="preference_front_camera_mirror">Зеркалить фронтальную камеру</string>
+    <string name="preference_front_camera_mirror_summary">Отражать изображения зеркально при использовании фронтальной камеры.</string>
+
+    <string name="preference_calibrate_level">Калибровать уровень угла</string>
+    <string name="preference_calibrate_level_summary">Эта настройка калибрует акселерометр вашего устройства для корректной работы автоматической стабилизации и настроек наэкранного уровня/угла.</string>
+    <string name="preference_calibrate_level_dialog">Поместите ваше устройство на ровную горизонтальную поверхность для установки уровня (в портретной или ландшафтной ориентации), затем выберите "Откалибровать".\n\nНажмите "Сбросить" для удаления калибровки с вашего устройства.\n\nНажмите "Назад" для отмены.</string>
+    <string name="preference_calibrate_level_calibrate">Откалибровать</string>
+    <string name="preference_calibrate_level_reset">Сбросить</string>
+    <string name="preference_calibrate_level_calibrated">Уровень откалиброван</string>
+    <string name="preference_calibrate_level_calibration_reset">Сброс уровня калибровки</string>
+
+    <string name="photo_mode_dro">DRO</string>
+
+    <string name="preference_show_pitch_lines">Отображать делительные линии</string>
+    <string name="preference_show_pitch_lines_summary">Отображать горизонтальные делительные линии на экране</string>
+    <string name="preference_show_geo_direction_lines">Отображать линии направления компаса</string>
+    <string name="preference_show_geo_direction_lines_summary">Отображать линии направления компаса на экране</string>
+    <string name="preference_video_subtitle">Субтитры видео</string>
+    <string name="preference_video_subtitle_summary">Создавать файл субтитров (.SRT) с датой и временем записи, а также информацией GPS при включенных данных геолокации/направления</string>
 </resources>
