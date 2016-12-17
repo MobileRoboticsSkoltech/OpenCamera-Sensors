@@ -756,8 +756,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		return font_size;
     }
-    
-    @Override
+
+	private String getVideoSubtitlePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return sharedPreferences.getString(PreferenceKeys.getVideoSubtitlePref(), "preference_video_subtitle_no");
+	}
+
+	@Override
     public int getZoomPref() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getZoomPref: " + zoom_factor);
@@ -932,15 +937,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startedVideo()");
 		final int video_method = this.createOutputVideoMethod();
-		boolean dategeo_subtitles = false; // TODO
+		boolean dategeo_subtitles = getVideoSubtitlePref().equals("preference_video_subtitle_yes");
 		if( dategeo_subtitles && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
 			final String preference_stamp_dateformat = this.getStampDateFormatPref();
 			final String preference_stamp_timeformat = this.getStampTimeFormatPref();
 			final String preference_stamp_gpsformat = this.getStampGPSFormatPref();
 			final boolean store_location = getGeotaggingPref() && getLocation() != null;
-			final Location location = store_location ? getLocation() : null;
 			final boolean store_geo_direction = main_activity.getPreview().hasGeoDirection() && getGeodirectionPref();
-			final double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
 			class SubtitleVideoTimerTask extends TimerTask {
 				OutputStreamWriter writer;
 				private int count = 1;
@@ -983,6 +986,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 					}
 					String date_stamp = MainActivity.getDateString(preference_stamp_dateformat, current_date);
 					String time_stamp = MainActivity.getTimeString(preference_stamp_timeformat, current_date);
+					Location location = store_location ? getLocation() : null;
+					double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
 					String gps_stamp = main_activity.getGPSString(preference_stamp_gpsformat, store_location, location, store_geo_direction, geo_direction);
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "date_stamp: " + date_stamp);

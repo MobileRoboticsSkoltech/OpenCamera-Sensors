@@ -163,6 +163,10 @@ public class PreferenceKeys {
     	return "preference_stamp_style";
     }
 
+    public static String getVideoSubtitlePref() {
+        return "preference_video_subtitle";
+    }
+
     public static String getFrontCameraMirrorKey() {
         return "preference_front_camera_mirror";
     }

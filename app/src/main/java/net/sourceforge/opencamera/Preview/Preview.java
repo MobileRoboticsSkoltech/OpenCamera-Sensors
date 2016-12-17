@@ -235,7 +235,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private final float [] cameraRotation = new float[9];
     private final float [] deviceInclination = new float[9];
     private boolean has_geo_direction;
-    private final float [] geo_direction = new float[3];
+	private final float [] geo_direction = new float[3];
+	private final float [] new_geo_direction = new float[3];
 
 	private final DecimalFormat decimal_format_1dp = new DecimalFormat("#.#");
 	private final DecimalFormat decimal_format_2dp = new DecimalFormat("#.##");
@@ -4758,13 +4759,71 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		return;
     	}
         SensorManager.remapCoordinateSystem(this.deviceRotation, SensorManager.AXIS_X, SensorManager.AXIS_Z, this.cameraRotation);
+		boolean has_old_geo_direction = has_geo_direction;
     	this.has_geo_direction = true;
-    	SensorManager.getOrientation(cameraRotation, geo_direction);
-    	//SensorManager.getOrientation(deviceRotation, geo_direction);
+    	//SensorManager.getOrientation(cameraRotation, geo_direction);
+		SensorManager.getOrientation(cameraRotation, new_geo_direction);
 		/*if( MyDebug.LOG ) {
+			Log.d(TAG, "###");
+			Log.d(TAG, "old geo_direction: " + (geo_direction[0]*180/Math.PI) + ", " + (geo_direction[1]*180/Math.PI) + ", " + (geo_direction[2]*180/Math.PI));
+		}*/
+		for(int i=0;i<3;i++) {
+			float old_compass = (float)Math.toDegrees(geo_direction[i]);
+			float new_compass = (float)Math.toDegrees(new_geo_direction[i]);
+			if( has_old_geo_direction ) {
+				float smoothFactorCompass = 0.1f;
+				float smoothThresholdCompass = 10.0f;
+				old_compass = lowPassFilter(old_compass, new_compass, smoothFactorCompass, smoothThresholdCompass);
+			}
+			else {
+				old_compass = new_compass;
+			}
+			geo_direction[i] = (float)Math.toRadians(old_compass);
+		}
+		/*if( MyDebug.LOG ) {
+			Log.d(TAG, "new_geo_direction: " + (new_geo_direction[0]*180/Math.PI) + ", " + (new_geo_direction[1]*180/Math.PI) + ", " + (new_geo_direction[2]*180/Math.PI));
 			Log.d(TAG, "geo_direction: " + (geo_direction[0]*180/Math.PI) + ", " + (geo_direction[1]*180/Math.PI) + ", " + (geo_direction[2]*180/Math.PI));
 		}*/
     }
+
+	/** Low pass filter, for angles.
+	 * @param old_value Old value in degrees.
+	 * @param new_value New value in degrees.
+     */
+	private float lowPassFilter(float old_value, float new_value, float smoothFactorCompass, float smoothThresholdCompass) {
+		// see http://stackoverflow.com/questions/4699417/android-compass-orientation-on-unreliable-low-pass-filter
+		// https://www.built.io/blog/applying-low-pass-filter-to-android-sensor-s-readings
+		// http://stackoverflow.com/questions/27846604/how-to-get-smooth-orientation-data-in-android
+		float diff = Math.abs(new_value - old_value);
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "diff: " + diff);*/
+		if( diff < 180 ) {
+			if( diff > smoothThresholdCompass ) {
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "jump to new compass");*/
+				old_value = new_value;
+			}
+			else {
+				old_value = old_value + smoothFactorCompass * (new_value - old_value);
+			}
+		}
+		else {
+			if( 360.0 - diff > smoothThresholdCompass ) {
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "jump to new compass");*/
+				old_value = new_value;
+			}
+			else {
+				if( old_value > new_value ) {
+					old_value = (old_value + smoothFactorCompass * ((360 + new_value - old_value) % 360) + 360) % 360;
+				}
+				else {
+					old_value = (old_value - smoothFactorCompass * ((360 - new_value + old_value) % 360) + 360) % 360;
+				}
+			}
+		}
+		return old_value;
+	}
     
     public boolean hasGeoDirection() {
     	return has_geo_direction;
