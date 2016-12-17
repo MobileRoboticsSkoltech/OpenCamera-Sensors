@@ -626,4 +626,12 @@
         <item>preference_front_camera_mirror_no</item>
         <item>preference_front_camera_mirror_photo</item>
     </string-array>
+	<string-array name="preference_video_subtitle_entries">
+        <item>Brez podnapisov</item>
+        <item>Zapiši podnapise</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_values">
+        <item>preference_video_subtitle_no</item>
+        <item>preference_video_subtitle_yes</item>
+    </string-array>
 </resources>
