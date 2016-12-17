@@ -975,15 +975,30 @@ public class DrawPreview {
 					canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 				}
 			}
-			final float angle_scale = 500.0f;
+			float camera_angle_x = preview.getViewAngleX();
+			float camera_angle_y = preview.getViewAngleY();
+			float angle_scale_x = (float)( canvas.getWidth() / (2.0 * Math.tan( Math.toRadians((camera_angle_x/2.0)) )) );
+			float angle_scale_y = (float)( canvas.getHeight() / (2.0 * Math.tan( Math.toRadians((camera_angle_y/2.0)) )) );
+			/*if( MyDebug.LOG ) {
+				Log.d(TAG, "camera_angle_x: " + camera_angle_x);
+				Log.d(TAG, "camera_angle_y: " + camera_angle_y);
+				Log.d(TAG, "angle_scale_x: " + angle_scale_x);
+				Log.d(TAG, "angle_scale_y: " + angle_scale_y);
+				Log.d(TAG, "angle_scale_x/scale: " + angle_scale_x/scale);
+				Log.d(TAG, "angle_scale_y/scale: " + angle_scale_y/scale);
+			}*/
+			float angle_scale = (float)Math.sqrt( angle_scale_x*angle_scale_x + angle_scale_y*angle_scale_y );
+			angle_scale *= preview.getZoomRatio();
 			if( has_pitch_angle && show_pitch_lines ) {
 				int pitch_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 100 : 80;
 				int pitch_radius = (int) (pitch_radius_dps * scale + 0.5f); // convert dps to pixels
-				for(int latitude_angle=-90;latitude_angle<=90;latitude_angle+=10) {
+				int angle_step = 10;
+				if( preview.getZoomRatio() >= 2.0f )
+					angle_step = 5;
+				for(int latitude_angle=-90;latitude_angle<=90;latitude_angle+=angle_step) {
 					double this_angle = pitch_angle - latitude_angle;
 					if( Math.abs(this_angle) < 90.0 ) {
-						float pitch_distance_dp = angle_scale * (float)Math.tan( Math.toRadians(this_angle) );
-						float pitch_distance = (pitch_distance_dp * scale + 0.5f); // convert dps to pixels
+						float pitch_distance = angle_scale * (float)Math.tan( Math.toRadians(this_angle) ); // angle_scale is already in pixels rather than dps
 						/*if( MyDebug.LOG ) {
 							Log.d(TAG, "pitch_angle: " + pitch_angle);
 							Log.d(TAG, "pitch_distance_dp: " + pitch_distance_dp);
@@ -1014,7 +1029,10 @@ public class DrawPreview {
 				int geo_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 80 : 100;
 				int geo_radius = (int) (geo_radius_dps * scale + 0.5f); // convert dps to pixels
 				float geo_angle = (float)Math.toDegrees(geo_direction);
-				for(int longitude_angle=0;longitude_angle<360;longitude_angle+=10) {
+				int angle_step = 10;
+				if( preview.getZoomRatio() >= 2.0f )
+					angle_step = 5;
+				for(int longitude_angle=0;longitude_angle<360;longitude_angle+=angle_step) {
 					double this_angle = longitude_angle - geo_angle;
 					/*if( MyDebug.LOG ) {
 						Log.d(TAG, "longitude_angle: " + longitude_angle);
@@ -1033,8 +1051,7 @@ public class DrawPreview {
 						/*if( MyDebug.LOG ) {
 							Log.d(TAG, "this_angle is now: " + this_angle);
 						}*/
-						float geo_distance_dp = angle_scale * (float)Math.tan( Math.toRadians(this_angle) );
-						float geo_distance = (geo_distance_dp * scale + 0.5f); // convert dps to pixels
+						float geo_distance = angle_scale * (float)Math.tan( Math.toRadians(this_angle) ); // angle_scale is already in pixels rather than dps
 						// draw outline
 						p.setColor(Color.BLACK);
 						p.setAlpha(64);

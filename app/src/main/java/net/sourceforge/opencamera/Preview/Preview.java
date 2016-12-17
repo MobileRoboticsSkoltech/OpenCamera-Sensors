@@ -189,6 +189,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private float exposure_step;
 	private boolean supports_expo_bracketing;
 	private boolean supports_raw;
+	private float view_angle_x;
+	private float view_angle_y;
 
 	private List<CameraController.Size> supported_preview_sizes;
 	
@@ -1082,6 +1084,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		exposure_step = 0.0f;
 		supports_expo_bracketing = false;
 		supports_raw = false;
+		view_angle_x = 55.0f; // set a sensible default
+		view_angle_y = 43.0f; // set a sensible default
 		sizes = null;
 		current_size_index = -1;
 		video_quality_handler.resetCurrentQuality();
@@ -1461,6 +1465,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.exposure_step = camera_features.exposure_step;
 			this.supports_expo_bracketing = camera_features.supports_expo_bracketing;
 			this.supports_raw = camera_features.supports_raw;
+			this.view_angle_x = camera_features.view_angle_x;
+			this.view_angle_y = camera_features.view_angle_y;
 			this.video_quality_handler.setVideoSizes(camera_features.video_sizes);
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
@@ -4982,8 +4988,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "supportsRaw");
     	return this.supports_raw;
     }
-    
-    public List<CameraController.Size> getSupportedPreviewSizes() {
+
+	public float getViewAngleX() {
+		return this.view_angle_x;
+	}
+
+	public float getViewAngleY() {
+		return this.view_angle_y;
+	}
+
+	public List<CameraController.Size> getSupportedPreviewSizes() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedPreviewSizes");
     	return this.supported_preview_sizes;

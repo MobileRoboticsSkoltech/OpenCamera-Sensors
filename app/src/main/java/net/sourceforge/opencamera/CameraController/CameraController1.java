@@ -354,6 +354,34 @@ public class CameraController1 extends CameraController {
         	camera_features.can_disable_shutter_sound = false;
         }
 
+		// Determine view angles. Note that these can vary based on the resolution - and since we read these before the caller has
+		// set the desired resolution, this isn't strictly correct. However these are presumably view angles for the photo anyway,
+		// when some callers (e.g., DrawPreview) want view angles for the preview anyway - so these will only be an approximation for
+		// what we want anyway.
+		final float default_view_angle_x = 55.0f;
+		final float default_view_angle_y = 43.0f;
+		try {
+			camera_features.view_angle_x = parameters.getHorizontalViewAngle();
+			camera_features.view_angle_y = parameters.getVerticalViewAngle();
+		}
+		catch(Exception e) {
+			// apparently some devices throw exceptions...
+			e.printStackTrace();
+			Log.e(TAG, "exception reading horizontal or vertical view angles");
+			camera_features.view_angle_x = default_view_angle_x;
+			camera_features.view_angle_y = default_view_angle_y;
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "view_angle_x: " + camera_features.view_angle_x);
+			Log.d(TAG, "view_angle_y: " + camera_features.view_angle_y);
+		}
+		// need to handle some devices reporting rubbish
+		if( camera_features.view_angle_x > 150.0f || camera_features.view_angle_y > 150.0f ) {
+			Log.e(TAG, "camera API reporting stupid view angles, set to sensible defaults");
+			camera_features.view_angle_x = default_view_angle_x;
+			camera_features.view_angle_y = default_view_angle_y;
+		}
+
 		return camera_features;
 	}
 	
