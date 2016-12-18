@@ -38,6 +38,7 @@ import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Range;
+import android.util.SizeF;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -1092,6 +1093,24 @@ public class CameraController2 extends CameraController {
 		camera_features.exposure_step = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP).floatValue();
 
 		camera_features.can_disable_shutter_sound = true;
+
+		{
+			// Calculate view angles
+			// Note this is an approximation (see http://stackoverflow.com/questions/39965408/what-is-the-android-camera2-api-equivalent-of-camera-parameters-gethorizontalvie ).
+			// Potentially we could do better, taking into account the aspect ratio of the current resolution.
+			// Note that we'd want to distinguish between the field of view of the preview versus the photo (or view) (for example,
+			// DrawPreview would want the preview's field of view).
+			// Also if we wanted to do this, we'd need to make sure that this was done after the caller had set the desired preview
+			// and photo/video resolutions.
+			SizeF physical_size = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+			float [] focal_lengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+			camera_features.view_angle_x = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getWidth(), (2.0 * focal_lengths[0])));
+			camera_features.view_angle_y = (float)Math.toDegrees(2.0 * Math.atan2(physical_size.getHeight(), (2.0 * focal_lengths[0])));
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "view_angle_x: " + camera_features.view_angle_x);
+				Log.d(TAG, "view_angle_y: " + camera_features.view_angle_y);
+			}
+		}
 
 		return camera_features;
 	}

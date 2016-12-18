@@ -618,4 +618,20 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+    <string-array name="preference_front_camera_mirror_entries">
+        <item>Не зеркалить</item>
+        <item>Зеркалить фото</item>
+    </string-array>
+    <string-array name="preference_front_camera_mirror_values">
+        <item>preference_front_camera_mirror_no</item>
+        <item>preference_front_camera_mirror_photo</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_entries">
+        <item>Нет субтитров</item>
+        <item>Записывать субтитры</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_values">
+        <item>preference_video_subtitle_no</item>
+        <item>preference_video_subtitle_yes</item>
+    </string-array>
 </resources>
