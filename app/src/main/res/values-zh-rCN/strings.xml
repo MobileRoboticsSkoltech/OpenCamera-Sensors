@@ -285,4 +285,28 @@
     <string name="audio_control_stop">停止音频监听</string>
     <string name="speech_recognizer_started">说 \"cheese\"</string>
     <string name="audio_listener_started">发出大的声音</string>
+
+    <string name="duration_unlimited">无限</string>
+    <string name="duration_5s">5 秒</string>
+    <string name="duration_10s">10 秒</string>
+    <string name="duration_15s">15 秒</string>
+    <string name="duration_30s">30 秒</string>
+    <string name="duration_1m">1 分</string>
+    <string name="duration_2m">2 分</string>
+    <string name="duration_3m">3 分</string>
+    <string name="duration_4m">4 分</string>
+    <string name="duration_5m">5 分</string>
+    <string name="duration_6m">6 分</string>
+    <string name="duration_7m">7 分</string>
+    <string name="duration_8m">8 分</string>
+    <string name="duration_9m">9 分</string>
+    <string name="duration_10m">10 分</string>
+    <string name="duration_11m">11 分</string>
+    <string name="duration_12m">12 分</string>
+    <string name="duration_15m">15 分</string>
+    <string name="duration_20m">20 分</string>
+    <string name="duration_25m">25 分</string>
+    <string name="duration_30m">30 分</string>
+    <string name="duration_45m">45 分</string>
+    <string name="duration_1h">1 小时</string>
 </resources>

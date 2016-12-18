@@ -263,4 +263,28 @@
     <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
     <string name="permission_record_audio_not_available">Мікрафон не даступны</string>
     <string name="permission_location_not_available">Месцазнаходжанне не даступна</string>
+
+    <string name="duration_unlimited">Не абмежавана</string>
+    <string name="duration_5s">5 секунд</string>
+    <string name="duration_10s">10 секунд</string>
+    <string name="duration_15s">15 секунд</string>
+    <string name="duration_30s">30 секунд</string>
+    <string name="duration_1m">1 хвіліна</string>
+    <string name="duration_2m">2 хвіліны</string>
+    <string name="duration_3m">3 хвіліны</string>
+    <string name="duration_4m">4 хвіліны</string>
+    <string name="duration_5m">5 хвілін</string>
+    <string name="duration_6m">6 хвілін</string>
+    <string name="duration_7m">7 хвілін</string>
+    <string name="duration_8m">8 хвілін</string>
+    <string name="duration_9m">9 хвілін</string>
+    <string name="duration_10m">10 хвілін</string>
+    <string name="duration_11m">11 хвілін</string>
+    <string name="duration_12m">12 хвілін</string>
+    <string name="duration_15m">15 хвілін</string>
+    <string name="duration_20m">20 хвілін</string>
+    <string name="duration_25m">25 хвілін</string>
+    <string name="duration_30m">30 хвілін</string>
+    <string name="duration_45m">45 хвілін</string>
+    <string name="duration_1h">1 гадзіна</string>
 </resources>

@@ -372,4 +372,28 @@
     <string name="preference_show_geo_direction_lines_summary">Отображать линии направления компаса на экране</string>
     <string name="preference_video_subtitle">Субтитры видео</string>
     <string name="preference_video_subtitle_summary">Создавать файл субтитров (.SRT) с датой и временем записи, а также информацией GPS при включенных данных геолокации/направления</string>
+
+    <string name="duration_unlimited">Без ограничений</string>
+    <string name="duration_5s">5 секунд</string>
+    <string name="duration_10s">10 секунд</string>
+    <string name="duration_15s">15 секунд</string>
+    <string name="duration_30s">30 секунд</string>
+    <string name="duration_1m">1 минута</string>
+    <string name="duration_2m">2 минуты</string>
+    <string name="duration_3m">3 минуты</string>
+    <string name="duration_4m">4 минуты</string>
+    <string name="duration_5m">5 минут</string>
+    <string name="duration_6m">6 минут</string>
+    <string name="duration_7m">7 минут</string>
+    <string name="duration_8m">8 минут</string>
+    <string name="duration_9m">9 минут</string>
+    <string name="duration_10m">10 минут</string>
+    <string name="duration_11m">11 минут</string>
+    <string name="duration_12m">12 минут</string>
+    <string name="duration_15m">15 минут</string>
+    <string name="duration_20m">20 минут</string>
+    <string name="duration_25m">25 минут</string>
+    <string name="duration_30m">30 минут</string>
+    <string name="duration_45m">45 минут</string>
+    <string name="duration_1h">1 час</string>
 </resources>

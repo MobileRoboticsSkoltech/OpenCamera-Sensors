@@ -333,4 +333,28 @@
         utilisent beaucoup d\'espace disque, un explorateur de fichiers peut être utilise pour faire le ménage.\n\nLes
         fichiers DNG ne sont enregistrés que dans le mode photo standard.
     </string>
+
+    <string name="duration_unlimited">Illimité</string>
+    <string name="duration_5s">5 secondes</string>
+    <string name="duration_10s">10 secondes</string>
+    <string name="duration_15s">15 secondes</string>
+    <string name="duration_30s">30 secondes</string>
+    <string name="duration_1m">1 minute</string>
+    <string name="duration_2m">2 minutes</string>
+    <string name="duration_3m">3 minutes</string>
+    <string name="duration_4m">4 minutes</string>
+    <string name="duration_5m">5 minutes</string>
+    <string name="duration_6m">6 minutes</string>
+    <string name="duration_7m">7 minutes</string>
+    <string name="duration_8m">8 minutes</string>
+    <string name="duration_9m">9 minutes</string>
+    <string name="duration_10m">10 minutes</string>
+    <string name="duration_11m">11 minutes</string>
+    <string name="duration_12m">12 minutes</string>
+    <string name="duration_15m">15 minutes</string>
+    <string name="duration_20m">20 minutes</string>
+    <string name="duration_25m">25 minutes</string>
+    <string name="duration_30m">30 minutes</string>
+    <string name="duration_45m">45 minutes</string>
+    <string name="duration_1h">1 heure</string>
 </resources>

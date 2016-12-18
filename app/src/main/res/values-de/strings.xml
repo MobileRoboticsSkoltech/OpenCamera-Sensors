@@ -260,4 +260,28 @@
 
     <string name="saf_select_save_location">Speicherort auswählen</string>
     <string name="saf_cancelled">Storage Access Framework abgebrochen</string>
+
+    <string name="duration_unlimited">Unbegrenzt</string>
+    <string name="duration_5s">5 Sekunden</string>
+    <string name="duration_10s">10 Sekunden</string>
+    <string name="duration_15s">15 Sekunden</string>
+    <string name="duration_30s">30 Sekunden</string>
+    <string name="duration_1m">1 Minute</string>
+    <string name="duration_2m">2 Minuten</string>
+    <string name="duration_3m">3 Minuten</string>
+    <string name="duration_4m">4 Minuten</string>
+    <string name="duration_5m">5 Minuten</string>
+    <string name="duration_6m">6 Minuten</string>
+    <string name="duration_7m">7 Minuten</string>
+    <string name="duration_8m">8 Minuten</string>
+    <string name="duration_9m">9 Minuten</string>
+    <string name="duration_10m">10 Minuten</string>
+    <string name="duration_11m">11 Minuten</string>
+    <string name="duration_12m">12 Minuten</string>
+    <string name="duration_15m">15 Minuten</string>
+    <string name="duration_20m">20 Minuten</string>
+    <string name="duration_25m">25 Minuten</string>
+    <string name="duration_30m">30 Minuten</string>
+    <string name="duration_45m">45 Minuten</string>
+    <string name="duration_1h">1 Stunde</string>
 </resources>

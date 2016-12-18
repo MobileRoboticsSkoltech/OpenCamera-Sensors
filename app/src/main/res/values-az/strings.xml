@@ -222,4 +222,28 @@
     <string name="folder_exists">Qovluq artıq mövcuddur</string>
     <string name="focus_distance">Fokus məsafəsi</string>
     <string name="focus_mode">Fokus rejimi</string>
+
+    <string name="duration_unlimited">Qeyri-məhdud</string>
+    <string name="duration_5s">5 saniyə</string>
+    <string name="duration_10s">10 saniyə</string>
+    <string name="duration_15s">15 saniyə</string>
+    <string name="duration_30s">30 saniyə</string>
+    <string name="duration_1m">1 dəqiqə</string>
+    <string name="duration_2m">2 dəqiqə</string>
+    <string name="duration_3m">3 dəqiqə</string>
+    <string name="duration_4m">4 dəqiqə</string>
+    <string name="duration_5m">5 dəqiqə</string>
+    <string name="duration_6m">6 dəqiqə</string>
+    <string name="duration_7m">7 dəqiqə</string>
+    <string name="duration_8m">8 dəqiqə</string>
+    <string name="duration_9m">9 dəqiqə</string>
+    <string name="duration_10m">10 dəqiqə</string>
+    <string name="duration_11m">11 dəqiqə</string>
+    <string name="duration_12m">12 dəqiqə</string>
+    <string name="duration_15m">15 dəqiqə</string>
+    <string name="duration_20m">20 dəqiqə</string>
+    <string name="duration_25m">25 dəqiqə</string>
+    <string name="duration_30m">30 dəqiqə</string>
+    <string name="duration_45m">45 dəqiqə</string>
+    <string name="duration_1h">1 saat</string>
 </resources>

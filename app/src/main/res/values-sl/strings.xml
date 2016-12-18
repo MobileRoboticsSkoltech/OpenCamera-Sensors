@@ -373,4 +373,28 @@
     <string name="preference_show_geo_direction_lines_summary">Prikaži črte smeri neba</string>
 	<string name="preference_video_subtitle">Podnapisi</string>
     <string name="preference_video_subtitle_summary">Ustvari datoteko podnapisov (.srt) s podatki o času, datumu in tudi GPS-u, če sta lokacija in smer omogočena</string>
+
+    <string name="duration_unlimited">Neomejeno</string>
+    <string name="duration_5s">5 s</string>
+    <string name="duration_10s">10 s</string>
+    <string name="duration_15s">15 s</string>
+    <string name="duration_30s">30 s</string>
+    <string name="duration_1m">1 min.</string>
+    <string name="duration_2m">2 min.</string>
+    <string name="duration_3m">3 min.</string>
+    <string name="duration_4m">4 min.</string>
+    <string name="duration_5m">5 min.</string>
+    <string name="duration_6m">6 min.</string>
+    <string name="duration_7m">7 min.</string>
+    <string name="duration_8m">8 min.</string>
+    <string name="duration_9m">9 min.</string>
+    <string name="duration_10m">10 min.</string>
+    <string name="duration_11m">11 min.</string>
+    <string name="duration_12m">12 min.</string>
+    <string name="duration_15m">15 min.</string>
+    <string name="duration_20m">20 min.</string>
+    <string name="duration_25m">25 min.</string>
+    <string name="duration_30m">30 min.</string>
+    <string name="duration_45m">45 min.</string>
+    <string name="duration_1h">1 ura</string>
 </resources>

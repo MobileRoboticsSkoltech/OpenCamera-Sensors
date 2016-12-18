@@ -450,56 +450,6 @@
         <item>100</item>
         <item>120</item>
     </string-array>
-    <string-array name="preference_video_max_duration_entries">
-        <item>Unlimited</item>
-        <item>5 seconds</item>
-        <item>10 seconds</item>
-        <item>15 seconds</item>
-        <item>30 seconds</item>
-        <item>1 minute</item>
-        <item>2 minutes</item>
-        <item>3 minutes</item>
-        <item>4 minutes</item>
-        <item>5 minutes</item>
-        <item>6 minutes</item>
-        <item>7 minutes</item>
-        <item>8 minutes</item>
-        <item>9 minutes</item>
-        <item>10 minutes</item>
-        <item>11 minutes</item>
-        <item>12 minutes</item>
-        <item>15 minutes</item>
-        <item>20 minutes</item>
-        <item>25 minutes</item>
-        <item>30 minutes</item>
-        <item>45 minutes</item>
-        <item>1 hour</item>
-    </string-array>
-    <string-array name="preference_video_max_duration_values">
-        <item>0</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>180</item>
-        <item>240</item>
-        <item>300</item>
-        <item>360</item>
-        <item>420</item>
-        <item>480</item>
-        <item>540</item>
-        <item>600</item>
-        <item>660</item>
-        <item>720</item>
-        <item>900</item>
-        <item>1200</item>
-        <item>1500</item>
-        <item>1800</item>
-        <item>2700</item>
-        <item>3600</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>Don\'t restart</item>
         <item>Repeat 1 time</item>
@@ -633,5 +583,68 @@
     <string-array name="preference_video_subtitle_values">
         <item>preference_video_subtitle_no</item>
         <item>preference_video_subtitle_yes</item>
+    </string-array>
+
+    <!-- The following arrays no longer need to have translated versions, as we read directly from strings.
+         This means we can edit the translations via the strings.xml files in Android Studio's Translation Editor
+         (see https://code.google.com/p/android/issues/detail?id=75303 ).
+         A side-benefit is that we don't have to worry about a translated array missing an entry (which could
+         mean anything from a crash or undefined behaviour if the _entries and _values arrays are different lengths,
+         to that option being unavailable on a particular translation). With this method, the worst that happens is
+         that a new entry is available, but untranslated (same as any other new string we add, that isn't translated
+         yet).
+         This also means it's quick to add an existing new entry to an existing array, without having to update every
+         other arrays.xml file.
+    -->
+
+    <string-array name="preference_video_max_duration_entries">
+        <item>@string/duration_unlimited</item>
+        <item>@string/duration_5s</item>
+        <item>@string/duration_10s</item>
+        <item>@string/duration_15s</item>
+        <item>@string/duration_30s</item>
+        <item>@string/duration_1m</item>
+        <item>@string/duration_2m</item>
+        <item>@string/duration_3m</item>
+        <item>@string/duration_4m</item>
+        <item>@string/duration_5m</item>
+        <item>@string/duration_6m</item>
+        <item>@string/duration_7m</item>
+        <item>@string/duration_8m</item>
+        <item>@string/duration_9m</item>
+        <item>@string/duration_10m</item>
+        <item>@string/duration_11m</item>
+        <item>@string/duration_12m</item>
+        <item>@string/duration_15m</item>
+        <item>@string/duration_20m</item>
+        <item>@string/duration_25m</item>
+        <item>@string/duration_30m</item>
+        <item>@string/duration_45m</item>
+        <item>@string/duration_1h</item>
+    </string-array>
+    <string-array name="preference_video_max_duration_values">
+        <item>0</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+        <item>180</item>
+        <item>240</item>
+        <item>300</item>
+        <item>360</item>
+        <item>420</item>
+        <item>480</item>
+        <item>540</item>
+        <item>600</item>
+        <item>660</item>
+        <item>720</item>
+        <item>900</item>
+        <item>1200</item>
+        <item>1500</item>
+        <item>1800</item>
+        <item>2700</item>
+        <item>3600</item>
     </string-array>
 </resources>
