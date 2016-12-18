@@ -368,4 +368,9 @@
 	
 	<string name="preference_show_pitch_lines">Prikaži višinske črte</string>
     <string name="preference_show_pitch_lines_summary">Prikaži vodoravne višinske črte</string>
+	
+	<string name="preference_show_geo_direction_lines">Prikaži črte smeri neba</string>
+    <string name="preference_show_geo_direction_lines_summary">Prikaži črte smeri neba</string>
+	<string name="preference_video_subtitle">Podnapisi</string>
+    <string name="preference_video_subtitle_summary">Ustvari datoteko podnapisov (.srt) s podatki o času, datumu in tudi GPS-u, če sta lokacija in smer omogočena</string>
 </resources>
