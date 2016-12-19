@@ -599,6 +599,7 @@
 
     <string-array name="preference_video_max_duration_entries">
         <item>@string/duration_unlimited</item>
+        <item>@string/duration_3s</item>
         <item>@string/duration_5s</item>
         <item>@string/duration_10s</item>
         <item>@string/duration_15s</item>

@@ -193,6 +193,7 @@
     <string name="folder_exists">Questa cartella risulta già presente</string>
 
     <string name="duration_unlimited">Illimitata</string>
+    <string name="duration_3s">3 secondi</string>
     <string name="duration_5s">5 secondi</string>
     <string name="duration_10s">10 secondi</string>
     <string name="duration_15s">15 secondi</string>

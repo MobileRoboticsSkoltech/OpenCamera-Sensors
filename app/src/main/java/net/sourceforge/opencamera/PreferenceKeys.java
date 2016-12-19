@@ -254,11 +254,15 @@ public class PreferenceKeys {
     public static String getShowZoomSliderControlsPreferenceKey() {
     	return "preference_show_zoom_slider_controls";
     }
-    
+
+    public static String getShowTakePhotoPreferenceKey() {
+        return "preference_show_take_photo";
+    }
+
     public static String getShowZoomPreferenceKey() {
     	return "preference_show_zoom";
     }
-    
+
     public static String getShowISOPreferenceKey() {
     	return "preference_show_iso";
     }

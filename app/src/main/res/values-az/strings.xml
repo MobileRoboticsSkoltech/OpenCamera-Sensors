@@ -224,6 +224,7 @@
     <string name="focus_mode">Fokus rejimi</string>
 
     <string name="duration_unlimited">Qeyri-məhdud</string>
+    <string name="duration_3s">3 saniyə</string>
     <string name="duration_5s">5 saniyə</string>
     <string name="duration_10s">10 saniyə</string>
     <string name="duration_15s">15 saniyə</string>

@@ -265,6 +265,7 @@
     <string name="permission_location_not_available">Месцазнаходжанне не даступна</string>
 
     <string name="duration_unlimited">Не абмежавана</string>
+    <string name="duration_3s">3 секунд</string>
     <string name="duration_5s">5 секунд</string>
     <string name="duration_10s">10 секунд</string>
     <string name="duration_15s">15 секунд</string>

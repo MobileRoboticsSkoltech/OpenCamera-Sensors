@@ -237,6 +237,7 @@
     <string name="folder_exists">A pasta já existe</string>
 
     <string name="duration_unlimited">Ilimitado</string>
+    <string name="duration_3s">3 segundos</string>
     <string name="duration_5s">5 segundos</string>
     <string name="duration_10s">10 segundos</string>
     <string name="duration_15s">15 segundos</string>
