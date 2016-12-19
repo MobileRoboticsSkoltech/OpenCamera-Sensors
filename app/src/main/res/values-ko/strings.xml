@@ -235,4 +235,28 @@
     <string name="enter_new_folder">새 폴더 이름 입력</string>
     <string name="failed_create_folder">폴더 생성 실패</string>
     <string name="folder_exists">폴더가 이미 존재함</string>
+
+    <string name="duration_unlimited">무제한</string>
+    <string name="duration_5s">5초</string>
+    <string name="duration_10s">10초</string>
+    <string name="duration_15s">15초</string>
+    <string name="duration_30s">30초</string>
+    <string name="duration_1m">1분</string>
+    <string name="duration_2m">2분</string>
+    <string name="duration_3m">3분</string>
+    <string name="duration_4m">4분</string>
+    <string name="duration_5m">5분</string>
+    <string name="duration_6m">6분</string>
+    <string name="duration_7m">7분</string>
+    <string name="duration_8m">8분</string>
+    <string name="duration_9m">9분</string>
+    <string name="duration_10m">10분</string>
+    <string name="duration_11m">11분</string>
+    <string name="duration_12m">12분</string>
+    <string name="duration_15m">15분</string>
+    <string name="duration_20m">20분</string>
+    <string name="duration_25m">25분</string>
+    <string name="duration_30m">30분</string>
+    <string name="duration_45m">45분</string>
+    <string name="duration_1h">1시간</string>
 </resources>

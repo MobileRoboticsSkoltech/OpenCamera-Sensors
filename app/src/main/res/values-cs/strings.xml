@@ -267,4 +267,28 @@
     <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
     <string name="permission_record_audio_not_available">Oprávnění k přístupu k mikrofonu není dostupné</string>
     <string name="permission_location_not_available">Oprávnění k přístupu k poloze není dostupné</string>
+
+    <string name="duration_unlimited">Nekonečné</string>
+    <string name="duration_5s">5 sekund</string>
+    <string name="duration_10s">10 sekund</string>
+    <string name="duration_15s">15 sekund</string>
+    <string name="duration_30s">30 sekund</string>
+    <string name="duration_1m">1 minuta</string>
+    <string name="duration_2m">2 minuty</string>
+    <string name="duration_3m">3 minuty</string>
+    <string name="duration_4m">4 minuty</string>
+    <string name="duration_5m">5 minut</string>
+    <string name="duration_6m">6 minut</string>
+    <string name="duration_7m">7 minut</string>
+    <string name="duration_8m">8 minut</string>
+    <string name="duration_9m">9 minut</string>
+    <string name="duration_10m">10 minut</string>
+    <string name="duration_11m">11 minut</string>
+    <string name="duration_12m">12 minut</string>
+    <string name="duration_15m">15 minut</string>
+    <string name="duration_20m">20 minut</string>
+    <string name="duration_25m">25 minut</string>
+    <string name="duration_30m">30 minut</string>
+    <string name="duration_45m">45 minut</string>
+    <string name="duration_1h">1 hodina</string>
 </resources>

@@ -266,4 +266,28 @@
     <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
     <string name="permission_record_audio_not_available">Mikrofon izni etkin değil</string>
     <string name="permission_location_not_available">Konum izni etkin değil</string>
+
+    <string name="duration_unlimited">Sınırsız</string>
+    <string name="duration_5s">5 saniye</string>
+    <string name="duration_10s">10 saniye</string>
+    <string name="duration_15s">15 saniye</string>
+    <string name="duration_30s">30 saniye</string>
+    <string name="duration_1m">1 dakika</string>
+    <string name="duration_2m">2 dakika</string>
+    <string name="duration_3m">3 dakika</string>
+    <string name="duration_4m">4 dakika</string>
+    <string name="duration_5m">5 dakika</string>
+    <string name="duration_6m">6 dakika</string>
+    <string name="duration_7m">7 dakika</string>
+    <string name="duration_8m">8 dakika</string>
+    <string name="duration_9m">9 dakika</string>
+    <string name="duration_10m">10 dakika</string>
+    <string name="duration_11m">11 dakika</string>
+    <string name="duration_12m">12 dakika</string>
+    <string name="duration_15m">15 dakika</string>
+    <string name="duration_20m">20 dakika</string>
+    <string name="duration_25m">25 dakika</string>
+    <string name="duration_30m">30 dakika</string>
+    <string name="duration_45m">45 dakika</string>
+    <string name="duration_1h">1 saat</string>
 </resources>

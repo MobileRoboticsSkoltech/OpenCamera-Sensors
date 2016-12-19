@@ -372,56 +372,6 @@
         <item>100</item>
         <item>120</item>
     </string-array>
-    <string-array name="preference_video_max_duration_entries">
-        <item>무제한</item>
-        <item>5초</item>
-        <item>10초</item>
-        <item>15초</item>
-        <item>30초</item>
-        <item>1분</item>
-        <item>2분</item>
-        <item>3분</item>
-        <item>4분</item>
-        <item>5분</item>
-        <item>6분</item>
-        <item>7분</item>
-        <item>8분</item>
-        <item>9분</item>
-        <item>10분</item>
-        <item>11분</item>
-        <item>12분</item>
-        <item>15분</item>
-        <item>20분</item>
-        <item>25분</item>
-        <item>30분</item>
-        <item>45분</item>
-        <item>1시간</item>
-    </string-array>
-    <string-array name="preference_video_max_duration_values">
-        <item>0</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>180</item>
-        <item>240</item>
-        <item>300</item>
-        <item>360</item>
-        <item>420</item>
-        <item>480</item>
-        <item>540</item>
-        <item>600</item>
-        <item>660</item>
-        <item>720</item>
-        <item>900</item>
-        <item>1200</item>
-        <item>1500</item>
-        <item>1800</item>
-        <item>2700</item>
-        <item>3600</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>반복하지 않음</item>
         <item>1회 반복</item>

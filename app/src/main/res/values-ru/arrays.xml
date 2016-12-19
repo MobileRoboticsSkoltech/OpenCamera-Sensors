@@ -450,56 +450,6 @@
         <item>100</item>
         <item>120</item>
     </string-array>
-    <string-array name="preference_video_max_duration_entries">
-        <item>Без ограничений</item>
-        <item>5 секунд</item>
-        <item>10 секунд</item>
-        <item>15 секунд</item>
-        <item>30 секунд</item>
-        <item>1 минута</item>
-        <item>2 минуты</item>
-        <item>3 минуты</item>
-        <item>4 минуты</item>
-        <item>5 минут</item>
-        <item>6 минут</item>
-        <item>7 минут</item>
-        <item>8 минут</item>
-        <item>9 минут</item>
-        <item>10 минут</item>
-        <item>11 минут</item>
-        <item>12 минут</item>
-        <item>15 минут</item>
-        <item>20 минут</item>
-        <item>25 минут</item>
-        <item>30 минут</item>
-        <item>45 минут</item>
-        <item>1 час</item>
-    </string-array>
-    <string-array name="preference_video_max_duration_values">
-        <item>0</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>180</item>
-        <item>240</item>
-        <item>300</item>
-        <item>360</item>
-        <item>420</item>
-        <item>480</item>
-        <item>540</item>
-        <item>600</item>
-        <item>660</item>
-        <item>720</item>
-        <item>900</item>
-        <item>1200</item>
-        <item>1500</item>
-        <item>1800</item>
-        <item>2700</item>
-        <item>3600</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>Не повторять</item>
         <item>Повторить 1 раз</item>

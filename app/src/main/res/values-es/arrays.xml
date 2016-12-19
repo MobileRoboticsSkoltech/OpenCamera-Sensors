@@ -442,56 +442,6 @@
         <item>100</item>
         <item>120</item>
     </string-array>
-    <string-array name="preference_video_max_duration_entries">
-        <item>Unlimited</item>
-        <item>5 segundos</item>
-        <item>10 segundos</item>
-        <item>15 segundos</item>
-        <item>30 segundos</item>
-        <item>1 minutos</item>
-        <item>2 minutos</item>
-        <item>3 minutos</item>
-        <item>4 minutos</item>
-        <item>5 minutos</item>
-        <item>6 minutos</item>
-        <item>7 minutos</item>
-        <item>8 minutos</item>
-        <item>9 minutos</item>
-        <item>10 minutos</item>
-        <item>11 minutos</item>
-        <item>12 minutos</item>
-        <item>15 minutos</item>
-        <item>20 minutos</item>
-        <item>25 minutos</item>
-        <item>30 minutos</item>
-        <item>45 minutos</item>
-        <item>1 hora</item>
-    </string-array>
-    <string-array name="preference_video_max_duration_values">
-        <item>0</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-        <item>180</item>
-        <item>240</item>
-        <item>300</item>
-        <item>360</item>
-        <item>420</item>
-        <item>480</item>
-        <item>540</item>
-        <item>600</item>
-        <item>660</item>
-        <item>720</item>
-        <item>900</item>
-        <item>1200</item>
-        <item>1500</item>
-        <item>1800</item>
-        <item>2700</item>
-        <item>3600</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>No repetir</item>
         <item>Repetir 1 vez</item>

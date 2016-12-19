@@ -258,5 +258,29 @@
     <string name="folder_exists">La carpeta ya existe</string>
 
     <string name="saf_select_save_location">Selecciona el lugar de guardado</string>
-    <string name="saf_cancelled">Framework de Almacenamiento de Acceso cancelado</string>   
+    <string name="saf_cancelled">Framework de Almacenamiento de Acceso cancelado</string>
+
+    <string name="duration_unlimited">Unlimited</string>
+    <string name="duration_5s">5 segundos</string>
+    <string name="duration_10s">10 segundos</string>
+    <string name="duration_15s">15 segundos</string>
+    <string name="duration_30s">30 segundos</string>
+    <string name="duration_1m">1 minutos</string>
+    <string name="duration_2m">2 minutos</string>
+    <string name="duration_3m">3 minutos</string>
+    <string name="duration_4m">4 minutos</string>
+    <string name="duration_5m">5 minutos</string>
+    <string name="duration_6m">6 minutos</string>
+    <string name="duration_7m">7 minutos</string>
+    <string name="duration_8m">8 minutos</string>
+    <string name="duration_9m">9 minutos</string>
+    <string name="duration_10m">10 minutos</string>
+    <string name="duration_11m">11 minutos</string>
+    <string name="duration_12m">12 minutos</string>
+    <string name="duration_15m">15 minutos</string>
+    <string name="duration_20m">20 minutos</string>
+    <string name="duration_25m">25 minutos</string>
+    <string name="duration_30m">30 minutos</string>
+    <string name="duration_45m">45 minutos</string>
+    <string name="duration_1h">1 hora</string>
 </resources>

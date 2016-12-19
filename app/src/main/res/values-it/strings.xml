@@ -191,5 +191,28 @@
     <string name="enter_new_folder">Inserisci il nome della nuova cartella</string>
     <string name="failed_create_folder">Creazione della cartella fallita</string>
     <string name="folder_exists">Questa cartella risulta già presente</string>
-    
+
+    <string name="duration_unlimited">Illimitata</string>
+    <string name="duration_5s">5 secondi</string>
+    <string name="duration_10s">10 secondi</string>
+    <string name="duration_15s">15 secondi</string>
+    <string name="duration_30s">30 secondi</string>
+    <string name="duration_1m">1 minuto</string>
+    <string name="duration_2m">2 minuti</string>
+    <string name="duration_3m">3 minuti</string>
+    <string name="duration_4m">4 minuti</string>
+    <string name="duration_5m">5 minuti</string>
+    <string name="duration_6m">6 minuti</string>
+    <string name="duration_7m">7 minuti</string>
+    <string name="duration_8m">8 minuti</string>
+    <string name="duration_9m">9 minuti</string>
+    <string name="duration_10m">10 minuti</string>
+    <string name="duration_11m">11 minuti</string>
+    <string name="duration_12m">12 minuti</string>
+    <string name="duration_15m">15 minuti</string>
+    <string name="duration_20m">20 minuti</string>
+    <string name="duration_25m">25 minuti</string>
+    <string name="duration_30m">30 minuti</string>
+    <string name="duration_45m">45 minuti</string>
+    <string name="duration_1h">1 ora</string>
 </resources>

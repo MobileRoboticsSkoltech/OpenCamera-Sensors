@@ -304,4 +304,28 @@
     <string name="raw_info">Ficheiros DNG contêm a informação total descomprimida e não processada da sua câmara.\n\nA maioria das aplicações de galeria não reconhecem DNG, em vez disso as mesmas devem ser usadas com aplicações especializadas como Snapseed ou Lightroom.\n\nNote que várias opções de processamento como "Carimbar fotografias" e "Auto-estabilizar" serão aplicadas apenas às imagens JPEG, e não às imagens DNG.\n\nFicheiros DNG utilizam muito espaço; um explorador de ficheiros poderá ser útil para transferir ou eliminar os mesmos.</string>
 
     <string name="dont_show_again">Não mostrar novamente</string>
+
+    <string name="duration_unlimited">Ilimitado</string>
+    <string name="duration_5s">5 segundos</string>
+    <string name="duration_10s">10 segundos</string>
+    <string name="duration_15s">15 segundos</string>
+    <string name="duration_30s">30 segundos</string>
+    <string name="duration_1m">1 minuto</string>
+    <string name="duration_2m">2 minutos</string>
+    <string name="duration_3m">3 minutos</string>
+    <string name="duration_4m">4 minutos</string>
+    <string name="duration_5m">5 minutos</string>
+    <string name="duration_6m">6 minutos</string>
+    <string name="duration_7m">7 minutos</string>
+    <string name="duration_8m">8 minutos</string>
+    <string name="duration_9m">9 minutos</string>
+    <string name="duration_10m">10 minutos</string>
+    <string name="duration_11m">11 minutos</string>
+    <string name="duration_12m">12 minutos</string>
+    <string name="duration_15m">15 minutos</string>
+    <string name="duration_20m">20 minutos</string>
+    <string name="duration_25m">25 minutos</string>
+    <string name="duration_30m">30 minutos</string>
+    <string name="duration_45m">45 minutos</string>
+    <string name="duration_1h">1 hora</string>
 </resources>
