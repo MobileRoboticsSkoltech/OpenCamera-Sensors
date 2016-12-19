@@ -569,7 +569,9 @@ public class MainUI {
         		String pref_immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
         		if( pref_immersive_mode.equals("immersive_mode_everything") ) {
     			    View takePhotoButton = main_activity.findViewById(R.id.take_photo);
-    			    takePhotoButton.setVisibility(visibility);
+					if( sharedPreferences.getBoolean(PreferenceKeys.getShowTakePhotoPreferenceKey(), true) ) {
+						takePhotoButton.setVisibility(visibility);
+					}
         		}
 				if( !immersive_mode ) {
 					// make sure the GUI is set up as expected

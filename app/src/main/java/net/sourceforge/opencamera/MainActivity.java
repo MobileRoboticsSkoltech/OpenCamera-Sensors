@@ -2199,6 +2199,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "cameraSetup: time after setting up zoom: " + (System.currentTimeMillis() - debug_time));
+
+			View takePhotoButton = findViewById(R.id.take_photo);
+			if( sharedPreferences.getBoolean(PreferenceKeys.getShowTakePhotoPreferenceKey(), true) ) {
+				if( !mainUI.inImmersiveMode() ) {
+					takePhotoButton.setVisibility(View.VISIBLE);
+				}
+			}
+			else {
+				takePhotoButton.setVisibility(View.INVISIBLE);
+			}
 		}
 		{
 			if( MyDebug.LOG )

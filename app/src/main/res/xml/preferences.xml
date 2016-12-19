@@ -312,7 +312,14 @@
                 android:defaultValue="true"
                 />
 
-            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+			<CheckBoxPreference
+				android:key="preference_show_take_photo"
+				android:title="@string/preference_show_take_photo"
+				android:summary="@string/preference_show_take_photo_summary"
+				android:defaultValue="true"
+				/>
+
+			<!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
             <CheckBoxPreference
                 android:key="preference_show_iso"
                 android:title="@string/preference_show_iso"

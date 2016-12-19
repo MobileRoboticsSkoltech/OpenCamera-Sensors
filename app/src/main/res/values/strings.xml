@@ -397,4 +397,7 @@
     <string name="duration_30m">30 minutes</string>
     <string name="duration_45m">45 minutes</string>
     <string name="duration_1h">1 hour</string>
+
+    <string name="preference_show_take_photo">Show take photo icon</string>
+    <string name="preference_show_take_photo_summary">Show the icon for taking photos and recording videos. Useful if your device has a hardware shutter button and you\'d rather use that.</string>
 </resources>
