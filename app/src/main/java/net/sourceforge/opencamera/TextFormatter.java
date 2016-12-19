@@ -86,4 +86,13 @@ public class TextFormatter {
         }
         return gps_stamp;
     }
+
+    public static String formatTimeMS(long time_ms) {
+        int ms = (int) (time_ms) % 1000 ;
+        int seconds = (int) (time_ms / 1000) % 60 ;
+        int minutes = (int) ((time_ms / (1000*60)) % 60);
+        int hours   = (int) ((time_ms / (1000*60*60)) % 24);
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d,%03d", hours, minutes, seconds, ms);
+    }
+
 }
