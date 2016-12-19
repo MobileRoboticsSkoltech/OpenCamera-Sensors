@@ -373,11 +373,17 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean is_samsung = Build.MANUFACTURER.toLowerCase(Locale.US).contains("samsung");
 		boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
+		boolean is_nexus = Build.MODEL.toLowerCase(Locale.US).contains("nexus");
 		boolean is_nexus6 = Build.MODEL.toLowerCase(Locale.US).contains("nexus 6");
+		boolean is_pixel_phone = Build.DEVICE != null && Build.DEVICE.equals("sailfish");
+		boolean is_pixel_xl_phone = Build.DEVICE != null && Build.DEVICE.equals("marlin");
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "is_samsung? " + is_samsung);
 			Log.d(TAG, "is_oneplus? " + is_oneplus);
+			Log.d(TAG, "is_nexus? " + is_nexus);
 			Log.d(TAG, "is_nexus6? " + is_nexus6);
+			Log.d(TAG, "is_pixel_phone? " + is_pixel_phone);
+			Log.d(TAG, "is_pixel_xl_phone? " + is_pixel_xl_phone);
 		}
 		if( is_samsung || is_oneplus ) {
 			// workaround needed for Samsung S7 at least (tested on Samsung RTL)
@@ -391,6 +397,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			// we set this even for Nexus 6 devices not on Android 7, as at some point they'll likely be upgraded to Android 7
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), false);
+			editor.apply();
+		}
+		if( is_nexus || is_pixel_phone || is_pixel_xl_phone ) {
+			// generally continuous picture mode works better than auto-focus, though we want to make sure it works okay on the device
+			// Nexus devices seem to work fine with continuous mode, and we know that Google's camera uses continuous focus
+			SharedPreferences.Editor editor = sharedPreferences.edit();
+			editor.putString(PreferenceKeys.getFocusPreferenceKey(0, false), "focus_mode_continuous_picture");
 			editor.apply();
 		}
 	}
