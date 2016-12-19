@@ -16,6 +16,7 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.Preview;
+import net.sourceforge.opencamera.TextFormatter;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import net.sourceforge.opencamera.UI.PopupView;
 
@@ -27,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 //import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
@@ -6631,6 +6633,34 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "restart: " + i + " / " + n_restarts);
 			restart();
 		}
+	}
+
+	public void testGPSString() {
+		Log.d(TAG, "testGPSString");
+		setToDefault();
+
+		Location location1 = new Location("");
+		location1.setLatitude(0.0);
+		location1.setLongitude(0.0);
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_none", true, location1, true, Math.toRadians(180)), "");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location1, true, Math.toRadians(180)), "0, 0, 180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location1, true, Math.toRadians(180)), "0°0'0\", 0°0'0\", 180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location1, false, Math.toRadians(180)), "0, 0");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location1, false, Math.toRadians(180)), "0°0'0\", 0°0'0\"");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", false, null, true, Math.toRadians(180)), "180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(180)), "180°");
+
+		Location location2 = new Location("");
+		location2.setLatitude(-29.3);
+		location2.setLongitude(47.6173);
+		location2.setAltitude(106.5);
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_none", true, location2, true, Math.toRadians(74)), "");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location2, true, Math.toRadians(74)), "-29.3, 47.6173, 106.5m, 74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location2, true, Math.toRadians(74)), "-29°18'0\", 47°37'2\", 106.5m, 74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location2, false, Math.toRadians(74)), "-29.3, 47.6173, 106.5m");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location2, false, Math.toRadians(74)), "-29°18'0\", 47°37'2\", 106.5m");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", false, null, true, Math.toRadians(74)), "74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(74)), "74°");
 	}
 
 	/** The following testHDRX tests test the HDR algorithm on a given set of input images.
