@@ -6,12 +6,15 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
@@ -40,6 +43,9 @@ public class MainUI {
 
 	private boolean immersive_mode;
     private boolean show_gui = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
+
+	private boolean keydown_volume_up;
+	private boolean keydown_volume_down;
 
 	public MainUI(MainActivity main_activity) {
 		if( MyDebug.LOG )
@@ -117,7 +123,7 @@ public class MainUI {
 			Log.d(TAG, "layoutUI");
 			debug_time = System.currentTimeMillis();
 		}
-		//this.preview.updateUIPlacement();
+		//main_activity.getPreview().updateUIPlacement();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
     	// we cache the preference_ui_placement to save having to check it in the draw() method
@@ -846,6 +852,163 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "time to create popup: " + (System.currentTimeMillis() - time_s));
     }
+
+	@SuppressWarnings("deprecation")
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onKeyDown: " + keyCode);
+		switch( keyCode ) {
+			case KeyEvent.KEYCODE_VOLUME_UP:
+			case KeyEvent.KEYCODE_VOLUME_DOWN:
+			case KeyEvent.KEYCODE_MEDIA_PREVIOUS: // media codes are for "selfie sticks" buttons
+			case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+			case KeyEvent.KEYCODE_MEDIA_STOP:
+			{
+				if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+					keydown_volume_up = true;
+				else if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN )
+					keydown_volume_down = true;
+
+				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+				String volume_keys = sharedPreferences.getString(PreferenceKeys.getVolumeKeysPreferenceKey(), "volume_take_photo");
+
+				if((keyCode==KeyEvent.KEYCODE_MEDIA_PREVIOUS
+						||keyCode==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+						||keyCode==KeyEvent.KEYCODE_MEDIA_STOP)
+						&&!(volume_keys.equals("volume_take_photo"))) {
+					AudioManager audioManager = (AudioManager) main_activity.getSystemService(Context.AUDIO_SERVICE);
+					if(audioManager==null) break;
+					if(!audioManager.isWiredHeadsetOn()) break; // isWiredHeadsetOn() is deprecated, but comment says "Use only to check is a headset is connected or not."
+				}
+
+				if( volume_keys.equals("volume_take_photo") ) {
+					main_activity.takePicture();
+					return true;
+				}
+				else if( volume_keys.equals("volume_focus") ) {
+					if( keydown_volume_up && keydown_volume_down ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "take photo rather than focus, as both volume keys are down");
+						main_activity.takePicture();
+					}
+					else if( main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ) {
+						if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+							main_activity.changeFocusDistance(-1);
+						else
+							main_activity.changeFocusDistance(1);
+					}
+					else {
+						// important not to repeatedly request focus, even though main_activity.getPreview().requestAutoFocus() will cancel, as causes problem if key is held down (e.g., flash gets stuck on)
+						// also check DownTime vs EventTime to prevent repeated focusing whilst the key is held down
+						if( event.getDownTime() == event.getEventTime() && !main_activity.getPreview().isFocusWaiting() ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "request focus due to volume key");
+							main_activity.getPreview().requestAutoFocus();
+						}
+					}
+					return true;
+				}
+				else if( volume_keys.equals("volume_zoom") ) {
+					if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+						main_activity.zoomIn();
+					else
+						main_activity.zoomOut();
+					return true;
+				}
+				else if( volume_keys.equals("volume_exposure") ) {
+					if( main_activity.getPreview().getCameraController() != null ) {
+						String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
+						boolean manual_iso = !value.equals("auto");
+						if( keyCode == KeyEvent.KEYCODE_VOLUME_UP ) {
+							if( manual_iso ) {
+								if( main_activity.getPreview().supportsISORange() )
+									main_activity.changeISO(1);
+							}
+							else
+								main_activity.changeExposure(1);
+						}
+						else {
+							if( manual_iso ) {
+								if( main_activity.getPreview().supportsISORange() )
+									main_activity.changeISO(-1);
+							}
+							else
+								main_activity.changeExposure(-1);
+						}
+					}
+					return true;
+				}
+				else if( volume_keys.equals("volume_auto_stabilise") ) {
+					if( main_activity.supportsAutoStabilise() ) {
+						boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
+						auto_stabilise = !auto_stabilise;
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), auto_stabilise);
+						editor.apply();
+						String message = main_activity.getResources().getString(R.string.preference_auto_stabilise) + ": " + main_activity.getResources().getString(auto_stabilise ? R.string.on : R.string.off);
+						main_activity.getPreview().showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
+					}
+					else {
+						main_activity.getPreview().showToast(main_activity.getChangedAutoStabiliseToastBoxer(), R.string.auto_stabilise_not_supported);
+					}
+					return true;
+				}
+				else if( volume_keys.equals("volume_really_nothing") ) {
+					// do nothing, but still return true so we don't change volume either
+					return true;
+				}
+				// else do nothing here, but still allow changing of volume (i.e., the default behaviour)
+				break;
+			}
+			case KeyEvent.KEYCODE_MENU:
+			{
+				// needed to support hardware menu button
+				// tested successfully on Samsung S3 (via RTL)
+				// see http://stackoverflow.com/questions/8264611/how-to-detect-when-user-presses-menu-key-on-their-android-device
+				main_activity.openSettings();
+				return true;
+			}
+			case KeyEvent.KEYCODE_CAMERA:
+			{
+				if( event.getRepeatCount() == 0 ) {
+					main_activity.takePicture();
+					return true;
+				}
+			}
+			case KeyEvent.KEYCODE_FOCUS:
+			{
+				// important not to repeatedly request focus, even though main_activity.getPreview().requestAutoFocus() will cancel - causes problem with hardware camera key where a half-press means to focus
+				// also check DownTime vs EventTime to prevent repeated focusing whilst the key is held down - see https://sourceforge.net/p/opencamera/tickets/174/ ,
+				// or same issue above for volume key focus
+				if( event.getDownTime() == event.getEventTime() && !main_activity.getPreview().isFocusWaiting() ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "request focus due to focus key");
+					main_activity.getPreview().requestAutoFocus();
+				}
+				return true;
+			}
+			case KeyEvent.KEYCODE_ZOOM_IN:
+			{
+				main_activity.zoomIn();
+				return true;
+			}
+			case KeyEvent.KEYCODE_ZOOM_OUT:
+			{
+				main_activity.zoomOut();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void onKeyUp(int keyCode, KeyEvent event) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onKeyUp: " + keyCode);
+		if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
+			keydown_volume_up = false;
+		else if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN )
+			keydown_volume_down = false;
+	}
 
     // for testing
     public View getPopupButton(String key) {

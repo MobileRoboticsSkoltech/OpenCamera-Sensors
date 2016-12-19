@@ -130,9 +130,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 
-	private boolean keydown_volume_up;
-	private boolean keydown_volume_down;
-	
 	// for testing; must be volatile for test project reading the state
 	public boolean is_test; // whether called from OpenCamera.test testing
 	public volatile Bitmap gallery_bitmap;
@@ -660,159 +657,17 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	public boolean onKeyDown(int keyCode, KeyEvent event) { 
 		if( MyDebug.LOG )
 			Log.d(TAG, "onKeyDown: " + keyCode);
-		switch( keyCode ) {
-        case KeyEvent.KEYCODE_VOLUME_UP:
-        case KeyEvent.KEYCODE_VOLUME_DOWN:
-        case KeyEvent.KEYCODE_MEDIA_PREVIOUS: // media codes are for "selfie sticks" buttons
-        case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-        case KeyEvent.KEYCODE_MEDIA_STOP:
-	        {
-    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-    				keydown_volume_up = true;
-    			else if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN )
-    				keydown_volume_down = true;
-
-	    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-	    		String volume_keys = sharedPreferences.getString(PreferenceKeys.getVolumeKeysPreferenceKey(), "volume_take_photo");
-
-	    		if((keyCode==KeyEvent.KEYCODE_MEDIA_PREVIOUS
-	        		||keyCode==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
-	        		||keyCode==KeyEvent.KEYCODE_MEDIA_STOP)
-	        		&&!(volume_keys.equals("volume_take_photo"))) {
-	        		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-	        		if(audioManager==null) break;
-	        		if(!audioManager.isWiredHeadsetOn()) break; // isWiredHeadsetOn() is deprecated, but comment says "Use only to check is a headset is connected or not."
-	        	}
-	    		
-	    		if( volume_keys.equals("volume_take_photo") ) {
-	            	takePicture();
-	                return true;
-	    		}
-	    		else if( volume_keys.equals("volume_focus") ) {
-	    			if( keydown_volume_up && keydown_volume_down ) {
-	    				if( MyDebug.LOG )
-	    					Log.d(TAG, "take photo rather than focus, as both volume keys are down");
-		            	takePicture();
-	    			}
-	    			else if( preview.getCurrentFocusValue() != null && preview.getCurrentFocusValue().equals("focus_mode_manual2") ) {
-		    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-		    				this.changeFocusDistance(-1);
-		    			else
-		    				this.changeFocusDistance(1);
-	    			}
-	    			else {
-	    				// important not to repeatedly request focus, even though preview.requestAutoFocus() will cancel, as causes problem if key is held down (e.g., flash gets stuck on)
-	    				// also check DownTime vs EventTime to prevent repeated focusing whilst the key is held down
-	    				if( event.getDownTime() == event.getEventTime() && !preview.isFocusWaiting() ) {
-		    				if( MyDebug.LOG )
-		    					Log.d(TAG, "request focus due to volume key");
-		    				preview.requestAutoFocus();
-	    				}
-	    			}
-					return true;
-	    		}
-	    		else if( volume_keys.equals("volume_zoom") ) {
-	    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-	    				this.zoomIn();
-	    			else
-	    				this.zoomOut();
-	                return true;
-	    		}
-	    		else if( volume_keys.equals("volume_exposure") ) {
-	    			if( preview.getCameraController() != null ) {
-		    			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
-		    			boolean manual_iso = !value.equals("auto");
-		    			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP ) {
-		    				if( manual_iso ) {
-		    					if( preview.supportsISORange() )
-			    					this.changeISO(1);
-		    				}
-		    				else
-		    					this.changeExposure(1);
-		    			}
-		    			else {
-		    				if( manual_iso ) {
-		    					if( preview.supportsISORange() )
-			    					this.changeISO(-1);
-		    				}
-		    				else
-		    					this.changeExposure(-1);
-		    			}
-	    			}
-	                return true;
-	    		}
-	    		else if( volume_keys.equals("volume_auto_stabilise") ) {
-	    			if( this.supports_auto_stabilise ) {
-						boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
-						auto_stabilise = !auto_stabilise;
-						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), auto_stabilise);
-						editor.apply();
-						String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(auto_stabilise ? R.string.on : R.string.off);
-						preview.showToast(changed_auto_stabilise_toast, message);
-	    			}
-	    			else {
-	    				preview.showToast(changed_auto_stabilise_toast, R.string.auto_stabilise_not_supported);
-	    			}
-	    			return true;
-	    		}
-	    		else if( volume_keys.equals("volume_really_nothing") ) {
-	    			// do nothing, but still return true so we don't change volume either
-	    			return true;
-	    		}
-	    		// else do nothing here, but still allow changing of volume (i.e., the default behaviour)
-	    		break;
-	        }
-		case KeyEvent.KEYCODE_MENU:
-			{
-	        	// needed to support hardware menu button
-	        	// tested successfully on Samsung S3 (via RTL)
-	        	// see http://stackoverflow.com/questions/8264611/how-to-detect-when-user-presses-menu-key-on-their-android-device
-				openSettings();
-	            return true;
-			}
-		case KeyEvent.KEYCODE_CAMERA:
-			{
-				if( event.getRepeatCount() == 0 ) {
-	            	takePicture();
-		            return true;
-				}
-			}
-		case KeyEvent.KEYCODE_FOCUS:
-			{
-				// important not to repeatedly request focus, even though preview.requestAutoFocus() will cancel - causes problem with hardware camera key where a half-press means to focus
-				// also check DownTime vs EventTime to prevent repeated focusing whilst the key is held down - see https://sourceforge.net/p/opencamera/tickets/174/ ,
-				// or same issue above for volume key focus
-				if( event.getDownTime() == event.getEventTime() && !preview.isFocusWaiting() ) {
-    				if( MyDebug.LOG )
-    					Log.d(TAG, "request focus due to focus key");
-    				preview.requestAutoFocus();
-				}
-	            return true;
-			}
-		case KeyEvent.KEYCODE_ZOOM_IN:
-			{
-				this.zoomIn();
-	            return true;
-			}
-		case KeyEvent.KEYCODE_ZOOM_OUT:
-			{
-				this.zoomOut();
-	            return true;
-			}
-		}
-        return super.onKeyDown(keyCode, event); 
+		boolean handled = mainUI.onKeyDown(keyCode, event);
+		if( handled )
+			return true;
+        return super.onKeyDown(keyCode, event);
     }
 
 	public boolean onKeyUp(int keyCode, KeyEvent event) { 
 		if( MyDebug.LOG )
 			Log.d(TAG, "onKeyUp: " + keyCode);
-		if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-			keydown_volume_up = false;
-		else if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN )
-			keydown_volume_down = false;
-
-        return super.onKeyUp(keyCode, event); 
+		mainUI.onKeyUp(keyCode, event);
+        return super.onKeyUp(keyCode, event);
 	}
 
 	public void zoomIn() {
@@ -827,11 +682,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		mainUI.changeSeekbar(R.id.exposure_seekbar, change);
 	}
 
-	private void changeISO(int change) {
+	public void changeISO(int change) {
 		mainUI.changeSeekbar(R.id.iso_seekbar, change);
 	}
 
-	private void changeFocusDistance(int change) {
+	public void changeFocusDistance(int change) {
 		mainUI.changeSeekbar(R.id.focus_seekbar, change);
 	}
 	
@@ -1112,7 +967,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		mainUI.togglePopupSettings();
     }
     
-    private void openSettings() {
+    public void openSettings() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "openSettings");
 		waitUntilImageQueueEmpty(); // in theory not needed as we could continue running in the background, but best to be safe
@@ -2012,7 +1867,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		applicationInterface.trashLastImage();
     }
 
-    private void takePicture() {
+    public void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
 		closePopup();
