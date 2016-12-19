@@ -375,6 +375,7 @@
     <string name="preference_video_subtitle_summary">Ustvari datoteko podnapisov (.srt) s podatki o času, datumu in tudi GPS-u, če sta lokacija in smer omogočena</string>
 
     <string name="duration_unlimited">Neomejeno</string>
+    <string name="duration_3s">3 s</string>
     <string name="duration_5s">5 s</string>
     <string name="duration_10s">10 s</string>
     <string name="duration_15s">15 s</string>

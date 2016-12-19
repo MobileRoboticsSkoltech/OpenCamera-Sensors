@@ -261,6 +261,7 @@
     <string name="saf_cancelled">Storage Access Framework 已取消</string>
 
     <string name="duration_unlimited">無限</string>
+    <string name="duration_3s">3 秒</string>
     <string name="duration_5s">5 秒</string>
     <string name="duration_10s">10 秒</string>
     <string name="duration_15s">15 秒</string>

@@ -287,6 +287,7 @@
     <string name="audio_listener_started">发出大的声音</string>
 
     <string name="duration_unlimited">无限</string>
+    <string name="duration_3s">3 秒</string>
     <string name="duration_5s">5 秒</string>
     <string name="duration_10s">10 秒</string>
     <string name="duration_15s">15 秒</string>

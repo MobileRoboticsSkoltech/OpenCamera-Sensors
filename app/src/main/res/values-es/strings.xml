@@ -261,6 +261,7 @@
     <string name="saf_cancelled">Framework de Almacenamiento de Acceso cancelado</string>
 
     <string name="duration_unlimited">Unlimited</string>
+    <string name="duration_3s">3 segundos</string>
     <string name="duration_5s">5 segundos</string>
     <string name="duration_10s">10 segundos</string>
     <string name="duration_15s">15 segundos</string>

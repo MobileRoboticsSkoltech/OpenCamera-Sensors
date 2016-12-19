@@ -269,6 +269,7 @@
     <string name="permission_location_not_available">位置情報の使用が許可されていません</string>
 
     <string name="duration_unlimited">制限なし</string>
+    <string name="duration_3s">3秒</string>
     <string name="duration_5s">5秒</string>
     <string name="duration_10s">10秒</string>
     <string name="duration_15s">15秒</string>
