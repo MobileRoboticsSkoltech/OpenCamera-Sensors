@@ -984,11 +984,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 						Log.d(TAG, "offset_ms: " + offset_ms);
 						Log.d(TAG, "video_time: " + video_time);
 					}
-					String date_stamp = MainActivity.getDateString(preference_stamp_dateformat, current_date);
-					String time_stamp = MainActivity.getTimeString(preference_stamp_timeformat, current_date);
+					String date_stamp = TextFormatter.getDateString(preference_stamp_dateformat, current_date);
+					String time_stamp = TextFormatter.getTimeString(preference_stamp_timeformat, current_date);
 					Location location = store_location ? getLocation() : null;
 					double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
-					String gps_stamp = main_activity.getGPSString(preference_stamp_gpsformat, store_location, location, store_geo_direction, geo_direction);
+					String gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, store_location, location, store_geo_direction, geo_direction);
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "date_stamp: " + date_stamp);
 						Log.d(TAG, "time_stamp: " + time_stamp);
