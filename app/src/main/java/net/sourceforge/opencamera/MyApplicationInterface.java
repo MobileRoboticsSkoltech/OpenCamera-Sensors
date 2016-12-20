@@ -1212,20 +1212,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public void onVideoInfo(int what, int extra) {
-		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
-			int message_id;
-			if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "max duration reached");
-				message_id = R.string.video_max_duration;
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "max filesize reached");
-				message_id = R.string.video_max_filesize;
-			}
-			if( message_id != 0 )
-				main_activity.getPreview().showToast(null, message_id);
+		// we don't show a toast for MEDIA_RECORDER_INFO_MAX_DURATION_REACHED - conflicts with "n repeats to go" toast from Preview
+		if( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "max filesize reached");
+			int message_id = R.string.video_max_filesize;
+			main_activity.getPreview().showToast(null, message_id);
 			// in versions 1.24 and 1.24, there was a bug where we had "info_" for onVideoError and "error_" for onVideoInfo!
 			// fixed in 1.25; also was correct for 1.23 and earlier
 			String debug_value = "info_" + what + "_" + extra;
