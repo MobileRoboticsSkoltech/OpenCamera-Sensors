@@ -16,6 +16,7 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.Preview;
+import net.sourceforge.opencamera.TextFormatter;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import net.sourceforge.opencamera.UI.PopupView;
 
@@ -27,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 //import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
@@ -2890,7 +2892,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(zoomSeekBar.getVisibility() == View.GONE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
 	    
-	    subTestTakeVideo(false, false, false, true, null, 5000, false);
+	    subTestTakeVideo(false, false, false, true, null, 5000, false, false);
 
 	    // test touch exits immersive mode
 		TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
@@ -3746,7 +3748,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int doTest(); // return expected number of new files
 	}
 	
-	private void subTestTakeVideo(boolean test_exposure_lock, boolean test_focus_area, boolean allow_failure, boolean immersive_mode, VideoTestCallback test_cb, long time_ms, boolean max_filesize) throws InterruptedException {
+	private void subTestTakeVideo(boolean test_exposure_lock, boolean test_focus_area, boolean allow_failure, boolean immersive_mode, VideoTestCallback test_cb, long time_ms, boolean max_filesize, boolean subtitles) throws InterruptedException {
 		assertTrue(mPreview.isPreviewStarted());
 
 		if( test_exposure_lock && !mPreview.supportsExposureLock() ) {
@@ -3892,13 +3894,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				// if quick, should have deleted corrupt video - but may be device dependent, sometimes we manage to record a video anyway!
 				assertTrue(n_new_files == 0 || n_new_files == 1);
 			}
+			else if( subtitles ) {
+				assertEquals(n_new_files, 2);
+			}
 			else {
-				assertTrue(n_new_files == 1);
+				assertEquals(n_new_files, 1);
 			}
 		}
 		else {
 			Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
-			assertTrue(n_new_files == exp_n_new_files);
+			assertEquals(n_new_files, exp_n_new_files);
 		}
 
 		// trash/share only shown when preview is paused after taking a photo
@@ -3917,7 +3922,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 
 	    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_selector );
-		assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video) ) );
+		assertEquals( takePhotoButton.getContentDescription(), mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video) );
 	}
 
 	public void testTakeVideo() throws InterruptedException {
@@ -3925,7 +3930,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-		subTestTakeVideo(false, false, false, false, null, 5000, false);
+		subTestTakeVideo(false, false, false, false, null, 5000, false, false);
 	}
 
 	public void testTakeVideoAudioControl() throws InterruptedException {
@@ -3938,7 +3943,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
-		subTestTakeVideo(false, false, false, false, null, 5000, false);
+		subTestTakeVideo(false, false, false, false, null, 5000, false, false);
 	}
 
 	// If this test fails, make sure we've manually selected that folder (as permission can't be given through the test framework).
@@ -3958,9 +3963,24 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
-		subTestTakeVideo(false, false, false, false, null, 5000, false);
+		subTestTakeVideo(false, false, false, false, null, 5000, false, false);
 	}
-	
+
+	public void testTakeVideoSubtitles() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSubtitles");
+
+		setToDefault();
+		{
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putString(PreferenceKeys.getVideoSubtitlePref(), "preference_video_subtitle_yes");
+			editor.apply();
+			updateForSettings();
+		}
+
+		subTestTakeVideo(false, false, false, false, null, 5000, false, true);
+	}
+
 	/** Set available memory to make sure that we stop before running out of memory.
 	 *  This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
 	 */
@@ -3987,7 +4007,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Log.d(TAG, "video recording now stopped");
 				return 1;
 			}
-		}, 5000, true);
+		}, 5000, true, false);
 	}
 
 	/** Set available memory small enough to make sure we don't even attempt to record video.
@@ -4009,7 +4029,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Log.d(TAG, "video recording now stopped");
 				return 0;
 			}
-		}, 5000, true);
+		}, 5000, true, false);
 	}
 
 	/** Set maximum filesize so that we get approx 3s of video time. Check that recording stops and restarts within 6s.
@@ -4067,7 +4087,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Log.d(TAG, "video recording now stopped again");
 				return 2;
 			}
-		}, 5000, true);
+		}, 5000, true, false);
 	}
 
 	/* Max filesize is for ~4.5s, and max duration is 5s, check we only get 1 video.
@@ -4106,7 +4126,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	}
 				return 1;
 			}
-		}, 5000, true);
+		}, 5000, true, false);
 	}
 
 	/* Max filesize for ~5s, max duration 7s, max n_repeats 1 - to ensure we're not repeating indefinitely; should get 4 videos.
@@ -4144,7 +4164,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	}
 				return 4;
 			}
-		}, 5000, true);
+		}, 5000, true, false);
 	}
 
 	public void testTakeVideoStabilization() throws InterruptedException {
@@ -4164,7 +4184,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 	    assertTrue(mPreview.getCameraController().getVideoStabilization());
 
-		subTestTakeVideo(false, false, false, false, null, 5000, false);
+		subTestTakeVideo(false, false, false, false, null, 5000, false, false);
 
 	    assertTrue(mPreview.getCameraController().getVideoStabilization());
 	}
@@ -4174,7 +4194,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-		subTestTakeVideo(true, false, false, false, null, 5000, false);
+		subTestTakeVideo(true, false, false, false, null, 5000, false, false);
 	}
 
 	public void testTakeVideoFocusArea() throws InterruptedException {
@@ -4182,7 +4202,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
-		subTestTakeVideo(false, true, false, false, null, 5000, false);
+		subTestTakeVideo(false, true, false, false, null, 5000, false, false);
 	}
 
 	public void testTakeVideoQuick() throws InterruptedException {
@@ -4191,7 +4211,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
     	// still need a short delay (at least 500ms, otherwise Open Camera will ignore the repeated stop)
-		subTestTakeVideo(false, false, false, false, null, 500, false);
+		subTestTakeVideo(false, false, false, false, null, 500, false, false);
 	}
 
 	// If this test fails, make sure we've manually selected that folder (as permission can't be given through the test framework).
@@ -4212,7 +4232,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
     	// still need a short delay (at least 500ms, otherwise Open Camera will ignore the repeated stop)
-		subTestTakeVideo(false, false, false, false, null, 500, false);
+		subTestTakeVideo(false, false, false, false, null, 500, false, false);
 	}
 
 	public void testTakeVideoForceFailure() throws InterruptedException {
@@ -4221,7 +4241,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		mActivity.getPreview().test_video_failure = true;
-		subTestTakeVideo(false, false, true, false, null, 5000, false);
+		subTestTakeVideo(false, false, true, false, null, 5000, false, false);
 	}
 
 	/* Test can be reliable on some devices, test no longer run as part of test suites.
@@ -4240,7 +4260,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
-		subTestTakeVideo(false, false, true, false, null, 5000, false);
+		subTestTakeVideo(false, false, true, false, null, 5000, false, false);
 	}
 
 	/* Test can be reliable on some devices, test no longer run as part of test suites.
@@ -4259,7 +4279,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 			Log.d(TAG, "test video with fps: " + fps_value);
 			boolean allow_failure = fps_value.equals("24") || fps_value.equals("25") || fps_value.equals("60");
-			subTestTakeVideo(false, false, allow_failure, false, null, 5000, false);
+			subTestTakeVideo(false, false, allow_failure, false, null, 5000, false, false);
 		}
 	}
 
@@ -4280,7 +4300,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 			Log.d(TAG, "test video with bitrate: " + bitrate_value);
 			boolean allow_failure = bitrate_value.equals("30000000") || bitrate_value.equals("50000000");
-			subTestTakeVideo(false, false, allow_failure, false, null, 5000, false);
+			subTestTakeVideo(false, false, allow_failure, false, null, 5000, false, false);
 		}
 	}
 
@@ -6631,6 +6651,34 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "restart: " + i + " / " + n_restarts);
 			restart();
 		}
+	}
+
+	public void testGPSString() {
+		Log.d(TAG, "testGPSString");
+		setToDefault();
+
+		Location location1 = new Location("");
+		location1.setLatitude(0.0);
+		location1.setLongitude(0.0);
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_none", true, location1, true, Math.toRadians(180)), "");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location1, true, Math.toRadians(180)), "0, 0, 180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location1, true, Math.toRadians(180)), "0°0'0\", 0°0'0\", 180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location1, false, Math.toRadians(180)), "0, 0");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location1, false, Math.toRadians(180)), "0°0'0\", 0°0'0\"");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", false, null, true, Math.toRadians(180)), "180°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(180)), "180°");
+
+		Location location2 = new Location("");
+		location2.setLatitude(-29.3);
+		location2.setLongitude(47.6173);
+		location2.setAltitude(106.5);
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_none", true, location2, true, Math.toRadians(74)), "");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location2, true, Math.toRadians(74)), "-29.3, 47.6173, 106.5m, 74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location2, true, Math.toRadians(74)), "-29°18'0\", 47°37'2\", 106.5m, 74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", true, location2, false, Math.toRadians(74)), "-29.3, 47.6173, 106.5m");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", true, location2, false, Math.toRadians(74)), "-29°18'0\", 47°37'2\", 106.5m");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_default", false, null, true, Math.toRadians(74)), "74°");
+		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(74)), "74°");
 	}
 
 	/** The following testHDRX tests test the HDR algorithm on a given set of input images.

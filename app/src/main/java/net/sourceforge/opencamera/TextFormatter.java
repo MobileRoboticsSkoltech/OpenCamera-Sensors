@@ -64,6 +64,8 @@ public class TextFormatter {
         String gps_stamp = "";
         if( !preference_stamp_gpsformat.equals("preference_stamp_gpsformat_none") ) {
             if( store_location ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "location: " + location);
                 if( preference_stamp_gpsformat.equals("preference_stamp_gpsformat_dms") )
                     gps_stamp += LocationSupplier.locationToDMS(location.getLatitude()) + ", " + LocationSupplier.locationToDMS(location.getLongitude());
                 else
@@ -84,6 +86,17 @@ public class TextFormatter {
                 gps_stamp += "" + Math.round(geo_angle) + (char)0x00B0;
             }
         }
+        if( MyDebug.LOG )
+            Log.d(TAG, "gps_stamp: " + gps_stamp);
         return gps_stamp;
     }
+
+    public static String formatTimeMS(long time_ms) {
+        int ms = (int) (time_ms) % 1000 ;
+        int seconds = (int) (time_ms / 1000) % 60 ;
+        int minutes = (int) ((time_ms / (1000*60)) % 60);
+        int hours   = (int) ((time_ms / (1000*60*60)));
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d,%03d", hours, minutes, seconds, ms);
+    }
+
 }

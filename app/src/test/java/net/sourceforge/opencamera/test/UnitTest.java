@@ -7,10 +7,14 @@ import net.sourceforge.opencamera.CameraController.CameraController2;
 import net.sourceforge.opencamera.LocationSupplier;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.Preview.VideoQualityHandler;
+import net.sourceforge.opencamera.TextFormatter;
 
 import org.junit.Test;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -96,6 +100,51 @@ public class UnitTest {
 		location_string = LocationSupplier.locationToDMS(-147.00938);
 		Log.d(TAG, "location_string: " + location_string);
 		assertTrue(location_string.equals("-147°0'33\""));
+	}
+
+	@Test
+	public void testDateString() throws ParseException {
+		Log.d(TAG, "testDateString");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		Date date1 = sdf.parse("2017/01/31");
+		assertEquals( TextFormatter.getDateString("preference_stamp_dateformat_none", date1), "" );
+		assertEquals( TextFormatter.getDateString("preference_stamp_dateformat_yyyymmdd", date1), "2017/01/31" );
+		assertEquals( TextFormatter.getDateString("preference_stamp_dateformat_ddmmyyyy", date1), "31/01/2017" );
+		assertEquals( TextFormatter.getDateString("preference_stamp_dateformat_mmddyyyy", date1), "01/31/2017" );
+	}
+
+	@Test
+	public void testTimeString() throws ParseException {
+		Log.d(TAG, "testTimeString");
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		Date time1 = sdf.parse("00:00:00");
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_none", time1), "" );
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_12hour", time1), "12:00:00 AM" );
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_24hour", time1), "00:00:00" );
+		Date time2 = sdf.parse("08:15:43");
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_none", time2), "" );
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_12hour", time2), "08:15:43 AM" );
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_24hour", time2), "08:15:43" );
+		Date time3 = sdf.parse("12:00:00");
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_none", time3), "" );
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_12hour", time3), "12:00:00 PM" );
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_24hour", time3), "12:00:00" );
+		Date time4 = sdf.parse("13:53:06");
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_none", time4), "" );
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_12hour", time4), "01:53:06 PM" );
+		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_24hour", time4), "13:53:06" );
+	}
+
+	@Test
+	public void testFormatTime() {
+		Log.d(TAG, "testFormatTime");
+		assertEquals( TextFormatter.formatTimeMS(952), "00:00:00,952" );
+		assertEquals( TextFormatter.formatTimeMS(1092), "00:00:01,092" );
+		assertEquals( TextFormatter.formatTimeMS(37301), "00:00:37,301" );
+		assertEquals( TextFormatter.formatTimeMS(306921), "00:05:06,921" );
+		assertEquals( TextFormatter.formatTimeMS(5391002), "01:29:51,002" );
+		assertEquals( TextFormatter.formatTimeMS(92816837), "25:46:56,837" );
+		assertEquals( TextFormatter.formatTimeMS(792816000), "220:13:36,000" );
 	}
 
 	@Test

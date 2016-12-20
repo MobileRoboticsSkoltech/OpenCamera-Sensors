@@ -948,14 +948,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 				OutputStreamWriter writer;
 				private int count = 1;
 
-				private String formatTimeMS(long time_ms) {
-					int ms = (int) (time_ms) % 1000 ;
-					int seconds = (int) (time_ms / 1000) % 60 ;
-					int minutes = (int) ((time_ms / (1000*60)) % 60);
-					int hours   = (int) ((time_ms / (1000*60*60)) % 24);
-					return String.format(Locale.getDefault(), "%02d:%02d:%02d,%03d", hours, minutes, seconds, ms);
-				}
-
 				private String getSubtitleFilename(String video_filename) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "getSubtitleFilename");
@@ -1014,8 +1006,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 					long video_time_to = video_time_from + 999;
 					if( video_time_from < 0 )
 						video_time_from = 0;
-					String subtitle_time_from = formatTimeMS(video_time_from);
-					String subtitle_time_to = formatTimeMS(video_time_to);
+					String subtitle_time_from = TextFormatter.formatTimeMS(video_time_from);
+					String subtitle_time_to = TextFormatter.formatTimeMS(video_time_to);
 					try {
 						synchronized( this ) {
 							if( writer == null ) {
