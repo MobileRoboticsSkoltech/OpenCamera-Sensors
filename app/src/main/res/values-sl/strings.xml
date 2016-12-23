@@ -398,4 +398,7 @@
     <string name="duration_30m">30 min.</string>
     <string name="duration_45m">45 min.</string>
     <string name="duration_1h">1 ura</string>
+	
+	<string name="preference_show_take_photo">Prikaži ikono za slikanje fotografije</string>
+    <string name="preference_show_take_photo_summary">Prikaži ikono za slikanje fotografij in snemanje videoposnetkov. Uporabno, če ima vaša naprava fizični sprožilec, ki bi ga raje uporabili.</string>
 </resources>
