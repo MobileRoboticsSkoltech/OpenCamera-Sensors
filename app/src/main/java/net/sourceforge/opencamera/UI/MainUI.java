@@ -279,14 +279,21 @@ public class MainUI {
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
-	
+
 			view = main_activity.findViewById(R.id.take_photo);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
-	
+
+			view = main_activity.findViewById(R.id.pause_video);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+			view.setLayoutParams(layoutParams);
+			setViewRotation(view, ui_rotation);
+
 			view = main_activity.findViewById(R.id.zoom);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
@@ -499,6 +506,24 @@ public class MainUI {
 		}
     }
 
+	/** Set content description for pause video button.
+	 */
+	public void setPauseVideoContentDescription() {
+		if (MyDebug.LOG)
+			Log.d(TAG, "setPauseVideoContentDescription()");
+		View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
+		int content_description;
+		if( main_activity.getPreview().isVideoRecordingPaused() ) {
+			content_description = R.string.resume_video;
+		}
+		else {
+			content_description = R.string.pause_video;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "content_description: " + main_activity.getResources().getString(content_description));
+		pauseVideoButton.setContentDescription(main_activity.getResources().getString(content_description));
+	}
+
     public boolean getUIPlacementRight() {
     	return this.ui_placement_right;
     }
@@ -574,9 +599,13 @@ public class MainUI {
 				}
         		String pref_immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
         		if( pref_immersive_mode.equals("immersive_mode_everything") ) {
-    			    View takePhotoButton = main_activity.findViewById(R.id.take_photo);
 					if( sharedPreferences.getBoolean(PreferenceKeys.getShowTakePhotoPreferenceKey(), true) ) {
+						View takePhotoButton = main_activity.findViewById(R.id.take_photo);
 						takePhotoButton.setVisibility(visibility);
+					}
+					if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && main_activity.getPreview().isVideoRecording() ) {
+						View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
+						pauseVideoButton.setVisibility(visibility);
 					}
         		}
 				if( !immersive_mode ) {

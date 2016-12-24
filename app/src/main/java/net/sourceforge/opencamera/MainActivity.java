@@ -249,6 +249,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    speechRecognizerButton.setVisibility(View.GONE); // disabled by default, until the speech recognizer is created
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting button visibility: " + (System.currentTimeMillis() - debug_time));
+		View pauseVideoButton = findViewById(R.id.pause_video);
+		pauseVideoButton.setVisibility(View.INVISIBLE);
 
 		// listen for orientation event change
 	    orientationEventListener = new OrientationEventListener(this) {
@@ -812,7 +814,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "clickedTakePhoto");
     	this.takePicture();
     }
-    
+
+	public void clickedPauseVideo(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedPauseVideo");
+		if( preview.isVideoRecording() ) { // just in case
+			preview.pauseVideo();
+			mainUI.setPauseVideoContentDescription();
+		}
+	}
+
     public void clickedAudioControl(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedAudioControl");
@@ -1198,19 +1209,30 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         }
         super.onBackPressed();        
     }
-    
-    public boolean usingKitKatImmersiveMode() {
-    	// whether we are using a Kit Kat style immersive mode (either hiding GUI, or everything)
+
+	public boolean usingKitKatImmersiveMode() {
+		// whether we are using a Kit Kat style immersive mode (either hiding GUI, or everything)
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
-    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    		String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-    		if( immersive_mode.equals("immersive_mode_gui") || immersive_mode.equals("immersive_mode_everything") )
-    			return true;
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			if( immersive_mode.equals("immersive_mode_gui") || immersive_mode.equals("immersive_mode_everything") )
+				return true;
 		}
 		return false;
-    }
-    
-    private Handler immersive_timer_handler = null;
+	}
+	public boolean usingKitKatImmersiveModeEverything() {
+		// whether we are using a Kit Kat style immersive mode for everything
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			if( immersive_mode.equals("immersive_mode_everything") )
+				return true;
+		}
+		return false;
+	}
+
+
+	private Handler immersive_timer_handler = null;
     private Runnable immersive_timer_runnable = null;
     
     private void setImmersiveTimer() {
