@@ -2797,7 +2797,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
 	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 	    View zoomSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
-	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
 	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 	    int exposureVisibility = exposureButton.getVisibility();
@@ -2807,7 +2808,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(trashButton.getVisibility() == View.GONE);
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
-	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+		assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
 
 	    // now wait for immersive mode to kick in
 	    Thread.sleep(6000);
@@ -2821,7 +2823,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.GONE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
-	    
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
+
 	    subTestTakePhoto(false, true, true, true, false, false, false, false);
 	    
 	    // test now exited immersive mode
@@ -2835,6 +2838,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
 
 	    // wait for immersive mode to kick in again
 	    Thread.sleep(6000);
@@ -2848,6 +2852,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.GONE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
 
 	    subTestTakePhotoPreviewPaused(true, false);
 
@@ -2862,6 +2867,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
 
 	    // need to switch video before going back to immersive mode
 		if( !mPreview.isVideo() ) {
@@ -2878,7 +2884,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
-	    
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
+
 	    // wait for immersive mode to kick in again
 	    Thread.sleep(6000);
 	    assertTrue(switchCameraButton.getVisibility() == View.GONE);
@@ -2891,7 +2898,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.GONE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
-	    
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
+
 	    subTestTakeVideo(false, false, false, true, null, 5000, false, false);
 
 	    // test touch exits immersive mode
@@ -2906,6 +2914,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
 
 	    // switch back to photo mode
 		if( mPreview.isVideo() ) {
@@ -2928,6 +2937,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue(shareButton.getVisibility() == View.GONE);
 		    assertTrue(zoomSeekBar.getVisibility() == View.GONE);
 		    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+			assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
 		}
 	}
 
@@ -2954,7 +2964,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
 	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
-	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
 	    View zoomSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
 	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
@@ -2965,6 +2976,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
 
 	    // now wait for immersive mode to kick in
 	    Thread.sleep(6000);
@@ -2977,8 +2989,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.GONE);
 	    assertTrue(takePhotoButton.getVisibility() == View.GONE);
-	    
-	    // now touch to exit immersive mode
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
+
+		// now touch to exit immersive mode
 		TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
 		Thread.sleep(500);
 
@@ -2992,6 +3005,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
 
 	    // test touch exits immersive mode
 		TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
@@ -3004,6 +3018,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 	    assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(takePhotoButton.getVisibility() == View.VISIBLE);
+		assertTrue(pauseVideoButton.getVisibility() == View.INVISIBLE);
 	}
 	
 	private void subTestTakePhotoPreviewPaused(boolean immersive_mode, boolean is_raw) throws InterruptedException {
@@ -3755,26 +3770,34 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 
-	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+		View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( mPreview.isVideo() ) {
 			assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_selector );
 			assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video) ) );
+			assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
 			assertTrue( switchVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_photo) ) );
 		}
 		else {
 			assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_photo_selector );
 			assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.take_photo) ) );
+			assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
 			assertTrue( switchVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_video) ) );
 		}
+		assertTrue( pauseVideoButton.getVisibility() == View.INVISIBLE );
 
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
+		assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_selector );
+		assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video) ) );
+		assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
 		assertTrue( switchVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_photo) ) );
-		
+		assertTrue( pauseVideoButton.getVisibility() == View.INVISIBLE );
+
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
 		Log.d(TAG, "folder: " + folder);
@@ -3815,6 +3838,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    if( mPreview.isTakingPhoto() ) {
 		    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_recording );
 			assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
+			assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N )
+				assertTrue( pauseVideoButton.getVisibility() == View.VISIBLE );
+			else
+				assertTrue( pauseVideoButton.getVisibility() == View.INVISIBLE );
 		    assertTrue(switchCameraButton.getVisibility() == View.GONE);
 		    assertTrue(switchVideoButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 		    assertTrue(audioControlButton.getVisibility() == View.GONE);
@@ -3835,6 +3863,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	Thread.sleep(time_ms);
 			    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_recording );
 				assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
 
 				assertTrue(!mPreview.hasFocusArea());
 				if( !allow_failure ) {
@@ -3871,6 +3900,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 			    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_recording );
 				assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
 				Log.d(TAG, "about to click stop video");
 			    clickView(takePhotoButton);
 				Log.d(TAG, "done clicking stop video");
@@ -3923,6 +3953,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_selector );
 		assertEquals( takePhotoButton.getContentDescription(), mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video) );
+		assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
+		assertTrue( pauseVideoButton.getVisibility() == View.INVISIBLE );
 	}
 
 	public void testTakeVideo() throws InterruptedException {
