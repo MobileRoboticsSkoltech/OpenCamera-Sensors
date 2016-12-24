@@ -4013,6 +4013,190 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakeVideo(false, false, false, false, null, 5000, false, true);
 	}
 
+	/** Set pausing and resuming video.
+	 */
+	public void testTakeVideoPause() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoPause");
+
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
+			Log.d(TAG, "pause video requires Android N or better");
+			return;
+		}
+
+		setToDefault();
+
+		subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
+			@Override
+			public int doTest() {
+				View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+				View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
+				final long time_tol_ms = 1000;
+
+				Log.d(TAG, "wait before pausing");
+				try {
+					Thread.sleep(3000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
+				assertTrue( pauseVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( !mPreview.isVideoRecordingPaused() );
+				long video_time = mPreview.getVideoTime();
+				Log.d(TAG, "video time: " + video_time);
+				assertTrue( video_time >= 3000 - time_tol_ms );
+				assertTrue( video_time <= 3000 + time_tol_ms );
+
+				Log.d(TAG, "about to click pause video");
+				clickView(pauseVideoButton);
+				Log.d(TAG, "done clicking pause video");
+				getInstrumentation().waitForIdleSync();
+				Log.d(TAG, "after idle sync");
+
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.resume_video) ) );
+				assertTrue( pauseVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( mPreview.isVideoRecordingPaused() );
+
+				Log.d(TAG, "wait before resuming");
+				try {
+					Thread.sleep(3000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.resume_video) ) );
+				assertTrue( pauseVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( mPreview.isVideoRecordingPaused() );
+				video_time = mPreview.getVideoTime();
+				Log.d(TAG, "video time: " + video_time);
+				assertTrue( video_time >= 3000 - time_tol_ms );
+				assertTrue( video_time <= 3000 + time_tol_ms );
+
+				Log.d(TAG, "about to click resume video");
+				clickView(pauseVideoButton);
+				Log.d(TAG, "done clicking resume video");
+				getInstrumentation().waitForIdleSync();
+				Log.d(TAG, "after idle sync");
+
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
+				assertTrue( pauseVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( !mPreview.isVideoRecordingPaused() );
+
+				Log.d(TAG, "wait before stopping");
+				try {
+					Thread.sleep(3000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				Log.d(TAG, "takePhotoButton description: " + takePhotoButton.getContentDescription());
+				assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
+				assertTrue( pauseVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( !mPreview.isVideoRecordingPaused() );
+				video_time = mPreview.getVideoTime();
+				Log.d(TAG, "video time: " + video_time);
+				assertTrue( video_time >= 6000 - time_tol_ms );
+				assertTrue( video_time <= 6000 + time_tol_ms );
+
+				Log.d(TAG, "about to click stop video");
+				clickView(takePhotoButton);
+				Log.d(TAG, "done clicking stop video");
+				getInstrumentation().waitForIdleSync();
+				Log.d(TAG, "after idle sync");
+
+				return 1;
+			}
+		}, 5000, false, false);
+	}
+
+	/** Set pausing and stopping video.
+	 */
+	public void testTakeVideoPauseStop() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoPauseStop");
+
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
+			Log.d(TAG, "pause video requires Android N or better");
+			return;
+		}
+
+		setToDefault();
+
+		subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
+			@Override
+			public int doTest() {
+				View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+				View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
+				final long time_tol_ms = 1000;
+
+				Log.d(TAG, "wait before pausing");
+				try {
+					Thread.sleep(3000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
+				assertTrue( pauseVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( !mPreview.isVideoRecordingPaused() );
+				long video_time = mPreview.getVideoTime();
+				Log.d(TAG, "video time: " + video_time);
+				assertTrue( video_time >= 3000 - time_tol_ms );
+				assertTrue( video_time <= 3000 + time_tol_ms );
+
+				Log.d(TAG, "about to click pause video");
+				clickView(pauseVideoButton);
+				Log.d(TAG, "done clicking pause video");
+				getInstrumentation().waitForIdleSync();
+				Log.d(TAG, "after idle sync");
+
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.resume_video) ) );
+				assertTrue( pauseVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( mPreview.isVideoRecordingPaused() );
+
+				Log.d(TAG, "wait before stopping");
+				try {
+					Thread.sleep(3000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				Log.d(TAG, "takePhotoButton description: " + takePhotoButton.getContentDescription());
+				assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
+				assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.resume_video) ) );
+				assertTrue( pauseVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( mPreview.isVideoRecordingPaused() );
+				video_time = mPreview.getVideoTime();
+				Log.d(TAG, "video time: " + video_time);
+				assertTrue( video_time >= 3000 - time_tol_ms );
+				assertTrue( video_time <= 3000 + time_tol_ms );
+
+				Log.d(TAG, "about to click stop video");
+				clickView(takePhotoButton);
+				Log.d(TAG, "done clicking stop video");
+				getInstrumentation().waitForIdleSync();
+				Log.d(TAG, "after idle sync");
+
+				return 1;
+			}
+		}, 5000, false, false);
+	}
+
 	/** Set available memory to make sure that we stop before running out of memory.
 	 *  This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
 	 */
