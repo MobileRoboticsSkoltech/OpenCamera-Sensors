@@ -24,6 +24,19 @@
 		android:background="@null"
         />
 
+    <ImageButton
+        android:id="@+id/pause_video"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/pause_video"
+        android:src="@drawable/ic_pause_circle_outline_white_48dp"
+        android:onClick="clickedPauseVideo"
+        android:layout_above="@+id/take_photo"
+        android:background="@null"
+        />
+
     <ZoomControls
         android:id="@+id/zoom"
         android:contentDescription="@string/zoom"

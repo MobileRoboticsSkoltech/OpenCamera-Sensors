@@ -2,17 +2,13 @@ package net.sourceforge.opencamera;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -936,6 +932,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void startedVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "startedVideo()");
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+			if( !( main_activity.getMainUI().inImmersiveMode() && main_activity.usingKitKatImmersiveModeEverything() ) ) {
+				View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
+				pauseVideoButton.setVisibility(View.VISIBLE);
+			}
+			main_activity.getMainUI().setPauseVideoContentDescription();
+		}
 		final int video_method = this.createOutputVideoMethod();
 		boolean dategeo_subtitles = getVideoSubtitlePref().equals("preference_video_subtitle_yes");
 		if( dategeo_subtitles && video_method != ApplicationInterface.VIDEOMETHOD_URI ) {
@@ -966,6 +969,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 						Log.d(TAG, "SubtitleVideoTimerTask run");
 					long video_time = main_activity.getPreview().getVideoTime();
 					if( !main_activity.getPreview().isVideoRecording() ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "no longer video recording");
+						return;
+					}
+					if( main_activity.getPreview().isVideoRecordingPaused() ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "video recording is paused");
 						return;
 					}
 					Date current_date = new Date();
@@ -1093,6 +1103,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "uri " + uri);
 			Log.d(TAG, "filename " + filename);
 		}
+		View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
+		pauseVideoButton.setVisibility(View.INVISIBLE);
 		if( subtitleVideoTimerTask != null ) {
 			subtitleVideoTimerTask.cancel();
 			subtitleVideoTimerTask = null;

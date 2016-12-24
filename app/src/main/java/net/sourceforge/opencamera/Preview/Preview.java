@@ -113,8 +113,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean is_video;
 	private volatile MediaRecorder video_recorder; // must be volatile for test project reading the state
 	private volatile boolean video_start_time_set; // must be volatile for test project reading the state
-	private long video_start_time;
-	private long video_accumulated_time;
+	private long video_start_time; // when the video recording was started, or last resumed if it's was paused
+	private long video_accumulated_time; // this time should be added to (System.currentTimeMillis() - video_start_time) to find the true video duration, that takes into account pausing/resuming, as well as any auto-restarts from max filesize
+	private boolean video_recorder_is_paused; // whether video_recorder is running but has paused
 	private boolean video_restart_on_max_filesize;
 	private static final long min_safe_restart_video_time = 1000; // if the remaining max time after restart is less than this, don't restart
 	private int video_method = ApplicationInterface.VIDEOMETHOD_FILE;
@@ -201,8 +202,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private final ToastBoxer flash_toast = new ToastBoxer();
 	private final ToastBoxer focus_toast = new ToastBoxer();
 	private final ToastBoxer take_photo_toast = new ToastBoxer();
+	private final ToastBoxer pause_video_toast = new ToastBoxer();
 	private final ToastBoxer seekbar_toast = new ToastBoxer();
-	
+
 	private int ui_rotation;
 
 	private boolean supports_face_detection;
@@ -819,6 +821,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			Log.d(TAG, "release video_recorder");
     		video_recorder.release(); 
     		video_recorder = null;
+			video_recorder_is_paused = false;
 			reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
 			applicationInterface.stoppedVideo(video_method, video_uri, video_filename);
     		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
@@ -3795,9 +3798,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		}
 			boolean told_app_starting = false; // true if we called applicationInterface.startingVideo()
         	try {
-				//video_recorder.setMaxFileSize(15*1024*1024); // test
 				ApplicationInterface.VideoMaxFileSize video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
 				long max_filesize = video_max_filesize.max_filesize;
+				//max_filesize = 15*1024*1024; // test
 				if (max_filesize > 0) {
 					if (MyDebug.LOG)
 						Log.d(TAG, "set max file size of: " + max_filesize);
@@ -3854,6 +3857,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if (MyDebug.LOG)
 					Log.d(TAG, "about to start video recorder");
 				video_recorder.start();
+				video_recorder_is_paused = false;
 				if (MyDebug.LOG)
 					Log.d(TAG, "video recorder started");
 				if (test_video_failure) {
@@ -3879,6 +3883,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				video_recorder.reset();
 				video_recorder.release();
 				video_recorder = null;
+				video_recorder_is_paused = false;
 				this.phase = PHASE_NORMAL;
 				applicationInterface.cameraInOperation(false);
 				this.reconnectCamera(true);
@@ -3912,6 +3917,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				video_recorder.reset();
 				video_recorder.release();
 				video_recorder = null;
+				video_recorder_is_paused = false;
 				this.phase = PHASE_NORMAL;
 				applicationInterface.cameraInOperation(false);
 				this.reconnectCamera(true);
@@ -4009,9 +4015,48 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		video_recorder.reset();
 		video_recorder.release(); 
 		video_recorder = null;
+		video_recorder_is_paused = false;
 		this.phase = PHASE_NORMAL;
 		applicationInterface.cameraInOperation(false);
 		this.reconnectCamera(true);
+	}
+
+	/** Pauses the video recording - or unpauses if already paused.
+	 *  This does nothing if isVideoRecording() returns false, or not on Android 7 or higher.
+	 */
+	@TargetApi(Build.VERSION_CODES.N)
+	public void pauseVideo() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "pauseVideo");
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
+			Log.e(TAG, "pauseVideo called but requires Android N");
+		}
+		else if( this.isVideoRecording() ) {
+			if( video_recorder_is_paused ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "resuming...");
+				video_recorder.resume();
+				video_recorder_is_paused = false;
+				video_start_time = System.currentTimeMillis();
+				this.showToast(pause_video_toast, R.string.video_resume);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "pausing...");
+				video_recorder.pause();
+				video_recorder_is_paused = true;
+				long last_time = System.currentTimeMillis() - video_start_time;
+				video_accumulated_time += last_time;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "last_time: " + last_time);
+					Log.d(TAG, "video_accumulated_time is now: " + video_accumulated_time);
+				}
+				this.showToast(pause_video_toast, R.string.video_pause);
+			}
+		}
+		else {
+			Log.e(TAG, "pauseVideo called but not video recording");
+		}
 	}
 
 	/** Take photo. The caller should aready have set the phase to PHASE_TAKING_PHOTO.
@@ -5245,8 +5290,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public boolean isVideoRecording() {
 		return video_recorder != null && video_start_time_set;
 	}
+
+	public boolean isVideoRecordingPaused() {
+		return isVideoRecording() && video_recorder_is_paused;
+	}
 	
 	public long getVideoTime() {
+		if( this.isVideoRecordingPaused() ) {
+			return video_accumulated_time;
+		}
 		long time_now = System.currentTimeMillis();
 		return time_now - video_start_time + video_accumulated_time;
 	}

@@ -400,4 +400,10 @@
 
     <string name="preference_show_take_photo">Show take photo icon</string>
     <string name="preference_show_take_photo_summary">Show the icon for taking photos and recording videos. Useful if your device has a hardware shutter button and you\'d rather use that.</string>
+
+    <string name="video_pause">Video paused</string>
+    <string name="video_resume">Video resumed</string>
+    <string name="pause_video">Pause video recording</string>
+    <string name="resume_video">Resume video recording</string>
+    pause_video
 </resources>
