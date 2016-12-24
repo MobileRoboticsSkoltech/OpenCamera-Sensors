@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.*;
 
@@ -105,7 +106,7 @@ public class UnitTest {
 	@Test
 	public void testDateString() throws ParseException {
 		Log.d(TAG, "testDateString");
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
 		Date date1 = sdf.parse("2017/01/31");
 		assertEquals( TextFormatter.getDateString("preference_stamp_dateformat_none", date1), "" );
 		assertEquals( TextFormatter.getDateString("preference_stamp_dateformat_yyyymmdd", date1), "2017/01/31" );
@@ -116,7 +117,7 @@ public class UnitTest {
 	@Test
 	public void testTimeString() throws ParseException {
 		Log.d(TAG, "testTimeString");
-		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.US);
 		Date time1 = sdf.parse("00:00:00");
 		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_none", time1), "" );
 		assertEquals( TextFormatter.getTimeString("preference_stamp_timeformat_12hour", time1), "12:00:00 AM" );

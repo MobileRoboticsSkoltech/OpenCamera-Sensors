@@ -108,7 +108,7 @@ public class PopupView extends LinearLayout {
     			}
     		});
             
-    		List<String> supported_isos = null;
+    		List<String> supported_isos;
 			final String manual_value = "m";
 			if( preview.supportsISORange() ) {
 				if( MyDebug.LOG )

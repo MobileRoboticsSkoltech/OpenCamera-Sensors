@@ -928,7 +928,6 @@ public class DrawPreview {
 				is_level = true;
 			}
 
-			int base_radius = radius;
 			if( is_level ) {
 				radius = (int)(radius * 1.2);
 			}

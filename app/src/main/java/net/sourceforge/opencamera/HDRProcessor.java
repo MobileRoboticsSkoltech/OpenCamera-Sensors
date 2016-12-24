@@ -902,7 +902,7 @@ public class HDRProcessor {
 		}*/
 	}
 
-	private class LuminanceInfo {
+	private static class LuminanceInfo {
 		final int median_value;
 		final boolean noisy;
 

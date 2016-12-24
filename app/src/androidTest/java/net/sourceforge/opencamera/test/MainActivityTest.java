@@ -16,7 +16,6 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.Preview;
-import net.sourceforge.opencamera.TextFormatter;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import net.sourceforge.opencamera.UI.PopupView;
 
