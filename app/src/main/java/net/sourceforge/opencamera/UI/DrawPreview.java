@@ -365,6 +365,8 @@ public class DrawPreview {
 	}
 
 	public void onDrawPreview(Canvas canvas) {
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "onDrawPreview");*/
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
@@ -996,6 +998,10 @@ public class DrawPreview {
 				Log.d(TAG, "angle_scale_y: " + angle_scale_y);
 				Log.d(TAG, "angle_scale_x/scale: " + angle_scale_x/scale);
 				Log.d(TAG, "angle_scale_y/scale: " + angle_scale_y/scale);
+			}*/
+			/*if( MyDebug.LOG ) {
+				Log.d(TAG, "has_pitch_angle?: " + has_pitch_angle);
+				Log.d(TAG, "show_pitch_lines?: " + show_pitch_lines);
 			}*/
 			float angle_scale = (float)Math.sqrt( angle_scale_x*angle_scale_x + angle_scale_y*angle_scale_y );
 			angle_scale *= preview.getZoomRatio();
