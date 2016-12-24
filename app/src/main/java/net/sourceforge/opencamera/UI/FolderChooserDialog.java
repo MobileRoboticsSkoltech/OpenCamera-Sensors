@@ -264,7 +264,7 @@ public class FolderChooserDialog extends DialogFragment {
     
     private static class NewFolderInputFilter implements InputFilter {
 		// whilst Android seems to allow any characters on internal memory, SD cards are typically formatted with FAT32
-		final String disallowed = "|\\?*<\":>";
+		private final static String disallowed = "|\\?*<\":>";
 		
 		@Override
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) { 

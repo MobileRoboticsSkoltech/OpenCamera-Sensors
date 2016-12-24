@@ -199,40 +199,13 @@ public class DrawPreview {
     	return hours + ":" + String.format(Locale.getDefault(), "%02d", mins) + ":" + String.format(Locale.getDefault(), "%02d", secs);
     }
 
-	public void onDrawPreview(Canvas canvas) {
+	private void drawGrids(Canvas canvas) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
-		int ui_rotation = preview.getUIRotation();
-		boolean has_level_angle = preview.hasLevelAngle();
-		double level_angle = preview.getLevelAngle();
-		boolean has_pitch_angle = preview.hasPitchAngle();
-		double pitch_angle = preview.getPitchAngle();
-		boolean has_geo_direction = preview.hasGeoDirection();
-		double geo_direction = preview.getGeoDirection();
-		boolean ui_placement_right = main_activity.getMainUI().getUIPlacementRight();
-		if( main_activity.getMainUI().inImmersiveMode() ) {
-			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-			if( immersive_mode.equals("immersive_mode_everything") ) {
-				// exit, to ensure we don't display anything!
-				return;
-			}
-		}
-		final float scale = getContext().getResources().getDisplayMetrics().density;
 		String preference_grid = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
-		if( camera_controller!= null && front_screen_flash ) {
-			p.setColor(Color.WHITE);
-			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
-		}
-		else if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
-			p.setColor(Color.WHITE);
-			p.setStyle(Paint.Style.STROKE);
-			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels
-			p.setStrokeWidth(this_stroke_width);
-			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
-			p.setStyle(Paint.Style.FILL); // reset
-			p.setStrokeWidth(stroke_width); // reset
-		}
+		final float scale = getContext().getResources().getDisplayMetrics().density;
+
 		if( camera_controller != null && preference_grid.equals("preference_grid_3x3") ) {
 			p.setColor(Color.WHITE);
 			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
@@ -286,7 +259,7 @@ public class DrawPreview {
 			int full_height = canvas.getHeight();
 			int width = (int)(full_width*((double)fibb_n)/(double)(fibb));
 			int height = full_height;
-			
+
 			for(int count=0;count<2;count++) {
 				canvas.save();
 				draw_rect.set(left, top, left+width, top+height);
@@ -295,11 +268,11 @@ public class DrawPreview {
 				draw_rect.set(left, top, left+2*width, top+2*height);
 				canvas.drawOval(draw_rect, p);
 				canvas.restore();
-				
+
 				int old_fibb = fibb;
 				fibb = fibb_n;
 				fibb_n = old_fibb - fibb;
-	
+
 				left += width;
 				full_width = full_width - width;
 				width = full_width;
@@ -312,11 +285,11 @@ public class DrawPreview {
 				draw_rect.set(left-width, top, left+width, top+2*height);
 				canvas.drawOval(draw_rect, p);
 				canvas.restore();
-	
+
 				old_fibb = fibb;
 				fibb = fibb_n;
 				fibb_n = old_fibb - fibb;
-	
+
 				top += height;
 				full_height = full_height - height;
 				height = full_height;
@@ -330,11 +303,11 @@ public class DrawPreview {
 				draw_rect.set(left-width, top-height, left+width, top+height);
 				canvas.drawOval(draw_rect, p);
 				canvas.restore();
-	
+
 				old_fibb = fibb;
 				fibb = fibb_n;
 				fibb_n = old_fibb - fibb;
-	
+
 				full_width = full_width - width;
 				width = full_width;
 				left -= width;
@@ -358,7 +331,7 @@ public class DrawPreview {
 				top -= height;
 				width = (int)(width*((double)fibb_n)/(double)(fibb));
 			}
-			
+
 			canvas.restore();
 			p.setStyle(Paint.Style.FILL); // reset
 		}
@@ -389,6 +362,42 @@ public class DrawPreview {
 				canvas.drawLine(diff+canvas.getHeight()-1.0f, 0.0f, diff, canvas.getHeight()-1.0f, p);
 			}
 		}
+	}
+
+	public void onDrawPreview(Canvas canvas) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		Preview preview  = main_activity.getPreview();
+		CameraController camera_controller = preview.getCameraController();
+		int ui_rotation = preview.getUIRotation();
+		boolean has_level_angle = preview.hasLevelAngle();
+		double level_angle = preview.getLevelAngle();
+		boolean has_pitch_angle = preview.hasPitchAngle();
+		double pitch_angle = preview.getPitchAngle();
+		boolean has_geo_direction = preview.hasGeoDirection();
+		double geo_direction = preview.getGeoDirection();
+		boolean ui_placement_right = main_activity.getMainUI().getUIPlacementRight();
+		if( main_activity.getMainUI().inImmersiveMode() ) {
+			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			if( immersive_mode.equals("immersive_mode_everything") ) {
+				// exit, to ensure we don't display anything!
+				return;
+			}
+		}
+		final float scale = getContext().getResources().getDisplayMetrics().density;
+		if( camera_controller!= null && front_screen_flash ) {
+			p.setColor(Color.WHITE);
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+		}
+		else if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
+			p.setColor(Color.WHITE);
+			p.setStyle(Paint.Style.STROKE);
+			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels
+			p.setStrokeWidth(this_stroke_width);
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+			p.setStyle(Paint.Style.FILL); // reset
+			p.setStrokeWidth(stroke_width); // reset
+		}
+		drawGrids(canvas);
 
 		if( preview.isVideo() || sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
 			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.getShowCropGuidePreferenceKey(), "crop_guide_none");
@@ -928,7 +937,6 @@ public class DrawPreview {
 				is_level = true;
 			}
 
-			int base_radius = radius;
 			if( is_level ) {
 				radius = (int)(radius * 1.2);
 			}

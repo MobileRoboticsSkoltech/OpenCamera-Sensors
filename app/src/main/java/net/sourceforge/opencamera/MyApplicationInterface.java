@@ -1105,6 +1105,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
 		pauseVideoButton.setVisibility(View.INVISIBLE);
+		main_activity.getMainUI().setPauseVideoContentDescription(); // just to be safe
 		if( subtitleVideoTimerTask != null ) {
 			subtitleVideoTimerTask.cancel();
 			subtitleVideoTimerTask = null;
