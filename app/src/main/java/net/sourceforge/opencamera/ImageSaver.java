@@ -986,11 +986,11 @@ public class ImageSaver extends Thread {
     	long time_s = System.currentTimeMillis();
 		
 		// unpack:
-		boolean image_capture_intent = request.image_capture_intent;
-		boolean using_camera2 = request.using_camera2;
-		Date current_date = request.current_date;
-		boolean store_location = request.store_location;
-		boolean store_geo_direction = request.store_geo_direction;
+		final boolean image_capture_intent = request.image_capture_intent;
+		final boolean using_camera2 = request.using_camera2;
+		final Date current_date = request.current_date;
+		final boolean store_location = request.store_location;
+		final boolean store_geo_direction = request.store_geo_direction;
 
         boolean success = false;
 		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
@@ -1131,90 +1131,10 @@ public class ImageSaver extends Thread {
 	    	    		if( MyDebug.LOG ) {
 	    	    			Log.d(TAG, "Save single image performance: time after saving temp photo for EXIF: " + (System.currentTimeMillis() - time_s));
 	    	    		}
-        	    		if( MyDebug.LOG )
-        	    			Log.d(TAG, "read back EXIF data");
-        	    		try {
-	    	            	ExifInterface exif = new ExifInterface(tempFile.getAbsolutePath());
-	    	            	String exif_aperture = exif.getAttribute(ExifInterface.TAG_APERTURE);
-	    	            	String exif_datetime = exif.getAttribute(ExifInterface.TAG_DATETIME);
-	    	            	String exif_exposure_time = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME);
-	    	            	String exif_flash = exif.getAttribute(ExifInterface.TAG_FLASH);
-	    	            	String exif_focal_length = exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH);
-	    	            	String exif_gps_altitude = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE);
-	    	            	String exif_gps_altitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF);
-	    	            	String exif_gps_datestamp = exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP);
-	    	            	String exif_gps_latitude = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
-	    	            	String exif_gps_latitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
-	    	            	String exif_gps_longitude = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
-	    	            	String exif_gps_longitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
-	    	            	String exif_gps_processing_method = exif.getAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD);
-	    	            	String exif_gps_timestamp = exif.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP);
-	    	            	// leave width/height, as this will have changed!
-	    	            	String exif_iso = exif.getAttribute(ExifInterface.TAG_ISO);
-	    	            	String exif_make = exif.getAttribute(ExifInterface.TAG_MAKE);
-	    	            	String exif_model = exif.getAttribute(ExifInterface.TAG_MODEL);
-	    	            	int exif_orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-	    	            	exif_orientation_s = exif_orientation; // store for later use (for the thumbnail, to save rereading it)
-	    	            	String exif_white_balance = exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE);
-	    	        		if( MyDebug.LOG ) {
-	    	        			Log.d(TAG, "Save single image performance: time after reading EXIF: " + (System.currentTimeMillis() - time_s));
-	    	        		}
-	
-	    	            	if( MyDebug.LOG )
-	        	    			Log.d(TAG, "now write new EXIF data");
-	    	            	ExifInterface exif_new = new ExifInterface(picFile.getAbsolutePath());
-	    	            	if( exif_aperture != null )
-	    	            		exif_new.setAttribute(ExifInterface.TAG_APERTURE, exif_aperture);
-	    	            	if( exif_datetime != null )
-	    	            		exif_new.setAttribute(ExifInterface.TAG_DATETIME, exif_datetime);
-	    	            	if( exif_exposure_time != null )
-	    	            		exif_new.setAttribute(ExifInterface.TAG_EXPOSURE_TIME, exif_exposure_time);
-	    	            	if( exif_flash != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_FLASH, exif_flash);
-	        	            if( exif_focal_length != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, exif_focal_length);
-	        	            if( exif_gps_altitude != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, exif_gps_altitude);
-	        	            if( exif_gps_altitude_ref != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, exif_gps_altitude_ref);
-	        	            if( exif_gps_datestamp != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, exif_gps_datestamp);
-	        	            if( exif_gps_latitude != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exif_gps_latitude);
-	        	            if( exif_gps_latitude_ref != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, exif_gps_latitude_ref);
-	        	            if( exif_gps_longitude != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exif_gps_longitude);
-	        	            if( exif_gps_longitude_ref != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, exif_gps_longitude_ref);
-	        	            if( exif_gps_processing_method != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, exif_gps_processing_method);
-	        	            if( exif_gps_timestamp != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exif_gps_timestamp);
-	    	            	// leave width/height, as this will have changed!
-	        	            if( exif_iso != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_ISO, exif_iso);
-	        	            if( exif_make != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_MAKE, exif_make);
-	        	            if( exif_model != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_MODEL, exif_model);
-	        	            if( exif_orientation != ExifInterface.ORIENTATION_UNDEFINED )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_ORIENTATION, "" + exif_orientation);
-	        	            if( exif_white_balance != null )
-	        	            	exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
-	        	            setGPSDirectionExif(exif_new, store_geo_direction, request.geo_direction);
-	        	            setDateTimeExif(exif_new);
-	        	            if( needGPSTimestampHack(using_camera2, store_location) ) {
-	        	            	fixGPSTimestamp(exif_new, current_date);
-	        	            }
-	    	            	exif_new.saveAttributes();
-        	    		}
-    		    		catch(NoClassDefFoundError exception) {
-    		    			// have had Google Play crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g)
-    		    			if( MyDebug.LOG )
-    		    				Log.e(TAG, "exif orientation NoClassDefFoundError");
-    		    			exception.printStackTrace();
-    		    		}
+						exif_orientation_s = setExifFromFile(request, tempFile, picFile);
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "Save single image performance: time after copying EXIF: " + (System.currentTimeMillis() - time_s));
+						}
     					if( !tempFile.delete() ) {
     						if( MyDebug.LOG )
     							Log.e(TAG, "failed to delete temp " + tempFile.getAbsolutePath());
@@ -1410,6 +1330,95 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "Save single image performance: total time: " + (System.currentTimeMillis() - time_s));
 		}
         return success;
+	}
+
+	@SuppressWarnings("deprecation")
+	private int setExifFromFile(final Request request, File from_file, File to_file) throws IOException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setExifFromFile");
+		int exif_orientation_s = ExifInterface.ORIENTATION_UNDEFINED;
+		if( MyDebug.LOG )
+			Log.d(TAG, "read back EXIF data");
+		try {
+			ExifInterface exif = new ExifInterface(from_file.getAbsolutePath());
+			String exif_aperture = exif.getAttribute(ExifInterface.TAG_APERTURE);
+			String exif_datetime = exif.getAttribute(ExifInterface.TAG_DATETIME);
+			String exif_exposure_time = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME);
+			String exif_flash = exif.getAttribute(ExifInterface.TAG_FLASH);
+			String exif_focal_length = exif.getAttribute(ExifInterface.TAG_FOCAL_LENGTH);
+			String exif_gps_altitude = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE);
+			String exif_gps_altitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF);
+			String exif_gps_datestamp = exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP);
+			String exif_gps_latitude = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
+			String exif_gps_latitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
+			String exif_gps_longitude = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
+			String exif_gps_longitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
+			String exif_gps_processing_method = exif.getAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD);
+			String exif_gps_timestamp = exif.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP);
+			// leave width/height, as this will have changed!
+			String exif_iso = exif.getAttribute(ExifInterface.TAG_ISO);
+			String exif_make = exif.getAttribute(ExifInterface.TAG_MAKE);
+			String exif_model = exif.getAttribute(ExifInterface.TAG_MODEL);
+			int exif_orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+			exif_orientation_s = exif_orientation; // store for later use (for the thumbnail, to save rereading it)
+			String exif_white_balance = exif.getAttribute(ExifInterface.TAG_WHITE_BALANCE);
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "now write new EXIF data");
+			ExifInterface exif_new = new ExifInterface(to_file.getAbsolutePath());
+			if( exif_aperture != null )
+				exif_new.setAttribute(ExifInterface.TAG_APERTURE, exif_aperture);
+			if( exif_datetime != null )
+				exif_new.setAttribute(ExifInterface.TAG_DATETIME, exif_datetime);
+			if( exif_exposure_time != null )
+				exif_new.setAttribute(ExifInterface.TAG_EXPOSURE_TIME, exif_exposure_time);
+			if( exif_flash != null )
+				exif_new.setAttribute(ExifInterface.TAG_FLASH, exif_flash);
+			if( exif_focal_length != null )
+				exif_new.setAttribute(ExifInterface.TAG_FOCAL_LENGTH, exif_focal_length);
+			if( exif_gps_altitude != null )
+				exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, exif_gps_altitude);
+			if( exif_gps_altitude_ref != null )
+				exif_new.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, exif_gps_altitude_ref);
+			if( exif_gps_datestamp != null )
+				exif_new.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, exif_gps_datestamp);
+			if( exif_gps_latitude != null )
+				exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exif_gps_latitude);
+			if( exif_gps_latitude_ref != null )
+				exif_new.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, exif_gps_latitude_ref);
+			if( exif_gps_longitude != null )
+				exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exif_gps_longitude);
+			if( exif_gps_longitude_ref != null )
+				exif_new.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, exif_gps_longitude_ref);
+			if( exif_gps_processing_method != null )
+				exif_new.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, exif_gps_processing_method);
+			if( exif_gps_timestamp != null )
+				exif_new.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exif_gps_timestamp);
+			// leave width/height, as this will have changed!
+			if( exif_iso != null )
+				exif_new.setAttribute(ExifInterface.TAG_ISO, exif_iso);
+			if( exif_make != null )
+				exif_new.setAttribute(ExifInterface.TAG_MAKE, exif_make);
+			if( exif_model != null )
+				exif_new.setAttribute(ExifInterface.TAG_MODEL, exif_model);
+			if( exif_orientation != ExifInterface.ORIENTATION_UNDEFINED )
+				exif_new.setAttribute(ExifInterface.TAG_ORIENTATION, "" + exif_orientation);
+			if( exif_white_balance != null )
+				exif_new.setAttribute(ExifInterface.TAG_WHITE_BALANCE, exif_white_balance);
+			setGPSDirectionExif(exif_new, request.store_geo_direction, request.geo_direction);
+			setDateTimeExif(exif_new);
+			if( needGPSTimestampHack(request.using_camera2, request.store_location) ) {
+				fixGPSTimestamp(exif_new, request.current_date);
+			}
+			exif_new.saveAttributes();
+		}
+		catch(NoClassDefFoundError exception) {
+			// have had Google Play crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g)
+			if( MyDebug.LOG )
+				Log.e(TAG, "exif orientation NoClassDefFoundError");
+			exception.printStackTrace();
+		}
+		return exif_orientation_s;
 	}
 
 	/** May be run in saver thread or picture callback thread (depending on whether running in background).
