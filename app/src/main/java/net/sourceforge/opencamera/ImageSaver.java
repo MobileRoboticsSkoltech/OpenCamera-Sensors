@@ -1355,7 +1355,7 @@ public class ImageSaver extends Thread {
 			String exif_gps_longitude_ref = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
 			String exif_gps_processing_method = exif.getAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD);
 			String exif_gps_timestamp = exif.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP);
-			// leave width/height, as this will have changed!
+			// leave width/height, as this may have changed!
 			String exif_iso = exif.getAttribute(ExifInterface.TAG_ISO);
 			String exif_make = exif.getAttribute(ExifInterface.TAG_MAKE);
 			String exif_model = exif.getAttribute(ExifInterface.TAG_MODEL);
@@ -1394,7 +1394,7 @@ public class ImageSaver extends Thread {
 				exif_new.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, exif_gps_processing_method);
 			if( exif_gps_timestamp != null )
 				exif_new.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exif_gps_timestamp);
-			// leave width/height, as this will have changed!
+			// leave width/height, as this may have changed!
 			if( exif_iso != null )
 				exif_new.setAttribute(ExifInterface.TAG_ISO, exif_iso);
 			if( exif_make != null )
