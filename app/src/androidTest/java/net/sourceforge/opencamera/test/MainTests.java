@@ -12,6 +12,7 @@ public class MainTests {
 		TestSuite suite = new TestSuite(MainTests.class.getName());
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testStartCameraPreviewCount"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveVideoMode"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFocusMode"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFlashTorchQuit"));
 		//suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFlashTorchSwitchCamera"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFlashStartup"));

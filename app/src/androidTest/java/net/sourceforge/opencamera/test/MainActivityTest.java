@@ -348,6 +348,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( switchVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_photo) ) );
 	}
 
+	/* Ensures that we save the focus mode for photos when restarting.
+	 * Note that saving the focus mode for video mode is tested in testFocusSwitchVideoResetContinuous.
+	 */
+	public void testSaveFocusMode() {
+		Log.d(TAG, "testSaveVideoMode");
+		if( !mPreview.supportsFocus() ) {
+			return;
+		}
+
+		setToDefault();
+		switchToFocusValue("focus_mode_macro");
+
+		restart();
+		String focus_value = mPreview.getCameraController().getFocusValue();
+		assertTrue(focus_value.equals("focus_mode_macro"));
+
+		pauseAndResume();
+		focus_value = mPreview.getCameraController().getFocusValue();
+		assertTrue(focus_value.equals("focus_mode_macro"));
+	}
+
 	/* Ensures that we save the flash mode torch when quitting and restarting.
 	 */
 	public void testSaveFlashTorchQuit() throws InterruptedException {
@@ -666,6 +687,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    int saved_count = 0; // set to 0 rather than count_cameraAutoFocus, as on Galaxy Nexus, it can happen that startup autofocus has already occurred by the time we reach here
 	    Log.d(TAG, "saved_count: " + saved_count);
 		setToDefault();
+		switchToFocusValue("focus_mode_auto");
 
 		assertTrue(!mPreview.hasFocusArea());
 	    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
@@ -810,10 +832,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    int saved_count = 0; // set to 0 rather than count_cameraAutoFocus, as on Galaxy Nexus, it can happen that startup autofocus has already occurred by the time we reach here
 	    Log.d(TAG, "saved_count: " + saved_count);
 		setToDefault();
+		switchToFocusValue("focus_mode_auto");
+
 		Thread.sleep(1000);
 	    Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus + " compare to saved_count: " + saved_count);
 		assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
-		
+
 	    restart();
 		//saved_count = mPreview.count_cameraAutoFocus;
 	    saved_count = 0;
@@ -1311,10 +1335,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(!mPreview.isOnTimer());
 
 		// wait until photos taken
-		// wait 10s, and test that we've taken the photos by then
+		// wait 15s, and test that we've taken the photos by then
 		while( mPreview.count_cameraTakePicture < 3 ) {
 		}
-		Thread.sleep(1000); // allow pictures to save
+		Thread.sleep(1500); // allow pictures to save
 	    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 		Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 		assertTrue(mPreview.count_cameraTakePicture==3);
@@ -1719,9 +1743,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 * - check in continuous focus mode
 	 * - switch to auto focus mode
 	 * - then pause and resume
-	 * - then check still in video mode, but has reset to continuous mode
+	 * - then check still in video mode, still in auto focus mode
 	 * - then repeat with restarting instead
-	 * This test is important, as there is some reported corruption if we start up in a mode other than continuous (e.g., Galaxy S5 with UHD recording); also if the app quits altogether, we reset to continuous mode for video anyway
+	 * (Note the name is a bit misleading - it used to be that we reset to continuous mode, now we don't.)
 	 */
 	public void testFocusSwitchVideoResetContinuous() {
 		Log.d(TAG, "testFocusSwitchVideoResetContinuous");
@@ -1731,6 +1755,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 
 		setToDefault();
+		switchToFocusValue("focus_mode_auto");
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
@@ -1745,7 +1770,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(mPreview.isVideo());
 	    
 	    focus_value = mPreview.getCameraController().getFocusValue();
-	    assertTrue(focus_value.equals("focus_mode_continuous_video"));
+	    assertTrue(focus_value.equals("focus_mode_auto"));
 
 	    // now with restart
 
@@ -1757,7 +1782,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(mPreview.isVideo());
 
 	    focus_value = mPreview.getCameraController().getFocusValue();
-	    assertTrue(focus_value.equals("focus_mode_continuous_video"));
+	    assertTrue(focus_value.equals("focus_mode_auto"));
 	}
 
 	public void testTakePhotoExposureCompensation() throws InterruptedException {
