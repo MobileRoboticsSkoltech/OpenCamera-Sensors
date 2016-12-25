@@ -316,15 +316,19 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		// show "about" dialog for first time use; also set some per-device defaults
 		boolean has_done_first_time = sharedPreferences.contains(PreferenceKeys.getFirstTimePreferenceKey());
+		if( MyDebug.LOG )
+			Log.d(TAG, "has_done_first_time: " + has_done_first_time);
 		if( !has_done_first_time ) {
 			setDeviceDefaults();
 		}
-        if( !has_done_first_time && !is_test ) {
-	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.setTitle(R.string.app_name);
-            alertDialog.setMessage(R.string.intro_text);
-            alertDialog.setPositiveButton(R.string.intro_ok, null);
-            alertDialog.show();
+        if( !has_done_first_time ) {
+			if( !is_test ) {
+				AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+				alertDialog.setTitle(R.string.app_name);
+				alertDialog.setMessage(R.string.intro_text);
+				alertDialog.setPositiveButton(R.string.intro_ok, null);
+				alertDialog.show();
+			}
 
             setFirstTimeFlag();
         }
@@ -390,6 +394,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( is_samsung || is_oneplus ) {
 			// workaround needed for Samsung S7 at least (tested on Samsung RTL)
 			// workaround needed for OnePlus 3 at least (see http://forum.xda-developers.com/oneplus-3/help/camera2-support-t3453103 )
+			if( MyDebug.LOG )
+				Log.d(TAG, "set fake flash for camera2");
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), true);
 			editor.apply();
@@ -397,6 +403,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( is_nexus6 ) {
 			// Nexus 6 captureBurst() started having problems with Android 7 upgrade - images appeared in wrong order (and with wrong order of shutter speeds in exif info), as well as problems with the camera failing with serious errors
 			// we set this even for Nexus 6 devices not on Android 7, as at some point they'll likely be upgraded to Android 7
+			if( MyDebug.LOG )
+				Log.d(TAG, "disable fast burst for camera2");
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), false);
 			editor.apply();
@@ -404,6 +412,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( is_nexus || is_pixel_phone || is_pixel_xl_phone ) {
 			// generally continuous picture mode works better than auto-focus, though we want to make sure it works okay on the device
 			// Nexus devices seem to work fine with continuous mode, and we know that Google's camera uses continuous focus
+			if( MyDebug.LOG )
+				Log.d(TAG, "set continuous focus mode for photo");
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putString(PreferenceKeys.getFocusPreferenceKey(0, false), "focus_mode_continuous_picture");
 			editor.apply();
@@ -543,6 +553,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 	
 	private void setFirstTimeFlag() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setFirstTimeFlag");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putBoolean(PreferenceKeys.getFirstTimePreferenceKey(), true);
