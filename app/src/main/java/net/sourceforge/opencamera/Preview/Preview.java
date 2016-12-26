@@ -447,7 +447,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		return true;
         }
         applicationInterface.touchEvent(event);
-        //invalidate();
 		/*if( MyDebug.LOG ) {
 			Log.d(TAG, "touch event: " + event.getAction());
 		}*/
@@ -4755,8 +4754,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "level_angle is now: " + level_angle);*/
-
-			cameraSurface.getView().invalidate();
 		}
 	}
     
