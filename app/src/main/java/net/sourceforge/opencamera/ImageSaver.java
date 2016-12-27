@@ -484,14 +484,16 @@ public class ImageSaver extends Thread {
 		}
 	}
 
-	/** Converts the array of jpegs to Bitmaps. The first bitmap will be marked as mutable.
+	/** Converts the array of jpegs to Bitmaps. The bitmap with index mutable_id will be marked as mutable (or set to -1 to have no mutable bitmaps).
 	 */
 	@SuppressWarnings("deprecation")
-	private List<Bitmap> loadBitmaps(List<byte []> jpeg_images) {
-		if( MyDebug.LOG )
+	private List<Bitmap> loadBitmaps(List<byte []> jpeg_images, int mutable_id) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "loadBitmaps");
+			Log.d(TAG, "mutable_id: " + mutable_id);
+		}
 		BitmapFactory.Options mutable_options = new BitmapFactory.Options();
-		mutable_options.inMutable = true; // first bitmap needs to be writable
+		mutable_options.inMutable = true; // bitmap that needs to be writable
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inMutable = false; // later bitmaps don't need to be writable
 		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
@@ -501,7 +503,7 @@ public class ImageSaver extends Thread {
 		}
 		LoadBitmapThread [] threads = new LoadBitmapThread[jpeg_images.size()];
 		for(int i=0;i<jpeg_images.size();i++) {
-			threads[i] = new LoadBitmapThread( i==0 ? mutable_options : options, jpeg_images.get(i) );
+			threads[i] = new LoadBitmapThread( i==mutable_id ? mutable_options : options, jpeg_images.get(i) );
 		}
 		// start threads
 		if( MyDebug.LOG )
@@ -524,6 +526,8 @@ public class ImageSaver extends Thread {
 			e.printStackTrace();
 			ok = false;
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "threads completed");
 
 		List<Bitmap> bitmaps = new ArrayList<>();
 		for(int i=0;i<jpeg_images.size() && ok;i++) {
@@ -531,6 +535,10 @@ public class ImageSaver extends Thread {
 			if( bitmap == null ) {
 				Log.e(TAG, "failed to decode bitmap in thread: " + i);
 				ok = false;
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "bitmap " + i + ": " + bitmap + " is mutable? " + bitmap.isMutable());
 			}
 			bitmaps.add(bitmap);
 		}
@@ -605,10 +613,16 @@ public class ImageSaver extends Thread {
 
 			// note, even if we failed saving some of the expo images, still try to save the HDR image
 			if( MyDebug.LOG )
-				Log.e(TAG, "create HDR image");
+				Log.d(TAG, "create HDR image");
 			main_activity.savingImage(true);
 
-			List<Bitmap> bitmaps = loadBitmaps(request.jpeg_images);
+			// see documentation for HDRProcessor.processHDR() - because we're using release_bitmaps==true, we need to make sure that
+			// the bitmap that will hold the output HDR image is mutable (in case of options like photo stamp)
+			// see test testTakePhotoHDRPhotoStamp.
+			int base_bitmap = (request.jpeg_images.size()-1)/2;
+			if( MyDebug.LOG )
+				Log.d(TAG, "base_bitmap: " + base_bitmap);
+			List<Bitmap> bitmaps = loadBitmaps(request.jpeg_images, base_bitmap);
 			if( bitmaps == null ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "failed to load bitmaps");
@@ -617,11 +631,17 @@ public class ImageSaver extends Thread {
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after decompressing base exposures: " + (System.currentTimeMillis() - time_s));
     		}
+			if( MyDebug.LOG )
+				Log.d(TAG, "before HDR first bitmap: " + bitmaps.get(0) + " is mutable? " + bitmaps.get(0).isMutable());
 			hdrProcessor.processHDR(bitmaps, true, null, true); // this will recycle all the bitmaps except bitmaps.get(0), which will contain the hdr image
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after creating HDR image: " + (System.currentTimeMillis() - time_s));
     		}
+			if( MyDebug.LOG )
+				Log.d(TAG, "after HDR first bitmap: " + bitmaps.get(0) + " is mutable? " + bitmaps.get(0).isMutable());
 			Bitmap hdr_bitmap = bitmaps.get(0);
+			if( MyDebug.LOG )
+				Log.d(TAG, "hdr_bitmap: " + hdr_bitmap + " is mutable? " + hdr_bitmap.isMutable());
 			bitmaps.clear();
 	        System.gc();
 			main_activity.savingImage(false);
@@ -876,7 +896,7 @@ public class ImageSaver extends Thread {
 			}
 			if( bitmap != null ) {
 				if( MyDebug.LOG )
-					Log.d(TAG, "stamp info to bitmap");
+					Log.d(TAG, "stamp info to bitmap: " + bitmap);
 				if( MyDebug.LOG )
 					Log.d(TAG, "bitmap is mutable?: " + bitmap.isMutable());
 				int font_size = request.font_size;
