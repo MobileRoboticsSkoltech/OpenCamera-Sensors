@@ -55,6 +55,7 @@ public class PhotoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPictureFocusBurst"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPhotoStamp"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDRO"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDROPhotoStamp"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder1"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder2"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder3"));

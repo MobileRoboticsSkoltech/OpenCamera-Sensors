@@ -245,11 +245,14 @@ public class HDRProcessor {
 	 *                Currently only supports a list of either 1 image, or 3 images (the 2nd should be
 	 *                at the desired exposure level for the resultant image).
 	 *                The bitmaps must all be the same resolution.
-	 * @param release_bitmaps If true, the resultant image is returned in the first bitmap in bitmaps. The
-	 *                        remainder bitmaps will have recycle() called on them, and set to null.
+	 * @param release_bitmaps If true, the resultant image will be stored in one of the input bitmaps.
+	 *                        The bitmaps array will be updated so that the first entry will contain
+	 *                        the output bitmap. If assume_sortted is true, this will be equal to the
+	 *                        input bitmaps.get( (bitmaps.size()-1) / 2). The remainder bitmaps will have
+	 *                        recycle() called on them.
 	 *                        If false, the resultant image is copied to output_bitmap.
-	 * @param output_bitmap If release_bitmaps is false, the resultant image is stored in the first copied
-	 *                      to output_bitmap. If release_bitmaps is true, this parameter is ignored.
+	 * @param output_bitmap If release_bitmaps is false, the resultant image is stored in this bitmap.
+	 *                      If release_bitmaps is true, this parameter is ignored.
 	 * @param assume_sorted If true, the input bitmaps should be sorted in order from darkest to brightest
 	 *                      exposure. If false, the function will automatically resort.
 	 */
@@ -540,7 +543,8 @@ public class HDRProcessor {
 			Log.d(TAG, "call processHDRScript");
 		Allocation output_allocation;
 		if( release_bitmaps ) {
-			// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset
+			// must use allocations[base_bitmap] as the output, as that's the image guaranteed to have no offset (otherwise we'll have
+			// problems due to the output being equal to one of the inputs)
 			output_allocation = allocations[base_bitmap];
 		}
 		else {
@@ -565,6 +569,7 @@ public class HDRProcessor {
 		adjustHistogram(output_allocation, output_allocation, width, height, time_s);
 
 		if( release_bitmaps ) {
+			// must be the base_bitmap we copy to - see note above about using allocations[base_bitmap] as the output
 			allocations[base_bitmap].copyTo(bitmaps.get(base_bitmap));
 			if (MyDebug.LOG)
 				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));

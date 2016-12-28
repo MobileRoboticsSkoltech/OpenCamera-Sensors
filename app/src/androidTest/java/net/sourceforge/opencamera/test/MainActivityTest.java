@@ -1243,6 +1243,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 
 	    setToDefault();
+		// first switch to auto-focus (if we're already in continuous picture mode, we might have already done the continuous focus moving
+		switchToFocusValue("focus_mode_auto");
+		pauseAndResume();
 		switchToFocusValue("focus_mode_continuous_picture");
 
 		// check continuous focus is working
@@ -2123,6 +2126,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         if( mPreview.getMaxNumFocusAreas() != 0 && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") || focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") || focus_value.equals("focus_mode_manual2") ) ) {
         	can_focus_area = true;
         }
+		Log.d(TAG, "focus_value? " + focus_value);
 		Log.d(TAG, "can_auto_focus? " + can_auto_focus);
 		Log.d(TAG, "manual_can_auto_focus? " + manual_can_auto_focus);
 		Log.d(TAG, "can_focus_area? " + can_focus_area);
@@ -3308,7 +3312,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 
 	    // icon may be null, or have been set to another image - only changed after a delay
-	    Thread.sleep(1000);
+	    Thread.sleep(2000);
+		Log.d(TAG, "gallery_bitmap: " + mActivity.gallery_bitmap);
+		Log.d(TAG, "thumbnail: " + thumbnail);
 		assertTrue(mActivity.gallery_bitmap != thumbnail);
 	}
 
@@ -3784,7 +3790,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	private interface VideoTestCallback {
-		int doTest(); // return expected number of new files
+		int doTest(); // return expected number of new files (or -1 to indicate not to check this)
 	}
 	
 	private void subTestTakeVideo(boolean test_exposure_lock, boolean test_focus_area, boolean allow_failure, boolean immersive_mode, VideoTestCallback test_cb, long time_ms, boolean max_filesize, boolean subtitles) throws InterruptedException {
@@ -3957,7 +3963,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 		else {
 			Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
-			assertEquals(n_new_files, exp_n_new_files);
+			if( exp_n_new_files >= 0 ) {
+				assertEquals(n_new_files, exp_n_new_files);
+			}
 		}
 
 		// trash/share only shown when preview is paused after taking a photo
@@ -3978,6 +3986,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_selector );
 		assertEquals( takePhotoButton.getContentDescription(), mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video) );
 		assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
+		Log.d(TAG, "pauseVideoButton.getVisibility(): " + pauseVideoButton.getVisibility());
 		assertTrue( pauseVideoButton.getVisibility() == View.INVISIBLE );
 	}
 
@@ -4272,8 +4281,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}, 5000, true, false);
 	}
 
-	/** Set maximum filesize so that we get approx 3s of video time. Check that recording stops and restarts within 6s.
-	 *  Then check recording stops again within 7s.
+	/** Set maximum filesize so that we get approx 3s of video time. Check that recording stops and restarts within 10s.
+	 *  Then check recording stops again within 10s.
 	 *  This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoMaxFileSize1() throws InterruptedException {
@@ -4282,8 +4291,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
-		editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "15728640"); // approx 3-4s on Nexus 6 at 4K
+		//editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
+		//editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "15728640"); // approx 3-4s on Nexus 6 at 4K
+		editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "9437184"); // approx 3-4s on Nexus 6 at 4K
 		editor.apply();
 		updateForSettings();
 
@@ -4315,17 +4325,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				time_s = System.currentTimeMillis();
 		    	while( mPreview.isVideoRecording() ) {
 		    		long c_time = System.currentTimeMillis();
-		    		if( c_time - time_s > 8000 ) {
+		    		if( c_time - time_s > 10000 ) {
 				    	Log.e(TAG, "time: " + (c_time - time_s));
 		    		}
-				    assertTrue( c_time - time_s <= 8000 );
+				    assertTrue( c_time - time_s <= 10000 );
 				    long video_time = mPreview.getVideoTime();
 				    if( video_time < video_time_s )
 				    	Log.d(TAG, "compare: " + video_time_s + " to " + video_time);
 				    assertTrue( video_time + 1 >= video_time_s );
 		    	}
 				Log.d(TAG, "video recording now stopped again");
-				return 2;
+				return -1; // the number of videos recorded can very, as the max duration corresponding to max filesize can vary widly
 			}
 		}, 5000, true, false);
 	}
@@ -4369,7 +4379,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}, 5000, true, false);
 	}
 
-	/* Max filesize for ~5s, max duration 7s, max n_repeats 1 - to ensure we're not repeating indefinitely; should get 4 videos.
+	/* Max filesize for ~5s, max duration 7s, max n_repeats 1 - to ensure we're not repeating indefinitely.
 	 * This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoMaxFileSize3() throws InterruptedException {
@@ -4379,7 +4389,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
-		editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "26214400"); // approx 5s on Nexus 6 at 4K
+		//editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "26214400"); // approx 5s on Nexus 6 at 4K
+		editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "15728640"); // approx 5s on Nexus 6 at 4K
 		editor.putString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "7");
 		editor.putString(PreferenceKeys.getVideoRestartPreferenceKey(), "1");
 		editor.apply();
@@ -4402,7 +4413,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	while( System.currentTimeMillis() - time_s <= 5000 ) {
 				    assertFalse( mPreview.isVideoRecording() );
 		    	}
-				return 4;
+				return -1; // the number of videos recorded can very, as the max duration corresponding to max filesize can vary widly
 			}
 		}, 5000, true, false);
 	}
@@ -6710,6 +6721,36 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_dro");
+		editor.apply();
+		updateForSettings();
+
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
+
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
+
+		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+		editor.apply();
+		updateForSettings();
+
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
+	}
+
+	public void testTakePhotoDROPhotoStamp() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoDROPhotoStamp");
+		if( !mActivity.supportsDRO() ) {
+			return;
+		}
+
+		setToDefault();
+
+		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_dro");
+		editor.putString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_yes");
 		editor.apply();
 		updateForSettings();
 
