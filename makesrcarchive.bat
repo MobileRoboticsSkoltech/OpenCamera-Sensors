@@ -22,7 +22,7 @@ copy %src%\app\build.gradle %dst%\app\
 mkdir %dst%\gradle
 xcopy %src%\gradle %dst%\gradle /E /Y
 
-mkdir %dst%\_docs
-xcopy %src%\_docs %dst%\_docs /E /Y
+REM mkdir %dst%\_docs
+REM xcopy %src%\_docs %dst%\_docs /E /Y
 
 REM exit
