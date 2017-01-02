@@ -5406,8 +5406,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	// FindBugs warns about returning the array directly, but in fact we need to return direct access rather than copying, so that the on-screen display of faces rectangles updates
     	return this.faces_detected;
     }
-    
+
+	/** Returns the current zoom factor of the camera. Always returns 1.0f if zoom isn't supported.
+     */
 	public float getZoomRatio() {
+		if( zoom_ratios == null )
+			return 1.0f;
 		int zoom_factor = camera_controller.getZoom();
 		return this.zoom_ratios.get(zoom_factor)/100.0f;
 	}

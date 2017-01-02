@@ -1687,6 +1687,26 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         }
     }
 
+	void updateSaveFolder(String new_save_location) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateSaveFolder: " + new_save_location);
+		if( new_save_location != null ) {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String orig_save_location = this.applicationInterface.getStorageUtils().getSaveLocation();
+
+			if( !orig_save_location.equals(new_save_location) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "changed save_folder to: " + this.applicationInterface.getStorageUtils().getSaveLocation());
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), new_save_location);
+				editor.apply();
+
+				this.save_location_history.updateFolderHistory(this.getStorageUtils().getSaveLocation(), true);
+				this.preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + this.applicationInterface.getStorageUtils().getSaveLocation());
+			}
+		}
+	}
+
 	public static class MyFolderChooserDialog extends FolderChooserDialog {
 		@Override
 		public void onDismiss(DialogInterface dialog) {
@@ -1698,22 +1718,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			main_activity.setWindowFlagsForCamera();
 			main_activity.showPreview(true);
 			String new_save_location = this.getChosenFolder();
-			if( new_save_location != null ) {
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-				String orig_save_location = main_activity.applicationInterface.getStorageUtils().getSaveLocation();
-
-				if( !orig_save_location.equals(new_save_location) ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "changed save_folder to: " + main_activity.applicationInterface.getStorageUtils().getSaveLocation());
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(PreferenceKeys.getSaveLocationPreferenceKey(), new_save_location);
-					editor.apply();
-
-					main_activity.save_location_history.updateFolderHistory(main_activity.getStorageUtils().getSaveLocation(), true);
-					main_activity.preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + main_activity.applicationInterface.getStorageUtils().getSaveLocation());
-				}
-			}
-
+			main_activity.updateSaveFolder(new_save_location);
 			super.onDismiss(dialog);
 		}
 	}

@@ -100,10 +100,14 @@ public class CameraController1 extends CameraController {
 	@Override
 	public void onError() {
 		Log.e(TAG, "onError");
-		this.camera.release();
-		this.camera = null;
-		// need to communicate the problem to the application
-		this.camera_error_cb.onError();
+		if( this.camera != null ) { // I got Google Play crash reports due to camera being null in v1.36
+			this.camera.release();
+			this.camera = null;
+		}
+		if( this.camera_error_cb != null ) {
+			// need to communicate the problem to the application
+			this.camera_error_cb.onError();
+		}
 	}
 	
 	private class CameraErrorCallback implements Camera.ErrorCallback {
