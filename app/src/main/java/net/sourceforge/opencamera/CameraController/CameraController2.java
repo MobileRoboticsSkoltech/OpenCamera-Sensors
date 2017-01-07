@@ -3686,6 +3686,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "onCaptureStarted: capture");
 				// n.b., we don't play the shutter sound here, as it typically sounds "too late"
 			}
+			super.onCaptureStarted(session, request, timestamp, frameNumber);
 		}
 
 		public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
