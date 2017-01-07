@@ -20,6 +20,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.DngCreator;
@@ -3301,7 +3302,9 @@ public class CameraController2 extends CameraController {
 			if( use_expo_fast_burst ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "using fast burst");
-				captureSession.captureBurst(requests, previewCaptureCallback, handler);
+				int sequenceId = captureSession.captureBurst(requests, previewCaptureCallback, handler);
+				if( MyDebug.LOG )
+					Log.d(TAG, "sequenceId: " + sequenceId);
 			}
 			else {
 				if( MyDebug.LOG )
@@ -3648,6 +3651,35 @@ public class CameraController2 extends CameraController {
 		private long last_process_frame_number = 0;
 		private int last_af_state = -1;
 
+		public void onCaptureBufferLost(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, Surface target, long frameNumber) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "onCaptureBufferLost: " + frameNumber);
+			super.onCaptureBufferLost(session, request, target, frameNumber);
+		}
+
+		public void onCaptureFailed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, CaptureFailure failure) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "onCaptureFailed: " + failure);
+			super.onCaptureFailed(session, request, failure); // API docs say this does nothing, but call it just to be safe
+		}
+
+		public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session, int sequenceId) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "onCaptureSequenceAborted");
+				Log.d(TAG, "sequenceId: " + sequenceId);
+			}
+			super.onCaptureSequenceAborted(session, sequenceId); // API docs say this does nothing, but call it just to be safe
+		}
+
+		public void onCaptureSequenceCompleted(@NonNull CameraCaptureSession session, int sequenceId, long frameNumber) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "onCaptureSequenceCompleted");
+				Log.d(TAG, "sequenceId: " + sequenceId);
+				Log.d(TAG, "frameNumber: " + frameNumber);
+			}
+			super.onCaptureSequenceCompleted(session, sequenceId, frameNumber); // API docs say this does nothing, but call it just to be safe
+		}
+
 		public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if( MyDebug.LOG )
@@ -3664,8 +3696,12 @@ public class CameraController2 extends CameraController {
 		}
 
 		public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-			/*if( MyDebug.LOG )
-				Log.d(TAG, "onCaptureCompleted");*/
+			if( request.getTag() == RequestTag.CAPTURE ) {
+				if (MyDebug.LOG) {
+					Log.d(TAG, "onCaptureCompleted: capture");
+					Log.d(TAG, "sequenceId: " + result.getSequenceId());
+				}
+			}
 			process(result);
 			processCompleted(request, result);
 			super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
