@@ -1958,13 +1958,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 
-	    if( mPreview.supportsExposureTime() ) {
+		// n.b., currently don't test this on devices with long shutter times (e.g., OnePlus 3T) until this is properly supported
+	    if( mPreview.supportsExposureTime() && mPreview.getMaximumExposureTime() < 1000000000 ) {
 			Log.d(TAG, "change exposure time to max");
 		    exposureTimeSeekBar.setProgress(100);
 			this.getInstrumentation().waitForIdleSync();
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
 	    }
+		long saved_exposure_time = mPreview.getCameraController().getExposureTime();
 
 	    // test the exposure button clears and reopens without changing exposure level
 	    clickView(exposureButton);
@@ -1977,7 +1979,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 	    if( mPreview.supportsExposureTime() )
-			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
+			assertTrue( mPreview.getCameraController().getExposureTime() == saved_exposure_time );
 
 	    // test touch to focus clears the exposure controls
 		int [] gui_location = new int[2];
@@ -1994,7 +1996,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 	    if( mPreview.supportsExposureTime() )
-			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
+			assertTrue( mPreview.getCameraController().getExposureTime() == saved_exposure_time );
 
 	    // clear again so as to not interfere with take photo routine
 	    TouchUtils.drag(MainActivityTest.this, gui_location[0]+step_dist_c, gui_location[0], gui_location[1]+step_dist_c, gui_location[1], step_count_c);
@@ -2011,8 +2013,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 		    assertTrue(exposureContainer.getVisibility() == View.GONE);
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
-		    if( mPreview.supportsExposureTime() )
-				assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
+		    if( mPreview.supportsExposureTime() ) {
+				Log.d(TAG, "exposure time: " + mPreview.getCameraController().getExposureTime());
+				Log.d(TAG, "min exposure time: " + mPreview.getMinimumExposureTime());
+				Log.d(TAG, "max exposure time: " + mPreview.getMaximumExposureTime());
+				if( saved_exposure_time < mPreview.getMinimumExposureTime() )
+					saved_exposure_time = mPreview.getMinimumExposureTime();
+				if( saved_exposure_time > mPreview.getMaximumExposureTime() )
+					saved_exposure_time = mPreview.getMaximumExposureTime();
+				assertTrue( mPreview.getCameraController().getExposureTime() == saved_exposure_time );
+			}
 
 		    clickView(exposureButton);
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
@@ -2021,7 +2031,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 		    if( mPreview.supportsExposureTime() )
-				assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
+				assertTrue( mPreview.getCameraController().getExposureTime() == saved_exposure_time );
 		}
 	}
 
@@ -2193,7 +2203,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		Log.d(TAG, "wait until finished taking photo");
+		long time_s = System.currentTimeMillis();
 	    while( mPreview.isTakingPhoto() ) {
+			assertTrue( System.currentTimeMillis() - time_s < 10000 ); // make sure the test fails rather than hanging, if for some reason we get stuck
 		    assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
 		    assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
 		    //assertTrue(!mPreview.isTakingPhoto() || flashButton.getVisibility() == View.GONE);
@@ -4340,7 +4352,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}, 5000, true, false);
 	}
 
-	/* Max filesize is for ~4.5s, and max duration is 5s, check we only get 1 video.
+	/** Max filesize is for ~4.5s, and max duration is 5s, check we only get 1 video.
+	 *  This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoMaxFileSize2() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxFileSize2");
@@ -5327,7 +5340,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 	}
 	
-	/* Tests taking photos repeatedly with auto-stabilise enabled.
+	/* Tests taking photos repeatedly with auto-repeat "burst" method.
 	 */
 	public void testTakePhotoBurst() {
 		Log.d(TAG, "testTakePhotoBurst");
@@ -6864,6 +6877,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
 
+	/** Tests expo bracketing with default values.
+     */
 	public void testTakePhotoExpo() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExpo");
 		if( !mActivity.supportsExpoBracketing() ) {
@@ -6880,6 +6895,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
 
+	/** Tests expo bracketing with 5 images, 1 stop.
+	 *  Note this test [usually] fails on OnePlus 3T as onImageAvailable is only called 4 times, we never receive the 5th image.
+	 */
 	public void testTakePhotoExpo5() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExpo5");
 		if( !mActivity.supportsExpoBracketing() ) {
