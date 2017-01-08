@@ -4,7 +4,7 @@ import net.sourceforge.opencamera.MyDebug;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import android.annotation.TargetApi;
@@ -481,8 +481,17 @@ public class CameraController1 extends CameraController {
 			String [] isos_array = iso_values.split(",");
 			// split shouldn't return null
 			if( isos_array.length > 0 ) {
+				// remove duplicates (OnePlus 3T has several duplicate "auto" entries)
+				HashSet<String> hashSet = new HashSet<>();
 				values = new ArrayList<>();
-				Collections.addAll(values, isos_array);
+				// use hashset for efficiency
+				// make sure we alo preserve the order
+				for(String iso : isos_array) {
+					if( !hashSet.contains(iso) ) {
+						values.add(iso);
+						hashSet.add(iso);
+					}
+				}
 			}
 		}
 
