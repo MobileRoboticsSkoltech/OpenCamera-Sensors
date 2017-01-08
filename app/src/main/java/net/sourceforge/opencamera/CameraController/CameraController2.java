@@ -293,7 +293,14 @@ public class CameraController2 extends CameraController {
 				}
 				builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
-				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+				long actual_exposure_time = exposure_time;
+				if( !is_still ) {
+					// if this isn't for still capture, have a max exposure time of 1/12s
+					actual_exposure_time = Math.min(exposure_time, 1000000000L/12);
+					if( MyDebug.LOG )
+						Log.d(TAG, "actually using exposure_time of: " + actual_exposure_time);
+				}
+				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, actual_exposure_time);
 				// for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
 				builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 				// set flash via CaptureRequest.FLASH
@@ -4200,7 +4207,7 @@ public class CameraController2 extends CameraController {
 				// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
 				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 				if( MyDebug.LOG )
-					Log.e(TAG, "### reset ae mode");
+					Log.d(TAG, "### reset ae mode");
 				String saved_flash_value = camera_settings.flash_value;
 				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 					// same hack as in setFlashValue() - for fake precapture we need to turn off the torch mode that was set, but
