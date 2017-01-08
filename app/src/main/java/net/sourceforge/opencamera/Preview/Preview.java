@@ -223,7 +223,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private static final int FOCUS_FAILED = 2;
 	private static final int FOCUS_DONE = 3;
 	private String set_flash_value_after_autofocus = "";
-	private boolean take_photo_after_autofocus; // set to take a photo when the in-progress autofocus has completed
+	private boolean take_photo_after_autofocus; // set to take a photo when the in-progress autofocus has completed; if setting, remember to call camera_controller.setCaptureFollowAutofocusHint()
 	private boolean successfully_focused;
 	private long successfully_focused_time = -1;
 
@@ -941,6 +941,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		synchronized( this ) {
 			// synchronise for consistency (keep FindBugs happy)
 			take_photo_after_autofocus = false;
+			// no need to call camera_controller.setCaptureFollowAutofocusHint() as we're closing the camera
 		}
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
@@ -1051,6 +1052,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		synchronized( this ) {
 			// synchronise for consistency (keep FindBugs happy)
 			take_photo_after_autofocus = false;
+			// no need to call camera_controller.setCaptureFollowAutofocusHint() as we're opening the camera
 		}
 		set_flash_value_after_autofocus = "";
 		successfully_focused = false;
@@ -4077,6 +4079,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					if( MyDebug.LOG )
 						Log.d(TAG, "autofocus_in_continuous_mode: take photo after current focus");
 					take_photo_after_autofocus = true;
+					camera_controller.setCaptureFollowAutofocusHint(true);
 				}
 				else {
 					// when autofocus_in_continuous_mode==true, it means the user recently touched to focus in continuous focus mode, so don't do another focus
@@ -4100,7 +4103,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					takePhotoWhenFocused();
 				}
 	        };
-			camera_controller.autoFocus(autoFocusCallback);
+			camera_controller.autoFocus(autoFocusCallback, true);
 		}
 		else if( skip_autofocus || this.recentlyFocused() ) {
 			if( MyDebug.LOG ) {
@@ -4122,6 +4125,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					if( MyDebug.LOG )
 						Log.d(TAG, "take photo after current focus");
 					take_photo_after_autofocus = true;
+					camera_controller.setCaptureFollowAutofocusHint(true);
 				}
 				else {
 					focus_success = FOCUS_DONE; // clear focus rectangle for new refocus
@@ -4137,7 +4141,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			        };
 					if( MyDebug.LOG )
 						Log.d(TAG, "start autofocus to take picture");
-					camera_controller.autoFocus(autoFocusCallback);
+					camera_controller.autoFocus(autoFocusCallback, true);
 					count_cameraAutoFocus++;
 				}
 			}
@@ -4503,7 +4507,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "set focus_success to " + focus_success);
 	    		this.focus_complete_time = -1;
 	    		this.successfully_focused = false;
-    			camera_controller.autoFocus(autoFocusCallback);
+    			camera_controller.autoFocus(autoFocusCallback, false);
     			count_cameraAutoFocus++;
     			this.focus_started_time = System.currentTimeMillis();
 				if( MyDebug.LOG )

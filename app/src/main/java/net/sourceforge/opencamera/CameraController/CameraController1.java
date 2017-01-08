@@ -1190,7 +1190,8 @@ public class CameraController1 extends CameraController {
 		camera.setFaceDetectionListener(new CameraFaceDetectionListener());
 	}
 
-	public void autoFocus(final CameraController.AutoFocusCallback cb) {
+	@Override
+	public void autoFocus(final CameraController.AutoFocusCallback cb, boolean capture_follows_autofocus_hint) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoFocus");
         Camera.AutoFocusCallback camera_cb = new Camera.AutoFocusCallback() {
@@ -1227,7 +1228,13 @@ public class CameraController1 extends CameraController {
 			cb.onAutoFocus(false);
 		}
 	}
-	
+
+	@Override
+	public void setCaptureFollowAutofocusHint(boolean capture_follows_autofocus_hint) {
+		// unused by this API
+	}
+
+	@Override
 	public void cancelAutoFocus() {
 		try {
 			camera.cancelAutoFocus();

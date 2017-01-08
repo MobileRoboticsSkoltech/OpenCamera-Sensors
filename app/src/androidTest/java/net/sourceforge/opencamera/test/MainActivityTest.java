@@ -1270,7 +1270,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    
 		// check continuous focus is working
 		saved_count_cameraContinuousFocusMoving = mPreview.count_cameraContinuousFocusMoving;
-		Thread.sleep(1000);
+		Thread.sleep(3000);
 		new_count_cameraContinuousFocusMoving = mPreview.count_cameraContinuousFocusMoving;
 		Log.d(TAG, "count_cameraContinuousFocusMoving compare saved: "+ saved_count_cameraContinuousFocusMoving + " to new: " + new_count_cameraContinuousFocusMoving);
 		assertTrue( new_count_cameraContinuousFocusMoving > saved_count_cameraContinuousFocusMoving );
@@ -1958,13 +1958,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 
-	    if( mPreview.supportsExposureTime() ) {
+		// n.b., currently don't test this on devices with long shutter times (e.g., OnePlus 3T) until this is properly supported
+	    if( mPreview.supportsExposureTime() && mPreview.getMaximumExposureTime() < 1000000000 ) {
 			Log.d(TAG, "change exposure time to max");
 		    exposureTimeSeekBar.setProgress(100);
 			this.getInstrumentation().waitForIdleSync();
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
 	    }
+		long saved_exposure_time = mPreview.getCameraController().getExposureTime();
 
 	    // test the exposure button clears and reopens without changing exposure level
 	    clickView(exposureButton);
@@ -1977,7 +1979,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 	    if( mPreview.supportsExposureTime() )
-			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
+			assertTrue( mPreview.getCameraController().getExposureTime() == saved_exposure_time );
 
 	    // test touch to focus clears the exposure controls
 		int [] gui_location = new int[2];
@@ -1994,7 +1996,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 	    if( mPreview.supportsExposureTime() )
-			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
+			assertTrue( mPreview.getCameraController().getExposureTime() == saved_exposure_time );
 
 	    // clear again so as to not interfere with take photo routine
 	    TouchUtils.drag(MainActivityTest.this, gui_location[0]+step_dist_c, gui_location[0], gui_location[1]+step_dist_c, gui_location[1], step_count_c);
@@ -2011,8 +2013,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 		    assertTrue(exposureContainer.getVisibility() == View.GONE);
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
-		    if( mPreview.supportsExposureTime() )
-				assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
+		    if( mPreview.supportsExposureTime() ) {
+				Log.d(TAG, "exposure time: " + mPreview.getCameraController().getExposureTime());
+				Log.d(TAG, "min exposure time: " + mPreview.getMinimumExposureTime());
+				Log.d(TAG, "max exposure time: " + mPreview.getMaximumExposureTime());
+				if( saved_exposure_time < mPreview.getMinimumExposureTime() )
+					saved_exposure_time = mPreview.getMinimumExposureTime();
+				if( saved_exposure_time > mPreview.getMaximumExposureTime() )
+					saved_exposure_time = mPreview.getMaximumExposureTime();
+				assertTrue( mPreview.getCameraController().getExposureTime() == saved_exposure_time );
+			}
 
 		    clickView(exposureButton);
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
@@ -2021,7 +2031,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 		    if( mPreview.supportsExposureTime() )
-				assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
+				assertTrue( mPreview.getCameraController().getExposureTime() == saved_exposure_time );
 		}
 	}
 
@@ -2193,7 +2203,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		Log.d(TAG, "wait until finished taking photo");
+		long time_s = System.currentTimeMillis();
 	    while( mPreview.isTakingPhoto() ) {
+			assertTrue( System.currentTimeMillis() - time_s < 20000 ); // make sure the test fails rather than hanging, if for some reason we get stuck (note that testTakePhotoManualISOExposure takes over 10s on Nexus 6)
 		    assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
 		    assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
 		    //assertTrue(!mPreview.isTakingPhoto() || flashButton.getVisibility() == View.GONE);
@@ -2535,6 +2547,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
 	}
 
+	/** Tests the "fake" flash mode. Important to do this even for devices where standard Camera2 flash work fine, as we use
+	 *  fake flash for modes like HDR (plus it's good to still test the fake flash mode on as many devices as possible).
+	 *  We do more tests with flash on than flash auto (especially due to bug on OnePlus 3T where fake flash auto never fires the flash
+	 *  anyway).
+     */
 	public void testTakePhotoFlashAutoFakeMode() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashAutoFakeMode");
 		if( !mPreview.supportsFlash() ) {
@@ -2552,12 +2569,24 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		switchToFlashValue("flash_auto");
+		switchToFocusValue("focus_mode_auto");
 		Thread.sleep(2000); // wait so we don't take the photo immediately, to be more realistic
+		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
+		subTestTakePhoto(false, false, false, false, false, false, false, false);
+
+		// now test continuous focus mode
+		Thread.sleep(1000);
+		switchToFocusValue("focus_mode_continuous_picture");
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
 	}
 
-	/** May have precapture timeout if phone is face down (due to taking too long to wait for exposure to lock again.
+	/** Tests the "fake" flash mode. Important to do this even for devices where standard Camera2 flash work fine, as we use
+	 *  fake flash for modes like HDR (plus it's good to still test the fake flash mode on as many devices as possible).
+	 *  We do more tests with flash on than flash auto (especially due to bug on OnePlus 3T where fake flash auto never fires the flash
+	 *  anyway).
+	 *  May have precapture timeout if phone is face down (at least on Nexus 6 and OnePlus 3T) - issue that we've already ae converged,
+	 *  so we think fake-precapture never starts when firing the flash for taking photo.
 	 */
 	public void testTakePhotoFlashOnFakeMode() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashOnFakeMode");
@@ -2575,12 +2604,45 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
+		switchToFocusValue("focus_mode_auto");
 		switchToFlashValue("flash_on");
 		Thread.sleep(2000); // wait so we don't take the photo immediately, to be more realistic
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
+		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
 
-		mPreview.getCameraController().count_precapture_timeout = 0; // hack - precapture timeouts are more common with fake flash precapture mode, especially when phone is face down during testing
+		// now test doing autofocus, waiting, then taking photo
+		Thread.sleep(1000);
+		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+
+		// now test doing autofocus, then taking photo immediately
+		Thread.sleep(1000);
+		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
+		subTestTakePhoto(false, false, true, false, false, false, false, false);
+		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+
+		// now test it all again with continuous focus mode
+		switchToFocusValue("focus_mode_continuous_picture");
+		Thread.sleep(1000);
+		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
+		subTestTakePhoto(false, false, false, false, false, false, false, false);
+		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+
+		// now test doing autofocus, waiting, then taking photo
+		Thread.sleep(1000);
+		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+
+		// now test doing autofocus, then taking photo immediately
+		Thread.sleep(1000);
+		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
+		subTestTakePhoto(false, false, true, false, false, false, false, false);
+		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+
+		//mPreview.getCameraController().count_precapture_timeout = 0; // hack - precapture timeouts are more common with fake flash precapture mode, especially when phone is face down during testing
 	}
 
 	public void testTakePhotoSingleTap() throws InterruptedException {
@@ -4340,7 +4402,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}, 5000, true, false);
 	}
 
-	/* Max filesize is for ~4.5s, and max duration is 5s, check we only get 1 video.
+	/** Max filesize is for ~4.5s, and max duration is 5s, check we only get 1 video.
+	 *  This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoMaxFileSize2() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxFileSize2");
@@ -5327,7 +5390,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 	}
 	
-	/* Tests taking photos repeatedly with auto-stabilise enabled.
+	/* Tests taking photos repeatedly with auto-repeat "burst" method.
 	 */
 	public void testTakePhotoBurst() {
 		Log.d(TAG, "testTakePhotoBurst");
@@ -6864,6 +6927,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
 
+	/** Tests expo bracketing with default values.
+     */
 	public void testTakePhotoExpo() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExpo");
 		if( !mActivity.supportsExpoBracketing() ) {
@@ -6880,6 +6945,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
 
+	/** Tests expo bracketing with 5 images, 1 stop.
+	 *  Note this test [usually] fails on OnePlus 3T as onImageAvailable is only called 4 times, we never receive the 5th image.
+	 */
 	public void testTakePhotoExpo5() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExpo5");
 		if( !mActivity.supportsExpoBracketing() ) {

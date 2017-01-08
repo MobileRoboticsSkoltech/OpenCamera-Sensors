@@ -286,7 +286,17 @@ public abstract class CameraController {
 	public abstract void stopPreview();
 	public abstract boolean startFaceDetection();
 	public abstract void setFaceDetectionListener(final CameraController.FaceDetectionListener listener);
-	public abstract void autoFocus(final CameraController.AutoFocusCallback cb);
+
+	/**
+	 * @param cb Callback to be called when autofocus completes.
+	 * @param capture_follows_autofocus_hint Set to true if you intend to take a photo immediately after autofocus. If the
+	 *                                       decision changes after autofocus has started (e.g., user initiates autofocus,
+	 *                                       then takes photo before autofocus has completed), use setCaptureFollowAutofocusHint().
+     */
+	public abstract void autoFocus(final CameraController.AutoFocusCallback cb, boolean capture_follows_autofocus_hint);
+	/** See autoFocus() for details - used to update the capture_follows_autofocus_hint setting.
+     */
+	public abstract void setCaptureFollowAutofocusHint(boolean capture_follows_autofocus_hint);
 	public abstract void cancelAutoFocus();
 	public abstract void setContinuousFocusMoveCallback(ContinuousFocusMoveCallback cb);
 	public abstract void takePicture(final CameraController.PictureCallback picture, final ErrorCallback error);
