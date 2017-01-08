@@ -4064,10 +4064,11 @@ public class CameraController2 extends CameraController {
 				capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "capture_result_iso: " + capture_result_iso);*/
-				if( camera_settings.has_iso && camera_settings.iso != capture_result_iso ) {
-					// ugly hack: problem that when we start recording video (video_recorder.start() call), this often causes the ISO setting to reset to the wrong value!
+				if( camera_settings.has_iso && Math.abs(camera_settings.iso - capture_result_iso) > 10  ) {
+					// ugly hack: problem (on Nexus 6 at least) that when we start recording video (video_recorder.start() call), this often causes the ISO setting to reset to the wrong value!
 					// seems to happen more often with shorter exposure time
 					// seems to happen on other camera apps with Camera2 API too
+					// update: allow some tolerance, as on OnePlus 3T it's normal to have some slight difference between requested and actual
 					// this workaround still means a brief flash with incorrect ISO, but is best we can do for now!
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "ISO " + capture_result_iso + " different to requested ISO " + camera_settings.iso);
