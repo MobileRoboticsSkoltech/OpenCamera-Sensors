@@ -3253,7 +3253,13 @@ public class CameraController2 extends CameraController {
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 			}
 			// else don't turn torch off, as user may be in torch on mode
-			if( capture_result_has_iso )
+
+			// obtain current ISO/etc settings from the capture result - but if we're in manual ISO mode,
+			// might as well use the settings the user has actually requested (also useful for workaround for
+			// OnePlus 3T bug where the reported ISO and exposure_time are wrong in dark scenes)
+			if( camera_settings.has_iso )
+				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, camera_settings.iso );
+			else if( capture_result_has_iso )
 				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, capture_result_iso );
 			else
 				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 800);
@@ -3263,7 +3269,9 @@ public class CameraController2 extends CameraController {
 				stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
 
 			long base_exposure_time = 1000000000L/30;
-			if( capture_result_has_exposure_time )
+			if( camera_settings.has_iso )
+				base_exposure_time = camera_settings.exposure_time;
+			else if( capture_result_has_exposure_time )
 				base_exposure_time = capture_result_exposure_time;
 
 			int n_half_images = expo_bracketing_n_images/2;
