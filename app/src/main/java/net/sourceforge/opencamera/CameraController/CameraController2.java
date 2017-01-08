@@ -62,6 +62,7 @@ public class CameraController2 extends CameraController {
 	private CameraCaptureSession captureSession;
 	private CaptureRequest.Builder previewBuilder;
 	private AutoFocusCallback autofocus_cb;
+	private boolean capture_follows_autofocus_hint;
 	private FaceDetectionListener face_detection_listener;
 	private final Object image_reader_lock = new Object(); // lock to make sure we only handle one image being available at a time
 	private final Object open_camera_lock = new Object(); // lock to wait for camera to be opened from CameraDevice.StateCallback
@@ -2917,9 +2918,11 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	public void autoFocus(final AutoFocusCallback cb) {
-		if( MyDebug.LOG )
+	public void autoFocus(final AutoFocusCallback cb, boolean capture_follows_autofocus_hint) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "autoFocus");
+			Log.d(TAG, "capture_follows_autofocus_hint? " + capture_follows_autofocus_hint);
+		}
 		fake_precapture_torch_focus_performed = false;
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
@@ -2944,6 +2947,7 @@ public class CameraController2 extends CameraController {
 			 *    This seems to happen with scenes that have both light and dark regions.
 			 *  (All tested on Nexus 6, Android 6.)
 			 */
+			this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
 			this.autofocus_cb = cb;
 			return;
 		}
@@ -2951,6 +2955,7 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "already waiting for an autofocus");
 			// need to update the callback!
+			this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
 			this.autofocus_cb = cb;
 			return;
 		}*/
@@ -2971,6 +2976,7 @@ public class CameraController2 extends CameraController {
 		}
 		state = STATE_WAITING_AUTOFOCUS;
 		precapture_state_change_time_ms = -1;
+		this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
 		this.autofocus_cb = cb;
 		// Camera2Basic sets a trigger with capture
 		// Google Camera sets to idle with a repeating request, then sets af trigger to start with a capture
@@ -2988,11 +2994,21 @@ public class CameraController2 extends CameraController {
 				if( want_flash ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "turn on torch for fake flash");
-					//afBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
+					afBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 					afBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 					fake_precapture_torch_focus_performed = true;
+					setRepeatingRequest(afBuilder.build());
+					// We sleep for a short time as on some devices (e.g., OnePlus 3T), the torch will turn off when autofocus
+					// completes even if we don't want that (because we'll be taking a photo).
+					// Note that on other devices such as Nexus 6, this problem doesn't occur even if we don't have a separate
+					// setRepeatingRequest.
+					try {
+						Thread.sleep(100);
+					}
+					catch(InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-				// CONTROL_AE_MODE is set back to flash auto after the capture is completed
 			}
 			afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 			setRepeatingRequest(afBuilder.build());
@@ -3010,8 +3026,18 @@ public class CameraController2 extends CameraController {
 			precapture_state_change_time_ms = -1;
 			autofocus_cb.onAutoFocus(false);
 			autofocus_cb = null;
-		} 
+			this.capture_follows_autofocus_hint = false;
+		}
 		afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
+	}
+
+	@Override
+	public void setCaptureFollowAutofocusHint(boolean capture_follows_autofocus_hint) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setCaptureFollowAutofocusHint");
+			Log.d(TAG, "capture_follows_autofocus_hint? " + capture_follows_autofocus_hint);
+		}
+		this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
 	}
 
 	@Override
@@ -3038,6 +3064,7 @@ public class CameraController2 extends CameraController {
 		}
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 		this.autofocus_cb = null;
+		this.capture_follows_autofocus_hint = false;
 		state = STATE_NORMAL;
 		precapture_state_change_time_ms = -1;
 		try {
@@ -3104,6 +3131,8 @@ public class CameraController2 extends CameraController {
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			camera_settings.setupBuilder(stillBuilder, true);
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting torch for capture");
 				stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 			}
@@ -3153,6 +3182,8 @@ public class CameraController2 extends CameraController {
     			stillBuilder.addTarget(imageReaderRaw.getSurface());
 
 			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
+			if( MyDebug.LOG )
+				Log.d(TAG, "capture with stillBuilder");
 			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
 			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
 				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
@@ -3357,6 +3388,8 @@ public class CameraController2 extends CameraController {
 	    	precapture_state_change_time_ms = System.currentTimeMillis();
 
 	    	// first set precapture to idle - this is needed, otherwise we hang in state STATE_WAITING_PRECAPTURE_START, because precapture already occurred whilst autofocusing, and it doesn't occur again unless we first set the precapture trigger to idle
+			if( MyDebug.LOG )
+				Log.d(TAG, "capture with precaptureBuilder");
 			captureSession.capture(precaptureBuilder.build(), previewCaptureCallback, handler);
 			captureSession.setRepeatingRequest(precaptureBuilder.build(), previewCaptureCallback, handler);
 
@@ -3383,6 +3416,8 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "runFakePrecapture");
 		if( camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_on") ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "turn on torch");
 			previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 			previewBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 			fake_precapture_torch_performed = true;
@@ -3401,7 +3436,6 @@ public class CameraController2 extends CameraController {
 		else {
 			if( MyDebug.LOG )
 				Log.e(TAG, "runFakePrecapture called with unexpected flash value: " + camera_settings.flash_value);
-			
 		}
     	state = STATE_WAITING_FAKE_PRECAPTURE_START;
     	precapture_state_change_time_ms = System.currentTimeMillis();
@@ -3490,10 +3524,30 @@ public class CameraController2 extends CameraController {
 				// fake precapture works by turning on torch (or using a "front screen flash"), so we can't use the camera's own decision for flash auto
 				// instead we check the current ISO value
 				boolean auto_flash = camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto");
+				Integer flash_mode = previewBuilder.get(CaptureRequest.FLASH_MODE);
+				if( MyDebug.LOG )
+					Log.d(TAG, "flash_mode: " + flash_mode);
 				if( auto_flash && !fireAutoFlash() ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "fake precapture flash auto: seems bright enough to not need flash");
 					takePictureAfterPrecapture();
+				}
+				else if( flash_mode != null && flash_mode == CameraMetadata.FLASH_MODE_TORCH ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "fake precapture flash: torch already on (presumably from autofocus)");
+					// On some devices (e.g., OnePlus 3T), if we've already turned on torch for an autofocus immediately before
+					// taking the photo, ae convergence has already occurred - so if we called runFakePrecapture(), we'd just get
+					// stuck waiting for CONTROL_AE_STATE_SEARCHING which will never happen, until we hit the timeout - it works,
+					// but it means taking photos is slower as we have to wait until the timeout
+					// Instead we assume that ae scanning has already started, so go straight to STATE_WAITING_FAKE_PRECAPTURE_DONE,
+					// which means wait until we're no longer CONTROL_AE_STATE_SEARCHING.
+					// (Note, we don't want to go straight to takePictureAfterPrecapture(), as it might be that ae scanning is still
+					// taking place.)
+					// An alternative solution would be to switch torch off and back on again to cause ae scanning to start - but
+					// at worst this is tricky to get working, and at best, taking photos would be slower.
+					fake_precapture_torch_performed = true; // so we know to fire the torch when capturing
+					state = STATE_WAITING_FAKE_PRECAPTURE_DONE;
+					precapture_state_change_time_ms = System.currentTimeMillis();
 				}
 				else {
 					runFakePrecapture();
@@ -3750,6 +3804,7 @@ public class CameraController2 extends CameraController {
 						}
 						autofocus_cb.onAutoFocus(focus_success);
 						autofocus_cb = null;
+						capture_follows_autofocus_hint = false;
 					}
 				}
 			}
@@ -3807,6 +3862,7 @@ public class CameraController2 extends CameraController {
 						autofocus_cb.onAutoFocus(false);
 						autofocus_cb = null;
 					}
+					capture_follows_autofocus_hint = false;
 				}
 				else if( af_state != last_af_state ) {
 					// check for autofocus completing
@@ -3825,26 +3881,33 @@ public class CameraController2 extends CameraController {
 						state = STATE_NORMAL;
 				    	precapture_state_change_time_ms = -1;
 						if( use_fake_precapture_mode && fake_precapture_torch_focus_performed ) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "turn off torch after focus (fake precapture code)");
 							fake_precapture_torch_focus_performed = false;
-							camera_settings.setAEMode(previewBuilder, false);
-							try {
-								setRepeatingRequest();
-							}
-							catch(CameraAccessException e) {
-								if( MyDebug.LOG ) {
-									Log.e(TAG, "failed to set repeating request to turn off torch after autofocus");
-									Log.e(TAG, "reason: " + e.getReason());
-									Log.e(TAG, "message: " + e.getMessage());
+							if( !capture_follows_autofocus_hint ) {
+								// If we're going to be taking a photo immediately after the autofocus, it's better for the fake flash
+								// mode to leave the torch on. If we don't do this, one of the following issues can happen:
+								// - On OnePlus 3T, the torch doesn't get turned off, but because we've switched off the torch flag
+								//   in previewBuilder, we go ahead with the precapture routine instead of
+								if( MyDebug.LOG )
+									Log.d(TAG, "turn off torch after focus (fake precapture code)");
+								camera_settings.setAEMode(previewBuilder, false);
+								try {
+									setRepeatingRequest();
 								}
-								e.printStackTrace();
-							} 
+								catch(CameraAccessException e) {
+									if( MyDebug.LOG ) {
+										Log.e(TAG, "failed to set repeating request to turn off torch after autofocus");
+										Log.e(TAG, "reason: " + e.getReason());
+										Log.e(TAG, "message: " + e.getMessage());
+									}
+									e.printStackTrace();
+								}
+							}
 						}
 						if( autofocus_cb != null ) {
 							autofocus_cb.onAutoFocus(focus_success);
 							autofocus_cb = null;
 						}
+						capture_follows_autofocus_hint = false;
 					}
 				}
 			}
