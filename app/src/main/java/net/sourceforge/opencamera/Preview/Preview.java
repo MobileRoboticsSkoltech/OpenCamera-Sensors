@@ -4242,6 +4242,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	        	if( !is_preview_started ) {
     	    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
     	    	    	// (otherwise this can fail, at least on Nexus 7)
+						if( MyDebug.LOG )
+							Log.d(TAG, "burst mode photos remaining: onPictureTaken about to start preview: " + remaining_burst_photos);
     		            startCameraPreview();
     	        		if( MyDebug.LOG )
     	        			Log.d(TAG, "burst mode photos remaining: onPictureTaken started preview: " + remaining_burst_photos);
@@ -4279,7 +4281,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			}
 
     			if( MyDebug.LOG )
-    				Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
+    				Log.d(TAG, "do we need to take another photo? remaining_burst_photos: " + remaining_burst_photos);
     	        if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
     	        	if( remaining_burst_photos > 0 )
     	        		remaining_burst_photos--;
