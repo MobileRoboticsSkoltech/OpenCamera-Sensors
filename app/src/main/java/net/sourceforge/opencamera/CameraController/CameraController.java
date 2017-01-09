@@ -110,6 +110,7 @@ public abstract class CameraController {
 	}
 	
 	public interface PictureCallback {
+		void onStarted(); // called immediately before we start capturing the picture
 		void onCompleted(); // called after all relevant on*PictureTaken() callbacks have been called and returned
 		void onPictureTaken(byte[] data);
 		/** Only called if RAW is requested.
@@ -187,6 +188,11 @@ public abstract class CameraController {
 	 *            If manual_iso i false, this value is ignored.
 	 */
 	public abstract void setManualISO(boolean manual_iso, int iso);
+
+	/**
+	 * @return Whether in manual ISO mode (as opposed to auto).
+     */
+	public abstract boolean isManualISO();
 	/** Specify a specific ISO value. Only supported if supports_iso_range is true. Callers should
 	 *  first switch to manual ISO mode using setManualISO().
 	 */

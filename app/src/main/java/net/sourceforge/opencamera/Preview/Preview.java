@@ -2708,8 +2708,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public String getExposureTimeString(long exposure_time) {
 		double exposure_time_s = exposure_time/1000000000.0;
 		String string;
-		if( exposure_time >= 1000000000 ) {
-			// show exposure times of more than 1s directly
+		if( exposure_time >= 500000000 ) {
+			// show exposure times of more than 0.5s directly
 			string = decimal_format_1dp.format(exposure_time_s) + getResources().getString(R.string.seconds_abbreviation);
 		}
 		else {
@@ -4230,6 +4230,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			private boolean has_date = false;
 			private Date current_date = null;
 
+			public void onStarted() {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onStarted");
+				applicationInterface.onCaptureStarted();
+			}
+
 			public void onCompleted() {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onCompleted");
@@ -4242,6 +4248,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	        	if( !is_preview_started ) {
     	    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
     	    	    	// (otherwise this can fail, at least on Nexus 7)
+						if( MyDebug.LOG )
+							Log.d(TAG, "burst mode photos remaining: onPictureTaken about to start preview: " + remaining_burst_photos);
     		            startCameraPreview();
     	        		if( MyDebug.LOG )
     	        			Log.d(TAG, "burst mode photos remaining: onPictureTaken started preview: " + remaining_burst_photos);
@@ -4279,7 +4287,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			}
 
     			if( MyDebug.LOG )
-    				Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
+    				Log.d(TAG, "do we need to take another photo? remaining_burst_photos: " + remaining_burst_photos);
     	        if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
     	        	if( remaining_burst_photos > 0 )
     	        		remaining_burst_photos--;

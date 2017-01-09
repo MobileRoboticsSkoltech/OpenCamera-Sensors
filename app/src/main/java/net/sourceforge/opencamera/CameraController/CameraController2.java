@@ -293,7 +293,14 @@ public class CameraController2 extends CameraController {
 				}
 				builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
 				builder.set(CaptureRequest.SENSOR_SENSITIVITY, iso);
-				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+				long actual_exposure_time = exposure_time;
+				if( !is_still ) {
+					// if this isn't for still capture, have a max exposure time of 1/12s
+					actual_exposure_time = Math.min(exposure_time, 1000000000L/12);
+					if( MyDebug.LOG )
+						Log.d(TAG, "actually using exposure_time of: " + actual_exposure_time);
+				}
+				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, actual_exposure_time);
 				// for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
 				builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 				// set flash via CaptureRequest.FLASH
@@ -1558,6 +1565,11 @@ public class CameraController2 extends CameraController {
 			}
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public boolean isManualISO() {
+		return camera_settings.has_iso;
 	}
 
 	@Override
@@ -3182,6 +3194,11 @@ public class CameraController2 extends CameraController {
     			stillBuilder.addTarget(imageReaderRaw.getSurface());
 
 			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
+			if( jpeg_cb != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "call onStarted() in callback");
+				jpeg_cb.onStarted();
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "capture with stillBuilder");
 			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
@@ -3246,7 +3263,13 @@ public class CameraController2 extends CameraController {
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 			}
 			// else don't turn torch off, as user may be in torch on mode
-			if( capture_result_has_iso )
+
+			// obtain current ISO/etc settings from the capture result - but if we're in manual ISO mode,
+			// might as well use the settings the user has actually requested (also useful for workaround for
+			// OnePlus 3T bug where the reported ISO and exposure_time are wrong in dark scenes)
+			if( camera_settings.has_iso )
+				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, camera_settings.iso );
+			else if( capture_result_has_iso )
 				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, capture_result_iso );
 			else
 				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 800);
@@ -3256,7 +3279,9 @@ public class CameraController2 extends CameraController {
 				stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
 
 			long base_exposure_time = 1000000000L/30;
-			if( capture_result_has_exposure_time )
+			if( camera_settings.has_iso )
+				base_exposure_time = camera_settings.exposure_time;
+			else if( capture_result_has_exposure_time )
 				base_exposure_time = capture_result_exposure_time;
 
 			int n_half_images = expo_bracketing_n_images/2;
@@ -3329,6 +3354,12 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "n_burst: " + n_burst);
 
 			captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
+
+			if( jpeg_cb != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "call onStarted() in callback");
+				jpeg_cb.onStarted();
+			}
 
 			if( use_expo_fast_burst ) {
 				if( MyDebug.LOG )
@@ -4057,10 +4088,11 @@ public class CameraController2 extends CameraController {
 				capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "capture_result_iso: " + capture_result_iso);*/
-				if( camera_settings.has_iso && camera_settings.iso != capture_result_iso ) {
-					// ugly hack: problem that when we start recording video (video_recorder.start() call), this often causes the ISO setting to reset to the wrong value!
+				if( camera_settings.has_iso && Math.abs(camera_settings.iso - capture_result_iso) > 10  ) {
+					// ugly hack: problem (on Nexus 6 at least) that when we start recording video (video_recorder.start() call), this often causes the ISO setting to reset to the wrong value!
 					// seems to happen more often with shorter exposure time
 					// seems to happen on other camera apps with Camera2 API too
+					// update: allow some tolerance, as on OnePlus 3T it's normal to have some slight difference between requested and actual
 					// this workaround still means a brief flash with incorrect ISO, but is best we can do for now!
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "ISO " + capture_result_iso + " different to requested ISO " + camera_settings.iso);
@@ -4200,7 +4232,7 @@ public class CameraController2 extends CameraController {
 				// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
 				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 				if( MyDebug.LOG )
-					Log.e(TAG, "### reset ae mode");
+					Log.d(TAG, "### reset ae mode");
 				String saved_flash_value = camera_settings.flash_value;
 				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 					// same hack as in setFlashValue() - for fake precapture we need to turn off the torch mode that was set, but

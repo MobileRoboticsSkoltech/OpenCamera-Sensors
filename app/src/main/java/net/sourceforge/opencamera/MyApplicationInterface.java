@@ -1359,6 +1359,13 @@ public class MyApplicationInterface implements ApplicationInterface {
     	drawPreview.turnFrontScreenFlashOn();
     }
 
+	@Override
+	public void onCaptureStarted() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onCaptureStarted");
+		drawPreview.onCaptureStarted();
+	}
+
     @Override
 	public void onPictureCompleted() {
 		if( MyDebug.LOG )
