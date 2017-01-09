@@ -2708,8 +2708,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public String getExposureTimeString(long exposure_time) {
 		double exposure_time_s = exposure_time/1000000000.0;
 		String string;
-		if( exposure_time >= 1000000000 ) {
-			// show exposure times of more than 1s directly
+		if( exposure_time >= 500000000 ) {
+			// show exposure times of more than 0.5s directly
 			string = decimal_format_1dp.format(exposure_time_s) + getResources().getString(R.string.seconds_abbreviation);
 		}
 		else {
@@ -4229,6 +4229,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			private boolean success = false; // whether jpeg callback succeeded
 			private boolean has_date = false;
 			private Date current_date = null;
+
+			public void onStarted() {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onStarted");
+				applicationInterface.onCaptureStarted();
+			}
 
 			public void onCompleted() {
 				if( MyDebug.LOG )

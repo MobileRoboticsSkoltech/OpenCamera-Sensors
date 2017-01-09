@@ -1568,6 +1568,11 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public boolean isManualISO() {
+		return camera_settings.has_iso;
+	}
+
+	@Override
 	// Returns whether ISO was modified
 	// N.B., use setManualISO() to switch between auto and manual mode
 	public boolean setISO(int iso) {
@@ -3189,6 +3194,11 @@ public class CameraController2 extends CameraController {
     			stillBuilder.addTarget(imageReaderRaw.getSurface());
 
 			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
+			if( jpeg_cb != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "call onStarted() in callback");
+				jpeg_cb.onStarted();
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "capture with stillBuilder");
 			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
@@ -3344,6 +3354,12 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "n_burst: " + n_burst);
 
 			captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
+
+			if( jpeg_cb != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "call onStarted() in callback");
+				jpeg_cb.onStarted();
+			}
 
 			if( use_expo_fast_burst ) {
 				if( MyDebug.LOG )

@@ -572,6 +572,12 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public boolean isManualISO() {
+		// not supported for CameraController1
+		return false;
+	}
+
+	@Override
 	public boolean setISO(int iso) {
 		// not supported for CameraController1
 		return false;
@@ -1312,6 +1318,11 @@ public class CameraController1 extends CameraController {
     	    }
         };
 
+		if( picture != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "call onStarted() in callback");
+			picture.onStarted();
+		}
         try {
         	camera.takePicture(shutter, null, camera_jpeg);
         }
