@@ -173,6 +173,9 @@ public abstract class CameraController {
 		return cameraId;
 	}
 	public abstract SupportedValues setSceneMode(String value);
+	/**
+	 * @return The current scene mode. Will be null if scene mode not supported.
+     */
 	public abstract String getSceneMode();
 	public abstract SupportedValues setColorEffect(String value);
 	public abstract String getColorEffect();
