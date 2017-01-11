@@ -408,4 +408,6 @@
     <string name="resume_video">Nadaljuj snemanje</string>
 	
 	<string name="capturing">Zajemanje …</string>
+	
+	<string name="audio_listener_failed">Začenjanje poslušanja zvoka je spodletelo</string>
 </resources>
