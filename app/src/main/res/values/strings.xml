@@ -407,4 +407,6 @@
     <string name="resume_video">Resume video recording</string>
 
     <string name="capturing">Capturing…</string>
+
+    <string name="audio_listener_failed">Failed to initalise audio listening</string>
 </resources>

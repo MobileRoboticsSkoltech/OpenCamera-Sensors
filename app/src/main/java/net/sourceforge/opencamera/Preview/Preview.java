@@ -3692,6 +3692,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			Log.d(TAG, "bit rate " + profile.videoBitRate);
     		}
 
+			boolean enable_sound = applicationInterface.getShutterSoundPref();
+			if( MyDebug.LOG )
+				Log.d(TAG, "enable_sound? " + enable_sound);
+			camera_controller.enableShutterSound(enable_sound); // Camera2 API can disable video sound too
     		video_recorder = new MediaRecorder();
     		this.camera_controller.unlock();
     		if( MyDebug.LOG )

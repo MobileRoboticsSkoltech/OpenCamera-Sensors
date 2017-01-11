@@ -48,9 +48,23 @@ class AudioListener {
 		}
 		catch(Exception e) {
 			e.printStackTrace();
-			if( MyDebug.LOG )
-				Log.e(TAG, "failed to create audiorecord");
+			Log.e(TAG, "failed to create audiorecord");
 			return;
+		}
+
+		// check initialised
+		synchronized(AudioListener.this) {
+			if( ar.getState() == AudioRecord.STATE_INITIALIZED ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "audiorecord is initialised");
+			}
+			else {
+				Log.e(TAG, "audiorecord failed to initialise");
+				ar.release();
+				ar = null;
+				AudioListener.this.notifyAll(); // again probably not needed, but just in case
+				return;
+			}
 		}
 
 		final short[] buffer = new short[buffer_size];
@@ -116,6 +130,17 @@ class AudioListener {
 			}
 		};
 		// n.b., not good practice to start threads in constructors, so we require the caller to call start() instead
+	}
+
+	/**
+	 * @return Whether the audio recorder was created successfully.
+     */
+	boolean status() {
+		boolean ok = false;
+		synchronized(AudioListener.this) {
+			ok = ar != null;
+		}
+		return ok;
 	}
 
 	/** Start listening.

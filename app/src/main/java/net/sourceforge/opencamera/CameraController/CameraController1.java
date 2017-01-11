@@ -410,7 +410,9 @@ public class CameraController1 extends CameraController {
 		}*/
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
-			if( !parameters.getSceneMode().equals(supported_values.selected_value) ) {
+			String scene_mode = parameters.getSceneMode();
+			// if scene mode is null, it should mean scene modes aren't supported anyway
+			if( scene_mode != null && !scene_mode.equals(supported_values.selected_value) ) {
 	        	parameters.setSceneMode(supported_values.selected_value);
 	        	setCameraParameters(parameters);
 			}

@@ -2581,29 +2581,36 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "startAudioListener");
 		audio_listener = new AudioListener(this);
-		audio_listener.start();
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.getAudioNoiseControlSensitivityPreferenceKey(), "0");
-		if( sensitivity_pref.equals("3") ) {
-			audio_noise_sensitivity = 50;
-		}
-		else if( sensitivity_pref.equals("2") ) {
-			audio_noise_sensitivity = 75;
-		}
-		else if( sensitivity_pref.equals("1") ) {
-			audio_noise_sensitivity = 125;
-		}
-		else if( sensitivity_pref.equals("-1") ) {
-			audio_noise_sensitivity = 150;
-		}
-		else if( sensitivity_pref.equals("-2") ) {
-			audio_noise_sensitivity = 200;
+		if( audio_listener.status() ) {
+			audio_listener.start();
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.getAudioNoiseControlSensitivityPreferenceKey(), "0");
+			if( sensitivity_pref.equals("3") ) {
+				audio_noise_sensitivity = 50;
+			}
+			else if( sensitivity_pref.equals("2") ) {
+				audio_noise_sensitivity = 75;
+			}
+			else if( sensitivity_pref.equals("1") ) {
+				audio_noise_sensitivity = 125;
+			}
+			else if( sensitivity_pref.equals("-1") ) {
+				audio_noise_sensitivity = 150;
+			}
+			else if( sensitivity_pref.equals("-2") ) {
+				audio_noise_sensitivity = 200;
+			}
+			else {
+				// default
+				audio_noise_sensitivity = 100;
+			}
+			mainUI.audioControlStarted();
 		}
 		else {
-			// default
-			audio_noise_sensitivity = 100;
+			audio_listener.release(true); // shouldn't be needed, but just to be safe
+			audio_listener = null;
+			preview.showToast(null, R.string.audio_listener_failed);
 		}
-        mainUI.audioControlStarted();
 	}
 	
 	private void initSpeechRecognizer() {
