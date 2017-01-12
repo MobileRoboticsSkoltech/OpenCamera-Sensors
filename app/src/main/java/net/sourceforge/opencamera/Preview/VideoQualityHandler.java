@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera.Preview;
 
 import android.media.CamcorderProfile;
+import android.os.Build;
 import android.util.Log;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
@@ -65,6 +66,14 @@ public class VideoQualityHandler {
                 Log.d(TAG, "supports QUALITY_HIGH");
             Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_HIGH);
             addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_HIGH, dim.width, dim.height);
+        }
+        if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+            if( profiles.get(CamcorderProfile.QUALITY_2160P) != null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "supports QUALITY_2160P");
+                Dimension2D dim = profiles.get(CamcorderProfile.QUALITY_2160P);
+                addVideoResolutions(done_video_size, CamcorderProfile.QUALITY_2160P, dim.width, dim.height);
+            }
         }
         if( profiles.get(CamcorderProfile.QUALITY_1080P) != null ) {
             if( MyDebug.LOG )
