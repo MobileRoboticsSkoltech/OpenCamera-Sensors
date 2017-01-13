@@ -41,6 +41,7 @@ public abstract class CameraController {
 		public boolean supports_face_detection;
 		public List<CameraController.Size> picture_sizes;
 		public List<CameraController.Size> video_sizes;
+		public List<CameraController.Size> video_sizes_high_speed;
 		public List<CameraController.Size> preview_sizes;
 		public List<String> supported_flash_values;
 		public List<String> supported_focus_values;

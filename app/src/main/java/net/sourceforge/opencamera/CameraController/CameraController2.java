@@ -972,13 +972,19 @@ public class CameraController2 extends CameraController {
 
 		int [] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
 		boolean capabilities_raw = false;
+		boolean capabilities_high_speed_video = false;
 		for(int capability : capabilities) {
 			if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ) {
 				capabilities_raw = true;
 			}
+			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO ) {
+				capabilities_high_speed_video = true;
+			}
 		}
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "capabilities_raw?: " + capabilities_raw);
+			Log.d(TAG, "capabilities_high_speed_video?: " + capabilities_high_speed_video);
+		}
 
 		StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
@@ -1030,6 +1036,18 @@ public class CameraController2 extends CameraController {
 			if( camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160 )
 				continue; // Nexus 6 returns these, even though not supported?!
 			camera_features.video_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+		}
+
+		if( capabilities_high_speed_video ) {
+			android.util.Size[] camera_video_sizes_high_speed = configs.getHighSpeedVideoSizes();
+			camera_features.video_sizes_high_speed = new ArrayList<>();
+			for (android.util.Size camera_size : camera_video_sizes_high_speed) {
+				if (MyDebug.LOG)
+					Log.d(TAG, "high speed video size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
+				if (camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160)
+					continue; // just in case? see above
+				camera_features.video_sizes_high_speed.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+			}
 		}
 
 		android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceTexture.class);
