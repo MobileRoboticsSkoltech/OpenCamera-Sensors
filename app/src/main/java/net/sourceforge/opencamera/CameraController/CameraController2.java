@@ -970,7 +970,7 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
-		int [] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES); 
+		int [] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
 		boolean capabilities_raw = false;
 		for(int capability : capabilities) {
 			if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ) {
