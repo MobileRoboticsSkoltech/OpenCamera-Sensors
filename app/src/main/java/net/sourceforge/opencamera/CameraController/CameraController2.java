@@ -543,6 +543,8 @@ public class CameraController2 extends CameraController {
 	/*private boolean push_set_ae_lock = false;
 	private CaptureRequest push_set_ae_lock_id = null;*/
 
+	private CaptureRequest fake_precapture_turn_on_torch_id = null; // the CaptureRequest used to turn on torch when starting the "fake" precapture
+
 	@Override
 	public void onError() {
 		Log.e(TAG, "onError");
@@ -3498,8 +3500,15 @@ public class CameraController2 extends CameraController {
 		}
     	state = STATE_WAITING_FAKE_PRECAPTURE_START;
     	precapture_state_change_time_ms = System.currentTimeMillis();
+		fake_precapture_turn_on_torch_id = null;
 		try {
-			setRepeatingRequest();
+			CaptureRequest request = previewBuilder.build();
+			if( fake_precapture_torch_performed ) {
+				fake_precapture_turn_on_torch_id = request;
+				if( MyDebug.LOG )
+					Log.d(TAG, "fake_precapture_turn_on_torch_id: " + request);
+			}
+			setRepeatingRequest(request);
 		}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -3525,8 +3534,11 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "fireAutoFlash");
 		long time_now = System.currentTimeMillis();
-		if( MyDebug.LOG && fake_precapture_use_flash_time_ms != -1 )
+		if( MyDebug.LOG && fake_precapture_use_flash_time_ms != -1 ) {
+			Log.d(TAG, "fake_precapture_use_flash_time_ms: " + fake_precapture_use_flash_time_ms);
+			Log.d(TAG, "time_now: " + time_now);
 			Log.d(TAG, "time since last flash auto decision: " + (time_now - fake_precapture_use_flash_time_ms));
+		}
 		final long cache_time_ms = 3000; // needs to be at least the time of a typical autoflash, see comment for this function above
 		if( fake_precapture_use_flash_time_ms != -1 && time_now - fake_precapture_use_flash_time_ms < cache_time_ms ) {
 			if( MyDebug.LOG )
@@ -3814,7 +3826,7 @@ public class CameraController2 extends CameraController {
 		public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureProgressed");*/
-			process(partialResult);
+			process(request, partialResult);
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
@@ -3825,14 +3837,14 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "sequenceId: " + result.getSequenceId());
 				}
 			}
-			process(result);
+			process(request, result);
 			processCompleted(request, result);
 			super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
 		/** Processes either a partial or total result.
 		 */
-		private void process(CaptureResult result) {
+		private void process(CaptureRequest request, CaptureResult result) {
 			/*if( MyDebug.LOG )
 			Log.d(TAG, "process, state: " + state);*/
 			if( result.getFrameNumber() < last_process_frame_number ) {
@@ -3841,7 +3853,21 @@ public class CameraController2 extends CameraController {
 				return;
 			}
 			last_process_frame_number = result.getFrameNumber();
-			
+
+			/*Integer flash_mode = result.get(CaptureResult.FLASH_MODE);
+			if( MyDebug.LOG ) {
+				if( flash_mode == null )
+					Log.d(TAG, "FLASH_MODE is null");
+				else if( flash_mode == CaptureResult.FLASH_MODE_OFF )
+					Log.d(TAG, "FLASH_MODE = FLASH_MODE_OFF");
+				else if( flash_mode == CaptureResult.FLASH_MODE_SINGLE )
+					Log.d(TAG, "FLASH_MODE = FLASH_MODE_SINGLE");
+				else if( flash_mode == CaptureResult.FLASH_MODE_TORCH )
+					Log.d(TAG, "FLASH_MODE = FLASH_MODE_TORCH");
+				else
+					Log.d(TAG, "FLASH_MODE = " + flash_mode);
+			}*/
+
 			// use Integer instead of int, so can compare to null: Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
 			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
 			/*if( MyDebug.LOG ) {
@@ -3962,6 +3988,12 @@ public class CameraController2 extends CameraController {
 				else
 					Log.d(TAG, "CONTROL_AWB_STATE = " + awb_state);
 			}*/
+
+			if( fake_precapture_turn_on_torch_id != null && fake_precapture_turn_on_torch_id == request ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "torch turned on for fake precapture");
+				fake_precapture_turn_on_torch_id = null;
+			}
 
 			if( state == STATE_NORMAL ) {
 				// do nothing
@@ -4113,7 +4145,12 @@ public class CameraController2 extends CameraController {
 					else
 						Log.d(TAG, "CONTROL_AE_STATE is null");
 				}
-				if( ae_state == null || ae_state == CaptureResult.CONTROL_AE_STATE_SEARCHING ) {
+				if( fake_precapture_turn_on_torch_id != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "still waiting for torch to come on for fake precapture");
+				}
+
+				if( fake_precapture_turn_on_torch_id == null && (ae_state == null || ae_state == CaptureResult.CONTROL_AE_STATE_SEARCHING) ) {
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "fake precapture started after: " + (System.currentTimeMillis() - precapture_state_change_time_ms));
 					}
@@ -4127,6 +4164,7 @@ public class CameraController2 extends CameraController {
 					count_precapture_timeout++;
 					state = STATE_WAITING_FAKE_PRECAPTURE_DONE;
 					precapture_state_change_time_ms = System.currentTimeMillis();
+					fake_precapture_turn_on_torch_id = null;
 				}
 			}
 			else if( state == STATE_WAITING_FAKE_PRECAPTURE_DONE ) {
@@ -4264,7 +4302,7 @@ public class CameraController2 extends CameraController {
 					face_detection_listener.onFaceDetection(faces);
 				}
 			}
-			
+
 			if( push_repeating_request_when_torch_off && push_repeating_request_when_torch_off_id == request ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "received push_repeating_request_when_torch_off");
