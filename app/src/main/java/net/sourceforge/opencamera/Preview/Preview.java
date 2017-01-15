@@ -3856,7 +3856,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 				if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
 					video_recorder.setOutputFile(video_filename);
-				} else {
+				}
+				else {
 					video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
 				}
 
