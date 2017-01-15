@@ -406,4 +406,8 @@
     <string name="video_resume">Nadaljevanje videoposnetka</string>
     <string name="pause_video">Premor snemanja</string>
     <string name="resume_video">Nadaljuj snemanje</string>
+	
+	<string name="capturing">Zajemanje …</string>
+	
+	<string name="audio_listener_failed">Začenjanje poslušanja zvoka je spodletelo</string>
 </resources>
