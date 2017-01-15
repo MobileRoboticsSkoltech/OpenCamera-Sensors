@@ -3634,7 +3634,17 @@ public class CameraController2 extends CameraController {
 				}
 			}
 			else {
-				runPrecapture();
+				// standard flash, flash auto or on
+				if( camera_settings.flash_value.equals("flash_auto") && !capture_result_needs_flash ) {
+					// if we call precapture anyway, flash wouldn't fire - but we tend to have a pause
+					// so skipping the precapture if flash isn't going to fire makes this faster
+					if( MyDebug.LOG )
+						Log.d(TAG, "flash auto, but we don't need flash");
+					takePictureAfterPrecapture();
+				}
+				else {
+					runPrecapture();
+				}
 			}
 		}
 
