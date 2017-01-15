@@ -605,15 +605,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         boolean widthLonger = previewWidth > previewHeight;
         int longSide = (widthLonger ? previewWidth : previewHeight);
         int shortSide = (widthLonger ? previewHeight : previewWidth);
-        if (longSide > shortSide * aspect_ratio) {
+        if( longSide > shortSide * aspect_ratio ) {
             longSide = (int) ((double) shortSide * aspect_ratio);
-        } else {
+        }
+		else {
             shortSide = (int) ((double) longSide / aspect_ratio);
         }
-        if (widthLonger) {
+        if( widthLonger ) {
             previewWidth = longSide;
             previewHeight = shortSide;
-        } else {
+        }
+		else {
             previewWidth = shortSide;
             previewHeight = longSide;
         }
@@ -3815,14 +3817,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				ApplicationInterface.VideoMaxFileSize video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
 				long max_filesize = video_max_filesize.max_filesize;
 				//max_filesize = 15*1024*1024; // test
-				if (max_filesize > 0) {
-					if (MyDebug.LOG)
+				if( max_filesize > 0 ) {
+					if( MyDebug.LOG )
 						Log.d(TAG, "set max file size of: " + max_filesize);
 					try {
 						video_recorder.setMaxFileSize(max_filesize);
-					} catch (RuntimeException e) {
+					}
+					catch(RuntimeException e) {
 						// Google Camera warns this can happen - for example, if 64-bit filesizes not supported
-						if (MyDebug.LOG)
+						if( MyDebug.LOG )
 							Log.e(TAG, "failed to set max filesize of: " + max_filesize);
 						e.printStackTrace();
 					}
@@ -3851,7 +3854,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "actual video_max_duration: " + video_max_duration);
 				video_recorder.setMaxDuration((int)video_max_duration);
 
-				if (video_method == ApplicationInterface.VIDEOMETHOD_FILE) {
+				if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
 					video_recorder.setOutputFile(video_filename);
 				} else {
 					video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
@@ -3864,18 +3867,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         			throw new IOException();*/
 				cameraSurface.setVideoRecorder(video_recorder);
 				video_recorder.setOrientationHint(getImageVideoRotation());
-				if (MyDebug.LOG)
+				if( MyDebug.LOG )
 					Log.d(TAG, "about to prepare video recorder");
 				video_recorder.prepare();
 				camera_controller.initVideoRecorderPostPrepare(video_recorder);
-				if (MyDebug.LOG)
+				if( MyDebug.LOG )
 					Log.d(TAG, "about to start video recorder");
 				video_recorder.start();
 				video_recorder_is_paused = false;
-				if (MyDebug.LOG)
+				if( MyDebug.LOG )
 					Log.d(TAG, "video recorder started");
-				if (test_video_failure) {
-					if (MyDebug.LOG)
+				if( test_video_failure ) {
+					if( MyDebug.LOG )
 						Log.d(TAG, "test_video_failure is true");
 					throw new RuntimeException();
 				}
@@ -4772,9 +4775,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.level_angle -= calibrated_level_angle;
 			this.orig_level_angle = this.level_angle;
 			this.level_angle -= (float) this.current_orientation;
-			if (this.level_angle < -180.0) {
+			if( this.level_angle < -180.0 ) {
 				this.level_angle += 360.0;
-			} else if (this.level_angle > 180.0) {
+			}
+			else if( this.level_angle > 180.0 ) {
 				this.level_angle -= 360.0;
 			}
 			/*if( MyDebug.LOG )
