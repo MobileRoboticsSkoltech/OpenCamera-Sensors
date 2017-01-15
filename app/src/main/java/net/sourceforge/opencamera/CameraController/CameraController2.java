@@ -3525,14 +3525,15 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "fireAutoFlash");
 		long time_now = System.currentTimeMillis();
+		if( MyDebug.LOG && fake_precapture_use_flash_time_ms != -1 )
+			Log.d(TAG, "time since last flash auto decision: " + (time_now - fake_precapture_use_flash_time_ms));
 		final long cache_time_ms = 3000; // needs to be at least the time of a typical autoflash, see comment for this function above
 		if( fake_precapture_use_flash_time_ms != -1 && time_now - fake_precapture_use_flash_time_ms < cache_time_ms ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "use recent decision: " + fake_precapture_use_flash);
+			fake_precapture_use_flash_time_ms = time_now;
 			return fake_precapture_use_flash;
 		}
-		if( MyDebug.LOG && fake_precapture_use_flash_time_ms != -1 )
-			Log.d(TAG, "time since last flash auto decision: " + (time_now - fake_precapture_use_flash_time_ms));
 		fake_precapture_use_flash_time_ms = time_now;
 		if( camera_settings.flash_value.equals("flash_auto") ) {
 			fake_precapture_use_flash = capture_result_needs_flash;
