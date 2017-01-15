@@ -3269,7 +3269,7 @@ public class CameraController2 extends CameraController {
 
 			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
-			stillBuilder.setTag(RequestTag.CAPTURE);
+			// n.b., don't set RequestTag.CAPTURE here - we only do it for the last of the burst captures (see below)
 			camera_settings.setupBuilder(stillBuilder, true);
 			clearPending();
         	Surface surface = getPreviewSurface();
@@ -3375,6 +3375,15 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "    exposure_time: " + exposure_time);
 					}
 					stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+					if( i == n_half_images - 1 ) {
+						// RequestTag.CAPTURE should only be set for the last request, otherwise we'll may do things like turning
+						// off torch (for fake flash) before all images are received
+						// More generally, doesn't seem a good idea to be doing the post-capture commands (resetting ae state etc)
+						// multiple times, and before all captures are complete!
+						if( MyDebug.LOG )
+							Log.d(TAG, "set RequestTag.CAPTURE for last burst request");
+						stillBuilder.setTag(RequestTag.CAPTURE);
+					}
 					requests.add( stillBuilder.build() );
 				}
 			}
@@ -3829,6 +3838,7 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onCaptureStarted: capture");
 				// n.b., we don't play the shutter sound here, as it typically sounds "too late"
+				// (if ever we changed this, would also need to fix for burst, where we only set the RequestTag.CAPTURE for the last image)
 			}
 			super.onCaptureStarted(session, request, timestamp, frameNumber);
 		}
@@ -4363,6 +4373,7 @@ public class CameraController2 extends CameraController {
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "capture request completed");
+				test_capture_results++;
 				if( onRawImageAvailableListener != null ) {
 					if( test_wait_capture_result ) {
 						// for RAW capture, we require the capture result before creating DngCreator

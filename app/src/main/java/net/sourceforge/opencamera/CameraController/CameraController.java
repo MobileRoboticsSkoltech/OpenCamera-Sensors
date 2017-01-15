@@ -33,6 +33,7 @@ public abstract class CameraController {
 	public int count_camera_parameters_exception;
 	public int count_precapture_timeout;
 	public boolean test_wait_capture_result; // whether to test delayed capture result in Camera2 API
+	public volatile int test_capture_results; // for Camera2 API, only many capture requests completed with RequestTag.CAPTURE
 
 	public static class CameraFeatures {
 		public boolean is_zoom_supported;
