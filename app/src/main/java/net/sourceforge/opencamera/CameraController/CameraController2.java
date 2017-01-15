@@ -124,6 +124,7 @@ public class CameraController2 extends CameraController {
 	private boolean sounds_enabled = true;
 
 	private boolean capture_result_is_ae_scanning;
+	private boolean capture_result_needs_flash; // whether flash will fire
 	private boolean capture_result_has_iso;
 	private int capture_result_iso;
 	private boolean capture_result_has_exposure_time;
@@ -331,16 +332,20 @@ public class CameraController2 extends CameraController {
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 		    	}
 		    	else if( flash_value.equals("flash_auto") ) {
-		    		if( use_fake_precapture || CameraController2.this.want_expo_bracketing )
+					// note we set this even in fake flash mode (where we manually turn torch on and off to simulate flash) so we
+					// can read the FLASH_REQUIRED state to determine if flash is required
+		    		/*if( use_fake_precapture || CameraController2.this.want_expo_bracketing )
 			    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-		    		else
+		    		else*/
 		    			builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH);
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 		    	}
 		    	else if( flash_value.equals("flash_on") ) {
-		    		if( use_fake_precapture || CameraController2.this.want_expo_bracketing )
+					// see note above for "flash_auto" for why we set this even fake flash mode - arguably we don't need to know
+					// about FLASH_REQUIRED in flash_on mode, but we set it for consistency...
+		    		/*if( use_fake_precapture || CameraController2.this.want_expo_bracketing )
 			    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-		    		else
+		    		else*/
 		    			builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
 					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 		    	}
@@ -3013,7 +3018,7 @@ public class CameraController2 extends CameraController {
 		try {
 			if( use_fake_precapture_mode && !camera_settings.has_iso ) {
 				boolean want_flash = false;
-				if( camera_settings.flash_value.equals("flash_auto") ) {
+				if( camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) {
 					// calling fireAutoFlash() also caches the decision on whether to flash - otherwise if the flash fires now, we'll then think the scene is bright enough to not need the flash!
 					if( fireAutoFlash() )
 						want_flash = true;
@@ -3032,8 +3037,13 @@ public class CameraController2 extends CameraController {
 					// completes even if we don't want that (because we'll be taking a photo).
 					// Note that on other devices such as Nexus 6, this problem doesn't occur even if we don't have a separate
 					// setRepeatingRequest.
+					// Update for 1.37: now we do need this for Nexus 6 too, after switching to setting CONTROL_AE_MODE_ON_AUTO_FLASH
+					// or CONTROL_AE_MODE_ON_ALWAYS_FLASH even for fake flash (see note in CameraSettings.setAEMode()) - and we
+					// needed to increase to 200ms! Otherwise photos come out too dark for flash on if doing touch to focus then
+					// quickly taking a photo. (It also work to previously switch to CONTROL_AE_MODE_ON/FLASH_MODE_OFF first,
+					// but then the same problem shows up on OnePlus 3T again!)
 					try {
-						Thread.sleep(100);
+						Thread.sleep(200);
 					}
 					catch(InterruptedException e) {
 						e.printStackTrace();
@@ -3524,14 +3534,22 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG && fake_precapture_use_flash_time_ms != -1 )
 			Log.d(TAG, "time since last flash auto decision: " + (time_now - fake_precapture_use_flash_time_ms));
 		fake_precapture_use_flash_time_ms = time_now;
-		/** iso_threshold fine-tuned for Nexus 6 - front camera ISO never goes above 805, but a threshold of 700 is too low
-		 */
-		int iso_threshold = camera_settings.flash_value.equals("flash_frontscreen_auto") ? 750 : 1000;
-		fake_precapture_use_flash = capture_result_has_iso && capture_result_iso >= iso_threshold;
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "fake_precapture_use_flash: " + fake_precapture_use_flash);
-			Log.d(TAG, "    ISO was: " + capture_result_iso);
+		if( camera_settings.flash_value.equals("flash_auto") ) {
+			fake_precapture_use_flash = capture_result_needs_flash;
 		}
+		else if( camera_settings.flash_value.equals("flash_frontscreen_auto") ) {
+			// iso_threshold fine-tuned for Nexus 6 - front camera ISO never goes above 805, but a threshold of 700 is too low
+			int iso_threshold = camera_settings.flash_value.equals("flash_frontscreen_auto") ? 750 : 1000;
+			fake_precapture_use_flash = capture_result_has_iso && capture_result_iso >= iso_threshold;
+			if( MyDebug.LOG )
+				Log.d(TAG, "    ISO was: " + capture_result_iso);
+		}
+		else {
+			// shouldn't really be calling this function if not flash auto...
+			fake_precapture_use_flash = false;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "fake_precapture_use_flash: " + fake_precapture_use_flash);
 		return fake_precapture_use_flash;
 	}
 	
@@ -3585,7 +3603,7 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG )
 						Log.d(TAG, "fake precapture flash: torch already on (presumably from autofocus)");
 					// On some devices (e.g., OnePlus 3T), if we've already turned on torch for an autofocus immediately before
-					// taking the photo, ae convergence has already occurred - so if we called runFakePrecapture(), we'd just get
+					// taking the photo, ae convergence may have already occurred - so if we called runFakePrecapture(), we'd just get
 					// stuck waiting for CONTROL_AE_STATE_SEARCHING which will never happen, until we hit the timeout - it works,
 					// but it means taking photos is slower as we have to wait until the timeout
 					// Instead we assume that ae scanning has already started, so go straight to STATE_WAITING_FAKE_PRECAPTURE_DONE,
@@ -3897,6 +3915,17 @@ public class CameraController2 extends CameraController {
 				capture_result_is_ae_scanning = false;
 			}
 
+			if( ae_state != null && ae_state == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED ) {
+				if( MyDebug.LOG && !capture_result_needs_flash )
+					Log.d(TAG, "ae_state now needs flash");
+				capture_result_needs_flash = true;
+			}
+			else {
+				if( MyDebug.LOG && capture_result_needs_flash )
+					Log.d(TAG, "ae_state no longer needs flash");
+				capture_result_needs_flash = false;
+			}
+
 			if( state == STATE_NORMAL ) {
 				// do nothing
 			}
@@ -3938,6 +3967,26 @@ public class CameraController2 extends CameraController {
 								//   in previewBuilder, we go ahead with the precapture routine instead of
 								if( MyDebug.LOG )
 									Log.d(TAG, "turn off torch after focus (fake precapture code)");
+
+								// same hack as in setFlashValue() - for fake precapture we need to turn off the torch mode that was set, but
+								// at least on Nexus 6, we need to turn to flash_off to turn off the torch!
+								String saved_flash_value = camera_settings.flash_value;
+								camera_settings.flash_value = "flash_off";
+								camera_settings.setAEMode(previewBuilder, false);
+								try {
+									capture();
+								}
+								catch(CameraAccessException e) {
+									if( MyDebug.LOG ) {
+										Log.e(TAG, "failed to do capture to turn off torch after autofocus");
+										Log.e(TAG, "reason: " + e.getReason());
+										Log.e(TAG, "message: " + e.getMessage());
+									}
+									e.printStackTrace();
+								}
+
+								// now set the actual (should be flash auto or flash on) mode
+								camera_settings.flash_value = saved_flash_value;
 								camera_settings.setAEMode(previewBuilder, false);
 								try {
 									setRepeatingRequest();
@@ -3950,6 +3999,10 @@ public class CameraController2 extends CameraController {
 									}
 									e.printStackTrace();
 								}
+							}
+							else {
+								if( MyDebug.LOG )
+									Log.d(TAG, "torch was enabled for autofocus, leave it on for capture (fake precapture code)");
 							}
 						}
 						if( autofocus_cb != null ) {
@@ -3980,9 +4033,8 @@ public class CameraController2 extends CameraController {
 				}
 				else if( precapture_state_change_time_ms != -1 && System.currentTimeMillis() - precapture_state_change_time_ms > precapture_start_timeout_c ) {
 					// hack - give up waiting - sometimes we never get a CONTROL_AE_STATE_PRECAPTURE so would end up stuck
-					if( MyDebug.LOG ) {
-						Log.e(TAG, "precapture start timeout");
-					}
+					// always log error, so we can look for it when manually testing with logging disabled
+					Log.e(TAG, "precapture start timeout");
 					count_precapture_timeout++;
 					state = STATE_WAITING_PRECAPTURE_DONE;
 					precapture_state_change_time_ms = System.currentTimeMillis();
@@ -4007,9 +4059,8 @@ public class CameraController2 extends CameraController {
 				}
 				else if( precapture_state_change_time_ms != -1 && System.currentTimeMillis() - precapture_state_change_time_ms > precapture_done_timeout_c ) {
 					// just in case
-					if( MyDebug.LOG ) {
-						Log.e(TAG, "precapture done timeout");
-					}
+					// always log error, so we can look for it when manually testing with logging disabled
+					Log.e(TAG, "precapture done timeout");
 					count_precapture_timeout++;
 					state = STATE_NORMAL;
 					precapture_state_change_time_ms = -1;
@@ -4034,9 +4085,8 @@ public class CameraController2 extends CameraController {
 				}
 				else if( precapture_state_change_time_ms != -1 && System.currentTimeMillis() - precapture_state_change_time_ms > precapture_start_timeout_c ) {
 					// just in case
-					if( MyDebug.LOG ) {
-						Log.e(TAG, "fake precapture start timeout");
-					}
+					// always log error, so we can look for it when manually testing with logging disabled
+					Log.e(TAG, "fake precapture start timeout");
 					count_precapture_timeout++;
 					state = STATE_WAITING_FAKE_PRECAPTURE_DONE;
 					precapture_state_change_time_ms = System.currentTimeMillis();
@@ -4063,9 +4113,8 @@ public class CameraController2 extends CameraController {
 				}
 				else if( precapture_state_change_time_ms != -1 && System.currentTimeMillis() - precapture_state_change_time_ms > precapture_done_timeout_c ) {
 					// sometimes camera can take a while to stop ae/af scanning, better to just go ahead and take photo
-					if( MyDebug.LOG ) {
-						Log.e(TAG, "fake precapture done timeout");
-					}
+					// always log error, so we can look for it when manually testing with logging disabled
+					Log.e(TAG, "fake precapture done timeout");
 					count_precapture_timeout++;
 					state = STATE_NORMAL;
 					precapture_state_change_time_ms = -1;
