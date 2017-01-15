@@ -3844,6 +3844,26 @@ public class CameraController2 extends CameraController {
 			
 			// use Integer instead of int, so can compare to null: Google Play crashes confirmed that this can happen; Google Camera also ignores cases with null af state
 			Integer af_state = result.get(CaptureResult.CONTROL_AF_STATE);
+			/*if( MyDebug.LOG ) {
+				if( af_state == null )
+					Log.d(TAG, "CONTROL_AF_STATE is null");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_INACTIVE )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_INACTIVE");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_PASSIVE_SCAN");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_PASSIVE_FOCUSED");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_ACTIVE_SCAN");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_FOCUSED_LOCKED");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_NOT_FOCUSED_LOCKED");
+				else if( af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED )
+					Log.d(TAG, "CONTROL_AF_STATE = CONTROL_AF_STATE_PASSIVE_UNFOCUSED");
+				else
+					Log.d(TAG, "CONTROL_AF_STATE = " + af_state);
+			}*/
 			if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ) {
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "not ready for capture: " + af_state);*/
@@ -3926,6 +3946,22 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "ae_state no longer needs flash");
 				capture_result_needs_flash = false;
 			}
+
+			/*Integer awb_state = result.get(CaptureResult.CONTROL_AWB_STATE);
+			if( MyDebug.LOG ) {
+				if( awb_state == null )
+					Log.d(TAG, "CONTROL_AWB_STATE is null");
+				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_INACTIVE )
+					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_INACTIVE");
+				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_SEARCHING )
+					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_SEARCHING");
+				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_CONVERGED )
+					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_CONVERGED");
+				else if( awb_state == CaptureResult.CONTROL_AWB_STATE_LOCKED )
+					Log.d(TAG, "CONTROL_AWB_STATE = CONTROL_AWB_STATE_LOCKED");
+				else
+					Log.d(TAG, "CONTROL_AWB_STATE = " + awb_state);
+			}*/
 
 			if( state == STATE_NORMAL ) {
 				// do nothing
