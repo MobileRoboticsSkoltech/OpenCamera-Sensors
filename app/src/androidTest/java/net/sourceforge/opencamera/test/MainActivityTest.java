@@ -2293,7 +2293,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				String filename = file.getName();
 				assertTrue(filename.startsWith("IMG_"));
 				if( filename.endsWith(".jpg") ) {
-					assertTrue(is_expo || filename_jpeg == null);
+					assertTrue(hdr_save_expo || is_expo || filename_jpeg == null);
 					if( is_hdr && hdr_save_expo ) {
 						// only look for the "_HDR" image
 						if( filename.contains("_HDR") )
@@ -6844,6 +6844,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+		assertTrue(mPreview.getCameraController().test_capture_results == 1);
 	}
 
 	public void testTakePhotoHDRSaveExpo() throws InterruptedException {
@@ -6861,6 +6863,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+		assertTrue(mPreview.getCameraController().test_capture_results == 1);
 	}
 
 	public void testTakePhotoHDRFrontCamera() throws InterruptedException {
@@ -6891,6 +6895,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(cameraId != new_cameraId);
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+		assertTrue(mPreview.getCameraController().test_capture_results == 1);
 	}
 
 	public void testTakePhotoHDRAutoStabilise() throws InterruptedException {
@@ -6908,6 +6914,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+		assertTrue(mPreview.getCameraController().test_capture_results == 1);
 	}
 
 	public void testTakePhotoHDRPhotoStamp() throws InterruptedException {
@@ -6925,6 +6933,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+		assertTrue(mPreview.getCameraController().test_capture_results == 1);
 	}
 
 	/** Tests expo bracketing with default values.
@@ -6943,6 +6953,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+		assertTrue(mPreview.getCameraController().test_capture_results == 1);
 	}
 
 	/** Tests expo bracketing with 5 images, 1 stop.
@@ -6964,6 +6976,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+		assertTrue(mPreview.getCameraController().test_capture_results == 1);
 	}
 
 	/*private Bitmap getBitmapFromAssets(String filename) throws IOException {

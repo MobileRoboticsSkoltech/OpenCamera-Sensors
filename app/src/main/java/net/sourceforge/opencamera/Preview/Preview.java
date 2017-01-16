@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -606,15 +605,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         boolean widthLonger = previewWidth > previewHeight;
         int longSide = (widthLonger ? previewWidth : previewHeight);
         int shortSide = (widthLonger ? previewHeight : previewWidth);
-        if (longSide > shortSide * aspect_ratio) {
+        if( longSide > shortSide * aspect_ratio ) {
             longSide = (int) ((double) shortSide * aspect_ratio);
-        } else {
+        }
+		else {
             shortSide = (int) ((double) longSide / aspect_ratio);
         }
-        if (widthLonger) {
+        if( widthLonger ) {
             previewWidth = longSide;
             previewHeight = shortSide;
-        } else {
+        }
+		else {
             previewWidth = shortSide;
             previewHeight = longSide;
         }
@@ -1972,46 +1973,56 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initialiseVideoQuality() {
 		int cameraId = camera_controller.getCameraId();
-		HashMap<Integer, VideoQualityHandler.Dimension2D> profiles = new HashMap<>();
+		List<Integer> profiles = new ArrayList<>();
+		List<VideoQualityHandler.Dimension2D> dimensions = new ArrayList<>();
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_HIGH) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
-        	profiles.put(CamcorderProfile.QUALITY_HIGH, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
+        	profiles.add(CamcorderProfile.QUALITY_HIGH);
+			dimensions.add(new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
 	        if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_2160P) ) {
 	    		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_2160P);
-	        	profiles.put(CamcorderProfile.QUALITY_2160P, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
+				profiles.add(CamcorderProfile.QUALITY_2160P);
+				dimensions.add(new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
 	        }
 		}
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_1080P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_1080P);
-        	profiles.put(CamcorderProfile.QUALITY_1080P, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
+			profiles.add(CamcorderProfile.QUALITY_1080P);
+			dimensions.add(new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_720P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_720P);
-        	profiles.put(CamcorderProfile.QUALITY_720P, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
+			profiles.add(CamcorderProfile.QUALITY_720P);
+			dimensions.add(new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_480P) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_480P);
-        	profiles.put(CamcorderProfile.QUALITY_480P, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
+			profiles.add(CamcorderProfile.QUALITY_480P);
+			dimensions.add(new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_CIF) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_CIF);
-        	profiles.put(CamcorderProfile.QUALITY_CIF, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
+			profiles.add(CamcorderProfile.QUALITY_CIF);
+			dimensions.add(new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QVGA) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_QVGA);
-        	profiles.put(CamcorderProfile.QUALITY_QVGA, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
+			profiles.add(CamcorderProfile.QUALITY_QVGA);
+			dimensions.add(new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_QCIF) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_QCIF);
-        	profiles.put(CamcorderProfile.QUALITY_QCIF, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
+			profiles.add(CamcorderProfile.QUALITY_QCIF);
+			dimensions.add(new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
         if( CamcorderProfile.hasProfile(cameraId, CamcorderProfile.QUALITY_LOW) ) {
     		CamcorderProfile profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_LOW);
-        	profiles.put(CamcorderProfile.QUALITY_LOW, new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
+			profiles.add(CamcorderProfile.QUALITY_LOW);
+			dimensions.add(new VideoQualityHandler.Dimension2D(profile.videoFrameWidth, profile.videoFrameHeight));
         }
-        this.video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
+        this.video_quality_handler.initialiseVideoQualityFromProfiles(profiles, dimensions);
 	}
 
 	private CamcorderProfile getCamcorderProfile(String quality) {
@@ -3806,14 +3817,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				ApplicationInterface.VideoMaxFileSize video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
 				long max_filesize = video_max_filesize.max_filesize;
 				//max_filesize = 15*1024*1024; // test
-				if (max_filesize > 0) {
-					if (MyDebug.LOG)
+				if( max_filesize > 0 ) {
+					if( MyDebug.LOG )
 						Log.d(TAG, "set max file size of: " + max_filesize);
 					try {
 						video_recorder.setMaxFileSize(max_filesize);
-					} catch (RuntimeException e) {
+					}
+					catch(RuntimeException e) {
 						// Google Camera warns this can happen - for example, if 64-bit filesizes not supported
-						if (MyDebug.LOG)
+						if( MyDebug.LOG )
 							Log.e(TAG, "failed to set max filesize of: " + max_filesize);
 						e.printStackTrace();
 					}
@@ -3842,9 +3854,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "actual video_max_duration: " + video_max_duration);
 				video_recorder.setMaxDuration((int)video_max_duration);
 
-				if (video_method == ApplicationInterface.VIDEOMETHOD_FILE) {
+				if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
 					video_recorder.setOutputFile(video_filename);
-				} else {
+				}
+				else {
 					video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
 				}
 
@@ -3855,18 +3868,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         			throw new IOException();*/
 				cameraSurface.setVideoRecorder(video_recorder);
 				video_recorder.setOrientationHint(getImageVideoRotation());
-				if (MyDebug.LOG)
+				if( MyDebug.LOG )
 					Log.d(TAG, "about to prepare video recorder");
 				video_recorder.prepare();
 				camera_controller.initVideoRecorderPostPrepare(video_recorder);
-				if (MyDebug.LOG)
+				if( MyDebug.LOG )
 					Log.d(TAG, "about to start video recorder");
 				video_recorder.start();
 				video_recorder_is_paused = false;
-				if (MyDebug.LOG)
+				if( MyDebug.LOG )
 					Log.d(TAG, "video recorder started");
-				if (test_video_failure) {
-					if (MyDebug.LOG)
+				if( test_video_failure ) {
+					if( MyDebug.LOG )
 						Log.d(TAG, "test_video_failure is true");
 					throw new RuntimeException();
 				}
@@ -4763,9 +4776,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.level_angle -= calibrated_level_angle;
 			this.orig_level_angle = this.level_angle;
 			this.level_angle -= (float) this.current_orientation;
-			if (this.level_angle < -180.0) {
+			if( this.level_angle < -180.0 ) {
 				this.level_angle += 360.0;
-			} else if (this.level_angle > 180.0) {
+			}
+			else if( this.level_angle > 180.0 ) {
 				this.level_angle -= 360.0;
 			}
 			/*if( MyDebug.LOG )

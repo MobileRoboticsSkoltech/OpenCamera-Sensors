@@ -33,6 +33,7 @@ public abstract class CameraController {
 	public int count_camera_parameters_exception;
 	public int count_precapture_timeout;
 	public boolean test_wait_capture_result; // whether to test delayed capture result in Camera2 API
+	public volatile int test_capture_results; // for Camera2 API, only many capture requests completed with RequestTag.CAPTURE
 
 	public static class CameraFeatures {
 		public boolean is_zoom_supported;
@@ -41,6 +42,7 @@ public abstract class CameraController {
 		public boolean supports_face_detection;
 		public List<CameraController.Size> picture_sizes;
 		public List<CameraController.Size> video_sizes;
+		public List<CameraController.Size> video_sizes_high_speed;
 		public List<CameraController.Size> preview_sizes;
 		public List<String> supported_flash_values;
 		public List<String> supported_focus_values;

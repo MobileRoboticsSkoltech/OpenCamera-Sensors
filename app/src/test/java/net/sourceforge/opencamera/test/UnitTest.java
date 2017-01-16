@@ -15,7 +15,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -236,12 +235,17 @@ public class UnitTest {
 		video_quality_handler.setVideoSizes(video_sizes);
 		video_quality_handler.sortVideoSizes();
 
-		HashMap<Integer, VideoQualityHandler.Dimension2D> profiles = new HashMap<>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new VideoQualityHandler.Dimension2D(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_1080P, new VideoQualityHandler.Dimension2D(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_720P, new VideoQualityHandler.Dimension2D(1280, 720));
-		profiles.put(CamcorderProfile.QUALITY_LOW, new VideoQualityHandler.Dimension2D(1280, 720));
-		video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
+		List<Integer> profiles = new ArrayList<>();
+		List<VideoQualityHandler.Dimension2D> dimensions = new ArrayList<>();
+		profiles.add(CamcorderProfile.QUALITY_HIGH);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1920, 1080));
+		profiles.add(CamcorderProfile.QUALITY_1080P);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1920, 1080));
+		profiles.add(CamcorderProfile.QUALITY_720P);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1280, 720));
+		profiles.add(CamcorderProfile.QUALITY_LOW);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1280, 720));
+		video_quality_handler.initialiseVideoQualityFromProfiles(profiles, dimensions);
 
 		List<String> video_quality = video_quality_handler.getSupportedVideoQuality();
 		List<String> exp_video_quality = new ArrayList<>();
@@ -264,11 +268,15 @@ public class UnitTest {
 		video_quality_handler.setVideoSizes(video_sizes);
 		video_quality_handler.sortVideoSizes();
 
-		HashMap<Integer, VideoQualityHandler.Dimension2D> profiles = new HashMap<>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new VideoQualityHandler.Dimension2D(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_720P, new VideoQualityHandler.Dimension2D(1280, 720));
-		profiles.put(CamcorderProfile.QUALITY_LOW, new VideoQualityHandler.Dimension2D(1280, 720));
-		video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
+		List<Integer> profiles = new ArrayList<>();
+		List<VideoQualityHandler.Dimension2D> dimensions = new ArrayList<>();
+		profiles.add(CamcorderProfile.QUALITY_HIGH);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1920, 1080));
+		profiles.add(CamcorderProfile.QUALITY_720P);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1280, 720));
+		profiles.add(CamcorderProfile.QUALITY_LOW);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1280, 720));
+		video_quality_handler.initialiseVideoQualityFromProfiles(profiles, dimensions);
 
 		List<String> video_quality = video_quality_handler.getSupportedVideoQuality();
 		List<String> exp_video_quality = new ArrayList<>();
@@ -301,15 +309,23 @@ public class UnitTest {
 		video_quality_handler.setVideoSizes(video_sizes);
 		video_quality_handler.sortVideoSizes();
 
-		HashMap<Integer, VideoQualityHandler.Dimension2D> profiles = new HashMap<>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new VideoQualityHandler.Dimension2D(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_1080P, new VideoQualityHandler.Dimension2D(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_720P, new VideoQualityHandler.Dimension2D(1280, 720));
-		profiles.put(CamcorderProfile.QUALITY_480P, new VideoQualityHandler.Dimension2D(720, 480));
-		profiles.put(CamcorderProfile.QUALITY_CIF, new VideoQualityHandler.Dimension2D(352, 288));
-		profiles.put(CamcorderProfile.QUALITY_QVGA, new VideoQualityHandler.Dimension2D(320, 240));
-		profiles.put(CamcorderProfile.QUALITY_LOW, new VideoQualityHandler.Dimension2D(320, 240));
-		video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
+		List<Integer> profiles = new ArrayList<>();
+		List<VideoQualityHandler.Dimension2D> dimensions = new ArrayList<>();
+		profiles.add(CamcorderProfile.QUALITY_HIGH);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1920, 1080));
+		profiles.add(CamcorderProfile.QUALITY_1080P);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1920, 1080));
+		profiles.add(CamcorderProfile.QUALITY_720P);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1280, 720));
+		profiles.add(CamcorderProfile.QUALITY_480P);
+		dimensions.add(new VideoQualityHandler.Dimension2D(720, 480));
+		profiles.add(CamcorderProfile.QUALITY_CIF);
+		dimensions.add(new VideoQualityHandler.Dimension2D(352, 288));
+		profiles.add(CamcorderProfile.QUALITY_QVGA);
+		dimensions.add(new VideoQualityHandler.Dimension2D(320, 240));
+		profiles.add(CamcorderProfile.QUALITY_LOW);
+		dimensions.add(new VideoQualityHandler.Dimension2D(320, 240));
+		video_quality_handler.initialiseVideoQualityFromProfiles(profiles, dimensions);
 
 		List<String> video_quality = video_quality_handler.getSupportedVideoQuality();
 		List<String> exp_video_quality = new ArrayList<>();
@@ -348,11 +364,15 @@ public class UnitTest {
 		video_quality_handler.setVideoSizes(video_sizes);
 		video_quality_handler.sortVideoSizes();
 
-		HashMap<Integer, VideoQualityHandler.Dimension2D> profiles = new HashMap<>();
-		profiles.put(CamcorderProfile.QUALITY_HIGH, new VideoQualityHandler.Dimension2D(1920, 1080));
-		profiles.put(CamcorderProfile.QUALITY_480P, new VideoQualityHandler.Dimension2D(640, 480));
-		profiles.put(CamcorderProfile.QUALITY_QCIF, new VideoQualityHandler.Dimension2D(176, 144));
-		video_quality_handler.initialiseVideoQualityFromProfiles(profiles);
+		List<Integer> profiles = new ArrayList<>();
+		List<VideoQualityHandler.Dimension2D> dimensions = new ArrayList<>();
+		profiles.add(CamcorderProfile.QUALITY_HIGH);
+		dimensions.add(new VideoQualityHandler.Dimension2D(1920, 1080));
+		profiles.add(CamcorderProfile.QUALITY_480P);
+		dimensions.add(new VideoQualityHandler.Dimension2D(640, 480));
+		profiles.add(CamcorderProfile.QUALITY_QCIF);
+		dimensions.add(new VideoQualityHandler.Dimension2D(176, 144));
+		video_quality_handler.initialiseVideoQualityFromProfiles(profiles, dimensions);
 
 		List<String> video_quality = video_quality_handler.getSupportedVideoQuality();
 		List<String> exp_video_quality = new ArrayList<>();
