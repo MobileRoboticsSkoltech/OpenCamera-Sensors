@@ -583,7 +583,7 @@ public class PopupView extends LinearLayout {
 				Log.d(TAG, "addButtonOptionsToPopup time 2: " + (System.currentTimeMillis() - debug_time));
 
 			final float scale = getResources().getDisplayMetrics().density;
-			int total_width = 280;
+			int total_width_dp = 280;
 			{
 				Activity activity = (Activity)this.getContext();
 			    Display display = activity.getWindowManager().getDefaultDisplay();
@@ -595,17 +595,19 @@ public class PopupView extends LinearLayout {
     			if( MyDebug.LOG )
     				Log.d(TAG, "dpHeight: " + dpHeight);
     			dpHeight -= 50; // allow space for the icons at top/right of screen
-    			if( total_width > dpHeight )
-    				total_width = dpHeight;
+    			if( total_width_dp > dpHeight )
+					total_width_dp = dpHeight;
 			}
 			if( MyDebug.LOG )
-				Log.d(TAG, "total_width: " + total_width);
-			int button_width_dp = total_width/supported_options.size();
+				Log.d(TAG, "total_width_dp: " + total_width_dp);
+			final int total_width = (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
+			int button_width_dp = total_width_dp/supported_options.size();
 			boolean use_scrollview = false;
 			if( button_width_dp < 40 ) {
 				button_width_dp = 40;
 				use_scrollview = true;
 			}
+			final int button_width = (int)(button_width_dp * scale + 0.5f); // convert dps to pixels
 			View current_view = null;
 
 			for(final String supported_option : supported_options) {
@@ -686,7 +688,7 @@ public class PopupView extends LinearLayout {
     				Log.d(TAG, "addButtonOptionsToPopup time 2.2: " + (System.currentTimeMillis() - debug_time));
 
     			ViewGroup.LayoutParams params = view.getLayoutParams();
-    			params.width = (int) (button_width_dp * scale + 0.5f); // convert dps to pixels
+    			params.width = button_width;
     			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
     			view.setLayoutParams(params);
 
@@ -724,7 +726,7 @@ public class PopupView extends LinearLayout {
 	        	scroll.addView(ll2);
 	        	{
 	    			ViewGroup.LayoutParams params = new LayoutParams(
-	    					(int) (total_width * scale + 0.5f), // convert dps to pixels
+	    					total_width,
 	    			        LayoutParams.WRAP_CONTENT);
 	    			scroll.setLayoutParams(params);
 	        	}
@@ -736,9 +738,15 @@ public class PopupView extends LinearLayout {
 	        			new OnGlobalLayoutListener() {
 							@Override
 							public void onGlobalLayout() {
-								/*if( MyDebug.LOG )
-									Log.d(TAG, "jump to " + final_current_view.getLeft());*/
-				        		scroll.scrollTo(final_current_view.getLeft(), 0);
+								// scroll so selected button is centred
+								int jump_x = final_current_view.getLeft() - (total_width-button_width)/2;
+								// scrollTo should automatically clamp to the bounds of the view, but just in case
+								jump_x = Math.min(jump_x, total_width-1);
+								if( jump_x > 0 ) {
+									/*if( MyDebug.LOG )
+										Log.d(TAG, "jump to " + jump_X);*/
+									scroll.scrollTo(jump_x, 0);
+								}
 							}
 	        			}
 	        		);

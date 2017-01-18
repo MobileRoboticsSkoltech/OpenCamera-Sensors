@@ -2121,6 +2121,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					Log.d(TAG, "bitrate invalid format, can't parse to int: " + bitrate_value);
 			}
 		}
+
 		String fps_value = applicationInterface.getVideoFPSPref();
 		if( !fps_value.equals("default") ) {
 			try {
@@ -2133,7 +2134,37 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "fps invalid format, can't parse to int: " + fps_value);
 			}
-		}		
+		}
+
+		/*String pref_video_output_format = applicationInterface.getRecordVideoOutputFormatPref();
+		if( MyDebug.LOG )
+			Log.d(TAG, "pref_video_output_format: " + pref_video_output_format);
+		if( pref_video_output_format.equals("output_format_default") ) {
+			// n.b., although there is MediaRecorder.OutputFormat.DEFAULT, we don't explicitly set that - rather stick with what is default in the CamcorderProfile
+		}
+		else if( pref_video_output_format.equals("output_format_aac_adts") ) {
+			profile.fileFormat = MediaRecorder.OutputFormat.AAC_ADTS;
+		}
+		else if( pref_video_output_format.equals("output_format_amr_nb") ) {
+			profile.fileFormat = MediaRecorder.OutputFormat.AMR_NB;
+		}
+		else if( pref_video_output_format.equals("output_format_amr_wb") ) {
+			profile.fileFormat = MediaRecorder.OutputFormat.AMR_WB;
+		}
+		else if( pref_video_output_format.equals("output_format_mpeg4") ) {
+			profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
+			//video_recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264 );
+			//video_recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC );
+		}
+		else if( pref_video_output_format.equals("output_format_3gpp") ) {
+			profile.fileFormat = MediaRecorder.OutputFormat.THREE_GPP;
+		}
+		else if( pref_video_output_format.equals("output_format_webm") ) {
+			profile.fileFormat = MediaRecorder.OutputFormat.WEBM;
+			profile.videoCodec = MediaRecorder.VideoEncoder.VP8;
+			profile.audioCodec = MediaRecorder.AudioEncoder.VORBIS;
+		}*/
+
 		return profile;
 	}
 	
