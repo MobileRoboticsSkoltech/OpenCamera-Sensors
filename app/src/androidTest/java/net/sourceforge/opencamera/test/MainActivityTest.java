@@ -4293,7 +4293,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	/** Set available memory to make sure that we stop before running out of memory.
-	 *  This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
+	 *  This test is fine-tuned to Nexus 6 and OnePlus 3T, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoAvailableMemory() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoAvailableMemory");
@@ -4345,7 +4345,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	/** Set maximum filesize so that we get approx 3s of video time. Check that recording stops and restarts within 10s.
 	 *  Then check recording stops again within 10s.
-	 *  This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
+	 *  This test is fine-tuned to Nexus 6 and OnePlus 3T, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoMaxFileSize1() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxFileSize1");
@@ -4403,7 +4403,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	/** Max filesize is for ~4.5s, and max duration is 5s, check we only get 1 video.
-	 *  This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
+	 *  This test is fine-tuned to OnePlus 3T, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoMaxFileSize2() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxFileSize2");
@@ -4411,8 +4411,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
-		editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "23592960"); // approx 4.5s on Nexus 6 at 4K
+		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6 or OnePlus 3T)
+		//editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "23592960"); // approx 4.5s on Nexus 6 at 4K
+		editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "35389440"); // approx 4.5s on OnePlus 3T at 4K
 		editor.putString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "5");
 		editor.apply();
 		updateForSettings();
@@ -4443,7 +4444,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	/* Max filesize for ~5s, max duration 7s, max n_repeats 1 - to ensure we're not repeating indefinitely.
-	 * This test is fine-tuned to Nexus 6, as we measure hitting max filesize based on time.
+	 * This test is fine-tuned to OnePlus 3T, as we measure hitting max filesize based on time.
 	 */
 	public void testTakeVideoMaxFileSize3() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxFileSize3");
@@ -4453,7 +4454,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6)
 		//editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "26214400"); // approx 5s on Nexus 6 at 4K
-		editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "15728640"); // approx 5s on Nexus 6 at 4K
+		//editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "15728640"); // approx 5s on Nexus 6 at 4K
+		editor.putString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "26214400"); // approx 5s on OnePlus 3T at 4K
 		editor.putString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "7");
 		editor.putString(PreferenceKeys.getVideoRestartPreferenceKey(), "1");
 		editor.apply();

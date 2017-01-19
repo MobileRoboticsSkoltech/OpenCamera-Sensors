@@ -1371,6 +1371,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureCompleted");
 		// call this, so that if pause-preview-after-taking-photo option is set, we remove the "taking photo" border indicator straight away
+		// also even for normal (not pausing) behaviour, good to remove the border asap
     	drawPreview.cameraInOperation(false);
     }
 
