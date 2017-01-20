@@ -253,7 +253,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 * - Back camera
 	 * - Photo mode
 	 * - Flash off (if flash supported)
-	 * - Focus mode auto (if focus modes supported)
+	 * - Focus mode picture continuous (if focus modes supported)
 	 * As a side-effect, the camera and/or camera parameters values may become invalid.
 	 */
 	private void setToDefault() {
@@ -277,7 +277,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		switchToFlashValue("flash_off");
-		switchToFocusValue("focus_mode_auto");
+		switchToFocusValue("focus_mode_continuous_picture");
 	}
 
 	/* Ensures that we only start the camera preview once when starting up.
@@ -967,10 +967,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		int saved_count = mPreview.count_cameraAutoFocus;
 		Log.d(TAG, "0 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
+		/*
 		// autofocus shouldn't be immediately, but after a delay
 		Thread.sleep(1000);
 		Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
 		assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
+		*/
+		Thread.sleep(1000);
 		assertTrue(!mPreview.hasFocusArea());
 	    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
 	    assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
@@ -985,7 +988,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    saved_count = mPreview.count_cameraAutoFocus;
 		TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
 		Log.d(TAG, "2 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
-		assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
+		assertTrue(mPreview.count_cameraAutoFocus == saved_count+1); // for autofocus
 		assertTrue(!mPreview.hasFocusArea());
 	    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
 	    assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
@@ -1144,6 +1147,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 		assertTrue(!mPreview.isVideo());
+		String photo_focus_value = mPreview.getCameraController().getFocusValue();
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
@@ -1161,7 +1165,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "picture focus_value: "+ focus_value);
 	    if( mPreview.supportsFocus() ) {
-	    	assertTrue(focus_value.equals("focus_mode_auto"));
+	    	assertTrue(focus_value.equals(photo_focus_value));
 	    	// check that this doesn't cause an autofocus
 	    	assertTrue(!mPreview.isFocusWaiting());
 		    Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
@@ -1177,7 +1181,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    focus_value = mPreview.getCameraController().getFocusValue();
 			Log.d(TAG, "front picture focus_value: "+ focus_value);
 		    if( mPreview.supportsFocus() ) {
-		    	assertTrue(focus_value.equals("focus_mode_auto"));
+		    	assertTrue(focus_value.equals(photo_focus_value));
 		    }
 
 		    clickView(switchVideoButton);
@@ -1193,7 +1197,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    focus_value = mPreview.getCameraController().getFocusValue();
 			Log.d(TAG, "front picture focus_value: "+ focus_value);
 		    if( mPreview.supportsFocus() ) {
-		    	assertTrue(focus_value.equals("focus_mode_auto"));
+		    	assertTrue(focus_value.equals(photo_focus_value));
 		    }
 
 			// now switch back
@@ -1623,6 +1627,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 
 		setToDefault();
+		switchToFocusValue("focus_mode_auto");
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
@@ -1694,6 +1699,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 
 		setToDefault();
+		switchToFocusValue("focus_mode_auto");
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
@@ -2130,9 +2136,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) {
         	can_auto_focus = true;
         }
-        if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") || focus_value.equals("focus_mode_continuous_picture") ) {
+
+        if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) {
         	manual_can_auto_focus = true;
         }
+		else if( focus_value.equals("focus_mode_continuous_picture") && !single_tap_photo ) {
+			// if single_tap_photo and continuous mode, we go straight to taking a photo rather than doing a touch to focus
+			manual_can_auto_focus = true;
+		}
+
         if( mPreview.getMaxNumFocusAreas() != 0 && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") || focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") || focus_value.equals("focus_mode_manual2") ) ) {
         	can_focus_area = true;
         }
@@ -2175,8 +2187,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		    new_focus_value_ui = mPreview.getCurrentFocusValue();
 			assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
-			if( focus_value.equals("focus_mode_continuous_picture") )
-				assertTrue(mPreview.getCameraController().getFocusValue().equals("focus_mode_auto")); // continuous focus mode switches to auto focus on touch
+			if( focus_value.equals("focus_mode_continuous_picture") && !single_tap_photo )
+				assertTrue(mPreview.getCameraController().getFocusValue().equals("focus_mode_auto")); // continuous focus mode switches to auto focus on touch (unless single_tap_photo)
 			else
 				assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
 			if( double_tap_photo ) {
@@ -2257,10 +2269,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// focus should be back to normal now:
 	    new_focus_value_ui = mPreview.getCurrentFocusValue();
+		Log.d(TAG, "focus_value_ui: " + focus_value_ui);
+		Log.d(TAG, "new new_focus_value_ui: " + new_focus_value_ui);
 		assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
+		String new_focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "focus_value: " + focus_value);
-		Log.d(TAG, "new focus_value: " + mPreview.getCameraController().getFocusValue());
-		assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
+		Log.d(TAG, "new focus_value: " + new_focus_value);
+		if( new_focus_value_ui != null && new_focus_value_ui.equals("focus_mode_continuous_picture") && focus_value.equals("focus_mode_auto") && new_focus_value.equals("focus_mode_continuous_picture") ) {
+			// this is fine, it just means we were temporarily in touch-to-focus mode
+		}
+		else {
+			assertTrue(new_focus_value.equals(focus_value));
+		}
 
 		assertTrue( folder.exists() );
 		File [] files2 = folder.listFiles();
@@ -2400,7 +2420,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
-	
+
 	/** Test taking photo with JPEG + DNG (RAW).
 	 */
 	public void testTakePhotoRaw() throws InterruptedException {
@@ -2521,6 +2541,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		switchToFlashValue("flash_auto");
 		Thread.sleep(2000); // wait so we don't take the photo immediately, to be more realistic
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
+		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
 	}
 
 	public void testTakePhotoFlashOn() throws InterruptedException {
@@ -2533,6 +2554,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		switchToFlashValue("flash_on");
 		Thread.sleep(2000); // wait so we don't take the photo immediately, to be more realistic
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
+		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
 	}
 
 	public void testTakePhotoFlashTorch() throws InterruptedException {
@@ -2781,6 +2803,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    switchToFlashValue("flash_frontscreen_on");
 
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+	}
+
+	/** Take a photo in auto focus mode.
+	 */
+	public void testTakePhotoAutoFocus() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoAutoFocus");
+		setToDefault();
+		switchToFocusValue("focus_mode_auto");
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
 
@@ -3520,6 +3551,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( locked ) {
 			switchToFocusValue("focus_mode_locked");
 		}
+		else {
+			switchToFocusValue("focus_mode_auto");
+		}
 
 		assertTrue(mPreview.isPreviewStarted());
 		
@@ -3654,10 +3688,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 1);
 
-		// taking photo should have done an auto-focus, and no focus areas
 		Log.d(TAG, "2 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
 		Log.d(TAG, "saved_count: " + saved_count);
+		/*
+		// taking photo should have done an auto-focus, and no focus areas [focus auto]
 		assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
+		*/
+		// taking photo shouldn't have done an auto-focus, and no focus areas [focus continuous]
+		assertTrue(mPreview.count_cameraAutoFocus == saved_count);
 		assertTrue(!mPreview.hasFocusArea());
 	    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
 	    assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
@@ -5419,8 +5457,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(!mPreview.isOnTimer());
 
 		try {
-			// wait 6s, and test that we've taken the photos by then
-			Thread.sleep(6000);
+			// wait 7s, and test that we've taken the photos by then
+			Thread.sleep(7000);
 		    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 			Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 			assertTrue(mPreview.count_cameraTakePicture==3);
@@ -5429,11 +5467,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			assertTrue(n_new_files == 3);
 
 			// now test pausing and resuming
-		    clickView(takePhotoButton);
 		    pauseAndResume();
 			// wait 5s, and test that we haven't taken any photos
 			Thread.sleep(5000);
 		    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
+			Log.d(TAG, "mPreview.count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 			assertTrue(mPreview.count_cameraTakePicture==3);
 			n_new_files = folder.listFiles().length - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
@@ -5447,7 +5485,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				editor.apply();
 			}
 		    clickView(takePhotoButton);
-			Thread.sleep(6000);
+			Thread.sleep(7000);
 			assertTrue(mPreview.count_cameraTakePicture==6);
 			n_new_files = folder.listFiles().length - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);

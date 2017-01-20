@@ -27,6 +27,7 @@ public class PhotoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFlashBug"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFrontCamera"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFrontCameraScreenFlash"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoFocus"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoLockedFocus"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoExposureCompensation"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoLockedLandscape"));
