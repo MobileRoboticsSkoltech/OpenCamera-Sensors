@@ -2632,18 +2632,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 1 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 1 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 1 );
 
 		// now test doing autofocus, waiting, then taking photo
 		Thread.sleep(1000);
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 2 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 2 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 2 );
 
 		// now test doing autofocus, then taking photo immediately
 		Thread.sleep(1000);
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, true, false, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 3 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 3 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 3 );
 
 		// now test it all again with continuous focus mode
 		switchToFocusValue("focus_mode_continuous_picture");
@@ -2651,18 +2660,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 3 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 4 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 4 );
 
 		// now test doing autofocus, waiting, then taking photo
 		Thread.sleep(1000);
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 4 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 5 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 5 );
 
 		// now test doing autofocus, then taking photo immediately
 		Thread.sleep(1000);
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, true, false, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 5 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 6 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 6 );
 
 		//mPreview.getCameraController().count_precapture_timeout = 0; // hack - precapture timeouts are more common with fake flash precapture mode, especially when phone is face down during testing
 	}

@@ -3033,6 +3033,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "turn on torch for fake flash");
 					afBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 					afBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+					test_fake_flash_focus++;
 					fake_precapture_torch_focus_performed = true;
 					setRepeatingRequest(afBuilder.build());
 					// We sleep for a short time as on some devices (e.g., OnePlus 3T), the torch will turn off when autofocus
@@ -3177,6 +3178,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "setting torch for capture");
 				stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+				test_fake_flash_photo++;
 			}
 			if( !camera_settings.has_iso && this.optimise_ae_for_dro && capture_result_has_exposure_time && (camera_settings.flash_value.equals("flash_off") || camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto") ) ) {
 				final double full_exposure_time_scale = Math.pow(2.0, -0.5);
@@ -3291,6 +3293,7 @@ public class CameraController2 extends CameraController {
 			stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+				test_fake_flash_photo++;
 			}
 			// else don't turn torch off, as user may be in torch on mode
 
@@ -3490,6 +3493,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "turn on torch");
 			previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 			previewBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+			test_fake_flash_precapture++;
 			fake_precapture_torch_performed = true;
 		}
 		else if( camera_settings.flash_value.equals("flash_frontscreen_auto") || camera_settings.flash_value.equals("flash_frontscreen_on") ) {
@@ -3635,6 +3639,7 @@ public class CameraController2 extends CameraController {
 					// An alternative solution would be to switch torch off and back on again to cause ae scanning to start - but
 					// at worst this is tricky to get working, and at best, taking photos would be slower.
 					fake_precapture_torch_performed = true; // so we know to fire the torch when capturing
+					test_fake_flash_precapture++; // for testing, should treat this same as if we did do the precapture
 					state = STATE_WAITING_FAKE_PRECAPTURE_DONE;
 					precapture_state_change_time_ms = System.currentTimeMillis();
 				}
