@@ -1121,9 +1121,13 @@ public class DrawPreview {
 			canvas.restore();
 		}
 
-		if( camera_controller != null && continuous_focus_moving ) {
+		if( camera_controller != null && continuous_focus_moving & !taking_picture ) {
+			// we don't display the continuous focusing animation when taking a photo - and can also ive the impression of having
+			// frozen if we pause because the image saver queue is full
 			long dt = System.currentTimeMillis() - continuous_focus_moving_ms;
 			final long length = 1000;
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "continuous focus moving, dt: " + dt);*/
 			if( dt <= length ) {
 				float frac = ((float)dt) / (float)length;
 				float pos_x = canvas.getWidth()/2.0f;

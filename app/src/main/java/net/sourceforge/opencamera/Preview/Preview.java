@@ -3078,7 +3078,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "found no existing focus_value");
-			updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, true, auto_focus);
+			// here we set the default values for focus mode
+			// note if updating default focus value for photo mode, also update MainActivityTest.setToDefault()
+			updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_continuous_picture", true, true, auto_focus);
 		}
 	}
 
@@ -3102,7 +3104,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "need to change focus mode");
 				old_focus_mode = this.getCurrentFocusValue();
-				updateFocus(is_video ? "focus_mode_continuous_video" : "focus_mode_auto", true, false, false); // don't save, as we're just changing focus mode temporarily for the Samsung S5 video hack
+				updateFocus("focus_mode_continuous_video", true, false, false); // don't save, as we're just changing focus mode temporarily for the Samsung S5 video hack
 			}
 		}
 		return old_focus_mode;
