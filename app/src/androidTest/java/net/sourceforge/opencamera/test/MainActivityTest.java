@@ -2530,7 +2530,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		switchToFocusValue("focus_mode_continuous_picture");
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
 	}
-	
+
+	/**  May have precapture timeout if phone is face down and devices uses fake flash by default (e.g., OnePlus 3T) - see testTakePhotoFlashOnFakeMode.
+	 */
 	public void testTakePhotoFlashAuto() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashAuto");
 		if( !mPreview.supportsFlash() ) {
@@ -2544,6 +2546,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
 	}
 
+	/**  May have precapture timeout if phone is face down and devices uses fake flash by default (e.g., OnePlus 3T) - see testTakePhotoFlashOnFakeMode.
+	 */
 	public void testTakePhotoFlashOn() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashOn");
 		if( !mPreview.supportsFlash() ) {
@@ -4101,6 +4105,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(trashButton.getVisibility() == View.GONE);
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 
+		assertFalse( mPreview.isVideoRecording() );
 	    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_selector );
 		assertEquals( takePhotoButton.getContentDescription(), mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video) );
 		assertTrue( pauseVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.pause_video) ) );
@@ -4366,12 +4371,24 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Log.d(TAG, "wait until video recording stops");
 				long time_s = System.currentTimeMillis();
 				long video_time_s = mPreview.getVideoTime();
+				// simulate remaining memory now being reduced, so we don't keep trying to restart
+				mActivity.getApplicationInterface().test_available_memory = 10000000;
 		    	while( mPreview.isVideoRecording() ) {
 				    assertTrue( System.currentTimeMillis() - time_s <= 30000 );
 				    long video_time = mPreview.getVideoTime();
 				    assertTrue( video_time >= video_time_s );
 		    	}
 				Log.d(TAG, "video recording now stopped");
+				// now allow time for video recording to properly shut down
+				try {
+					Thread.sleep(1000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				Log.d(TAG, "done waiting");
+
 				return 1;
 			}
 		}, 5000, true, false);
@@ -4453,7 +4470,39 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				    assertTrue( video_time + 1 >= video_time_s );
 		    	}
 				Log.d(TAG, "video recording now stopped again");
-				return -1; // the number of videos recorded can very, as the max duration corresponding to max filesize can vary widly
+
+				// now start again
+				time_s = System.currentTimeMillis();
+				while( !mPreview.isVideoRecording() ) {
+					long c_time = System.currentTimeMillis();
+					if( c_time - time_s > 10000 ) {
+						Log.e(TAG, "time: " + (c_time - time_s));
+					}
+					assertTrue( c_time - time_s <= 10000 );
+				}
+				try {
+					Thread.sleep(1000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+
+				// now properly stop
+				View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+				Log.d(TAG, "about to click stop video");
+				clickView(takePhotoButton);
+				Log.d(TAG, "done clicking stop video");
+				getInstrumentation().waitForIdleSync();
+				Log.d(TAG, "after idle sync");
+				try {
+					Thread.sleep(1000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				return -1; // the number of videos recorded can vary, as the max duration corresponding to max filesize can vary widly
 			}
 		}, 5000, true, false);
 	}
