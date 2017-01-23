@@ -1257,6 +1257,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Thread.sleep(1000);
 		int new_count_cameraContinuousFocusMoving = mPreview.count_cameraContinuousFocusMoving;
 		Log.d(TAG, "count_cameraContinuousFocusMoving compare saved: "+ saved_count_cameraContinuousFocusMoving + " to new: " + new_count_cameraContinuousFocusMoving);
+		assertTrue( mPreview.getCameraController().test_af_state_null_focus == 0 );
 		assertTrue( new_count_cameraContinuousFocusMoving > saved_count_cameraContinuousFocusMoving );
 
 		// switch to video
@@ -1277,6 +1278,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Thread.sleep(3000);
 		new_count_cameraContinuousFocusMoving = mPreview.count_cameraContinuousFocusMoving;
 		Log.d(TAG, "count_cameraContinuousFocusMoving compare saved: "+ saved_count_cameraContinuousFocusMoving + " to new: " + new_count_cameraContinuousFocusMoving);
+		assertTrue( mPreview.getCameraController().test_af_state_null_focus == 0 );
 		assertTrue( new_count_cameraContinuousFocusMoving > saved_count_cameraContinuousFocusMoving );
 	}
 
@@ -2519,6 +2521,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		switchToFocusValue("focus_mode_continuous_picture");
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+
+		assertTrue( mPreview.getCameraController().test_af_state_null_focus == 0 );
 	}
 	
 	/** Test taking photo with continuous photo mode. Don't touch to focus first, so we take the
@@ -2529,6 +2533,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		switchToFocusValue("focus_mode_continuous_picture");
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
+
+		assertTrue( mPreview.getCameraController().test_af_state_null_focus == 0 );
 	}
 
 	/**  May have precapture timeout if phone is face down and devices uses fake flash by default (e.g., OnePlus 3T) - see testTakePhotoFlashOnFakeMode.
@@ -2835,6 +2841,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		switchToFocusValue("focus_mode_auto");
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+
+		assertTrue( mPreview.getCameraController().test_af_state_null_focus == 0 );
 	}
 
 	public void testTakePhotoLockedFocus() throws InterruptedException {

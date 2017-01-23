@@ -3941,6 +3941,9 @@ public class CameraController2 extends CameraController {
 							else
 								Log.d(TAG, "af_state: " + af_state);
 						}
+						if( af_state == null ) {
+							test_af_state_null_focus++;
+						}
 						autofocus_cb.onAutoFocus(focus_success);
 						autofocus_cb = null;
 						capture_follows_autofocus_hint = false;
@@ -4028,6 +4031,7 @@ public class CameraController2 extends CameraController {
 					// autofocus shouldn't really be requested if af not available, but still allow this rather than getting stuck waiting for autofocus to complete
 					if( MyDebug.LOG )
 						Log.e(TAG, "waiting for autofocus but af_state is null");
+					test_af_state_null_focus++;
 					state = STATE_NORMAL;
 			    	precapture_state_change_time_ms = -1;
 					if( autofocus_cb != null ) {
