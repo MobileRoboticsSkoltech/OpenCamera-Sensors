@@ -3851,11 +3851,17 @@ public class CameraController2 extends CameraController {
 		public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureProgressed");*/
-			process(request, partialResult);
+			//process(request, partialResult);
+			// Note that we shouldn't try to process partial results - or if in future we decide to, remember that it's documented that
+			// not all results may be available. E.g., OnePlus 3T on Android 7 (OxygenOS 4.0.2) reports null for AF_STATE from this method.
+			// We'd also need to fix up the discarding of old frames in process(), as we probably don't want to be discarding the
+			// complete results from onCaptureCompleted()!
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
 		public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "onCaptureCompleted");*/
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if (MyDebug.LOG) {
 					Log.d(TAG, "onCaptureCompleted: capture");
