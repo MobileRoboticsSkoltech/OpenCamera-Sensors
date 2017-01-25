@@ -2618,7 +2618,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 *  We do more tests with flash on than flash auto (especially due to bug on OnePlus 3T where fake flash auto never fires the flash
 	 *  anyway).
 	 *  May have precapture timeout if phone is face down (at least on Nexus 6 and OnePlus 3T) - issue that we've already ae converged,
-	 *  so we think fake-precapture never starts when firing the flash for taking photo.
+	 *  so we think fake-precapture never starts when firing the flash for taking photo. I think this is when being face down means that
+	 *  although flash fires, it doesn't light up the picture.
 	 */
 	public void testTakePhotoFlashOnFakeMode() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashOnFakeMode");
