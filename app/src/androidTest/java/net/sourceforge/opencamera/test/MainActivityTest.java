@@ -2661,9 +2661,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, true, false, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+		Log.d(TAG, "test_fake_flash_focus: " + mPreview.getCameraController().test_fake_flash_focus);
 		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 3 );
 		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 3 );
 		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 3 );
+
+		// this should match CameraController2.do_af_trigger_for_continuous
+		boolean do_af_for_continuous = true;
 
 		// now test it all again with continuous focus mode
 		switchToFocusValue("focus_mode_continuous_picture");
@@ -2671,7 +2675,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
-		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 3 );
+		Log.d(TAG, "test_fake_flash_focus: " + mPreview.getCameraController().test_fake_flash_focus);
+		assertTrue( mPreview.getCameraController().test_fake_flash_focus == (do_af_for_continuous ? 4 : 3) );
 		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 4 );
 		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 4 );
 
@@ -2680,7 +2685,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
-		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 4 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_focus == (do_af_for_continuous ? 5 : 4) );
 		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 5 );
 		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 5 );
 
@@ -2689,7 +2694,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.getCameraController().getUseCamera2FakeFlash() ); // make sure we turned on the option in the camera controller
 		subTestTakePhoto(false, false, true, false, false, false, false, false);
 		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
-		assertTrue( mPreview.getCameraController().test_fake_flash_focus == 5 );
+		assertTrue( mPreview.getCameraController().test_fake_flash_focus == (do_af_for_continuous ? 6 : 5) );
 		assertTrue( mPreview.getCameraController().test_fake_flash_precapture == 6 );
 		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 6 );
 
@@ -3283,8 +3288,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(shareButton.getVisibility() == View.GONE);
 
 	    // check still same icon even after a delay
+		Log.d(TAG, "thumbnail:" + thumbnail);
+		Log.d(TAG, "mActivity.gallery_bitmap: " + mActivity.gallery_bitmap);
 		assertTrue(mActivity.gallery_bitmap == thumbnail);
 	    Thread.sleep(1000);
+		Log.d(TAG, "thumbnail:" + thumbnail);
+		Log.d(TAG, "mActivity.gallery_bitmap: " + mActivity.gallery_bitmap);
 		assertTrue(mActivity.gallery_bitmap == thumbnail);
 	}
 
@@ -4497,13 +4506,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					assertTrue(false);
 				}
 
-				// now properly stop
-				View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
-				Log.d(TAG, "about to click stop video");
-				clickView(takePhotoButton);
-				Log.d(TAG, "done clicking stop video");
-				getInstrumentation().waitForIdleSync();
-				Log.d(TAG, "after idle sync");
+				// now properly stop - need to wait first so that stopping video isn't ignored (due to too quick after video start)
 				try {
 					Thread.sleep(1000);
 				}
@@ -4511,6 +4514,21 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					e.printStackTrace();
 					assertTrue(false);
 				}
+				View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+				Log.d(TAG, "about to click stop video");
+				clickView(takePhotoButton);
+				Log.d(TAG, "done clicking stop video");
+				getInstrumentation().waitForIdleSync();
+				Log.d(TAG, "after idle sync");
+				Log.d(TAG, "wait for stop");
+				try {
+					Thread.sleep(1000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				Log.d(TAG, "done wait for stop");
 				return -1; // the number of videos recorded can vary, as the max duration corresponding to max filesize can vary widly
 			}
 		}, 5000, true, false);

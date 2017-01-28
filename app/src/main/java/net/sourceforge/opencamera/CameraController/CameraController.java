@@ -326,6 +326,12 @@ public abstract class CameraController {
 	public boolean captureResultIsAEScanning() {
 		return false;
 	}
+	/**
+	 * @return whether flash will fire; returns false if not known
+     */
+	public boolean needsFlash() {
+		return false;
+	}
 	public boolean captureResultHasIso() {
 		return false;
 	}
