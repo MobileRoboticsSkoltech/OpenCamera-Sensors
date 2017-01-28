@@ -124,7 +124,7 @@ public class CameraController2 extends CameraController {
 	private boolean sounds_enabled = true;
 
 	private boolean capture_result_is_ae_scanning;
-	private boolean capture_result_needs_flash; // whether flash will fire
+	private Integer capture_result_ae; // latest ae_state, null if not available
 	private boolean capture_result_has_iso;
 	private int capture_result_iso;
 	private boolean capture_result_has_exposure_time;
@@ -2954,6 +2954,29 @@ public class CameraController2 extends CameraController {
 		this.face_detection_listener = listener;
 	}
 
+	/* If do_af_trigger_for_continuous is false, doing an autoFocus() in continuous focus mode just
+	   means we call the autofocus callback the moment focus is not scanning (as with old Camera API).
+	   If do_af_trigger_for_continuous is true, we set CONTROL_AF_TRIGGER_START, and wait for
+	   CONTROL_AF_STATE_FOCUSED_LOCKED or CONTROL_AF_STATE_NOT_FOCUSED_LOCKED, similar to other focus
+	   methods.
+	   do_af_trigger_for_continuous==true has advantages:
+	     - On Nexus 6 for flash auto, it means ae state is set to FLASH_REQUIRED if it is required
+	       when it comes to taking the photo. If do_af_trigger_for_continuous==false, sometimes
+	       it's set to CONTROL_AE_STATE_CONVERGED even for dark scenes, so we think we can skip
+	       the precapture, causing photos to come out dark (or we can force always doing precapture,
+	       but that makes things slower when flash isn't needed)
+	     - On OnePlus 3T, with do_af_trigger_for_continuous==false photos come out with blue tinge
+	       if the scene is not dark (but still dark enough that you'd want flash).
+	       do_af_trigger_for_continuous==true fixes this for cases where the flash fires for autofocus.
+	       Note that the problem is still not fixed for flash on where the scene is bright enough to
+	       not need flash (and so we don't fire flash for autofocus).
+	   do_af_trigger_for_continuous==true has disadvantage:
+	     - On both Nexus 6 and OnePlus 3T, taking photos with flash is longer, as we have flash firing
+	       for autofocus and precapture. Though note this is the case with autofocus mode anyway.
+	 */
+	//private final boolean do_af_trigger_for_continuous = false;
+	private final boolean do_af_trigger_for_continuous = true;
+
 	@Override
 	public void autoFocus(final AutoFocusCallback cb, boolean capture_follows_autofocus_hint) {
 		if( MyDebug.LOG ) {
@@ -2975,15 +2998,8 @@ public class CameraController2 extends CameraController {
 			cb.onAutoFocus(true);
 			return;
 		}
-		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
-			/* In the old Camera API, doing an autofocus in FOCUS_MODE_CONTINUOUS_PICTURE mode would call the callback when the camera isn't focusing,
-			 * and return whether focus was successful or not. So we replicate the behaviour here too (see previewCaptureCallback.process()).
-			 * This is essential to have correct behaviour for flash mode in continuous picture focus mode. Otherwise:
-			 *  - Taking photo with flash auto when flash is used, or flash on, takes longer (excessive amount of flash firing due to an additional unnecessary focus before taking photo).
-			 *  - Taking photo with flash auto when flash is needed sometime results in flash firing for the (unnecessary) autofocus, then not firing for final picture, resulting in too dark pictures.
-			 *    This seems to happen with scenes that have both light and dark regions.
-			 *  (All tested on Nexus 6, Android 6.)
-			 */
+		else if( !do_af_trigger_for_continuous && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
+			// See note above for do_af_trigger_for_continuous
 			this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
 			this.autofocus_cb = cb;
 			return;
@@ -3015,8 +3031,6 @@ public class CameraController2 extends CameraController {
 		precapture_state_change_time_ms = -1;
 		this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
 		this.autofocus_cb = cb;
-		// Camera2Basic sets a trigger with capture
-		// Google Camera sets to idle with a repeating request, then sets af trigger to start with a capture
 		try {
 			if( use_fake_precapture_mode && !camera_settings.has_iso ) {
 				boolean want_flash = false;
@@ -3053,6 +3067,9 @@ public class CameraController2 extends CameraController {
 					}
 				}
 			}
+
+			// Camera2Basic sets a trigger with capture
+			// Google Camera sets to idle with a repeating request, then sets af trigger to start with a capture
 			afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE);
 			setRepeatingRequest(afBuilder.build());
 			afBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
@@ -3561,7 +3578,7 @@ public class CameraController2 extends CameraController {
 		}
 		fake_precapture_use_flash_time_ms = time_now;
 		if( camera_settings.flash_value.equals("flash_auto") ) {
-			fake_precapture_use_flash = capture_result_needs_flash;
+			fake_precapture_use_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
 		}
 		else if( camera_settings.flash_value.equals("flash_frontscreen_auto") ) {
 			// iso_threshold fine-tuned for Nexus 6 - front camera ISO never goes above 805, but a threshold of 700 is too low
@@ -3649,7 +3666,11 @@ public class CameraController2 extends CameraController {
 			}
 			else {
 				// standard flash, flash auto or on
-				if( camera_settings.flash_value.equals("flash_auto") && !capture_result_needs_flash ) {
+				// note that we don't call needsFlash() - as if ae state is neither CONVERGED nor FLASH_REQUIRED, we err on the side
+				// of caution and don't skip the precapture
+				//boolean needs_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
+				boolean needs_flash = capture_result_ae != null && capture_result_ae != CaptureResult.CONTROL_AE_STATE_CONVERGED;
+				if( camera_settings.flash_value.equals("flash_auto") && !needs_flash ) {
 					// if we call precapture anyway, flash wouldn't fire - but we tend to have a pause
 					// so skipping the precapture if flash isn't going to fire makes this faster
 					if( MyDebug.LOG )
@@ -3759,6 +3780,12 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public boolean needsFlash() {
+		boolean needs_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
+		return needs_flash;
+	}
+
+	@Override
 	public boolean captureResultHasIso() {
 		return capture_result_has_iso;
 	}
@@ -3851,11 +3878,17 @@ public class CameraController2 extends CameraController {
 		public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureProgressed");*/
-			process(request, partialResult);
+			//process(request, partialResult);
+			// Note that we shouldn't try to process partial results - or if in future we decide to, remember that it's documented that
+			// not all results may be available. E.g., OnePlus 3T on Android 7 (OxygenOS 4.0.2) reports null for AF_STATE from this method.
+			// We'd also need to fix up the discarding of old frames in process(), as we probably don't want to be discarding the
+			// complete results from onCaptureCompleted()!
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
 		public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "onCaptureCompleted");*/
 			if( request.getTag() == RequestTag.CAPTURE ) {
 				if (MyDebug.LOG) {
 					Log.d(TAG, "onCaptureCompleted: capture");
@@ -3915,47 +3948,7 @@ public class CameraController2 extends CameraController {
 				else
 					Log.d(TAG, "CONTROL_AF_STATE = " + af_state);
 			}*/
-			if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ) {
-				/*if( MyDebug.LOG )
-					Log.d(TAG, "not ready for capture: " + af_state);*/
-				ready_for_capture = false;
-			}
-			else {
-				/*if( MyDebug.LOG )
-					Log.d(TAG, "ready for capture: " + af_state);*/
-				ready_for_capture = true;
-				if( autofocus_cb != null && focusIsContinuous() ) {
-					Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
-					if( focus_mode != null && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "call autofocus callback, as continuous mode and not focusing: " + af_state);
-						// need to check af_state != null, I received Google Play crash in 1.33 where it was null
-						boolean focus_success = af_state != null && ( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED );
-						if( MyDebug.LOG ) {
-							if( focus_success )
-								Log.d(TAG, "autofocus success");
-							else
-								Log.d(TAG, "autofocus failed");
-							if( af_state == null )
-								Log.e(TAG, "continuous focus mode but af_state is null");
-							else
-								Log.d(TAG, "af_state: " + af_state);
-						}
-						autofocus_cb.onAutoFocus(focus_success);
-						autofocus_cb = null;
-						capture_follows_autofocus_hint = false;
-					}
-				}
-			}
 
-			/*if( MyDebug.LOG ) {
-				if( autofocus_cb == null ) {
-					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
-						Log.d(TAG, "processAF: autofocus success but no callback set");
-					else if( af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED )
-						Log.d(TAG, "processAF: autofocus failed but no callback set");
-				}
-			}*/
 			// CONTROL_AE_STATE can be null on some devices, so as with af_state, use Integer
 			Integer ae_state = result.get(CaptureResult.CONTROL_AE_STATE);
 			/*if( MyDebug.LOG ) {
@@ -3976,6 +3969,58 @@ public class CameraController2 extends CameraController {
 				else
 					Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
 			}*/
+			if( ae_state != capture_result_ae ) {
+				// need to store this before calling the autofocus callbacks below
+				if( MyDebug.LOG )
+					Log.d(TAG, "CONTROL_AE_STATE changed from " + capture_result_ae + " to " + ae_state);
+				capture_result_ae = ae_state;
+			}
+
+			if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ) {
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "not ready for capture: " + af_state);*/
+				ready_for_capture = false;
+			}
+			else {
+				/*if( MyDebug.LOG )
+					Log.d(TAG, "ready for capture: " + af_state);*/
+				ready_for_capture = true;
+				if( autofocus_cb != null && !do_af_trigger_for_continuous && focusIsContinuous() ) {
+					Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
+					if( focus_mode != null && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "call autofocus callback, as continuous mode and not focusing: " + af_state);
+						// need to check af_state != null, I received Google Play crash in 1.33 where it was null
+						boolean focus_success = af_state != null && ( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED );
+						if( MyDebug.LOG ) {
+							if( focus_success )
+								Log.d(TAG, "autofocus success");
+							else
+								Log.d(TAG, "autofocus failed");
+							if( af_state == null )
+								Log.e(TAG, "continuous focus mode but af_state is null");
+							else
+								Log.d(TAG, "af_state: " + af_state);
+						}
+						if( af_state == null ) {
+							test_af_state_null_focus++;
+						}
+						autofocus_cb.onAutoFocus(focus_success);
+						autofocus_cb = null;
+						capture_follows_autofocus_hint = false;
+					}
+				}
+			}
+
+			/*if( MyDebug.LOG ) {
+				if( autofocus_cb == null ) {
+					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED )
+						Log.d(TAG, "processAF: autofocus success but no callback set");
+					else if( af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED )
+						Log.d(TAG, "processAF: autofocus failed but no callback set");
+				}
+			}*/
+
 			if( ae_state != null && ae_state == CaptureResult.CONTROL_AE_STATE_SEARCHING ) {
 				/*if( MyDebug.LOG && !capture_result_is_ae_scanning )
 					Log.d(TAG, "ae_state now searching");*/
@@ -3985,17 +4030,6 @@ public class CameraController2 extends CameraController {
 				/*if( MyDebug.LOG && capture_result_is_ae_scanning )
 					Log.d(TAG, "ae_state stopped searching");*/
 				capture_result_is_ae_scanning = false;
-			}
-
-			if( ae_state != null && ae_state == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED ) {
-				if( MyDebug.LOG && !capture_result_needs_flash )
-					Log.d(TAG, "ae_state now needs flash");
-				capture_result_needs_flash = true;
-			}
-			else {
-				if( MyDebug.LOG && capture_result_needs_flash )
-					Log.d(TAG, "ae_state no longer needs flash");
-				capture_result_needs_flash = false;
 			}
 
 			/*Integer awb_state = result.get(CaptureResult.CONTROL_AWB_STATE);
@@ -4028,6 +4062,7 @@ public class CameraController2 extends CameraController {
 					// autofocus shouldn't really be requested if af not available, but still allow this rather than getting stuck waiting for autofocus to complete
 					if( MyDebug.LOG )
 						Log.e(TAG, "waiting for autofocus but af_state is null");
+					test_af_state_null_focus++;
 					state = STATE_NORMAL;
 			    	precapture_state_change_time_ms = -1;
 					if( autofocus_cb != null ) {
@@ -4039,8 +4074,8 @@ public class CameraController2 extends CameraController {
 				else if( af_state != last_af_state ) {
 					// check for autofocus completing
 					// need to check that af_state != last_af_state, except for continuous focus mode where if we're already focused, should return immediately
-					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED ||
-							af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED
+					if( af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED /*||
+							af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_UNFOCUSED*/
 							) {
 						boolean focus_success = af_state == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED || af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED;
 						if( MyDebug.LOG ) {
@@ -4119,6 +4154,7 @@ public class CameraController2 extends CameraController {
 				if( ae_state == null || ae_state == CaptureResult.CONTROL_AE_STATE_PRECAPTURE /*|| ae_state == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED*/ ) {
 					// we have to wait for CONTROL_AE_STATE_PRECAPTURE; if we allow CONTROL_AE_STATE_FLASH_REQUIRED, then on Nexus 6 at least we get poor quality results with flash:
 					// varying levels of brightness, sometimes too bright or too dark, sometimes with blue tinge, sometimes even with green corruption
+					// similarly photos with flash come out too dark on OnePlus 3T
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "precapture started after: " + (System.currentTimeMillis() - precapture_state_change_time_ms));
 					}

@@ -37,6 +37,7 @@ public abstract class CameraController {
 	public volatile int test_fake_flash_focus; // for Camera2 API, records torch turning on for fake flash during autofocus
 	public volatile int test_fake_flash_precapture; // for Camera2 API, records torch turning on for fake flash during precapture
 	public volatile int test_fake_flash_photo; // for Camera2 API, records torch turning on for fake flash for photo capture
+	public volatile int test_af_state_null_focus; // for Camera2 API, records af_state being null even when we've requested autofocus
 
 	public static class CameraFeatures {
 		public boolean is_zoom_supported;
@@ -323,6 +324,12 @@ public abstract class CameraController {
 	public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException;
 	public abstract String getParametersString();
 	public boolean captureResultIsAEScanning() {
+		return false;
+	}
+	/**
+	 * @return whether flash will fire; returns false if not known
+     */
+	public boolean needsFlash() {
 		return false;
 	}
 	public boolean captureResultHasIso() {
