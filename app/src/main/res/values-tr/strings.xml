@@ -237,7 +237,6 @@
     <string name="preference_reset_summary">Tüm Open Camera ayarlarını öntanımlı ayarlara döndür</string>
     <string name="preference_reset_question">Tüm Open Camera ayarlarını öntanımlı ayarlara döndürmek istediğinize emin misiniz?</string>
 
-    <string name="about_ok">TAMAM</string>
     <string name="about_available">Etkinleştir</string>
     <string name="about_not_available">Etkin değil</string>
     <string name="about_copy_to_clipboard">Clipboarda kopyala</string>
@@ -252,7 +251,6 @@
     <string name="share">Fotoğraf Paylaş</string>
     
     <string name="parent_folder">Ana Klasör</string>
-    <string name="use_folder">Klasör Kullan</string>
     <string name="new_folder">Yeni Klasör</string>
     <string name="cant_write_folder">Bu klasöre kaydetme izniniz yok</string>
     <string name="cant_access_folder">bu klasöre erişim izniniz yok</string>

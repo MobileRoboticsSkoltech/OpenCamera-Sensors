@@ -238,7 +238,6 @@
     <string name="preference_reset_summary">Obnoví všechna nastavení Open Camera na původní</string>
     <string name="preference_reset_question">Jste si jist/á, že chcete obnovit všechna nastavení Open Camera na původní?</string>
 
-    <string name="about_ok">OK</string>
     <string name="about_available">Dostupné</string>
     <string name="about_not_available">Nedostupné</string>
     <string name="about_copy_to_clipboard">Kopírovat do schránky</string>
@@ -253,7 +252,6 @@
     <string name="share">Sdílet fotografii</string>
     
     <string name="parent_folder">Rodičovský adresář</string>
-    <string name="use_folder">Použít složku</string>
     <string name="new_folder">Nová složka</string>
     <string name="cant_write_folder">Do této složky nemohu zapisovat</string>
     <string name="cant_access_folder">K této složce nemám přístup</string>

@@ -255,7 +255,6 @@
     <string name="preference_reset_summary">Repor todas as definições do Open Camera para as predefinidas</string>
     <string name="preference_reset_question">Tem a certeza que pretende repor todas as definições do Open Camera para as predefinidas?</string>
 
-    <string name="about_ok">OK</string>
     <string name="about_available">Disponível</string>
     <string name="about_not_available">Não disponível</string>
     <string name="about_copy_to_clipboard">Copiar para a área de transferência</string>
@@ -274,7 +273,6 @@
     <string name="share">Partilhar fotografia</string>
     
     <string name="parent_folder">Pasta superior</string>
-    <string name="use_folder">Usar pasta</string>
     <string name="new_folder">Nova pasta</string>
     <string name="cant_write_folder">Não é possível escrever nesta pasta</string>
     <string name="cant_access_folder">Não é possível aceder a esta pasta</string>

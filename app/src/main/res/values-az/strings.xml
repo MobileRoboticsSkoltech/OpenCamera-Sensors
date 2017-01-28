@@ -201,7 +201,6 @@
     <string name="preference_reset">Parametrləri sıfırla</string>
     <string name="preference_reset_summary">Bütün Open Camera parametrlərinin susmaya görə sıfırlanması</string>
     <string name="preference_reset_question">Bütün papametrlərin sıfırlanmasını istəyirsiniz?</string>
-    <string name="about_ok">OK</string>
     <string name="about_available">Mövcuddur</string>
     <string name="about_not_available">Mövcud deyil</string>
     <string name="about_copy_to_clipboard">Mübadilə buferinə köçür</string>
@@ -213,7 +212,6 @@
     <string name="trash">Sonuncu çəkilişi sil</string>
     <string name="share">Paylaş</string>
     <string name="parent_folder">Üst qovluğa keç</string>
-    <string name="use_folder">İstifadə et</string>
     <string name="new_folder">Yeni qovluq</string>
     <string name="cant_write_folder">Bu qovluğa yazmaq olmur</string>
     <string name="cant_access_folder">Bu qovluğa giriş əldə etmək olmur</string>

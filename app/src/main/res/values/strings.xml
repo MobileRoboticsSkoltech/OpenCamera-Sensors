@@ -255,7 +255,6 @@
     <string name="preference_reset_summary">Reset all Open Camera settings to default</string>
     <string name="preference_reset_question">Are you sure you want to reset all Open Camera settings to default?</string>
 
-    <string name="about_ok">OK</string>
     <string name="about_available">Available</string>
     <string name="about_not_available">Not available</string>
     <string name="about_copy_to_clipboard">Copy to clipboard</string>
@@ -274,7 +273,6 @@
     <string name="share">Share Photo</string>
     
     <string name="parent_folder">Parent Folder</string>
-    <string name="use_folder">Use Folder</string>
     <string name="new_folder">New Folder</string>
     <string name="cant_write_folder">Can\'t write to this folder</string>
     <string name="cant_access_folder">Can\'t access this folder</string>

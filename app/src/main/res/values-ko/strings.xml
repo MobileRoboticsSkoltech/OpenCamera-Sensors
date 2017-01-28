@@ -213,7 +213,6 @@
     <string name="preference_reset_summary">모든 오픈 카메라 설정을 초기화합니다</string>
     <string name="preference_reset_question">모든 오픈 카메라 설정을 초기화할까요?</string>
 
-    <string name="about_ok">확인</string>
     <string name="about_available">가능</string>
     <string name="about_not_available">불가능</string>
     <string name="about_copy_to_clipboard">클립보드로 복사</string>
@@ -228,7 +227,6 @@
     <string name="share">사진 공유</string>
 
     <string name="parent_folder">상위 폴더</string>
-    <string name="use_folder">폴더 사용</string>
     <string name="new_folder">새 폴더</string>
     <string name="cant_write_folder">이 폴더에 쓸 수 없음</string>
     <string name="cant_access_folder">이 폴더에 접근할 수 없음</string>

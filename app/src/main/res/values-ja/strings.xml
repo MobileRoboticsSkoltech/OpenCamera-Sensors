@@ -238,7 +238,6 @@
     <string name="preference_reset_summary">Open Cameraの設定をすべてリセットします</string>
     <string name="preference_reset_question">本当にすべての設定をリセットしますか？</string>
 
-    <string name="about_ok">OK</string>
     <string name="about_available">利用可能</string>
     <string name="about_not_available">利用不可</string>
     <string name="about_copy_to_clipboard">クリップボードにコピーする</string>
@@ -253,7 +252,6 @@
     <string name="share">この写真を共有する</string>
     
     <string name="parent_folder">親フォルダ</string>
-    <string name="use_folder">このフォルダを使う</string>
     <string name="new_folder">新規フォルダを作る</string>
     <string name="cant_write_folder">このフォルダは使えません</string>
     <string name="cant_access_folder">フォルダにアクセスできません</string>

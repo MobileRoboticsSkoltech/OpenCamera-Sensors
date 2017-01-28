@@ -234,7 +234,6 @@
     <string name="preference_reset_summary">Скід усіх налад .</string>
     <string name="preference_reset_question">Вы ўпэўнены, што хочаце скінуць усе налады?</string>
 
-    <string name="about_ok">Добра</string>
     <string name="about_available">Даступна</string>
     <string name="about_not_available">Не даступна</string>
     <string name="about_copy_to_clipboard">Капіраваць ў буфер абмену</string>
@@ -249,7 +248,6 @@
     <string name="share">Падзяліцца фота</string>
 
     <string name="parent_folder">Бацькоўская тэчка</string>
-    <string name="use_folder">Выкарыстанне тэчак</string>
     <string name="new_folder">Новая тэчка</string>
     <string name="cant_write_folder">Немагчыма запісаць у гэтую тэчку</string>
     <string name="cant_access_folder">Няма доступу да гэтай тэчкі</string>

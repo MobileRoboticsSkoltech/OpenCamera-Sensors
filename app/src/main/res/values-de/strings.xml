@@ -235,7 +235,6 @@
     <string name="preference_reset_summary">Standard-Einstellungen von Open Camera wiederherstellen</string>
     <string name="preference_reset_question">Sind Sie sich sicher, alle Einstellungen von Open Camera auf die Standardwerte zurückzusetzen?</string>
 
-    <string name="about_ok">Okay</string>
     <string name="about_available">verfügbar</string>
     <string name="about_not_available">nicht verfügbar</string>
     <string name="about_copy_to_clipboard">In die Zwischenablage kopieren</string>
@@ -250,7 +249,6 @@
     <string name="share">Foto teilen</string>
 
     <string name="parent_folder">Übergeordnetes Verzeichnis</string>
-    <string name="use_folder">Ordner verwenden</string>
     <string name="new_folder">Neuer Ordner</string>
     <string name="cant_write_folder">In diesem Ordner kann nicht gespeichert werden</string>
     <string name="cant_access_folder">Kein Zugriff auf diesem Ordner</string>

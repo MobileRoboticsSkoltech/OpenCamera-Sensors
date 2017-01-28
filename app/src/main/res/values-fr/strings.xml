@@ -249,7 +249,6 @@
     <string name="preference_reset_summary">Réinitialise tout les paramètres aux valeurs par défaut d\'Open Camera</string>
     <string name="preference_reset_question">Êtes-vous sûr de vouloir réinitialiser tout les réglages d\'Open Camera par défaut\u00A0?</string>
 
-    <string name="about_ok">OK</string>
     <string name="about_available">Disponible</string>
     <string name="about_not_available">Non disponible</string>
     <string name="about_copy_to_clipboard">Copier dans le presse-papier</string>
@@ -268,7 +267,6 @@
     <string name="share">Partager la photo</string>
     
     <string name="parent_folder">Dossier parent</string>
-    <string name="use_folder">Utiliser ce dossier</string>
     <string name="new_folder">Nouveau dossier</string>
     <string name="cant_write_folder">Ne peux pas écrire dans ce dossier</string>
     <string name="cant_access_folder">Ne peux pas accèder à ce dossier</string>
