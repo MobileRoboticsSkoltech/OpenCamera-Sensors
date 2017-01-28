@@ -717,7 +717,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 		}
                         
                         alertDialog.setMessage(about_string);
-                        alertDialog.setPositiveButton(R.string.about_ok, null);
+                        alertDialog.setPositiveButton(android.R.string.ok, null);
                         alertDialog.setNegativeButton(R.string.about_copy_to_clipboard, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                         		if( MyDebug.LOG )

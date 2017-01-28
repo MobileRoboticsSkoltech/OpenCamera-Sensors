@@ -169,7 +169,6 @@
     <string name="preference_donate_summary">Se questa applicazione ti piace, puoi sempre pensare di fare una donazione. Puoi farlo premendo sul relativo bottone - cliccando su quel tasto aprirai la pagina per la donazione. Grazie mille!</string>
     <string name="preference_about">Informazioni</string>
     <string name="preference_about_summary">App e informazioni di debug</string>
-    <string name="about_ok">OK</string>
     <string name="about_available">Disponibile</string>
     <string name="about_not_available">Non disponibile</string>
     <string name="about_copy_to_clipboard">Copia nella clipboard</string>
@@ -184,7 +183,6 @@
     <string name="share">Condividi foto</string>
     
     <string name="parent_folder">Cartella padre</string>
-    <string name="use_folder">Usa cartella</string>
     <string name="new_folder">Nuova cartella</string>
     <string name="cant_write_folder">Non puoi scrivere in questa cartella</string>
     <string name="cant_access_folder">Non puoi accedere a questa cartella</string>

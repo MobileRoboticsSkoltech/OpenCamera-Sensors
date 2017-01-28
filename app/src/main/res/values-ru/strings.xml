@@ -255,7 +255,6 @@
     <string name="preference_reset_summary">Сброс всех настроек Open Camera на стандартные значения</string>
     <string name="preference_reset_question">Сбросить все настройки Open Camera на стандартные значения?</string>
 
-    <string name="about_ok">ОК</string>
     <string name="about_available">Доступно</string>
     <string name="about_not_available">Не доступно</string>
     <string name="about_copy_to_clipboard">Копировать в буфер</string>
@@ -274,7 +273,6 @@
     <string name="share">Поделиться</string>
     
     <string name="parent_folder">Родительская папка</string>
-    <string name="use_folder">Использовать папку</string>
     <string name="new_folder">Новая папка</string>
     <string name="cant_write_folder">Невозможно записать в эту папку</string>
     <string name="cant_access_folder">Не удается получить доступ к этой папке</string>

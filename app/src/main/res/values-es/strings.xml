@@ -233,8 +233,7 @@
     <string name="preference_reset">Resetear ajustes</string>
     <string name="preference_reset_summary">Resetear todos los ajustes de Open Camera a los predefinidos</string>
     <string name="preference_reset_question">Estás seguro de que quieres resetear todos los ajustes de Open Camera a los predefinidos?</string>
-    
-    <string name="about_ok">OK</string>
+
     <string name="about_available">Disponible</string>
     <string name="about_not_available">No Disponible</string>
     <string name="about_copy_to_clipboard">Copiar al Portapapeles</string>
@@ -249,7 +248,6 @@
     <string name="share">Compartir Foto</string>
     
     <string name="parent_folder">Subir Carpeta</string>
-    <string name="use_folder">Usar Carpeta</string>
     <string name="new_folder">Nueva Carpeta</string>
     <string name="cant_write_folder">No se puede escribir en esta carpeta</string>
     <string name="cant_access_folder">No se puede acceder a esta carpeta</string>

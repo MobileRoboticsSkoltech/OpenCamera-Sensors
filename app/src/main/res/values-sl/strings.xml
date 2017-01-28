@@ -255,7 +255,6 @@
     <string name="preference_reset_summary">Ponastavi vse nastavitve Open Camera na privzete</string>
     <string name="preference_reset_question">Ali res želite ponastaviti vse nastavitve Open Camera na privzete?</string>
 
-    <string name="about_ok">V redu</string>
     <string name="about_available">Na voljo</string>
     <string name="about_not_available">Ni na voljo</string>
     <string name="about_copy_to_clipboard">Kopiraj na odložišče</string>
@@ -274,7 +273,6 @@
     <string name="share">Deli fotografijo</string>
     
     <string name="parent_folder">Nadrejena mapa</string>
-    <string name="use_folder">Uporabi mapo</string>
     <string name="new_folder">Nova mapa</string>
     <string name="cant_write_folder">V to mapo ni mogoče pisati</string>
     <string name="cant_access_folder">Dostop do te mape ni mogoč</string>

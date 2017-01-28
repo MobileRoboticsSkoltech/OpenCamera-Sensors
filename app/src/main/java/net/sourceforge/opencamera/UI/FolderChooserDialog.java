@@ -119,11 +119,12 @@ public class FolderChooserDialog extends DialogFragment {
 				refreshList(file);
 			}
 		});
+		// good to use as short a text as possible for the icons, to reduce chance that the three buttons will have to appear on top of each other rather than in a row, in portrait mode
 		folder_dialog = new AlertDialog.Builder(getActivity())
 	        //.setIcon(R.drawable.alert_dialog_icon)
 	        .setView(list)
-	        .setPositiveButton(R.string.use_folder, null) // we set the listener in onShowListener, so we can prevent the dialog from closing (if chosen folder isn't writable)
-	        .setNeutralButton(R.string.new_folder, null) // we set the listener in onShowListener, so we can prevent the dialog from closing
+	        .setPositiveButton(android.R.string.ok, null) // we set the listener in onShowListener, so we can prevent the dialog from closing (if chosen folder isn't writable)
+			.setNeutralButton(R.string.new_folder, null) // we set the listener in onShowListener, so we can prevent the dialog from closing
 	        .setNegativeButton(android.R.string.cancel, null)
 	        .create();
 		folder_dialog.setOnShowListener(new DialogInterface.OnShowListener() {

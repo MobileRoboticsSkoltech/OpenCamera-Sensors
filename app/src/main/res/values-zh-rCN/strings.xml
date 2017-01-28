@@ -245,7 +245,6 @@
     <string name="preference_reset_summary">重设所有 Open Camera 设置为默认</string>
     <string name="preference_reset_question">你确定要重设所有 Open Camera 设置为默认值吗？</string>
 
-    <string name="about_ok">好</string>
     <string name="about_available">可用</string>
     <string name="about_not_available">不可用</string>
     <string name="about_copy_to_clipboard">复制到剪贴板</string>
@@ -260,7 +259,6 @@
     <string name="share">共享照片</string>
     
     <string name="parent_folder">父文件夹</string>
-    <string name="use_folder">使用文件夹</string>
     <string name="new_folder">新文件夹</string>
     <string name="cant_write_folder">不能写到这个文件夹</string>
     <string name="cant_access_folder">不能访问这个文件夹</string>

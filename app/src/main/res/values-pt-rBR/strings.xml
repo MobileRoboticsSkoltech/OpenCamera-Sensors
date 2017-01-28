@@ -213,7 +213,6 @@
     <string name="preference_reset_summary">Restaurar todas as configurações para padrão</string>
     <string name="preference_reset_question">Você tem certeza que quer restaurar todas as configurações para padrão?</string>
 
-    <string name="about_ok">OK</string>
     <string name="about_available">Disponível</string>
     <string name="about_not_available">Não disponível</string>
     <string name="about_copy_to_clipboard">Copiar para área de transferência</string>
@@ -228,7 +227,6 @@
     <string name="share">Compartilhar Foto</string>
 	
     <string name="parent_folder">Pasta Principal</string>
-    <string name="use_folder">Usar Pasta</string>
     <string name="new_folder">Nova Pasta</string>
     <string name="cant_write_folder">Impossível salvar nessa pasta</string>
     <string name="cant_access_folder">Impossível acessar essa pasta</string>
