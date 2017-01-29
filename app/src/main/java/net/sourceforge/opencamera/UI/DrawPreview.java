@@ -729,21 +729,27 @@ public class DrawPreview {
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
 			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 			p.setTextAlign(Paint.Align.LEFT);
+			// padding to align with ISO text
+			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
 			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
 			int location_y = top_y + (int) (32 * scale + 0.5f); // convert dps to pixels
-			//int location_y2 = top_y + (int) (48 * scale + 0.5f); // convert dps to pixels
+			int location_x2 = location_x - flash_padding;
+			int location_y2 = top_y + (int) (50 * scale + 0.5f); // convert dps to pixels
+			final int flash_size = (int) (16 * scale + 0.5f); // convert dps to pixels
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
 				int diff = canvas.getWidth() - canvas.getHeight();
 				location_x += diff/2;
+				location_x2 += diff/2;
 				location_y -= diff/2;
-				//location_y2 -= diff/2;
+				location_y2 -= diff/2;
 			}
 			if( ui_rotation == 90 ) {
 				location_y = canvas.getHeight() - location_y - location_size;
-				//location_y2 = canvas.getHeight() - location_y2 - location_size;
+				location_y2 = canvas.getHeight() - location_y2 - location_size;
 			}
 			if( ui_rotation == 180 ) {
 				location_x = canvas.getWidth() - location_x;
+				location_x2 = location_x - flash_size + flash_padding;
 				p.setTextAlign(Paint.Align.RIGHT);
 			}
 			String string = "";
@@ -797,6 +803,17 @@ public class DrawPreview {
 				string = preview.getFocusDistanceString(dist_min, dist_max);
 				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y2, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true); // Yellow 500
 			}*/
+
+			if( camera_controller != null && camera_controller.getFlashValue().equals("flash_auto") && camera_controller.needsFlash() ) {
+				flash_dest.set(location_x2, location_y2, location_x2 + flash_size, location_y2 + flash_size);
+
+				p.setStyle(Paint.Style.FILL);
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				canvas.drawRect(flash_dest, p);
+				p.setAlpha(255);
+				canvas.drawBitmap(flash_bitmap, null, flash_dest, p);
+			}
 		}
 		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {
 			float zoom_ratio = preview.getZoomRatio();
@@ -851,10 +868,6 @@ public class DrawPreview {
 				p.setStyle(Paint.Style.FILL);
 				canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
 			}
-		}
-		if( camera_controller != null && camera_controller.getFlashValue().equals("flash_auto") && camera_controller.needsFlash() ) {
-			flash_dest.set(battery_x - location_size/2, battery_y + location_size, battery_x + location_size/2, battery_y + 2 * location_size);
-			canvas.drawBitmap(flash_bitmap, null, flash_dest, p);
 		}
 
 		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
