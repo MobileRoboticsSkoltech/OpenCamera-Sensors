@@ -150,7 +150,7 @@
     <string name="preference_show_zoom_slider_controls">Prikaži drsnik povečave</string>
     <string name="preference_show_zoom_slider_controls_summary">Prikaži drsnik za nadzor povečave</string>
     <string name="preference_show_iso">Prikaži ISO</string>
-    <string name="preference_show_iso_summary">Prikaži trenutno raven ISO (zahteva API Camera2)</string>
+    <string name="preference_show_iso_summary">Prikaži trenutno raven ISO. V načinu bliskavice bo simbol bliskavice tudi nakazal, da se bo sprožila bliskavica (zahteva API Camera2).</string>
     <string name="preference_free_memory">Prikaži nezaseden prostor</string>
     <string name="preference_free_memory_summary">Na zaslonu prikaži količino nezasedenega prostora na pomnilniški napravi</string>
     <string name="preference_show_angle">Prikaži kot</string>
