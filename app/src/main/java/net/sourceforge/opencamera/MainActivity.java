@@ -380,14 +380,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		boolean is_samsung = Build.MANUFACTURER.toLowerCase(Locale.US).contains("samsung");
 		boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
 		//boolean is_nexus = Build.MODEL.toLowerCase(Locale.US).contains("nexus");
-		boolean is_nexus6 = Build.MODEL.toLowerCase(Locale.US).contains("nexus 6");
+		//boolean is_nexus6 = Build.MODEL.toLowerCase(Locale.US).contains("nexus 6");
 		//boolean is_pixel_phone = Build.DEVICE != null && Build.DEVICE.equals("sailfish");
 		//boolean is_pixel_xl_phone = Build.DEVICE != null && Build.DEVICE.equals("marlin");
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "is_samsung? " + is_samsung);
 			Log.d(TAG, "is_oneplus? " + is_oneplus);
 			//Log.d(TAG, "is_nexus? " + is_nexus);
-			Log.d(TAG, "is_nexus6? " + is_nexus6);
+			//Log.d(TAG, "is_nexus6? " + is_nexus6);
 			//Log.d(TAG, "is_pixel_phone? " + is_pixel_phone);
 			//Log.d(TAG, "is_pixel_xl_phone? " + is_pixel_xl_phone);
 		}
@@ -404,15 +404,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			editor.putBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), true);
 			editor.apply();
 		}
-		if( is_nexus6 ) {
+		/*if( is_nexus6 ) {
 			// Nexus 6 captureBurst() started having problems with Android 7 upgrade - images appeared in wrong order (and with wrong order of shutter speeds in exif info), as well as problems with the camera failing with serious errors
 			// we set this even for Nexus 6 devices not on Android 7, as at some point they'll likely be upgraded to Android 7
+			// Update: seems to be fixed now as on v1.37 - unclear if this is due to improvement in Open Camera, or an update for the Nexus 6
 			if( MyDebug.LOG )
 				Log.d(TAG, "disable fast burst for camera2");
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), false);
 			editor.apply();
-		}
+		}*/
 	}
 
 	/** Switches modes if required, if called from a relevant intent/tile.
