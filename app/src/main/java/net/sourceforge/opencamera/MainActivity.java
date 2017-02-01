@@ -394,6 +394,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( is_samsung || is_oneplus ) {
 			// workaround needed for Samsung S7 at least (tested on Samsung RTL)
 			// workaround needed for OnePlus 3 at least (see http://forum.xda-developers.com/oneplus-3/help/camera2-support-t3453103 )
+			// update for v1.37: significant improvements have been made for standard flash and Camera2 API. But OnePlus 3T still has problem
+			// that photos come out with a blue tinge if flash is on, and the scene is bright enough not to need it; Samsung devices also seem
+			// to work okay, testing on S7 on RTL, but still keeping the fake flash mode in place for these devices, until we're sure of good
+			// behaviour
 			if( MyDebug.LOG )
 				Log.d(TAG, "set fake flash for camera2");
 			SharedPreferences.Editor editor = sharedPreferences.edit();
