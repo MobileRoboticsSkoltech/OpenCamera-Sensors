@@ -125,6 +125,7 @@ public class CameraController2 extends CameraController {
 
 	private boolean capture_result_is_ae_scanning;
 	private Integer capture_result_ae; // latest ae_state, null if not available
+	private boolean is_flash_required; // whether capture_result_ae suggests FLASH_REQUIRED? Or in neither FLASH_REQUIRED nor CONVERGED, this stores the last known result
 	private boolean capture_result_has_iso;
 	private int capture_result_iso;
 	private boolean capture_result_has_exposure_time;
@@ -2973,6 +2974,9 @@ public class CameraController2 extends CameraController {
 	   do_af_trigger_for_continuous==true has disadvantage:
 	     - On both Nexus 6 and OnePlus 3T, taking photos with flash is longer, as we have flash firing
 	       for autofocus and precapture. Though note this is the case with autofocus mode anyway.
+	   Note for fake flash mode, we still can use do_af_trigger_for_continuous==false (and doing the
+	   af trigger for fake flash mode can sometimes mean flash fires for too long and we get a worse
+	   result).
 	 */
 	//private final boolean do_af_trigger_for_continuous = false;
 	private final boolean do_af_trigger_for_continuous = true;
@@ -2998,7 +3002,7 @@ public class CameraController2 extends CameraController {
 			cb.onAutoFocus(true);
 			return;
 		}
-		else if( !do_af_trigger_for_continuous && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
+		else if( (!do_af_trigger_for_continuous || use_fake_precapture_mode) && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
 			// See note above for do_af_trigger_for_continuous
 			this.capture_follows_autofocus_hint = capture_follows_autofocus_hint;
 			this.autofocus_cb = cb;
@@ -3576,9 +3580,8 @@ public class CameraController2 extends CameraController {
 			fake_precapture_use_flash_time_ms = time_now;
 			return fake_precapture_use_flash;
 		}
-		fake_precapture_use_flash_time_ms = time_now;
 		if( camera_settings.flash_value.equals("flash_auto") ) {
-			fake_precapture_use_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
+			fake_precapture_use_flash = is_flash_required;
 		}
 		else if( camera_settings.flash_value.equals("flash_frontscreen_auto") ) {
 			// iso_threshold fine-tuned for Nexus 6 - front camera ISO never goes above 805, but a threshold of 700 is too low
@@ -3593,6 +3596,16 @@ public class CameraController2 extends CameraController {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "fake_precapture_use_flash: " + fake_precapture_use_flash);
+		// We only cache the result if we decide to turn on torch, as that mucks up our ability to tell if we need the flash (since once the torch
+		// is on, the ae_state thinks it's bright enough to not need flash!)
+		// But if we don't turn on torch, this problem doesn't occur, so no need to cache - and good that the next time we should make an up-to-date
+		// decision.
+		if( fake_precapture_use_flash ) {
+			fake_precapture_use_flash_time_ms = time_now;
+		}
+		else {
+			fake_precapture_use_flash_time_ms = -1;
+		}
 		return fake_precapture_use_flash;
 	}
 	
@@ -3631,6 +3644,7 @@ public class CameraController2 extends CameraController {
 				takePictureAfterPrecapture();
 			}
 			else if( use_fake_precapture_mode ) {
+				// fake flash auto/on mode
 				// fake precapture works by turning on torch (or using a "front screen flash"), so we can't use the camera's own decision for flash auto
 				// instead we check the current ISO value
 				boolean auto_flash = camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_frontscreen_auto");
@@ -3666,7 +3680,7 @@ public class CameraController2 extends CameraController {
 			}
 			else {
 				// standard flash, flash auto or on
-				// note that we don't call needsFlash() - as if ae state is neither CONVERGED nor FLASH_REQUIRED, we err on the side
+				// note that we don't call needsFlash() (or use is_flash_required) - as if ae state is neither CONVERGED nor FLASH_REQUIRED, we err on the side
 				// of caution and don't skip the precapture
 				//boolean needs_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
 				boolean needs_flash = capture_result_ae != null && capture_result_ae != CaptureResult.CONTROL_AE_STATE_CONVERGED;
@@ -3781,8 +3795,9 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean needsFlash() {
-		boolean needs_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
-		return needs_flash;
+		//boolean needs_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
+		//return needs_flash;
+		return is_flash_required;
 	}
 
 	@Override
@@ -3969,11 +3984,25 @@ public class CameraController2 extends CameraController {
 				else
 					Log.d(TAG, "CONTROL_AE_STATE = " + ae_state);
 			}*/
-			if( ae_state != capture_result_ae ) {
+			Integer flash_mode = result.get(CaptureResult.FLASH_MODE);
+			if( use_fake_precapture_mode && ( fake_precapture_torch_focus_performed || fake_precapture_torch_performed ) && flash_mode != null && flash_mode == CameraMetadata.FLASH_MODE_TORCH ) {
+				// don't change ae state while torch is on for fake flash
+			}
+			else if( ae_state != capture_result_ae ) {
 				// need to store this before calling the autofocus callbacks below
 				if( MyDebug.LOG )
 					Log.d(TAG, "CONTROL_AE_STATE changed from " + capture_result_ae + " to " + ae_state);
 				capture_result_ae = ae_state;
+				if( capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED && !is_flash_required ) {
+					is_flash_required = true;
+					if( MyDebug.LOG )
+						Log.d(TAG, "flash now required");
+				}
+				else if( capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_CONVERGED && is_flash_required ) {
+					is_flash_required = false;
+					if( MyDebug.LOG )
+						Log.d(TAG, "flash no longer required");
+				}
 			}
 
 			if( af_state != null && af_state == CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN ) {
@@ -3985,7 +4014,7 @@ public class CameraController2 extends CameraController {
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "ready for capture: " + af_state);*/
 				ready_for_capture = true;
-				if( autofocus_cb != null && !do_af_trigger_for_continuous && focusIsContinuous() ) {
+				if( autofocus_cb != null && (!do_af_trigger_for_continuous || use_fake_precapture_mode) && focusIsContinuous() ) {
 					Integer focus_mode = previewBuilder.get(CaptureRequest.CONTROL_AF_MODE);
 					if( focus_mode != null && focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
 						if( MyDebug.LOG )
