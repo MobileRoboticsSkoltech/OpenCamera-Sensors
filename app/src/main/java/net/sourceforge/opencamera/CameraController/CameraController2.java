@@ -3423,6 +3423,18 @@ public class CameraController2 extends CameraController {
 				}
 			}
 
+			/*
+			// testing:
+			requests.add( stillBuilder.build() );
+			requests.add( stillBuilder.build() );
+			requests.add( stillBuilder.build() );
+			requests.add( stillBuilder.build() );
+			if( MyDebug.LOG )
+				Log.d(TAG, "set RequestTag.CAPTURE for last burst request");
+			stillBuilder.setTag(RequestTag.CAPTURE);
+			*/
+
+			requests.add( stillBuilder.build() );
 			n_burst = requests.size();
 			if( MyDebug.LOG )
 				Log.d(TAG, "n_burst: " + n_burst);
