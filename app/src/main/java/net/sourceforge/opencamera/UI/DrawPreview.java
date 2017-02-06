@@ -59,6 +59,7 @@ public class DrawPreview {
 
 	private Bitmap flash_bitmap;
 	private final Rect flash_dest = new Rect();
+	private long needs_flash_time = -1; // time when flash symbol comes on (used for fade-in effect)
 
 	private Bitmap last_thumbnail; // thumbnail of last picture taken
 	private volatile boolean thumbnail_anim; // whether we are displaying the thumbnail animation; must be volatile for test project reading the state
@@ -805,14 +806,29 @@ public class DrawPreview {
 			}*/
 
 			if( camera_controller != null && camera_controller.getFlashValue().equals("flash_auto") && camera_controller.needsFlash() ) {
-				flash_dest.set(location_x2, location_y2, location_x2 + flash_size, location_y2 + flash_size);
+				long time_now = System.currentTimeMillis();
+				if( needs_flash_time != -1 ) {
+					final long fade_ms = 500;
+					float alpha = (time_now - needs_flash_time)/(float)fade_ms;
+					if( time_now - needs_flash_time >= fade_ms )
+						alpha = 1.0f;
+					flash_dest.set(location_x2, location_y2, location_x2 + flash_size, location_y2 + flash_size);
 
-				p.setStyle(Paint.Style.FILL);
-				p.setColor(Color.BLACK);
-				p.setAlpha(64);
-				canvas.drawRect(flash_dest, p);
-				p.setAlpha(255);
-				canvas.drawBitmap(flash_bitmap, null, flash_dest, p);
+					p.setStyle(Paint.Style.FILL);
+					p.setColor(Color.BLACK);
+					p.setAlpha((int)(64*alpha));
+					canvas.drawRect(flash_dest, p);
+					/*if( MyDebug.LOG )
+						Log.d(TAG, "alpha: " + alpha);*/
+					p.setAlpha((int)(255*alpha));
+					canvas.drawBitmap(flash_bitmap, null, flash_dest, p);
+				}
+				else {
+					needs_flash_time = time_now;
+				}
+			}
+			else {
+				needs_flash_time = -1;
 			}
 		}
 		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {

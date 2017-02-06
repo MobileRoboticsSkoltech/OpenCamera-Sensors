@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -1772,9 +1773,19 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public void setOptimiseAEForDRO(boolean optimise_ae_for_dro) {
-		if (MyDebug.LOG)
-			Log.d(TAG, "clearCaptureExposureScaleStops");
-		this.optimise_ae_for_dro = optimise_ae_for_dro;
+		if( MyDebug.LOG )
+			Log.d(TAG, "setOptimiseAEForDRO: " + optimise_ae_for_dro);
+		boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
+		if( is_oneplus ) {
+			// OnePlus 3T has preview corruption / camera freezing problems when using manual shutter speeds
+			// So best not to modify auto-exposure for DRO
+			this.optimise_ae_for_dro = false;
+			if( MyDebug.LOG )
+				Log.d(TAG, "don't modify ae for OnePlus");
+		}
+		else {
+			this.optimise_ae_for_dro = optimise_ae_for_dro;
+		}
 	}
 
 	@Override
@@ -3411,6 +3422,18 @@ public class CameraController2 extends CameraController {
 					requests.add( stillBuilder.build() );
 				}
 			}
+
+			/*
+			// testing:
+			requests.add( stillBuilder.build() );
+			requests.add( stillBuilder.build() );
+			requests.add( stillBuilder.build() );
+			requests.add( stillBuilder.build() );
+			if( MyDebug.LOG )
+				Log.d(TAG, "set RequestTag.CAPTURE for last burst request");
+			stillBuilder.setTag(RequestTag.CAPTURE);
+			requests.add( stillBuilder.build() );
+			*/
 
 			n_burst = requests.size();
 			if( MyDebug.LOG )
