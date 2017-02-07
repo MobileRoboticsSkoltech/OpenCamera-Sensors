@@ -366,7 +366,7 @@ public class StorageUtils {
 		else if( "com.android.providers.downloads.documents".equals(uri.getAuthority()) ) {
 			final String id = DocumentsContract.getDocumentId(uri);
 			final Uri contentUri = ContentUris.withAppendedId(
-					Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+					Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
 
 			String filename = getDataColumn(contentUri, null, null);
 			if( filename != null )
