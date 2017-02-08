@@ -407,7 +407,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		/*if( is_nexus6 ) {
 			// Nexus 6 captureBurst() started having problems with Android 7 upgrade - images appeared in wrong order (and with wrong order of shutter speeds in exif info), as well as problems with the camera failing with serious errors
 			// we set this even for Nexus 6 devices not on Android 7, as at some point they'll likely be upgraded to Android 7
-			// Update: seems to be fixed now as on v1.37 - unclear if this is due to improvement in Open Camera, or an update for the Nexus 6
+			// Update: now fixed in v1.37, this was due to bug where we set RequestTag.CAPTURE for all captures in takePictureBurstExpoBracketing(), rather than just the last!
 			if( MyDebug.LOG )
 				Log.d(TAG, "disable fast burst for camera2");
 			SharedPreferences.Editor editor = sharedPreferences.edit();

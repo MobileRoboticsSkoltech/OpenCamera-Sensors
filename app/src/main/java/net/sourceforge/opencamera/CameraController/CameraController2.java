@@ -2989,8 +2989,8 @@ public class CameraController2 extends CameraController {
 	   af trigger for fake flash mode can sometimes mean flash fires for too long and we get a worse
 	   result).
 	 */
-	//private final boolean do_af_trigger_for_continuous = false;
-	private final boolean do_af_trigger_for_continuous = true;
+	//private final static boolean do_af_trigger_for_continuous = false;
+	private final static boolean do_af_trigger_for_continuous = true;
 
 	@Override
 	public void autoFocus(final AutoFocusCallback cb, boolean capture_follows_autofocus_hint) {
@@ -4011,7 +4011,11 @@ public class CameraController2 extends CameraController {
 			if( use_fake_precapture_mode && ( fake_precapture_torch_focus_performed || fake_precapture_torch_performed ) && flash_mode != null && flash_mode == CameraMetadata.FLASH_MODE_TORCH ) {
 				// don't change ae state while torch is on for fake flash
 			}
-			else if( ae_state != capture_result_ae ) {
+			else if( ae_state == null ) {
+				capture_result_ae = null;
+				is_flash_required = false;
+			}
+			else if( !ae_state.equals(capture_result_ae) ) {
 				// need to store this before calling the autofocus callbacks below
 				if( MyDebug.LOG )
 					Log.d(TAG, "CONTROL_AE_STATE changed from " + capture_result_ae + " to " + ae_state);
