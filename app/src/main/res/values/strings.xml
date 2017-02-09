@@ -345,7 +345,7 @@
     <string name="camera_error">Serious camera error</string>
 
     <string name="preference_camera2_fast_burst">Enable fast HDR/expo burst</string>
-    <string name="preference_camera2_fast_burst_summary">Allows faster capture of the HDR/expo shots. Disable this if your device has problems when taking photos with HDR or Expo photo modes (such as camera stops working, or expo photos in wrong order).</string>
+    <string name="preference_camera2_fast_burst_summary">Allows faster capture of the HDR/expo shots. Disable this if your device has problems when taking photos with HDR or Expo photo modes.</string>
 
     <string name="camera">Camera</string>
     <string name="record_video">Record video</string>
