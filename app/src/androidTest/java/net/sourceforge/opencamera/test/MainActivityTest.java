@@ -965,10 +965,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
-		int saved_count = mPreview.count_cameraAutoFocus;
+		int saved_count;
 		Log.d(TAG, "0 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
 		/*
 		// autofocus shouldn't be immediately, but after a delay
+		saved_count = mPreview.count_cameraAutoFocus;
 		Thread.sleep(1000);
 		Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
 		assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);

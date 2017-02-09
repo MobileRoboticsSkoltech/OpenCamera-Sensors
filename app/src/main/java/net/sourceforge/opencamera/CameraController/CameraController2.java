@@ -3874,13 +3874,13 @@ public class CameraController2 extends CameraController {
 		private long last_process_frame_number = 0;
 		private int last_af_state = -1;
 
-		public void onCaptureBufferLost(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, Surface target, long frameNumber) {
+		public void onCaptureBufferLost(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull Surface target, long frameNumber) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureBufferLost: " + frameNumber);
 			super.onCaptureBufferLost(session, request, target, frameNumber);
 		}
 
-		public void onCaptureFailed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, CaptureFailure failure) {
+		public void onCaptureFailed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureFailed: " + failure);
 			super.onCaptureFailed(session, request, failure); // API docs say this does nothing, but call it just to be safe
@@ -4020,12 +4020,13 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "CONTROL_AE_STATE changed from " + capture_result_ae + " to " + ae_state);
 				capture_result_ae = ae_state;
-				if( capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED && !is_flash_required ) {
+				// capture_result_ae should always be non-null here, as we've already handled ae_state separately
+				if( capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED && !is_flash_required ) {
 					is_flash_required = true;
 					if( MyDebug.LOG )
 						Log.d(TAG, "flash now required");
 				}
-				else if( capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_CONVERGED && is_flash_required ) {
+				else if( capture_result_ae == CaptureResult.CONTROL_AE_STATE_CONVERGED && is_flash_required ) {
 					is_flash_required = false;
 					if( MyDebug.LOG )
 						Log.d(TAG, "flash no longer required");

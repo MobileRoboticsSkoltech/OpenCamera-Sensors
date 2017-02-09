@@ -805,7 +805,7 @@ public class DrawPreview {
 				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y2, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true); // Yellow 500
 			}*/
 
-			if( camera_controller != null && camera_controller.getFlashValue().equals("flash_auto") && camera_controller.needsFlash() ) {
+			if( camera_controller.getFlashValue().equals("flash_auto") && camera_controller.needsFlash() ) {
 				long time_now = System.currentTimeMillis();
 				if( needs_flash_time != -1 ) {
 					final long fade_ms = 500;
