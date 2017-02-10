@@ -10,6 +10,7 @@ public class MainTests {
         .includeAllPackagesUnderHere()
         .build();*/
 		TestSuite suite = new TestSuite(MainTests.class.getName());
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPause"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testStartCameraPreviewCount"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveVideoMode"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFocusMode"));

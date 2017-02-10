@@ -17,8 +17,10 @@ public class CanvasView extends View {
 
 	private final Preview preview;
 	private final int [] measure_spec = new int[2];
-	
-	CanvasView(Context context, Preview preview) {
+	private final Handler handler = new Handler();
+	private Runnable tick;
+
+	CanvasView(Context context, final Preview preview) {
 		super(context);
 		this.preview = preview;
 		if( MyDebug.LOG ) {
@@ -28,16 +30,15 @@ public class CanvasView extends View {
         // deprecated setting, but required on Android versions prior to 3.0
 		//getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // deprecated
 		
-		final Handler handler = new Handler();
-		Runnable tick = new Runnable() {
+		tick = new Runnable() {
 		    public void run() {
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "invalidate()");*/
+				preview.test_ticker_called = true;
 		        invalidate();
 		        handler.postDelayed(this, 100);
 		    }
 		};
-		tick.run();
 	}
 	
 	@Override
@@ -52,4 +53,16 @@ public class CanvasView extends View {
     	preview.getMeasureSpec(measure_spec, widthSpec, heightSpec);
     	super.onMeasure(measure_spec[0], measure_spec[1]);
     }
+
+	void onPause() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onPause()");
+		handler.removeCallbacks(tick);
+	}
+
+	void onResume() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onResume()");
+		tick.run();
+	}
 }
