@@ -2583,24 +2583,26 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			audio_listener.start();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.getAudioNoiseControlSensitivityPreferenceKey(), "0");
-			if( sensitivity_pref.equals("3") ) {
-				audio_noise_sensitivity = 50;
-			}
-			else if( sensitivity_pref.equals("2") ) {
-				audio_noise_sensitivity = 75;
-			}
-			else if( sensitivity_pref.equals("1") ) {
-				audio_noise_sensitivity = 125;
-			}
-			else if( sensitivity_pref.equals("-1") ) {
-				audio_noise_sensitivity = 150;
-			}
-			else if( sensitivity_pref.equals("-2") ) {
-				audio_noise_sensitivity = 200;
-			}
-			else {
-				// default
-				audio_noise_sensitivity = 100;
+			switch(sensitivity_pref) {
+				case "3":
+					audio_noise_sensitivity = 50;
+					break;
+				case "2":
+					audio_noise_sensitivity = 75;
+					break;
+				case "1":
+					audio_noise_sensitivity = 125;
+					break;
+				case "-1":
+					audio_noise_sensitivity = 150;
+					break;
+				case "-2":
+					audio_noise_sensitivity = 200;
+					break;
+				default:
+					// default
+					audio_noise_sensitivity = 100;
+					break;
 			}
 			mainUI.audioControlStarted();
 		}

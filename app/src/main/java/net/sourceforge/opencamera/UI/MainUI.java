@@ -910,81 +910,77 @@ public class MainUI {
 					if(!audioManager.isWiredHeadsetOn()) break; // isWiredHeadsetOn() is deprecated, but comment says "Use only to check is a headset is connected or not."
 				}
 
-				if( volume_keys.equals("volume_take_photo") ) {
-					main_activity.takePicture();
-					return true;
-				}
-				else if( volume_keys.equals("volume_focus") ) {
-					if( keydown_volume_up && keydown_volume_down ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "take photo rather than focus, as both volume keys are down");
+				switch(volume_keys) {
+					case "volume_take_photo":
 						main_activity.takePicture();
-					}
-					else if( main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ) {
-						if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-							main_activity.changeFocusDistance(-1);
-						else
-							main_activity.changeFocusDistance(1);
-					}
-					else {
-						// important not to repeatedly request focus, even though main_activity.getPreview().requestAutoFocus() will cancel, as causes problem if key is held down (e.g., flash gets stuck on)
-						// also check DownTime vs EventTime to prevent repeated focusing whilst the key is held down
-						if( event.getDownTime() == event.getEventTime() && !main_activity.getPreview().isFocusWaiting() ) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "request focus due to volume key");
-							main_activity.getPreview().requestAutoFocus();
+						return true;
+					case "volume_focus":
+						if(keydown_volume_up && keydown_volume_down) {
+							if (MyDebug.LOG)
+								Log.d(TAG, "take photo rather than focus, as both volume keys are down");
+							main_activity.takePicture();
 						}
-					}
-					return true;
-				}
-				else if( volume_keys.equals("volume_zoom") ) {
-					if( keyCode == KeyEvent.KEYCODE_VOLUME_UP )
-						main_activity.zoomIn();
-					else
-						main_activity.zoomOut();
-					return true;
-				}
-				else if( volume_keys.equals("volume_exposure") ) {
-					if( main_activity.getPreview().getCameraController() != null ) {
-						String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
-						boolean manual_iso = !value.equals("auto");
-						if( keyCode == KeyEvent.KEYCODE_VOLUME_UP ) {
-							if( manual_iso ) {
-								if( main_activity.getPreview().supportsISORange() )
-									main_activity.changeISO(1);
-							}
+						else if (main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2")) {
+							if(keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+								main_activity.changeFocusDistance(-1);
 							else
-								main_activity.changeExposure(1);
+								main_activity.changeFocusDistance(1);
 						}
 						else {
-							if( manual_iso ) {
-								if( main_activity.getPreview().supportsISORange() )
-									main_activity.changeISO(-1);
+							// important not to repeatedly request focus, even though main_activity.getPreview().requestAutoFocus() will cancel, as causes problem if key is held down (e.g., flash gets stuck on)
+							// also check DownTime vs EventTime to prevent repeated focusing whilst the key is held down
+							if(event.getDownTime() == event.getEventTime() && !main_activity.getPreview().isFocusWaiting()) {
+								if(MyDebug.LOG)
+									Log.d(TAG, "request focus due to volume key");
+								main_activity.getPreview().requestAutoFocus();
 							}
-							else
-								main_activity.changeExposure(-1);
 						}
-					}
-					return true;
-				}
-				else if( volume_keys.equals("volume_auto_stabilise") ) {
-					if( main_activity.supportsAutoStabilise() ) {
-						boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
-						auto_stabilise = !auto_stabilise;
-						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), auto_stabilise);
-						editor.apply();
-						String message = main_activity.getResources().getString(R.string.preference_auto_stabilise) + ": " + main_activity.getResources().getString(auto_stabilise ? R.string.on : R.string.off);
-						main_activity.getPreview().showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
-					}
-					else {
-						main_activity.getPreview().showToast(main_activity.getChangedAutoStabiliseToastBoxer(), R.string.auto_stabilise_not_supported);
-					}
-					return true;
-				}
-				else if( volume_keys.equals("volume_really_nothing") ) {
-					// do nothing, but still return true so we don't change volume either
-					return true;
+						return true;
+					case "volume_zoom":
+						if(keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+							main_activity.zoomIn();
+						else
+							main_activity.zoomOut();
+						return true;
+					case "volume_exposure":
+						if(main_activity.getPreview().getCameraController() != null) {
+							String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
+							boolean manual_iso = !value.equals("auto");
+							if(keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+								if(manual_iso) {
+									if(main_activity.getPreview().supportsISORange())
+										main_activity.changeISO(1);
+								}
+								else
+									main_activity.changeExposure(1);
+							}
+							else {
+								if(manual_iso) {
+									if(main_activity.getPreview().supportsISORange())
+										main_activity.changeISO(-1);
+								}
+								else
+									main_activity.changeExposure(-1);
+							}
+						}
+						return true;
+					case "volume_auto_stabilise":
+						if(main_activity.supportsAutoStabilise()) {
+							boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
+							auto_stabilise = !auto_stabilise;
+							SharedPreferences.Editor editor = sharedPreferences.edit();
+							editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), auto_stabilise);
+							editor.apply();
+							String message = main_activity.getResources().getString(R.string.preference_auto_stabilise) + ": " + main_activity.getResources().getString(auto_stabilise ? R.string.on : R.string.off);
+							main_activity.getPreview().showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
+						}
+						else {
+							main_activity.getPreview().showToast(main_activity.getChangedAutoStabiliseToastBoxer(), R.string.auto_stabilise_not_supported);
+						}
+						return true;
+					case "volume_really_nothing":
+						// do nothing, but still return true so we don't change volume either
+						return true;
 				}
 				// else do nothing here, but still allow changing of volume (i.e., the default behaviour)
 				break;

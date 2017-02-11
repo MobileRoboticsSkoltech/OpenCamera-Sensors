@@ -38,12 +38,14 @@ public class DrawPreview {
 	private final MainActivity main_activity;
 	private final MyApplicationInterface applicationInterface;
 
+	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
 	private final RectF face_rect = new RectF();
 	private final RectF draw_rect = new RectF();
 	private final int [] gui_location = new int[2];
 	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	private final float stroke_width;
+	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
 
 	private float free_memory_gb = -1.0f;
 	private long last_free_memory_time;
@@ -260,17 +262,19 @@ public class DrawPreview {
 		}
 		else if( camera_controller != null && ( preference_grid.equals("preference_grid_golden_spiral_right") || preference_grid.equals("preference_grid_golden_spiral_left") || preference_grid.equals("preference_grid_golden_spiral_upside_down_right") || preference_grid.equals("preference_grid_golden_spiral_upside_down_left") ) ) {
 			canvas.save();
-			if( preference_grid.equals("preference_grid_golden_spiral_left") ) {
-				canvas.scale(-1.0f, 1.0f, canvas.getWidth()*0.5f, canvas.getHeight()*0.5f);
-			}
-			else if( preference_grid.equals("preference_grid_golden_spiral_right") ) {
-				// no transformation needed
-			}
-			else if( preference_grid.equals("preference_grid_golden_spiral_upside_down_left") ) {
-				canvas.rotate(180.0f, canvas.getWidth()*0.5f, canvas.getHeight()*0.5f);
-			}
-			else if( preference_grid.equals("preference_grid_golden_spiral_upside_down_right") ) {
-				canvas.scale(1.0f, -1.0f, canvas.getWidth()*0.5f, canvas.getHeight()*0.5f);
+			switch(preference_grid) {
+				case "preference_grid_golden_spiral_left":
+					canvas.scale(-1.0f, 1.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
+					break;
+				case "preference_grid_golden_spiral_right":
+					// no transformation needed
+					break;
+				case "preference_grid_golden_spiral_upside_down_left":
+					canvas.rotate(180.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
+					break;
+				case "preference_grid_golden_spiral_upside_down_right":
+					canvas.scale(1.0f, -1.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
+					break;
 			}
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
@@ -429,35 +433,37 @@ public class DrawPreview {
 				p.setStyle(Paint.Style.STROKE);
 				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 				double crop_ratio = -1.0;
-				if( preference_crop_guide.equals("crop_guide_1") ) {
-					crop_ratio = 1.0;
-				}
-				else if( preference_crop_guide.equals("crop_guide_1.25") ) {
-					crop_ratio = 1.25;
-				}
-				else if( preference_crop_guide.equals("crop_guide_1.33") ) {
-					crop_ratio = 1.33333333;
-				}
-				else if( preference_crop_guide.equals("crop_guide_1.4") ) {
-					crop_ratio = 1.4;
-				}
-				else if( preference_crop_guide.equals("crop_guide_1.5") ) {
-					crop_ratio = 1.5;
-				}
-				else if( preference_crop_guide.equals("crop_guide_1.78") ) {
-					crop_ratio = 1.77777778;
-				}
-				else if( preference_crop_guide.equals("crop_guide_1.85") ) {
-					crop_ratio = 1.85;
-				}
-				else if( preference_crop_guide.equals("crop_guide_2.33") ) {
-					crop_ratio = 2.33333333;
-				}
-				else if( preference_crop_guide.equals("crop_guide_2.35") ) {
-					crop_ratio = 2.35006120; // actually 1920:817
-				}
-				else if( preference_crop_guide.equals("crop_guide_2.4") ) {
-					crop_ratio = 2.4;
+				switch(preference_crop_guide) {
+					case "crop_guide_1":
+						crop_ratio = 1.0;
+						break;
+					case "crop_guide_1.25":
+						crop_ratio = 1.25;
+						break;
+					case "crop_guide_1.33":
+						crop_ratio = 1.33333333;
+						break;
+					case "crop_guide_1.4":
+						crop_ratio = 1.4;
+						break;
+					case "crop_guide_1.5":
+						crop_ratio = 1.5;
+						break;
+					case "crop_guide_1.78":
+						crop_ratio = 1.77777778;
+						break;
+					case "crop_guide_1.85":
+						crop_ratio = 1.85;
+						break;
+					case "crop_guide_2.33":
+						crop_ratio = 2.33333333;
+						break;
+					case "crop_guide_2.35":
+						crop_ratio = 2.35006120; // actually 1920:817
+						break;
+					case "crop_guide_2.4":
+						crop_ratio = 2.4;
+						break;
 				}
 				if( crop_ratio > 0.0 && Math.abs(preview.getTargetRatio() - crop_ratio) > 1.0e-5 ) {
 		    		/*if( MyDebug.LOG ) {
@@ -942,7 +948,7 @@ public class DrawPreview {
 	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
 	        // http://code.google.com/p/android/issues/detail?id=42104
 	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
-	        String current_time = DateFormat.getTimeInstance().format(c.getTime());
+	        String current_time = dateFormatTimeInstance.format(c.getTime());
 	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
 	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
 	    }

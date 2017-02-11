@@ -329,44 +329,47 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "flash_value: " + flash_value);
 				}
 				// prefer to set flash via the ae mode (otherwise get even worse results), except for torch which we can't
-		    	if( flash_value.equals("flash_off") ) {
-		    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-		    	}
-		    	else if( flash_value.equals("flash_auto") ) {
-					// note we set this even in fake flash mode (where we manually turn torch on and off to simulate flash) so we
-					// can read the FLASH_REQUIRED state to determine if flash is required
+				switch(flash_value) {
+					case "flash_off":
+						builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+						builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+						break;
+					case "flash_auto":
+						// note we set this even in fake flash mode (where we manually turn torch on and off to simulate flash) so we
+						// can read the FLASH_REQUIRED state to determine if flash is required
 		    		/*if( use_fake_precapture || CameraController2.this.want_expo_bracketing )
 			    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 		    		else*/
-		    			builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH);
-					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-		    	}
-		    	else if( flash_value.equals("flash_on") ) {
-					// see note above for "flash_auto" for why we set this even fake flash mode - arguably we don't need to know
-					// about FLASH_REQUIRED in flash_on mode, but we set it for consistency...
+						builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH);
+						builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+						break;
+					case "flash_on":
+						// see note above for "flash_auto" for why we set this even fake flash mode - arguably we don't need to know
+						// about FLASH_REQUIRED in flash_on mode, but we set it for consistency...
 		    		/*if( use_fake_precapture || CameraController2.this.want_expo_bracketing )
 			    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 		    		else*/
-		    			builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
-					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-		    	}
-		    	else if( flash_value.equals("flash_torch") ) {
-					builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-		    	}
-		    	else if( flash_value.equals("flash_red_eye") ) {
-		    		// not supported for expo bracketing
-		    		if( CameraController2.this.want_expo_bracketing )
-			    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-		    		else
-		    			builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE);
-					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-		    	}
-		    	else if( flash_value.equals("flash_frontscreen_auto") || flash_value.equals("flash_frontscreen_on") ) {
-		    		builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-					builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-		    	}
+						builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
+						builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+						break;
+					case "flash_torch":
+						builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+						builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+						break;
+					case "flash_red_eye":
+						// not supported for expo bracketing
+						if (CameraController2.this.want_expo_bracketing)
+							builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+						else
+							builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE);
+						builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+						break;
+					case "flash_frontscreen_auto":
+					case "flash_frontscreen_on":
+						builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+						builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+						break;
+				}
 			}
 			return true;
 		}
@@ -1239,58 +1242,60 @@ public class CameraController2 extends CameraController {
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
 			int selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
-			if( supported_values.selected_value.equals("action") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_ACTION;
-			}
-			else if( supported_values.selected_value.equals("barcode") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_BARCODE;
-			}
-			else if( supported_values.selected_value.equals("beach") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_BEACH;
-			}
-			else if( supported_values.selected_value.equals("candlelight") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_CANDLELIGHT;
-			}
-			else if( supported_values.selected_value.equals("auto") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
-			}
-			else if( supported_values.selected_value.equals("fireworks") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_FIREWORKS;
-			}
-			// "hdr" no longer available in Camera2
-			else if( supported_values.selected_value.equals("landscape") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_LANDSCAPE;
-			}
-			else if( supported_values.selected_value.equals("night") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_NIGHT;
-			}
-			else if( supported_values.selected_value.equals("night-portrait") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_NIGHT_PORTRAIT;
-			}
-			else if( supported_values.selected_value.equals("party") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_PARTY;
-			}
-			else if( supported_values.selected_value.equals("portrait") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_PORTRAIT;
-			}
-			else if( supported_values.selected_value.equals("snow") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_SNOW;
-			}
-			else if( supported_values.selected_value.equals("sports") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_SPORTS;
-			}
-			else if( supported_values.selected_value.equals("steadyphoto") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_STEADYPHOTO;
-			}
-			else if( supported_values.selected_value.equals("sunset") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_SUNSET;
-			}
-			else if( supported_values.selected_value.equals("theatre") ) {
-				selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_THEATRE;
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+			switch(supported_values.selected_value) {
+				case "action":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_ACTION;
+					break;
+				case "barcode":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_BARCODE;
+					break;
+				case "beach":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_BEACH;
+					break;
+				case "candlelight":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_CANDLELIGHT;
+					break;
+				case "auto":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
+					break;
+				case "fireworks":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_FIREWORKS;
+					break;
+				// "hdr" no longer available in Camera2
+				case "landscape":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_LANDSCAPE;
+					break;
+				case "night":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_NIGHT;
+					break;
+				case "night-portrait":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_NIGHT_PORTRAIT;
+					break;
+				case "party":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_PARTY;
+					break;
+				case "portrait":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_PORTRAIT;
+					break;
+				case "snow":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_SNOW;
+					break;
+				case "sports":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_SPORTS;
+					break;
+				case "steadyphoto":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_STEADYPHOTO;
+					break;
+				case "sunset":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_SUNSET;
+					break;
+				case "theatre":
+					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_THEATRE;
+					break;
+				default:
+					if (MyDebug.LOG)
+						Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+					break;
 			}
 
 			camera_settings.scene_mode = selected_value2;
@@ -1375,36 +1380,38 @@ public class CameraController2 extends CameraController {
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
 			int selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
-			if( supported_values.selected_value.equals("aqua") ) {
-				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_AQUA;
-			}
-			else if( supported_values.selected_value.equals("blackboard") ) {
-				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_BLACKBOARD;
-			}
-			else if( supported_values.selected_value.equals("mono") ) {
-				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_MONO;
-			}
-			else if( supported_values.selected_value.equals("negative") ) {
-				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_NEGATIVE;
-			}
-			else if( supported_values.selected_value.equals("none") ) {
-				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
-			}
-			else if( supported_values.selected_value.equals("posterize") ) {
-				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_POSTERIZE;
-			}
-			else if( supported_values.selected_value.equals("sepia") ) {
-				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_SEPIA;
-			}
-			else if( supported_values.selected_value.equals("solarize") ) {
-				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_SOLARIZE;
-			}
-			else if( supported_values.selected_value.equals("whiteboard") ) {
-				selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_WHITEBOARD;
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+			switch(supported_values.selected_value) {
+				case "aqua":
+					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_AQUA;
+					break;
+				case "blackboard":
+					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_BLACKBOARD;
+					break;
+				case "mono":
+					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_MONO;
+					break;
+				case "negative":
+					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_NEGATIVE;
+					break;
+				case "none":
+					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
+					break;
+				case "posterize":
+					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_POSTERIZE;
+					break;
+				case "sepia":
+					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_SEPIA;
+					break;
+				case "solarize":
+					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_SOLARIZE;
+					break;
+				case "whiteboard":
+					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_WHITEBOARD;
+					break;
+				default:
+					if (MyDebug.LOG)
+						Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+					break;
 			}
 
 			camera_settings.color_effect = selected_value2;
@@ -1486,33 +1493,35 @@ public class CameraController2 extends CameraController {
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
 			int selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
-			if( supported_values.selected_value.equals("auto") ) {
-				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
-			}
-			else if( supported_values.selected_value.equals("cloudy-daylight") ) {
-				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_CLOUDY_DAYLIGHT;
-			}
-			else if( supported_values.selected_value.equals("daylight") ) {
-				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_DAYLIGHT;
-			}
-			else if( supported_values.selected_value.equals("fluorescent") ) {
-				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_FLUORESCENT;
-			}
-			else if( supported_values.selected_value.equals("incandescent") ) {
-				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_INCANDESCENT;
-			}
-			else if( supported_values.selected_value.equals("shade") ) {
-				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_SHADE;
-			}
-			else if( supported_values.selected_value.equals("twilight") ) {
-				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_TWILIGHT;
-			}
-			else if( supported_values.selected_value.equals("warm-fluorescent") ) {
-				selected_value2 = CameraMetadata.CONTROL_AWB_MODE_WARM_FLUORESCENT;
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+			switch(supported_values.selected_value) {
+				case "auto":
+					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
+					break;
+				case "cloudy-daylight":
+					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_CLOUDY_DAYLIGHT;
+					break;
+				case "daylight":
+					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_DAYLIGHT;
+					break;
+				case "fluorescent":
+					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_FLUORESCENT;
+					break;
+				case "incandescent":
+					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_INCANDESCENT;
+					break;
+				case "shade":
+					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_SHADE;
+					break;
+				case "twilight":
+					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_TWILIGHT;
+					break;
+				case "warm-fluorescent":
+					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_WARM_FLUORESCENT;
+					break;
+				default:
+					if (MyDebug.LOG)
+						Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+					break;
 			}
 
 			camera_settings.white_balance = selected_value2;
@@ -2137,34 +2146,36 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setFocusValue: " + focus_value);
 		int focus_mode;
-    	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_locked") ) {
-    		focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
-    	}
-    	else if( focus_value.equals("focus_mode_infinity") ) {
-    		focus_mode = CaptureRequest.CONTROL_AF_MODE_OFF;
-        	camera_settings.focus_distance = 0.0f;
-    	}
-    	else if( focus_value.equals("focus_mode_manual2") ) {
-    		focus_mode = CaptureRequest.CONTROL_AF_MODE_OFF;
-        	camera_settings.focus_distance = camera_settings.focus_distance_manual;
-    	}
-    	else if( focus_value.equals("focus_mode_macro") ) {
-    		focus_mode = CaptureRequest.CONTROL_AF_MODE_MACRO;
-    	}
-    	else if( focus_value.equals("focus_mode_edof") ) {
-    		focus_mode = CaptureRequest.CONTROL_AF_MODE_EDOF;
-    	}
-    	else if( focus_value.equals("focus_mode_continuous_picture") ) {
-    		focus_mode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
-    	}
-    	else if( focus_value.equals("focus_mode_continuous_video") ) {
-    		focus_mode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
-    	}
-    	else {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
-    		return;
-    	}
+		switch(focus_value) {
+			case "focus_mode_auto":
+			case "focus_mode_locked":
+				focus_mode = CaptureRequest.CONTROL_AF_MODE_AUTO;
+				break;
+			case "focus_mode_infinity":
+				focus_mode = CaptureRequest.CONTROL_AF_MODE_OFF;
+				camera_settings.focus_distance = 0.0f;
+				break;
+			case "focus_mode_manual2":
+				focus_mode = CaptureRequest.CONTROL_AF_MODE_OFF;
+				camera_settings.focus_distance = camera_settings.focus_distance_manual;
+				break;
+			case "focus_mode_macro":
+				focus_mode = CaptureRequest.CONTROL_AF_MODE_MACRO;
+				break;
+			case "focus_mode_edof":
+				focus_mode = CaptureRequest.CONTROL_AF_MODE_EDOF;
+				break;
+			case "focus_mode_continuous_picture":
+				focus_mode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
+				break;
+			case "focus_mode_continuous_video":
+				focus_mode = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
+				break;
+			default:
+				if (MyDebug.LOG)
+					Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
+				return;
+		}
     	camera_settings.has_af_mode = true;
     	camera_settings.af_mode = focus_mode;
     	camera_settings.setFocusMode(previewBuilder);
@@ -3532,28 +3543,32 @@ public class CameraController2 extends CameraController {
 	private void runFakePrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "runFakePrecapture");
-		if( camera_settings.flash_value.equals("flash_auto") || camera_settings.flash_value.equals("flash_on") ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "turn on torch");
-			previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
-			previewBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-			test_fake_flash_precapture++;
-			fake_precapture_torch_performed = true;
-		}
-		else if( camera_settings.flash_value.equals("flash_frontscreen_auto") || camera_settings.flash_value.equals("flash_frontscreen_on") ) {
-			if( jpeg_cb != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "request screen turn on for frontscreen flash");
-				jpeg_cb.onFrontScreenTurnOn();
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.e(TAG, "can't request screen turn on for frontscreen flash, as no jpeg_cb");
-			}
-		}
-		else {
-			if( MyDebug.LOG )
-				Log.e(TAG, "runFakePrecapture called with unexpected flash value: " + camera_settings.flash_value);
+		switch(camera_settings.flash_value) {
+			case "flash_auto":
+			case "flash_on":
+				if(MyDebug.LOG)
+					Log.d(TAG, "turn on torch");
+				previewBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+				previewBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+				test_fake_flash_precapture++;
+				fake_precapture_torch_performed = true;
+				break;
+			case "flash_frontscreen_auto":
+			case "flash_frontscreen_on":
+				if(jpeg_cb != null) {
+					if(MyDebug.LOG)
+						Log.d(TAG, "request screen turn on for frontscreen flash");
+					jpeg_cb.onFrontScreenTurnOn();
+				}
+				else {
+					if (MyDebug.LOG)
+						Log.e(TAG, "can't request screen turn on for frontscreen flash, as no jpeg_cb");
+				}
+				break;
+			default:
+				if(MyDebug.LOG)
+					Log.e(TAG, "runFakePrecapture called with unexpected flash value: " + camera_settings.flash_value);
+				break;
 		}
     	state = STATE_WAITING_FAKE_PRECAPTURE_START;
     	precapture_state_change_time_ms = System.currentTimeMillis();
@@ -3603,19 +3618,21 @@ public class CameraController2 extends CameraController {
 			fake_precapture_use_flash_time_ms = time_now;
 			return fake_precapture_use_flash;
 		}
-		if( camera_settings.flash_value.equals("flash_auto") ) {
-			fake_precapture_use_flash = is_flash_required;
-		}
-		else if( camera_settings.flash_value.equals("flash_frontscreen_auto") ) {
-			// iso_threshold fine-tuned for Nexus 6 - front camera ISO never goes above 805, but a threshold of 700 is too low
-			int iso_threshold = camera_settings.flash_value.equals("flash_frontscreen_auto") ? 750 : 1000;
-			fake_precapture_use_flash = capture_result_has_iso && capture_result_iso >= iso_threshold;
-			if( MyDebug.LOG )
-				Log.d(TAG, "    ISO was: " + capture_result_iso);
-		}
-		else {
-			// shouldn't really be calling this function if not flash auto...
-			fake_precapture_use_flash = false;
+		switch(camera_settings.flash_value) {
+			case "flash_auto":
+				fake_precapture_use_flash = is_flash_required;
+				break;
+			case "flash_frontscreen_auto":
+				// iso_threshold fine-tuned for Nexus 6 - front camera ISO never goes above 805, but a threshold of 700 is too low
+				int iso_threshold = camera_settings.flash_value.equals("flash_frontscreen_auto") ? 750 : 1000;
+				fake_precapture_use_flash = capture_result_has_iso && capture_result_iso >= iso_threshold;
+				if(MyDebug.LOG)
+					Log.d(TAG, "    ISO was: " + capture_result_iso);
+				break;
+			default:
+				// shouldn't really be calling this function if not flash auto...
+				fake_precapture_use_flash = false;
+				break;
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "fake_precapture_use_flash: " + fake_precapture_use_flash);
