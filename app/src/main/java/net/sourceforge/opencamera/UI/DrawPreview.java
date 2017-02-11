@@ -38,12 +38,14 @@ public class DrawPreview {
 	private final MainActivity main_activity;
 	private final MyApplicationInterface applicationInterface;
 
+	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
 	private final RectF face_rect = new RectF();
 	private final RectF draw_rect = new RectF();
 	private final int [] gui_location = new int[2];
 	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	private final float stroke_width;
+	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
 
 	private float free_memory_gb = -1.0f;
 	private long last_free_memory_time;
@@ -942,7 +944,7 @@ public class DrawPreview {
 	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
 	        // http://code.google.com/p/android/issues/detail?id=42104
 	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
-	        String current_time = DateFormat.getTimeInstance().format(c.getTime());
+	        String current_time = dateFormatTimeInstance.format(c.getTime());
 	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
 	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
 	    }
