@@ -24,10 +24,12 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 
 	private final Preview preview;
 	private final int [] measure_spec = new int[2];
-	
+	private final Handler handler = new Handler();
+	private Runnable tick;
+
 	@SuppressWarnings("deprecation")
 	public
-	MySurfaceView(Context context, Preview preview) {
+	MySurfaceView(Context context, final Preview preview) {
 		super(context);
 		this.preview = preview;
 		if( MyDebug.LOG ) {
@@ -40,16 +42,15 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
         // deprecated setting, but required on Android versions prior to 3.0
 		getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // deprecated
 
-		final Handler handler = new Handler();
-		Runnable tick = new Runnable() {
+		tick = new Runnable() {
 			public void run() {
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "invalidate()");*/
+				preview.test_ticker_called = true;
 				invalidate();
 				handler.postDelayed(this, 100);
 			}
 		};
-		tick.run();
 	}
 	
 	@Override
@@ -98,5 +99,19 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setting transforms not supported for MySurfaceView");
 		throw new RuntimeException();
+	}
+
+	@Override
+	public void onPause() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onPause()");
+		handler.removeCallbacks(tick);
+	}
+
+	@Override
+	public void onResume() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onResume()");
+		tick.run();
 	}
 }

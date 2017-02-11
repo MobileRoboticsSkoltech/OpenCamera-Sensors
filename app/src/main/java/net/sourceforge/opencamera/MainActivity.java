@@ -124,6 +124,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private final ToastBoxer audio_control_toast = new ToastBoxer();
 	private boolean block_startup_toast = false; // used when returning from Settings/Popup - if we're displaying a toast anyway, don't want to display the info toast too
 
+	private final int manual_n = 1000; // the number of values on the seekbar used for manual focus distance, ISO or exposure speed
+
 	// for testing; must be volatile for test project reading the state
 	public boolean is_test; // whether called from OpenCamera.test testing
 	public volatile Bitmap gallery_bitmap;
@@ -943,17 +945,17 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     private static double seekbarScalingInverse(double scaling) {
     	return Math.log(99.0*scaling + 1.0) / Math.log(100.0);
     }
-    
+
 	private void setProgressSeekbarScaled(SeekBar seekBar, double min_value, double max_value, double value) {
-		seekBar.setMax(100);
+		seekBar.setMax(manual_n);
 		double scaling = (value - min_value)/(max_value - min_value);
 		double frac = MainActivity.seekbarScalingInverse(scaling);
-		int percent = (int)(frac*100.0 + 0.5); // add 0.5 for rounding
-		if( percent < 0 )
-			percent = 0;
-		else if( percent > 100 )
-			percent = 100;
-		seekBar.setProgress(percent);
+		int new_value = (int)(frac*manual_n + 0.5); // add 0.5 for rounding
+		if( new_value < 0 )
+			new_value = 0;
+		else if( new_value > manual_n )
+			new_value = manual_n;
+		seekBar.setProgress(new_value);
 	}
     
     public void clickedExposureLock(View view) {
@@ -2117,7 +2119,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		    focusSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-					double frac = progress/100.0;
+					double frac = progress/(double)manual_n;
 					double scaling = MainActivity.seekbarScaling(frac);
 					float focus_distance = (float)(scaling * preview.getMinimumFocusDistance());
 					preview.setFocusDistance(focus_distance);
@@ -2148,7 +2150,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "iso seekbar onProgressChanged: " + progress);
-						double frac = progress/100.0;
+						double frac = progress/(double)manual_n;
 						if( MyDebug.LOG )
 							Log.d(TAG, "exposure_time frac: " + frac);
 						double scaling = MainActivity.seekbarScaling(frac);
@@ -2179,7 +2181,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure_time seekbar onProgressChanged: " + progress);
-							double frac = progress/100.0;
+							double frac = progress/(double)manual_n;
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure_time frac: " + frac);
 							//long exposure_time = min_exposure_time + (long)(frac * (max_exposure_time - min_exposure_time));

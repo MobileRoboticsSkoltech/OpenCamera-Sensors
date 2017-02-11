@@ -537,7 +537,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(camera_api);
                         {
                         	String last_video_error = sharedPreferences.getString("last_video_error", "");
-                        	if( last_video_error != null && last_video_error.length() > 0 ) {
+                        	if( last_video_error.length() > 0 ) {
                                 about_string.append("\nLast video error: ");
                                 about_string.append(last_video_error);
                         	}

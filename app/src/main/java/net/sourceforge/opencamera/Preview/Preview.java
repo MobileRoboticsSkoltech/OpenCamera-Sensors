@@ -258,6 +258,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public volatile int count_cameraContinuousFocusMoving;
 	public volatile boolean test_fail_open_camera;
 	public volatile boolean test_video_failure;
+	public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
 
 	public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
 		if( MyDebug.LOG ) {
@@ -5149,6 +5150,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
 		this.app_is_paused = false;
+		cameraSurface.onResume();
+		if( canvasView != null )
+			canvasView.onResume();
 		this.openCamera();
     }
 
@@ -5157,6 +5161,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "onPause");
 		this.app_is_paused = true;
 		this.closeCamera();
+		cameraSurface.onPause();
+		if( canvasView != null )
+			canvasView.onPause();
     }
     
     /*void updateUIPlacement() {

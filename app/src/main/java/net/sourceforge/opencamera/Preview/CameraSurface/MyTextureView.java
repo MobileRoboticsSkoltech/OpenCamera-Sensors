@@ -79,4 +79,12 @@ public class MyTextureView extends TextureView implements CameraSurface {
 	public void setTransform(Matrix matrix) {
 		super.setTransform(matrix);
 	}
+
+	@Override
+	public void onPause() {
+	}
+
+	@Override
+	public void onResume() {
+	}
 }

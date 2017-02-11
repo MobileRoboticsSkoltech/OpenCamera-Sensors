@@ -136,7 +136,7 @@ class AudioListener {
 	 * @return Whether the audio recorder was created successfully.
      */
 	boolean status() {
-		boolean ok = false;
+		boolean ok;
 		synchronized(AudioListener.this) {
 			ok = ar != null;
 		}

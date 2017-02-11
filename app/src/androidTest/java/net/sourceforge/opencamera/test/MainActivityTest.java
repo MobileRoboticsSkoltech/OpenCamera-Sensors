@@ -280,6 +280,48 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		switchToFocusValue("focus_mode_continuous_picture");
 	}
 
+	/* Ensures that shut down properly when pausing.
+	 */
+	public void testPause() throws InterruptedException {
+		Log.d(TAG, "testPause");
+
+		setToDefault();
+		Thread.sleep(1000);
+
+		// checker ticker is running okay
+		assertTrue(mPreview.test_ticker_called);
+		mPreview.test_ticker_called = false;
+		Thread.sleep(300);
+		assertTrue(mPreview.test_ticker_called);
+
+		mActivity.runOnUiThread(new Runnable() {
+			public void run() {
+				Log.d(TAG, "pause...");
+				getInstrumentation().callActivityOnPause(mActivity);
+			}
+		});
+		this.getInstrumentation().waitForIdleSync();
+
+		// ensure ticker is turned off after certain time
+		Thread.sleep(3000);
+		mPreview.test_ticker_called = false;
+		Thread.sleep(1000);
+		assertFalse(mPreview.test_ticker_called);
+
+		// resume, and assume we've started the ticker again
+		mActivity.runOnUiThread(new Runnable() {
+			public void run() {
+				Log.d(TAG, "resume...");
+				getInstrumentation().callActivityOnResume(mActivity);
+			}
+		});
+		Thread.sleep(3000);
+		assertTrue(mPreview.test_ticker_called);
+		mPreview.test_ticker_called = false;
+		Thread.sleep(300);
+		assertTrue(mPreview.test_ticker_called);
+	}
+
 	/* Ensures that we only start the camera preview once when starting up.
 	 */
 	public void testStartCameraPreviewCount() {
@@ -965,10 +1007,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
-		int saved_count = mPreview.count_cameraAutoFocus;
+		int saved_count;
 		Log.d(TAG, "0 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
 		/*
 		// autofocus shouldn't be immediately, but after a delay
+		saved_count = mPreview.count_cameraAutoFocus;
 		Thread.sleep(1000);
 		Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
 		assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
