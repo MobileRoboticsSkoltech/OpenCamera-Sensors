@@ -345,7 +345,7 @@
 	<string name="camera_error">Resna napaka fotoaparata</string>
 	
 	<string name="preference_camera2_fast_burst">Omogoči hitro zaporedje HDR/kor. sam. osvetlitve</string>
-    <string name="preference_camera2_fast_burst_summary">Omogoča hitrejše slikanje fotografij s HDR-om/kor. sam. osvetlitve. Onemogočite, če ima vaša naprava pri slikanju fotografij z načinoma HDR/kor. sam. osvetlitve težave (fotoaparat preneha delovati ali so fotografije načina kor. sam. osvetlitve v napačnem zaporedju).</string>
+    <string name="preference_camera2_fast_burst_summary">Omogoča hitrejše slikanje fotografij s HDR-om/kor. sam. osvetlitve. Onemogočite, če ima vaša naprava pri slikanju fotografij z načinoma HDR/kor. sam. osvetlitve težave.</string>
 	
 	<string name="camera">Fotoaparat</string>
 	<string name="record_video">Posnemi videoposnetek</string>
