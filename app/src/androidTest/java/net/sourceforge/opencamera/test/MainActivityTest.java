@@ -1387,10 +1387,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(!mPreview.isOnTimer());
 
 		// wait until photos taken
-		// wait 15s, and test that we've taken the photos by then
+		// wait, and test that we've taken the photos by then
 		while( mPreview.count_cameraTakePicture < 3 ) {
 		}
-		Thread.sleep(1500); // allow pictures to save
+		Thread.sleep(2000); // allow pictures to save
 	    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 		Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 		assertTrue(mPreview.count_cameraTakePicture==3);
