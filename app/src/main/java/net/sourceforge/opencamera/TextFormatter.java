@@ -28,14 +28,20 @@ public class TextFormatter {
     public static String getDateString(String preference_stamp_dateformat, Date date) {
         String date_stamp = "";
         if( !preference_stamp_dateformat.equals("preference_stamp_dateformat_none") ) {
-            if( preference_stamp_dateformat.equals("preference_stamp_dateformat_yyyymmdd") )
-                date_stamp = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(date);
-            else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_ddmmyyyy") )
-                date_stamp = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date);
-            else if( preference_stamp_dateformat.equals("preference_stamp_dateformat_mmddyyyy") )
-                date_stamp = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(date);
-            else // default
-                date_stamp = DateFormat.getDateInstance().format(date);
+            switch(preference_stamp_dateformat) {
+                case "preference_stamp_dateformat_yyyymmdd":
+                    date_stamp = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(date);
+                    break;
+                case "preference_stamp_dateformat_ddmmyyyy":
+                    date_stamp = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date);
+                    break;
+                case "preference_stamp_dateformat_mmddyyyy":
+                    date_stamp = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(date);
+                    break;
+                default:
+                    date_stamp = DateFormat.getDateInstance().format(date);
+                    break;
+            }
         }
         return date_stamp;
     }
@@ -46,12 +52,17 @@ public class TextFormatter {
     public static String getTimeString(String preference_stamp_timeformat, Date date) {
         String time_stamp = "";
         if( !preference_stamp_timeformat.equals("preference_stamp_timeformat_none") ) {
-            if( preference_stamp_timeformat.equals("preference_stamp_timeformat_12hour") )
-                time_stamp = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault()).format(date);
-            else if( preference_stamp_timeformat.equals("preference_stamp_timeformat_24hour") )
-                time_stamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(date);
-            else // default
-                time_stamp = DateFormat.getTimeInstance().format(date);
+            switch(preference_stamp_timeformat) {
+                case "preference_stamp_timeformat_12hour":
+                    time_stamp = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault()).format(date);
+                    break;
+                case "preference_stamp_timeformat_24hour":
+                    time_stamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(date);
+                    break;
+                default:
+                    time_stamp = DateFormat.getTimeInstance().format(date);
+                    break;
+            }
         }
         return time_stamp;
     }

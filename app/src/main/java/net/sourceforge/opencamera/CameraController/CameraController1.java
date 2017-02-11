@@ -751,31 +751,34 @@ public class CameraController1 extends CameraController {
 	@Override
 	public void setFocusValue(String focus_value) {
 		Camera.Parameters parameters = this.getParameters();
-    	if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_locked") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-    	}
-    	else if( focus_value.equals("focus_mode_infinity") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
-    	}
-    	else if( focus_value.equals("focus_mode_macro") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
-    	}
-    	else if( focus_value.equals("focus_mode_fixed") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_FIXED);
-    	}
-    	else if( focus_value.equals("focus_mode_edof") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_EDOF);
-    	}
-    	else if( focus_value.equals("focus_mode_continuous_picture") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-    	}
-    	else if( focus_value.equals("focus_mode_continuous_video") ) {
-    		parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-    	}
-    	else {
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
-    	}
+		switch(focus_value) {
+			case "focus_mode_auto":
+			case "focus_mode_locked":
+				parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+				break;
+			case "focus_mode_infinity":
+				parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
+				break;
+			case "focus_mode_macro":
+				parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
+				break;
+			case "focus_mode_fixed":
+				parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_FIXED);
+				break;
+			case "focus_mode_edof":
+				parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_EDOF);
+				break;
+			case "focus_mode_continuous_picture":
+				parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+				break;
+			case "focus_mode_continuous_video":
+				parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+				break;
+			default:
+				if (MyDebug.LOG)
+					Log.d(TAG, "setFocusValue() received unknown focus value " + focus_value);
+				break;
+		}
     	setCameraParameters(parameters);
 	}
 	
@@ -834,24 +837,26 @@ public class CameraController1 extends CameraController {
 
 	private String convertFlashValueToMode(String flash_value) {
 		String flash_mode = "";
-    	if( flash_value.equals("flash_off") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_OFF;
-    	}
-    	else if( flash_value.equals("flash_auto") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_AUTO;
-    	}
-    	else if( flash_value.equals("flash_on") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_ON;
-    	}
-    	else if( flash_value.equals("flash_torch") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_TORCH;
-    	}
-    	else if( flash_value.equals("flash_red_eye") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_RED_EYE;
-    	}
-    	else if( flash_value.equals("flash_frontscreen_on") ) {
-    		flash_mode = Camera.Parameters.FLASH_MODE_OFF;
-    	}
+		switch(flash_value) {
+			case "flash_off":
+				flash_mode = Camera.Parameters.FLASH_MODE_OFF;
+				break;
+			case "flash_auto":
+				flash_mode = Camera.Parameters.FLASH_MODE_AUTO;
+				break;
+			case "flash_on":
+				flash_mode = Camera.Parameters.FLASH_MODE_ON;
+				break;
+			case "flash_torch":
+				flash_mode = Camera.Parameters.FLASH_MODE_TORCH;
+				break;
+			case "flash_red_eye":
+				flash_mode = Camera.Parameters.FLASH_MODE_RED_EYE;
+				break;
+			case "flash_frontscreen_on":
+				flash_mode = Camera.Parameters.FLASH_MODE_OFF;
+				break;
+		}
     	return flash_mode;
 	}
 	
