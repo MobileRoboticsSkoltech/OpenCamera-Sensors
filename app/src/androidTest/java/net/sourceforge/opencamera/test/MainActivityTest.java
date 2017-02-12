@@ -66,7 +66,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
 		SharedPreferences.Editor editor = settings.edit();
 		editor.clear();
-		//editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
+		editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
 		editor.apply();
 		
 	    Intent intent = new Intent();
@@ -1387,10 +1387,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(!mPreview.isOnTimer());
 
 		// wait until photos taken
-		// wait 15s, and test that we've taken the photos by then
+		// wait, and test that we've taken the photos by then
 		while( mPreview.count_cameraTakePicture < 3 ) {
 		}
-		Thread.sleep(1500); // allow pictures to save
+		Thread.sleep(2000); // allow pictures to save
 	    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 		Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 		assertTrue(mPreview.count_cameraTakePicture==3);
@@ -1987,9 +1987,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
 
-	    assertTrue( isoSeekBar.getMax() == 100 );
+		final int manual_n = 1000; // should match MainActivity.manual_n
+	    assertTrue( isoSeekBar.getMax() == manual_n );
 	    if( mPreview.supportsExposureTime() )
-		    assertTrue( exposureTimeSeekBar.getMax() == 100 );
+		    assertTrue( exposureTimeSeekBar.getMax() == manual_n );
 
 		Log.d(TAG, "change ISO to min");
 	    isoSeekBar.setProgress(0);
@@ -2005,14 +2006,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 
 		Log.d(TAG, "change ISO to max");
-	    isoSeekBar.setProgress(100);
+	    isoSeekBar.setProgress(manual_n);
 		this.getInstrumentation().waitForIdleSync();
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 
 		// n.b., currently don't test this on devices with long shutter times (e.g., OnePlus 3T) until this is properly supported
 	    if( mPreview.supportsExposureTime() && mPreview.getMaximumExposureTime() < 1000000000 ) {
 			Log.d(TAG, "change exposure time to max");
-		    exposureTimeSeekBar.setProgress(100);
+		    exposureTimeSeekBar.setProgress(manual_n);
 			this.getInstrumentation().waitForIdleSync();
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
@@ -2710,7 +2711,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.getCameraController().test_fake_flash_photo == 3 );
 
 		// this should match CameraController2.do_af_trigger_for_continuous
-		boolean do_af_for_continuous = true;
+		//final boolean do_af_for_continuous = true;
+		// actually for fake flash, we no longer do af trigger for continuous
+		final boolean do_af_for_continuous = false;
 
 		// now test it all again with continuous focus mode
 		switchToFocusValue("focus_mode_continuous_picture");

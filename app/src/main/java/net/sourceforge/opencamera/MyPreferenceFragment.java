@@ -499,7 +499,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(version);
                         about_string.append("\nCode: ");
                         about_string.append(version_code);
-                        about_string.append("\n(c) 2013-2016 Mark Harman");
+                        about_string.append("\n(c) 2013-2017 Mark Harman");
                         about_string.append("\nReleased under the GPL v3 or later");
                         about_string.append("\nPackage: ");
                         about_string.append(MyPreferenceFragment.this.getActivity().getPackageName());
