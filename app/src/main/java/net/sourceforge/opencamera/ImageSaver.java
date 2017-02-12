@@ -1667,13 +1667,14 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "current datetime: " + exif.getAttribute(ExifInterface.TAG_DATETIME));
 		}
 		// Hack: Problem on Camera2 API (at least on Nexus 6) that if geotagging is enabled, then the resultant image has incorrect Exif TAG_GPS_DATESTAMP and TAG_GPS_TIMESTAMP (GPSDateStamp) set (date tends to be around 2038 - possibly a driver bug of casting long to int?).
-		// This causes problems when viewing with Gallery apps, as they show this incorrect date.
+		// This causes problems when viewing with Gallery apps (e.g., Gallery ICS; Google Photos seems fine however), as they show this incorrect date.
 		// Update: Before v1.34 this was "fixed" by calling: exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, Long.toString(System.currentTimeMillis()));
 		// However this stopped working on or before 20161006. This wasn't a change in Open Camera (whilst this was working fine in
 		// 1.33 when I released it, the bug had come back when I retested that version) and I'm not sure how this ever worked, since
 		// TAG_GPS_TIMESTAMP is meant to be a string such "21:45:23", and not the number of ms since 1970 - possibly it wasn't really
 		// working , and was simply invalidating it such that Gallery then fell back to looking elsewhere for the datetime?
 		// So now hopefully fixed properly...
+		// Note, this problem also occurs on OnePlus 3T and Gallery ICS, if we don't have this function called
 		SimpleDateFormat date_fmt = new SimpleDateFormat("yyyy:MM:dd", Locale.US);
 		date_fmt.setTimeZone(TimeZone.getTimeZone("UTC")); // needs to be UTC time
 		String datestamp = date_fmt.format(current_date);
