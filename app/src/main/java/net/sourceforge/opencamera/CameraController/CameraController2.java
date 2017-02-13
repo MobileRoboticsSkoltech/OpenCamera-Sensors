@@ -58,6 +58,8 @@ public class CameraController2 extends CameraController {
 	private CameraCharacteristics characteristics;
 	private List<Integer> zoom_ratios;
 	private int current_zoom_value;
+	private boolean supports_face_detect_mode_simple;
+	private boolean supports_face_detect_mode_full;
 	private final ErrorCallback preview_error_cb;
 	private final ErrorCallback camera_error_cb;
 	private CameraCaptureSession captureSession;
@@ -966,19 +968,34 @@ public class CameraController2 extends CameraController {
 
 		int [] face_modes = characteristics.get(CameraCharacteristics.STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES);
 		camera_features.supports_face_detection = false;
+		supports_face_detect_mode_simple = false;
+		supports_face_detect_mode_full = false;
 		for(int face_mode : face_modes) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "face detection mode: " + face_mode);
-			// Although we currently only make use of the "SIMPLE" features, some devices (e.g., Nexus 6) support FULL and not SIMPLE.
-			// We don't support SIMPLE yet, as I don't have any devices to test this.
-			if( face_mode == CameraCharacteristics.STATISTICS_FACE_DETECT_MODE_FULL ) {
+			// we currently only make use of the "SIMPLE" features, documented as:
+			// "Return face rectangle and confidence values only."
+			// note that devices that support STATISTICS_FACE_DETECT_MODE_FULL (e.g., Nexus 6) don't return
+			// STATISTICS_FACE_DETECT_MODE_SIMPLE in the list, so we have check for either
+			if( face_mode == CameraCharacteristics.STATISTICS_FACE_DETECT_MODE_SIMPLE ) {
 				camera_features.supports_face_detection = true;
+				supports_face_detect_mode_simple = true;
+				if( MyDebug.LOG )
+					Log.d(TAG, "supports simple face detection mode");
+			}
+			else if( face_mode == CameraCharacteristics.STATISTICS_FACE_DETECT_MODE_FULL ) {
+				camera_features.supports_face_detection = true;
+				supports_face_detect_mode_full = true;
+				if( MyDebug.LOG )
+					Log.d(TAG, "supports full face detection mode");
 			}
 		}
 		if( camera_features.supports_face_detection ) {
 			int face_count = characteristics.get(CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT);
 			if( face_count <= 0 ) {
 				camera_features.supports_face_detection = false;
+				supports_face_detect_mode_simple = false;
+				supports_face_detect_mode_full = false;
 			}
 		}
 
@@ -2952,14 +2969,33 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public boolean startFaceDetection() {
-    	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL ) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startFaceDetection");
+    	if( previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "face detection already enabled");
     		return false;
     	}
-    	camera_settings.has_face_detect_mode = true;
-    	camera_settings.face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL;
+		if( supports_face_detect_mode_full ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "use full face detection");
+			camera_settings.has_face_detect_mode = true;
+			camera_settings.face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL;
+		}
+		else if( supports_face_detect_mode_simple ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "use simple face detection");
+			camera_settings.has_face_detect_mode = true;
+			camera_settings.face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_SIMPLE;
+		}
+		else {
+			Log.e(TAG, "startFaceDetection() called but face detection not available");
+			return false;
+		}
     	camera_settings.setFaceDetectMode(previewBuilder);
     	try {
     		setRepeatingRequest();
+			return false;
     	}
 		catch(CameraAccessException e) {
 			if( MyDebug.LOG ) {
@@ -4426,7 +4462,7 @@ public class CameraController2 extends CameraController {
 				capture_result_has_focus_distance = false;
 			}*/
 
-			if( face_detection_listener != null && previewBuilder != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) == CaptureRequest.STATISTICS_FACE_DETECT_MODE_FULL ) {
+			if( face_detection_listener != null && previewBuilder != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != null && previewBuilder.get(CaptureRequest.STATISTICS_FACE_DETECT_MODE) != CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF ) {
 				Rect sensor_rect = getViewableRect();
 				android.hardware.camera2.params.Face [] camera_faces = result.get(CaptureResult.STATISTICS_FACES);
 				if( camera_faces != null ) {

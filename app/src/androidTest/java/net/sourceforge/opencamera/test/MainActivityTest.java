@@ -66,7 +66,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
 		SharedPreferences.Editor editor = settings.edit();
 		editor.clear();
-		editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
+		//editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
 		editor.apply();
 		
 	    Intent intent = new Intent();
@@ -1021,8 +1021,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
 	    assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
 	    boolean face_detection_started = false;
+		// check face detection already started
 	    if( !mPreview.getCameraController().startFaceDetection() ) {
-	    	// should throw RuntimeException if face detection already started
 	    	face_detection_started = true;
 		}
 	    assertTrue(face_detection_started);
@@ -1040,8 +1040,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
 		    face_detection_started = false;
+			// check face detection already started
 		    if( !mPreview.getCameraController().startFaceDetection() ) {
-		    	// should throw RuntimeException if face detection already started
 		    	face_detection_started = true;
 			}
 		    assertTrue(face_detection_started);
