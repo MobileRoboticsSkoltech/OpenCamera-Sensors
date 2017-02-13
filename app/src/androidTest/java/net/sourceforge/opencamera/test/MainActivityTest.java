@@ -7278,7 +7278,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int [] offsets_x = mActivity.getApplicationInterface().getHDRProcessor().offsets_x;
 		int [] offsets_y = mActivity.getApplicationInterface().getHDRProcessor().offsets_y;
 		for(int i=0;i<3;i++) {
-			Log.d(TAG, "offsets " + i + " ( " + offsets_x[i] + " , " + offsets_y[i] + " ), expected ( " + exp_offsets_x[i] + " , " + exp_offsets_y[i] + ")");
+			Log.d(TAG, "offsets " + i + " ( " + offsets_x[i] + " , " + offsets_y[i] + " ), expected ( " + exp_offsets_x[i] + " , " + exp_offsets_y[i] + " )");
 			assertTrue( offsets_x[i] == exp_offsets_x[i] );
 			assertTrue( offsets_y[i] == exp_offsets_y[i] );
 		}
@@ -7391,8 +7391,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR5_output.jpg", false);
 
+		// Nexus 6:
+		//int [] exp_offsets_x = {0, 0, 0};
+		//int [] exp_offsets_y = {-1, 0, 0};
+		// OnePlus 3T:
 		int [] exp_offsets_x = {0, 0, 0};
-		int [] exp_offsets_y = {-1, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -7655,8 +7659,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR17_output.jpg", true);
 
-		int [] exp_offsets_x = {0, 0, -3};
-		int [] exp_offsets_y = {0, 0, -4};
+		// Nexus 6:
+		//int [] exp_offsets_x = {0, 0, -3};
+		//int [] exp_offsets_y = {0, 0, -4};
+		// OnePlus 3T:
+		int [] exp_offsets_x = {0, 0, -2};
+		int [] exp_offsets_y = {0, 0, -3};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
@@ -7765,7 +7773,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDR22_output.jpg", true);
 
-		int [] exp_offsets_x = {1, 0, -5};
+		// Nexus 6:
+		//int [] exp_offsets_x = {1, 0, -5};
+		//int [] exp_offsets_y = {1, 0, -6};
+		// OnePlus 3T:
+		int [] exp_offsets_x = {0, 0, -5};
 		int [] exp_offsets_y = {1, 0, -6};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
