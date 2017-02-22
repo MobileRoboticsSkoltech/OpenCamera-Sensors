@@ -372,7 +372,7 @@
     <string name="preference_video_subtitle_summary">Создавать файл субтитров (.SRT) с датой и временем записи, а также информацией GPS при включенных данных геолокации/направления</string>
 
     <string name="duration_unlimited">Без ограничений</string>
-    <string name="duration_3s">3 секунд</string>
+    <string name="duration_3s">3 секунды</string>
     <string name="duration_5s">5 секунд</string>
     <string name="duration_10s">10 секунд</string>
     <string name="duration_15s">15 секунд</string>
@@ -395,4 +395,16 @@
     <string name="duration_30m">30 минут</string>
     <string name="duration_45m">45 минут</string>
     <string name="duration_1h">1 час</string>
+
+    <string name="preference_show_take_photo">Показать кнопку съемки</string>
+    <string name="preference_show_take_photo_summary">Отображение кнопки фото- и видеосъемки. Полезно, если на вашем устройстве уже есть аппаратная кнопка спуска затвора.</string>
+
+    <string name="video_pause">Запись видео приостановлена</string>
+    <string name="video_resume">Запись видео продолжена</string>
+    <string name="pause_video">Приостановить запись видео</string>
+    <string name="resume_video">Приостановить запись видео</string>
+
+    <string name="capturing">Захват…</string>
+
+    <string name="audio_listener_failed">Не удалось инициализировать прослушивание аудио</string>
 </resources>
