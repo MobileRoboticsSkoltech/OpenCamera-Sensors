@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Open Camera</string>
+    <string name="action_settings">Beállítások</string>
+    <string name="action_popup">Felugró beállítások</string>
+    <string name="intro_text">Érintéssel állíthatsz élességet, és a kék kamera gombbal tudsz fényképezni. További segítséget a beállítások online súgójában találsz. Az Open Camera teljesen ingyenes. Ha tetszik az alkalmazás, kérlek fontold meg az adományozói verzió megvásárlását :) (lásd a hivatkozást a Beállításokban és az online súgóban). \ N \ nAdatvédelmi feltételek: A helymeghatározás a fényképek geokódolásához szükséges, de alapértelmezésben le van tiltva. Ha engedélyezed, a kép készítésének helye bele lesz mentve a fájlokba (és semmi másra nem lesz használva).</string>
+    <string name="intro_ok">OK (Ez az üzenet nem jelenik meg újra)</string>
+    
+    <string name="answer_yes">Igen</string>
+    <string name="answer_no">Nem</string>
+
+    <string name="on">Be</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
+    <string name="off">Ki</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->
+    
+    <string name="choose_save_location">Válaszd ki a mentés helyét:</string>
+    <string name="clear_folder_history">Könyvtárelőzmények törlése</string>
+    <string name="clear_folder_history_question">Törlöd a könyvtárelőzményeket?</string>
+    <string name="choose_another_folder">Válassz másik könyvtárat</string>
+    <string name="changed_save_location">Mentés helye módosult erre:</string>
+    <string name="stopped_recording_video">Videofelvétel megállítva</string>
+    <string name="repeats_to_go">ismétlések az indításhoz</string> <!--  intentionally starts lower case -->
+    <string name="failed_to_reconnect_camera">Nem sikerült újrakapcsolódni a kamerához</string>
+    <string name="video_may_be_corrupted">Hiba történt, a videofájl sérülhetett</string>
+    <string name="not_supported">nem támogatott az eszközödön</string> <!--  intentionally starts lower case -->
+    <string name="video_error_unknown">Ismeretlen hiba, a videó leállítva</string>
+    <string name="video_error_server_died">A kiszolgáló leállt, a videó megállítva</string>
+    <string name="video_max_duration">A videó elérte a maximális hosszt</string>
+    <string name="video_max_filesize">A videó elérte a maximális fájlméretet</string>
+    <string name="exposure_compensation">Expozíció kompenzáció</string>
+    <string name="fps">FPS</string>
+    <string name="focus_distance">Fókusztávolság</string>
+    <string name="infinite">Végtelen</string>
+    <string name="front_camera">Előlapi kamera</string>
+    <string name="back_camera">Hátlapi kamera</string>
+    <string name="photo">Fotó</string>
+    <string name="video">Videó</string>
+    <string name="exposure_locked">Expozíció zárolva</string>
+    <string name="exposure_unlocked">Expozíció feloldva</string>
+    <string name="cancelled_timer">Időzítő megszakítva</string>
+    <string name="cancelled_burst_mode">Sorozatfelvétel megszakítva</string>
+    <string name="started_timer">Időzítő elindult</string>
+    <string name="failed_to_save_video">Nem sikerült menteni a videofájlt </string>
+    <string name="failed_to_record_video">Nem sikerült videofelvételt készíteni</string>
+    <string name="started_recording_video">Videofelvétel elindult</string>
+    <string name="sorry">Sajnálom</string>
+    <string name="failed_to_save_photo">Nem sikerült menteni a fotót</string>
+    <string name="failed_to_save_photo_raw">Nem sikerült menteni a RAW fotót</string>
+    <string name="failed_to_auto_stabilise">Nem sikerült az auto-stabilizálás</string>
+    <string name="failed_to_start_camera_preview">Nem sikerült elindítani a kamera előnézetet</string>
+    <string name="taking_photo">Fotózás</string>
+    <string name="failed_to_take_picture">Nem sikerült fényképet készíteni</string>
+    <string name="location_not_available">A GPS helymeghatározás nem érhető el</string>
+    <string name="photo_deleted">Fotó törölve</string>
+    <string name="no_gallery_app">Nincs elérhető galéria alkalmazás</string>
+    <string name="screen_is_locked">Képernyő zárolva\nA feloldáshoz csúsztasd az ujjad a képernyőn</string>
+    <string name="unlocked">Feloldva</string>
+    <string name="auto_stabilise_not_supported">Sajnálom, az auto-stabilizálás\nnem támogatott ezen az eszközön</string>
+    <string name="audio_disabled">Hang letiltva</string>
+    <string name="max_duration">Max időtartam</string>
+    <string name="color_effect">Színhatás</string>
+    <string name="scene_mode">Fotó üzemmód</string>
+    <string name="white_balance">Fehéregyensúly</string>
+    
+    <string name="angle">Szög</string>
+    <string name="direction">Irány</string>
+    <string name="failed_to_open_camera_1">NEM SIKERÜLT MEGNYITNI A KAMERÁT.</string>
+    <string name="failed_to_open_camera_2">LEHET, HOGY A KAMERÁT</string>
+    <string name="failed_to_open_camera_3">EGY MÁSIK ALKALMAZÁS HASZNÁLJA?</string>
+    <string name="iso">ISO</string>
+    <string name="zoom">Zoom</string>
+    <string name="free_memory">Szabad</string>
+    <string name="screen_lock_message_1">[Zárolva:</string>
+    <string name="screen_lock_message_2">Csúsztasd a feloldáshoz]</string>
+    
+    <string name="failed_to_stamp">Nem sikerült információkat írni a fotóba</string>
+    <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
+    
+    <string name="preference_category_camera_effects">Kamera hatások</string>
+    <string name="preference_auto_stabilise">Auto-stabilizálás</string>
+    <string name="preference_auto_stabilise_summary">A képek elforgatásra kerülnek, így automatikusan jó irányba fognak állni (csak fotók) (a fotózás kicsit lassabb, és kevés memóriájú eszközön sikertelen is lehet)</string>
+    <string name="preference_color_effect">Színhatás alkalmazása</string>
+    <string name="preference_color_effect_summary">Alkalmazza a kiválasztott színhatást a fotón</string>
+    <string name="preference_scene_mode">Alkalmaz egy motívumprogramot</string>
+    <string name="preference_scene_mode_summary">A különböző jelenetekhez optimalizálja a fotót</string>
+    <string name="preference_white_balance">Fehéregyensúly beállítása</string>
+    <string name="preference_white_balance_summary">Válassz egy beállítást a fehéregyensúly állításához</string>
+    <string name="preference_iso">ISO-érzékenység beállítása</string>
+    <string name="preference_iso_summary">A magasabb érték nagyobb fényérzékenységet jelent (nem működik néhány eszközön)</string>
+    <string name="preference_exposure">Expozíció kompenzáció beállítása</string>
+    <string name="preference_exposure_summary">Az alapértelmezett kompenzációhoz állítsd 0-ra</string>
+    <string name="preference_lock_orientation">Fotó/videó tájolás zárolása</string>
+    <string name="preference_lock_orientation_summary">Ha be van állítva, a készülék tájolása figyelmen kívül lesz hagyva, és a fotó/videó a megadott tájolás szerint fog állni</string>
+    <string name="preference_face_detection">Arcfelismerés</string>
+    <string name="preference_face_detection_summary">Arcfelismerés használata fókuszterületek helyett</string>
+
+    <string name="preference_category_camera_controls">Kamera kezelés</string>
+    <string name="preference_timer">Időzítő</string>
+    <string name="preference_timer_summary">Késleltetett képkészítés beállítása</string>
+    <string name="preference_timer_beep">Időzítő hangjelzés</string>
+    <string name="preference_timer_beep_summary">Csipogjon az időzítő visszaszámlálása és sorozatfelvétel készítés alatt</string>
+    <string name="preference_timer_speak">Hangos visszaszámlálás</string>
+    <string name="preference_timer_speak_summary">Az időzítő és sorozatfelvétel visszaszámlálás késleltetésének bemondása (60 másodperctől)</string>
+    <string name="preference_burst_mode">Sorozatfelvétel</string>
+    <string name="preference_burst_mode_summary">Több kép készítése egymás után</string>
+    <string name="preference_burst_interval">Sorozatfelvétel intervallum</string>
+    <string name="preference_burst_interval_summary">Késleltetés a sorozatfelvétel fotói között</string>
+    <string name="preference_screen_camera_controls_more">További kamera beállítások…</string>
+    <string name="preference_touch_capture">Exponálás érintéssel</string>
+    <string name="preference_touch_capture_summary">Fénykép készítése az előnézet érintésével, vagy dupla koppintással</string>
+    <string name="preference_pause_preview">Fotózás utáni szünet</string>
+    <string name="preference_pause_preview_summary">Kép kimerevítése a fotó elkészítése után, a fotó megosztásának és törlésének lehetőségével</string>
+    <string name="preference_shutter_sound">Zárhang</string>
+    <string name="preference_shutter_sound_summary">Hang lejátszása fotózáskor</string>
+    <string name="preference_volume_keys">Hangerő gombok</string>
+    <string name="preference_volume_keys_summary">Mi történjen a hangerőgombok megnyomásakor?</string>
+    <string name="preference_audio_control">Hangvezérlési lehetőségek</string>
+    <string name="preference_audio_control_summary">Fotó, vagy videó készítése zajra, vagy hangjelzésre (pl. \"csíz\"). Ha engedélyezve van, használd a képernyőn megjelenő mikrofon gombot a figyelés indításához és leállításához.</string>
+    <string name="preference_audio_noise_control_sensitivity">Hangvezérlés érzékenysége</string>
+    <string name="preference_audio_noise_control_sensitivity_summary">Hangvezérlés zajszintérzékenysége</string>
+    <string name="preference_save_location">Mentés helye</string>
+    <string name="preference_save_location_summary">Fotók, videofájlok mentésének könyvtára</string>
+    <string name="preference_using_saf">Storage Access Framework használata</string>
+    <string name="preference_using_saf_summary">Használja-e az Android 5 Storage Access Frameworkjét a fotók és videók mentéséhez</string>
+    <string name="preference_save_photo_prefix">Fotó fájlnév előtag</string>
+    <string name="preference_save_photo_prefix_summary">A fényképek mentésekor használt fájlnév előtag</string>
+    <string name="preference_save_video_prefix">Videó fájlnév előtag</string>
+    <string name="preference_save_video_prefix_summary">A videók mentésekor használt fájlnév előtag</string>
+    <string name="preference_save_zulu_time">Fájlnév időformátum</string>
+    <string name="preference_save_zulu_time_summary">A fotók és videók fájlnevében a helyi idő, vagy az UTC (egyezményes koordinált világidő) jelenjen meg</string>
+    <string name="preference_show_when_locked">Kamera megjelenítése zárolt állapotban</string>
+    <string name="preference_show_when_locked_summary">Ha engedélyezve van, az Open Camera látható marad a zárképernyő alatt is (de fel kell oldanod a beállítások, geléria, stb. eléréséhez)</string>
+    <string name="preference_startup_focus">Autofókusz indításkor</string>
+    <string name="preference_startup_focus_summary">Automatikus fókuszálás, amikor az Open Camera elindul. Ha gondok vannak az induláskor bekapcsoló vakuval, tiltsd ezt le</string>
+    <string name="preference_lock_video">Képernyő zárolása videofelvétel alatt</string>
+    <string name="preference_lock_video_summary">Videó készítése alatt a felhasználói felület zárolva lesz, megakadályozva a felvétel véletlen leállítását. Feloldáshoz csúsztad az ujjad a képernyőn. Megjegyzendő, hogy a felvétel le fog állni, ha az alkalmazás háttérbe kerül vagy a képernyő kikapcsol.</string>
+    <string name="preference_rotate_preview">Előnézet forgatása</string>
+    <string name="preference_rotate_preview_summary">Az előnézet forgatásának lehetősége (nem befolyásolja az elkészített fotót, videót)</string>
+    <string name="preference_screen_gui">Kezelőfelület…</string>
+    <string name="preference_preview_size">Előnézet mérete</string>
+    <string name="preference_preview_size_summary">Hogyan kerüljön kiválasztásra az előnézet mérete</string>
+    <string name="preference_ui_placement">Kezelőfelület elhelyezés</string>
+    <string name="preference_ui_placement_summary">Bal- vagy jobbkezes használathoz megfelelő felület</string>
+    <string name="preference_immersive_mode">Kiterjesztett üzemmód</string>
+    <string name="preference_immersive_mode_summary">\"Kiterjesztett módú\" üzemmód beállításai</string>
+    <string name="preference_show_zoom">Zoom megjelenítése</string>
+    <string name="preference_show_zoom_summary">Az aktuális zoomszint megjelenítése a képernyőn (zoomolt állapotban)</string>
+    <string name="preference_show_zoom_controls">Zoom -/+ gombok</string>
+    <string name="preference_show_zoom_controls_summary">A zoom +/- vezérlőgombjainak megjelenítése</string>
+    <string name="preference_show_zoom_slider_controls">Zoomcsúszka megjelenítése</string>
+    <string name="preference_show_zoom_slider_controls_summary">Zoomszint állító csúszka megjelenítése</string>
+    <string name="preference_show_iso">ISO megjelenítése</string>
+    <string name="preference_show_iso_summary">Megjeleníti az aktuális ISO szintet. Automatikus vaku módban egy vaku szimbólum fogja jelezni, ha villanni fog. (Camera2 API szükséges hozzá)</string>
+    <string name="preference_free_memory">Szabad tárhely megjelenítése</string>
+    <string name="preference_free_memory_summary">Megjeleníti az eszköz tárhelyének szabad kapacitását</string>
+    <string name="preference_show_angle">Szög megjelenítése</string>
+    <string name="preference_show_angle_summary">Megjeleníti a képernyőn az eszköz dőlésszögét</string>
+    <string name="preference_show_angle_line">Vízszintező</string>
+    <string name="preference_show_angle_line_summary">Megjeleníti a vízszint vonalát</string>
+    <string name="preference_angle_highlight_color">Szög/magasság kiemelés színe</string>
+    <string name="preference_angle_highlight_color_summary">A kiemelés színe, amikor a kamera közel vízszintesen áll</string>
+    <string name="preference_show_geo_direction">Iránytű szög megjelenítése</string>
+    <string name="preference_show_geo_direction_summary">Az eszköz iránytű szerinti irányának megjelenítése a képernyőn</string>
+    <string name="preference_show_time">Idő megjelenítése</string>
+    <string name="preference_show_time_summary">Az aktuális idő megjelenítése a képernyőn</string>
+    <string name="preference_show_battery">Akkumulátor megjelenítése</string>
+    <string name="preference_show_battery_summary">Az aktuális akkumulátortöltöttség megjelenítése a képernyőn</string>
+    <string name="preference_grid">Rács megjelenítése</string>
+    <string name="preference_grid_summary">Egy rács megjelenítése a különféle választhatóak közül</string>
+    <string name="grid">Rács</string> <!-- short form of Show a grid -->
+    <string name="preference_crop_guide">Vágási segédvonal megjelenítése</string>
+    <string name="preference_crop_guide_summary">A vágási segéd egy négyzetet jelenít meg, mutatva, hogy nézne ki a megadott oldalarány – hasznos, ha a fotót/videót később más oldalarányúra tervezed vágni. WYSIWYG fényképmód, vagy videózás mód szükséges hozzá.</string>
+    <string name="preference_show_toasts">\"toast\" üzenetek megjelenítése</string>
+    <string name="preference_show_toasts_summary">Megjelenjenek-e felugró \"toast\" üzenetek</string>
+    <string name="preference_thumbnail_animation">Bélyegkép animáció megjelenítése</string>
+    <string name="preference_thumbnail_animation_summary">Mozgó bélyegkép animáció megjelenítése exponálás után</string>
+    <string name="preference_take_photo_border">Keret megjelenítése exponáláskor</string>
+    <string name="preference_take_photo_border_summary">Keret megjelenítése a kijelzőn, jelezve hogy fotó készül</string>
+    <string name="preference_keep_display_on">Kijelző bekapcsolva tartása</string>
+    <string name="preference_keep_display_on_summary">Ha engedélyezve van, akkor a képernyő nem kapcsol ki, míg az Open Camera főképernyője aktív</string>
+    <string name="preference_max_brightness">Maximális fényerő kényszerítése</string>
+    <string name="preference_max_brightness_summary">A kijelző mindenképpen maximális fényerővel üzemel, az eszköz alapértelmezése helyett</string>
+    
+    <string name="preference_category_camera_quality">Fotó és videó beállítások</string>
+    <string name="preference_screen_photo_settings">Fotó beállítások…</string>
+    <string name="preference_screen_video_settings">Videó beállítások…</string>
+    <string name="preference_screen_location_settings">Helymeghatározás beállítások…</string>
+    <string name="preference_resolution">Kamera felbontása</string>
+    <string name="preference_resolution_summary">Beállítja a kamera által készített képek felbontását</string>
+    <string name="preference_quality">Képminőség</string>
+    <string name="preference_quality_summary">Beállítja, hogy a képek milyen JPEG minőséggel legyenek elmentve (ajánlott érték 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
+    <string name="preference_raw">RAW</string>
+    <string name="preference_raw_summary">Mentsen-e RAW (DNG) formátumban</string>
+    <string name="preference_location">Helyadatok eltárolása (geotaggelés)</string>
+    <string name="preference_location_summary">Eltárolja a GPS helyadatot a fotóban/videóban</string>
+    <string name="preference_gps_direction">Irány eltárolása</string>
+    <string name="preference_gps_direction_summary">A GPS irány elmentése a fotókba</string>
+    <string name="preference_require_location">Helyadatok megkövetelése</string>
+    <string name="preference_require_location_summary">Ha a helymeghatározás engedélyezve van, csak akkor enged fotózni/videózni, ha a helyadat rendelkezésre áll</string>
+    <string name="preference_stamp">Fotók feliratozása</string>
+    <string name="preference_stamp_summary">A fotók feliratozása dátum- és időbélyeggel, valamint GPS információval, ha a hely/irány adat elérhető</string>
+    <string name="preference_stamp_dateformat">Dátumbélyeg formátum</string>
+    <string name="preference_stamp_dateformat_summary">Add meg a dátumbélyeg formátumát (ha engedélyezve van)</string>
+    <string name="preference_stamp_timeformat">Időbélyeg formátum</string>
+    <string name="preference_stamp_timeformat_summary">Add meg az időbélyeg formátumát (ha engedélyezve van)</string>
+    <string name="preference_stamp_gpsformat">GPS bélyeg formátum</string>
+    <string name="preference_stamp_gpsformat_summary">Add meg a GPS-bélyegző formátumát (ha engedélyezve van)</string>
+    <string name="preference_textstamp">Egyéni szöveg</string>
+    <string name="preference_textstamp_summary">Képek feliratozása egyéni szöveggel</string>
+    <string name="preference_stamp_fontsize">Betűméret</string>
+    <string name="preference_stamp_fontsize_summary">A feliratozás szövegének betűmérete</string>
+    <string name="preference_stamp_font_color">Betűszín</string>
+    <string name="preference_stamp_font_color_summary">A feliratozás szövegének betűszíne</string>
+    <string name="preference_stamp_style">Szövegstílus</string>
+    <string name="preference_stamp_style_summary">A feliratozás szövegének stílusa</string>
+    <string name="preference_background_photo_saving">Háttérszál használata</string>
+    <string name="preference_background_photo_saving_summary">A fotók mentése háttérben futó programszálon (gyorsabb műveletek)</string>
+    <string name="video_quality">Videó felbontása</string>
+    <string name="video_quality_summary">Videók felbontásának beállítása</string>
+    <string name="preference_force_video_4k">4K UHD videó kényszerítése (csak egyes eszközökön működik)</string>
+    <string name="preference_force_video_4k_summary">3840x2160 felbontású videofelvétel engedélyezése hátlapi kamerával - ez a lehetőség egy trükk, ami lehetővé teheti a 4K videózást olyan 4K-s eszközökön amelyek nem kínálják fel ezt a lehetőséget a nem gyári kamera alkalmazásoknak. Nem biztos, hogy működik, használat előtt próbáld ki.</string>
+    <string name="preference_video_stabilization">Videó stabilizáció engedélyezése</string>
+    <string name="preference_video_stabilization_summary">A videó stabilizálása csökkenti a kamera mozgásából származó remegést az előnézeten és a felvett videón.</string>
+    <string name="preference_video_bitrate">Videó bitráta (nagyjából)</string>
+    <string name="preference_video_bitrate_summary">A videók hozzávetőleges bitrátájának beállítása (a magasabb jobb minőséget jelent, de több tárhelyet foglal; ha a bitráta nem támogatott, sikertelen lehet a felvétel)</string>
+    <string name="preference_video_fps">Videó képkockaszám (nagyjából)</string>
+    <string name="preference_video_fps_summary">A videók képkockasebességének (FPS) beállítása (hozzávetőleges, az elérése nem garantálható és ha a képkockaszám nem támogatott, sikertelen lehet a felvétel)</string>
+    <string name="preference_video_max_duration">Videó maximális időtartama</string>
+    <string name="preference_video_max_duration_summary">A videofelvétel leáll a megadott idő után</string>
+    <string name="preference_video_restart">Újraindítás a maximális időtartam után</string>
+    <string name="preference_video_restart_summary">Ha a videó elérte a maximális időtartamot (ha be lett állítva) és megállt, újraindítja a felvételt a megadott számú alkalommal</string>
+    <string name="preference_video_max_filesize">Videó maximális fáljmérete</string>
+    <string name="preference_video_max_filesize_summary">A felvétel leáll és/vagy újraindul (lásd a beállítást alább), ha (nagyjából) elérte a maximális fájlméretet. Megjegyezzük, hogy az Androidos eszközökön korlátozott a videofájlok mérete (általában 2GB vagy 4GB körül), de ez a beállítás lehetővé teszi egyedi érték megadását</string>
+    <string name="preference_video_restart_max_filesize">Újraindítás a maximális méret után</string>
+    <string name="preference_video_restart_max_filesize_summary">Újrainduljon-e a videofelvétel, miután elérte a maximális fájlméretet (az eszközön alapértelmezett, vagy a beállított)</string>
+    <string name="preference_record_audio">Hangrögzítés</string>
+    <string name="preference_record_audio_summary">Hangrögzítés videofelvétel alatt</string>
+    <string name="preference_record_audio_src">Hangforrás</string>
+    <string name="preference_record_audio_src_summary">Hangrögzítésre használandó mikrofon</string>
+    <string name="preference_record_audio_channels">Hangcsatornák</string>
+    <string name="preference_record_audio_channels_summary">Monó vagy sztereó hangfelvétel készítése (sztereó felvételre nem minden eszköz képes)</string>
+    <string name="preference_video_flash">Villogás felvétel alatt</string>
+    <string name="preference_video_flash_summary">Ha engedélyezve van, a vaku ki-be kapcsol a felvétel alatt (ezzel jelezhető, hogy egy kamera épp rögzít a távolban)</string>
+    
+    <string name="preference_category_online">Egyéb</string>
+    <string name="preference_online_help">Online súgó</string>
+    <string name="preference_online_help_summary">Open Camera weboldal megnyitása böngészőben</string>
+    <string name="preference_donate">Támogasd a fejlesztést adománnyal</string>
+    <string name="preference_donate_summary">A tetszik az alkalmazás, fontold meg adomány küldését a fejlesztés támogatására. Ezt a „támogatói alkalmazás” megvásárlásával teheted meg – kattints ide, hogy megnyisd a támogató alkalmazás oldalát. Köszönjük!</string>
+    <string name="preference_use_camera2">Camera2 API használata</string>
+    <string name="preference_use_camera2_summary">Lehetővé teszi az Android 5-ös Camera2 API használatát - extra funkciókat kínál, de nem minden eszközön működik megfelelően (újraindulást eredményez)</string>
+    <string name="preference_about">Névjegy</string>
+    <string name="preference_about_summary">App és hibakeresési információk</string>
+    <string name="preference_reset">Beállítások visszaállítása</string>
+    <string name="preference_reset_summary">Az Open Camera összes beállítását alaphelyzetbe állítja</string>
+    <string name="preference_reset_question">Biztosan vissza szeretnéd állítani az Open Camera összes beállítását az alapértelmezettre?</string>
+
+    <string name="about_available">Elérhető</string>
+    <string name="about_not_available">Nem elérhető</string>
+    <string name="about_copy_to_clipboard">Vágólapra másolás</string>
+    
+    <string name="take_photo">Fotózás</string>
+    <string name="gallery">Galéria</string>
+    <string name="exposure">Expozíció</string>
+    <string name="exposure_lock">Expozíciórögzítés</string>
+    <string name="focus_mode">Fókuszmód</string>
+    <string name="flash_mode">Vaku üzemmód</string>
+    <string name="switch_to_front_camera">Váltás előlapi kamerára</string>
+    <string name="switch_to_back_camera">Váltás hátlapi kamerára</string>
+    <string name="switch_to_video">Váltás videó módba</string>
+    <string name="switch_to_photo">Váltás fotó módba</string>
+    <string name="trash">Utolsó kép törlése</string>
+    <string name="share">Fénykép megosztása</string>
+    
+    <string name="parent_folder">Szülő könyvtár</string>
+    <string name="new_folder">Új könyvtár</string>
+    <string name="cant_write_folder">Nem lehet írni ebbe a könyvtárba</string>
+    <string name="cant_access_folder">Nem lehet elérni ezt a könyvtárat</string>
+    <string name="enter_new_folder">Add meg az új könyvtár nevét</string>
+    <string name="failed_create_folder">Nem sikerült létrehozni a könyvtárat</string>
+    <string name="folder_exists">A könyvtár már létezik</string>
+
+    <string name="saf_select_save_location">Válaszd ki a mentés helyét</string>
+    <string name="saf_cancelled">Storage Access Framework visszavonva</string>
+    
+    <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
+    <string name="permission_record_audio_not_available">Mikrofon engedély nem érhető el</string>
+    <string name="permission_location_not_available">Hely engedély nem érhető el</string>
+
+    <string name="start_video">Videofelvétel indítása</string>
+    <string name="stop_video">Videofelvétel leállítása</string>
+
+    <string name="max_filesize">Maximális fájlméret</string>
+    <string name="mb_abbreviation">MB</string> <!-- symbol short for megabytes -->
+    <string name="gb_abbreviation">GB</string> <!-- symbol short for gigabytes -->
+
+    <string name="audio_control_start">Hangfigyelés indítása</string>
+    <string name="audio_control_stop">Hangfigyelés leállítása</string>
+    <string name="speech_recognizer_started">Mondd, hogy „csíííz”</string>
+    <string name="audio_listener_started">Csinálj hangos zajt</string>
+
+    <string name="auto_stabilise_info">Az auto-stabilizálás automatikusan elforgatja a fotókat, hogy szintben legyenek.\n\nNe felejtsd el, hogy a képek így kicsit kisebb felbontásúak lesznek (a forgatás és vágás miatt).</string>
+    <string name="raw_info">A DNG fájlok a kamera teljes, tömörítetlen és feldolgozatlan adatait tartalmazzák.\n\nA legtöbb galéria alkalmazás nem ismeri a DNG formátumot, érdemes helyette specializált alkalmazást használni, mint például a Snapseed vagy a Lightroom.\n\nMegjegyzendő, hogy az utófeldolgozó beállítások, mint a „Fotók feliratozása” és „Auto-stabilizálás” csak a JPEG képekre kerülnek rá, a DNG-re nem.\n\nA DNG fájlok sokkal több helyet foglalnak; egy fájlkezelő alkalmazás hasznos lehet a másolásukhoz, törlésükhöz.\n\nDNG fájlok csak Normál és DRO fotómódban mentődnek.</string>
+    <string name="hdr_info">A HDR mód változó fényerejű felvételek készítésénél hasznos. Úgy működik, hogy több felvételt kész különböző expozíciós idővel, és ezeket összekombinálva hozza létre a végleges képet.\n\nMegjegyzendő, hogy a HDR nem alkalmas gyorsan mozgó tárgyak fotózására, mert kevésbé pontos színvisszaadást eredményez.\n\nA HDR fotók készítése lassabb.</string>
+
+    <string name="dont_show_again">Ne jelenjen meg újra</string>
+
+    <string name="photo_mode">Fotómód</string>
+    <string name="photo_mode_standard">Normál</string>
+    <string name="photo_mode_hdr">HDR</string>
+    <string name="photo_mode_expo_bracketing">Expozíció {}</string>
+    <string name="photo_mode_expo_bracketing_full">Expozíció sorozat</string>
+    <string name="preference_category_stamp">Fotó feliratozás</string>
+    <string name="preference_hdr_save_expo">Az összes kép mentése HDR módban</string>
+    <string name="preference_hdr_save_expo_summary">Ha engedélyezve van, HDR mód használatakor a három eltérő expozíciójú alapkép is el lesz mentve a végleges HDR fotó mellett. Megjegyzendő, hogy a mentés így lassabb lesz, főleg ha a „Fotók feliratozása” vagy az „Auto-stabilizálás” is be van kapcsolva.</string>
+
+    <string name="no_permission">ENGEDÉLY NEM ELÉRHETŐ</string>
+    <string name="permission_rationale_title">Engedély szükséges</string>
+    <string name="permission_rationale_camera">A kamera eléréséhez „kamera engedély” szükséges</string>
+    <string name="permission_rationale_storage">A fotók mentéséhez írási/olvasási engedély szükséges</string>
+    <string name="permission_rationale_record_audio">Hangos videofelvétel készítéséhez mikrofon engedély szükséges</string>
+    <string name="permission_rationale_location">Geotaggeléshez helymeghatározás engedély szükséges</string>
+
+    <string name="preference_category_photo_debugging">Hibakeresési lehetőségek</string>
+    <string name="preference_category_video_debugging">Hibakeresési lehetőségek</string>
+    <string name="preference_camera2_fake_flash">Alternatív vakukezelés használata</string>
+    <string name="preference_camera2_fake_flash_summary">Engedélyezd, ha a készülék vakuja hibásan működik Camera2 API-val</string>
+
+    <string name="preference_expo_bracketing_n_images">Expozíciósorozat</string>
+    <string name="preference_expo_bracketing_n_images_summary">Képek száma az expozíciósorozat módban</string>
+    <string name="preference_expo_bracketing_stops">Expozíciósorozat lépésköz</string>
+    <string name="preference_expo_bracketing_stops_summary">Az egyes képek készítése ennyi fényérték eltéréssel</string>
+
+    <string name="seconds_abbreviation">mp</string> <!-- short for seconds -->
+
+    <string name="video_no_free_space">Nincs elég szabad hely videofelvétel készítéséhez</string>
+    <string name="video_power_critical">Felvétel leállítva\nAz akkumulátorszint kritikusan alacsony</string>
+    <string name="preference_video_low_power_check">Kritikus akkumulátorszint ellenőrzés</string>
+    <string name="preference_video_low_power_check_summary">Leállítja a videofelvételt, ha az akkumulátor kritikusan alacsony szintre merül. Segít csökkenteni annak a kockázatát, hogy a felvétel hibás lesz, amikor az eszköz váratlanul lemerül és kikapcsol.</string>
+
+    <string name="dark">Sötét</string> <!-- exposure compensation dark -->
+    <string name="bright">Világos</string> <!-- exposure compensation bright -->
+    <string name="exposure_shutter_speed">Zársebesség</string>
+
+    <string name="camera_error">Súlyos kamerahiba</string>
+
+    <string name="preference_camera2_fast_burst">Gyors HDR/expozíciósorozat engedélyezése</string>
+    <string name="preference_camera2_fast_burst_summary">Lehetővé teszi HDR képek / expozíciósorozatok gyorsabb rögzítését. Tiltsd le, ha problémákat tapasztalsz a készülékeden HDR vagy expozíciósorozat készítése közben (például a kamera leáll, vagy az expozíciósorozat rossz sorrendben készül)</string>
+
+    <string name="camera">Kamera</string>
+    <string name="record_video">Videofelvétel</string>
+    <string name="selfie">Szelfi</string>
+
+    <string name="preference_front_camera_mirror">Előlapi kamera tükrözés</string>
+    <string name="preference_front_camera_mirror_summary">Az előlapi kamera használatakor a kép tükrözése.</string>
+
+    <string name="preference_calibrate_level">Vízszint kalibrálása</string>
+    <string name="preference_calibrate_level_summary">Ez a beállítás kalibrálja a készülék gyorsulásmérőjét, így az auto-stabilizálás és a képernyőn megjelenő vízszintező jól fog működni</string>
+    <string name="preference_calibrate_level_dialog">Helyezd a készüléket sík, vízszintes felületre (fekvő vagy álló helyzetben), majd nyomj a Kalibrálás gombra.\n\nA kalibrálás visszavonásához kattints a Visszaállításra.\n\nA megszakításhoz nyomd meg a vissza gombot.</string>
+    <string name="preference_calibrate_level_calibrate">Kalibrálás</string>
+    <string name="preference_calibrate_level_reset">Visszaállítás</string>
+    <string name="preference_calibrate_level_calibrated">Vízszint kalibrálva</string>
+    <string name="preference_calibrate_level_calibration_reset">Vízszint kalibrálás visszaállítása</string>
+
+    <string name="photo_mode_dro">DRO</string>
+
+    <string name="preference_show_pitch_lines">Osztóvonalak megjelenítése</string>
+    <string name="preference_show_pitch_lines_summary">Vízszintes osztóköz megjelenítése</string>
+    <string name="preference_show_geo_direction_lines">Iránytű irányvonalak megjelenítése</string>
+    <string name="preference_show_geo_direction_lines_summary">Irányvonalakat jelenít meg az iránytű alapján</string>
+    <string name="preference_video_subtitle">Videó feliratok</string>
+    <string name="preference_video_subtitle_summary">Felirat (.srt) fájl létrehozása dátummal, idővel és GPS szélesség/hosszúság adatokkal</string>
+
+    <string name="duration_unlimited">Korlátlan</string>
+    <string name="duration_3s">3 másodperc</string>
+    <string name="duration_5s">5 másodperc</string>
+    <string name="duration_10s">10 másodperc</string>
+    <string name="duration_15s">15 másodperc</string>
+    <string name="duration_30s">30 másodperc</string>
+    <string name="duration_1m">1 perc</string>
+    <string name="duration_2m">2 perc</string>
+    <string name="duration_3m">3 perc</string>
+    <string name="duration_4m">4 perc</string>
+    <string name="duration_5m">5 perc</string>
+    <string name="duration_6m">6 perc</string>
+    <string name="duration_7m">7 perc</string>
+    <string name="duration_8m">8 perc</string>
+    <string name="duration_9m">9 perc</string>
+    <string name="duration_10m">10 perc</string>
+    <string name="duration_11m">11 perc</string>
+    <string name="duration_12m">12 perc</string>
+    <string name="duration_15m">15 perc</string>
+    <string name="duration_20m">20 perc</string>
+    <string name="duration_25m">25 perc</string>
+    <string name="duration_30m">30 perc</string>
+    <string name="duration_45m">45 perc</string>
+    <string name="duration_1h">1 óra</string>
+
+    <string name="preference_show_take_photo">Fénykép készítése ikon megjelenítése</string>
+    <string name="preference_show_take_photo_summary">A fénykép és videó készítése gombok megjelenítése. Hasznos, ha a készüléknek van saját fényképezés gombja, ezért a képernyőn lévőt nem használod.</string>
+
+    <string name="video_pause">Videó szünetel</string>
+    <string name="video_resume">Videó folytatása</string>
+    <string name="pause_video">Videofelvétel szüneteltetése</string>
+    <string name="resume_video">Videofelvétel folytatása</string>
+
+    <string name="capturing">Rögzítés…</string>
+
+    <string name="audio_listener_failed">Nem sikerült elindítani a hangfigyelést</string>
+</resources>
