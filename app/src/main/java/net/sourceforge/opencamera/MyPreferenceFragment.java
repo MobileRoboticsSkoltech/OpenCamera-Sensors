@@ -56,7 +56,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		final int cameraId = bundle.getInt("cameraId");
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
-		
+		final int nCameras = bundle.getInt("nCameras");
+		if( MyDebug.LOG )
+			Log.d(TAG, "nCameras: " + nCameras);
+
 		final String camera_api = bundle.getString("camera_api");
 		
 		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
@@ -531,8 +534,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                             about_string.append("x");
                             about_string.append(display_size.y);
                         }
-                        about_string.append("\nCurrent camera ID: ");
-                        about_string.append(cameraId);
+						about_string.append("\nCurrent camera ID: ");
+						about_string.append(cameraId);
+						about_string.append("\nNo. of cameras: ");
+						about_string.append(nCameras);
                         about_string.append("\nCamera API: ");
                         about_string.append(camera_api);
                         {
