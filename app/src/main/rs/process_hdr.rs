@@ -115,24 +115,24 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 			weight = 1.0f - weight;
 			if( avg <= 127.5f ) {
 				rgb = (float3){ (float)pixels[2].r, (float)pixels[2].g, (float)pixels[2].b };
-				avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
+				/*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 				diff = fabs( avg - 127.5f );
 				if( diff > safe_range_c ) {
 					// scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
 					weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
-				}
+				}*/
 	
 				rgb = parameter_A[2] * rgb + parameter_B[2];
 			}
 			else {
 				rgb = (float3){ (float)pixels[0].r, (float)pixels[0].g, (float)pixels[0].b };
-				avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
+				/*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 				diff = fabs( avg - 127.5f );
 				if( diff > safe_range_c ) {
 					// scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
 					weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
-				}
-	
+				}*/
+
 				rgb = parameter_A[0] * rgb + parameter_B[0];
 			}
 	

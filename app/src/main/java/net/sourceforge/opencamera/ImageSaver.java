@@ -43,8 +43,11 @@ import android.util.Log;
 public class ImageSaver extends Thread {
 	private static final String TAG = "ImageSaver";
 
+	// note that ExifInterface now has fields for these types, but that requires Android 6 or 7
 	private static final String TAG_GPS_IMG_DIRECTION = "GPSImgDirection";
 	private static final String TAG_GPS_IMG_DIRECTION_REF = "GPSImgDirectionRef";
+	private static final String TAG_DATETIME_ORIGINAL = "DateTimeOriginal";
+	private static final String TAG_DATETIME_DIGITIZED = "DateTimeDigitized";
 
 	private final Paint p = new Paint();
 
@@ -1875,8 +1878,8 @@ public class ImageSaver extends Thread {
     	if( exif_datetime != null ) {
         	if( MyDebug.LOG )
     			Log.d(TAG, "write datetime tags: " + exif_datetime);
-        	exif.setAttribute("DateTimeOriginal", exif_datetime);
-        	exif.setAttribute("DateTimeDigitized", exif_datetime);
+        	exif.setAttribute(TAG_DATETIME_ORIGINAL, exif_datetime);
+        	exif.setAttribute(TAG_DATETIME_DIGITIZED, exif_datetime);
     	}
 	}
 	
