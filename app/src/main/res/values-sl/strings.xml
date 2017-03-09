@@ -188,7 +188,7 @@
     <string name="preference_resolution">Ločljivost fotoaparata</string>
     <string name="preference_resolution_summary">Nastavite ločljivost fotografij</string>
     <string name="preference_quality">Kakovost slik</string>
-    <string name="preference_quality_summary">Nastavite kakovost shranjenih slik JPEG (priporočljiva vrednost je 90 %%)</string>
+    <string name="preference_quality_summary">Nastavite kakovost shranjenih slik JPEG (privzeta vrednost je 90 %%)</string>
 	<string name="preference_raw">RAW</string>
     <string name="preference_raw_summary">Ali naj se slike shranjuje v obliki RAW (DNG)</string>
     <string name="preference_location">Shrani podatke o lokaciji (označevanje z zemljepisnim položajem)</string>
