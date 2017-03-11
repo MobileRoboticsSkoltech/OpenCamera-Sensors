@@ -100,6 +100,10 @@ public class MainUI {
 			seekBar = (SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar);
 			seekBar.setProgressTintList(progress_color);
 			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.white_balance_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
 		}
 	}
 
@@ -357,8 +361,9 @@ public class MainUI {
 			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
 			int exposure_zoom_gap = (int) (4 * scale + 0.5f); // convert dps to pixels
 
-			View view = main_activity.findViewById(R.id.exposure_container);
+			View view = main_activity.findViewById(R.id.sliders_container);
 			setViewRotation(view, ui_rotation);
+
 			view = main_activity.findViewById(R.id.exposure_seekbar);
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
@@ -368,9 +373,6 @@ public class MainUI {
 			view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
 			view.setAlpha(0.5f);
 
-			view = main_activity.findViewById(R.id.manual_exposure_container);
-			setViewRotation(view, ui_rotation);
-
 			view = main_activity.findViewById(R.id.iso_seekbar);
 			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
@@ -378,6 +380,12 @@ public class MainUI {
 			view.setLayoutParams(lp);
 
 			view = main_activity.findViewById(R.id.exposure_time_seekbar);
+			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+
+			view = main_activity.findViewById(R.id.white_balance_seekbar);
 			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
@@ -686,6 +694,16 @@ public class MainUI {
 					seek_bar_zoom.setVisibility(View.VISIBLE);
 				}
 			}
+
+			// we also show slider for manual white balance, if in that mode
+			String white_balance_value = main_activity.getApplicationInterface().getWhiteBalancePref();
+			View manual_white_balance_seek_bar = main_activity.findViewById(R.id.manual_white_balance_container);
+			if( main_activity.getPreview().usingCamera2API() && white_balance_value.equals("manual") ) {
+				manual_white_balance_seek_bar.setVisibility(View.VISIBLE);
+			}
+			else {
+				manual_white_balance_seek_bar.setVisibility(View.GONE);
+			}
 		}
     }
 
@@ -724,6 +742,8 @@ public class MainUI {
 		view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
 		view.setVisibility(View.GONE);
 		view = main_activity.findViewById(R.id.manual_exposure_container);
+		view.setVisibility(View.GONE);
+		view = main_activity.findViewById(R.id.manual_white_balance_container);
 		view.setVisibility(View.GONE);
     }
     

@@ -189,14 +189,28 @@
         android:visibility="gone"
         />
 
-    <RelativeLayout
-        android:id="@+id/exposure_container"
+    <LinearLayout
+        android:id="@+id/sliders_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:orientation="vertical"
         android:background="@color/seekbar_background"
         >
+
+    <RelativeLayout
+        android:id="@+id/exposure_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/exposure_seekbar_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/exposure_compensation"
+            />
 
         <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
         <SeekBar
@@ -204,6 +218,7 @@
             android:contentDescription="@string/exposure_compensation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/exposure_seekbar_text"
             android:alpha="0.9"
             />
 
@@ -233,16 +248,12 @@
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/exposure_seekbar_text_dark"
             />
-
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/manual_exposure_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:background="@color/seekbar_background"
         >
 
         <TextView
@@ -281,6 +292,33 @@
             />
 
     </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/manual_white_balance_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/white_balance_seekbar_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/white_balance"
+            />
+
+        <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
+        <SeekBar
+            android:id="@+id/white_balance_seekbar"
+            android:contentDescription="@string/white_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/white_balance_seekbar_text"
+            android:alpha="0.9"
+            />
+
+    </RelativeLayout>
+
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/prefs_container"
