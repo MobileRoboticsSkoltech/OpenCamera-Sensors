@@ -173,6 +173,7 @@ public class MainUI {
 			align_parent_top = RelativeLayout.ALIGN_PARENT_BOTTOM;
 			align_parent_bottom = RelativeLayout.ALIGN_PARENT_TOP;
 		}
+
 		{
 			// we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
 			View view = main_activity.findViewById(R.id.gui_anchor);
@@ -683,9 +684,8 @@ public class MainUI {
 			clearSeekBar();
 		}
 		else if( main_activity.getPreview().getCameraController() != null ) {
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
-			if( main_activity.getPreview().usingCamera2API() && !value.equals("auto") ) {
+			String iso_value = main_activity.getApplicationInterface().getISOPref();
+			if( main_activity.getPreview().usingCamera2API() && !iso_value.equals("auto") ) {
 				// with Camera2 API, when using manual ISO we instead show sliders for ISO range and exposure time
 				if( main_activity.getPreview().supportsISORange()) {
 					manual_exposure_seek_bar.setVisibility(View.VISIBLE);
