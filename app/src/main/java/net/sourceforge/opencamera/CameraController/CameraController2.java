@@ -27,6 +27,7 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.DngCreator;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
+import android.hardware.camera2.params.RggbChannelVector;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
 import android.media.ExifInterface;
@@ -153,6 +154,7 @@ public class CameraController2 extends CameraController {
 		private int scene_mode = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
 		private int color_effect = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
 		private int white_balance = CameraMetadata.CONTROL_AWB_MODE_AUTO;
+		private int white_balance_temperature = 5000; // used for white_balance == CONTROL_AWB_MODE_OFF
 		private String flash_value = "flash_off";
 		private boolean has_iso;
 		//private int ae_mode = CameraMetadata.CONTROL_AE_MODE_ON;
@@ -275,6 +277,7 @@ public class CameraController2 extends CameraController {
 		}
 
 		private boolean setWhiteBalance(CaptureRequest.Builder builder) {
+			boolean changed = false;
 			/*if( builder.get(CaptureRequest.CONTROL_AWB_MODE) == null && white_balance == CameraMetadata.CONTROL_AWB_MODE_AUTO ) {
 				// can leave off
 			}
@@ -282,9 +285,70 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setting white balance: " + white_balance);
 				builder.set(CaptureRequest.CONTROL_AWB_MODE, white_balance);
-				return true;
+				changed = true;
 			}
-			return false;
+			if( white_balance == CameraMetadata.CONTROL_AWB_MODE_OFF ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting white balance temperature: " + white_balance_temperature);
+				// manual white balance
+				float temperature = white_balance_temperature / 100.0f;
+				float red;
+				float green;
+				float blue;
+
+				if( temperature <= 66 ) {
+					red = 255;
+				}
+				else {
+					red = temperature - 60;
+					red = (float) (329.698727446 * (Math.pow((double) red, -0.1332047592)));
+					if( red < 0 )
+						red = 0;
+					if( red > 255 )
+						red = 255;
+				}
+
+				if( temperature <= 66 ) {
+					green = temperature;
+					green = (float) (99.4708025861 * Math.log(green) - 161.1195681661);
+					if( green < 0 )
+						green = 0;
+					if( green > 255 )
+						green = 255;
+				}
+				else {
+					green = temperature - 60;
+					green = (float) (288.1221695283 * (Math.pow((double) green, -0.0755148492)));
+					if (green < 0)
+						green = 0;
+					if (green > 255)
+						green = 255;
+				}
+
+				if( temperature >= 66 )
+					blue = 255;
+				else if( temperature <= 19 )
+					blue = 0;
+				else {
+					blue = temperature - 10;
+					blue = (float) (138.5177312231 * Math.log(blue) - 305.0447927307);
+					if( blue < 0 )
+						blue = 0;
+					if( blue > 255 )
+						blue = 255;
+				}
+
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "red: " + red);
+					Log.d(TAG, "green: " + green);
+					Log.d(TAG, "blue: " + blue);
+				}
+				RggbChannelVector rggbChannelVector = new RggbChannelVector((red/255)*2,(green/255),(green/255),(blue/255)*2);
+				builder.set(CaptureRequest.COLOR_CORRECTION_MODE, CameraMetadata.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX);
+				builder.set(CaptureRequest.COLOR_CORRECTION_GAINS, rggbChannelVector);
+				changed = true;
+			}
+			return changed;
 		}
 
 		private boolean setAEMode(CaptureRequest.Builder builder, boolean is_still) {
@@ -1484,6 +1548,9 @@ public class CameraController2 extends CameraController {
 		case CameraMetadata.CONTROL_AWB_MODE_WARM_FLUORESCENT:
 			value = "warm-fluorescent";
 			break;
+		case CameraMetadata.CONTROL_AWB_MODE_OFF:
+			value = "manual";
+			break;
 		default:
 			if( MyDebug.LOG )
 				Log.d(TAG, "unknown white balance: " + value2);
@@ -1535,6 +1602,9 @@ public class CameraController2 extends CameraController {
 				case "warm-fluorescent":
 					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_WARM_FLUORESCENT;
 					break;
+				case "manual":
+					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_OFF;
+					break;
 				default:
 					if (MyDebug.LOG)
 						Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
@@ -1565,6 +1635,38 @@ public class CameraController2 extends CameraController {
 			return null;
 		int value2 = previewBuilder.get(CaptureRequest.CONTROL_AWB_MODE);
 		return convertWhiteBalance(value2);
+	}
+
+	@Override
+	// Returns whether white balance temperature was modified
+	public boolean setWhiteBalanceTemperature(int temperature) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setWhiteBalanceTemperature: " + temperature);
+		if( camera_settings.white_balance == temperature ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "already set");
+			return false;
+		}
+		try {
+			camera_settings.white_balance_temperature = temperature;
+			if( camera_settings.setWhiteBalance(previewBuilder) ) {
+				setRepeatingRequest();
+			}
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set white balance temperature");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		}
+		return true;
+	}
+
+	@Override
+	public int getWhiteBalanceTemperature() {
+		return camera_settings.white_balance;
 	}
 
 	@Override

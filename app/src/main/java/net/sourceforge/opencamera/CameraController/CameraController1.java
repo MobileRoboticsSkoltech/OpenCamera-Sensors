@@ -464,6 +464,18 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public boolean setWhiteBalanceTemperature(int temperature) {
+		// not supported for CameraController1
+		return false;
+	}
+
+	@Override
+	public int getWhiteBalanceTemperature() {
+		// not supported for CameraController1
+		return 0;
+	}
+
+	@Override
 	public SupportedValues setISO(String value) {
     	Camera.Parameters parameters = this.getParameters();
 		// get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting
