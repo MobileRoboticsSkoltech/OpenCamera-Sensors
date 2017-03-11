@@ -189,96 +189,136 @@
         android:visibility="gone"
         />
 
-    <RelativeLayout
-        android:id="@+id/exposure_container"
+    <LinearLayout
+        android:id="@+id/sliders_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:orientation="vertical"
         android:background="@color/seekbar_background"
         >
 
-        <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
-        <SeekBar
-            android:id="@+id/exposure_seekbar"
-            android:contentDescription="@string/exposure_compensation"
+        <RelativeLayout
+            android:id="@+id/exposure_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="0.9"
-            />
+            >
 
-        <TextView
+            <TextView
+                android:id="@+id/exposure_seekbar_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/exposure_compensation"
+                />
+
+            <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
+            <SeekBar
+                android:id="@+id/exposure_seekbar"
+                android:contentDescription="@string/exposure_compensation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/exposure_seekbar_text"
+                android:alpha="0.9"
+                />
+
+            <TextView
+                android:id="@+id/exposure_seekbar_text_dark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dark"
+                android:layout_alignLeft="@+id/exposure_seekbar"
+                android:layout_below="@+id/exposure_seekbar"
+                />
+
+            <TextView
+                android:id="@+id/exposure_seekbar_text_bright"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bright"
+                android:layout_alignRight="@+id/exposure_seekbar"
+                android:layout_below="@+id/exposure_seekbar"
+                />
+
+            <ZoomControls
+                android:id="@+id/exposure_seekbar_zoom"
+                android:contentDescription="@string/exposure_compensation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/exposure_seekbar_text_dark"
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/manual_exposure_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/dark"
-            android:layout_alignLeft="@+id/exposure_seekbar"
-            android:layout_below="@+id/exposure_seekbar"
-            />
+            >
 
-        <TextView
+            <TextView
+                android:id="@+id/iso_seekbar_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/iso"
+                />
+
+            <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
+            <SeekBar
+                android:id="@+id/iso_seekbar"
+                android:contentDescription="@string/iso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/iso_seekbar_text"
+                android:alpha="0.9"
+                />
+
+            <TextView
+                android:id="@+id/exposure_time_seekbar_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/iso_seekbar"
+                android:text="@string/exposure_shutter_speed"
+                />
+
+            <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
+            <SeekBar
+                android:id="@+id/exposure_time_seekbar"
+                android:contentDescription="@string/exposure"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/exposure_time_seekbar_text"
+                android:alpha="0.9"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/manual_white_balance_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/bright"
-            android:layout_alignRight="@+id/exposure_seekbar"
-            android:layout_below="@+id/exposure_seekbar"
-            />
+            >
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/white_balance_seekbar_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/white_balance"
+                />
 
-    <ZoomControls
-        android:id="@+id/exposure_seekbar_zoom"
-        android:contentDescription="@string/exposure_compensation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        />
+            <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
+            <SeekBar
+                android:id="@+id/white_balance_seekbar"
+                android:contentDescription="@string/white_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/white_balance_seekbar_text"
+                android:alpha="0.9"
+                />
 
-    <RelativeLayout
-        android:id="@+id/manual_exposure_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:background="@color/seekbar_background"
-        >
+        </RelativeLayout>
 
-        <TextView
-            android:id="@+id/iso_seekbar_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/iso"
-            />
-
-        <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
-        <SeekBar
-            android:id="@+id/iso_seekbar"
-            android:contentDescription="@string/iso"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/iso_seekbar_text"
-            android:alpha="0.9"
-            />
-
-        <TextView
-            android:id="@+id/exposure_time_seekbar_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/iso_seekbar"
-            android:text="@string/exposure_shutter_speed"
-            />
-
-        <!-- alpha set as workaround for Android 7 bug where seekbar doesn't show when rotated -->
-        <SeekBar
-            android:id="@+id/exposure_time_seekbar"
-            android:contentDescription="@string/exposure"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/exposure_time_seekbar_text"
-            android:alpha="0.9"
-            />
-
-    </RelativeLayout>
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/prefs_container"

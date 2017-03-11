@@ -187,6 +187,8 @@ public abstract class CameraController {
 	public abstract String getColorEffect();
 	public abstract SupportedValues setWhiteBalance(String value);
 	public abstract String getWhiteBalance();
+	public abstract boolean setWhiteBalanceTemperature(int temperature);
+	public abstract int getWhiteBalanceTemperature();
 	/** Set an ISO value. Only supported if supports_iso_range is false.
 	 */
 	public abstract SupportedValues setISO(String value);

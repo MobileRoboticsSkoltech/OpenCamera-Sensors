@@ -100,6 +100,10 @@ public class MainUI {
 			seekBar = (SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar);
 			seekBar.setProgressTintList(progress_color);
 			seekBar.setThumbTintList(thumb_color);
+
+			seekBar = (SeekBar)main_activity.findViewById(R.id.white_balance_seekbar);
+			seekBar.setProgressTintList(progress_color);
+			seekBar.setThumbTintList(thumb_color);
 		}
 	}
 
@@ -173,6 +177,7 @@ public class MainUI {
 			align_parent_top = RelativeLayout.ALIGN_PARENT_BOTTOM;
 			align_parent_bottom = RelativeLayout.ALIGN_PARENT_TOP;
 		}
+
 		{
 			// we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
 			View view = main_activity.findViewById(R.id.gui_anchor);
@@ -356,8 +361,9 @@ public class MainUI {
 			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
 			int exposure_zoom_gap = (int) (4 * scale + 0.5f); // convert dps to pixels
 
-			View view = main_activity.findViewById(R.id.exposure_container);
+			View view = main_activity.findViewById(R.id.sliders_container);
 			setViewRotation(view, ui_rotation);
+
 			view = main_activity.findViewById(R.id.exposure_seekbar);
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
@@ -365,29 +371,7 @@ public class MainUI {
 			view.setLayoutParams(lp);
 
 			view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
-			setViewRotation(view, ui_rotation);
 			view.setAlpha(0.5f);
-
-			// n.b., using left_of etc doesn't work properly when using rotation (as the amount of space reserved is based on the UI elements before being rotated)
-			if( ui_rotation == 0 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(height_pixels+exposure_zoom_gap);
-			}
-			else if( ui_rotation == 90 ) {
-				view.setTranslationX(-height_pixels-exposure_zoom_gap);
-				view.setTranslationY(0);
-			}
-			else if( ui_rotation == 180 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(-height_pixels-exposure_zoom_gap);
-			}
-			else if( ui_rotation == 270 ) {
-				view.setTranslationX(height_pixels+exposure_zoom_gap);
-				view.setTranslationY(0);
-			}
-
-			view = main_activity.findViewById(R.id.manual_exposure_container);
-			setViewRotation(view, ui_rotation);
 
 			view = main_activity.findViewById(R.id.iso_seekbar);
 			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -396,6 +380,12 @@ public class MainUI {
 			view.setLayoutParams(lp);
 
 			view = main_activity.findViewById(R.id.exposure_time_seekbar);
+			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			lp.width = width_pixels;
+			lp.height = height_pixels;
+			view.setLayoutParams(lp);
+
+			view = main_activity.findViewById(R.id.white_balance_seekbar);
 			lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			lp.width = width_pixels;
 			lp.height = height_pixels;
@@ -683,9 +673,8 @@ public class MainUI {
 			clearSeekBar();
 		}
 		else if( main_activity.getPreview().getCameraController() != null ) {
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-			String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
-			if( main_activity.getPreview().usingCamera2API() && !value.equals("auto") ) {
+			String iso_value = main_activity.getApplicationInterface().getISOPref();
+			if( main_activity.getPreview().usingCamera2API() && !iso_value.equals("auto") ) {
 				// with Camera2 API, when using manual ISO we instead show sliders for ISO range and exposure time
 				if( main_activity.getPreview().supportsISORange()) {
 					manual_exposure_seek_bar.setVisibility(View.VISIBLE);
@@ -704,6 +693,16 @@ public class MainUI {
 					ZoomControls seek_bar_zoom = (ZoomControls)main_activity.findViewById(R.id.exposure_seekbar_zoom);
 					seek_bar_zoom.setVisibility(View.VISIBLE);
 				}
+			}
+
+			// we also show slider for manual white balance, if in that mode
+			String white_balance_value = main_activity.getApplicationInterface().getWhiteBalancePref();
+			View manual_white_balance_seek_bar = main_activity.findViewById(R.id.manual_white_balance_container);
+			if( main_activity.getPreview().usingCamera2API() && white_balance_value.equals("manual") ) {
+				manual_white_balance_seek_bar.setVisibility(View.VISIBLE);
+			}
+			else {
+				manual_white_balance_seek_bar.setVisibility(View.GONE);
 			}
 		}
     }
@@ -743,6 +742,8 @@ public class MainUI {
 		view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
 		view.setVisibility(View.GONE);
 		view = main_activity.findViewById(R.id.manual_exposure_container);
+		view.setVisibility(View.GONE);
+		view = main_activity.findViewById(R.id.manual_white_balance_container);
 		view.setVisibility(View.GONE);
     }
     
