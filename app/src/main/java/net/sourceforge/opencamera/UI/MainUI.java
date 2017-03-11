@@ -366,26 +366,7 @@ public class MainUI {
 			view.setLayoutParams(lp);
 
 			view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
-			setViewRotation(view, ui_rotation);
 			view.setAlpha(0.5f);
-
-			// n.b., using left_of etc doesn't work properly when using rotation (as the amount of space reserved is based on the UI elements before being rotated)
-			if( ui_rotation == 0 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(height_pixels+exposure_zoom_gap);
-			}
-			else if( ui_rotation == 90 ) {
-				view.setTranslationX(-height_pixels-exposure_zoom_gap);
-				view.setTranslationY(0);
-			}
-			else if( ui_rotation == 180 ) {
-				view.setTranslationX(0);
-				view.setTranslationY(-height_pixels-exposure_zoom_gap);
-			}
-			else if( ui_rotation == 270 ) {
-				view.setTranslationX(height_pixels+exposure_zoom_gap);
-				view.setTranslationY(0);
-			}
 
 			view = main_activity.findViewById(R.id.manual_exposure_container);
 			setViewRotation(view, ui_rotation);

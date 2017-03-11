@@ -208,6 +208,7 @@
             />
 
         <TextView
+            android:id="@+id/exposure_seekbar_text_dark"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/dark"
@@ -216,6 +217,7 @@
             />
 
         <TextView
+            android:id="@+id/exposure_seekbar_text_bright"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/bright"
@@ -223,16 +225,16 @@
             android:layout_below="@+id/exposure_seekbar"
             />
 
-    </RelativeLayout>
+        <ZoomControls
+            android:id="@+id/exposure_seekbar_zoom"
+            android:contentDescription="@string/exposure_compensation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/exposure_seekbar_text_dark"
+            />
 
-    <ZoomControls
-        android:id="@+id/exposure_seekbar_zoom"
-        android:contentDescription="@string/exposure_compensation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        />
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/manual_exposure_container"
