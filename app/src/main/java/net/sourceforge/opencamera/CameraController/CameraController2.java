@@ -1661,6 +1661,15 @@ public class CameraController2 extends CameraController {
 				values.add(this_value);
 			}
 		}
+		{
+			// re-order so that auto is first, manual is second
+			boolean has_auto = values.remove("auto");
+			boolean has_manual = values.remove("manual");
+			if( has_manual )
+				values.add(0, "manual");
+			if( has_auto )
+				values.add(0, "auto");
+		}
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
 			int selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
