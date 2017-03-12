@@ -2542,6 +2542,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		String white_balance = camera_controller.getWhiteBalance();
     	if( white_balance != null && !white_balance.equals(camera_controller.getDefaultWhiteBalance()) ) {
     		toast_string += "\n" + getResources().getString(R.string.white_balance) + ": " + white_balance;
+			if( white_balance.equals("manual") && preview.supportsWhiteBalanceTemperature() ) {
+				toast_string += " " + camera_controller.getWhiteBalanceTemperature();
+			}
 			simple = false;
     	}
 		String color_effect = camera_controller.getColorEffect();
