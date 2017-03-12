@@ -2209,13 +2209,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				}
 			}
 		}
-		if( preview.getSupportedWhiteBalances() != null && preview.getSupportedWhiteBalances().contains("manual") ) {
+		if( preview.getSupportedWhiteBalances() != null && preview.supportsWhiteBalanceTemperature() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up manual white balance");
 			SeekBar white_balance_seek_bar = ((SeekBar)findViewById(R.id.white_balance_seekbar));
 			white_balance_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-			final int minimum_temperature = 1000;
-			final int maximum_temperature = 10000;
+			final int minimum_temperature = preview.getMinimumWhiteBalanceTemperature();
+			final int maximum_temperature = preview.getMaximumWhiteBalanceTemperature();
 			// white balance should use linear scaling
 			white_balance_seek_bar.setMax(maximum_temperature - minimum_temperature);
 			white_balance_seek_bar.setProgress(preview.getCameraController().getWhiteBalanceTemperature() - minimum_temperature);

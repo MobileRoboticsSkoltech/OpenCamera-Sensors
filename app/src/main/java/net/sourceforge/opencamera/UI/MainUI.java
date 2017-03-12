@@ -695,14 +695,15 @@ public class MainUI {
 				}
 			}
 
-			// we also show slider for manual white balance, if in that mode
-			String white_balance_value = main_activity.getApplicationInterface().getWhiteBalancePref();
-			View manual_white_balance_seek_bar = main_activity.findViewById(R.id.manual_white_balance_container);
-			if( main_activity.getPreview().usingCamera2API() && white_balance_value.equals("manual") ) {
-				manual_white_balance_seek_bar.setVisibility(View.VISIBLE);
-			}
-			else {
-				manual_white_balance_seek_bar.setVisibility(View.GONE);
+			if( main_activity.getPreview().supportsWhiteBalanceTemperature()) {
+				// we also show slider for manual white balance, if in that mode
+				String white_balance_value = main_activity.getApplicationInterface().getWhiteBalancePref();
+				View manual_white_balance_seek_bar = main_activity.findViewById(R.id.manual_white_balance_container);
+				if (main_activity.getPreview().usingCamera2API() && white_balance_value.equals("manual")) {
+					manual_white_balance_seek_bar.setVisibility(View.VISIBLE);
+				} else {
+					manual_white_balance_seek_bar.setVisibility(View.GONE);
+				}
 			}
 		}
     }
