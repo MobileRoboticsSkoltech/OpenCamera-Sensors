@@ -290,7 +290,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return sharedPreferences.getString(PreferenceKeys.getWhiteBalancePreferenceKey(), "auto");
     }
 
-    @Override
+	@Override
+	public int getWhiteBalanceTemperaturePref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return sharedPreferences.getInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), 5000);
+	}
+
+	@Override
 	public String getISOPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
@@ -1504,8 +1510,16 @@ public class MyApplicationInterface implements ApplicationInterface {
 		editor.remove(PreferenceKeys.getWhiteBalancePreferenceKey());
 		editor.apply();
     }
-	
-    @Override
+
+	@Override
+	public void setWhiteBalanceTemperaturePref(int white_balance_temperature) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), white_balance_temperature);
+		editor.apply();
+	}
+
+	@Override
 	public void setISOPref(String iso) {
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -71,6 +71,10 @@ public class PreferenceKeys {
     	return "preference_white_balance";
     }
 
+    public static String getWhiteBalanceTemperaturePreferenceKey() {
+        return "preference_white_balance_temperature";
+    }
+
     public static String getISOPreferenceKey() {
     	return "preference_iso";
     }

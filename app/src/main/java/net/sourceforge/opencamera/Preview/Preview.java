@@ -1554,6 +1554,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				white_balances = supported_values.values;
 	    		// now save, so it's available for PreferenceActivity
 				applicationInterface.setWhiteBalancePref(supported_values.selected_value);
+
+				if( supported_values.selected_value.equals("manual") ) {
+					int temperature = applicationInterface.getWhiteBalanceTemperaturePref();
+					camera_controller.setWhiteBalanceTemperature(temperature);
+					if( MyDebug.LOG )
+						Log.d(TAG, "saved white balance: " + value);
+				}
 			}
 			else {
 				// delete key in case it's present (e.g., if feature no longer available due to change in OS, or switching APIs)
@@ -2713,7 +2720,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( camera_controller != null ) {
 			if( camera_controller.setWhiteBalanceTemperature(new_temperature) ) {
 				// now save
-				//applicationInterface.setISOPref("" + new_iso);
+				applicationInterface.setWhiteBalanceTemperaturePref(new_temperature);
 				showToast(seekbar_toast, getResources().getString(R.string.white_balance) + " " + new_temperature, 96);
 			}
 		}

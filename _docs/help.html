@@ -112,7 +112,8 @@ click the Exposure button again, or click elsewhere on the screen. See
 <a href="http://en.wikipedia.org/wiki/Exposure_compensation">Exposure compensation</a>.
 (Only available if the camera supports control of the exposure, and ISO is "auto".) If Camera2 API is used, and
 a non-auto ISO mode is selected, then instead clicking this icon will bring up sliders allowing you to control the ISO
-setting and (if supported) the exposure time.</p>
+setting and (if supported) the exposure time. If Camera2 API is used, and manual white balance is enabled, then this
+icon will also bring up a slider allowing you to control the white balance temperature.</p>
 
 <p><img src="exposure_unlocked.png" alt="Lock Exposure icon" width="32" height="32"><b>Exposure lock</b> - Click to lock or unlock the exposure.
 When locked, the icon will change to <img src="exposure_locked.png" alt="Exposure Locked icon" width="32" height="32">. Locking the exposure means
@@ -148,7 +149,9 @@ time. You can also select "M" to switch straight to manual mode, keeping to the 
 <li><b>White balance</b> - Choose a method to control how the white balance is set. See
 <a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an
 explanation of white balance. (Only available if the camera supports different white balance
-settings.)</li>
+settings.) If Camera2 API is enabled, then you can also set "manual". In this mode, manual
+control over the white balance temperature is available from the exposure compensation icon
+<img src="ic_exposure_white_48dp.png" alt="Exposure Compensation icon" width="32" height="32">.</li>
 <li><b>Scene mode</b> - Choose a scene mode to apply. (Only available if the camera supports scene
 modes.)</li>
 <li><b>Color effect</b> - Choose a color effect to apply. (Only available if the camera supports
