@@ -147,7 +147,7 @@ public class CameraController2 extends CameraController {
 	}
 
 	private final static int min_white_balance_temperature_c = 1000;
-	private final static int max_white_balance_temperature_c = 10000;
+	private final static int max_white_balance_temperature_c = 15000;
 
 	private class CameraSettings {
 		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
