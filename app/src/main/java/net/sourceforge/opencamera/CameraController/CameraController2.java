@@ -130,6 +130,8 @@ public class CameraController2 extends CameraController {
 	private boolean capture_result_is_ae_scanning;
 	private Integer capture_result_ae; // latest ae_state, null if not available
 	private boolean is_flash_required; // whether capture_result_ae suggests FLASH_REQUIRED? Or in neither FLASH_REQUIRED nor CONVERGED, this stores the last known result
+	private boolean capture_result_has_white_balance_rggb;
+	private RggbChannelVector capture_result_white_balance_rggb;
 	private boolean capture_result_has_iso;
 	private int capture_result_iso;
 	private boolean capture_result_has_exposure_time;
@@ -526,7 +528,14 @@ public class CameraController2 extends CameraController {
 	 *  Note that this is not necessarily an inverse of convertTemperatureToRggb, since many rggb
 	 *  values can map to the same temperature.
 	 */
-	private int convertTemperatureToRggb(RggbChannelVector rggbChannelVector) {
+	private int convertRggbToTemperature(RggbChannelVector rggbChannelVector) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "temperature:");
+			Log.d(TAG, "    red: " + rggbChannelVector.getRed());
+			Log.d(TAG, "    green even: " + rggbChannelVector.getGreenEven());
+			Log.d(TAG, "    green odd: " + rggbChannelVector.getGreenOdd());
+			Log.d(TAG, "    blue: " + rggbChannelVector.getBlue());
+		}
 		float red = rggbChannelVector.getRed();
 		float green_even = rggbChannelVector.getGreenEven();
 		float green_odd = rggbChannelVector.getGreenOdd();
@@ -575,6 +584,9 @@ public class CameraController2 extends CameraController {
 		}
 		temperature = Math.max(temperature, min_temperature);
 		temperature = Math.min(temperature, max_temperature);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "    temperature: " + temperature);
+		}
 		return temperature;
 	}
 
@@ -4042,6 +4054,18 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public boolean captureResultHasWhiteBalanceTemperature() {
+		return capture_result_has_white_balance_rggb;
+	}
+
+	@Override
+	public int captureResultWhiteBalanceTemperature() {
+		// for performance reasons, we don't convert from rggb to temperature in every frame, rather only when requested
+		int temperature = convertRggbToTemperature(capture_result_white_balance_rggb);
+		return temperature;
+	}
+
+	@Override
 	public boolean captureResultHasIso() {
 		return capture_result_has_iso;
 	}
@@ -4626,16 +4650,18 @@ public class CameraController2 extends CameraController {
 			else {
 				capture_result_has_focus_distance = false;
 			}*/
+			{
+				RggbChannelVector vector = result.get(CaptureResult.COLOR_CORRECTION_GAINS);
+				if( vector != null ) {
+					capture_result_has_white_balance_rggb = true;
+					capture_result_white_balance_rggb = vector;
+				}
+			}
+
 			/*if( MyDebug.LOG ) {
 				RggbChannelVector vector = result.get(CaptureResult.COLOR_CORRECTION_GAINS);
 				if( vector != null ) {
-					Log.d(TAG, "temperature:");
-					Log.d(TAG, "    red: " + vector.getRed());
-					Log.d(TAG, "    green even: " + vector.getGreenEven());
-					Log.d(TAG, "    green odd: " + vector.getGreenOdd());
-					Log.d(TAG, "    blue: " + vector.getBlue());
-					int temperature = convertTemperatureToRggb(vector);
-					Log.d(TAG, "    temperature: " + temperature);
+					convertRggbToTemperature(vector); // logging will occur in this function
 				}
 			}*/
 

@@ -334,6 +334,12 @@ public abstract class CameraController {
 	public boolean needsFlash() {
 		return false;
 	}
+	public boolean captureResultHasWhiteBalanceTemperature() {
+		return false;
+	}
+	public int captureResultWhiteBalanceTemperature() {
+		return 0;
+	}
 	public boolean captureResultHasIso() {
 		return false;
 	}

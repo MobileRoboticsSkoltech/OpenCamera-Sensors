@@ -552,13 +552,38 @@ public class PopupView extends LinearLayout {
 			// popup should only be opened if we have a camera controller, but check just to be safe
 			if( preview.getCameraController() != null ) {
 				List<String> supported_white_balances = preview.getSupportedWhiteBalances();
-				addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE");
+				addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE", new RadioOptionsListener() {
+					@Override
+					public void onClick(String selected_option) {
+						if( selected_option.equals("manual") ) {
+							// if we used the generic "manual", then instead try to preserve the current iso if it exists
+							if( preview.getCameraController() != null ) {
+								String current_white_balance = preview.getCameraController().getWhiteBalance();
+								if( current_white_balance == null || !current_white_balance.equals("manual") ) {
+									// try to choose a default manual white balance temperature as close as possible to the current auto
+									if( MyDebug.LOG )
+										Log.d(TAG, "changed to manual white balance");
+									if( preview.getCameraController().captureResultHasWhiteBalanceTemperature() ) {
+										int temperature = preview.getCameraController().captureResultWhiteBalanceTemperature();
+										if( MyDebug.LOG )
+											Log.d(TAG, "default to manual white balance temperature: " + temperature);
+										SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+										SharedPreferences.Editor editor = sharedPreferences.edit();
+										editor.putInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), temperature);
+										editor.apply();
+									}
+									// otherwise default to the saved value
+								}
+							}
+						}
+					}
+				});
 
 				List<String> supported_scene_modes = preview.getSupportedSceneModes();
-				addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE");
+				addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", null);
 
 				List<String> supported_color_effects = preview.getSupportedColorEffects();
-				addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT");
+				addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", null);
 			}
 
 		}
@@ -771,8 +796,17 @@ public class PopupView extends LinearLayout {
 		//text_view.setBackgroundColor(Color.GRAY); // debug
     	this.addView(text_view);
     }
-    
-    private void addRadioOptionsToPopup(List<String> supported_options, final String title, final String preference_key, final String default_option, final String test_key) {
+
+	private abstract class RadioOptionsListener {
+		/** Called when a radio option is selected.
+		 * @param selected_option The entry in the supplied supported_options list (received by
+		 *                        addRadioOptionsToPopup) that corresponds to the selected radio
+		 *                        option.
+		 */
+		public abstract void onClick(String selected_option);
+	}
+
+	private void addRadioOptionsToPopup(List<String> supported_options, final String title, final String preference_key, final String default_option, final String test_key, final RadioOptionsListener listener) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addOptionsToPopup: " + title);
     	if( supported_options != null ) {
@@ -807,6 +841,9 @@ public class PopupView extends LinearLayout {
 					public void onClick(View v) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "clicked current_option: " + supported_option);
+						if( listener != null ) {
+							listener.onClick(supported_option);
+						}
 						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
 						editor.putString(preference_key, supported_option);
