@@ -175,6 +175,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<String> scene_modes;
 	private List<String> white_balances;
 	private List<String> isos;
+	private boolean supports_white_balance_temperature;
+	private int min_temperature;
+	private int max_temperature;
 	private boolean supports_iso_range;
 	private int min_iso;
 	private int max_iso;
@@ -1072,6 +1075,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		color_effects = null;
 		white_balances = null;
 		isos = null;
+		supports_white_balance_temperature = false;
+		min_temperature = 0;
+		max_temperature = 0;
 		supports_iso_range = false;
 		min_iso = 0;
 		max_iso = 0;
@@ -1454,6 +1460,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        this.is_exposure_lock_supported = camera_features.is_exposure_lock_supported;
 	        this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
 	        this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
+			this.supports_white_balance_temperature = camera_features.supports_white_balance_temperature;
+			this.min_temperature = camera_features.min_temperature;
+			this.max_temperature = camera_features.max_temperature;
 	        this.supports_iso_range = camera_features.supports_iso_range;
 	        this.min_iso = camera_features.min_iso;
 	        this.max_iso = camera_features.max_iso;
@@ -1555,7 +1564,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    		// now save, so it's available for PreferenceActivity
 				applicationInterface.setWhiteBalancePref(supported_values.selected_value);
 
-				if( supported_values.selected_value.equals("manual") ) {
+				if( supported_values.selected_value.equals("manual") && this.supports_white_balance_temperature ) {
 					int temperature = applicationInterface.getWhiteBalanceTemperaturePref();
 					camera_controller.setWhiteBalanceTemperature(temperature);
 					if( MyDebug.LOG )
@@ -2714,6 +2723,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
+	/** Set a manual white balance temperature. The white balance mode must be set to "manual" for
+	 *  this to have an effect.
+	 */
 	public void setWhiteBalanceTemperature(int new_temperature) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "seWhiteBalanceTemperature(): " + new_temperature);
@@ -4998,6 +5010,30 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "getISOKey");
     	return camera_controller == null ? "" : camera_controller.getISOKey();
     }
+
+	/** Whether manual white balance temperatures can be specified via setWhiteBalanceTemperature().
+	 */
+	public boolean supportsWhiteBalanceTemperature() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsWhiteBalanceTemperature");
+		return this.supports_white_balance_temperature;
+	}
+
+	/** Minimum allowed white balance temperature.
+	 */
+	public int getMinimumWhiteBalanceTemperature() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getMinimumWhiteBalanceTemperature");
+		return this.min_temperature;
+	}
+
+	/** Maximum allowed white balance temperature.
+	 */
+	public int getMaximumWhiteBalanceTemperature() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getMaximumWhiteBalanceTemperature");
+		return this.max_temperature;
+	}
 
 	/** Returns whether a range of manual ISO values can be set. If this returns true, use
 	 *  getMinimumISO() and getMaximumISO() to return the valid range of values. If this returns

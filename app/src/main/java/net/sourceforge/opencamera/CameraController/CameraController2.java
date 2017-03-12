@@ -130,6 +130,8 @@ public class CameraController2 extends CameraController {
 	private boolean capture_result_is_ae_scanning;
 	private Integer capture_result_ae; // latest ae_state, null if not available
 	private boolean is_flash_required; // whether capture_result_ae suggests FLASH_REQUIRED? Or in neither FLASH_REQUIRED nor CONVERGED, this stores the last known result
+	private boolean capture_result_has_white_balance_rggb;
+	private RggbChannelVector capture_result_white_balance_rggb;
 	private boolean capture_result_has_iso;
 	private int capture_result_iso;
 	private boolean capture_result_has_exposure_time;
@@ -143,7 +145,10 @@ public class CameraController2 extends CameraController {
 	private enum RequestTag {
 		CAPTURE
 	}
-	
+
+	private final static int min_white_balance_temperature_c = 1000;
+	private final static int max_white_balance_temperature_c = 15000;
+
 	private class CameraSettings {
 		// keys that we need to store, to pass to the stillBuilder, but doesn't need to be passed to previewBuilder (should set sensible defaults)
 		private int rotation;
@@ -526,7 +531,14 @@ public class CameraController2 extends CameraController {
 	 *  Note that this is not necessarily an inverse of convertTemperatureToRggb, since many rggb
 	 *  values can map to the same temperature.
 	 */
-	private int convertTemperatureToRggb(RggbChannelVector rggbChannelVector) {
+	private int convertRggbToTemperature(RggbChannelVector rggbChannelVector) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "temperature:");
+			Log.d(TAG, "    red: " + rggbChannelVector.getRed());
+			Log.d(TAG, "    green even: " + rggbChannelVector.getGreenEven());
+			Log.d(TAG, "    green odd: " + rggbChannelVector.getGreenOdd());
+			Log.d(TAG, "    blue: " + rggbChannelVector.getBlue());
+		}
 		float red = rggbChannelVector.getRed();
 		float green_even = rggbChannelVector.getGreenEven();
 		float green_odd = rggbChannelVector.getGreenOdd();
@@ -545,8 +557,6 @@ public class CameraController2 extends CameraController {
 		int red_i = (int)red;
 		int green_i = (int)green;
 		int blue_i = (int)blue;
-		final int min_temperature = 1000;
-		final int max_temperature = 10000;
 		int temperature;
 		if( red_i == blue_i ) {
 			temperature = 6600;
@@ -565,7 +575,7 @@ public class CameraController2 extends CameraController {
 		else {
 			// temperature >= 6700
 			if( red_i <= 1 || green_i <= 1 ) {
-				temperature = max_temperature;
+				temperature = max_white_balance_temperature_c;
 			}
 			else {
 				int t_r = (int) (100 * (Math.pow(red_i / 329.698727446, 1.0 / -0.1332047592) + 60.0));
@@ -573,8 +583,11 @@ public class CameraController2 extends CameraController {
 				temperature = (t_r + t_g) / 2;
 			}
 		}
-		temperature = Math.max(temperature, min_temperature);
-		temperature = Math.min(temperature, max_temperature);
+		temperature = Math.max(temperature, min_white_balance_temperature_c);
+		temperature = Math.min(temperature, max_white_balance_temperature_c);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "    temperature: " + temperature);
+		}
 		return temperature;
 	}
 
@@ -1255,6 +1268,17 @@ public class CameraController2 extends CameraController {
 		
         camera_features.is_video_stabilization_supported = true;
 
+		int [] white_balance_modes = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
+		if( white_balance_modes != null ) {
+			for(int value : white_balance_modes) {
+				if( value == CameraMetadata.CONTROL_AWB_MODE_OFF ) {
+					camera_features.supports_white_balance_temperature = true;
+					camera_features.min_temperature = min_white_balance_temperature_c;
+					camera_features.max_temperature = max_white_balance_temperature_c;
+				}
+			}
+		}
+
 		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
 		if( iso_range != null ) {
 			camera_features.supports_iso_range = true;
@@ -1637,6 +1661,15 @@ public class CameraController2 extends CameraController {
 				values.add(this_value);
 			}
 		}
+		{
+			// re-order so that auto is first, manual is second
+			boolean has_auto = values.remove("auto");
+			boolean has_manual = values.remove("manual");
+			if( has_manual )
+				values.add(0, "manual");
+			if( has_auto )
+				values.add(0, "auto");
+		}
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
 			int selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
@@ -1711,6 +1744,8 @@ public class CameraController2 extends CameraController {
 			return false;
 		}
 		try {
+			temperature = Math.max(temperature, min_white_balance_temperature_c);
+			temperature = Math.min(temperature, max_white_balance_temperature_c);
 			camera_settings.white_balance_temperature = temperature;
 			if( camera_settings.setWhiteBalance(previewBuilder) ) {
 				setRepeatingRequest();
@@ -4042,6 +4077,18 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
+	public boolean captureResultHasWhiteBalanceTemperature() {
+		return capture_result_has_white_balance_rggb;
+	}
+
+	@Override
+	public int captureResultWhiteBalanceTemperature() {
+		// for performance reasons, we don't convert from rggb to temperature in every frame, rather only when requested
+		int temperature = convertRggbToTemperature(capture_result_white_balance_rggb);
+		return temperature;
+	}
+
+	@Override
 	public boolean captureResultHasIso() {
 		return capture_result_has_iso;
 	}
@@ -4626,16 +4673,18 @@ public class CameraController2 extends CameraController {
 			else {
 				capture_result_has_focus_distance = false;
 			}*/
+			{
+				RggbChannelVector vector = result.get(CaptureResult.COLOR_CORRECTION_GAINS);
+				if( vector != null ) {
+					capture_result_has_white_balance_rggb = true;
+					capture_result_white_balance_rggb = vector;
+				}
+			}
+
 			/*if( MyDebug.LOG ) {
 				RggbChannelVector vector = result.get(CaptureResult.COLOR_CORRECTION_GAINS);
 				if( vector != null ) {
-					Log.d(TAG, "temperature:");
-					Log.d(TAG, "    red: " + vector.getRed());
-					Log.d(TAG, "    green even: " + vector.getGreenEven());
-					Log.d(TAG, "    green odd: " + vector.getGreenOdd());
-					Log.d(TAG, "    blue: " + vector.getBlue());
-					int temperature = convertTemperatureToRggb(vector);
-					Log.d(TAG, "    temperature: " + temperature);
+					convertRggbToTemperature(vector); // logging will occur in this function
 				}
 			}*/
 

@@ -54,6 +54,9 @@ public abstract class CameraController {
 		public float minimum_focus_distance;
 		public boolean is_exposure_lock_supported;
 		public boolean is_video_stabilization_supported;
+		public boolean supports_white_balance_temperature;
+		public int min_temperature;
+		public int max_temperature;
 		public boolean supports_iso_range;
 		public int min_iso;
 		public int max_iso;
@@ -333,6 +336,12 @@ public abstract class CameraController {
      */
 	public boolean needsFlash() {
 		return false;
+	}
+	public boolean captureResultHasWhiteBalanceTemperature() {
+		return false;
+	}
+	public int captureResultWhiteBalanceTemperature() {
+		return 0;
 	}
 	public boolean captureResultHasIso() {
 		return false;

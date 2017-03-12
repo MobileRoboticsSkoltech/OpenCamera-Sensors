@@ -2130,191 +2130,94 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue( audioControlButton.getVisibility() == View.GONE );
 	}
 
-	/*
-	 * Note that we pass test_wait_capture_result as a parameter rather than reading from the activity, as for some reason this sometimes resets to false?! Declaring it volatile doesn't fix the problem.
-	 */
-	private void subTestTakePhoto(boolean locked_focus, boolean immersive_mode, boolean touch_to_focus, boolean wait_after_focus, boolean single_tap_photo, boolean double_tap_photo, boolean is_raw, boolean test_wait_capture_result) throws InterruptedException {
-		assertTrue(mPreview.isPreviewStarted());
-
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean has_thumbnail_anim = sharedPreferences.getBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), true);
-		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
-		boolean is_dro = mActivity.supportsDRO() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_dro");
-		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
-		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
-		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
-		int n_expo_images = Integer.parseInt(n_expo_images_s);
-		
-		int saved_count_cameraTakePicture = mPreview.count_cameraTakePicture;
-		
-		// count initial files in folder
-		File folder = mActivity.getImageFolder();
-		Log.d(TAG, "folder: " + folder);
-		File [] files = folder.listFiles();
-		int n_files = files.length;
-		Log.d(TAG, "n_files at start: " + n_files);
-		
-	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
-	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
-	    //View focusButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
-	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
-	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
-	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
-	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
-	    assertTrue(switchCameraButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
-	    assertTrue(switchVideoButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
-	    int exposureVisibility = exposureButton.getVisibility();
-	    int exposureLockVisibility = exposureLockButton.getVisibility();
-	    assertTrue(audioControlButton.getVisibility() == ((has_audio_control_button && !immersive_mode) ? View.VISIBLE : View.GONE));
-	    assertTrue(popupButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
-	    assertTrue(trashButton.getVisibility() == View.GONE);
-	    assertTrue(shareButton.getVisibility() == View.GONE);
-
-		String focus_value = mPreview.getCameraController().getFocusValue();
-		String focus_value_ui = mPreview.getCurrentFocusValue();
-		boolean can_auto_focus = false;
-        boolean manual_can_auto_focus = false;
-		boolean can_focus_area = false;
-        if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) {
-        	can_auto_focus = true;
-        }
-
-        if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) {
-        	manual_can_auto_focus = true;
-        }
-		else if( focus_value.equals("focus_mode_continuous_picture") && !single_tap_photo ) {
-			// if single_tap_photo and continuous mode, we go straight to taking a photo rather than doing a touch to focus
-			manual_can_auto_focus = true;
-		}
-
-        if( mPreview.getMaxNumFocusAreas() != 0 && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") || focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") || focus_value.equals("focus_mode_manual2") ) ) {
-        	can_focus_area = true;
-        }
-		Log.d(TAG, "focus_value? " + focus_value);
-		Log.d(TAG, "can_auto_focus? " + can_auto_focus);
-		Log.d(TAG, "manual_can_auto_focus? " + manual_can_auto_focus);
-		Log.d(TAG, "can_focus_area? " + can_focus_area);
-	    int saved_count = mPreview.count_cameraAutoFocus;
-	    String new_focus_value_ui = mPreview.getCurrentFocusValue();
-		assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
-		assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
-	    if( touch_to_focus ) {
-			// touch to auto-focus with focus area (will also exit immersive mode)
-			// autofocus shouldn't be immediately, but after a delay
-			Thread.sleep(1000);
-		    saved_count = mPreview.count_cameraAutoFocus;
-			Log.d(TAG, "saved count_cameraAutoFocus: " + saved_count);
-			Log.d(TAG, "about to click preview for autofocus");
-			if( double_tap_photo ) {
-				TouchUtils.tapView(MainActivityTest.this, mPreview.getView());
-			}
-			else {
-				TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
-			}
-			this.getInstrumentation().waitForIdleSync();
-			Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
-			assertTrue(mPreview.count_cameraAutoFocus == (manual_can_auto_focus ? saved_count+1 : saved_count));
-			assertTrue(mPreview.hasFocusArea() == can_focus_area);
-			if( can_focus_area ) {
-			    assertTrue(mPreview.getCameraController().getFocusAreas() != null);
-			    assertTrue(mPreview.getCameraController().getFocusAreas().size() == 1);
-			    assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
-			    assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
-			}
-			else {
-			    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
-			    // we still set metering areas
-			    assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
-			    assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
-			}
-		    new_focus_value_ui = mPreview.getCurrentFocusValue();
-			assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
-			if( focus_value.equals("focus_mode_continuous_picture") && !single_tap_photo )
-				assertTrue(mPreview.getCameraController().getFocusValue().equals("focus_mode_auto")); // continuous focus mode switches to auto focus on touch (unless single_tap_photo)
-			else
-				assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
-			if( double_tap_photo ) {
-				Thread.sleep(100);
-				Log.d(TAG, "about to click preview again for double tap");
-				//TouchUtils.tapView(MainActivityTest.this, mPreview.getView());
-				mPreview.onDoubleTap(); // calling tapView twice doesn't seem to work consistently, so we call this directly!
-				this.getInstrumentation().waitForIdleSync();
-			}
-			if( wait_after_focus && !single_tap_photo && !double_tap_photo) {
-				// don't wait after single or double tap photo taking, as the photo taking operation is already started
-				Log.d(TAG, "wait after focus...");
-				Thread.sleep(3000);
-			}
-	    }
-		Log.d(TAG, "saved count_cameraAutoFocus: " + saved_count);
-
-		if( !single_tap_photo && !double_tap_photo ) {
-			View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
-			assertFalse( mActivity.hasThumbnailAnimation() );
-			Log.d(TAG, "about to click take photo");
-		    clickView(takePhotoButton);
-			Log.d(TAG, "done clicking take photo");
-		}
+	private void waitForTakePhoto() {
+		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		//View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+		//View focusButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+		View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+		View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+		View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+		View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 
 		Log.d(TAG, "wait until finished taking photo");
 		long time_s = System.currentTimeMillis();
-	    while( mPreview.isTakingPhoto() ) {
+		while( mPreview.isTakingPhoto() ) {
 			assertTrue( System.currentTimeMillis() - time_s < 20000 ); // make sure the test fails rather than hanging, if for some reason we get stuck (note that testTakePhotoManualISOExposure takes over 10s on Nexus 6)
-		    assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
-		    //assertTrue(!mPreview.isTakingPhoto() || flashButton.getVisibility() == View.GONE);
-		    //assertTrue(!mPreview.isTakingPhoto() || focusButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || exposureButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || exposureLockButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || audioControlButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || popupButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || trashButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || shareButton.getVisibility() == View.GONE);
-	    }
+			assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
+			assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
+			//assertTrue(!mPreview.isTakingPhoto() || flashButton.getVisibility() == View.GONE);
+			//assertTrue(!mPreview.isTakingPhoto() || focusButton.getVisibility() == View.GONE);
+			assertTrue(!mPreview.isTakingPhoto() || exposureButton.getVisibility() == View.GONE);
+			assertTrue(!mPreview.isTakingPhoto() || exposureLockButton.getVisibility() == View.GONE);
+			assertTrue(!mPreview.isTakingPhoto() || audioControlButton.getVisibility() == View.GONE);
+			assertTrue(!mPreview.isTakingPhoto() || popupButton.getVisibility() == View.GONE);
+			assertTrue(!mPreview.isTakingPhoto() || trashButton.getVisibility() == View.GONE);
+			assertTrue(!mPreview.isTakingPhoto() || shareButton.getVisibility() == View.GONE);
+		}
 		Log.d(TAG, "done taking photo");
+	}
 
-		Date date = new Date();
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(date);
-        String suffix = "";
-		if( is_dro ) {
-			suffix = "_DRO";
-		}
-		else if( is_hdr ) {
-			suffix = "_HDR";
-		}
-		else if( is_expo ) {
-			suffix = "_EXP" + (n_expo_images-1);
-		}
-		String expected_filename = "IMG_" + timeStamp + suffix + ".jpg";
-		// allow for possibility that the time has passed on by 1s since taking the photo
-		Date date1 = new Date(date.getTime() - 1000);
-        String timeStamp1 = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(date1);
-		String expected_filename1= "IMG_" + timeStamp1 + suffix + ".jpg";
-		this.getInstrumentation().waitForIdleSync();
-		Log.d(TAG, "after idle sync");
-		Log.d(TAG, "take picture count: " + mPreview.count_cameraTakePicture);
-		assertTrue(mPreview.count_cameraTakePicture==saved_count_cameraTakePicture+1);
-		if( test_wait_capture_result ) {
-			// if test_wait_capture_result, then we'll have waited too long for thumbnail animation
-		}
-		else if( has_thumbnail_anim ) {
-			while( !mActivity.hasThumbnailAnimation() ) {
-				Log.d(TAG, "waiting for thumbnail animation");
-				Thread.sleep(10);
-			}
+	private void subTestTouchToFocus(final boolean wait_after_focus, final boolean single_tap_photo, final boolean double_tap_photo, final boolean manual_can_auto_focus, final boolean can_focus_area, final String focus_value, final String focus_value_ui) throws InterruptedException {
+		// touch to auto-focus with focus area (will also exit immersive mode)
+		// autofocus shouldn't be immediately, but after a delay
+		Thread.sleep(1000);
+		int saved_count = mPreview.count_cameraAutoFocus;
+		Log.d(TAG, "saved count_cameraAutoFocus: " + saved_count);
+		Log.d(TAG, "about to click preview for autofocus");
+		if( double_tap_photo ) {
+			TouchUtils.tapView(MainActivityTest.this, mPreview.getView());
 		}
 		else {
-			assertFalse( mActivity.hasThumbnailAnimation() );
+			TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
 		}
-		mActivity.waitUntilImageQueueEmpty();
-		Log.d(TAG, "mActivity.hasThumbnailAnimation()?: " + mActivity.hasThumbnailAnimation());
+		this.getInstrumentation().waitForIdleSync();
+		Log.d(TAG, "1 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
+		assertTrue(mPreview.count_cameraAutoFocus == (manual_can_auto_focus ? saved_count+1 : saved_count));
+		assertTrue(mPreview.hasFocusArea() == can_focus_area);
+		if( can_focus_area ) {
+			assertTrue(mPreview.getCameraController().getFocusAreas() != null);
+			assertTrue(mPreview.getCameraController().getFocusAreas().size() == 1);
+			assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
+			assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
+		}
+		else {
+			assertTrue(mPreview.getCameraController().getFocusAreas() == null);
+			// we still set metering areas
+			assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
+			assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
+		}
+		String new_focus_value_ui = mPreview.getCurrentFocusValue();
+		assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
+		if( focus_value.equals("focus_mode_continuous_picture") && !single_tap_photo )
+			assertTrue(mPreview.getCameraController().getFocusValue().equals("focus_mode_auto")); // continuous focus mode switches to auto focus on touch (unless single_tap_photo)
+		else
+			assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
+		if( double_tap_photo ) {
+			Thread.sleep(100);
+			Log.d(TAG, "about to click preview again for double tap");
+			//TouchUtils.tapView(MainActivityTest.this, mPreview.getView());
+			mPreview.onDoubleTap(); // calling tapView twice doesn't seem to work consistently, so we call this directly!
+			this.getInstrumentation().waitForIdleSync();
+		}
+		if( wait_after_focus && !single_tap_photo && !double_tap_photo) {
+			// don't wait after single or double tap photo taking, as the photo taking operation is already started
+			Log.d(TAG, "wait after focus...");
+			Thread.sleep(3000);
+		}
+	}
 
+	private void checkFocusInitial(final String focus_value, final String focus_value_ui) {
+		String new_focus_value_ui = mPreview.getCurrentFocusValue();
+		assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
+		assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
+	}
+
+	private void checkFocusAfterTakePhoto(final String focus_value, final String focus_value_ui) {
 		// focus should be back to normal now:
-	    new_focus_value_ui = mPreview.getCurrentFocusValue();
+		String new_focus_value_ui = mPreview.getCurrentFocusValue();
 		Log.d(TAG, "focus_value_ui: " + focus_value_ui);
 		Log.d(TAG, "new new_focus_value_ui: " + new_focus_value_ui);
 		assertTrue(new_focus_value_ui == focus_value_ui || new_focus_value_ui.equals(focus_value_ui)); // also need to do == check, as strings may be null if focus not supported
@@ -2327,11 +2230,50 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		else {
 			assertTrue(new_focus_value.equals(focus_value));
 		}
+	}
 
-		assertTrue( folder.exists() );
-		File [] files2 = folder.listFiles();
-		int n_new_files = files2.length - n_files;
-		Log.d(TAG, "n_new_files: " + n_new_files);
+	private void checkFocusAfterTakePhoto2(final boolean touch_to_focus, final boolean test_wait_capture_result, final boolean locked_focus, final boolean can_auto_focus, final boolean can_focus_area, final int saved_count) {
+		// in locked focus mode, taking photo should never redo an auto-focus
+		// if photo mode, we may do a refocus if the previous auto-focus failed, but not if it succeeded
+		Log.d(TAG, "2 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
+		if( locked_focus ) {
+			assertTrue(mPreview.count_cameraAutoFocus == (can_auto_focus ? saved_count+1 : saved_count));
+		}
+		if( test_wait_capture_result ) {
+			// if test_wait_capture_result, then we'll have waited too long, so focus settings may have changed
+		}
+		else if( touch_to_focus ) {
+			Log.d(TAG, "can_focus_area?: " + can_focus_area);
+			Log.d(TAG, "hasFocusArea?: " + mPreview.hasFocusArea());
+			assertTrue(mPreview.hasFocusArea() == can_focus_area);
+			if( can_focus_area ) {
+				assertTrue(mPreview.getCameraController().getFocusAreas() != null);
+				assertTrue(mPreview.getCameraController().getFocusAreas().size() == 1);
+				assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
+				assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
+			}
+			else {
+				assertTrue(mPreview.getCameraController().getFocusAreas() == null);
+				// we still set metering areas
+				assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
+				assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
+			}
+		}
+		else {
+			assertFalse(mPreview.hasFocusArea());
+			assertTrue(mPreview.getCameraController().getFocusAreas() == null);
+			assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
+		}
+	}
+
+	private int getExpNNewFiles(final boolean is_raw) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
+		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
+		int n_expo_images = Integer.parseInt(n_expo_images_s);
+
 		int exp_n_new_files;
 		if( is_raw )
 			exp_n_new_files = 2;
@@ -2342,10 +2284,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		else
 			exp_n_new_files = 1;
 		Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
-		assertTrue(n_new_files == exp_n_new_files);
+		return exp_n_new_files;
+	}
+
+	private void checkFilenames(final boolean is_raw, final File [] files, final File [] files2) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
+		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+
 		// check files have names as expected
 		String filename_jpeg = null;
 		String filename_dng = null;
+		int n_files = files.length;
 		for(File file : files2) {
 			Log.d(TAG, "file: " + file);
 			boolean is_new = true;
@@ -2398,6 +2349,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "filename_base_dng: " + filename_base_dng);
 			assertTrue( filename_base_jpeg.equals(filename_base_dng) );
 		}
+	}
+
+	private void checkFilesAfterTakePhoto(final boolean is_raw, final boolean test_wait_capture_result, final File [] files, final String expected_filename, final String expected_filename1) throws InterruptedException {
+		File folder = mActivity.getImageFolder();
+		int n_files = files.length;
+		assertTrue( folder.exists() );
+		File [] files2 = folder.listFiles();
+		int n_new_files = files2.length - n_files;
+		Log.d(TAG, "n_new_files: " + n_new_files);
+		int exp_n_new_files = getExpNNewFiles(is_raw);
+		assertTrue(n_new_files == exp_n_new_files);
+		checkFilenames(is_raw, files, files2);
 		Thread.sleep(1500); // wait until we've scanned
 		if( test_wait_capture_result ) {
 			// if test_wait_capture_result, then it may take longer before we've scanned
@@ -2406,59 +2369,172 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "failed to scan: " + mActivity.getStorageUtils().failed_to_scan);
 			assertFalse(mActivity.getStorageUtils().failed_to_scan);
 		}
-		
+
 		assertTrue(mActivity.test_last_saved_image != null);
 		File saved_image_file = new File(mActivity.test_last_saved_image);
 		Log.d(TAG, "saved name: " + saved_image_file.getName());
 		Log.d(TAG, "expected name: " + expected_filename);
 		Log.d(TAG, "expected name1: " + expected_filename1);
 		assertTrue(expected_filename.equals(saved_image_file.getName()) || expected_filename1.equals(saved_image_file.getName()));
-		
-		// in locked focus mode, taking photo should never redo an auto-focus
-		// if photo mode, we may do a refocus if the previous auto-focus failed, but not if it succeeded
-		Log.d(TAG, "2 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus);
-		if( locked_focus ) {
-			assertTrue(mPreview.count_cameraAutoFocus == (can_auto_focus ? saved_count+1 : saved_count));
-		}
-		if( test_wait_capture_result ) {
-			// if test_wait_capture_result, then we'll have waited too long, so focus settings may have changed
-		}
-		else if( touch_to_focus ) {
-			Log.d(TAG, "can_focus_area?: " + can_focus_area);
-			Log.d(TAG, "hasFocusArea?: " + mPreview.hasFocusArea());
-			assertTrue(mPreview.hasFocusArea() == can_focus_area);
-			if( can_focus_area ) {
-			    assertTrue(mPreview.getCameraController().getFocusAreas() != null);
-			    assertTrue(mPreview.getCameraController().getFocusAreas().size() == 1);
-			    assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
-			    assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
-			}
-			else {
-			    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
-			    // we still set metering areas
-			    assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
-			    assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
-			}
-		}
-		else {
-			assertFalse(mPreview.hasFocusArea());
-		    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
-		    assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
-		}
+	}
+
+	private void postTakePhotoChecks(final boolean immersive_mode, final int exposureVisibility, final int exposureLockVisibility) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
+
+		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+		View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+		View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+		View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+		View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
 
 		// trash/share only shown when preview is paused after taking a photo
 
 		assertTrue(mPreview.isPreviewStarted()); // check preview restarted
-	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
-	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
-	    if( !immersive_mode ) {
-	    	assertTrue(exposureButton.getVisibility() == exposureVisibility);
-	    	assertTrue(exposureLockButton.getVisibility() == exposureLockVisibility);
-	    }
-	    assertTrue(audioControlButton.getVisibility() == (has_audio_control_button ? View.VISIBLE : View.GONE));
-	    assertTrue(popupButton.getVisibility() == View.VISIBLE);
+		assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
+		assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
+		if( !immersive_mode ) {
+			assertTrue(exposureButton.getVisibility() == exposureVisibility);
+			assertTrue(exposureLockButton.getVisibility() == exposureLockVisibility);
+		}
+		assertTrue(audioControlButton.getVisibility() == (has_audio_control_button ? View.VISIBLE : View.GONE));
+		assertTrue(popupButton.getVisibility() == View.VISIBLE);
+		assertTrue(trashButton.getVisibility() == View.GONE);
+		assertTrue(shareButton.getVisibility() == View.GONE);
+	}
+
+	/*
+	 * Note that we pass test_wait_capture_result as a parameter rather than reading from the activity, as for some reason this sometimes resets to false?! Declaring it volatile doesn't fix the problem.
+	 */
+	private void subTestTakePhoto(boolean locked_focus, boolean immersive_mode, boolean touch_to_focus, boolean wait_after_focus, boolean single_tap_photo, boolean double_tap_photo, boolean is_raw, boolean test_wait_capture_result) throws InterruptedException {
+		assertTrue(mPreview.isPreviewStarted());
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		boolean has_thumbnail_anim = sharedPreferences.getBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), true);
+		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
+		boolean is_dro = mActivity.supportsDRO() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_dro");
+		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
+		int n_expo_images = Integer.parseInt(n_expo_images_s);
+		
+		int saved_count_cameraTakePicture = mPreview.count_cameraTakePicture;
+		
+		// count initial files in folder
+		File folder = mActivity.getImageFolder();
+		Log.d(TAG, "folder: " + folder);
+		File [] files = folder.listFiles();
+		int n_files = files.length;
+		Log.d(TAG, "n_files at start: " + n_files);
+		
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
+	    //View focusButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
+	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    View audioControlButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.audio_control);
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+	    View trashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.trash);
+	    View shareButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.share);
+	    assertTrue(switchCameraButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
+	    assertTrue(switchVideoButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
+	    int exposureVisibility = exposureButton.getVisibility();
+	    int exposureLockVisibility = exposureLockButton.getVisibility();
+	    assertTrue(audioControlButton.getVisibility() == ((has_audio_control_button && !immersive_mode) ? View.VISIBLE : View.GONE));
+	    assertTrue(popupButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 	    assertTrue(trashButton.getVisibility() == View.GONE);
 	    assertTrue(shareButton.getVisibility() == View.GONE);
+
+		String focus_value = mPreview.getCameraController().getFocusValue();
+		String focus_value_ui = mPreview.getCurrentFocusValue();
+		boolean can_auto_focus = false;
+		boolean manual_can_auto_focus = false;
+		boolean can_focus_area = false;
+		if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) {
+			can_auto_focus = true;
+		}
+
+		if( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") ) {
+			manual_can_auto_focus = true;
+		}
+		else if( focus_value.equals("focus_mode_continuous_picture") && !single_tap_photo ) {
+			// if single_tap_photo and continuous mode, we go straight to taking a photo rather than doing a touch to focus
+			manual_can_auto_focus = true;
+		}
+
+		if( mPreview.getMaxNumFocusAreas() != 0 && ( focus_value.equals("focus_mode_auto") || focus_value.equals("focus_mode_macro") || focus_value.equals("focus_mode_continuous_picture") || focus_value.equals("focus_mode_continuous_video") || focus_value.equals("focus_mode_manual2") ) ) {
+			can_focus_area = true;
+		}
+		Log.d(TAG, "focus_value? " + focus_value);
+		Log.d(TAG, "can_auto_focus? " + can_auto_focus);
+		Log.d(TAG, "manual_can_auto_focus? " + manual_can_auto_focus);
+		Log.d(TAG, "can_focus_area? " + can_focus_area);
+		int saved_count = mPreview.count_cameraAutoFocus;
+
+		checkFocusInitial(focus_value, focus_value_ui);
+
+	    if( touch_to_focus ) {
+			subTestTouchToFocus(wait_after_focus, single_tap_photo, double_tap_photo, manual_can_auto_focus, can_focus_area, focus_value, focus_value_ui);
+	    }
+		Log.d(TAG, "saved count_cameraAutoFocus: " + saved_count);
+
+		if( !single_tap_photo && !double_tap_photo ) {
+			View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+			assertFalse( mActivity.hasThumbnailAnimation() );
+			Log.d(TAG, "about to click take photo");
+		    clickView(takePhotoButton);
+			Log.d(TAG, "done clicking take photo");
+		}
+
+		waitForTakePhoto();
+
+		Date date = new Date();
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(date);
+        String suffix = "";
+		if( is_dro ) {
+			suffix = "_DRO";
+		}
+		else if( is_hdr ) {
+			suffix = "_HDR";
+		}
+		else if( is_expo ) {
+			suffix = "_EXP" + (n_expo_images-1);
+		}
+		String expected_filename = "IMG_" + timeStamp + suffix + ".jpg";
+		// allow for possibility that the time has passed on by 1s since taking the photo
+		Date date1 = new Date(date.getTime() - 1000);
+        String timeStamp1 = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(date1);
+		String expected_filename1= "IMG_" + timeStamp1 + suffix + ".jpg";
+		this.getInstrumentation().waitForIdleSync();
+		Log.d(TAG, "after idle sync");
+		Log.d(TAG, "take picture count: " + mPreview.count_cameraTakePicture);
+		assertTrue(mPreview.count_cameraTakePicture==saved_count_cameraTakePicture+1);
+		if( test_wait_capture_result ) {
+			// if test_wait_capture_result, then we'll have waited too long for thumbnail animation
+		}
+		else if( has_thumbnail_anim ) {
+			while( !mActivity.hasThumbnailAnimation() ) {
+				Log.d(TAG, "waiting for thumbnail animation");
+				Thread.sleep(10);
+			}
+		}
+		else {
+			assertFalse( mActivity.hasThumbnailAnimation() );
+		}
+		mActivity.waitUntilImageQueueEmpty();
+		Log.d(TAG, "mActivity.hasThumbnailAnimation()?: " + mActivity.hasThumbnailAnimation());
+
+		checkFocusAfterTakePhoto(focus_value, focus_value_ui);
+
+		checkFilesAfterTakePhoto(is_raw, test_wait_capture_result, files, expected_filename, expected_filename1);
+
+		checkFocusAfterTakePhoto2(touch_to_focus, test_wait_capture_result, locked_focus, can_auto_focus, can_focus_area, saved_count);
+
+		postTakePhotoChecks(immersive_mode, exposureVisibility, exposureLockVisibility);
 	}
 
 	public void testTakePhoto() throws InterruptedException {
@@ -3268,19 +3344,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
 
-		Log.d(TAG, "wait until finished taking photo");
-	    while( mPreview.isTakingPhoto() ) {
-		    assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || popupButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || audioControlButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || exposureButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || exposureLockButton.getVisibility() == View.GONE);
-		    // trash/share not yet shown, as still taking the photo
-		    assertTrue(!mPreview.isTakingPhoto() || trashButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || shareButton.getVisibility() == View.GONE);
-	    }
-		Log.d(TAG, "done taking photo");
+		waitForTakePhoto();
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 		assertTrue(mPreview.count_cameraTakePicture==1);
@@ -3425,21 +3489,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
 
-		Log.d(TAG, "wait until finished taking photo");
-	    while( mPreview.isTakingPhoto() ) {
-		    assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
-		    //assertTrue(!mPreview.isTakingPhoto() || flashButton.getVisibility() == View.GONE);
-		    //assertTrue(!mPreview.isTakingPhoto() || focusButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || exposureButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || exposureLockButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || audioControlButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || popupButton.getVisibility() == View.GONE);
-		    // trash/share not yet shown, as still taking the photo
-		    assertTrue(!mPreview.isTakingPhoto() || trashButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || shareButton.getVisibility() == View.GONE);
-	    }
-		Log.d(TAG, "done taking photo");
+		waitForTakePhoto();
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 		Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
@@ -3750,20 +3800,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take photo");
 
-		Log.d(TAG, "wait until finished taking photo");
-	    while( mPreview.isTakingPhoto() ) {
-		    assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
-		    //assertTrue(!mPreview.isTakingPhoto() || flashButton.getVisibility() == View.GONE);
-		    //assertTrue(!mPreview.isTakingPhoto() || focusButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || exposureButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || exposureLockButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || audioControlButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || popupButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || trashButton.getVisibility() == View.GONE);
-		    assertTrue(!mPreview.isTakingPhoto() || shareButton.getVisibility() == View.GONE);
-	    }
-		Log.d(TAG, "done taking photo");
+		waitForTakePhoto();
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 		assertTrue(mPreview.count_cameraTakePicture==1);

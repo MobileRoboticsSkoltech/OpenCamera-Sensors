@@ -1173,11 +1173,7 @@ public class ImageSaver extends Thread {
         	    			Log.d(TAG, "add GPS direction exif info");
     	            	try {
 	    	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
-	        	            setGPSDirectionExif(exif, store_geo_direction, request.geo_direction);
-	        	            setDateTimeExif(exif);
-	        	            if( needGPSTimestampHack(using_camera2, store_location) ) {
-	        	            	fixGPSTimestamp(exif, current_date);
-	        	            }
+							modifyExif(exif, using_camera2, current_date, store_location, store_geo_direction, request.geo_direction);
 	    	            	exif.saveAttributes();
     	            	}
     		    		catch(NoClassDefFoundError exception) {
@@ -1355,12 +1351,12 @@ public class ImageSaver extends Thread {
         return success;
 	}
 
-	@SuppressWarnings("deprecation")
 	/**
 	 *  Note that we use several ExifInterface tags that are now deprecated in API level 23 and 24. These are replaced with new tags that have
 	 *  the same string value (e.g., TAG_APERTURE replaced with TAG_F_NUMBER, but both have value "FNumber"). We use the deprecated versions
 	 *  to avoid complicating the code (we'd still have to read the deprecated values for older devices).
 	 */
+	@SuppressWarnings("deprecation")
 	private int setExifFromFile(final Request request, File from_file, File to_file) throws IOException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExifFromFile");
@@ -1649,11 +1645,7 @@ public class ImageSaver extends Thread {
 					exif_new.setAttribute(ExifInterface.TAG_USER_COMMENT, exif_user_comment);
 			}
 
-			setGPSDirectionExif(exif_new, request.store_geo_direction, request.geo_direction);
-			setDateTimeExif(exif_new);
-			if( needGPSTimestampHack(request.using_camera2, request.store_location) ) {
-				fixGPSTimestamp(exif_new, request.current_date);
-			}
+			modifyExif(exif_new, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction);
 			exif_new.saveAttributes();
 		}
 		catch(NoClassDefFoundError exception) {
@@ -1855,6 +1847,16 @@ public class ImageSaver extends Thread {
 		}
 		return bitmap;
     }
+
+	/** Makes various modifications to the exif data, if necessary.
+	 */
+    private void modifyExif(ExifInterface exif, boolean using_camera2, Date current_date, boolean store_location, boolean store_geo_direction, double geo_direction) {
+		setGPSDirectionExif(exif, store_geo_direction, geo_direction);
+		setDateTimeExif(exif);
+		if( needGPSTimestampHack(using_camera2, store_location) ) {
+			fixGPSTimestamp(exif, current_date);
+		}
+	}
 
 	private void setGPSDirectionExif(ExifInterface exif, boolean store_geo_direction, double geo_direction) {
     	if( store_geo_direction ) {
