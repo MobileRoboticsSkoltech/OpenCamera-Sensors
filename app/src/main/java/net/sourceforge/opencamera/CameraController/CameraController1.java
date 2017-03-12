@@ -448,6 +448,15 @@ public class CameraController1 extends CameraController {
 		String default_value = getDefaultWhiteBalance();
     	Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedWhiteBalance();
+		if( values != null ) {
+			// Some devices (e.g., OnePlus 3T) claim to support a "manual" mode, even though this
+			// isn't one of the possible white balances defined in Camera.Parameters.
+			// Since the old API doesn't support white balance temperatures, and this mode seems to
+			// have no useful effect, we remove it to avoid confusion.
+			while( values.contains("manual") ) {
+				values.remove("manual");
+			}
+		}
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
 			if( !parameters.getWhiteBalance().equals(supported_values.selected_value) ) {
