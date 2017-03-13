@@ -1139,6 +1139,20 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
+		if( MyDebug.LOG ) {
+			int[] ois_modes = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
+			if (ois_modes != null) {
+				for (int ois_mode : ois_modes) {
+					if (MyDebug.LOG)
+						Log.d(TAG, "ois mode: " + ois_mode);
+					if (ois_mode == CameraCharacteristics.LENS_OPTICAL_STABILIZATION_MODE_ON) {
+						if (MyDebug.LOG)
+							Log.d(TAG, "supports ois");
+					}
+				}
+			}
+		}
+
 		int [] capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
 		boolean capabilities_raw = false;
 		boolean capabilities_high_speed_video = false;
