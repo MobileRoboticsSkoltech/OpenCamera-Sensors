@@ -819,23 +819,26 @@ public class DrawPreview {
 			}
 		}
 		
+		// set up text etc for the multiple lines of "info" (time, free mem, etc)
+		p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+		p.setTextAlign(Paint.Align.LEFT);
+		int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
+		int location_y = top_y;
+		final int diff_y = (int) (16 * scale + 0.5f); // convert dps to pixels
+		if( ui_rotation == 90 || ui_rotation == 270 ) {
+			int diff = canvas.getWidth() - canvas.getHeight();
+			location_x += diff/2;
+			location_y -= diff/2;
+		}
+		if( ui_rotation == 90 ) {
+			location_y = canvas.getHeight() - location_y - location_size;
+		}
+		if( ui_rotation == 180 ) {
+			location_x = canvas.getWidth() - location_x;
+			p.setTextAlign(Paint.Align.RIGHT);
+		}
+
 		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.LEFT);
-			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-			int location_y = top_y;
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				int diff = canvas.getWidth() - canvas.getHeight();
-				location_x += diff/2;
-				location_y -= diff/2;
-			}
-			if( ui_rotation == 90 ) {
-				location_y = canvas.getHeight() - location_y - location_size;
-			}
-			if( ui_rotation == 180 ) {
-				location_x = canvas.getWidth() - location_x;
-				p.setTextAlign(Paint.Align.RIGHT);
-			}
 	        Calendar c = Calendar.getInstance();
 	        // n.b., DateFormat.getTimeInstance() ignores user preferences such as 12/24 hour or date format, but this is an Android bug.
 	        // Whilst DateUtils.formatDateTime doesn't have that problem, it doesn't print out seconds! See:
@@ -848,23 +851,13 @@ public class DrawPreview {
 	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
 	    }
 
+		if( ui_rotation == 90 ) {
+			location_y -= diff_y;
+		}
+		else {
+			location_y += diff_y;
+		}
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.LEFT);
-			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-			int location_y = top_y + (int) (16 * scale + 0.5f); // convert dps to pixels
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				int diff = canvas.getWidth() - canvas.getHeight();
-				location_x += diff/2;
-				location_y -= diff/2;
-			}
-			if( ui_rotation == 90 ) {
-				location_y = canvas.getHeight() - location_y - location_size;
-			}
-			if( ui_rotation == 180 ) {
-				location_x = canvas.getWidth() - location_x;
-				p.setTextAlign(Paint.Align.RIGHT);
-			}
 			long time_now = System.currentTimeMillis();
 			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 1000 ) {
 				long free_mb = main_activity.freeMemory();
@@ -878,31 +871,28 @@ public class DrawPreview {
 			}
 		}
 
+		if( ui_rotation == 90 ) {
+			location_y -= diff_y;
+		}
+		else {
+			location_y += diff_y;
+		}
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.LEFT);
 			// padding to align with ISO text
 			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
-			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-			int location_y = top_y + (int) (32 * scale + 0.5f); // convert dps to pixels
 			int location_x2 = location_x - flash_padding;
 			int location_y2 = top_y + (int) (50 * scale + 0.5f); // convert dps to pixels
 			final int flash_size = (int) (16 * scale + 0.5f); // convert dps to pixels
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
 				int diff = canvas.getWidth() - canvas.getHeight();
-				location_x += diff/2;
 				location_x2 += diff/2;
-				location_y -= diff/2;
 				location_y2 -= diff/2;
 			}
 			if( ui_rotation == 90 ) {
-				location_y = canvas.getHeight() - location_y - location_size;
 				location_y2 = canvas.getHeight() - location_y2 - location_size;
 			}
 			if( ui_rotation == 180 ) {
-				location_x = canvas.getWidth() - location_x;
 				location_x2 = location_x - flash_size + flash_padding;
-				p.setTextAlign(Paint.Align.RIGHT);
 			}
 			String string = "";
 			if( camera_controller.captureResultHasIso() ) {
