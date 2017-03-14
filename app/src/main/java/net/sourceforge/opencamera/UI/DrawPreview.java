@@ -59,8 +59,10 @@ public class DrawPreview {
 	private Bitmap location_off_bitmap;
 	private final Rect location_dest = new Rect();
 
+	private Bitmap raw_bitmap;
+	private Bitmap auto_stabilise_bitmap;
 	private Bitmap flash_bitmap;
-	private final Rect flash_dest = new Rect();
+	private final Rect icon_dest = new Rect();
 	private long needs_flash_time = -1; // time when flash symbol comes on (used for fade-in effect)
 
 	private Bitmap last_thumbnail; // thumbnail of last picture taken
@@ -99,6 +101,8 @@ public class DrawPreview {
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth);
     	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth_off);
+		raw_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.raw_icon);
+		auto_stabilise_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.auto_stabilise_icon);
 		flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
 	}
 	
@@ -113,6 +117,14 @@ public class DrawPreview {
 		if( location_off_bitmap != null ) {
 			location_off_bitmap.recycle();
 			location_off_bitmap = null;
+		}
+		if( raw_bitmap != null ) {
+			raw_bitmap.recycle();
+			raw_bitmap = null;
+		}
+		if( auto_stabilise_bitmap != null ) {
+			auto_stabilise_bitmap.recycle();
+			auto_stabilise_bitmap = null;
 		}
 		if( flash_bitmap != null ) {
 			flash_bitmap.recycle();
@@ -529,10 +541,45 @@ public class DrawPreview {
 			// padding to align with earlier text
 			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
 			int location_x2 = location_x - flash_padding;
-			final int flash_size = (int) (16 * scale + 0.5f); // convert dps to pixels
+			final int icon_size = (int) (16 * scale + 0.5f); // convert dps to pixels
 			if( ui_rotation == 180 ) {
-				location_x2 = location_x - flash_size + flash_padding;
+				location_x2 = location_x - icon_size + flash_padding;
 			}
+
+			if( applicationInterface.isRawPref() ) {
+				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
+				p.setStyle(Paint.Style.FILL);
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				canvas.drawRect(icon_dest, p);
+				p.setAlpha(255);
+				canvas.drawBitmap(raw_bitmap, null, icon_dest, p);
+
+				if( ui_rotation == 180 ) {
+					location_x2 -= icon_size + flash_padding;
+				}
+				else {
+					location_x2 += icon_size + flash_padding;
+				}
+			}
+
+			if( applicationInterface.getAutoStabilisePref() ) {
+				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
+				p.setStyle(Paint.Style.FILL);
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				canvas.drawRect(icon_dest, p);
+				p.setAlpha(255);
+				canvas.drawBitmap(auto_stabilise_bitmap, null, icon_dest, p);
+
+				if( ui_rotation == 180 ) {
+					location_x2 -= icon_size + flash_padding;
+				}
+				else {
+					location_x2 += icon_size + flash_padding;
+				}
+			}
+
 			String flash_value = preview.getCurrentFlashValue();
 			// note, flash_frontscreen_auto not yet support for the flash symbol (as camera_controller.needsFlash() only returns info on the built-in actual flash, not frontscreen flash)
 			if( flash_value != null && flash_value.equals("flash_auto") && camera_controller.needsFlash() ) {
@@ -542,16 +589,16 @@ public class DrawPreview {
 					float alpha = (time_now - needs_flash_time)/(float)fade_ms;
 					if( time_now - needs_flash_time >= fade_ms )
 						alpha = 1.0f;
-					flash_dest.set(location_x2, location_y, location_x2 + flash_size, location_y + flash_size);
+					icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 
+					/*if( MyDebug.LOG )
+						Log.d(TAG, "alpha: " + alpha);*/
 					p.setStyle(Paint.Style.FILL);
 					p.setColor(Color.BLACK);
 					p.setAlpha((int)(64*alpha));
-					canvas.drawRect(flash_dest, p);
-					/*if( MyDebug.LOG )
-						Log.d(TAG, "alpha: " + alpha);*/
+					canvas.drawRect(icon_dest, p);
 					p.setAlpha((int)(255*alpha));
-					canvas.drawBitmap(flash_bitmap, null, flash_dest, p);
+					canvas.drawBitmap(flash_bitmap, null, icon_dest, p);
 				}
 				else {
 					needs_flash_time = time_now;
