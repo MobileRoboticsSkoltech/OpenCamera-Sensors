@@ -849,14 +849,15 @@ public class DrawPreview {
 	        String current_time = dateFormatTimeInstance.format(c.getTime());
 	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
 	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+
+			if( ui_rotation == 90 ) {
+				location_y -= diff_y;
+			}
+			else {
+				location_y += diff_y;
+			}
 	    }
 
-		if( ui_rotation == 90 ) {
-			location_y -= diff_y;
-		}
-		else {
-			location_y += diff_y;
-		}
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
 			long time_now = System.currentTimeMillis();
 			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 1000 ) {
@@ -869,14 +870,15 @@ public class DrawPreview {
 			if( free_memory_gb >= 0.0f ) {
 				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation), Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
 			}
+
+			if( ui_rotation == 90 ) {
+				location_y -= diff_y;
+			}
+			else {
+				location_y += diff_y;
+			}
 		}
 
-		if( ui_rotation == 90 ) {
-			location_y -= diff_y;
-		}
-		else {
-			location_y += diff_y;
-		}
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
 			String string = "";
 			if( camera_controller.captureResultHasIso() ) {
@@ -929,16 +931,23 @@ public class DrawPreview {
 				string = preview.getFocusDistanceString(dist_min, dist_max);
 				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y2, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true); // Yellow 500
 			}*/
+
+			if( ui_rotation == 90 ) {
+				location_y -= diff_y;
+			}
+			else {
+				location_y += diff_y;
+			}
 		}
 
-		final int symbols_diff_y = (int) (18 * scale + 0.5f); // convert dps to pixels;
-		if( ui_rotation == 90 ) {
-			location_y -= symbols_diff_y;
-		}
-		else {
-			location_y += symbols_diff_y;
-		}
 		if( camera_controller != null ) {
+			final int symbols_diff_y = (int) (2 * scale + 0.5f); // convert dps to pixels;
+			if( ui_rotation == 90 ) {
+				location_y -= symbols_diff_y;
+			}
+			else {
+				location_y += symbols_diff_y;
+			}
 			// padding to align with earlier text
 			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
 			int location_x2 = location_x - flash_padding;
