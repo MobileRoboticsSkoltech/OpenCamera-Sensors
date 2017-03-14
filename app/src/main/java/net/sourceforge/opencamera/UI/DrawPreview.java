@@ -878,22 +878,6 @@ public class DrawPreview {
 			location_y += diff_y;
 		}
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
-			// padding to align with ISO text
-			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
-			int location_x2 = location_x - flash_padding;
-			int location_y2 = top_y + (int) (50 * scale + 0.5f); // convert dps to pixels
-			final int flash_size = (int) (16 * scale + 0.5f); // convert dps to pixels
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				int diff = canvas.getWidth() - canvas.getHeight();
-				location_x2 += diff/2;
-				location_y2 -= diff/2;
-			}
-			if( ui_rotation == 90 ) {
-				location_y2 = canvas.getHeight() - location_y2 - location_size;
-			}
-			if( ui_rotation == 180 ) {
-				location_x2 = location_x - flash_size + flash_padding;
-			}
 			String string = "";
 			if( camera_controller.captureResultHasIso() ) {
 				int iso = camera_controller.captureResultIso();
@@ -945,7 +929,23 @@ public class DrawPreview {
 				string = preview.getFocusDistanceString(dist_min, dist_max);
 				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y2, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true); // Yellow 500
 			}*/
+		}
 
+		final int symbols_diff_y = (int) (18 * scale + 0.5f); // convert dps to pixels;
+		if( ui_rotation == 90 ) {
+			location_y -= symbols_diff_y;
+		}
+		else {
+			location_y += symbols_diff_y;
+		}
+		if( camera_controller != null ) {
+			// padding to align with earlier text
+			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
+			int location_x2 = location_x - flash_padding;
+			final int flash_size = (int) (16 * scale + 0.5f); // convert dps to pixels
+			if( ui_rotation == 180 ) {
+				location_x2 = location_x - flash_size + flash_padding;
+			}
 			String flash_value = preview.getCurrentFlashValue();
 			// note, flash_frontscreen_auto not yet support for the flash symbol (as camera_controller.needsFlash() only returns info on the built-in actual flash, not frontscreen flash)
 			if( flash_value != null && flash_value.equals("flash_auto") && camera_controller.needsFlash() ) {
@@ -955,7 +955,7 @@ public class DrawPreview {
 					float alpha = (time_now - needs_flash_time)/(float)fade_ms;
 					if( time_now - needs_flash_time >= fade_ms )
 						alpha = 1.0f;
-					flash_dest.set(location_x2, location_y2, location_x2 + flash_size, location_y2 + flash_size);
+					flash_dest.set(location_x2, location_y, location_x2 + flash_size, location_y + flash_size);
 
 					p.setStyle(Paint.Style.FILL);
 					p.setColor(Color.BLACK);
