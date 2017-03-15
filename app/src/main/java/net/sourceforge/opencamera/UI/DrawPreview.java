@@ -59,8 +59,10 @@ public class DrawPreview {
 	private Bitmap location_off_bitmap;
 	private final Rect location_dest = new Rect();
 
+	private Bitmap raw_bitmap;
+	private Bitmap auto_stabilise_bitmap;
 	private Bitmap flash_bitmap;
-	private final Rect flash_dest = new Rect();
+	private final Rect icon_dest = new Rect();
 	private long needs_flash_time = -1; // time when flash symbol comes on (used for fade-in effect)
 
 	private Bitmap last_thumbnail; // thumbnail of last picture taken
@@ -99,6 +101,8 @@ public class DrawPreview {
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth);
     	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth_off);
+		raw_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.raw_icon);
+		auto_stabilise_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.auto_stabilise_icon);
 		flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
 	}
 	
@@ -113,6 +117,14 @@ public class DrawPreview {
 		if( location_off_bitmap != null ) {
 			location_off_bitmap.recycle();
 			location_off_bitmap = null;
+		}
+		if( raw_bitmap != null ) {
+			raw_bitmap.recycle();
+			raw_bitmap = null;
+		}
+		if( auto_stabilise_bitmap != null ) {
+			auto_stabilise_bitmap.recycle();
+			auto_stabilise_bitmap = null;
 		}
 		if( flash_bitmap != null ) {
 			flash_bitmap.recycle();
@@ -386,6 +398,214 @@ public class DrawPreview {
 			if( diff > 0 ) {
 				canvas.drawLine(diff, 0.0f, diff+canvas.getHeight()-1.0f, canvas.getHeight()-1.0f, p);
 				canvas.drawLine(diff+canvas.getHeight()-1.0f, 0.0f, diff, canvas.getHeight()-1.0f, p);
+			}
+		}
+	}
+
+	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size, final String ybounds_text) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		Preview preview  = main_activity.getPreview();
+		CameraController camera_controller = preview.getCameraController();
+		int ui_rotation = preview.getUIRotation();
+		final float scale = getContext().getResources().getDisplayMetrics().density;
+
+		// set up text etc for the multiple lines of "info" (time, free mem, etc)
+		p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+		p.setTextAlign(Paint.Align.LEFT);
+		int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
+		int location_y = top_y;
+		final int diff_y = (int) (16 * scale + 0.5f); // convert dps to pixels
+		if( ui_rotation == 90 || ui_rotation == 270 ) {
+			int diff = canvas.getWidth() - canvas.getHeight();
+			location_x += diff/2;
+			location_y -= diff/2;
+		}
+		if( ui_rotation == 90 ) {
+			location_y = canvas.getHeight() - location_y - location_size;
+		}
+		if( ui_rotation == 180 ) {
+			location_x = canvas.getWidth() - location_x;
+			p.setTextAlign(Paint.Align.RIGHT);
+		}
+
+		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
+	        Calendar c = Calendar.getInstance();
+	        // n.b., DateFormat.getTimeInstance() ignores user preferences such as 12/24 hour or date format, but this is an Android bug.
+	        // Whilst DateUtils.formatDateTime doesn't have that problem, it doesn't print out seconds! See:
+	        // http://stackoverflow.com/questions/15981516/simpledateformat-gettimeinstance-ignores-24-hour-format
+	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
+	        // http://code.google.com/p/android/issues/detail?id=42104
+	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
+	        String current_time = dateFormatTimeInstance.format(c.getTime());
+	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
+	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+
+			if( ui_rotation == 90 ) {
+				location_y -= diff_y;
+			}
+			else {
+				location_y += diff_y;
+			}
+	    }
+
+		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
+			long time_now = System.currentTimeMillis();
+			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 1000 ) {
+				long free_mb = main_activity.freeMemory();
+				if( free_mb >= 0 ) {
+					free_memory_gb = free_mb/1024.0f;
+				}
+				last_free_memory_time = time_now; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
+			}
+			if( free_memory_gb >= 0.0f ) {
+				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation), Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+			}
+
+			if( ui_rotation == 90 ) {
+				location_y -= diff_y;
+			}
+			else {
+				location_y += diff_y;
+			}
+		}
+
+		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
+			String string = "";
+			if( camera_controller.captureResultHasIso() ) {
+				int iso = camera_controller.captureResultIso();
+				if( string.length() > 0 )
+					string += " ";
+				string += preview.getISOString(iso);
+			}
+			if( camera_controller.captureResultHasExposureTime() ) {
+				long exposure_time = camera_controller.captureResultExposureTime();
+				if( string.length() > 0 )
+					string += " ";
+				string += preview.getExposureTimeString(exposure_time);
+			}
+			/*if( camera_controller.captureResultHasFrameDuration() ) {
+				long frame_duration = camera_controller.captureResultFrameDuration();
+				if( string.length() > 0 )
+					string += " ";
+				string += preview.getFrameDurationString(frame_duration);
+			}*/
+			if( string.length() > 0 ) {
+				boolean is_scanning = false;
+				if( camera_controller.captureResultIsAEScanning() ) {
+					// only show as scanning if in auto ISO mode (problem on Nexus 6 at least that if we're in manual ISO mode, after pausing and
+					// resuming, the camera driver continually reports CONTROL_AE_STATE_SEARCHING)
+					String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
+					if( value.equals("auto") ) {
+						is_scanning = true;
+					}
+				}
+
+				int text_color = Color.rgb(255, 235, 59); // Yellow 500
+				if( is_scanning ) {
+					// we only change the color if ae scanning is at least a certain time, otherwise we get a lot of flickering of the color
+					if( ae_started_scanning_ms == -1 ) {
+						ae_started_scanning_ms = System.currentTimeMillis();
+					}
+					else if( System.currentTimeMillis() - ae_started_scanning_ms > 500 ) {
+						text_color = Color.rgb(244, 67, 54); // Red 500
+					}
+				}
+				else {
+					ae_started_scanning_ms = -1;
+				}
+				applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
+			}
+			/*if( camera_controller.captureResultHasFocusDistance() ) {
+				float dist_min = camera_controller.captureResultFocusDistanceMin();
+				float dist_max = camera_controller.captureResultFocusDistanceMin();
+				string = preview.getFocusDistanceString(dist_min, dist_max);
+				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y2, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true); // Yellow 500
+			}*/
+
+			if( ui_rotation == 90 ) {
+				location_y -= diff_y;
+			}
+			else {
+				location_y += diff_y;
+			}
+		}
+
+		if( camera_controller != null ) {
+			final int symbols_diff_y = (int) (2 * scale + 0.5f); // convert dps to pixels;
+			if( ui_rotation == 90 ) {
+				location_y -= symbols_diff_y;
+			}
+			else {
+				location_y += symbols_diff_y;
+			}
+			// padding to align with earlier text
+			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
+			int location_x2 = location_x - flash_padding;
+			final int icon_size = (int) (16 * scale + 0.5f); // convert dps to pixels
+			if( ui_rotation == 180 ) {
+				location_x2 = location_x - icon_size + flash_padding;
+			}
+
+			if( applicationInterface.isRawPref() ) {
+				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
+				p.setStyle(Paint.Style.FILL);
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				canvas.drawRect(icon_dest, p);
+				p.setAlpha(255);
+				canvas.drawBitmap(raw_bitmap, null, icon_dest, p);
+
+				if( ui_rotation == 180 ) {
+					location_x2 -= icon_size + flash_padding;
+				}
+				else {
+					location_x2 += icon_size + flash_padding;
+				}
+			}
+
+			if( applicationInterface.getAutoStabilisePref() ) {
+				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
+				p.setStyle(Paint.Style.FILL);
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				canvas.drawRect(icon_dest, p);
+				p.setAlpha(255);
+				canvas.drawBitmap(auto_stabilise_bitmap, null, icon_dest, p);
+
+				if( ui_rotation == 180 ) {
+					location_x2 -= icon_size + flash_padding;
+				}
+				else {
+					location_x2 += icon_size + flash_padding;
+				}
+			}
+
+			String flash_value = preview.getCurrentFlashValue();
+			// note, flash_frontscreen_auto not yet support for the flash symbol (as camera_controller.needsFlash() only returns info on the built-in actual flash, not frontscreen flash)
+			if( flash_value != null && flash_value.equals("flash_auto") && camera_controller.needsFlash() ) {
+				long time_now = System.currentTimeMillis();
+				if( needs_flash_time != -1 ) {
+					final long fade_ms = 500;
+					float alpha = (time_now - needs_flash_time)/(float)fade_ms;
+					if( time_now - needs_flash_time >= fade_ms )
+						alpha = 1.0f;
+					icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
+
+					/*if( MyDebug.LOG )
+						Log.d(TAG, "alpha: " + alpha);*/
+					p.setStyle(Paint.Style.FILL);
+					p.setColor(Color.BLACK);
+					p.setAlpha((int)(64*alpha));
+					canvas.drawRect(icon_dest, p);
+					p.setAlpha((int)(255*alpha));
+					canvas.drawBitmap(flash_bitmap, null, icon_dest, p);
+				}
+				else {
+					needs_flash_time = time_now;
+				}
+			}
+			else {
+				needs_flash_time = -1;
 			}
 		}
 	}
@@ -818,171 +1038,8 @@ public class DrawPreview {
 				canvas.drawBitmap(location_off_bitmap, null, location_dest, p);
 			}
 		}
-		
-		// set up text etc for the multiple lines of "info" (time, free mem, etc)
-		p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-		p.setTextAlign(Paint.Align.LEFT);
-		int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-		int location_y = top_y;
-		final int diff_y = (int) (16 * scale + 0.5f); // convert dps to pixels
-		if( ui_rotation == 90 || ui_rotation == 270 ) {
-			int diff = canvas.getWidth() - canvas.getHeight();
-			location_x += diff/2;
-			location_y -= diff/2;
-		}
-		if( ui_rotation == 90 ) {
-			location_y = canvas.getHeight() - location_y - location_size;
-		}
-		if( ui_rotation == 180 ) {
-			location_x = canvas.getWidth() - location_x;
-			p.setTextAlign(Paint.Align.RIGHT);
-		}
 
-		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
-	        Calendar c = Calendar.getInstance();
-	        // n.b., DateFormat.getTimeInstance() ignores user preferences such as 12/24 hour or date format, but this is an Android bug.
-	        // Whilst DateUtils.formatDateTime doesn't have that problem, it doesn't print out seconds! See:
-	        // http://stackoverflow.com/questions/15981516/simpledateformat-gettimeinstance-ignores-24-hour-format
-	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
-	        // http://code.google.com/p/android/issues/detail?id=42104
-	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
-	        String current_time = dateFormatTimeInstance.format(c.getTime());
-	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
-	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
-
-			if( ui_rotation == 90 ) {
-				location_y -= diff_y;
-			}
-			else {
-				location_y += diff_y;
-			}
-	    }
-
-		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
-			long time_now = System.currentTimeMillis();
-			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 1000 ) {
-				long free_mb = main_activity.freeMemory();
-				if( free_mb >= 0 ) {
-					free_memory_gb = free_mb/1024.0f;
-				}
-				last_free_memory_time = time_now; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
-			}
-			if( free_memory_gb >= 0.0f ) {
-				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation), Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
-			}
-
-			if( ui_rotation == 90 ) {
-				location_y -= diff_y;
-			}
-			else {
-				location_y += diff_y;
-			}
-		}
-
-		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
-			String string = "";
-			if( camera_controller.captureResultHasIso() ) {
-				int iso = camera_controller.captureResultIso();
-				if( string.length() > 0 )
-					string += " ";
-				string += preview.getISOString(iso);
-			}
-			if( camera_controller.captureResultHasExposureTime() ) {
-				long exposure_time = camera_controller.captureResultExposureTime();
-				if( string.length() > 0 )
-					string += " ";
-				string += preview.getExposureTimeString(exposure_time);
-			}
-			/*if( camera_controller.captureResultHasFrameDuration() ) {
-				long frame_duration = camera_controller.captureResultFrameDuration();
-				if( string.length() > 0 )
-					string += " ";
-				string += preview.getFrameDurationString(frame_duration);
-			}*/
-			if( string.length() > 0 ) {
-				boolean is_scanning = false;
-				if( camera_controller.captureResultIsAEScanning() ) {
-					// only show as scanning if in auto ISO mode (problem on Nexus 6 at least that if we're in manual ISO mode, after pausing and
-					// resuming, the camera driver continually reports CONTROL_AE_STATE_SEARCHING)
-					String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
-					if( value.equals("auto") ) {
-						is_scanning = true;
-					}
-				}
-
-				int text_color = Color.rgb(255, 235, 59); // Yellow 500
-				if( is_scanning ) {
-					// we only change the color if ae scanning is at least a certain time, otherwise we get a lot of flickering of the color
-					if( ae_started_scanning_ms == -1 ) {
-						ae_started_scanning_ms = System.currentTimeMillis();
-					}
-					else if( System.currentTimeMillis() - ae_started_scanning_ms > 500 ) {
-						text_color = Color.rgb(244, 67, 54); // Red 500
-					}
-				}
-				else {
-					ae_started_scanning_ms = -1;
-				}
-				applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
-			}
-			/*if( camera_controller.captureResultHasFocusDistance() ) {
-				float dist_min = camera_controller.captureResultFocusDistanceMin();
-				float dist_max = camera_controller.captureResultFocusDistanceMin();
-				string = preview.getFocusDistanceString(dist_min, dist_max);
-				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y2, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true); // Yellow 500
-			}*/
-
-			if( ui_rotation == 90 ) {
-				location_y -= diff_y;
-			}
-			else {
-				location_y += diff_y;
-			}
-		}
-
-		if( camera_controller != null ) {
-			final int symbols_diff_y = (int) (2 * scale + 0.5f); // convert dps to pixels;
-			if( ui_rotation == 90 ) {
-				location_y -= symbols_diff_y;
-			}
-			else {
-				location_y += symbols_diff_y;
-			}
-			// padding to align with earlier text
-			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
-			int location_x2 = location_x - flash_padding;
-			final int flash_size = (int) (16 * scale + 0.5f); // convert dps to pixels
-			if( ui_rotation == 180 ) {
-				location_x2 = location_x - flash_size + flash_padding;
-			}
-			String flash_value = preview.getCurrentFlashValue();
-			// note, flash_frontscreen_auto not yet support for the flash symbol (as camera_controller.needsFlash() only returns info on the built-in actual flash, not frontscreen flash)
-			if( flash_value != null && flash_value.equals("flash_auto") && camera_controller.needsFlash() ) {
-				long time_now = System.currentTimeMillis();
-				if( needs_flash_time != -1 ) {
-					final long fade_ms = 500;
-					float alpha = (time_now - needs_flash_time)/(float)fade_ms;
-					if( time_now - needs_flash_time >= fade_ms )
-						alpha = 1.0f;
-					flash_dest.set(location_x2, location_y, location_x2 + flash_size, location_y + flash_size);
-
-					p.setStyle(Paint.Style.FILL);
-					p.setColor(Color.BLACK);
-					p.setAlpha((int)(64*alpha));
-					canvas.drawRect(flash_dest, p);
-					/*if( MyDebug.LOG )
-						Log.d(TAG, "alpha: " + alpha);*/
-					p.setAlpha((int)(255*alpha));
-					canvas.drawBitmap(flash_bitmap, null, flash_dest, p);
-				}
-				else {
-					needs_flash_time = time_now;
-				}
-			}
-			else {
-				needs_flash_time = -1;
-			}
-		}
+		onDrawInfoLines(canvas, top_y, location_size, ybounds_text);
 
 		canvas.restore();
 

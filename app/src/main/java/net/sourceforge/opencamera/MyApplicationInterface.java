@@ -708,7 +708,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getString(PreferenceKeys.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
     }
 
-    private boolean getAutoStabilisePref() {
+    public boolean getAutoStabilisePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
 		if( auto_stabilise && main_activity.supportsAutoStabilise() )
