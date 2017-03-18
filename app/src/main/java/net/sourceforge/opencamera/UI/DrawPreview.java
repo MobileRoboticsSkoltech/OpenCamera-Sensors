@@ -47,6 +47,8 @@ public class DrawPreview {
 	private final float stroke_width;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
 
+	private final static double close_level_angle = 1.0f;
+
 	private float free_memory_gb = -1.0f;
 	private long last_free_memory_time;
 
@@ -402,6 +404,75 @@ public class DrawPreview {
 		}
 	}
 
+	private void drawCropGuides(Canvas canvas) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		Preview preview  = main_activity.getPreview();
+		CameraController camera_controller = preview.getCameraController();
+		if( preview.isVideo() || sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
+			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.getShowCropGuidePreferenceKey(), "crop_guide_none");
+			if( camera_controller != null && preview.getTargetRatio() > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
+				p.setStyle(Paint.Style.STROKE);
+				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
+				double crop_ratio = -1.0;
+				switch(preference_crop_guide) {
+					case "crop_guide_1":
+						crop_ratio = 1.0;
+						break;
+					case "crop_guide_1.25":
+						crop_ratio = 1.25;
+						break;
+					case "crop_guide_1.33":
+						crop_ratio = 1.33333333;
+						break;
+					case "crop_guide_1.4":
+						crop_ratio = 1.4;
+						break;
+					case "crop_guide_1.5":
+						crop_ratio = 1.5;
+						break;
+					case "crop_guide_1.78":
+						crop_ratio = 1.77777778;
+						break;
+					case "crop_guide_1.85":
+						crop_ratio = 1.85;
+						break;
+					case "crop_guide_2.33":
+						crop_ratio = 2.33333333;
+						break;
+					case "crop_guide_2.35":
+						crop_ratio = 2.35006120; // actually 1920:817
+						break;
+					case "crop_guide_2.4":
+						crop_ratio = 2.4;
+						break;
+				}
+				if( crop_ratio > 0.0 && Math.abs(preview.getTargetRatio() - crop_ratio) > 1.0e-5 ) {
+		    		/*if( MyDebug.LOG ) {
+		    			Log.d(TAG, "crop_ratio: " + crop_ratio);
+		    			Log.d(TAG, "preview_targetRatio: " + preview_targetRatio);
+		    			Log.d(TAG, "canvas width: " + canvas.getWidth());
+		    			Log.d(TAG, "canvas height: " + canvas.getHeight());
+		    		}*/
+					int left = 1, top = 1, right = canvas.getWidth()-1, bottom = canvas.getHeight()-1;
+					if( crop_ratio > preview.getTargetRatio() ) {
+						// crop ratio is wider, so we have to crop top/bottom
+						double new_hheight = ((double)canvas.getWidth()) / (2.0f*crop_ratio);
+						top = (canvas.getHeight()/2 - (int)new_hheight);
+						bottom = (canvas.getHeight()/2 + (int)new_hheight);
+					}
+					else {
+						// crop ratio is taller, so we have to crop left/right
+						double new_hwidth = (((double)canvas.getHeight()) * crop_ratio) / 2.0f;
+						left = (canvas.getWidth()/2 - (int)new_hwidth);
+						right = (canvas.getWidth()/2 + (int)new_hwidth);
+					}
+					canvas.drawRect(left, top, right, bottom, p);
+				}
+				p.setStyle(Paint.Style.FILL); // reset
+			}
+		}
+	}
+
 	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size, final String ybounds_text) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
@@ -610,189 +681,21 @@ public class DrawPreview {
 		}
 	}
 
-	public void onDrawPreview(Canvas canvas) {
-		/*if( MyDebug.LOG )
-			Log.d(TAG, "onDrawPreview");*/
+	/** This includes drawing of the UI that requires the canvas to be rotated according to the preview's
+	 *  current UI rotation.
+	 */
+	private void drawUI(Canvas canvas) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
+		boolean ui_placement_right = main_activity.getMainUI().getUIPlacementRight();
 		boolean has_level_angle = preview.hasLevelAngle();
 		double level_angle = preview.getLevelAngle();
-		boolean has_pitch_angle = preview.hasPitchAngle();
-		double pitch_angle = preview.getPitchAngle();
 		boolean has_geo_direction = preview.hasGeoDirection();
 		double geo_direction = preview.getGeoDirection();
-		boolean ui_placement_right = main_activity.getMainUI().getUIPlacementRight();
-		if( main_activity.getMainUI().inImmersiveMode() ) {
-			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-			if( immersive_mode.equals("immersive_mode_everything") ) {
-				// exit, to ensure we don't display anything!
-				return;
-			}
-		}
 		final float scale = getContext().getResources().getDisplayMetrics().density;
-		if( camera_controller!= null && front_screen_flash ) {
-			p.setColor(Color.WHITE);
-			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
-		}
-		else if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
-			p.setColor(Color.WHITE);
-			p.setStyle(Paint.Style.STROKE);
-			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels
-			p.setStrokeWidth(this_stroke_width);
-			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
-			p.setStyle(Paint.Style.FILL); // reset
-			p.setStrokeWidth(stroke_width); // reset
-		}
-		drawGrids(canvas);
 
-		if( preview.isVideo() || sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
-			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.getShowCropGuidePreferenceKey(), "crop_guide_none");
-			if( camera_controller != null && preview.getTargetRatio() > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
-				p.setStyle(Paint.Style.STROKE);
-				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
-				double crop_ratio = -1.0;
-				switch(preference_crop_guide) {
-					case "crop_guide_1":
-						crop_ratio = 1.0;
-						break;
-					case "crop_guide_1.25":
-						crop_ratio = 1.25;
-						break;
-					case "crop_guide_1.33":
-						crop_ratio = 1.33333333;
-						break;
-					case "crop_guide_1.4":
-						crop_ratio = 1.4;
-						break;
-					case "crop_guide_1.5":
-						crop_ratio = 1.5;
-						break;
-					case "crop_guide_1.78":
-						crop_ratio = 1.77777778;
-						break;
-					case "crop_guide_1.85":
-						crop_ratio = 1.85;
-						break;
-					case "crop_guide_2.33":
-						crop_ratio = 2.33333333;
-						break;
-					case "crop_guide_2.35":
-						crop_ratio = 2.35006120; // actually 1920:817
-						break;
-					case "crop_guide_2.4":
-						crop_ratio = 2.4;
-						break;
-				}
-				if( crop_ratio > 0.0 && Math.abs(preview.getTargetRatio() - crop_ratio) > 1.0e-5 ) {
-		    		/*if( MyDebug.LOG ) {
-		    			Log.d(TAG, "crop_ratio: " + crop_ratio);
-		    			Log.d(TAG, "preview_targetRatio: " + preview_targetRatio);
-		    			Log.d(TAG, "canvas width: " + canvas.getWidth());
-		    			Log.d(TAG, "canvas height: " + canvas.getHeight());
-		    		}*/
-					int left = 1, top = 1, right = canvas.getWidth()-1, bottom = canvas.getHeight()-1;
-					if( crop_ratio > preview.getTargetRatio() ) {
-						// crop ratio is wider, so we have to crop top/bottom
-						double new_hheight = ((double)canvas.getWidth()) / (2.0f*crop_ratio);
-						top = (canvas.getHeight()/2 - (int)new_hheight);
-						bottom = (canvas.getHeight()/2 + (int)new_hheight);
-					}
-					else {
-						// crop ratio is taller, so we have to crop left/right
-						double new_hwidth = (((double)canvas.getHeight()) * crop_ratio) / 2.0f;
-						left = (canvas.getWidth()/2 - (int)new_hwidth);
-						right = (canvas.getWidth()/2 + (int)new_hwidth);
-					}
-					canvas.drawRect(left, top, right, bottom, p);
-				}
-				p.setStyle(Paint.Style.FILL); // reset
-			}
-		}
-
-		if( show_last_image && last_thumbnail != null ) {
-			// If changing this code, ensure that pause preview still works when:
-			// - Taking a photo in portrait or landscape - and check rotating the device while preview paused
-			// - Taking a photo with lock to portrait/landscape options still shows the thumbnail with aspect ratio preserved
-			p.setColor(Color.rgb(0, 0, 0)); // in case image doesn't cover the canvas (due to different aspect ratios)
-			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p); // in case
-			last_image_src_rect.left = 0;
-			last_image_src_rect.top = 0;
-			last_image_src_rect.right = last_thumbnail.getWidth();
-			last_image_src_rect.bottom = last_thumbnail.getHeight();
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				last_image_src_rect.right = last_thumbnail.getHeight();
-				last_image_src_rect.bottom = last_thumbnail.getWidth();
-			}
-			last_image_dst_rect.left = 0;
-			last_image_dst_rect.top = 0;
-			last_image_dst_rect.right = canvas.getWidth();
-			last_image_dst_rect.bottom = canvas.getHeight();
-			/*if( MyDebug.LOG ) {
-				Log.d(TAG, "thumbnail: " + last_thumbnail.getWidth() + " x " + last_thumbnail.getHeight());
-				Log.d(TAG, "canvas: " + canvas.getWidth() + " x " + canvas.getHeight());
-			}*/
-			last_image_matrix.setRectToRect(last_image_src_rect, last_image_dst_rect, Matrix.ScaleToFit.CENTER); // use CENTER to preserve aspect ratio
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				// the rotation maps (0, 0) to (tw/2 - th/2, th/2 - tw/2), so we translate to undo this
-				float diff = last_thumbnail.getHeight() - last_thumbnail.getWidth();
-				last_image_matrix.preTranslate(diff/2.0f, -diff/2.0f);
-			}
-			last_image_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
-			canvas.drawBitmap(last_thumbnail, last_image_matrix, p);
-		}
-		
-		// note, no need to check preferences here, as we do that when setting thumbnail_anim
-		if( camera_controller != null && this.thumbnail_anim && last_thumbnail != null ) {
-			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
-			final long duration = 500;
-			if( time > duration ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "thumbnail_anim finished");
-				this.thumbnail_anim = false;
-			}
-			else {
-				thumbnail_anim_src_rect.left = 0;
-				thumbnail_anim_src_rect.top = 0;
-				thumbnail_anim_src_rect.right = last_thumbnail.getWidth();
-				thumbnail_anim_src_rect.bottom = last_thumbnail.getHeight();
-			    View galleryButton = main_activity.findViewById(R.id.gallery);
-				float alpha = ((float)time)/(float)duration;
-
-				int st_x = canvas.getWidth()/2;
-				int st_y = canvas.getHeight()/2;
-				int nd_x = galleryButton.getLeft() + galleryButton.getWidth()/2;
-				int nd_y = galleryButton.getTop() + galleryButton.getHeight()/2;
-				int thumbnail_x = (int)( (1.0f-alpha)*st_x + alpha*nd_x );
-				int thumbnail_y = (int)( (1.0f-alpha)*st_y + alpha*nd_y );
-
-				float st_w = canvas.getWidth();
-				float st_h = canvas.getHeight();
-				float nd_w = galleryButton.getWidth();
-				float nd_h = galleryButton.getHeight();
-				//int thumbnail_w = (int)( (1.0f-alpha)*st_w + alpha*nd_w );
-				//int thumbnail_h = (int)( (1.0f-alpha)*st_h + alpha*nd_h );
-				float correction_w = st_w/nd_w - 1.0f;
-				float correction_h = st_h/nd_h - 1.0f;
-				int thumbnail_w = (int)(st_w/(1.0f+alpha*correction_w));
-				int thumbnail_h = (int)(st_h/(1.0f+alpha*correction_h));
-				thumbnail_anim_dst_rect.left = thumbnail_x - thumbnail_w/2;
-				thumbnail_anim_dst_rect.top = thumbnail_y - thumbnail_h/2;
-				thumbnail_anim_dst_rect.right = thumbnail_x + thumbnail_w/2;
-				thumbnail_anim_dst_rect.bottom = thumbnail_y + thumbnail_h/2;
-				//canvas.drawBitmap(this.thumbnail, thumbnail_anim_src_rect, thumbnail_anim_dst_rect, p);
-				thumbnail_anim_matrix.setRectToRect(thumbnail_anim_src_rect, thumbnail_anim_dst_rect, Matrix.ScaleToFit.FILL);
-				//thumbnail_anim_matrix.reset();
-				if( ui_rotation == 90 || ui_rotation == 270 ) {
-					float ratio = ((float)last_thumbnail.getWidth())/(float)last_thumbnail.getHeight();
-					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
-				}
-				thumbnail_anim_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
-				canvas.drawBitmap(last_thumbnail, thumbnail_anim_matrix, p);
-			}
-		}
-		
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
 
@@ -834,7 +737,6 @@ public class DrawPreview {
 		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 
 		final String ybounds_text = getContext().getResources().getString(R.string.zoom) + getContext().getResources().getString(R.string.angle) + getContext().getResources().getString(R.string.direction);
-		final double close_angle = 1.0f;
 		if( camera_controller != null && !preview.isPreviewPaused() ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
@@ -851,7 +753,7 @@ public class DrawPreview {
 				else {
 					p.setTextAlign(Paint.Align.CENTER);
 				}
-				if( Math.abs(level_angle) <= close_angle ) {
+				if( Math.abs(level_angle) <= close_level_angle ) {
 					color = getAngleHighlightColor();
 					p.setUnderlineText(true);
 				}
@@ -1042,11 +944,24 @@ public class DrawPreview {
 		onDrawInfoLines(canvas, top_y, location_size, ybounds_text);
 
 		canvas.restore();
+	}
 
+	private void drawAngleLines(Canvas canvas) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		Preview preview  = main_activity.getPreview();
+		CameraController camera_controller = preview.getCameraController();
+		boolean has_level_angle = preview.hasLevelAngle();
 		boolean show_angle_line = sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false);
 		boolean show_pitch_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowPitchLinesPreferenceKey(), false);
 		boolean show_geo_direction_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionLinesPreferenceKey(), false);
 		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line || show_pitch_lines || show_geo_direction_lines ) ) {
+			final float scale = getContext().getResources().getDisplayMetrics().density;
+			int ui_rotation = preview.getUIRotation();
+			double level_angle = preview.getLevelAngle();
+			boolean has_pitch_angle = preview.hasPitchAngle();
+			double pitch_angle = preview.getPitchAngle();
+			boolean has_geo_direction = preview.hasGeoDirection();
+			double geo_direction = preview.getGeoDirection();
 			// n.b., must draw this without the standard canvas rotation
 			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
 			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
@@ -1069,9 +984,9 @@ public class DrawPreview {
 			}*/
 			int cx = canvas.getWidth()/2;
 			int cy = canvas.getHeight()/2;
-			
+
 			boolean is_level = false;
-			if( Math.abs(level_angle) <= close_angle ) { // n.b., use level_angle, not angle or orig_level_angle
+			if( Math.abs(level_angle) <= close_level_angle ) { // n.b., use level_angle, not angle or orig_level_angle
 				is_level = true;
 			}
 
@@ -1227,6 +1142,125 @@ public class DrawPreview {
 
 			canvas.restore();
 		}
+	}
+
+	public void onDrawPreview(Canvas canvas) {
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "onDrawPreview");*/
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		Preview preview  = main_activity.getPreview();
+		CameraController camera_controller = preview.getCameraController();
+		int ui_rotation = preview.getUIRotation();
+		if( main_activity.getMainUI().inImmersiveMode() ) {
+			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			if( immersive_mode.equals("immersive_mode_everything") ) {
+				// exit, to ensure we don't display anything!
+				return;
+			}
+		}
+		final float scale = getContext().getResources().getDisplayMetrics().density;
+		if( camera_controller!= null && front_screen_flash ) {
+			p.setColor(Color.WHITE);
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+		}
+		else if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
+			p.setColor(Color.WHITE);
+			p.setStyle(Paint.Style.STROKE);
+			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels
+			p.setStrokeWidth(this_stroke_width);
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+			p.setStyle(Paint.Style.FILL); // reset
+			p.setStrokeWidth(stroke_width); // reset
+		}
+		drawGrids(canvas);
+
+		drawCropGuides(canvas);
+
+		if( show_last_image && last_thumbnail != null ) {
+			// If changing this code, ensure that pause preview still works when:
+			// - Taking a photo in portrait or landscape - and check rotating the device while preview paused
+			// - Taking a photo with lock to portrait/landscape options still shows the thumbnail with aspect ratio preserved
+			p.setColor(Color.rgb(0, 0, 0)); // in case image doesn't cover the canvas (due to different aspect ratios)
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p); // in case
+			last_image_src_rect.left = 0;
+			last_image_src_rect.top = 0;
+			last_image_src_rect.right = last_thumbnail.getWidth();
+			last_image_src_rect.bottom = last_thumbnail.getHeight();
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				last_image_src_rect.right = last_thumbnail.getHeight();
+				last_image_src_rect.bottom = last_thumbnail.getWidth();
+			}
+			last_image_dst_rect.left = 0;
+			last_image_dst_rect.top = 0;
+			last_image_dst_rect.right = canvas.getWidth();
+			last_image_dst_rect.bottom = canvas.getHeight();
+			/*if( MyDebug.LOG ) {
+				Log.d(TAG, "thumbnail: " + last_thumbnail.getWidth() + " x " + last_thumbnail.getHeight());
+				Log.d(TAG, "canvas: " + canvas.getWidth() + " x " + canvas.getHeight());
+			}*/
+			last_image_matrix.setRectToRect(last_image_src_rect, last_image_dst_rect, Matrix.ScaleToFit.CENTER); // use CENTER to preserve aspect ratio
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				// the rotation maps (0, 0) to (tw/2 - th/2, th/2 - tw/2), so we translate to undo this
+				float diff = last_thumbnail.getHeight() - last_thumbnail.getWidth();
+				last_image_matrix.preTranslate(diff/2.0f, -diff/2.0f);
+			}
+			last_image_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+			canvas.drawBitmap(last_thumbnail, last_image_matrix, p);
+		}
+		
+		// note, no need to check preferences here, as we do that when setting thumbnail_anim
+		if( camera_controller != null && this.thumbnail_anim && last_thumbnail != null ) {
+			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
+			final long duration = 500;
+			if( time > duration ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "thumbnail_anim finished");
+				this.thumbnail_anim = false;
+			}
+			else {
+				thumbnail_anim_src_rect.left = 0;
+				thumbnail_anim_src_rect.top = 0;
+				thumbnail_anim_src_rect.right = last_thumbnail.getWidth();
+				thumbnail_anim_src_rect.bottom = last_thumbnail.getHeight();
+			    View galleryButton = main_activity.findViewById(R.id.gallery);
+				float alpha = ((float)time)/(float)duration;
+
+				int st_x = canvas.getWidth()/2;
+				int st_y = canvas.getHeight()/2;
+				int nd_x = galleryButton.getLeft() + galleryButton.getWidth()/2;
+				int nd_y = galleryButton.getTop() + galleryButton.getHeight()/2;
+				int thumbnail_x = (int)( (1.0f-alpha)*st_x + alpha*nd_x );
+				int thumbnail_y = (int)( (1.0f-alpha)*st_y + alpha*nd_y );
+
+				float st_w = canvas.getWidth();
+				float st_h = canvas.getHeight();
+				float nd_w = galleryButton.getWidth();
+				float nd_h = galleryButton.getHeight();
+				//int thumbnail_w = (int)( (1.0f-alpha)*st_w + alpha*nd_w );
+				//int thumbnail_h = (int)( (1.0f-alpha)*st_h + alpha*nd_h );
+				float correction_w = st_w/nd_w - 1.0f;
+				float correction_h = st_h/nd_h - 1.0f;
+				int thumbnail_w = (int)(st_w/(1.0f+alpha*correction_w));
+				int thumbnail_h = (int)(st_h/(1.0f+alpha*correction_h));
+				thumbnail_anim_dst_rect.left = thumbnail_x - thumbnail_w/2;
+				thumbnail_anim_dst_rect.top = thumbnail_y - thumbnail_h/2;
+				thumbnail_anim_dst_rect.right = thumbnail_x + thumbnail_w/2;
+				thumbnail_anim_dst_rect.bottom = thumbnail_y + thumbnail_h/2;
+				//canvas.drawBitmap(this.thumbnail, thumbnail_anim_src_rect, thumbnail_anim_dst_rect, p);
+				thumbnail_anim_matrix.setRectToRect(thumbnail_anim_src_rect, thumbnail_anim_dst_rect, Matrix.ScaleToFit.FILL);
+				//thumbnail_anim_matrix.reset();
+				if( ui_rotation == 90 || ui_rotation == 270 ) {
+					float ratio = ((float)last_thumbnail.getWidth())/(float)last_thumbnail.getHeight();
+					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+				}
+				thumbnail_anim_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+				canvas.drawBitmap(last_thumbnail, thumbnail_anim_matrix, p);
+			}
+		}
+
+		drawUI(canvas);
+
+		drawAngleLines(canvas);
 
 		if( camera_controller != null && continuous_focus_moving && !taking_picture ) {
 			// we don't display the continuous focusing animation when taking a photo - and can also ive the impression of having
