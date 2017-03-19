@@ -115,6 +115,14 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 			weight = 1.0f - weight;
 			if( avg <= 127.5f ) {
 				rgb = (float3){ (float)pixels[2].r, (float)pixels[2].g, (float)pixels[2].b };
+    			/* In some cases it can be that even on the neighbour image, the brightness is too
+    			   dark/bright - but it should still be a better choice than the base image.
+    			   If we change this (including say for handling more than 3 images), need to be
+    			   careful of unpredictable effects. In particular, image a pixel that is brightness
+    			   255 on the base image. As the brightness on the neighbour image increases, we
+    			   should expect that the resultant image also increases (or at least, doesn't
+    			   decrease). See testHDR36 for such an example.
+    			   */
 				/*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 				diff = fabs( avg - 127.5f );
 				if( diff > safe_range_c ) {
@@ -126,6 +134,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 			}
 			else {
 				rgb = (float3){ (float)pixels[0].r, (float)pixels[0].g, (float)pixels[0].b };
+				// see note above for why this is commented out
 				/*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 				diff = fabs( avg - 127.5f );
 				if( diff > safe_range_c ) {
