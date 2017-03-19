@@ -240,6 +240,16 @@ public class HDRProcessor {
 		}
 	}
 
+	public interface SortCallback {
+		/** This is called when the sort order for the input bitmaps is known, from darkest to brightest.
+		 * @param sort_order A list of length equal to the supplied bitmaps.size(). sort_order.get(i)
+		 *                   returns the index in the bitmaps array of the i-th image after sorting,
+		 *                   where i==0 represents the darkest image, and i==bitmaps.size()-1 is the
+		 *                   brightest.
+         */
+		void sortOrder(List<Integer> sort_order);
+	}
+
 	/** Converts a list of bitmaps into a HDR image, which is then tonemapped to a final RGB image.
 	 * @param bitmaps The list of bitmaps, which should be in order of increasing brightness (exposure).
 	 *                Currently only supports a list of either 1 image, or 3 images (the 2nd should be
@@ -247,7 +257,7 @@ public class HDRProcessor {
 	 *                The bitmaps must all be the same resolution.
 	 * @param release_bitmaps If true, the resultant image will be stored in one of the input bitmaps.
 	 *                        The bitmaps array will be updated so that the first entry will contain
-	 *                        the output bitmap. If assume_sortted is true, this will be equal to the
+	 *                        the output bitmap. If assume_sorted is true, this will be equal to the
 	 *                        input bitmaps.get( (bitmaps.size()-1) / 2). The remainder bitmaps will have
 	 *                        recycle() called on them.
 	 *                        If false, the resultant image is copied to output_bitmap.
@@ -255,10 +265,21 @@ public class HDRProcessor {
 	 *                      If release_bitmaps is true, this parameter is ignored.
 	 * @param assume_sorted If true, the input bitmaps should be sorted in order from darkest to brightest
 	 *                      exposure. If false, the function will automatically resort.
+	 * @param sort_cb       If assume_sorted is false and this is non-null, sort_cb.sortOrder() will be
+	 *                      called to indicate the sort order when this is known.
+	 * @param hdr_alpha     A value from 0.0f to 1.0f indicating the "strength" of the HDR effect. Specifically,
+	 *                      this controls the level of the local contrast enhancement done in adjustHistogram().
 	 */
-	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted) {
+	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
+		if( !assume_sorted && !release_bitmaps ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "take a copy of bitmaps array");
+			// if !release_bitmaps, then we shouldn't be modifying the input bitmaps array - but if !assume_sorted, we need to sort them
+			// so make sure we take a copy
+			bitmaps = new ArrayList<>(bitmaps);
+		}
 		int n_bitmaps = bitmaps.size();
 		if( n_bitmaps != 1 && n_bitmaps != 3 ) {
 			if( MyDebug.LOG )
@@ -279,10 +300,15 @@ public class HDRProcessor {
 		
 		switch( algorithm ) {
 		case HDRALGORITHM_SINGLE_IMAGE:
-			processSingleImage(bitmaps, release_bitmaps, output_bitmap);
+			if( !assume_sorted && sort_cb != null ) {
+				List<Integer> sort_order = new ArrayList<>();
+				sort_order.add(0);
+				sort_cb.sortOrder(sort_order);
+			}
+			processSingleImage(bitmaps, release_bitmaps, output_bitmap, hdr_alpha);
 			break;
 		case HDRALGORITHM_STANDARD:
-			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted);
+			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted, sort_cb, hdr_alpha);
 			break;
 		default:
 			if( MyDebug.LOG )
@@ -421,7 +447,7 @@ public class HDRProcessor {
 	 *  Android 5.0).
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted) {
+	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
 		
@@ -458,7 +484,7 @@ public class HDRProcessor {
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
-		autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, assume_sorted, time_s);
+		autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, assume_sorted, sort_cb, time_s);
 		if (MyDebug.LOG)
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
 
@@ -566,7 +592,9 @@ public class HDRProcessor {
 			}
 		}
 
-		adjustHistogram(output_allocation, output_allocation, width, height, time_s);
+		if( hdr_alpha != 0.0f ) {
+			adjustHistogram(output_allocation, output_allocation, width, height, hdr_alpha, time_s);
+		}
 
 		if( release_bitmaps ) {
 			// must be the base_bitmap we copy to - see note above about using allocations[base_bitmap] as the output
@@ -591,7 +619,7 @@ public class HDRProcessor {
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap) {
+	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha) {
 		if (MyDebug.LOG)
 			Log.d(TAG, "processSingleImage");
 
@@ -623,7 +651,7 @@ public class HDRProcessor {
 			output_allocation = Allocation.createFromBitmap(rs, output_bitmap);
 		}
 
-		adjustHistogram(allocation, output_allocation, width, height, time_s);
+		adjustHistogram(allocation, output_allocation, width, height, hdr_alpha, time_s);
 
 		if( release_bitmaps ) {
 			allocation.copyTo(bitmaps.get(0));
@@ -653,7 +681,7 @@ public class HDRProcessor {
 	 * If assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
      */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, boolean assume_sorted, long time_s) {
+	private void autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, boolean assume_sorted, SortCallback sort_cb, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoAlignment");
 		Allocation [] mtb_allocations = new Allocation[allocations.length];
@@ -690,18 +718,20 @@ public class HDRProcessor {
 				final LuminanceInfo luminanceInfo;
 				final Bitmap bitmap;
 				final Allocation allocation;
+				final int index;
 
-				BitmapInfo(LuminanceInfo luminanceInfo, Bitmap bitmap, Allocation allocation) {
+				BitmapInfo(LuminanceInfo luminanceInfo, Bitmap bitmap, Allocation allocation, int index) {
 					this.luminanceInfo = luminanceInfo;
 					this.bitmap = bitmap;
 					this.allocation = allocation;
+					this.index = index;
 				}
 
 			}
 
 			List<BitmapInfo> bitmapInfos = new ArrayList<>(bitmaps.size());
 			for(int i=0;i<bitmaps.size();i++) {
-				BitmapInfo bitmapInfo = new BitmapInfo(luminanceInfos[i], bitmaps.get(i), allocations[i]);
+				BitmapInfo bitmapInfo = new BitmapInfo(luminanceInfos[i], bitmaps.get(i), allocations[i], i);
 				bitmapInfos.add(bitmapInfo);
 			}
 			Collections.sort(bitmapInfos, new Comparator<BitmapInfo>() {
@@ -720,6 +750,15 @@ public class HDRProcessor {
 				for(int i=0;i<allocations.length;i++) {
 					Log.d(TAG, i + ": median_value: " + luminanceInfos[i].median_value);
 				}
+			}
+			if( sort_cb != null ) {
+				List<Integer> sort_order = new ArrayList<>();
+				for(int i=0;i<bitmapInfos.size();i++) {
+					sort_order.add( bitmapInfos.get(i).index);
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "sort_order: " + sort_order);
+				sort_cb.sortOrder(sort_order);
 			}
 		}
 
@@ -988,7 +1027,7 @@ public class HDRProcessor {
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, long time_s) {
+	private void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, float hdr_alpha, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "adjustHistogram");
 		final boolean adjust_histogram = false;
@@ -1070,6 +1109,7 @@ public class HDRProcessor {
 
 			ScriptC_histogram_adjust histogramAdjustScript = new ScriptC_histogram_adjust(rs);
 			histogramAdjustScript.set_c_histogram(histogramAllocation);
+			histogramAdjustScript.set_hdr_alpha(hdr_alpha);
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "call histogramAdjustScript");
@@ -1219,6 +1259,7 @@ public class HDRProcessor {
 			c_histogramAllocation.copyFrom(c_histogram);
 			ScriptC_histogram_adjust histogramAdjustScript = new ScriptC_histogram_adjust(rs);
 			histogramAdjustScript.set_c_histogram(c_histogramAllocation);
+			histogramAdjustScript.set_hdr_alpha(hdr_alpha);
 			histogramAdjustScript.set_n_tiles(n_tiles_c);
 			histogramAdjustScript.set_width(width);
 			histogramAdjustScript.set_height(height);

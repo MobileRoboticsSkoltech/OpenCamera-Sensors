@@ -4,6 +4,8 @@
 
 rs_allocation c_histogram;
 
+float hdr_alpha = 0.5f; // 0.0 means no change, 1.0 means fully equalise
+
 // Global histogram equalisation:
 
 /*uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t y) {
@@ -19,9 +21,7 @@ rs_allocation c_histogram;
 	float den = (float)(n_pixels - cdf_0);
 	int equal_value = (int)( 255.0f * (num/den) ); // value that we should choose to fully equalise the histogram
 	
-	const float alpha = 0.5f; // 0.0 means no change, 1.0 means fully equalise
-	//const float alpha = 1.0f; // 0.0 means no change, 1.0 means fully equalise
-	int new_value = (int)( (1.0f-alpha) * value + alpha * equal_value );
+	int new_value = (int)( (1.0f-hdr_alpha) * value + hdr_alpha * equal_value );
 	
 	float scale = ((float)new_value) / (float)value;
 
@@ -100,9 +100,7 @@ uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t 
 		equal_value = getEqualValue(histogram_offset, value);
 	}
 	
-	const float alpha = 0.5f; // 0.0 means no change, 1.0 means fully equalise
-	//const float alpha = 1.0f; // 0.0 means no change, 1.0 means fully equalise
-	int new_value = (int)( (1.0f-alpha) * value + alpha * equal_value );
+	int new_value = (int)( (1.0f-hdr_alpha) * value + hdr_alpha * equal_value );
 	
 	float scale = ((float)new_value) / (float)value;
 
