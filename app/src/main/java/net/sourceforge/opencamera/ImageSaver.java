@@ -1358,6 +1358,11 @@ public class ImageSaver extends Thread {
 	 */
 	@SuppressWarnings("deprecation")
 	private int setExifFromFile(final Request request, File from_file, File to_file) throws IOException {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setExifFromFile");
+			Log.d(TAG, "from_file: " + from_file);
+			Log.d(TAG, "to_file: " + to_file);
+		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExifFromFile");
 		int exif_orientation_s = ExifInterface.ORIENTATION_UNDEFINED;
