@@ -270,7 +270,7 @@ public class HDRProcessor {
 	 * @param hdr_alpha     A value from 0.0f to 1.0f indicating the "strength" of the HDR effect. Specifically,
 	 *                      this controls the level of the local contrast enhancement done in adjustHistogram().
 	 */
-	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha) {
+	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha) throws HDRProcessorException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
 		if( !assume_sorted && !release_bitmaps ) {
@@ -284,15 +284,14 @@ public class HDRProcessor {
 		if( n_bitmaps != 1 && n_bitmaps != 3 ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "n_bitmaps should be 1 or 3, not " + n_bitmaps);
-			// throw RuntimeException, as this is a programming error
-			throw new RuntimeException();
+			throw new HDRProcessorException(HDRProcessorException.INVALID_N_IMAGES);
 		}
 		for(int i=1;i<n_bitmaps;i++) {
 			if( bitmaps.get(i).getWidth() != bitmaps.get(0).getWidth() ||
 				bitmaps.get(i).getHeight() != bitmaps.get(0).getHeight() ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "bitmaps not of same resolution");
-				throw new RuntimeException();
+				throw new HDRProcessorException(HDRProcessorException.UNEQUAL_SIZES);
 			}
 		}
 		
