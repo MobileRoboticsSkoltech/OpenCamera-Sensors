@@ -191,14 +191,17 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
         }
 	    else if( tonemap_algorithm == tonemap_algorithm_filmic_c ) {
             // Filmic Uncharted 2
-            const float exposure_bias = 8.0f / 255.0f;
+            const float exposure_bias = 2.0f / 255.0f;
             float white_scale = 255.0f / Uncharted2Tonemap(W);
             float curr_r = Uncharted2Tonemap(exposure_bias * hdr.r);
             float curr_g = Uncharted2Tonemap(exposure_bias * hdr.g);
             float curr_b = Uncharted2Tonemap(exposure_bias * hdr.b);
-            out.r = (uchar)(curr_r * white_scale);
-            out.g = (uchar)(curr_g * white_scale);
-            out.b = (uchar)(curr_b * white_scale);
+            curr_r *= white_scale;
+            curr_g *= white_scale;
+            curr_b *= white_scale;
+            out.r = (uchar)clamp(curr_r, 0.0f, 255.0f);
+            out.g = (uchar)clamp(curr_g, 0.0f, 255.0f);
+            out.b = (uchar)clamp(curr_b, 0.0f, 255.0f);
         }
 	}
 
