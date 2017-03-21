@@ -39,6 +39,12 @@ public class HDRProcessor {
 		HDRALGORITHM_STANDARD,
 		HDRALGORITHM_SINGLE_IMAGE
 	}
+
+	public enum TonemappingAlgorithm {
+		TONEMAPALGORITHM_CLAMP,
+		TONEMAPALGORITHM_REINHARD,
+		TONEMAPALGORITHM_FILMIC
+	}
 	
 	public HDRProcessor(Context context) {
 		this.context = context;
@@ -269,8 +275,10 @@ public class HDRProcessor {
 	 *                      called to indicate the sort order when this is known.
 	 * @param hdr_alpha     A value from 0.0f to 1.0f indicating the "strength" of the HDR effect. Specifically,
 	 *                      this controls the level of the local contrast enhancement done in adjustHistogram().
+	 * @param tonemapping_algorithm
+	 *                      Algorithm to use for tonemapping (if multiple images are received).
 	 */
-	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha) throws HDRProcessorException {
+	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, TonemappingAlgorithm tonemapping_algorithm) throws HDRProcessorException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
 		if( !assume_sorted && !release_bitmaps ) {
@@ -307,7 +315,7 @@ public class HDRProcessor {
 			processSingleImage(bitmaps, release_bitmaps, output_bitmap, hdr_alpha);
 			break;
 		case HDRALGORITHM_STANDARD:
-			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted, sort_cb, hdr_alpha);
+			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted, sort_cb, hdr_alpha, tonemapping_algorithm);
 			break;
 		default:
 			if( MyDebug.LOG )
@@ -446,7 +454,7 @@ public class HDRProcessor {
 	 *  Android 5.0).
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha) {
+	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, TonemappingAlgorithm tonemapping_algorithm) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
 		
@@ -555,6 +563,26 @@ public class HDRProcessor {
 		processHDRScript.set_parameter_B2( response_functions[2].parameter_B );
 
 		// set globals
+
+		// set tonemapping algorithm
+		switch( tonemapping_algorithm ) {
+			case TONEMAPALGORITHM_CLAMP:
+				if( MyDebug.LOG )
+					Log.d(TAG, "tonemapping algorithm: clamp");
+				processHDRScript.set_tonemap_algorithm( processHDRScript.get_tonemap_algorithm_clamp_c() );
+				break;
+			case TONEMAPALGORITHM_REINHARD:
+				if( MyDebug.LOG )
+					Log.d(TAG, "tonemapping algorithm: reinhard");
+				processHDRScript.set_tonemap_algorithm( processHDRScript.get_tonemap_algorithm_reinhard_c() );
+				break;
+			case TONEMAPALGORITHM_FILMIC:
+				if( MyDebug.LOG )
+					Log.d(TAG, "tonemapping algorithm: filmic");
+				processHDRScript.set_tonemap_algorithm( processHDRScript.get_tonemap_algorithm_filmic_c() );
+				break;
+		}
+
 		//final float tonemap_scale_c = avg_luminance / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
 		final float tonemap_scale_c = 255.0f;
 		// Higher tonemap_scale_c values means darker results from the Reinhard tonemapping.
