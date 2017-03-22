@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import net.sourceforge.opencamera.HDRProcessor;
+import net.sourceforge.opencamera.HDRProcessorException;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.SaveLocationHistory;
@@ -7281,7 +7283,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
     	long time_s = System.currentTimeMillis();
-		mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true);
+		try {
+			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+		}
+		catch(HDRProcessorException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
 		Log.d(TAG, "HDR time: " + (System.currentTimeMillis() - time_s));
 		
 		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
@@ -7295,7 +7303,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( test_dro ) {
 			inputs.add(dro_bitmap_in);
 			time_s = System.currentTimeMillis();
-			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true);
+			try {
+				mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+			}
+			catch(HDRProcessorException e) {
+				e.printStackTrace();
+				throw new RuntimeException();
+			}
 			Log.d(TAG, "DRO time: " + (System.currentTimeMillis() - time_s));
 
 			file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/dro" + output_name);
