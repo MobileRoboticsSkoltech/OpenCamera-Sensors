@@ -58,6 +58,7 @@ public class HDRProcessor {
 			// problems e.g. when running MainTests as a full set with Camera2 API. Although we now reduce the problem by creating
 			// the rs lazily, it's still good to explicitly clear.
 			rs.destroy(); // on Android M onwards this is a NOP - instead we call RenderScript.releaseAllContexts(); in MainActivity.onDestroy()
+			rs = null;
 		}
 	}
 
@@ -479,20 +480,20 @@ public class HDRProcessor {
 		//int [] rgb = new int[3];
 
 		initRenderscript();
-		if (MyDebug.LOG)
+		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
 		// create allocations
 		Allocation [] allocations = new Allocation[n_bitmaps];
 		for(int i=0;i<n_bitmaps;i++) {
 			allocations[i] = Allocation.createFromBitmap(rs, bitmaps.get(i));
 		}
-		if (MyDebug.LOG)
+		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
 		autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, assume_sorted, sort_cb, time_s);
-		if (MyDebug.LOG)
+		if( MyDebug.LOG )
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
 
 		// compute response_functions
@@ -696,10 +697,12 @@ public class HDRProcessor {
 	}
 
 	private void initRenderscript() {
-		if (rs == null) {
+		if( MyDebug.LOG )
+	        Log.d(TAG, "initRenderscript");
+		if( rs == null ) {
 			// initialise renderscript
 			this.rs = RenderScript.create(context);
-			if (MyDebug.LOG)
+			if( MyDebug.LOG )
 				Log.d(TAG, "create renderscript object");
 		}
 	}
