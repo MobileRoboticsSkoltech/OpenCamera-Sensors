@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 //import android.graphics.Color;
@@ -23,6 +22,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.Script;
 import android.renderscript.ScriptIntrinsicHistogram;
 import android.renderscript.Type;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 public class HDRProcessor {
@@ -454,18 +454,11 @@ public class HDRProcessor {
 	 *  Android 5.0 anyway; even if we later added support for CameraController1, we can simply say HDR requires
 	 *  Android 5.0).
 	 */
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, TonemappingAlgorithm tonemapping_algorithm) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
 		
-		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
-			if( MyDebug.LOG )
-				Log.e(TAG, "HDR requires at least Android 5.0");
-			// throw runtime exception as this is a programming error - HDR should not be offered as supported on older Android versions
-			// (we require Android 5 for Camera2 API, to offer burst mode, anyway)
-			throw new RuntimeException();
-		}
     	long time_s = System.currentTimeMillis();
 		
 		int n_bitmaps = bitmaps.size();
@@ -646,18 +639,10 @@ public class HDRProcessor {
 			Log.d(TAG, "time for processHDRCore: " + (System.currentTimeMillis() - time_s));
 	}
 
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha) {
 		if (MyDebug.LOG)
 			Log.d(TAG, "processSingleImage");
-
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			if (MyDebug.LOG)
-				Log.e(TAG, "HDR requires at least Android 5.0");
-			// throw runtime exception as this is a programming error - HDR should not be offered as supported on older Android versions
-			// (we require Android 5 for Camera2 API, to offer burst mode, anyway)
-			throw new RuntimeException();
-		}
 
 		long time_s = System.currentTimeMillis();
 
@@ -710,7 +695,7 @@ public class HDRProcessor {
 	/**
 	 * If assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
      */
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private void autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, boolean assume_sorted, SortCallback sort_cb, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoAlignment");
@@ -1056,7 +1041,7 @@ public class HDRProcessor {
 		return new LuminanceInfo(127, true);
 	}
 
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, float hdr_alpha, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "adjustHistogram");
