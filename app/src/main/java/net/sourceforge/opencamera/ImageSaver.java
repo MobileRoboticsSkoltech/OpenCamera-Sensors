@@ -1838,6 +1838,8 @@ public class ImageSaver extends Thread {
     			Log.d(TAG, "    exif orientation: " + exif_orientation);
 
 			if( needs_tf ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "    need to rotate bitmap due to exif orientation tag");
 				Matrix m = new Matrix();
 				m.setRotate(exif_orientation, bitmap.getWidth() * 0.5f, bitmap.getHeight() * 0.5f);
 				Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap, 0, 0,bitmap.getWidth(), bitmap.getHeight(), m, true);
