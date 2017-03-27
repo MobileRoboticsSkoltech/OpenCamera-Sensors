@@ -7263,13 +7263,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(74)), "74°");
 	}
 
+	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro) throws IOException, InterruptedException {
+		subTestHDR(inputs, output_name, test_dro, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+	}
+
 	/** The following testHDRX tests test the HDR algorithm on a given set of input images.
 	 *  By testing on a fixed sample, this makes it easier to finetune the HDR algorithm for quality and performance.
 	 *  To use these tests, the testdata/ subfolder should be manually copied to the test device in the DCIM/testOpenCamera/
 	 *  folder (so you have DCIM/testOpenCamera/testdata/). We don't use assets/ as we'd end up with huge APK sizes which takes
 	 *  time to transfer to the device everytime we run the tests.
 	 */
-	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro) throws IOException, InterruptedException {
+	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro, HDRProcessor.TonemappingAlgorithm tonemapping_algorithm) throws IOException, InterruptedException {
 		Log.d(TAG, "subTestHDR");
 
 		Thread.sleep(1000); // wait for camera to open
@@ -7284,7 +7288,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     	long time_s = System.currentTimeMillis();
 		try {
-			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, tonemapping_algorithm);
 		}
 		catch(HDRProcessorException e) {
 			e.printStackTrace();
@@ -8168,6 +8172,29 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		int [] exp_offsets_x = {0, 0, 3};
 		int [] exp_offsets_y = {2, 0, -19};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR38".
+	 *  Tests with Filmic tonemapping.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR38() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR38");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR38/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR38/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR38/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR38_output.jpg", false, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_FILMIC);
+
+		int [] exp_offsets_x = {-1, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
