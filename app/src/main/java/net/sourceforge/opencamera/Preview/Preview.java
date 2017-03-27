@@ -5143,10 +5143,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	return this.supports_raw;
     }
 
+	/** Returns the horizontal angle of view in degrees (when unzoomed).
+	 */
 	public float getViewAngleX() {
 		return this.view_angle_x;
 	}
 
+	/** Returns the vertical angle of view in degrees (when unzoomed).
+	 */
 	public float getViewAngleY() {
 		return this.view_angle_y;
 	}

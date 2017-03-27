@@ -70,7 +70,7 @@ public abstract class CameraController {
 		public boolean supports_expo_bracketing;
 		public boolean supports_raw;
 		public float view_angle_x; // horizontal angle of view in degrees (when unzoomed)
-		public float view_angle_y; // view angle of view in degrees (when unzoomed)
+		public float view_angle_y; // vertical angle of view in degrees (when unzoomed)
 	}
 
 	public static class Size {
