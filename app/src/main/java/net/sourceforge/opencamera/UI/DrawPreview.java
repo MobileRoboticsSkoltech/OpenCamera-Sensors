@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
+import net.sourceforge.opencamera.GyroSensor;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.MyDebug;
@@ -88,6 +89,10 @@ public class DrawPreview {
     
 	private boolean continuous_focus_moving;
 	private long continuous_focus_moving_ms;
+
+	private boolean enable_gyro_target_spot;
+	private final float [] gyro_direction = new float[3];
+	private final float [] transformed_gyro_direction = new float[3];
 
 	public DrawPreview(MainActivity main_activity, MyApplicationInterface applicationInterface) {
 		if( MyDebug.LOG )
@@ -215,6 +220,17 @@ public class DrawPreview {
 			Log.d(TAG, "clearContinuousFocusMove");
 		continuous_focus_moving = false;
 		continuous_focus_moving_ms = 0;
+	}
+
+	public void setGyroDirectionMarker(float x, float y, float z) {
+		enable_gyro_target_spot = true;
+		gyro_direction[0] = x;
+		gyro_direction[1] = y;
+		gyro_direction[2] = z;
+	}
+
+	public void clearGyroDirectionMarker() {
+		enable_gyro_target_spot = false;
 	}
 
 	private boolean getTakePhotoBorderPref() {
@@ -1385,5 +1401,38 @@ public class DrawPreview {
 			}
 			p.setStyle(Paint.Style.FILL); // reset
 		}
+
+		if( enable_gyro_target_spot ) {
+			GyroSensor gyroSensor = main_activity.getApplicationInterface().getGyroSensor();
+			if( gyroSensor.isRecording() ) {
+				gyroSensor.getRelativeInverseVector(transformed_gyro_direction, gyro_direction);
+				// note that although X of gyro_direction represents left to right on the device, because we're in landscape mode,
+				// this is y coordinates on the screen
+				float angle_x = - (float)Math.asin(transformed_gyro_direction[1]);
+				float angle_y = - (float)Math.asin(transformed_gyro_direction[0]);
+				if( Math.abs(angle_x) < 0.5f*Math.PI && Math.abs(angle_y) < 0.5f*Math.PI ) {
+					float camera_angle_x = preview.getViewAngleX();
+					float camera_angle_y = preview.getViewAngleY();
+					float angle_scale_x = (float) (canvas.getWidth() / (2.0 * Math.tan(Math.toRadians((camera_angle_x / 2.0)))));
+					float angle_scale_y = (float) (canvas.getHeight() / (2.0 * Math.tan(Math.toRadians((camera_angle_y / 2.0)))));
+					angle_scale_x *= preview.getZoomRatio();
+					angle_scale_y *= preview.getZoomRatio();
+					float distance_x = angle_scale_x * (float) Math.tan(angle_x); // angle_scale is already in pixels rather than dps
+					float distance_y = angle_scale_y * (float) Math.tan(angle_y); // angle_scale is already in pixels rather than dps
+					p.setColor(Color.WHITE);
+					drawGyroSpot(canvas, 0.0f, 0.0f); // draw spot for the centre of the screen, to help the user orient the device
+					p.setColor(Color.BLUE);
+					drawGyroSpot(canvas, distance_x, distance_y);
+				}
+			}
+		}
     }
+
+    private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y) {
+		final float scale = getContext().getResources().getDisplayMetrics().density;
+		p.setAlpha(64);
+		float radius = (45 * scale + 0.5f); // convert dps to pixels
+		canvas.drawCircle(canvas.getWidth()/2 + distance_x, canvas.getHeight()/2 + distance_y, radius, p);
+		p.setAlpha(255);
+	}
 }

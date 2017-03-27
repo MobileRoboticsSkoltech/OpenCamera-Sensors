@@ -63,6 +63,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     
 	private final MainActivity main_activity;
 	private final LocationSupplier locationSupplier;
+	private final GyroSensor gyroSensor;
 	private final StorageUtils storageUtils;
 	private final DrawPreview drawPreview;
 	private final ImageSaver imageSaver;
@@ -113,6 +114,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		this.locationSupplier = new LocationSupplier(main_activity);
 		if( MyDebug.LOG )
 			Log.d(TAG, "MyApplicationInterface: time after creating location supplier: " + (System.currentTimeMillis() - debug_time));
+		this.gyroSensor = new GyroSensor(main_activity);
 		this.storageUtils = new StorageUtils(main_activity);
 		if( MyDebug.LOG )
 			Log.d(TAG, "MyApplicationInterface: time after creating storage utils: " + (System.currentTimeMillis() - debug_time));
@@ -164,6 +166,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	LocationSupplier getLocationSupplier() {
 		return locationSupplier;
+	}
+
+	public GyroSensor getGyroSensor() {
+		return gyroSensor;
 	}
 	
 	StorageUtils getStorageUtils() {
@@ -910,6 +916,56 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onContinuousFocusMove: " + start);
 		drawPreview.onContinuousFocusMove(start);
+	}
+
+    private int n_panorama_pics = 0;
+
+	void startPanorama() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "startPanorama");
+		gyroSensor.startRecording();
+		n_panorama_pics = 0;
+	}
+
+	void stopPanorama() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "stopPanorama");
+		gyroSensor.stopRecording();
+		clearPanoramaPoint();
+	}
+
+	void setNextPanoramaPoint() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setNextPanoramaPoint");
+		float camera_angle_y = main_activity.getPreview().getViewAngleY();
+		n_panorama_pics++;
+		float angle = (float) Math.toRadians(camera_angle_y) * n_panorama_pics;
+		final float pics_per_screen = 2.0f;
+		setNextPanoramaPoint((float) Math.sin(angle / pics_per_screen), 0.0f, (float) -Math.cos(angle / pics_per_screen));
+	}
+
+	private void setNextPanoramaPoint(float x, float y, float z) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setNextPanoramaPoint : " + x + " , " + y + " , " + z);
+
+		final float target_angle = 2.0f * 0.01745329252f;
+		gyroSensor.setTarget(x, y, z, target_angle, new GyroSensor.TargetCallback() {
+			@Override
+			public void onAchieved() {
+				if( MyDebug.LOG )
+					Log.d(TAG, "TargetCallback.onAchieved");
+				clearPanoramaPoint();
+				main_activity.takePicturePressed();
+			}
+		});
+		drawPreview.setGyroDirectionMarker(x, y, z);
+	}
+
+	void clearPanoramaPoint() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearPanoramaPoint");
+		gyroSensor.clearTarget();
+		drawPreview.clearGyroDirectionMarker();
 	}
 
 	@Override
