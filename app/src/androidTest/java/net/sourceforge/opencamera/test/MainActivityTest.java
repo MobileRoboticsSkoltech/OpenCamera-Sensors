@@ -8149,6 +8149,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
+	/** Tests HDR algorithm on test samples "testHDR37".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR37() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR37");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR37/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR37/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR37/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR37_output.jpg", false);
+
+		int [] exp_offsets_x = {0, 0, 3};
+		int [] exp_offsets_y = {2, 0, -19};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
 	/** Tests HDR algorithm on test samples "testHDRtemp".
 	 *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
 	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
