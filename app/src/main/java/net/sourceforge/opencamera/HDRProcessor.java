@@ -298,8 +298,12 @@ public class HDRProcessor {
 		for(int i=1;i<n_bitmaps;i++) {
 			if( bitmaps.get(i).getWidth() != bitmaps.get(0).getWidth() ||
 				bitmaps.get(i).getHeight() != bitmaps.get(0).getHeight() ) {
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.e(TAG, "bitmaps not of same resolution");
+					for(int j=0;j<n_bitmaps;j++) {
+						Log.e(TAG, "bitmaps " + j + " : " + bitmaps.get(j).getWidth() + " x " + bitmaps.get(j).getHeight());
+					}
+				}
 				throw new HDRProcessorException(HDRProcessorException.UNEQUAL_SIZES);
 			}
 		}
