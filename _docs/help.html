@@ -137,10 +137,10 @@ back to automatic ISO mode. Note that this setting may not be supported on all c
 If Camera2 API is used, then if a non-auto ISO is used, then selecting the exposure compensation icon
 <img src="ic_exposure_white_48dp.png" alt="Exposure Compensation icon" width="32" height="32"> will bring up sliders allowing direct control over the ISO and exposure
 time. You can also select "M" to switch straight to manual mode, keeping to the current ISO value.</li>
-<li><b>Photo Mode</b> - If Camera2 API is enabled, you can also choose different photo modes:<ul>
+<li><b>Photo Mode</b> - You can also choose different photo modes:<ul>
 	<li><b>Standard</b> - Ordinary operation: takes a single photo.</li>
-	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode.</li>
-	<li><b>HDR</b> - Enables <a href="#hdr">High Dynamic Range</a> mode.</li>
+	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode (requires Android 5).</li>
+	<li><b>HDR</b> - Enables <a href="#hdr">High Dynamic Range</a> mode (requires Android 5).</li>
 	<li><b>Exposure Bracketing</b> - Takes multiple images at different exposure levels (see
 	Settings/"Photo settings" for options to control the number of images and stops.</li>
 </ul></li>
@@ -245,14 +245,10 @@ the grass. Meanwhile the tree branches in the foreground is a bit too dark.</p>
 
 <p>Some things to note about Open Camera's HDR feature:</p>
 <ul>
-<li>HDR requires Camera2 API to be enabled (under Settings), which is only available on some devices.</li>
-<li>Taking photos with HDR is significantly slower than regular photos.</li>
+<li>Taking photos with HDR is significantly slower than regular photos (although note that HDR will give much faster performance if Camera2 API is enabled, see Settings - not all devices support this).</li>
 <li>HDR isn't suitable for scenes with movement, due to combining an image from multiple shots.</li>
 <li>Although Open Camera applies auto-alignment to the images, it's still best to try to hold your device steady while the photo is
 being taken.</li>
-<li>Some devices have problems taking photos in HDR or Exposure Bracketing mode (symptoms include preview freezing, or
-exposure bracketing shots coming out in the wrong order, which will also mess up the HDR algorithm), try disabling
-Settings/Photo settings/"Enable fast HDR/expo burst" if this happens.</li>
 <li>HDR can sometimes result in less accurate colour reproduction (due to trying to estimate the colours from multiple exposures).</li>
 <li>Some Android camera apps use "HDR" to mean "apply a whacky-looking filter". Whilst HDR filters can be used to apply a rather
 unreal or vivid image, for now Open Camera's HDR is more geared towards capturing the range of exposures. Also note that many camera
@@ -557,7 +553,7 @@ Exposure Bracketing Photo Mode). Note this will make saving slower, especially i
 (Camera2 API only).</p>
 
 <p><b>Exposure Bracketing Stops</b> - Specifies the number of stops between each successive image in Exposure
-Bracketing Photo Mode. An increase of 1 stop means a doubling of the amount of light (Camera2 API only).</p>
+Bracketing Photo Mode. An increase of 1 stop means a doubling of the amount of light.</p>
 
 <p><b>Front camera mirror</b> - Normally for front cameras, the preview will behave like a mirror, but resultant
 photos will still be as the camera (or other people) view the scene. This option can be used to mirror the

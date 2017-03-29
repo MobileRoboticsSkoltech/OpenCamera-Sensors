@@ -68,6 +68,7 @@ public abstract class CameraController {
 		public float exposure_step;
 		public boolean can_disable_shutter_sound;
 		public boolean supports_expo_bracketing;
+		public int max_expo_bracketing_n_images;
 		public boolean supports_raw;
 		public float view_angle_x; // horizontal angle of view in degrees (when unzoomed)
 		public float view_angle_y; // vertical angle of view in degrees (when unzoomed)

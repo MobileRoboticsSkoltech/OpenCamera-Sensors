@@ -1018,6 +1018,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putBoolean("supports_raw", this.preview.supportsRaw());
 		bundle.putBoolean("supports_hdr", this.supportsHDR());
 		bundle.putBoolean("supports_expo_bracketing", this.supportsExpoBracketing());
+		bundle.putInt("max_expo_bracketing_n_images", this.maxExpoBracketingNImages());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
 		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
 
@@ -2348,24 +2349,23 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	public boolean supportsDRO() {
 		// require at least Android 5, for the Renderscript support in HDRProcessor
-		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP )
-			return true;
-		return false;
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP );
 	}
 
     public boolean supportsHDR() {
     	// we also require the device have sufficient memory to do the processing, simplest to use the same test as we do for auto-stabilise...
-		if( this.supportsAutoStabilise() && preview.supportsExpoBracketing() )
-			return true;
-		return false;
+		// also require at least Android 5, for the Renderscript support in HDRProcessor
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && this.supportsAutoStabilise() && preview.supportsExpoBracketing() );
     }
     
     public boolean supportsExpoBracketing() {
-		if( preview.supportsExpoBracketing() )
-			return true;
-		return false;
+		return preview.supportsExpoBracketing();
     }
     
+    public int maxExpoBracketingNImages() {
+		return preview.maxExpoBracketingNImages();
+    }
+
     public boolean supportsForceVideo4K() {
     	return this.supports_force_video_4k;
     }

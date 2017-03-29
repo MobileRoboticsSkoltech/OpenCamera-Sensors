@@ -32,6 +32,14 @@ public class CameraController1 extends CameraController {
 	private boolean frontscreen_flash;
 	private final ErrorCallback camera_error_cb;
 
+	private int n_burst; // number of expected burst images in this capture
+	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
+	private List<Integer> burst_exposures;
+	private boolean want_expo_bracketing;
+	private final static int max_expo_bracketing_n_images = 3; // could be more, but problem that Open Camera defaults to 2.0 bracketing stops, and max exposure compensation typically isn't more than 2.0
+	private int expo_bracketing_n_images = 3;
+	private double expo_bracketing_stops = 2.0;
+
 	/** Opens the camera device.
 	 * @param cameraId Which camera to open (must be between 0 and CameraControllerManager1.getNumberOfCameras()-1).
 	 * @param camera_error_cb onError() will be called if the camera closes due to serious error. No more calls to the CameraController1 object should be made (though a new one can be created, to try reopening the camera).
@@ -315,18 +323,11 @@ public class CameraController1 extends CameraController {
 
         camera_features.is_video_stabilization_supported = parameters.isVideoStabilizationSupported();
         
+		camera_features.supports_expo_bracketing = true;
+		camera_features.max_expo_bracketing_n_images = max_expo_bracketing_n_images;
         camera_features.min_exposure = parameters.getMinExposureCompensation();
         camera_features.max_exposure = parameters.getMaxExposureCompensation();
-        try {
-        	camera_features.exposure_step = parameters.getExposureCompensationStep();
-        }
-        catch(Exception e) {
-        	// received a NullPointerException from StringToReal.parseFloat() beneath getExposureCompensationStep() on Google Play!
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "exception from getExposureCompensationStep()");
-        	e.printStackTrace();
-        	camera_features.exposure_step = 1.0f/3.0f; // make up a typical example
-        }
+		camera_features.exposure_step = getExposureCompensationStep();
 
 		List<Camera.Size> camera_video_sizes = parameters.getSupportedVideoSizes();
     	if( camera_video_sizes == null ) {
@@ -660,17 +661,46 @@ public class CameraController1 extends CameraController {
 	
 	@Override
 	public void setExpoBracketing(boolean want_expo_bracketing) {
-		// not supported for CameraController1
+		if( MyDebug.LOG )
+			Log.d(TAG, "setExpoBracketing: " + want_expo_bracketing);
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "no camera");
+			return;
+		}
+		if( this.want_expo_bracketing == want_expo_bracketing ) {
+			return;
+		}
+		this.want_expo_bracketing = want_expo_bracketing;
 	}
-	
+
 	@Override
 	public void setExpoBracketingNImages(int n_images) {
-		// not supported for CameraController1
+		if( MyDebug.LOG )
+			Log.d(TAG, "setExpoBracketingNImages: " + n_images);
+		if( n_images <= 1 || (n_images % 2) == 0 ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "n_images should be an odd number greater than 1");
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		if( n_images > max_expo_bracketing_n_images ) {
+			n_images = max_expo_bracketing_n_images;
+			if( MyDebug.LOG )
+				Log.e(TAG, "limiting n_images to max of " + n_images);
+		}
+		this.expo_bracketing_n_images = n_images;
 	}
-	
+
 	@Override
 	public void setExpoBracketingStops(double stops) {
-		// not supported for CameraController1
+		if( MyDebug.LOG )
+			Log.d(TAG, "setExpoBracketingStops: " + stops);
+		if( stops <= 0.0 ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "stops should be positive");
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		this.expo_bracketing_stops = stops;
 	}
 
 	@Override
@@ -727,6 +757,22 @@ public class CameraController1 extends CameraController {
 	public int getExposureCompensation() {
 		Camera.Parameters parameters = this.getParameters();
 		return parameters.getExposureCompensation();
+	}
+
+	private float getExposureCompensationStep() {
+		float exposure_step;
+		Camera.Parameters parameters = this.getParameters();
+        try {
+        	exposure_step = parameters.getExposureCompensationStep();
+        }
+        catch(Exception e) {
+        	// received a NullPointerException from StringToReal.parseFloat() beneath getExposureCompensationStep() on Google Play!
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "exception from getExposureCompensationStep()");
+        	e.printStackTrace();
+        	exposure_step = 1.0f/3.0f; // make up a typical example
+        }
+        return exposure_step;
 	}
 	
 	// Returns whether exposure was modified
@@ -1334,15 +1380,79 @@ public class CameraController1 extends CameraController {
         }
 	}
 	
+	private void clearPending() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearPending");
+		pending_burst_images.clear();
+		burst_exposures = null;
+		n_burst = 0;
+	}
+
 	private void takePictureNow(final CameraController.PictureCallback picture, final ErrorCallback error) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureNow");
-    	Camera.ShutterCallback shutter = new TakePictureShutterCallback();
-        Camera.PictureCallback camera_jpeg = picture == null ? null : new Camera.PictureCallback() {
+
+    	final Camera.ShutterCallback shutter = new TakePictureShutterCallback();
+        final Camera.PictureCallback camera_jpeg = picture == null ? null : new Camera.PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onPictureTaken");
     	    	// n.b., this is automatically run in a different thread
-    	    	picture.onPictureTaken(data);
-    	    	picture.onCompleted();
+
+				if( want_expo_bracketing && n_burst > 1 ) {
+					pending_burst_images.add(data);
+					if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
+						if( MyDebug.LOG )
+							Log.d(TAG, "all burst images available");
+						if( pending_burst_images.size() > n_burst ) {
+							Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than n_burst " + n_burst);
+						}
+
+						// set exposure compensation back to original
+						setExposureCompensation(burst_exposures.get(0));
+
+						// take a copy, so that we can clear pending_burst_images
+						// also allows us to reorder from dark to light
+						// since we took the images with the base exposure being first
+						int n_half_images = pending_burst_images.size()/2;
+						List<byte []> images = new ArrayList<>();
+						// darker images
+						for(int i=0;i<n_half_images;i++) {
+							images.add(pending_burst_images.get(i+1));
+						}
+						// base image
+						images.add(pending_burst_images.get(0));
+						// lighter images
+						for(int i=0;i<n_half_images;i++) {
+							images.add(pending_burst_images.get(n_half_images+1));
+						}
+
+						picture.onBurstPictureTaken(images);
+						pending_burst_images.clear();
+						picture.onCompleted();
+					}
+					else {
+						if( MyDebug.LOG )
+							Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
+						// set exposure compensation for next image
+						setExposureCompensation(burst_exposures.get(pending_burst_images.size()));
+						Handler handler = new Handler();
+						handler.postDelayed(new Runnable(){
+							@Override
+							public void run(){
+								if( MyDebug.LOG )
+									Log.d(TAG, "take picture after delay for next expo");
+								if( camera != null ) { // make sure camera wasn't released in the meantime
+									takePictureNow(picture, error);
+								}
+						   }
+						}, 1000);
+					}
+				}
+				else {
+					picture.onPictureTaken(data);
+					picture.onCompleted();
+				}
     	    }
         };
 
@@ -1366,6 +1476,58 @@ public class CameraController1 extends CameraController {
 	public void takePicture(final CameraController.PictureCallback picture, final ErrorCallback error) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
+
+		clearPending();
+        if( want_expo_bracketing ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up expo bracketing");
+			Camera.Parameters parameters = this.getParameters();
+			int n_half_images = expo_bracketing_n_images/2;
+			int min_exposure = parameters.getMinExposureCompensation();
+			int max_exposure = parameters.getMaxExposureCompensation();
+			float exposure_step = getExposureCompensationStep();
+			if( exposure_step == 0.0f ) // just in case?
+	        	exposure_step = 1.0f/3.0f; // make up a typical example
+			int exposure_current = getExposureCompensation();
+			int steps = (int)((expo_bracketing_stops+1.0e-5) / exposure_step); // need to add a small amount, otherwise we can round down
+			steps = Math.max(steps, 1);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "steps: " + steps);
+				Log.d(TAG, "exposure_current: " + exposure_current);
+			}
+
+			List<Integer> requests = new ArrayList<>();
+
+			// do the current exposure first, so we can take the first shot immediately
+			// if we change the order, remember to update the code that re-orders for passing resultant images back to picture.onBurstPictureTaken()
+			requests.add(exposure_current);
+
+			// darker images
+			for(int i=0;i<n_half_images;i++) {
+				int exposure = exposure_current - (n_half_images-i)*steps;
+				exposure = Math.max(exposure, min_exposure);
+				requests.add(exposure);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "add burst request for " + i + "th dark image:");
+					Log.d(TAG, "exposure: " + exposure);
+				}
+			}
+
+			// lighter images
+			for(int i=0;i<n_half_images;i++) {
+				int exposure = exposure_current + (i+1)*steps;
+				exposure = Math.min(exposure, max_exposure);
+				requests.add(exposure);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "add burst request for " + i + "th light image:");
+					Log.d(TAG, "exposure: " + exposure);
+				}
+			}
+
+			burst_exposures = requests;
+			n_burst = requests.size();
+		}
+
 		if( frontscreen_flash ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "front screen flash");

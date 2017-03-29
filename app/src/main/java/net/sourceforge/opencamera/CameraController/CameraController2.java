@@ -73,6 +73,7 @@ public class CameraController2 extends CameraController {
 	private final Object create_capture_session_lock = new Object(); // lock to wait for capture session to be created from CameraCaptureSession.StateCallback
 	private ImageReader imageReader;
 	private boolean want_expo_bracketing;
+	private final static int max_expo_bracketing_n_images = 5; // could be more, but limit to 5 for now
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
 	private boolean use_expo_fast_burst = true;
@@ -1303,6 +1304,7 @@ public class CameraController2 extends CameraController {
 			if( exposure_time_range != null ) {
 				camera_features.supports_exposure_time = true;
 				camera_features.supports_expo_bracketing = true;
+				camera_features.max_expo_bracketing_n_images = max_expo_bracketing_n_images;
 				camera_features.min_exposure_time = exposure_time_range.getLower();
 				camera_features.max_exposure_time = exposure_time_range.getUpper();
 			}
@@ -1988,6 +1990,11 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.e(TAG, "n_images should be an odd number greater than 1");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		if( n_images > max_expo_bracketing_n_images ) {
+			n_images = max_expo_bracketing_n_images;
+			if( MyDebug.LOG )
+				Log.e(TAG, "limiting n_images to max of " + n_images);
 		}
 		this.expo_bracketing_n_images = n_images;
 	}
