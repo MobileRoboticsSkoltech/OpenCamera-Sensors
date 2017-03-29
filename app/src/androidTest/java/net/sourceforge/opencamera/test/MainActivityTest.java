@@ -7063,8 +7063,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	public void testTakePhotoHDRSaveExpo() throws InterruptedException {
@@ -7082,8 +7084,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	public void testTakePhotoHDRFrontCamera() throws InterruptedException {
@@ -7114,8 +7118,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(cameraId != new_cameraId);
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	public void testTakePhotoHDRAutoStabilise() throws InterruptedException {
@@ -7133,8 +7139,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	public void testTakePhotoHDRPhotoStamp() throws InterruptedException {
@@ -7152,8 +7160,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	/** Tests expo bracketing with default values.
@@ -7172,8 +7182,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	/** Tests expo bracketing with 5 images, 1 stop.
@@ -7195,8 +7207,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	/*private Bitmap getBitmapFromAssets(String filename) throws IOException {
