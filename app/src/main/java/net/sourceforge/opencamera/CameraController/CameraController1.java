@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import android.annotation.TargetApi;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusMoveCallback;
@@ -277,7 +276,6 @@ public class CameraController1 extends CameraController {
 		return "Camera";
 	}
 	
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	public CameraFeatures getCameraFeatures() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCameraFeatures()");
@@ -1075,7 +1073,6 @@ public class CameraController1 extends CameraController {
     	setCameraParameters(parameters);
 	}
 
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	public void enableShutterSound(boolean enabled) {
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
         	camera.enableShutterSound(enabled);
@@ -1337,7 +1334,6 @@ public class CameraController1 extends CameraController {
 	}
 	
 	@Override
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 	public void setContinuousFocusMoveCallback(final ContinuousFocusMoveCallback cb) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setContinuousFocusMoveCallback");

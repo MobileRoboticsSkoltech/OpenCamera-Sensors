@@ -466,7 +466,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	/** Determine whether we support Camera2 API.
 	 */
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initCamera2Support() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initCamera2Support");
@@ -511,7 +510,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 	}
 	
-    @TargetApi(Build.VERSION_CODES.M)
 	@Override
 	protected void onDestroy() {
 		if( MyDebug.LOG ) {
@@ -931,7 +929,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void clickedExposure(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposure");
@@ -1274,7 +1271,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
 	void setImmersiveMode(boolean on) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setImmersiveMode: " + on);
@@ -1915,7 +1911,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		applicationInterface.trashLastImage();
     }
 
-    private boolean test_panorama = false;
+    private final boolean test_panorama = false;
 
 	/** User has pressed the take picture button, or done an equivalent action to request this (e.g.,
 	 *  volume buttons, audio trigger).
@@ -2362,7 +2358,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		return preview.supportsExpoBracketing();
     }
     
-    public int maxExpoBracketingNImages() {
+    private int maxExpoBracketingNImages() {
 		return preview.maxExpoBracketingNImages();
     }
 
@@ -2842,7 +2838,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 	
 	@SuppressWarnings("deprecation")
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initSound() {
 		if( sound_pool == null ) {
     		if( MyDebug.LOG )

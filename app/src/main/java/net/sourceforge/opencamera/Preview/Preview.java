@@ -279,7 +279,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "is_test: " + is_test);
 		}
 
-		this.using_android_l = applicationInterface.useCamera2();
+		this.using_android_l = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && applicationInterface.useCamera2();
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "using_android_l?: " + using_android_l);
 		}
@@ -1990,7 +1990,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		this.video_quality_handler.sortVideoSizes();
 	}
 
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initialiseVideoQuality() {
 		int cameraId = camera_controller.getCameraId();
 		List<Integer> profiles = new ArrayList<>();
@@ -4112,7 +4111,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	/** Pauses the video recording - or unpauses if already paused.
 	 *  This does nothing if isVideoRecording() returns false, or not on Android 7 or higher.
 	 */
-	@TargetApi(Build.VERSION_CODES.N)
 	public void pauseVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "pauseVideo");

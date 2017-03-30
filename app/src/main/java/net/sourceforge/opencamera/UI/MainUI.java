@@ -5,7 +5,6 @@ import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -73,7 +72,6 @@ public class MainUI {
 	    button.setBackgroundColor(Color.argb(63, 63, 63, 63)); // n.b., rgb color seems to be ignored for Android 6 onwards, but still relevant for older versions
 	}
 	
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void setSeekbarColors() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setSeekbarColors");
@@ -853,7 +851,6 @@ public class MainUI {
 		popup_container.getViewTreeObserver().addOnGlobalLayoutListener( 
 			new OnGlobalLayoutListener() {
 				@SuppressWarnings("deprecation")
-				@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 				@Override
 			    public void onGlobalLayout() {
 					if( MyDebug.LOG )
