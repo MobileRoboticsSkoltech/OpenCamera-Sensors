@@ -2519,9 +2519,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			// if test_wait_capture_result, then we'll have waited too long for thumbnail animation
 		}
 		else if( has_thumbnail_anim ) {
+			long time_s = System.currentTimeMillis();
 			while( !mActivity.hasThumbnailAnimation() ) {
 				Log.d(TAG, "waiting for thumbnail animation");
 				Thread.sleep(10);
+				assertTrue( System.currentTimeMillis() - time_s < 5000 );
 			}
 		}
 		else {
@@ -7090,6 +7092,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
+	/** Take photo in HDR mode with front camera.
+	 *  Note that this fails on OnePlus 3T with old camera API, due to bug where photo resolution changes when
+	 *  exposure compensation set for front camera.
+	 */
 	public void testTakePhotoHDRFrontCamera() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDRFrontCamera");
 		if( !mActivity.supportsHDR() ) {
