@@ -407,4 +407,5 @@
     <string name="capturing">Capturing…</string>
 
     <string name="audio_listener_failed">Failed to initalise audio listening</string>
+    <string name="failed_to_process_hdr">Failed to create HDR image</string>
 </resources>

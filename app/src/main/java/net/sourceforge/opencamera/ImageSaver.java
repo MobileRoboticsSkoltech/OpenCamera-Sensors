@@ -642,8 +642,19 @@ public class ImageSaver extends Thread {
 			catch(HDRProcessorException e) {
 				Log.e(TAG, "HDRProcessorException from processHDR: " + e.getCode());
 				e.printStackTrace();
-				// throw RuntimeException, as we shouldn't ever get the errors INVALID_N_IMAGES or UNEQUAL_SIZES, if we do it's a programming error
-				throw new RuntimeException();
+				if( e.getCode() == HDRProcessorException.UNEQUAL_SIZES ) {
+					// this can happen on OnePlus 3T with old camera API with front camera, seems to be a bug that resolution changes when exposure compensation is set!
+					main_activity.getPreview().showToast(null, R.string.failed_to_process_hdr);
+					Log.e(TAG, "UNEQUAL_SIZES");
+					bitmaps.clear();
+					System.gc();
+					main_activity.savingImage(false);
+			        return false;
+				}
+				else {
+					// throw RuntimeException, as we shouldn't ever get the error INVALID_N_IMAGES, if we do it's a programming error
+					throw new RuntimeException();
+				}
 			}
 			if( MyDebug.LOG ) {
     			Log.d(TAG, "HDR performance: time after creating HDR image: " + (System.currentTimeMillis() - time_s));
