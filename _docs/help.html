@@ -34,6 +34,7 @@
 <body>
 
 <p><small><b>More of my Free software:</b>
+<a href="https://play.google.com/store/apps/details?id=uk.org.opencamera.vibrancehdr">Vibrance HDR</a> ~
 <a href="http://wifiremoteplay.sourceforge.net">Wifi Remote Play</a> ~
 <a href="http://erebusrpg.sourceforge.net">Erebus RPG</a>
 </small>
@@ -141,8 +142,11 @@ time. You can also select "M" to switch straight to manual mode, keeping to the 
 	<li><b>Standard</b> - Ordinary operation: takes a single photo.</li>
 	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode (requires Android 5).</li>
 	<li><b>HDR</b> - Enables <a href="#hdr">High Dynamic Range</a> mode (requires Android 5).</li>
-	<li><b>Exposure Bracketing</b> - Takes multiple images at different exposure levels (see
-	Settings/"Photo settings" for options to control the number of images and stops.</li>
+	<li><b>Expo {}</b> - Enables Auto Exposure Bracketing (AEB) mode. Takes multiple images at different exposure
+	levels. See Settings/"Photo settings" for options to control the number of images and stops. These images can
+	be processed in other applications to create HDR images. For Android, you can try my own
+	<a href="https://play.google.com/store/apps/details?id=uk.org.opencamera.vibrancehdr">Vibrance HDR</a>. For
+	PC platforms, try <a href="http://qtpfsgui.sourceforge.net/">Luminance HDR</a>.</li>
 </ul></li>
 <li><b>Auto-stabilise</b> - Enable the auto-stabilise features for photos (see
 <a href="#auto_stabilise">below</a>). (Only available if the device has enough memory.)</li>
@@ -544,7 +548,9 @@ uncompressed and unprocessed information from your camera. Please note the follo
 
 <p><b>Save all images for HDR mode</b> - When using <a href="#hdr">HDR</a> mode, if this option is enabled,
 then the three base exposure images will be saved as well as the final HDR photo. This is useful if you want
-to use external HDR applications (such as <a href="http://qtpfsgui.sourceforge.net/">Luminance HDR</a>) to
+to use external HDR applications (such as my own
+<a href="https://play.google.com/store/apps/details?id=uk.org.opencamera.vibrancehdr">Vibrance HDR</a> for Android,
+or <a href="http://qtpfsgui.sourceforge.net/">Luminance HDR</a> for PC) to
 create the final HDR image (although if you don't want Open Camera's HDR mode at all, you can instead use the
 Exposure Bracketing Photo Mode). Note this will make saving slower, especially if options like "Stamp photos" or
 <a href="#auto_stabilise">Auto-stabilise</a> are also used.</p>
