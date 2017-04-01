@@ -328,7 +328,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 				alertDialog.setTitle(R.string.app_name);
 				alertDialog.setMessage(R.string.intro_text);
-				alertDialog.setPositiveButton(R.string.intro_ok, null);
+				alertDialog.setPositiveButton(android.R.string.ok, null);
+				alertDialog.setNegativeButton(R.string.preference_online_help, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "online help");
+						launchOnlineHelp();
+					}
+				});
 				alertDialog.show();
 			}
 
@@ -555,6 +563,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putBoolean(PreferenceKeys.getFirstTimePreferenceKey(), true);
 		editor.apply();
+	}
+
+	void launchOnlineHelp() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "launchOnlineHelp");
+		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://opencamera.sourceforge.net/"));
+		startActivity(browserIntent);
 	}
 
 	// for audio "noise" trigger option

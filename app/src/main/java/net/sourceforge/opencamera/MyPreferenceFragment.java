@@ -326,8 +326,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 	if( pref.getKey().equals("preference_online_help") ) {
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked online help");
-            	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://opencamera.sourceforge.net/"));
-            	        startActivity(browserIntent);
+	            		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+						main_activity.launchOnlineHelp();
                 		return false;
                 	}
                 	return false;
