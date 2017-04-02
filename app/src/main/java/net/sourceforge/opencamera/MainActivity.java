@@ -971,6 +971,33 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		seekBar.setProgress(new_value);
 	}
     
+    private static double exponentialScaling(double frac, double min, double max) {
+		/* We use S(frac) = A * e^(s * frac)
+		 * We want S(0) = min, S(1) = max
+		 * So A = min
+		 * and Ae^s = max
+		 * => s = ln(max/min)
+		 */
+		double s = Math.log(max / min);
+		return min * Math.exp(s * frac);
+	}
+
+    private static double exponentialScalingInverse(double value, double min, double max) {
+		double s = Math.log(max / min);
+		return Math.log(value / min) / s;
+	}
+
+	private void setProgressSeekbarExponential(SeekBar seekBar, double min_value, double max_value, double value) {
+		seekBar.setMax(manual_n);
+		double frac = exponentialScalingInverse(value, min_value, max_value);
+		int new_value = (int)(frac*manual_n + 0.5); // add 0.5 for rounding
+		if( new_value < 0 )
+			new_value = 0;
+		else if( new_value > manual_n )
+			new_value = manual_n;
+		seekBar.setProgress(new_value);
+	}
+
     public void clickedExposureLock(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposureLock");
@@ -2191,7 +2218,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					Log.d(TAG, "set up iso");
 				SeekBar iso_seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
 			    iso_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-				setProgressSeekbarScaled(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
+				setProgressSeekbarExponential(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
 				iso_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -2200,12 +2227,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						double frac = progress/(double)manual_n;
 						if( MyDebug.LOG )
 							Log.d(TAG, "exposure_time frac: " + frac);
-						double scaling = MainActivity.seekbarScaling(frac);
+						/*double scaling = MainActivity.seekbarScaling(frac);
 						if( MyDebug.LOG )
 							Log.d(TAG, "exposure_time scaling: " + scaling);
 						int min_iso = preview.getMinimumISO();
 						int max_iso = preview.getMaximumISO();
-						int iso = min_iso + (int)(scaling * (max_iso - min_iso));
+						int iso = min_iso + (int)(scaling * (max_iso - min_iso));*/
+						int min_iso = preview.getMinimumISO();
+						int max_iso = preview.getMaximumISO();
+						int iso = (int)exponentialScaling(frac, min_iso, max_iso);
 						preview.setISO(iso);
 					}
 
@@ -2222,7 +2252,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						Log.d(TAG, "set up exposure time");
 					SeekBar exposure_time_seek_bar = ((SeekBar)findViewById(R.id.exposure_time_seekbar));
 					exposure_time_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-					setProgressSeekbarScaled(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
+					setProgressSeekbarExponential(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
 					exposure_time_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 						@Override
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -2235,12 +2265,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 							//double exposure_time_r = min_exposure_time_r + (frac * (max_exposure_time_r - min_exposure_time_r));
 							//long exposure_time = (long)(1.0 / exposure_time_r);
 							// we use the formula: [100^(percent/100) - 1]/99.0 rather than a simple linear scaling
-							double scaling = MainActivity.seekbarScaling(frac);
+							/*double scaling = MainActivity.seekbarScaling(frac);
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure_time scaling: " + scaling);
 							long min_exposure_time = preview.getMinimumExposureTime();
 							long max_exposure_time = preview.getMaximumExposureTime();
-							long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));
+							long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));*/
+							long min_exposure_time = preview.getMinimumExposureTime();
+							long max_exposure_time = preview.getMaximumExposureTime();
+							long exposure_time = (long)exponentialScaling(frac, min_exposure_time, max_exposure_time);
 							preview.setExposureTime(exposure_time);
 						}
 
