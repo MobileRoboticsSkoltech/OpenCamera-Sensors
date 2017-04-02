@@ -85,6 +85,7 @@ public class CameraController2 extends CameraController {
 	private OnRawImageAvailableListener onRawImageAvailableListener;
 	private PictureCallback jpeg_cb;
 	private PictureCallback raw_cb;
+	//private CaptureRequest pending_request_when_ready;
 	private int n_burst; // number of expected burst images in this capture
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
 	private List<CaptureRequest> burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
@@ -976,6 +977,7 @@ public class CameraController2 extends CameraController {
 		if( captureSession != null ) {
 			captureSession.close();
 			captureSession = null;
+			//pending_request_when_ready = null;
 		}
 		previewBuilder = null;
 		if( camera != null ) {
@@ -2962,11 +2964,10 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "close old capture session");
 			captureSession.close();
 			captureSession = null;
+			//pending_request_when_ready = null;
 		}
 
 		try {
-			captureSession = null;
-
 			if( video_recorder != null ) {
 				closePictureImageReader();
 			}
@@ -3062,6 +3063,34 @@ public class CameraController2 extends CameraController {
 				    }
 					// don't throw CameraControllerException here, as won't be caught - instead we throw CameraControllerException below
 				}
+
+				/*@Override
+				public void onReady(CameraCaptureSession session) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "onReady: " + session);
+					if( pending_request_when_ready != null ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "have pending_request_when_ready: " + pending_request_when_ready);
+						CaptureRequest request = pending_request_when_ready;
+						pending_request_when_ready = null;
+						try {
+							captureSession.capture(request, previewCaptureCallback, handler);
+						}
+						catch(CameraAccessException e) {
+							if( MyDebug.LOG ) {
+								Log.e(TAG, "failed to take picture");
+								Log.e(TAG, "reason: " + e.getReason());
+								Log.e(TAG, "message: " + e.getMessage());
+							}
+							e.printStackTrace();
+							jpeg_cb = null;
+							if( take_picture_error_cb != null ) {
+								take_picture_error_cb.onError();
+								take_picture_error_cb = null;
+							}
+						}
+					}
+				}*/
 			}
 			final MyStateCallback myStateCallback = new MyStateCallback();
 
@@ -3163,6 +3192,8 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 		try {
+			//pending_request_when_ready = null;
+
 			captureSession.stopRepeating();
 			// although stopRepeating() alone will pause the preview, seems better to close captureSession altogether - this allows the app to make changes such as changing the picture size
 			if( MyDebug.LOG )
@@ -3533,6 +3564,7 @@ public class CameraController2 extends CameraController {
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "capture with stillBuilder");
+			//pending_request_when_ready = stillBuilder.build();
 			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
 			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
 				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
@@ -4160,18 +4192,21 @@ public class CameraController2 extends CameraController {
 		private long last_process_frame_number = 0;
 		private int last_af_state = -1;
 
+		@Override
 		public void onCaptureBufferLost(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull Surface target, long frameNumber) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureBufferLost: " + frameNumber);
 			super.onCaptureBufferLost(session, request, target, frameNumber);
 		}
 
+		@Override
 		public void onCaptureFailed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureFailed: " + failure);
 			super.onCaptureFailed(session, request, failure); // API docs say this does nothing, but call it just to be safe
 		}
 
+		@Override
 		public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session, int sequenceId) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "onCaptureSequenceAborted");
@@ -4180,6 +4215,7 @@ public class CameraController2 extends CameraController {
 			super.onCaptureSequenceAborted(session, sequenceId); // API docs say this does nothing, but call it just to be safe
 		}
 
+		@Override
 		public void onCaptureSequenceCompleted(@NonNull CameraCaptureSession session, int sequenceId, long frameNumber) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "onCaptureSequenceCompleted");
@@ -4189,16 +4225,21 @@ public class CameraController2 extends CameraController {
 			super.onCaptureSequenceCompleted(session, sequenceId, frameNumber); // API docs say this does nothing, but call it just to be safe
 		}
 
+		@Override
 		public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
 			if( request.getTag() == RequestTag.CAPTURE ) {
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "onCaptureStarted: capture");
+					Log.d(TAG, "frameNumber: " + frameNumber);
+					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
+				}
 				// n.b., we don't play the shutter sound here, as it typically sounds "too late"
 				// (if ever we changed this, would also need to fix for burst, where we only set the RequestTag.CAPTURE for the last image)
 			}
 			super.onCaptureStarted(session, request, timestamp, frameNumber);
 		}
 
+		@Override
 		public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureProgressed");*/
@@ -4210,13 +4251,16 @@ public class CameraController2 extends CameraController {
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
+		@Override
 		public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureCompleted");*/
 			if( request.getTag() == RequestTag.CAPTURE ) {
-				if (MyDebug.LOG) {
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "onCaptureCompleted: capture");
 					Log.d(TAG, "sequenceId: " + result.getSequenceId());
+					Log.d(TAG, "frameNumber: " + result.getFrameNumber());
+					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
 				}
 			}
 			process(request, result);
