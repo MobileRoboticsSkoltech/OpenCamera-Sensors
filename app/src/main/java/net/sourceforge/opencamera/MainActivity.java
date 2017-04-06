@@ -1058,6 +1058,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putBoolean("supports_hdr", this.supportsHDR());
 		bundle.putBoolean("supports_expo_bracketing", this.supportsExpoBracketing());
 		bundle.putInt("max_expo_bracketing_n_images", this.maxExpoBracketingNImages());
+		bundle.putBoolean("supports_exposure_compensation", this.preview.supportsExposures());
+		bundle.putBoolean("supports_iso_range", this.preview.supportsISORange());
+		bundle.putBoolean("supports_exposure_time", this.preview.supportsExposureTime());
+		bundle.putBoolean("supports_white_balance_temperature", this.preview.supportsWhiteBalanceTemperature());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
 		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
 
