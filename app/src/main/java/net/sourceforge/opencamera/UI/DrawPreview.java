@@ -64,6 +64,8 @@ public class DrawPreview {
 
 	private Bitmap raw_bitmap;
 	private Bitmap auto_stabilise_bitmap;
+	private Bitmap hdr_bitmap;
+	private Bitmap photostamp_bitmap;
 	private Bitmap flash_bitmap;
 	private final Rect icon_dest = new Rect();
 	private long needs_flash_time = -1; // time when flash symbol comes on (used for fade-in effect)
@@ -110,6 +112,8 @@ public class DrawPreview {
     	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth_off);
 		raw_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.raw_icon);
 		auto_stabilise_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.auto_stabilise_icon);
+		hdr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_hdr_on_white_48dp);
+		photostamp_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_text_format_white_48dp);
 		flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
 	}
 	
@@ -132,6 +136,14 @@ public class DrawPreview {
 		if( auto_stabilise_bitmap != null ) {
 			auto_stabilise_bitmap.recycle();
 			auto_stabilise_bitmap = null;
+		}
+		if( hdr_bitmap != null ) {
+			hdr_bitmap.recycle();
+			hdr_bitmap = null;
+		}
+		if( photostamp_bitmap != null ) {
+			photostamp_bitmap.recycle();
+			photostamp_bitmap = null;
 		}
 		if( flash_bitmap != null ) {
 			flash_bitmap.recycle();
@@ -633,7 +645,10 @@ public class DrawPreview {
 				location_x2 = location_x - icon_size + flash_padding;
 			}
 
-			if( applicationInterface.isRawPref() ) {
+			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
+			if( applicationInterface.isRawPref() &&
+					applicationInterface.getPhotoMode() != MyApplicationInterface.PhotoMode.HDR &&
+					applicationInterface.getPhotoMode() != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -658,6 +673,40 @@ public class DrawPreview {
 				canvas.drawRect(icon_dest, p);
 				p.setAlpha(255);
 				canvas.drawBitmap(auto_stabilise_bitmap, null, icon_dest, p);
+
+				if( ui_rotation == 180 ) {
+					location_x2 -= icon_size + flash_padding;
+				}
+				else {
+					location_x2 += icon_size + flash_padding;
+				}
+			}
+
+			if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.HDR ) {
+				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
+				p.setStyle(Paint.Style.FILL);
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				canvas.drawRect(icon_dest, p);
+				p.setAlpha(255);
+				canvas.drawBitmap(hdr_bitmap, null, icon_dest, p);
+
+				if( ui_rotation == 180 ) {
+					location_x2 -= icon_size + flash_padding;
+				}
+				else {
+					location_x2 += icon_size + flash_padding;
+				}
+			}
+
+			if( applicationInterface.getStampPref().equals("preference_stamp_yes") ) {
+				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
+				p.setStyle(Paint.Style.FILL);
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				canvas.drawRect(icon_dest, p);
+				p.setAlpha(255);
+				canvas.drawBitmap(photostamp_bitmap, null, icon_dest, p);
 
 				if( ui_rotation == 180 ) {
 					location_x2 -= icon_size + flash_padding;

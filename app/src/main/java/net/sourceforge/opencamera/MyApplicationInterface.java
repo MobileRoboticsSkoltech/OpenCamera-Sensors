@@ -722,7 +722,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return false;
     }
     
-    private String getStampPref() {
+    public String getStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_no");
     }

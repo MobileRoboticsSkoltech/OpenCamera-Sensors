@@ -3609,6 +3609,7 @@ public class CameraController2 extends CameraController {
         	Surface surface = getPreviewSurface();
         	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
 			stillBuilder.addTarget(imageReader.getSurface());
+			// don't add target imageReaderRaw, as Raw not supported for burst
 
 			List<CaptureRequest> requests = new ArrayList<>();
 
