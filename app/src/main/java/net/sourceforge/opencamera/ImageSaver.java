@@ -738,11 +738,11 @@ public class ImageSaver extends Thread {
 				main_activity.getPreview().showToast(null, R.string.failed_to_auto_stabilise);
 				System.gc();
 			}
-			if( bitmap != null && exifTempFile != null ) {
+			if( bitmap != null ) {
 				// rotate the bitmap if necessary for exif tags
 				if( MyDebug.LOG )
 					Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
-				bitmap = rotateForExif(bitmap, exifTempFile.getAbsolutePath());
+				bitmap = rotateForExif(bitmap, exifTempFile);
 			}
 		}
 		if( bitmap != null ) {
@@ -883,11 +883,11 @@ public class ImageSaver extends Thread {
 				// don't bother warning to the user - we simply won't mirror the image
 				System.gc();
 			}
-			if( bitmap != null && exifTempFile != null ) {
+			if( bitmap != null ) {
 				// rotate the bitmap if necessary for exif tags
 				if( MyDebug.LOG )
 					Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
-				bitmap = rotateForExif(bitmap, exifTempFile.getAbsolutePath());
+				bitmap = rotateForExif(bitmap, exifTempFile);
 			}
 		}
 		if( bitmap != null ) {
@@ -930,11 +930,11 @@ public class ImageSaver extends Thread {
 					main_activity.getPreview().showToast(null, R.string.failed_to_stamp);
 					System.gc();
 				}
-				if( bitmap != null && exifTempFile != null ) {
+				if( bitmap != null ) {
 					// rotate the bitmap if necessary for exif tags
 					if( MyDebug.LOG )
 						Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
-					bitmap = rotateForExif(bitmap, exifTempFile.getAbsolutePath());
+					bitmap = rotateForExif(bitmap, exifTempFile);
 				}
 			}
 			if( bitmap != null ) {
@@ -1089,11 +1089,11 @@ public class ImageSaver extends Thread {
 				e.printStackTrace();
 			}
 
-			if( bitmap != null && exifTempFile != null ) {
+			if( bitmap != null ) {
 				// rotate the bitmap if necessary for exif tags
 				if( MyDebug.LOG )
 					Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
-				bitmap = rotateForExif(bitmap, exifTempFile.getAbsolutePath());
+				bitmap = rotateForExif(bitmap, exifTempFile);
 			}
 		}
 		if( request.do_auto_stabilise ) {
@@ -1364,7 +1364,7 @@ public class ImageSaver extends Thread {
 				options.inSampleSize = sample_size;
     			thumbnail = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 				// now get the rotation from the Exif data
-				thumbnail = rotateForExif(thumbnail, picFile.getAbsolutePath());
+				thumbnail = rotateForExif(thumbnail, picFile);
 			}
 			else {
     			int width = bitmap.getWidth();
@@ -1852,11 +1852,18 @@ public class ImageSaver extends Thread {
         return success;
 	}
 
-    private Bitmap rotateForExif(Bitmap bitmap, String path) {
+	/** Rotates the supplied bitmap according to the orientation tag stored in the exif data of the
+	 *  supplied exifTempFile.
+	 * @param exifTempFile May be null, in which case the bitmap is returned without rotation.
+	 */
+    private Bitmap rotateForExif(Bitmap bitmap, File exifTempFile) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "rotateForExif");
+		if( exifTempFile == null ) {
+			return bitmap;
+		}
 		try {
-			if( MyDebug.LOG )
-				Log.d(TAG, "    read exif orientation");
-			ExifInterface exif = new ExifInterface(path);
+			ExifInterface exif = new ExifInterface(exifTempFile.getAbsolutePath());
 			int exif_orientation_s = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
     		if( MyDebug.LOG )
     			Log.d(TAG, "    exif orientation string: " + exif_orientation_s);
