@@ -1139,6 +1139,12 @@ public class ImageSaver extends Thread {
 	        				Log.d(TAG, "create bitmap");
 						// bitmap we return doesn't need to be mutable
 						bitmap = loadBitmap(data, false);
+						if( bitmap != null ) {
+							// rotate the bitmap if necessary for exif tags
+							if( MyDebug.LOG )
+								Log.d(TAG, "rotate bitmap for exif tags?");
+							bitmap = rotateForExif(bitmap, data, exifTempFile);
+						}
     				}
     				if( bitmap != null ) {
 	        			int width = bitmap.getWidth();
