@@ -2,6 +2,7 @@ package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -36,6 +37,7 @@ import android.media.ExifInterface;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 /** Handles the saving (and any required processing) of photos.
@@ -741,8 +743,8 @@ public class ImageSaver extends Thread {
 			if( bitmap != null ) {
 				// rotate the bitmap if necessary for exif tags
 				if( MyDebug.LOG )
-					Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
-				bitmap = rotateForExif(bitmap, exifTempFile);
+					Log.d(TAG, "rotate bitmap for exif tags?");
+				bitmap = rotateForExif(bitmap, data, exifTempFile);
 			}
 		}
 		if( bitmap != null ) {
@@ -886,8 +888,8 @@ public class ImageSaver extends Thread {
 			if( bitmap != null ) {
 				// rotate the bitmap if necessary for exif tags
 				if( MyDebug.LOG )
-					Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
-				bitmap = rotateForExif(bitmap, exifTempFile);
+					Log.d(TAG, "rotate bitmap for exif tags?");
+				bitmap = rotateForExif(bitmap, data, exifTempFile);
 			}
 		}
 		if( bitmap != null ) {
@@ -933,8 +935,8 @@ public class ImageSaver extends Thread {
 				if( bitmap != null ) {
 					// rotate the bitmap if necessary for exif tags
 					if( MyDebug.LOG )
-						Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
-					bitmap = rotateForExif(bitmap, exifTempFile);
+						Log.d(TAG, "rotate bitmap for exif tags?");
+					bitmap = rotateForExif(bitmap, data, exifTempFile);
 				}
 			}
 			if( bitmap != null ) {
@@ -1068,32 +1070,35 @@ public class ImageSaver extends Thread {
 			// either we have a bitmap, or will need to decode the bitmap to do post-processing
 			// need to rotate the bitmap according to the exif orientation (which some devices use, e.g., Samsung)
 			// so need to write to a temp file for this - we also use this later on to transfer the exif tags
-			try {
-				if( MyDebug.LOG )
-					Log.d(TAG, "write temp file to record EXIF data");
-				exifTempFile = File.createTempFile("opencamera_exif", "");
-				OutputStream tempOutputStream = new FileOutputStream(exifTempFile);
+			// on Android 7+, we can now read exif tags direct from the jpeg data
+			if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
 				try {
-					tempOutputStream.write(data);
+					if( MyDebug.LOG )
+						Log.d(TAG, "write temp file to record EXIF data");
+					exifTempFile = File.createTempFile("opencamera_exif", "");
+					OutputStream tempOutputStream = new FileOutputStream(exifTempFile);
+					try {
+						tempOutputStream.write(data);
+					}
+					finally {
+						tempOutputStream.close();
+					}
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "Save single image performance: time after saving temp photo for EXIF: " + (System.currentTimeMillis() - time_s));
+					}
 				}
-				finally {
-					tempOutputStream.close();
+				catch(IOException e) {
+					if (MyDebug.LOG)
+						Log.e(TAG, "exception writing to temp file");
+					e.printStackTrace();
 				}
-				if( MyDebug.LOG ) {
-					Log.d(TAG, "Save single image performance: time after saving temp photo for EXIF: " + (System.currentTimeMillis() - time_s));
-				}
-			}
-			catch(IOException e) {
-				if( MyDebug.LOG )
-					Log.e(TAG, "exception writing to temp file");
-				e.printStackTrace();
 			}
 
 			if( bitmap != null ) {
 				// rotate the bitmap if necessary for exif tags
 				if( MyDebug.LOG )
 					Log.d(TAG, "rotate pre-existing bitmap for exif tags?");
-				bitmap = rotateForExif(bitmap, exifTempFile);
+				bitmap = rotateForExif(bitmap, data, exifTempFile);
 			}
 		}
 		if( request.do_auto_stabilise ) {
@@ -1171,8 +1176,8 @@ public class ImageSaver extends Thread {
 					if( exifTempFile != null && !exifTempFile.delete() ) {
 						if( MyDebug.LOG )
 							Log.e(TAG, "failed to delete temp " + exifTempFile.getAbsolutePath());
-						exifTempFile = null;
 					}
+					exifTempFile = null;
         			main_activity.finish();
     			}
 			}
@@ -1218,17 +1223,27 @@ public class ImageSaver extends Thread {
 	    			success = true;
 	    		}
 	            if( picFile != null ) {
-	            	if( bitmap != null && exifTempFile != null ) {
+	            	if( bitmap != null ) {
 	            		// need to update EXIF data!
-						setExifFromFile(request, exifTempFile, picFile);
-						if( MyDebug.LOG ) {
-							Log.d(TAG, "Save single image performance: time after copying EXIF: " + (System.currentTimeMillis() - time_s));
+						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "set Exif tags from data");
+							setExifFromData(request, data, picFile);
 						}
-        	    		if( MyDebug.LOG )
-        	    			Log.d(TAG, "now saved EXIF data");
-        	    		if( MyDebug.LOG ) {
-        	    			Log.d(TAG, "Save single image performance: time after writing EXIF: " + (System.currentTimeMillis() - time_s));
-        	    		}
+						else {
+							if( MyDebug.LOG )
+								Log.d(TAG, "set Exif tags from file");
+							if( exifTempFile != null ) {
+								setExifFromFile(request, exifTempFile, picFile);
+								if( MyDebug.LOG ) {
+									Log.d(TAG, "Save single image performance: time after copying EXIF: " + (System.currentTimeMillis() - time_s));
+								}
+							}
+							else {
+								if( MyDebug.LOG )
+									Log.d(TAG, "can't set Exif tags without file pre-Android 7");
+							}
+						}
 	            	}
 	            	else if( store_geo_direction ) {
     	            	if( MyDebug.LOG )
@@ -1364,7 +1379,9 @@ public class ImageSaver extends Thread {
 				options.inSampleSize = sample_size;
     			thumbnail = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 				// now get the rotation from the Exif data
-				thumbnail = rotateForExif(thumbnail, picFile);
+				if( MyDebug.LOG )
+					Log.d(TAG, "rotate thumbnail for exif tags?");
+				thumbnail = rotateForExif(thumbnail, data, picFile);
 			}
 			else {
     			int width = bitmap.getWidth();
@@ -1418,6 +1435,26 @@ public class ImageSaver extends Thread {
         return success;
 	}
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void setExifFromData(final Request request, byte [] data, File to_file) throws IOException {
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "setExifFromData");
+            Log.d(TAG, "to_file: " + to_file);
+        }
+        InputStream inputStream = null;
+        try {
+			inputStream = new ByteArrayInputStream(data);
+			ExifInterface exif = new ExifInterface(inputStream);
+			ExifInterface exif_new = new ExifInterface(to_file.getAbsolutePath());
+			setExif(request, exif, exif_new);
+		}
+		finally {
+			if( inputStream != null ) {
+				inputStream.close();
+			}
+		}
+    }
+
 	/** Used to transfer exif tags, if we had to convert the jpeg info to a bitmap (for post-processing such as
 	 *  auto-stabilise or photo stamp).
 	 *  Note that we use several ExifInterface tags that are now deprecated in API level 23 and 24. These are replaced with new tags that have
@@ -1431,10 +1468,31 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "from_file: " + from_file);
 			Log.d(TAG, "to_file: " + to_file);
 		}
-		if( MyDebug.LOG )
-			Log.d(TAG, "read back EXIF data");
 		try {
 			ExifInterface exif = new ExifInterface(from_file.getAbsolutePath());
+			ExifInterface exif_new = new ExifInterface(to_file.getAbsolutePath());
+            setExif(request, exif, exif_new);
+		}
+		catch(NoClassDefFoundError exception) {
+			// have had Google Play crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g)
+			if( MyDebug.LOG )
+				Log.e(TAG, "exif orientation NoClassDefFoundError");
+			exception.printStackTrace();
+		}
+	}
+
+    /** Transfers exif tags from exif to exif_new.
+	 *  Note that we use several ExifInterface tags that are now deprecated in API level 23 and 24. These are replaced with new tags that have
+	 *  the same string value (e.g., TAG_APERTURE replaced with TAG_F_NUMBER, but both have value "FNumber"). We use the deprecated versions
+	 *  to avoid complicating the code (we'd still have to read the deprecated values for older devices).
+     */
+    @SuppressWarnings("deprecation")
+    private void setExif(final Request request, ExifInterface exif, ExifInterface exif_new) throws IOException {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setExif");
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "read back EXIF data");
 			String exif_aperture = exif.getAttribute(ExifInterface.TAG_APERTURE); // same as TAG_F_NUMBER
 			String exif_datetime = exif.getAttribute(ExifInterface.TAG_DATETIME);
 			String exif_exposure_time = exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME);
@@ -1580,7 +1638,6 @@ public class ImageSaver extends Thread {
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "now write new EXIF data");
-			ExifInterface exif_new = new ExifInterface(to_file.getAbsolutePath());
 			if( exif_aperture != null )
 				exif_new.setAttribute(ExifInterface.TAG_APERTURE, exif_aperture);
 			if( exif_datetime != null )
@@ -1714,13 +1771,6 @@ public class ImageSaver extends Thread {
 
 			modifyExif(exif_new, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction);
 			exif_new.saveAttributes();
-		}
-		catch(NoClassDefFoundError exception) {
-			// have had Google Play crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g)
-			if( MyDebug.LOG )
-				Log.e(TAG, "exif orientation NoClassDefFoundError");
-			exception.printStackTrace();
-		}
 	}
 
 	/** May be run in saver thread or picture callback thread (depending on whether running in background).
@@ -1852,18 +1902,39 @@ public class ImageSaver extends Thread {
         return success;
 	}
 
-	/** Rotates the supplied bitmap according to the orientation tag stored in the exif data of the
-	 *  supplied exifTempFile.
-	 * @param exifTempFile May be null, in which case the bitmap is returned without rotation.
+	/** Rotates the supplied bitmap according to the orientation tag stored in the exif data. On
+	 *  Android 7 onwards, we use the jpeg data; on earlier versions the supplied exifTimeFile is
+	 *  used. If no rotation is required, the input bitmap is returned.
+	 * @param data Jpeg data containing the Exif information to use.
+	 * @param exifTempFile Ignored on Android 7+. If this is null on older versions, the bitmap is
+	 *                     returned without rotation.
 	 */
-    private Bitmap rotateForExif(Bitmap bitmap, File exifTempFile) {
+    private Bitmap rotateForExif(Bitmap bitmap, byte [] data, File exifTempFile) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "rotateForExif");
-		if( exifTempFile == null ) {
-			return bitmap;
-		}
+		InputStream inputStream = null;
 		try {
-			ExifInterface exif = new ExifInterface(exifTempFile.getAbsolutePath());
+			ExifInterface exif;
+
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "Android 7: use data stream to read exif tags");
+				inputStream = new ByteArrayInputStream(data);
+				exif = new ExifInterface(inputStream);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "pre-Android 7: use file to read exif tags: " + exifTempFile);
+				if( exifTempFile != null ) {
+					exif = new ExifInterface(exifTempFile.getAbsolutePath());
+				}
+				else {
+					if( MyDebug.LOG )
+						Log.d(TAG, "but no file available to read exif tags from");
+					return bitmap;
+				}
+			}
+
 			int exif_orientation_s = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
     		if( MyDebug.LOG )
     			Log.d(TAG, "    exif orientation string: " + exif_orientation_s);
@@ -1916,6 +1987,17 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.e(TAG, "exif orientation NoClassDefFoundError");
 			exception.printStackTrace();
+		}
+		finally {
+			if( inputStream != null ) {
+				try {
+					inputStream.close();
+				}
+				catch(IOException e) {
+					e.printStackTrace();
+				}
+				inputStream = null;
+			}
 		}
 		return bitmap;
     }
