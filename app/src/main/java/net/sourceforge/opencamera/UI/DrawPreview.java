@@ -39,6 +39,9 @@ public class DrawPreview {
 	private final MainActivity main_activity;
 	private final MyApplicationInterface applicationInterface;
 
+	// store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
+	private SharedPreferences sharedPreferences;
+
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
 	private final RectF face_rect = new RectF();
@@ -246,12 +249,10 @@ public class DrawPreview {
 	}
 
 	private boolean getTakePhotoBorderPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getTakePhotoBorderPreferenceKey(), true);
     }
     
     private int getAngleHighlightColor() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		String color = sharedPreferences.getString(PreferenceKeys.getShowAngleHighlightColorPreferenceKey(), "#14e715");
 		return Color.parseColor(color);
     }
@@ -266,7 +267,6 @@ public class DrawPreview {
     }
 
 	private void drawGrids(Canvas canvas) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		String preference_grid = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
@@ -433,7 +433,6 @@ public class DrawPreview {
 	}
 
 	private void drawCropGuides(Canvas canvas) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		if( preview.isVideo() || sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
@@ -502,7 +501,6 @@ public class DrawPreview {
 	}
 
 	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size, final String ybounds_text) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -749,7 +747,6 @@ public class DrawPreview {
 	 *  current UI rotation.
 	 */
 	private void drawUI(Canvas canvas) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -1011,7 +1008,6 @@ public class DrawPreview {
 	}
 
 	private void drawAngleLines(Canvas canvas) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		boolean has_level_angle = preview.hasLevelAngle();
@@ -1211,7 +1207,8 @@ public class DrawPreview {
 	public void onDrawPreview(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		// make sure sharedPreferences up to date
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
