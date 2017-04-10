@@ -613,19 +613,15 @@ public class DrawPreview {
 					ae_started_scanning_ms = -1;
 				}
 				applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
-			}
-			/*if( camera_controller.captureResultHasFocusDistance() ) {
-				float dist_min = camera_controller.captureResultFocusDistanceMin();
-				float dist_max = camera_controller.captureResultFocusDistanceMin();
-				string = preview.getFocusDistanceString(dist_min, dist_max);
-				applicationInterface.drawTextWithBackground(canvas, p, string, Color.rgb(255, 235, 59), Color.BLACK, location_x, location_y2, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true); // Yellow 500
-			}*/
 
-			if( ui_rotation == 90 ) {
-				location_y -= diff_y;
-			}
-			else {
-				location_y += diff_y;
+				// only move location_y if we actually print something (because on old camera API, even if the ISO option has
+				// been enabled, we'll never be able to display the on-screen ISO)
+				if( ui_rotation == 90 ) {
+					location_y -= diff_y;
+				}
+				else {
+					location_y += diff_y;
+				}
 			}
 		}
 
