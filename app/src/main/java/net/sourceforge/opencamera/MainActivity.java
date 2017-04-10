@@ -1159,7 +1159,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	updateForSettings(null);
     }
 
-    public void updateForSettings(String toast_message) {
+	/** Must be called when an settings (as stored in SharedPreferences) are made, so we can update the
+	 *  camera, and make any other necessary changes.
+	 */
+	public void updateForSettings(String toast_message) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings()");
 			if( toast_message != null ) {
