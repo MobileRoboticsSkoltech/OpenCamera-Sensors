@@ -719,7 +719,9 @@ public class DrawPreview {
 
 			String flash_value = preview.getCurrentFlashValue();
 			// note, flash_frontscreen_auto not yet support for the flash symbol (as camera_controller.needsFlash() only returns info on the built-in actual flash, not frontscreen flash)
-			if( flash_value != null && flash_value.equals("flash_auto") && camera_controller.needsFlash() && !applicationInterface.isVideoPref() ) {
+			if( flash_value != null &&
+					( flash_value.equals("flash_on") || flash_value.equals("flash_red_eye") || ( flash_value.equals("flash_auto") && camera_controller.needsFlash() ) ) &&
+					!applicationInterface.isVideoPref() ) {
 				long time_now = System.currentTimeMillis();
 				if( needs_flash_time != -1 ) {
 					final long fade_ms = 500;
