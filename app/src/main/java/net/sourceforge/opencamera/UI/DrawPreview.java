@@ -647,6 +647,7 @@ public class DrawPreview {
 
 			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
 			if( applicationInterface.isRawPref() &&
+					!applicationInterface.isVideoPref() && // RAW not relevant for video mode
 					applicationInterface.getPhotoMode() != MyApplicationInterface.PhotoMode.HDR &&
 					applicationInterface.getPhotoMode() != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
@@ -665,7 +666,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getAutoStabilisePref() ) {
+			if( applicationInterface.getAutoStabilisePref() && !applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -682,7 +683,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.HDR ) {
+			if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.HDR && !applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -699,7 +700,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getStampPref().equals("preference_stamp_yes") ) {
+			if( applicationInterface.getStampPref().equals("preference_stamp_yes") && !applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -718,7 +719,7 @@ public class DrawPreview {
 
 			String flash_value = preview.getCurrentFlashValue();
 			// note, flash_frontscreen_auto not yet support for the flash symbol (as camera_controller.needsFlash() only returns info on the built-in actual flash, not frontscreen flash)
-			if( flash_value != null && flash_value.equals("flash_auto") && camera_controller.needsFlash() ) {
+			if( flash_value != null && flash_value.equals("flash_auto") && camera_controller.needsFlash() && !applicationInterface.isVideoPref() ) {
 				long time_now = System.currentTimeMillis();
 				if( needs_flash_time != -1 ) {
 					final long fade_ms = 500;
