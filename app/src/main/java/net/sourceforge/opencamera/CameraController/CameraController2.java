@@ -1288,7 +1288,7 @@ public class CameraController2 extends CameraController {
 		int [] white_balance_modes = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
 		if( white_balance_modes != null ) {
 			for(int value : white_balance_modes) {
-				if( value == CameraMetadata.CONTROL_AWB_MODE_OFF ) {
+				if( value == CameraMetadata.CONTROL_AWB_MODE_OFF && allowManualWB() ) {
 					camera_features.supports_white_balance_temperature = true;
 					camera_features.min_temperature = min_white_balance_temperature_c;
 					camera_features.max_temperature = max_white_balance_temperature_c;
@@ -1665,6 +1665,14 @@ public class CameraController2 extends CameraController {
 		return value;
 	}
 
+	/** Whether we should allow manual white balance, even if the device supports CONTROL_AWB_MODE_OFF.
+	 */
+	private boolean allowManualWB() {
+		boolean is_nexus6 = Build.MODEL.toLowerCase(Locale.US).contains("nexus 6");
+		// manual white balance doesn't seem to work on Nexus 6!
+		return !is_nexus6;
+	}
+
 	@Override
 	public SupportedValues setWhiteBalance(String value) {
 		if( MyDebug.LOG )
@@ -1676,7 +1684,12 @@ public class CameraController2 extends CameraController {
 		for(int value2 : values2) {
 			String this_value = convertWhiteBalance(value2);
 			if( this_value != null ) {
-				values.add(this_value);
+				if( value2 == CameraMetadata.CONTROL_AWB_MODE_OFF && !allowManualWB() ) {
+					// filter
+				}
+				else {
+					values.add(this_value);
+				}
 			}
 		}
 		{
