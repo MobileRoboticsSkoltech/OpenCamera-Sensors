@@ -1274,9 +1274,16 @@ public class CameraController2 extends CameraController {
 			camera_features.supported_flash_values.add("flash_frontscreen_on");
 		}
 
-		camera_features.minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
-		if( MyDebug.LOG )
-			Log.d(TAG, "minimum_focus_distance: " + camera_features.minimum_focus_distance);
+		Float minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
+		if( minimum_focus_distance != null ) {
+			camera_features.minimum_focus_distance = minimum_focus_distance;
+			if( MyDebug.LOG )
+				Log.d(TAG, "minimum_focus_distance: " + camera_features.minimum_focus_distance);
+		}
+		else {
+			camera_features.minimum_focus_distance = 0.0f;
+		}
+
 		int [] supported_focus_modes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES); // Android format
 		camera_features.supported_focus_values = convertFocusModesToValues(supported_focus_modes, camera_features.minimum_focus_distance); // convert to our format (also resorts)
 		camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
@@ -1800,9 +1807,10 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public SupportedValues setISO(String value) {
-		// not supported for CameraController2
-		Log.e(TAG, "setISO(String value) not supported for CameraController2");
-		throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		// not supported for CameraController2 - but Camera2 devices that don't support manual ISO can call this,
+		// so assume this is for auto ISO
+		this.setManualISO(false, 0);
+		return null;
 	}
 
 	@Override
