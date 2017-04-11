@@ -2272,7 +2272,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
 
@@ -2293,7 +2293,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 
 		// check files have names as expected
 		String filename_jpeg = null;
@@ -2419,7 +2419,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
 		boolean is_dro = mActivity.supportsDRO() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_dro");
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
 		
@@ -2523,7 +2523,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			while( !mActivity.hasThumbnailAnimation() ) {
 				Log.d(TAG, "waiting for thumbnail animation");
 				Thread.sleep(10);
-				assertTrue( System.currentTimeMillis() - time_s < 5000 );
+				int allowed_time_ms = 6000;
+				if( !mPreview.usingCamera2API() && ( is_hdr || is_expo ) ) {
+					// some devices need longer time
+					allowed_time_ms = 8000;
+				}
+				assertTrue( System.currentTimeMillis() - time_s < allowed_time_ms );
 			}
 		}
 		else {
