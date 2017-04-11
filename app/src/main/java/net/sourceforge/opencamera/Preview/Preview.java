@@ -5133,8 +5133,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }*/
 
     public boolean supportsExpoBracketing() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "supportsExpoBracketing");
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "supportsExpoBracketing");*/
     	return this.supports_expo_bracketing;
     }
     
