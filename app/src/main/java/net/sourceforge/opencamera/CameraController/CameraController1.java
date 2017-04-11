@@ -1432,6 +1432,18 @@ public class CameraController1 extends CameraController {
 							Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
 						// set exposure compensation for next image
 						setExposureCompensation(burst_exposures.get(pending_burst_images.size()));
+
+						// need to start preview again: otherwise fail to take subsequent photos on Nexus 6
+						// and Nexus 7; on Galaxy Nexus we succeed, but exposure compensation has no effect
+						try {
+							startPreview();
+						}
+						catch(CameraControllerException e) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "CameraControllerException trying to startPreview");
+							e.printStackTrace();
+						}
+
 						Handler handler = new Handler();
 						handler.postDelayed(new Runnable(){
 							@Override
