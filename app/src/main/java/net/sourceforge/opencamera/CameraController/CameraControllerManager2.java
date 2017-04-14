@@ -96,7 +96,9 @@ public class CameraControllerManager2 extends CameraControllerManager {
 			CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
 			return isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
 		}
-		catch(CameraAccessException | NumberFormatException e) {
+		catch(Exception e) {
+			// in theory we should only get CameraAccessException, but Google Play shows we can get a variety of exceptions
+			// from some devices, e.g., NumberFormatException, NullPointerException, so just catch everything!
 			if( MyDebug.LOG )
 				Log.e(TAG, "exception trying to get camera characteristics");
 			e.printStackTrace();
