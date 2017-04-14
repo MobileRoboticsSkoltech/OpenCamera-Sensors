@@ -2089,6 +2089,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
+	public void testTakePhotoManualWB() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoManualWB");
+		if( !mPreview.usingCamera2API() ) {
+			return;
+		}
+		if( !mPreview.supportsWhiteBalanceTemperature() ) {
+			return;
+		}
+		setToDefault();
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getWhiteBalancePreferenceKey(), "manual");
+		editor.apply();
+		updateForSettings();
+
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+	}
+
 	/** Tests that the audio control icon is visible or not as expect (guards against bug fixed in 1.30)
 	 */
 	public void testAudioControlIcon() {

@@ -9,6 +9,7 @@ public class PhotoCamera2Tests {
 		TestSuite suite = new TestSuite(MainTests.class.getName());
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoManualFocus"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoManualISOExposure"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoManualWB"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoRaw"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoRawMulti"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoRawWaitCaptureResult"));
