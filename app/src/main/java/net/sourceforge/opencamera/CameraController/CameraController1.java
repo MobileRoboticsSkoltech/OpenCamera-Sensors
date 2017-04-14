@@ -430,7 +430,9 @@ public class CameraController1 extends CameraController {
 		List<String> values = parameters.getSupportedColorEffects();
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
-			if( !parameters.getColorEffect().equals(supported_values.selected_value) ) {
+			String color_effect = parameters.getColorEffect();
+			// have got nullpointerexception from Google Play, so now check for null
+			if( color_effect == null || !color_effect.equals(supported_values.selected_value) ) {
 	        	parameters.setColorEffect(supported_values.selected_value);
 	        	setCameraParameters(parameters);
 			}
