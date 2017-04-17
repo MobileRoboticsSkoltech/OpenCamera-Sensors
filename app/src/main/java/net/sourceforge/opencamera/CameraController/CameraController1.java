@@ -35,7 +35,7 @@ public class CameraController1 extends CameraController {
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
 	private List<Integer> burst_exposures;
 	private boolean want_expo_bracketing;
-	private final static int max_expo_bracketing_n_images = 3; // could be more, but problem that Open Camera defaults to 2.0 bracketing stops, and max exposure compensation typically isn't more than 2.0
+	private final static int max_expo_bracketing_n_images = 3; // seem to have problems with 5 images in some cases, e.g., images coming out same brightness on OnePlus 3T
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
 
@@ -1499,7 +1499,8 @@ public class CameraController1 extends CameraController {
 			if( exposure_step == 0.0f ) // just in case?
 	        	exposure_step = 1.0f/3.0f; // make up a typical example
 			int exposure_current = getExposureCompensation();
-			int steps = (int)((expo_bracketing_stops+1.0e-5) / exposure_step); // need to add a small amount, otherwise we can round down
+			double stops_per_image = expo_bracketing_stops / (double)n_half_images;
+			int steps = (int)((stops_per_image+1.0e-5) / exposure_step); // need to add a small amount, otherwise we can round down
 			steps = Math.max(steps, 1);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "steps: " + steps);

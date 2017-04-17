@@ -558,8 +558,10 @@ Exposure Bracketing Photo Mode). Note this will make saving slower, especially i
 <p><b>Exposure Bracketing</b> - Specifies the total number of images to save in Exposure Bracketing Photo Mode
 (Camera2 API only).</p>
 
-<p><b>Exposure Bracketing Stops</b> - Specifies the number of stops between each successive image in Exposure
-Bracketing Photo Mode. An increase of 1 stop means a doubling of the amount of light.</p>
+<p><b>Exposure Bracketing Stops</b> - Specifies the number of stops to subtract/add from the "base"
+exposure level to the darkest/brightest image, in Exposure Bracketing Photo Mode. An increase of 1
+stop means a doubling of the amount of light. So a setting of "2", with 3 images, will produce
+images with exposure set to [-2, 0, +2]. For 5 images, this will produce [-2, -1, 0, +1, +2].</p>
 
 <p><b>Front camera mirror</b> - Normally for front cameras, the preview will behave like a mirror, but resultant
 photos will still be as the camera (or other people) view the scene. This option can be used to mirror the

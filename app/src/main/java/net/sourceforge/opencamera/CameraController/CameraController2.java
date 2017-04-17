@@ -3674,7 +3674,7 @@ public class CameraController2 extends CameraController {
 			int n_half_images = expo_bracketing_n_images/2;
 			long min_exposure_time = base_exposure_time;
 			long max_exposure_time = base_exposure_time;
-			final double scale = Math.pow(2.0, expo_bracketing_stops);
+			final double scale = Math.pow(2.0, expo_bracketing_stops/(double)n_half_images);
 			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
 			if( exposure_time_range != null ) {
 				min_exposure_time = exposure_time_range.getLower();
