@@ -4190,6 +4190,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    }
 		    else {
 		    	exp_n_new_files = test_cb.doTest();
+
+				if( mPreview.isVideoRecording() ) {
+					Log.d(TAG, "about to click stop video");
+					clickView(takePhotoButton);
+					Log.d(TAG, "done clicking stop video");
+					this.getInstrumentation().waitForIdleSync();
+					Log.d(TAG, "after idle sync");
+				}
 		    }
 	    }
 	    else {
@@ -4224,6 +4232,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 	    if( !max_filesize ) {
 	    	// if doing restart on max filesize, we may have already restarted by now (on Camera2 API at least)
+			Log.d(TAG, "switchCameraButton.getVisibility(): " + switchCameraButton.getVisibility());
 		    assertTrue(switchCameraButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 		    assertTrue(audioControlButton.getVisibility() == ((has_audio_control_button && !immersive_mode) ? View.VISIBLE : View.GONE));
 	    }
@@ -4296,6 +4305,62 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		subTestTakeVideo(false, false, false, false, null, 5000, false, true);
+	}
+
+	/** Tests video subtitles option, including GPS - also tests losing the connection.
+	 */
+	public void testTakeVideoSubtitlesGPS() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSubtitlesGPS");
+
+		setToDefault();
+		{
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putString(PreferenceKeys.getVideoSubtitlePref(), "preference_video_subtitle_yes");
+			editor.putBoolean(PreferenceKeys.getLocationPreferenceKey(), true);
+			editor.apply();
+			updateForSettings();
+		}
+
+		subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
+			@Override
+			public int doTest() {
+				// wait for location
+				long start_t = System.currentTimeMillis();
+				while( !mActivity.getLocationSupplier().testHasReceivedLocation() ) {
+					getInstrumentation().waitForIdleSync();
+					if( System.currentTimeMillis() - start_t > 20000 ) {
+						// need to allow long time for testing devices without mobile network; will likely fail altogether if don't even have wifi
+						assertTrue(false);
+					}
+				}
+				getInstrumentation().waitForIdleSync();
+				assertTrue(mActivity.getLocationSupplier().getLocation() != null);
+
+				Log.d(TAG, "have location");
+				try {
+					Thread.sleep(2000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+
+				// now test losing gps
+                Log.d(TAG, "test losing location");
+                mActivity.getLocationSupplier().setForceNoLocation(true);
+
+                try {
+                    Thread.sleep(2000);
+                }
+                catch(InterruptedException e) {
+                    e.printStackTrace();
+                    assertTrue(false);
+                }
+
+				return 2;
+			}
+		}, 5000, false, true);
 	}
 
 	/** Set pausing and resuming video.

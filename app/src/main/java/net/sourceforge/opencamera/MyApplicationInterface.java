@@ -1007,8 +1007,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			final String preference_stamp_dateformat = this.getStampDateFormatPref();
 			final String preference_stamp_timeformat = this.getStampTimeFormatPref();
 			final String preference_stamp_gpsformat = this.getStampGPSFormatPref();
-			final boolean store_location = getGeotaggingPref() && getLocation() != null;
-			final boolean store_geo_direction = main_activity.getPreview().hasGeoDirection() && getGeodirectionPref();
+			final boolean store_location = getGeotaggingPref();
+			final boolean store_geo_direction = getGeodirectionPref();
 			class SubtitleVideoTimerTask extends TimerTask {
 				OutputStreamWriter writer;
 				private int count = 1;
@@ -1051,8 +1051,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 					String date_stamp = TextFormatter.getDateString(preference_stamp_dateformat, current_date);
 					String time_stamp = TextFormatter.getTimeString(preference_stamp_timeformat, current_date);
 					Location location = store_location ? getLocation() : null;
-					double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
-					String gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, store_location, location, store_geo_direction, geo_direction);
+					double geo_direction = store_geo_direction && main_activity.getPreview().hasGeoDirection() ? main_activity.getPreview().getGeoDirection() : 0.0;
+					String gps_stamp = main_activity.getTextFormatter().getGPSString(preference_stamp_gpsformat, store_location && location!=null, location, store_geo_direction && main_activity.getPreview().hasGeoDirection(), geo_direction);
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "date_stamp: " + date_stamp);
 						Log.d(TAG, "time_stamp: " + time_stamp);
