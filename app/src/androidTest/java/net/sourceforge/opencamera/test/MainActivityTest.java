@@ -68,7 +68,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
 		SharedPreferences.Editor editor = settings.edit();
 		editor.clear();
-		//editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
+		editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
 		editor.apply();
 		
 	    Intent intent = new Intent();
@@ -232,23 +232,21 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	
 	private void switchToISO(int required_iso) {
 		Log.d(TAG, "switchToISO: "+ required_iso);
-	    if( mPreview.supportsFocus() ) {
-		    int iso = mPreview.getCameraController().getISO();
-			Log.d(TAG, "start iso: "+ iso);
-			if( iso != required_iso ) {
-				assertFalse( mActivity.popupIsOpen() );
-			    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-			    clickView(popupButton);
-			    while( !mActivity.popupIsOpen() ) {
-			    }
-			    View isoButton = mActivity.getPopupButton("TEST_ISO_" + required_iso);
-			    assertTrue(isoButton != null);
-			    clickView(isoButton);
-			    iso = mPreview.getCameraController().getISO();
-				Log.d(TAG, "changed iso to: "+ iso);
+		int iso = mPreview.getCameraController().getISO();
+		Log.d(TAG, "start iso: "+ iso);
+		if( iso != required_iso ) {
+			assertFalse( mActivity.popupIsOpen() );
+			View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+			clickView(popupButton);
+			while( !mActivity.popupIsOpen() ) {
 			}
-		    assertTrue(iso == required_iso);
-	    }
+			View isoButton = mActivity.getPopupButton("TEST_ISO_" + required_iso);
+			assertTrue(isoButton != null);
+			clickView(isoButton);
+			iso = mPreview.getCameraController().getISO();
+			Log.d(TAG, "changed iso to: "+ iso);
+		}
+		assertTrue(iso == required_iso);
 	}
 	
 	/* Sets the camera up to a predictable state:
