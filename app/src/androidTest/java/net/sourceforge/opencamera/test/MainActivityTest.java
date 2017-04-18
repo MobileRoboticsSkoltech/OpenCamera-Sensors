@@ -2010,7 +2010,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 
-		// n.b., currently don't test this on devices with long shutter times (e.g., OnePlus 3T) until this is properly supported
+		// n.b., currently don't test this on devices with long shutter times (e.g., OnePlus 3T)
 	    if( mPreview.supportsExposureTime() && mPreview.getMaximumExposureTime() < 1000000000 ) {
 			Log.d(TAG, "change exposure time to max");
 		    exposureTimeSeekBar.setProgress(manual_n);
@@ -2018,6 +2018,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
 	    }
+	    else {
+            Log.d(TAG, "change exposure time to 1s");
+            mActivity.setProgressSeekbarExponential(exposureTimeSeekBar, mPreview.getMinimumExposureTime(), mPreview.getMaximumExposureTime(), 1000000000);
+            this.getInstrumentation().waitForIdleSync();
+            assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
+            assertTrue( mPreview.getCameraController().getExposureTime() != mPreview.getMaximumExposureTime() );
+        }
 		long saved_exposure_time = mPreview.getCameraController().getExposureTime();
 
 	    // test the exposure button clears and reopens without changing exposure level

@@ -987,7 +987,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		return Math.log(value / min) / s;
 	}
 
-	private void setProgressSeekbarExponential(SeekBar seekBar, double min_value, double max_value, double value) {
+	public void setProgressSeekbarExponential(SeekBar seekBar, double min_value, double max_value, double value) {
 		seekBar.setMax(manual_n);
 		double frac = exponentialScalingInverse(value, min_value, max_value);
 		int new_value = (int)(frac*manual_n + 0.5); // add 0.5 for rounding
