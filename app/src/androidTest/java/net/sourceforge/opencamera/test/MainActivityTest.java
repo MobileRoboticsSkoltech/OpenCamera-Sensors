@@ -68,7 +68,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
 		SharedPreferences.Editor editor = settings.edit();
 		editor.clear();
-		editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
+		//editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
 		editor.apply();
 		
 	    Intent intent = new Intent();
@@ -7314,7 +7314,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	/** Tests expo bracketing with 5 images, 1 stop.
-	 *  Note this test [usually] fails on OnePlus 3T as onImageAvailable is only called 4 times, we never receive the 5th image.
 	 */
 	public void testTakePhotoExpo5() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExpo5");
