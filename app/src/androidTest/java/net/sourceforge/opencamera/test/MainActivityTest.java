@@ -2106,6 +2106,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
+
+		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_container);
+		SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
+		ZoomControls seekBarZoom = (ZoomControls) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar_zoom);
+        View manualWBContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.manual_white_balance_container);
+		SeekBar seekBarWB = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_seekbar);
+
+		assertTrue(exposureButton.getVisibility() == (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
+		assertTrue(exposureContainer.getVisibility() == View.GONE);
+		assertTrue(seekBarZoom.getVisibility() == View.GONE);
+		assertTrue(manualWBContainer.getVisibility() == View.GONE);
+
+		if( !mPreview.supportsExposures() ) {
+			return;
+		}
+
+		clickView(exposureButton);
+
+		assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+		assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
+		assertTrue(seekBar.getVisibility() == View.VISIBLE);
+		assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
+        assertTrue(manualWBContainer.getVisibility() == View.VISIBLE);
+		assertTrue(seekBarWB.getVisibility() == View.VISIBLE);
 	}
 
 	/** Tests that the audio control icon is visible or not as expect (guards against bug fixed in 1.30)
