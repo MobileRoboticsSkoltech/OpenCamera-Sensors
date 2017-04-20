@@ -1143,7 +1143,7 @@ public class CameraController2 extends CameraController {
 		}
 
 		if( MyDebug.LOG ) {
-			int[] ois_modes = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
+			int[] ois_modes = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION); // may be null on some devices
 			if (ois_modes != null) {
 				for (int ois_mode : ois_modes) {
 					if (MyDebug.LOG)
@@ -1274,7 +1274,7 @@ public class CameraController2 extends CameraController {
 			camera_features.supported_flash_values.add("flash_frontscreen_on");
 		}
 
-		Float minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
+		Float minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE); // may be null on some devices
 		if( minimum_focus_distance != null ) {
 			camera_features.minimum_focus_distance = minimum_focus_distance;
 			if( MyDebug.LOG )
@@ -1303,13 +1303,13 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
-		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
+		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
 		if( iso_range != null ) {
 			camera_features.supports_iso_range = true;
 			camera_features.min_iso = iso_range.getLower();
 			camera_features.max_iso = iso_range.getUpper();
 			// we only expose exposure_time if iso_range is supported
-			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
 			if( exposure_time_range != null ) {
 				camera_features.supports_exposure_time = true;
 				camera_features.supports_expo_bracketing = true;
@@ -1826,7 +1826,7 @@ public class CameraController2 extends CameraController {
 			if( manual_iso ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "switch to iso: " + iso);
-				Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
+				Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
 				if( iso_range == null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "iso not supported");
@@ -3538,7 +3538,7 @@ public class CameraController2 extends CameraController {
 				final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
 				long exposure_time = capture_result_exposure_time;
 				if( exposure_time <= fixed_exposure_time ) {
-					Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+					Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
 					if( exposure_time_range != null ) {
 						double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
 						if (MyDebug.LOG) {
@@ -3675,7 +3675,7 @@ public class CameraController2 extends CameraController {
 			long min_exposure_time = base_exposure_time;
 			long max_exposure_time = base_exposure_time;
 			final double scale = Math.pow(2.0, expo_bracketing_stops/(double)n_half_images);
-			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
 			if( exposure_time_range != null ) {
 				min_exposure_time = exposure_time_range.getLower();
 				max_exposure_time = exposure_time_range.getUpper();
