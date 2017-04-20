@@ -177,7 +177,7 @@
         <item>Focus</item>
         <item>Zoom in/out</item>
         <item>Change exposure level</item>
-        <item>Switch auto-stabilise on/off</item>
+        <item>Switch auto-level on/off</item>
         <item>Change device volume</item>
         <item>Do nothing</item>
     </string-array>

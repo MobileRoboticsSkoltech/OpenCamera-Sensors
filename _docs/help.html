@@ -51,7 +51,7 @@
 <ul>
 <li><a href="#quickstart">Quickstart</a></li>
 <li><a href="#user_interface">On-Screen User Interface</a></li>
-<li><a href="#auto_stabilise">Auto-stabilise feature</a></li>
+<li><a href="#auto_stabilise">Auto-level feature</a></li>
 <li><a href="#dro">DRO</a></li>
 <li><a href="#hdr">HDR</a></li>
 <li><a href="#dro_vs_hdr">DRO vs HDR</a></li>
@@ -148,7 +148,7 @@ time. You can also select "M" to switch straight to manual mode, keeping to the 
 	<a href="https://play.google.com/store/apps/details?id=uk.org.opencamera.vibrancehdr">Vibrance HDR</a>. For
 	PC platforms, try <a href="http://qtpfsgui.sourceforge.net/">Luminance HDR</a>.</li>
 </ul></li>
-<li><b>Auto-stabilise</b> - Enable the auto-stabilise features for photos (see
+<li><b>Auto-level</b> - Enable the auto-level feature for photos (see
 <a href="#auto_stabilise">below</a>). (Only available if the device has enough memory.)</li>
 <li><b>White balance</b> - Choose a method to control how the white balance is set. See
 <a href="http://digital-photography-school.com/introduction-to-white-balance">here</a> for an
@@ -194,14 +194,14 @@ the battery indicator when the location is available (you can still take photos 
 it's just that location data won't be stored in the photo). A dot shows to the top-right of the earth icon to
 indicate the accuracy (green for accurate, yellow for less accurate). If the location isn't available, a red dash will be shown through the earth icon.</p>
 
-<p><a name="auto_stabilise"></a><b>Auto-stabilise feature</b></p>
+<p><a name="auto_stabilise"></a><b>Auto-level feature</b></p>
 
 <p>All Android cameras will rotate the photo depending on the orientation of the camera, but only to the nearest 90 degrees - so the
 photos look right whether you hold the device in "portrait" or "landscape" mode. But Open Camera has the option to rotate the
 photos so they are perfectly level, so your shots come out looking perfectly level every time!</p>
 
 <p><a href="auto_stabilise_image_20131009.jpg">
-<img src="auto_stabilise_image_20131009.jpg" style="max-width:100%" alt="Screenshots demonstrating auto-stabilise" title="Screenshots demonstrating auto-stabilise">
+<img src="auto_stabilise_image_20131009.jpg" style="max-width:100%" alt="Screenshots demonstrating auto-level" title="Screenshots demonstrating auto-level">
 </a></p>
 
 <p>(Note the above screenshot is from a rather old version of Open Camera - the user interface icons look better
@@ -210,7 +210,7 @@ these days!)</p>
 <p>The above shows a rather exaggerated example - in practice, you can probably take better photos, but this feature ensures they
 come out perfectly level, without you having to edit them afterwards in a photo editor. Of course you won't always want this -
 perhaps you're going for artistic 45-degree shots - so this is an option. By default it is disabled.  To enable, open the
-<a href="#user_interface">Popup menu</a>, and enable "Auto-stabilise". Note that this feature is memory intensive - it will not be available
+<a href="#user_interface">Popup menu</a>, and enable "Auto-level". Note that this feature is memory intensive - it will not be available
 on devices with low memory. Even where it is available, the performance of taking photos will be
 slower, and there is a risk it may cause the app to fail on devices I haven't been able
 to test. If you do have problems, you'll have to disable the feature again.</p>
@@ -293,7 +293,7 @@ darker. Set to 0 for the default exposure. See
 noise. This mimics the film speed on traditional film cameras. Note that this setting may not be supported on all cameras.
 See <a href="http://digital-photography-school.com/iso-settings">here</a> for more details on ISO.</p>
 
-<p><b>Auto-stabilise</b> - Enable the auto-stabilise features for photos (see <a href="#auto_stabilise">above</a>). (Only available
+<p><b>Auto-level</b> - Enable the auto-level features for photos (see <a href="#auto_stabilise">above</a>). (Only available
 if the device has enough memory.)</p>-->
 
 <p><b>Camera Controls:</b></p>
@@ -341,7 +341,7 @@ will take a photo (or start/stop video). This makes your volume keys behave more
 key to focus, then both to take a photo.</li>
 <li>Zoom in/out.</li>
 <li>Change the exposure compensation (or if in manual ISO mode and using Camera2 API, change the ISO).</li>
-<li>Switch <a href="#auto_stabilise">auto-stabilise</a> on/off.</li>
+<li>Switch <a href="#auto_stabilise">auto-level</a> on/off.</li>
 <li>Change the device's volume as normal.</li>
 <li>Do nothing.</li>
 </ul>
@@ -361,7 +361,7 @@ If you find it's taking photos too often unintentionally, or isn't responding to
 <p><b>Lock photo/video orientation</b> - Normally the orientation of the photo/video will be rotated by some multiple of
 90 degree such that the orientation looks right - e.g. if your device is held in portrait, the resultant image/video will
 be in portrait. This option allows fixing the camera to either be in portrait or landscape. Note that if
-<a href="#auto_stabilise">auto-stabilise</a> is also enabled, it will have the effect of aligning photos to the nearest
+<a href="#auto_stabilise">auto-level</a> is also enabled, it will have the effect of aligning photos to the nearest
 90 degrees.</p>
 
 <p><a name="save_location"></a><b>Save location</b> - Select the folder to store the photos in. Click on a folder
@@ -406,7 +406,7 @@ be unavailable when your device is locked, you can disable this option.</p>
 <p><b>Perform auto-focus on startup</b> - Whether Open Camera should auto-focus when starting the camera. Some devices
 have a bug where the flash turns on when this happens, so a workaround is to disable this option.</p>
 
-<p><b>Calibrate level angle</b> - The options <a href="#auto_stabilise">Auto-stabilise</a>, "Show angle" and "Show angle line"
+<p><b>Calibrate level angle</b> - The options <a href="#auto_stabilise">Auto-level</a>, "Show angle" and "Show angle line"
 rely on your device's ability to detect which orientation it's being held (the accelerometer). On some device's this might not
 be calibated correctly. If so, you can use this option to calibrate the acceleromer (or reset the calibration back to the
 default behaviour).</p>
@@ -516,7 +516,7 @@ yourself afterwards - but this will correct the preview so that you can still se
 <p><b>Photo settings</b> - Select to access the following controls:</p>
 
 <p><b>Camera resolution</b> - Select the resolution of photo images taken by the camera. Note that if
-<a href="#auto_stabilise">auto-stabilise</a> is enabled, images will in general come out as a slightly lower resolution
+<a href="#auto_stabilise">auto-level</a> is enabled, images will in general come out as a slightly lower resolution
 (due to the rotation and cropping that's required).</p>
 
 <p><b>Image quality</b> - The image quality of saved JPEG images. Higher means better quality, but the image files will take up
@@ -540,7 +540,7 @@ uncompressed and unprocessed information from your camera. Please note the follo
 	<a href="https://play.google.com/store/apps/details?id=com.amaze.filemanager">Amaze</a> may also be useful,
 	to delete DNGs if you don't want them (DNGs take up a lot of space - and won't be deleted when you delete
 	the corresponding JPEG from a Gallery app).</li>
-	<li>Note that various processing options such as "Stamp photos" and <a href="#auto_stabilise">"Auto-stabilise"</a> will only apply
+	<li>Note that various processing options such as "Stamp photos" and <a href="#auto_stabilise">"Auto-level"</a> will only apply
 	to the JPEG images, and not the DNG images. This is not a bug - the DNGs represent the RAW output
 	of the camera device.</li>
 	<li>RAW images will only be saved in the Standard or DRO photo modes.</li>
@@ -553,7 +553,7 @@ to use external HDR applications (such as my own
 or <a href="http://qtpfsgui.sourceforge.net/">Luminance HDR</a> for PC) to
 create the final HDR image (although if you don't want Open Camera's HDR mode at all, you can instead use the
 Exposure Bracketing Photo Mode). Note this will make saving slower, especially if options like "Stamp photos" or
-<a href="#auto_stabilise">Auto-stabilise</a> are also used.</p>
+<a href="#auto_stabilise">Auto-level</a> are also used.</p>
 
 <p><b>Exposure Bracketing</b> - Specifies the total number of images to save in Exposure Bracketing Photo Mode
 (Camera2 API only).</p>
@@ -789,13 +789,13 @@ one possibility is due to focusing before taking photos; some
 cameras use continuous focus mode which gives faster picture taking. Open Camera supports continuous focus mode, just select
 the popup menu and choose the "C" icon
 <img src="focus_mode_continuous_picture.png" alt="Continuous Picture focus icon" width="32" height="32">.
-Other reasons may be if some options are set (such as <a href="#auto_stabilise">auto-stabilise</a>, or "Stamp photos"), these will result in slower photo
+Other reasons may be if some options are set (such as <a href="#auto_stabilise">auto-level</a>, or "Stamp photos"), these will result in slower photo
 times.</p>
 
-<p><b>My pictures are being rotated/cropped!</b> - This likely means the <a href="#auto_stabilise">auto-stabilise</a>
+<p><b>My pictures are being rotated/cropped!</b> - This likely means the <a href="#auto_stabilise">auto-level</a>
 option is on. (If they're being rotated even when the phone is held level, it may mean the accelerometer sensor on your
 device isn't calibrated.) It's off by default, but you may have accidentally switched it on. To turn off, go to the "popup" menu
-and untick Auto-stabilise.</p>
+and untick Auto-level.</p>
 
 <p><b>My device can do 4K/UHD, so why doesn't it work on Open Camera?</b> - Unfortunately many devices with 4K support
 have for some reason not exposed this through the Android API to 3rd party camera apps. (In some cases the "Force 4K"
@@ -815,7 +815,7 @@ the standard Android camera API.</p>
 have restricted the maximum resolution to 8MP for third party apps</a>.</p>
 
 <p><b>Why does the resolution of my photos not match the specified camera resolution?</b> - This happens if
-<a href="#auto_stabilise">auto-stabilise</a> is enabled. The image is rotated to be level, which means the
+<a href="#auto_stabilise">auto-level</a> is enabled. The image is rotated to be level, which means the
 resolution (and aspect-ratio) will change.</p>
 
 <p><b>Why can't I change the ISO?</b> - Even if your device supports ISO, this may not be made available through the
@@ -860,12 +860,12 @@ offer translations. If you think a particular translation is inaccurate, please 
 <p><b>Why is the screen forced to maximum brightness?</b> - If you don't like this feature, you can switch it off
 by going to Settings/On screen GUI/Force maximum brightness.</p>
 
-<p><b>Why is auto-stabilise slow?</b> - This feature requires doing a decompress of the JPEG data, followed by a
+<p><b>Why is auto-level slow?</b> - This feature requires doing a decompress of the JPEG data, followed by a
 rotation of a multi-megapixel image, then recompressing, which typically results in a short pause on most devices.
 And as devices get faster CPUs, they typically come with cameras with even bigger megapixels! This is why I've made
 it optional (and you can set the volume control to quickly switch it on and off if you like).</p>
 
-<p><b>Why is auto-stabilise for photos only?</b> - Doing auto-stabilise for video is a <i>massively</i> harder
+<p><b>Why is auto-level for photos only?</b> - Doing auto-level for video is a <i>massively</i> harder
 problem. This wouldn't be possible in real-time - rotating images causes a noticeable pause as it is, imagine
 having to do that for every frame. Also the rotation angle wouldn't be constant, so it's a much harder problem
 figuring out what the correct result should actually be.</p>
