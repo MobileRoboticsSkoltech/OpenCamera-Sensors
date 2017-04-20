@@ -547,7 +547,7 @@ public class DrawPreview {
 
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
 			long time_now = System.currentTimeMillis();
-			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 1000 ) {
+			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 5000 ) {
 				long free_mb = main_activity.freeMemory();
 				if( free_mb >= 0 ) {
 					free_memory_gb = free_mb/1024.0f;
@@ -819,7 +819,11 @@ public class DrawPreview {
 					p.setUnderlineText(true);
 				}
 				String number_string = decimalFormat.format(level_angle);
-				number_string = number_string.replaceAll( "^-(?=0(.0*)?$)", ""); // avoids displaying "-0.0", see http://stackoverflow.com/questions/11929096/negative-sign-in-case-of-zero-in-java
+				if( Math.abs(level_angle) < 0.1 ) {
+					// avoids displaying "-0.0", see http://stackoverflow.com/questions/11929096/negative-sign-in-case-of-zero-in-java
+					// only do this when level_angle is small, to help performance
+					number_string = number_string.replaceAll("^-(?=0(.0*)?$)", "");
+				}
 				String string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
 				applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
 				p.setUnderlineText(false);
