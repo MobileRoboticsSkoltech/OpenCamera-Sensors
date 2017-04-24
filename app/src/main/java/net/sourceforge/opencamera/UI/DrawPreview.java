@@ -49,6 +49,7 @@ public class DrawPreview {
 	private final int [] gui_location = new int[2];
 	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	private final float stroke_width;
+	private Calendar calendar;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
 
 	private final static double close_level_angle = 1.0f;
@@ -526,14 +527,18 @@ public class DrawPreview {
 		}
 
 		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
-	        Calendar c = Calendar.getInstance();
+			// avoid creating a new calendar object every time
+			if( calendar == null )
+		        calendar = Calendar.getInstance();
+			else
+				calendar.setTimeInMillis(System.currentTimeMillis());
 	        // n.b., DateFormat.getTimeInstance() ignores user preferences such as 12/24 hour or date format, but this is an Android bug.
 	        // Whilst DateUtils.formatDateTime doesn't have that problem, it doesn't print out seconds! See:
 	        // http://stackoverflow.com/questions/15981516/simpledateformat-gettimeinstance-ignores-24-hour-format
 	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
 	        // http://code.google.com/p/android/issues/detail?id=42104
 	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
-	        String current_time = dateFormatTimeInstance.format(c.getTime());
+	        String current_time = dateFormatTimeInstance.format(calendar.getTime());
 	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
 	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
 
