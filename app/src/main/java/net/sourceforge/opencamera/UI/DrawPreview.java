@@ -47,7 +47,7 @@ public class DrawPreview {
 	private final RectF face_rect = new RectF();
 	private final RectF draw_rect = new RectF();
 	private final int [] gui_location = new int[2];
-	private final DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+	private final static DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	private final float stroke_width;
 	private Calendar calendar;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
@@ -748,6 +748,18 @@ public class DrawPreview {
 		}
 	}
 
+    /** Formats the level_angle double into a string.
+     */
+	public static String formatLevelAngle(double level_angle) {
+        String number_string = decimalFormat.format(level_angle);
+        if( Math.abs(level_angle) < 0.1 ) {
+            // avoids displaying "-0.0", see http://stackoverflow.com/questions/11929096/negative-sign-in-case-of-zero-in-java
+            // only do this when level_angle is small, to help performance
+            number_string = number_string.replaceAll("^-(?=0(.0*)?$)", "");
+        }
+        return number_string;
+    }
+
 	/** This includes drawing of the UI that requires the canvas to be rotated according to the preview's
 	 *  current UI rotation.
 	 */
@@ -823,12 +835,7 @@ public class DrawPreview {
 					color = getAngleHighlightColor();
 					p.setUnderlineText(true);
 				}
-				String number_string = decimalFormat.format(level_angle);
-				if( Math.abs(level_angle) < 0.1 ) {
-					// avoids displaying "-0.0", see http://stackoverflow.com/questions/11929096/negative-sign-in-case-of-zero-in-java
-					// only do this when level_angle is small, to help performance
-					number_string = number_string.replaceAll("^-(?=0(.0*)?$)", "");
-				}
+				String number_string = formatLevelAngle(level_angle);
 				String string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
 				applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
 				p.setUnderlineText(false);
