@@ -1055,34 +1055,11 @@ public class HDRProcessor {
 		if( adjust_histogram ) {
 			// create histogram
 			int [] histogram = new int[256];
-			Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
-			//final boolean use_custom_histogram = false;
-			final boolean use_custom_histogram = true;
 			if( MyDebug.LOG )
 				Log.d(TAG, "time before creating histogram: " + (System.currentTimeMillis() - time_s));
-			if( use_custom_histogram ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "create histogramScript");
-				ScriptC_histogram_compute histogramScript = new ScriptC_histogram_compute(rs);
-				if( MyDebug.LOG )
-					Log.d(TAG, "bind histogram allocation");
-				histogramScript.bind_histogram(histogramAllocation);
-				histogramScript.invoke_init_histogram();
-				if( MyDebug.LOG )
-					Log.d(TAG, "call histogramScript");
-				histogramScript.forEach_histogram_compute(allocation_in);
-			}
-			else {
-				ScriptIntrinsicHistogram histogramScript = ScriptIntrinsicHistogram.create(rs, Element.U8_4(rs));
-				histogramScript.setOutput(histogramAllocation);
-				if( MyDebug.LOG )
-					Log.d(TAG, "call histogramScript");
-				histogramScript.forEach_Dot(allocation_in); // use forEach_dot(); using forEach would simply compute a histogram for red values!
-			}
+			Allocation histogramAllocation = computeHistogramAllocation(allocation_in, false, time_s);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after creating histogram: " + (System.currentTimeMillis() - time_s));
-
-			//histogramAllocation.setAutoPadding(true);
 			histogramAllocation.copyTo(histogram);
 
 				/*if( MyDebug.LOG ) {
@@ -1289,5 +1266,63 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
 		}
+	}
+
+	/**
+	 * @param avg If true, compute the color value as the average of the rgb values. If false,
+	 *            compute the color value as the maximum of the rgb values.
+	 */
+	private Allocation computeHistogramAllocation(Allocation allocation_in, boolean avg, long time_s) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "computeHistogramAllocation");
+		Allocation histogramAllocation = Allocation.createSized(rs, Element.I32(rs), 256);
+		//final boolean use_custom_histogram = false;
+		final boolean use_custom_histogram = true;
+		if( use_custom_histogram ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "create histogramScript");
+			ScriptC_histogram_compute histogramScript = new ScriptC_histogram_compute(rs);
+			if( MyDebug.LOG )
+				Log.d(TAG, "bind histogram allocation");
+			histogramScript.bind_histogram(histogramAllocation);
+			histogramScript.invoke_init_histogram();
+			if( MyDebug.LOG )
+				Log.d(TAG, "call histogramScript");
+			if( MyDebug.LOG )
+				Log.d(TAG, "time before histogramScript: " + (System.currentTimeMillis() - time_s));
+			if( avg )
+				histogramScript.forEach_histogram_compute_avg(allocation_in);
+			else
+				histogramScript.forEach_histogram_compute(allocation_in);
+			if( MyDebug.LOG )
+				Log.d(TAG, "time after histogramScript: " + (System.currentTimeMillis() - time_s));
+		}
+		else {
+			ScriptIntrinsicHistogram histogramScript = ScriptIntrinsicHistogram.create(rs, Element.U8_4(rs));
+			histogramScript.setOutput(histogramAllocation);
+			if( MyDebug.LOG )
+				Log.d(TAG, "call histogramScript");
+			histogramScript.forEach_Dot(allocation_in); // use forEach_dot(); using forEach would simply compute a histogram for red values!
+		}
+
+		//histogramAllocation.setAutoPadding(true);
+		return histogramAllocation;
+	}
+
+	/**
+	 * @param avg If true, compute the color value as the average of the rgb values. If false,
+	 *            compute the color value as the maximum of the rgb values.
+	 */
+	public int [] computeHistogram(Bitmap bitmap, boolean avg) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "computeHistogram");
+		long time_s = System.currentTimeMillis();
+		Allocation allocation_in = Allocation.createFromBitmap(rs, bitmap);
+		if( MyDebug.LOG )
+			Log.d(TAG, "time after createFromBitmap: " + (System.currentTimeMillis() - time_s));
+		int [] histogram = new int[256];
+		Allocation histogramAllocation = computeHistogramAllocation(allocation_in, avg, time_s);
+		histogramAllocation.copyTo(histogram);
+		return histogram;
 	}
 }
