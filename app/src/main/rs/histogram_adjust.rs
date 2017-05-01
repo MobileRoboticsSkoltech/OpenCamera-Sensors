@@ -101,13 +101,15 @@ uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t 
 	}
 	
 	int new_value = (int)( (1.0f-hdr_alpha) * value + hdr_alpha * equal_value );
-	
+
 	float scale = ((float)new_value) / (float)value;
 
 	uchar4 out;
-	out.r = min(255, (int)(in.r * scale));
-	out.g = min(255, (int)(in.g * scale));
-	out.b = min(255, (int)(in.b * scale));
+	// need to add +0.5 so that we round to nearest - particularly important as due to floating point rounding, we
+	// can end up with incorrect behaviour even when new_value==value!
+	out.r = min(255, (int)(in.r * scale + 0.5f));
+	out.g = min(255, (int)(in.g * scale + 0.5f));
+	out.b = min(255, (int)(in.b * scale + 0.5f));
 	
 	return out;
 }
