@@ -2763,6 +2763,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 *  fake flash for modes like HDR (plus it's good to still test the fake flash mode on as many devices as possible).
 	 *  We do more tests with flash on than flash auto (especially due to bug on OnePlus 3T where fake flash auto never fires the flash
 	 *  anyway).
+	 *  May have precapture timeout if phone is face down, see note for testTakePhotoFlashOnFakeMode.
      */
 	public void testTakePhotoFlashAutoFakeMode() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashAutoFakeMode");
