@@ -1184,6 +1184,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	/* Tests switching to/from video mode, for front and back cameras, and tests the focus mode changes as expected.
+	 * If this test fails with nullpointerexception on preview.getCameraController() after switching to video mode, check
+	 * that record audio permission is granted!
 	 */
 	public void testSwitchVideo() throws InterruptedException {
 		Log.d(TAG, "testSwitchVideo");
