@@ -10,8 +10,8 @@
     <string name="answer_yes">Da</string>
     <string name="answer_no">Ne</string>
 
-    <string name="on">Vkl.</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
-    <string name="off">Izk.</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->
+    <string name="on">Vkl.</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->
+    <string name="off">Izk.</string> <!-- whether a setting is turned off, e.g., "Auto-level: Off" -->
     
     <string name="choose_save_location">Izberite mesto za shranjevanje:</string>
     <string name="clear_folder_history">Počisti zgodovino mape</string>
@@ -46,7 +46,7 @@
     <string name="sorry">Oprostite</string>
     <string name="failed_to_save_photo">Shranjevanje fotografije je spodletelo</string>
 	<string name="failed_to_save_photo_raw">Shranjevanje fotografije v obliki RAW je spodletelo</string>
-    <string name="failed_to_auto_stabilise">Samodejna ustalitev je spodletela</string>
+    <string name="failed_to_auto_stabilise">Samodejna izravnava je spodletela</string>
     <string name="failed_to_start_camera_preview">Zagon predogleda fotoaparata je spodletel</string>
     <string name="taking_photo">Slikanje fotografije</string>
     <string name="failed_to_take_picture">Slikanje fotografije je spodletelo</string>
@@ -55,7 +55,7 @@
     <string name="no_gallery_app">Program galerije ni na voljo</string>
     <string name="screen_is_locked">Zaslon je zaklenjen\nPovlecite ga za odklepanje</string>
     <string name="unlocked">Odklenjen</string>
-    <string name="auto_stabilise_not_supported">Žal samodejna ustalitev ni podprta\nna tej napravi</string>
+    <string name="auto_stabilise_not_supported">Žal na tej napravi samodejna\nizravnava ni podprta</string>
     <string name="audio_disabled">Zvok onemogočen</string>
     <string name="max_duration">Najdaljše trajanje</string>
     <string name="color_effect">Barvni učinek</string>
@@ -77,7 +77,7 @@
     <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
     
     <string name="preference_category_camera_effects">Učinki fotoaparata</string>
-    <string name="preference_auto_stabilise">samodejno ustali</string>
+    <string name="preference_auto_stabilise">Samodejno izravnaj</string>
     <string name="preference_auto_stabilise_summary">Slike bodo zavrtene za samodejno vodoravno poravnavo (samo fotografije) (slikanje fotografij je počasnejše in lahko spodleti na napravah s premalo pomnilnika)</string>
     <string name="preference_color_effect">Uporabi barvni učinek</string>
     <string name="preference_color_effect_summary">Uporabi izbrani bavni učinek za fotografije</string>
@@ -299,8 +299,8 @@
     <string name="speech_recognizer_started">Recite \"cheese\"</string>
     <string name="audio_listener_started">Naredite glasen zvok</string>
 	
-	<string name="auto_stabilise_info">Samodejna ustalitev bo zavrtela fotografije, da bodo videti poravnane.\n\nUpoštevajte, da se bo ločljivost slik rahlo zmanjšala (zaradi zahtevanega vrtenja in obrezovanja).</string>
-    <string name="raw_info">Datoteke DNG vsebujejo nestisnjene in neobdelane podatke iz fotoaparata.\n\nVečina programov za galerijo ne prepozna oblike DNG, zato jo uporabljajte s posebnimi programi, kot je Snapseed ali Lightroom.\n\nUpoštevajte, da se bodo razne možnosti obdelave, kot sta "Dodaj žig" in "Samodejna ustalitev", uporabile samo za slike JPEG in ne za slike DNG.\n\nDatoteke DNG zavzamejo veliko prosotra; za njihov izbris ali prenos lahko uporabite raziskovalca datotek.\n\nDatoteke DNG se shranjujejo samo v običajnem načinu ali načinu DRO.</string>
+	<string name="auto_stabilise_info">Samodejna izravnava bo zavrtela fotografije, da bodo videti poravnane.\n\nUpoštevajte, da se bo ločljivost slik rahlo zmanjšala (zaradi zahtevanega vrtenja in obrezovanja).</string>
+    <string name="raw_info">Datoteke DNG vsebujejo nestisnjene in neobdelane podatke iz fotoaparata.\n\nVečina programov za galerijo ne prepozna oblike DNG, zato jo uporabljajte s posebnimi programi, kot je Snapseed ali Lightroom.\n\nUpoštevajte, da se bodo razne možnosti obdelave, kot sta "Dodaj žig" in "Samodejno izravnaj", uporabile samo za slike JPEG in ne za slike DNG.\n\nDatoteke DNG zavzamejo veliko prosotra; za njihov izbris ali prenos lahko uporabite raziskovalca datotek.\n\nDatoteke DNG se shranjujejo samo v običajnem načinu ali načinu DRO.</string>
     <string name="hdr_info">Način HDR je uporaben za posnetke z velikimi odstopanji v svetlosti. Deluje tako, da zajame več posnetkov z različnimi osvetlitvami in jih potem združi v končno sliko.\n\nUpoštevajte, da HDR ni primeren za hitro gibajoče prizore in lahko povzroči barvna odstopanja.\n\nSlikanje fotografij v načinu HDR je počasnejše.</string>
 
     <string name="dont_show_again">Ne prikazuj več</string>
@@ -312,7 +312,7 @@
     <string name="photo_mode_expo_bracketing_full">Korektura samodejne osvetlitve</string>
     <string name="preference_category_stamp">Dodaj žig</string>
     <string name="preference_hdr_save_expo">Shrani vse slike za način HDR</string>
-    <string name="preference_hdr_save_expo_summary">Če je omogočeno, bodo ob uporabi načina HDR posnete tri osnovne slike kot tudi končna slika HDR. Upoštevajte, da bo shranevanje počasnejše, posebno, če uporabljate možnosti, kot sta \"Dodaj žig\" ali samodejno ustalitev.</string>
+    <string name="preference_hdr_save_expo_summary">Če je omogočeno, bodo ob uporabi načina HDR posnete tri osnovne slike kot tudi končna slika HDR. Upoštevajte, da bo shranevanje počasnejše, posebno, če uporabljate možnosti, kot sta \"Dodaj žig\" ali samodejno izravnavo.</string>
 
     <string name="no_permission">DOVOLJENJA NISO NA VOLJO</string>
     <string name="permission_rationale_title">Zahtevano je dovoljenje</string>
@@ -327,9 +327,9 @@
     <string name="preference_camera2_fake_flash_summary">Omogočite, če se vaša naprava neobičajno vede z API-jem Camera2</string>
 
     <string name="preference_expo_bracketing_n_images">Korektura sam. osvetlitve</string>
-    <string name="preference_expo_bracketing_n_images_summary">Število slik za način korekture samodejne osvetlitve</string>
-    <string name="preference_expo_bracketing_stops">Ustavitve kor. sam. osvetlitve</string>
-    <string name="preference_expo_bracketing_stops_summary">Število ustavitev vsake slike</string>
+    <string name="preference_expo_bracketing_n_images_summary">Število slik korekture samodejne osvetlitve</string>
+    <string name="preference_expo_bracketing_stops">Korak kor. sam. osvetlitve</string>
+    <string name="preference_expo_bracketing_stops_summary">Število pozitivnih/negativnih korakov za najtemnejšo/najsvetlejšo sliko</string>
 	
 	<string name="seconds_abbreviation">s</string> <!-- short for seconds -->
 
@@ -355,7 +355,7 @@
     <string name="preference_front_camera_mirror_summary">Ali naj se ob uporabi sprednjega fotoaparata slike zrcalijo.</string>
 	
 	<string name="preference_calibrate_level">Kot ravni umerjanja</string>
-    <string name="preference_calibrate_level_summary">Ta možnost umeri pospeškomer naprave za pravilno delovanje samodejne ustalitve in prikaza ravni/kota na zaslonu.</string>
+    <string name="preference_calibrate_level_summary">Ta možnost umeri pospeškomer naprave za pravilno delovanje samodejne izravnave in prikaza ravni/kota na zaslonu.</string>
     <string name="preference_calibrate_level_dialog">Napravo postavite na ravno vodoravno površino in izberite Umeri.\n\nPritisnite Ponastavi za odstranitev umerjanja iz naprave.\n\nPritisnite gumb Nazaj za preklic.</string>
     <string name="preference_calibrate_level_calibrate">Umeri</string>
     <string name="preference_calibrate_level_reset">Ponastavi</string>
@@ -366,7 +366,6 @@
 	
 	<string name="preference_show_pitch_lines">Prikaži višinske črte</string>
     <string name="preference_show_pitch_lines_summary">Prikaži vodoravne višinske črte</string>
-	
 	<string name="preference_show_geo_direction_lines">Prikaži črte smeri neba</string>
     <string name="preference_show_geo_direction_lines_summary">Prikaži črte smeri neba</string>
 	<string name="preference_video_subtitle">Podnapisi</string>
@@ -408,4 +407,5 @@
 	<string name="capturing">Zajemanje …</string>
 	
 	<string name="audio_listener_failed">Začenjanje poslušanja zvoka je spodletelo</string>
+	<string name="failed_to_process_hdr">Ustvarjanje slike HDR je spodletelo</string>
 </resources>
