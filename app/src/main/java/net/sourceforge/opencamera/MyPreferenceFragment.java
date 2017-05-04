@@ -194,12 +194,34 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_expo_bracketing: " + supports_expo_bracketing);
 
-		if( !supports_expo_bracketing ) {
+		final int max_expo_bracketing_n_images = bundle.getInt("max_expo_bracketing_n_images");
+		if( MyDebug.LOG )
+			Log.d(TAG, "max_expo_bracketing_n_images: " + max_expo_bracketing_n_images);
+
+		final boolean supports_exposure_compensation = bundle.getBoolean("supports_exposure_compensation");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_exposure_compensation: " + supports_exposure_compensation);
+
+		final boolean supports_iso_range = bundle.getBoolean("supports_iso_range");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_iso_range: " + supports_iso_range);
+
+		final boolean supports_exposure_time = bundle.getBoolean("supports_exposure_time");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_exposure_time: " + supports_exposure_time);
+
+		final boolean supports_white_balance_temperature = bundle.getBoolean("supports_white_balance_temperature");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_white_balance_temperature: " + supports_white_balance_temperature);
+
+		if( !supports_expo_bracketing || max_expo_bracketing_n_images <= 3 ) {
 			Preference pref = findPreference("preference_expo_bracketing_n_images");
+			PreferenceGroup pg = (PreferenceGroup) this.findPreference("preference_screen_photo_settings");
+			pg.removePreference(pref);
+		}
+		if( !supports_expo_bracketing ) {
+			Preference pref = findPreference("preference_expo_bracketing_stops");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
-        	pg.removePreference(pref);
-			pref = findPreference("preference_expo_bracketing_stops");
-			pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
         	pg.removePreference(pref);
 		}
 
@@ -320,8 +342,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 	if( pref.getKey().equals("preference_online_help") ) {
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked online help");
-            	        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://opencamera.sourceforge.net/"));
-            	        startActivity(browserIntent);
+	            		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+						main_activity.launchOnlineHelp();
                 		return false;
                 	}
                 	return false;
@@ -615,6 +637,18 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(getString(supports_face_detection ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nRAW?: ");
                         about_string.append(getString(supports_raw ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nHDR?: ");
+                        about_string.append(getString(supports_hdr ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nExpo?: ");
+                        about_string.append(getString(supports_expo_bracketing ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nExpo compensation?: ");
+                        about_string.append(getString(supports_exposure_compensation ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nManual ISO?: ");
+                        about_string.append(getString(supports_iso_range ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nManual exposure?: ");
+                        about_string.append(getString(supports_exposure_time ? R.string.about_available : R.string.about_not_available));
+                        about_string.append("\nManual WB?: ");
+                        about_string.append(getString(supports_white_balance_temperature ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nVideo stabilization?: ");
                         about_string.append(getString(supports_video_stabilization ? R.string.about_available : R.string.about_not_available));
 						about_string.append("\nCan disable shutter sound?: ");

@@ -1,14 +1,14 @@
 package net.sourceforge.opencamera;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 import android.service.quicksettings.TileService;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 /** Provides service for quick settings tile.
  */
-@TargetApi(Build.VERSION_CODES.N)
+@RequiresApi(api = Build.VERSION_CODES.N)
 public class MyTileServiceFrontCamera extends TileService {
     private static final String TAG = "MyTileServiceFrontCam";
     public static final String TILE_ID = "net.sourceforge.opencamera.TILE_FRONT_CAMERA";

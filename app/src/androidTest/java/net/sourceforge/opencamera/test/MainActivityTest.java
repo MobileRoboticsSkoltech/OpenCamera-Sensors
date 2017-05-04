@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import net.sourceforge.opencamera.HDRProcessor;
+import net.sourceforge.opencamera.HDRProcessorException;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.SaveLocationHistory;
@@ -230,23 +232,21 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	
 	private void switchToISO(int required_iso) {
 		Log.d(TAG, "switchToISO: "+ required_iso);
-	    if( mPreview.supportsFocus() ) {
-		    int iso = mPreview.getCameraController().getISO();
-			Log.d(TAG, "start iso: "+ iso);
-			if( iso != required_iso ) {
-				assertFalse( mActivity.popupIsOpen() );
-			    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
-			    clickView(popupButton);
-			    while( !mActivity.popupIsOpen() ) {
-			    }
-			    View isoButton = mActivity.getPopupButton("TEST_ISO_" + required_iso);
-			    assertTrue(isoButton != null);
-			    clickView(isoButton);
-			    iso = mPreview.getCameraController().getISO();
-				Log.d(TAG, "changed iso to: "+ iso);
+		int iso = mPreview.getCameraController().getISO();
+		Log.d(TAG, "start iso: "+ iso);
+		if( iso != required_iso ) {
+			assertFalse( mActivity.popupIsOpen() );
+			View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+			clickView(popupButton);
+			while( !mActivity.popupIsOpen() ) {
 			}
-		    assertTrue(iso == required_iso);
-	    }
+			View isoButton = mActivity.getPopupButton("TEST_ISO_" + required_iso);
+			assertTrue(isoButton != null);
+			clickView(isoButton);
+			iso = mPreview.getCameraController().getISO();
+			Log.d(TAG, "changed iso to: "+ iso);
+		}
+		assertTrue(iso == required_iso);
 	}
 	
 	/* Sets the camera up to a predictable state:
@@ -1184,6 +1184,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	/* Tests switching to/from video mode, for front and back cameras, and tests the focus mode changes as expected.
+	 * If this test fails with nullpointerexception on preview.getCameraController() after switching to video mode, check
+	 * that record audio permission is granted!
 	 */
 	public void testSwitchVideo() throws InterruptedException {
 		Log.d(TAG, "testSwitchVideo");
@@ -2010,7 +2012,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 
-		// n.b., currently don't test this on devices with long shutter times (e.g., OnePlus 3T) until this is properly supported
+		// n.b., currently don't test this on devices with long shutter times (e.g., OnePlus 3T)
 	    if( mPreview.supportsExposureTime() && mPreview.getMaximumExposureTime() < 1000000000 ) {
 			Log.d(TAG, "change exposure time to max");
 		    exposureTimeSeekBar.setProgress(manual_n);
@@ -2018,6 +2020,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMaximumExposureTime() );
 	    }
+	    else {
+            Log.d(TAG, "change exposure time to 1s");
+            mActivity.setProgressSeekbarExponential(exposureTimeSeekBar, mPreview.getMinimumExposureTime(), mPreview.getMaximumExposureTime(), 1000000000);
+            this.getInstrumentation().waitForIdleSync();
+            assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
+            assertTrue( mPreview.getCameraController().getExposureTime() != mPreview.getMaximumExposureTime() );
+        }
 		long saved_exposure_time = mPreview.getCameraController().getExposureTime();
 
 	    // test the exposure button clears and reopens without changing exposure level
@@ -2085,6 +2094,50 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    if( mPreview.supportsExposureTime() )
 				assertTrue( mPreview.getCameraController().getExposureTime() == saved_exposure_time );
 		}
+	}
+
+	public void testTakePhotoManualWB() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoManualWB");
+		if( !mPreview.usingCamera2API() ) {
+			return;
+		}
+		if( !mPreview.supportsWhiteBalanceTemperature() ) {
+			return;
+		}
+		setToDefault();
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getWhiteBalancePreferenceKey(), "manual");
+		editor.apply();
+		updateForSettings();
+
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+
+		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_container);
+		SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
+		ZoomControls seekBarZoom = (ZoomControls) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar_zoom);
+        View manualWBContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.manual_white_balance_container);
+		SeekBar seekBarWB = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_seekbar);
+
+		assertTrue(exposureButton.getVisibility() == (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
+		assertTrue(exposureContainer.getVisibility() == View.GONE);
+		assertTrue(seekBarZoom.getVisibility() == View.GONE);
+		assertTrue(manualWBContainer.getVisibility() == View.GONE);
+
+		if( !mPreview.supportsExposures() ) {
+			return;
+		}
+
+		clickView(exposureButton);
+
+		assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+		assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
+		assertTrue(seekBar.getVisibility() == View.VISIBLE);
+		assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
+        assertTrue(manualWBContainer.getVisibility() == View.VISIBLE);
+		assertTrue(seekBarWB.getVisibility() == View.VISIBLE);
 	}
 
 	/** Tests that the audio control icon is visible or not as expect (guards against bug fixed in 1.30)
@@ -2270,7 +2323,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
 
@@ -2291,7 +2344,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 
 		// check files have names as expected
 		String filename_jpeg = null;
@@ -2417,7 +2470,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
 		boolean is_dro = mActivity.supportsDRO() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_dro");
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean is_expo = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
 		
@@ -2517,9 +2570,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			// if test_wait_capture_result, then we'll have waited too long for thumbnail animation
 		}
 		else if( has_thumbnail_anim ) {
+			long time_s = System.currentTimeMillis();
 			while( !mActivity.hasThumbnailAnimation() ) {
 				Log.d(TAG, "waiting for thumbnail animation");
 				Thread.sleep(10);
+				int allowed_time_ms = 6000;
+				if( !mPreview.usingCamera2API() && ( is_hdr || is_expo ) ) {
+					// some devices need longer time
+					allowed_time_ms = 8000;
+				}
+				assertTrue( System.currentTimeMillis() - time_s < allowed_time_ms );
 			}
 		}
 		else {
@@ -2703,6 +2763,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 *  fake flash for modes like HDR (plus it's good to still test the fake flash mode on as many devices as possible).
 	 *  We do more tests with flash on than flash auto (especially due to bug on OnePlus 3T where fake flash auto never fires the flash
 	 *  anyway).
+	 *  May have precapture timeout if phone is face down, see note for testTakePhotoFlashOnFakeMode.
      */
 	public void testTakePhotoFlashAutoFakeMode() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashAutoFakeMode");
@@ -4162,6 +4223,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    }
 		    else {
 		    	exp_n_new_files = test_cb.doTest();
+
+				if( mPreview.isVideoRecording() ) {
+					Log.d(TAG, "about to click stop video");
+					clickView(takePhotoButton);
+					Log.d(TAG, "done clicking stop video");
+					this.getInstrumentation().waitForIdleSync();
+					Log.d(TAG, "after idle sync");
+				}
 		    }
 	    }
 	    else {
@@ -4196,6 +4265,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 	    if( !max_filesize ) {
 	    	// if doing restart on max filesize, we may have already restarted by now (on Camera2 API at least)
+			Log.d(TAG, "switchCameraButton.getVisibility(): " + switchCameraButton.getVisibility());
 		    assertTrue(switchCameraButton.getVisibility() == (immersive_mode ? View.GONE : View.VISIBLE));
 		    assertTrue(audioControlButton.getVisibility() == ((has_audio_control_button && !immersive_mode) ? View.VISIBLE : View.GONE));
 	    }
@@ -4268,6 +4338,62 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		subTestTakeVideo(false, false, false, false, null, 5000, false, true);
+	}
+
+	/** Tests video subtitles option, including GPS - also tests losing the connection.
+	 */
+	public void testTakeVideoSubtitlesGPS() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSubtitlesGPS");
+
+		setToDefault();
+		{
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putString(PreferenceKeys.getVideoSubtitlePref(), "preference_video_subtitle_yes");
+			editor.putBoolean(PreferenceKeys.getLocationPreferenceKey(), true);
+			editor.apply();
+			updateForSettings();
+		}
+
+		subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
+			@Override
+			public int doTest() {
+				// wait for location
+				long start_t = System.currentTimeMillis();
+				while( !mActivity.getLocationSupplier().testHasReceivedLocation() ) {
+					getInstrumentation().waitForIdleSync();
+					if( System.currentTimeMillis() - start_t > 20000 ) {
+						// need to allow long time for testing devices without mobile network; will likely fail altogether if don't even have wifi
+						assertTrue(false);
+					}
+				}
+				getInstrumentation().waitForIdleSync();
+				assertTrue(mActivity.getLocationSupplier().getLocation() != null);
+
+				Log.d(TAG, "have location");
+				try {
+					Thread.sleep(2000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+
+				// now test losing gps
+                Log.d(TAG, "test losing location");
+                mActivity.getLocationSupplier().setForceNoLocation(true);
+
+                try {
+                    Thread.sleep(2000);
+                }
+                catch(InterruptedException e) {
+                    e.printStackTrace();
+                    assertTrue(false);
+                }
+
+				return 2;
+			}
+		}, 5000, false, true);
 	}
 
 	/** Set pausing and resuming video.
@@ -7061,8 +7187,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	public void testTakePhotoHDRSaveExpo() throws InterruptedException {
@@ -7080,10 +7208,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
+	/** Take photo in HDR mode with front camera.
+	 *  Note that this fails on OnePlus 3T with old camera API, due to bug where photo resolution changes when
+	 *  exposure compensation set for front camera.
+	 */
 	public void testTakePhotoHDRFrontCamera() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDRFrontCamera");
 		if( !mActivity.supportsHDR() ) {
@@ -7112,8 +7246,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(cameraId != new_cameraId);
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	public void testTakePhotoHDRAutoStabilise() throws InterruptedException {
@@ -7131,8 +7267,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	public void testTakePhotoHDRPhotoStamp() throws InterruptedException {
@@ -7150,8 +7288,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	/** Tests expo bracketing with default values.
@@ -7170,12 +7310,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	/** Tests expo bracketing with 5 images, 1 stop.
-	 *  Note this test [usually] fails on OnePlus 3T as onImageAvailable is only called 4 times, we never receive the 5th image.
 	 */
 	public void testTakePhotoExpo5() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExpo5");
@@ -7193,8 +7334,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
-		assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
 	}
 
 	/*private Bitmap getBitmapFromAssets(String filename) throws IOException {
@@ -7261,13 +7404,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(74)), "74°");
 	}
 
+	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro) throws IOException, InterruptedException {
+		subTestHDR(inputs, output_name, test_dro, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+	}
+
 	/** The following testHDRX tests test the HDR algorithm on a given set of input images.
 	 *  By testing on a fixed sample, this makes it easier to finetune the HDR algorithm for quality and performance.
 	 *  To use these tests, the testdata/ subfolder should be manually copied to the test device in the DCIM/testOpenCamera/
 	 *  folder (so you have DCIM/testOpenCamera/testdata/). We don't use assets/ as we'd end up with huge APK sizes which takes
 	 *  time to transfer to the device everytime we run the tests.
 	 */
-	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro) throws IOException, InterruptedException {
+	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro, HDRProcessor.TonemappingAlgorithm tonemapping_algorithm) throws IOException, InterruptedException {
 		Log.d(TAG, "subTestHDR");
 
 		Thread.sleep(1000); // wait for camera to open
@@ -7281,7 +7428,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
     	long time_s = System.currentTimeMillis();
-		mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true);
+		try {
+			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, tonemapping_algorithm);
+		}
+		catch(HDRProcessorException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
 		Log.d(TAG, "HDR time: " + (System.currentTimeMillis() - time_s));
 		
 		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
@@ -7295,7 +7448,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( test_dro ) {
 			inputs.add(dro_bitmap_in);
 			time_s = System.currentTimeMillis();
-			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true);
+			try {
+				mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+			}
+			catch(HDRProcessorException e) {
+				e.printStackTrace();
+				throw new RuntimeException();
+			}
 			Log.d(TAG, "DRO time: " + (System.currentTimeMillis() - time_s));
 
 			file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/dro" + output_name);
@@ -8132,6 +8291,51 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		int [] exp_offsets_x = {2, 0, -2};
 		int [] exp_offsets_y = {-4, 0, 2};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR37".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR37() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR37");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR37/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR37/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR37/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR37_output.jpg", false);
+
+		int [] exp_offsets_x = {0, 0, 3};
+		int [] exp_offsets_y = {2, 0, -19};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR38".
+	 *  Tests with Filmic tonemapping.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR38() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR38");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR38/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR38/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR38/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR38_output.jpg", false, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_FILMIC);
+
+		int [] exp_offsets_x = {-1, 0, 0};
+		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 

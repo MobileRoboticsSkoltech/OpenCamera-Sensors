@@ -22,6 +22,7 @@ public class LocationSupplier {
 	private final Context context;
 	private final LocationManager locationManager;
 	private MyLocationListener [] locationListeners;
+	volatile boolean test_force_no_location; // if true, always return null location; must be volatile for test project setting the state
 
 	LocationSupplier(Context context) {
 		this.context = context;
@@ -31,6 +32,8 @@ public class LocationSupplier {
 	public Location getLocation() {
 		// returns null if not available
 		if( locationListeners == null )
+			return null;
+		if( test_force_no_location )
 			return null;
 		// location listeners should be stored in order best to worst
 		for(MyLocationListener locationListener : locationListeners) {
@@ -44,7 +47,7 @@ public class LocationSupplier {
 	private static class MyLocationListener implements LocationListener {
 		private Location location;
 		volatile boolean test_has_received_location; // must be volatile for test project reading the state
-		
+
 		Location getLocation() {
 			return location;
 		}
@@ -198,6 +201,10 @@ public class LocationSupplier {
 				return true;
 		}
 		return false;
+	}
+
+	public void setForceNoLocation(boolean test_force_no_location) {
+		this.test_force_no_location = test_force_no_location;
 	}
 
 	public boolean hasLocationListeners() {

@@ -328,7 +328,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 				alertDialog.setTitle(R.string.app_name);
 				alertDialog.setMessage(R.string.intro_text);
-				alertDialog.setPositiveButton(R.string.intro_ok, null);
+				alertDialog.setPositiveButton(android.R.string.ok, null);
+				alertDialog.setNegativeButton(R.string.preference_online_help, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "online help");
+						launchOnlineHelp();
+					}
+				});
 				alertDialog.show();
 			}
 
@@ -466,7 +474,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	/** Determine whether we support Camera2 API.
 	 */
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initCamera2Support() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initCamera2Support");
@@ -511,7 +518,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 	}
 	
-    @TargetApi(Build.VERSION_CODES.M)
 	@Override
 	protected void onDestroy() {
 		if( MyDebug.LOG ) {
@@ -557,6 +563,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putBoolean(PreferenceKeys.getFirstTimePreferenceKey(), true);
 		editor.apply();
+	}
+
+	void launchOnlineHelp() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "launchOnlineHelp");
+		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://opencamera.sourceforge.net/"));
+		startActivity(browserIntent);
 	}
 
 	// for audio "noise" trigger option
@@ -673,8 +686,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
-	public boolean onKeyDown(int keyCode, KeyEvent event) { 
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onKeyDown: " + keyCode);
 		boolean handled = mainUI.onKeyDown(keyCode, event);
@@ -795,6 +807,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         freeAudioListener(false);
         freeSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
+		applicationInterface.getGyroSensor().stopRecording();
 		releaseSound();
 		applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
 		preview.onPause();
@@ -930,7 +943,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void clickedExposure(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposure");
@@ -958,6 +970,33 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		seekBar.setProgress(new_value);
 	}
     
+    private static double exponentialScaling(double frac, double min, double max) {
+		/* We use S(frac) = A * e^(s * frac)
+		 * We want S(0) = min, S(1) = max
+		 * So A = min
+		 * and Ae^s = max
+		 * => s = ln(max/min)
+		 */
+		double s = Math.log(max / min);
+		return min * Math.exp(s * frac);
+	}
+
+    private static double exponentialScalingInverse(double value, double min, double max) {
+		double s = Math.log(max / min);
+		return Math.log(value / min) / s;
+	}
+
+	public void setProgressSeekbarExponential(SeekBar seekBar, double min_value, double max_value, double value) {
+		seekBar.setMax(manual_n);
+		double frac = exponentialScalingInverse(value, min_value, max_value);
+		int new_value = (int)(frac*manual_n + 0.5); // add 0.5 for rounding
+		if( new_value < 0 )
+			new_value = 0;
+		else if( new_value > manual_n )
+			new_value = manual_n;
+		seekBar.setProgress(new_value);
+	}
+
     public void clickedExposureLock(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedExposureLock");
@@ -1017,6 +1056,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putBoolean("supports_raw", this.preview.supportsRaw());
 		bundle.putBoolean("supports_hdr", this.supportsHDR());
 		bundle.putBoolean("supports_expo_bracketing", this.supportsExpoBracketing());
+		bundle.putInt("max_expo_bracketing_n_images", this.maxExpoBracketingNImages());
+		bundle.putBoolean("supports_exposure_compensation", this.preview.supportsExposures());
+		bundle.putBoolean("supports_iso_range", this.preview.supportsISORange());
+		bundle.putBoolean("supports_exposure_time", this.preview.supportsExposureTime());
+		bundle.putBoolean("supports_white_balance_temperature", this.preview.supportsWhiteBalanceTemperature());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
 		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
 
@@ -1114,7 +1158,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	updateForSettings(null);
     }
 
-    public void updateForSettings(String toast_message) {
+	/** Must be called when an settings (as stored in SharedPreferences) are made, so we can update the
+	 *  camera, and make any other necessary changes.
+	 */
+	public void updateForSettings(String toast_message) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings()");
 			if( toast_message != null ) {
@@ -1272,7 +1319,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
 	void setImmersiveMode(boolean on) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setImmersiveMode: " + on);
@@ -1913,12 +1959,45 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		applicationInterface.trashLastImage();
     }
 
+    private final boolean test_panorama = false;
+
+	/** User has pressed the take picture button, or done an equivalent action to request this (e.g.,
+	 *  volume buttons, audio trigger).
+	 */
     public void takePicture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
-		closePopup();
-    	this.preview.takePicturePressed();
+
+		if( test_panorama ) {
+			if (applicationInterface.getGyroSensor().isRecording()) {
+				if (MyDebug.LOG)
+					Log.d(TAG, "panorama complete");
+				applicationInterface.stopPanorama();
+				return;
+			} else {
+				if (MyDebug.LOG)
+					Log.d(TAG, "start panorama");
+				applicationInterface.startPanorama();
+			}
+		}
+
+		this.takePicturePressed();
     }
+
+    void takePicturePressed() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takePicturePressed");
+
+		closePopup();
+
+		if( applicationInterface.getGyroSensor().isRecording() ) {
+			if (MyDebug.LOG)
+				Log.d(TAG, "set next panorama point");
+			applicationInterface.setNextPanoramaPoint();
+		}
+
+    	this.preview.takePicturePressed();
+	}
     
     /** Lock the screen - this is Open Camera's own lock to guard against accidental presses,
      *  not the standard Android lock.
@@ -2145,7 +2224,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					Log.d(TAG, "set up iso");
 				SeekBar iso_seek_bar = ((SeekBar)findViewById(R.id.iso_seekbar));
 			    iso_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-				setProgressSeekbarScaled(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
+				setProgressSeekbarExponential(iso_seek_bar, preview.getMinimumISO(), preview.getMaximumISO(), preview.getCameraController().getISO());
 				iso_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -2154,12 +2233,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						double frac = progress/(double)manual_n;
 						if( MyDebug.LOG )
 							Log.d(TAG, "exposure_time frac: " + frac);
-						double scaling = MainActivity.seekbarScaling(frac);
+						/*double scaling = MainActivity.seekbarScaling(frac);
 						if( MyDebug.LOG )
 							Log.d(TAG, "exposure_time scaling: " + scaling);
 						int min_iso = preview.getMinimumISO();
 						int max_iso = preview.getMaximumISO();
-						int iso = min_iso + (int)(scaling * (max_iso - min_iso));
+						int iso = min_iso + (int)(scaling * (max_iso - min_iso));*/
+						int min_iso = preview.getMinimumISO();
+						int max_iso = preview.getMaximumISO();
+						int iso = (int)exponentialScaling(frac, min_iso, max_iso);
 						preview.setISO(iso);
 					}
 
@@ -2176,7 +2258,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						Log.d(TAG, "set up exposure time");
 					SeekBar exposure_time_seek_bar = ((SeekBar)findViewById(R.id.exposure_time_seekbar));
 					exposure_time_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-					setProgressSeekbarScaled(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
+					setProgressSeekbarExponential(exposure_time_seek_bar, preview.getMinimumExposureTime(), preview.getMaximumExposureTime(), preview.getCameraController().getExposureTime());
 					exposure_time_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 						@Override
 						public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -2189,12 +2271,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 							//double exposure_time_r = min_exposure_time_r + (frac * (max_exposure_time_r - min_exposure_time_r));
 							//long exposure_time = (long)(1.0 / exposure_time_r);
 							// we use the formula: [100^(percent/100) - 1]/99.0 rather than a simple linear scaling
-							double scaling = MainActivity.seekbarScaling(frac);
+							/*double scaling = MainActivity.seekbarScaling(frac);
 							if( MyDebug.LOG )
 								Log.d(TAG, "exposure_time scaling: " + scaling);
 							long min_exposure_time = preview.getMinimumExposureTime();
 							long max_exposure_time = preview.getMaximumExposureTime();
-							long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));
+							long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));*/
+							long min_exposure_time = preview.getMinimumExposureTime();
+							long max_exposure_time = preview.getMaximumExposureTime();
+							long exposure_time = (long)exponentialScaling(frac, min_exposure_time, max_exposure_time);
 							preview.setExposureTime(exposure_time);
 						}
 
@@ -2314,24 +2399,23 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	public boolean supportsDRO() {
 		// require at least Android 5, for the Renderscript support in HDRProcessor
-		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP )
-			return true;
-		return false;
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP );
 	}
 
     public boolean supportsHDR() {
     	// we also require the device have sufficient memory to do the processing, simplest to use the same test as we do for auto-stabilise...
-		if( this.supportsAutoStabilise() && preview.supportsExpoBracketing() )
-			return true;
-		return false;
+		// also require at least Android 5, for the Renderscript support in HDRProcessor
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && this.supportsAutoStabilise() && preview.supportsExpoBracketing() );
     }
     
     public boolean supportsExpoBracketing() {
-		if( preview.supportsExpoBracketing() )
-			return true;
-		return false;
+		return preview.supportsExpoBracketing();
     }
     
+    private int maxExpoBracketingNImages() {
+		return preview.maxExpoBracketingNImages();
+    }
+
     public boolean supportsForceVideo4K() {
     	return this.supports_force_video_4k;
     }
@@ -2808,7 +2892,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 	
 	@SuppressWarnings("deprecation")
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initSound() {
 		if( sound_pool == null ) {
     		if( MyDebug.LOG )

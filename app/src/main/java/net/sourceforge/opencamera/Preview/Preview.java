@@ -189,6 +189,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int max_exposure;
 	private float exposure_step;
 	private boolean supports_expo_bracketing;
+	private int max_expo_bracketing_n_images;
 	private boolean supports_raw;
 	private float view_angle_x;
 	private float view_angle_y;
@@ -278,7 +279,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "is_test: " + is_test);
 		}
 
-		this.using_android_l = applicationInterface.useCamera2();
+		this.using_android_l = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && applicationInterface.useCamera2();
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "using_android_l?: " + using_android_l);
 		}
@@ -1089,6 +1090,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		max_exposure = 0;
 		exposure_step = 0.0f;
 		supports_expo_bracketing = false;
+		max_expo_bracketing_n_images = 0;
 		supports_raw = false;
 		view_angle_x = 55.0f; // set a sensible default
 		view_angle_y = 43.0f; // set a sensible default
@@ -1473,6 +1475,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.max_exposure = camera_features.max_exposure;
 			this.exposure_step = camera_features.exposure_step;
 			this.supports_expo_bracketing = camera_features.supports_expo_bracketing;
+			this.max_expo_bracketing_n_images = camera_features.max_expo_bracketing_n_images;
 			this.supports_raw = camera_features.supports_raw;
 			this.view_angle_x = camera_features.view_angle_x;
 			this.view_angle_y = camera_features.view_angle_y;
@@ -1987,7 +1990,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		this.video_quality_handler.sortVideoSizes();
 	}
 
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void initialiseVideoQuality() {
 		int cameraId = camera_controller.getCameraId();
 		List<Integer> profiles = new ArrayList<>();
@@ -4109,7 +4111,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	/** Pauses the video recording - or unpauses if already paused.
 	 *  This does nothing if isVideoRecording() returns false, or not on Android 7 or higher.
 	 */
-	@TargetApi(Build.VERSION_CODES.N)
 	public void pauseVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "pauseVideo");
@@ -5132,21 +5133,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }*/
 
     public boolean supportsExpoBracketing() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "supportsExpoBracketing");
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "supportsExpoBracketing");*/
     	return this.supports_expo_bracketing;
     }
     
+    public int maxExpoBracketingNImages() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "maxExpoBracketingNImages");
+    	return this.max_expo_bracketing_n_images;
+    }
+
     public boolean supportsRaw() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsRaw");
     	return this.supports_raw;
     }
 
+	/** Returns the horizontal angle of view in degrees (when unzoomed).
+	 */
 	public float getViewAngleX() {
 		return this.view_angle_x;
 	}
 
+	/** Returns the vertical angle of view in degrees (when unzoomed).
+	 */
 	public float getViewAngleY() {
 		return this.view_angle_y;
 	}

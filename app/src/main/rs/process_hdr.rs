@@ -16,10 +16,17 @@ float parameter_A2 = 1.0f;
 float parameter_B2 = 0.0f;
 
 const float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
+
+const int tonemap_algorithm_clamp_c = 0;
+const int tonemap_algorithm_reinhard_c = 1;
+const int tonemap_algorithm_filmic_c = 2;
+
+int tonemap_algorithm = tonemap_algorithm_reinhard_c;
+
+// for Reinhard:
 float tonemap_scale = 1.0f;
 
-/*
-// functions for Filmic Uncharted 2:
+// for Filmic Uncharted 2:
 const float W = 11.2f;
 
 static float Uncharted2Tonemap(float x) {
@@ -30,7 +37,7 @@ static float Uncharted2Tonemap(float x) {
 	const float E = 0.02f;
 	const float F = 0.30f;
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
-}*/
+}
 
 uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	// If this algorithm is changed, also update the Java version in HDRProcessor.calculateHDR()
@@ -115,6 +122,14 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 			weight = 1.0f - weight;
 			if( avg <= 127.5f ) {
 				rgb = (float3){ (float)pixels[2].r, (float)pixels[2].g, (float)pixels[2].b };
+    			/* In some cases it can be that even on the neighbour image, the brightness is too
+    			   dark/bright - but it should still be a better choice than the base image.
+    			   If we change this (including say for handling more than 3 images), need to be
+    			   careful of unpredictable effects. In particular, image a pixel that is brightness
+    			   255 on the base image. As the brightness on the neighbour image increases, we
+    			   should expect that the resultant image also increases (or at least, doesn't
+    			   decrease). See testHDR36 for such an example.
+    			   */
 				/*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 				diff = fabs( avg - 127.5f );
 				if( diff > safe_range_c ) {
@@ -126,6 +141,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 			}
 			else {
 				rgb = (float3){ (float)pixels[0].r, (float)pixels[0].g, (float)pixels[0].b };
+				// see note above for why this is commented out
 				/*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 				diff = fabs( avg - 127.5f );
 				if( diff > safe_range_c ) {
@@ -151,38 +167,42 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	// tonemap
 	uchar4 out;
 	{
-		/*
-		// Simple clamp
-		int r = (int)hdr.r;
-		int g = (int)hdr.g;
-		int b = (int)hdr.b;
-		r = min(r, 255);
-		g = min(g, 255);
-		b = min(b, 255);
-		out.r = r;
-		out.g = g;
-		out.b = b;
-		out.a = 255;
-		*/
-		// Reinhard
-		float max_hdr = fmax(hdr.r, hdr.g);
-		max_hdr = fmax(max_hdr, hdr.b);
-		float scale = 255.0f / ( tonemap_scale + max_hdr );
-		out.r = (uchar)(scale * hdr.r);
-		out.g = (uchar)(scale * hdr.g);
-		out.b = (uchar)(scale * hdr.b);
-		out.a = 255;
-		/*
-		// Filmic Uncharted 2
-		const float exposure_bias = 8.0f / 255.0f;
-		float white_scale = 255.0f / Uncharted2Tonemap(W);
-		float curr_r = Uncharted2Tonemap(exposure_bias * hdr.r);
-		float curr_g = Uncharted2Tonemap(exposure_bias * hdr.g);
-		float curr_b = Uncharted2Tonemap(exposure_bias * hdr.b);
-		out.r = (uchar)(curr_r * white_scale);
-		out.g = (uchar)(curr_g * white_scale);
-		out.b = (uchar)(curr_b * white_scale);
-		*/
+	    if( tonemap_algorithm == tonemap_algorithm_clamp_c ) {
+            // Simple clamp
+            int r = (int)hdr.r;
+            int g = (int)hdr.g;
+            int b = (int)hdr.b;
+            r = min(r, 255);
+            g = min(g, 255);
+            b = min(b, 255);
+            out.r = r;
+            out.g = g;
+            out.b = b;
+            out.a = 255;
+        }
+	    else if( tonemap_algorithm == tonemap_algorithm_reinhard_c ) {
+            float max_hdr = fmax(hdr.r, hdr.g);
+            max_hdr = fmax(max_hdr, hdr.b);
+            float scale = 255.0f / ( tonemap_scale + max_hdr );
+            out.r = (uchar)(scale * hdr.r);
+            out.g = (uchar)(scale * hdr.g);
+            out.b = (uchar)(scale * hdr.b);
+            out.a = 255;
+        }
+	    else if( tonemap_algorithm == tonemap_algorithm_filmic_c ) {
+            // Filmic Uncharted 2
+            const float exposure_bias = 2.0f / 255.0f;
+            float white_scale = 255.0f / Uncharted2Tonemap(W);
+            float curr_r = Uncharted2Tonemap(exposure_bias * hdr.r);
+            float curr_g = Uncharted2Tonemap(exposure_bias * hdr.g);
+            float curr_b = Uncharted2Tonemap(exposure_bias * hdr.b);
+            curr_r *= white_scale;
+            curr_g *= white_scale;
+            curr_b *= white_scale;
+            out.r = (uchar)clamp(curr_r, 0.0f, 255.0f);
+            out.g = (uchar)clamp(curr_g, 0.0f, 255.0f);
+            out.b = (uchar)clamp(curr_b, 0.0f, 255.0f);
+        }
 	}
 
     /*

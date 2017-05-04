@@ -166,7 +166,7 @@
         <item>None</item>
         <item>Single touch</item>
         <item>Double tap</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_touch_capture_values">
         <item>none</item>
         <item>single</item>
@@ -177,7 +177,7 @@
         <item>Focus</item>
         <item>Zoom in/out</item>
         <item>Change exposure level</item>
-        <item>Switch auto-stabilise on/off</item>
+        <item>Switch auto-level on/off</item>
         <item>Change device volume</item>
         <item>Do nothing</item>
     </string-array>
@@ -193,7 +193,7 @@
     <string-array name="preference_rotate_preview_entries">
         <item>Don\'t rotate</item>
         <item>Rotate 180 degrees</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_rotate_preview_values">
         <item>0</item>
         <item>180</item>
@@ -217,7 +217,7 @@
         <item>immersive_mode_low_profile</item>
         <item>immersive_mode_gui</item>
         <item>immersive_mode_everything</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_angle_highlight_color_entries">
         <item>Red</item>
         <item>Green</item>

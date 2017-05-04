@@ -8,7 +8,7 @@ android {
     defaultConfig {
         applicationId "net.sourceforge.opencamera"
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 24 // can't target 25 or later due to https://issuetracker.google.com/issues/37140083 , waiting for Android Studio 2.4 for this to be fully fixed
 
 		renderscriptTargetApi 20
 		//renderscriptSupportModeEnabled true // don't use support library as it bloats the APK, and we don't need pre-4.4 support

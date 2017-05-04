@@ -10,6 +10,9 @@ public class MainTests {
         .includeAllPackagesUnderHere()
         .build();*/
 		TestSuite suite = new TestSuite(MainTests.class.getName());
+		// put these tests first as they require various permissions be allowed, that can only be set by user action
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchVideo"));
+		// other tests:
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPause"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testStartCameraPreviewCount"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveVideoMode"));
@@ -26,7 +29,6 @@ public class MainTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchResolution"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFaceDetection"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFocusFlashAvailability"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchVideo"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFocusSwitchVideoSwitchCameras"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFocusRemainMacroSwitchCamera"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFocusRemainMacroSwitchPhoto"));

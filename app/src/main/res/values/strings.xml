@@ -10,8 +10,8 @@
     <string name="answer_yes">Yes</string>
     <string name="answer_no">No</string>
 
-    <string name="on">On</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
-    <string name="off">Off</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->
+    <string name="on">On</string> <!-- whether a setting is turned on, e.g., "Auto-level: On" -->
+    <string name="off">Off</string> <!-- whether a setting is turned off, e.g., "Auto-level: Off" -->
     
     <string name="choose_save_location">Choose save location:</string>
     <string name="clear_folder_history">Clear folder history</string>
@@ -46,7 +46,7 @@
     <string name="sorry">Sorry</string>
     <string name="failed_to_save_photo">Failed to save photo</string>
     <string name="failed_to_save_photo_raw">Failed to save RAW photo</string>
-    <string name="failed_to_auto_stabilise">Failed to auto-stabilise</string>
+    <string name="failed_to_auto_stabilise">Failed to auto-level</string>
     <string name="failed_to_start_camera_preview">Failed to start camera preview</string>
     <string name="taking_photo">Taking photo</string>
     <string name="failed_to_take_picture">Failed to take picture</string>
@@ -55,7 +55,7 @@
     <string name="no_gallery_app">No gallery app available</string>
     <string name="screen_is_locked">Screen is locked\nswipe the screen to unlock</string>
     <string name="unlocked">Unlocked</string>
-    <string name="auto_stabilise_not_supported">Sorry, auto-stabilise not supported\non this device</string>
+    <string name="auto_stabilise_not_supported">Sorry, auto-level not supported\non this device</string>
     <string name="audio_disabled">Audio disabled</string>
     <string name="max_duration">Max duration</string>
     <string name="color_effect">Color effect</string>
@@ -77,7 +77,7 @@
     <string name="metres_abbreviation">m</string> <!-- symbol short for metres -->
     
     <string name="preference_category_camera_effects">Camera Effects</string>
-    <string name="preference_auto_stabilise">Auto-stabilise</string>
+    <string name="preference_auto_stabilise">Auto-level</string>
     <string name="preference_auto_stabilise_summary">Images will be rotated so they are automatically level (photos only) (slower to take photos, and may fail on devices with too low memory)</string>
     <string name="preference_color_effect">Apply a color effect</string>
     <string name="preference_color_effect_summary">Applies the selected color effect to the photo</string>
@@ -299,8 +299,8 @@
     <string name="speech_recognizer_started">Say \"cheese\"</string>
     <string name="audio_listener_started">Make a loud noise</string>
 
-    <string name="auto_stabilise_info">Auto-stabilise will automatically rotate photos so that they appear level.\n\nNote that this means images will come out a slightly lower resolution (due to the rotation and cropping that\'s required).</string>
-    <string name="raw_info">DNG files contain the full uncompressed and unprocessed information from your camera.\n\nMost gallery apps won\'t recognise DNG, instead they should be used with specialised apps like Snapseed or Lightroom.\n\nNote that various processing options such as "Stamp photos" and "Auto-stabilise" will only apply to the JPEG images, and not the DNG images.\n\nDNG files take up a lot of space; a file explorer app may be useful for transferring or deleting them.\n\nDNG files are only saved in Standard or DRO photo modes.</string>
+    <string name="auto_stabilise_info">Auto-level will automatically rotate photos so that they appear level.\n\nNote that this means images will come out a slightly lower resolution (due to the rotation and cropping that\'s required).</string>
+    <string name="raw_info">DNG files contain the full uncompressed and unprocessed information from your camera.\n\nMost gallery apps won\'t recognise DNG, instead they should be used with specialised apps like Snapseed or Lightroom.\n\nNote that various processing options such as "Stamp photos" and "Auto-level" will only apply to the JPEG images, and not the DNG images.\n\nDNG files take up a lot of space; a file explorer app may be useful for transferring or deleting them.\n\nDNG files are only saved in Standard or DRO photo modes.</string>
     <string name="hdr_info">HDR mode is useful for shots with a large variation in brightness. It works by taking multiple shots at different exposures, and combining them to create the final image.\n\nNote that HDR is not suitable for scenes with fast movement, and may result in less accurate colour reproduction.\n\nTaking photos in HDR mode will be slower.</string>
 
     <string name="dont_show_again">Don\'t show again</string>
@@ -312,7 +312,7 @@
     <string name="photo_mode_expo_bracketing_full">Exposure Bracketing</string>
     <string name="preference_category_stamp">Photo Stamp</string>
     <string name="preference_hdr_save_expo">Save all images for HDR mode</string>
-    <string name="preference_hdr_save_expo_summary">If enabled, when using HDR photo mode, the three base exposure images will be saved as well as the final HDR photo. Note this will make saving slower, especially if options like \"Stamp photos\" or Auto-stabilise are also used.</string>
+    <string name="preference_hdr_save_expo_summary">If enabled, when using HDR photo mode, the three base exposure images will be saved as well as the final HDR photo. Note this will make saving slower, especially if options like \"Stamp photos\" or Auto-level are also used.</string>
 
     <string name="no_permission">PERMISSIONS NOT AVAILABLE</string>
     <string name="permission_rationale_title">Permission required</string>
@@ -329,7 +329,7 @@
     <string name="preference_expo_bracketing_n_images">Exposure Bracketing</string>
     <string name="preference_expo_bracketing_n_images_summary">Number of images for exposure bracketing mode</string>
     <string name="preference_expo_bracketing_stops">Exposure Bracketing Stops</string>
-    <string name="preference_expo_bracketing_stops_summary">Number of stops for each image</string>
+    <string name="preference_expo_bracketing_stops_summary">How many stops to subtract/add for the darkest/brightest image</string>
 
     <string name="seconds_abbreviation">s</string> <!-- short for seconds -->
 
@@ -355,7 +355,7 @@
     <string name="preference_front_camera_mirror_summary">Whether to mirror images when using the front camera.</string>
 
     <string name="preference_calibrate_level">Calibrate level angle</string>
-    <string name="preference_calibrate_level_summary">This option calibrates your device\'s accelerometer, so the auto-stabilise and on-screen level/angle options work correctly.</string>
+    <string name="preference_calibrate_level_summary">This option calibrates your device\'s accelerometer, so the auto-level and on-screen level/angle options work correctly.</string>
     <string name="preference_calibrate_level_dialog">Please place your device on a flat horizontal surface so that it is level (either in portrait or landscape orientation), and then select Calibrate.\n\nPress Reset to remove the calibration from your device.\n\nPress back button to cancel.</string>
     <string name="preference_calibrate_level_calibrate">Calibrate</string>
     <string name="preference_calibrate_level_reset">Reset</string>
@@ -407,4 +407,5 @@
     <string name="capturing">Capturing…</string>
 
     <string name="audio_listener_failed">Failed to initalise audio listening</string>
+    <string name="failed_to_process_hdr">Failed to create HDR image</string>
 </resources>

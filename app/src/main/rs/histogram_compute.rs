@@ -17,3 +17,12 @@ void __attribute__((kernel)) histogram_compute(uchar4 in, uint32_t x, uint32_t y
 
 	rsAtomicInc(&histogram[value]);
 }
+
+void __attribute__((kernel)) histogram_compute_avg(uchar4 in, uint32_t x, uint32_t y) {
+    float3 in_f = convert_float3(in.rgb);
+    float avg = (in_f.r + in_f.g + in_f.b)/3.0;
+    uchar value = (int)(avg+0.5); // round to nearest
+	value = min(value, (uchar)255); // just in case
+
+	rsAtomicInc(&histogram[value]);
+}

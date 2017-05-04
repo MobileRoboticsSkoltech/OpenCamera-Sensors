@@ -73,6 +73,7 @@ public class CameraController2 extends CameraController {
 	private final Object create_capture_session_lock = new Object(); // lock to wait for capture session to be created from CameraCaptureSession.StateCallback
 	private ImageReader imageReader;
 	private boolean want_expo_bracketing;
+	private final static int max_expo_bracketing_n_images = 5; // could be more, but limit to 5 for now
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
 	private boolean use_expo_fast_burst = true;
@@ -84,6 +85,7 @@ public class CameraController2 extends CameraController {
 	private OnRawImageAvailableListener onRawImageAvailableListener;
 	private PictureCallback jpeg_cb;
 	private PictureCallback raw_cb;
+	//private CaptureRequest pending_request_when_ready;
 	private int n_burst; // number of expected burst images in this capture
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
 	private List<CaptureRequest> burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
@@ -975,6 +977,7 @@ public class CameraController2 extends CameraController {
 		if( captureSession != null ) {
 			captureSession.close();
 			captureSession = null;
+			//pending_request_when_ready = null;
 		}
 		previewBuilder = null;
 		if( camera != null ) {
@@ -1140,7 +1143,7 @@ public class CameraController2 extends CameraController {
 		}
 
 		if( MyDebug.LOG ) {
-			int[] ois_modes = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
+			int[] ois_modes = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION); // may be null on some devices
 			if (ois_modes != null) {
 				for (int ois_mode : ois_modes) {
 					if (MyDebug.LOG)
@@ -1271,9 +1274,16 @@ public class CameraController2 extends CameraController {
 			camera_features.supported_flash_values.add("flash_frontscreen_on");
 		}
 
-		camera_features.minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);
-		if( MyDebug.LOG )
-			Log.d(TAG, "minimum_focus_distance: " + camera_features.minimum_focus_distance);
+		Float minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE); // may be null on some devices
+		if( minimum_focus_distance != null ) {
+			camera_features.minimum_focus_distance = minimum_focus_distance;
+			if( MyDebug.LOG )
+				Log.d(TAG, "minimum_focus_distance: " + camera_features.minimum_focus_distance);
+		}
+		else {
+			camera_features.minimum_focus_distance = 0.0f;
+		}
+
 		int [] supported_focus_modes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES); // Android format
 		camera_features.supported_focus_values = convertFocusModesToValues(supported_focus_modes, camera_features.minimum_focus_distance); // convert to our format (also resorts)
 		camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
@@ -1285,7 +1295,7 @@ public class CameraController2 extends CameraController {
 		int [] white_balance_modes = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
 		if( white_balance_modes != null ) {
 			for(int value : white_balance_modes) {
-				if( value == CameraMetadata.CONTROL_AWB_MODE_OFF ) {
+				if( value == CameraMetadata.CONTROL_AWB_MODE_OFF && allowManualWB() ) {
 					camera_features.supports_white_balance_temperature = true;
 					camera_features.min_temperature = min_white_balance_temperature_c;
 					camera_features.max_temperature = max_white_balance_temperature_c;
@@ -1293,16 +1303,17 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
-		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
+		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
 		if( iso_range != null ) {
 			camera_features.supports_iso_range = true;
 			camera_features.min_iso = iso_range.getLower();
 			camera_features.max_iso = iso_range.getUpper();
 			// we only expose exposure_time if iso_range is supported
-			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
 			if( exposure_time_range != null ) {
 				camera_features.supports_exposure_time = true;
 				camera_features.supports_expo_bracketing = true;
+				camera_features.max_expo_bracketing_n_images = max_expo_bracketing_n_images;
 				camera_features.min_exposure_time = exposure_time_range.getLower();
 				camera_features.max_exposure_time = exposure_time_range.getUpper();
 			}
@@ -1661,6 +1672,14 @@ public class CameraController2 extends CameraController {
 		return value;
 	}
 
+	/** Whether we should allow manual white balance, even if the device supports CONTROL_AWB_MODE_OFF.
+	 */
+	private boolean allowManualWB() {
+		boolean is_nexus6 = Build.MODEL.toLowerCase(Locale.US).contains("nexus 6");
+		// manual white balance doesn't seem to work on Nexus 6!
+		return !is_nexus6;
+	}
+
 	@Override
 	public SupportedValues setWhiteBalance(String value) {
 		if( MyDebug.LOG )
@@ -1672,7 +1691,12 @@ public class CameraController2 extends CameraController {
 		for(int value2 : values2) {
 			String this_value = convertWhiteBalance(value2);
 			if( this_value != null ) {
-				values.add(this_value);
+				if( value2 == CameraMetadata.CONTROL_AWB_MODE_OFF && !allowManualWB() ) {
+					// filter
+				}
+				else {
+					values.add(this_value);
+				}
 			}
 		}
 		{
@@ -1783,9 +1807,10 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public SupportedValues setISO(String value) {
-		// not supported for CameraController2
-		Log.e(TAG, "setISO(String value) not supported for CameraController2");
-		throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		// not supported for CameraController2 - but Camera2 devices that don't support manual ISO can call this,
+		// so assume this is for auto ISO
+		this.setManualISO(false, 0);
+		return null;
 	}
 
 	@Override
@@ -1801,7 +1826,7 @@ public class CameraController2 extends CameraController {
 			if( manual_iso ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "switch to iso: " + iso);
-				Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE);
+				Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
 				if( iso_range == null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "iso not supported");
@@ -1988,6 +2013,11 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.e(TAG, "n_images should be an odd number greater than 1");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		if( n_images > max_expo_bracketing_n_images ) {
+			n_images = max_expo_bracketing_n_images;
+			if( MyDebug.LOG )
+				Log.e(TAG, "limiting n_images to max of " + n_images);
 		}
 		this.expo_bracketing_n_images = n_images;
 	}
@@ -2955,11 +2985,10 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "close old capture session");
 			captureSession.close();
 			captureSession = null;
+			//pending_request_when_ready = null;
 		}
 
 		try {
-			captureSession = null;
-
 			if( video_recorder != null ) {
 				closePictureImageReader();
 			}
@@ -3055,6 +3084,34 @@ public class CameraController2 extends CameraController {
 				    }
 					// don't throw CameraControllerException here, as won't be caught - instead we throw CameraControllerException below
 				}
+
+				/*@Override
+				public void onReady(CameraCaptureSession session) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "onReady: " + session);
+					if( pending_request_when_ready != null ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "have pending_request_when_ready: " + pending_request_when_ready);
+						CaptureRequest request = pending_request_when_ready;
+						pending_request_when_ready = null;
+						try {
+							captureSession.capture(request, previewCaptureCallback, handler);
+						}
+						catch(CameraAccessException e) {
+							if( MyDebug.LOG ) {
+								Log.e(TAG, "failed to take picture");
+								Log.e(TAG, "reason: " + e.getReason());
+								Log.e(TAG, "message: " + e.getMessage());
+							}
+							e.printStackTrace();
+							jpeg_cb = null;
+							if( take_picture_error_cb != null ) {
+								take_picture_error_cb.onError();
+								take_picture_error_cb = null;
+							}
+						}
+					}
+				}*/
 			}
 			final MyStateCallback myStateCallback = new MyStateCallback();
 
@@ -3156,6 +3213,8 @@ public class CameraController2 extends CameraController {
 			return;
 		}
 		try {
+			//pending_request_when_ready = null;
+
 			captureSession.stopRepeating();
 			// although stopRepeating() alone will pause the preview, seems better to close captureSession altogether - this allows the app to make changes such as changing the picture size
 			if( MyDebug.LOG )
@@ -3479,7 +3538,7 @@ public class CameraController2 extends CameraController {
 				final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
 				long exposure_time = capture_result_exposure_time;
 				if( exposure_time <= fixed_exposure_time ) {
-					Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+					Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
 					if( exposure_time_range != null ) {
 						double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
 						if (MyDebug.LOG) {
@@ -3526,6 +3585,7 @@ public class CameraController2 extends CameraController {
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "capture with stillBuilder");
+			//pending_request_when_ready = stillBuilder.build();
 			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
 			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
 				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
@@ -3570,6 +3630,7 @@ public class CameraController2 extends CameraController {
         	Surface surface = getPreviewSurface();
         	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
 			stillBuilder.addTarget(imageReader.getSurface());
+			// don't add target imageReaderRaw, as Raw not supported for burst
 
 			List<CaptureRequest> requests = new ArrayList<>();
 
@@ -3613,8 +3674,8 @@ public class CameraController2 extends CameraController {
 			int n_half_images = expo_bracketing_n_images/2;
 			long min_exposure_time = base_exposure_time;
 			long max_exposure_time = base_exposure_time;
-			final double scale = Math.pow(2.0, expo_bracketing_stops);
-			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE);
+			final double scale = Math.pow(2.0, expo_bracketing_stops/(double)n_half_images);
+			Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
 			if( exposure_time_range != null ) {
 				min_exposure_time = exposure_time_range.getLower();
 				max_exposure_time = exposure_time_range.getUpper();
@@ -4153,18 +4214,21 @@ public class CameraController2 extends CameraController {
 		private long last_process_frame_number = 0;
 		private int last_af_state = -1;
 
+		@Override
 		public void onCaptureBufferLost(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull Surface target, long frameNumber) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureBufferLost: " + frameNumber);
 			super.onCaptureBufferLost(session, request, target, frameNumber);
 		}
 
+		@Override
 		public void onCaptureFailed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureFailed: " + failure);
 			super.onCaptureFailed(session, request, failure); // API docs say this does nothing, but call it just to be safe
 		}
 
+		@Override
 		public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session, int sequenceId) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "onCaptureSequenceAborted");
@@ -4173,6 +4237,7 @@ public class CameraController2 extends CameraController {
 			super.onCaptureSequenceAborted(session, sequenceId); // API docs say this does nothing, but call it just to be safe
 		}
 
+		@Override
 		public void onCaptureSequenceCompleted(@NonNull CameraCaptureSession session, int sequenceId, long frameNumber) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "onCaptureSequenceCompleted");
@@ -4182,16 +4247,21 @@ public class CameraController2 extends CameraController {
 			super.onCaptureSequenceCompleted(session, sequenceId, frameNumber); // API docs say this does nothing, but call it just to be safe
 		}
 
+		@Override
 		public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
 			if( request.getTag() == RequestTag.CAPTURE ) {
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "onCaptureStarted: capture");
+					Log.d(TAG, "frameNumber: " + frameNumber);
+					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
+				}
 				// n.b., we don't play the shutter sound here, as it typically sounds "too late"
 				// (if ever we changed this, would also need to fix for burst, where we only set the RequestTag.CAPTURE for the last image)
 			}
 			super.onCaptureStarted(session, request, timestamp, frameNumber);
 		}
 
+		@Override
 		public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureProgressed");*/
@@ -4203,13 +4273,16 @@ public class CameraController2 extends CameraController {
 			super.onCaptureProgressed(session, request, partialResult); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
 		}
 
+		@Override
 		public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "onCaptureCompleted");*/
 			if( request.getTag() == RequestTag.CAPTURE ) {
-				if (MyDebug.LOG) {
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "onCaptureCompleted: capture");
 					Log.d(TAG, "sequenceId: " + result.getSequenceId());
+					Log.d(TAG, "frameNumber: " + result.getFrameNumber());
+					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
 				}
 			}
 			process(request, result);

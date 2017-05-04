@@ -8,6 +8,7 @@ import net.sourceforge.opencamera.LocationSupplier;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.Preview.VideoQualityHandler;
 import net.sourceforge.opencamera.TextFormatter;
+import net.sourceforge.opencamera.UI.DrawPreview;
 
 import org.junit.Test;
 
@@ -398,5 +399,19 @@ public class UnitTest {
 		assertEquals( 2.0/3.0, CameraController2.getScaleForExposureTime(1000000000L/90, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale), delta );
 		assertEquals( 0.5, CameraController2.getScaleForExposureTime(1000000000L/120, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale), delta );
 		assertEquals( 0.5, CameraController2.getScaleForExposureTime(1000000000L/240, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale), delta );
+	}
+
+	@Test
+	public void testFormatLevelAngle() {
+		Log.d(TAG, "testFormatLevelAngle");
+
+		assertEquals( "0.1", DrawPreview.formatLevelAngle(0.1));
+		assertEquals( "1.2", DrawPreview.formatLevelAngle(1.21));
+		assertEquals( "1.3", DrawPreview.formatLevelAngle(1.29));
+		assertEquals( "0.0", DrawPreview.formatLevelAngle(0.0));
+		assertEquals( "0.0", DrawPreview.formatLevelAngle(-0.0));
+		assertEquals( "0.0", DrawPreview.formatLevelAngle(-0.0001));
+		assertEquals( "-0.1", DrawPreview.formatLevelAngle(-0.1));
+		assertEquals( "-10.7", DrawPreview.formatLevelAngle(-10.6753));
 	}
 }
