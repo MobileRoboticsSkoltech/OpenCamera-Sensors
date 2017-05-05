@@ -8371,4 +8371,61 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		subTestHDR(inputs, "testHDRtemp_output.jpg", true);
 	}
+
+	/** Tests calling the DRO routine with 0.0 factor - and that the resultant image is identical.
+	 */
+	public void testDROZero() throws IOException, InterruptedException {
+		Log.d(TAG, "testDROZero");
+
+		setToDefault();
+
+		Bitmap bitmap = getBitmapFromFile(hdr_images_path + "testHDR3/input1.jpg");
+		Bitmap bitmap_saved = bitmap.copy(bitmap.getConfig(), false);
+
+		Thread.sleep(1000); // wait for camera to open
+
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add(bitmap);
+		try {
+			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.0f, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+		}
+		catch(HDRProcessorException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+
+		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/droZerotestHDR3_output.jpg");
+		OutputStream outputStream = new FileOutputStream(file);
+		inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+		outputStream.close();
+		mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+		checkHistogram(bitmap);
+
+		// check bitmaps are the same
+		Log.d(TAG, "compare bitmap " + bitmap);
+		Log.d(TAG, "with bitmap_saved " + bitmap_saved);
+		// sameAs doesn't seem to work
+		//assertTrue( bitmap.sameAs(bitmap_saved) );
+		assertTrue( bitmap.getWidth() == bitmap_saved.getWidth() );
+		assertTrue( bitmap.getHeight() == bitmap_saved.getHeight() );
+		int [] old_row = new int[bitmap.getWidth()];
+		int [] new_row = new int[bitmap.getWidth()];
+		for(int y=0;y<bitmap.getHeight();y++) {
+			//Log.d(TAG, "check row " + y + " / " + bitmap.getHeight());
+			bitmap_saved.getPixels(old_row, 0, bitmap.getWidth(), 0, y, bitmap.getWidth(), 1);
+			bitmap.getPixels(new_row, 0, bitmap.getWidth(), 0, y, bitmap.getWidth(), 1);
+			for(int x=0;x<bitmap.getWidth();x++) {
+				//int old_pixel = bitmap_saved.getPixel(x, y);
+				//int new_pixel = bitmap.getPixel(x, y);
+				int old_pixel = old_row[x];
+				int new_pixel = new_row[x];
+				assertTrue( old_pixel == new_pixel );
+			}
+		}
+
+		bitmap.recycle();
+		bitmap_saved.recycle();
+		Thread.sleep(500);
+
+	}
 }
