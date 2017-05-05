@@ -7404,6 +7404,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(74)), "74°");
 	}
 
+	/** Checks for the resultant histogram.
+	 * @param bitmap The bitmap to compute and check a histogram for.
+	 */
+	private void checkHistogram(Bitmap bitmap) {
+		int [] histogram = mActivity.getApplicationInterface().getHDRProcessor().computeHistogram(bitmap, true);
+		assertEquals(256, histogram.length);
+		for(int i=0;i<histogram.length;i++) {
+			assert( histogram[i] > 0 );
+		}
+	}
+
 	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro) throws IOException, InterruptedException {
 		subTestHDR(inputs, output_name, test_dro, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
 	}
@@ -7442,6 +7453,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
         outputStream.close();
         mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+		checkHistogram(inputs.get(0));
 		inputs.get(0).recycle();
 		inputs.clear();
 
@@ -7462,6 +7474,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
 			outputStream.close();
 			mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+			checkHistogram(inputs.get(0));
 			inputs.get(0).recycle();
 			inputs.clear();
 		}
