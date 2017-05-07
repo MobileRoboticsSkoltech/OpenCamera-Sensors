@@ -639,7 +639,13 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.d(TAG, "before HDR first bitmap: " + bitmaps.get(0) + " is mutable? " + bitmaps.get(0).isMutable());
 			try {
-				hdrProcessor.processHDR(bitmaps, true, null, true, null, 0.5f, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD); // this will recycle all the bitmaps except bitmaps.get(0), which will contain the hdr image
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+					hdrProcessor.processHDR(bitmaps, true, null, true, null, 0.5f, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD); // this will recycle all the bitmaps except bitmaps.get(0), which will contain the hdr image
+				}
+				else {
+					Log.e(TAG, "shouldn't have offered HDR as an option if not on Android 5");
+					throw new RuntimeException()
+				}
 			}
 			catch(HDRProcessorException e) {
 				Log.e(TAG, "HDRProcessorException from processHDR: " + e.getCode());
