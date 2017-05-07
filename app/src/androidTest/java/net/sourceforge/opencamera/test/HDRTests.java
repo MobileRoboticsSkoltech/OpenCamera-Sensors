@@ -12,6 +12,7 @@ public class HDRTests {
 	 */
 	public static Test suite() {
 		TestSuite suite = new TestSuite(MainTests.class.getName());
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testDROZero"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR1"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR2"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR3"));
