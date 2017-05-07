@@ -177,7 +177,7 @@
         <item>Ostrenje</item>
         <item>Povečaj/Pomanjšaj</item>
         <item>Spremeni raven osvetlitve</item>
-        <item>Vklopi/Izklopi samodejno ustalitev</item>
+        <item>Vklopi/Izklopi samodejno izravnavo</item>
         <item>Spremeni glasnost naprave</item>
         <item>Ne naredi ničesar</item>
     </string-array>
@@ -193,7 +193,7 @@
     <string-array name="preference_rotate_preview_entries">
         <item>Ne zavrti</item>
         <item>Zavrti za 180°</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_rotate_preview_values">
         <item>0</item>
         <item>180</item>
@@ -217,7 +217,7 @@
         <item>immersive_mode_low_profile</item>
         <item>immersive_mode_gui</item>
         <item>immersive_mode_everything</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_angle_highlight_color_entries">
         <item>Rdeča</item>
         <item>Zelena</item>
