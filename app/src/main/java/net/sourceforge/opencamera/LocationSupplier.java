@@ -22,7 +22,7 @@ public class LocationSupplier {
 	private final Context context;
 	private final LocationManager locationManager;
 	private MyLocationListener [] locationListeners;
-	volatile boolean test_force_no_location; // if true, always return null location; must be volatile for test project setting the state
+	private volatile boolean test_force_no_location; // if true, always return null location; must be volatile for test project setting the state
 
 	LocationSupplier(Context context) {
 		this.context = context;

@@ -25,7 +25,7 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 	private final Preview preview;
 	private final int [] measure_spec = new int[2];
 	private final Handler handler = new Handler();
-	private Runnable tick;
+	private final Runnable tick;
 
 	@SuppressWarnings("deprecation")
 	public

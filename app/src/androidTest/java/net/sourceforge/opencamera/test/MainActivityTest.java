@@ -7413,8 +7413,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	private void checkHistogram(Bitmap bitmap) {
 		int [] histogram = mActivity.getApplicationInterface().getHDRProcessor().computeHistogram(bitmap, true);
 		assertEquals(256, histogram.length);
-		for(int i=0;i<histogram.length;i++) {
-			assertTrue( histogram[i] > 0 );
+		for(int value : histogram) {
+			assertTrue(value > 0);
 		}
 	}
 
