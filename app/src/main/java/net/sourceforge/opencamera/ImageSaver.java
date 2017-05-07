@@ -644,7 +644,7 @@ public class ImageSaver extends Thread {
 				}
 				else {
 					Log.e(TAG, "shouldn't have offered HDR as an option if not on Android 5");
-					throw new RuntimeException()
+					throw new RuntimeException();
 				}
 			}
 			catch(HDRProcessorException e) {
