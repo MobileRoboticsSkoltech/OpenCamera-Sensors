@@ -279,6 +279,7 @@ public class HDRProcessor {
 	 * @param tonemapping_algorithm
 	 *                      Algorithm to use for tonemapping (if multiple images are received).
 	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, TonemappingAlgorithm tonemapping_algorithm) throws HDRProcessorException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
@@ -1272,6 +1273,7 @@ public class HDRProcessor {
 	 * @param avg If true, compute the color value as the average of the rgb values. If false,
 	 *            compute the color value as the maximum of the rgb values.
 	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private Allocation computeHistogramAllocation(Allocation allocation_in, boolean avg, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "computeHistogramAllocation");
@@ -1313,6 +1315,7 @@ public class HDRProcessor {
 	 * @param avg If true, compute the color value as the average of the rgb values. If false,
 	 *            compute the color value as the maximum of the rgb values.
 	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public int [] computeHistogram(Bitmap bitmap, boolean avg) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "computeHistogram");

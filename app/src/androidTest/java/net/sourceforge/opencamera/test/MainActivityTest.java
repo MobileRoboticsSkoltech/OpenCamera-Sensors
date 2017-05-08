@@ -22,6 +22,7 @@ import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import net.sourceforge.opencamera.UI.PopupView;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 //import android.content.res.AssetManager;
@@ -37,6 +38,7 @@ import android.os.Build;
 import android.os.Environment;
 //import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.RequiresApi;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
 import android.util.Log;
@@ -7407,11 +7409,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	/** Checks for the resultant histogram.
 	 * @param bitmap The bitmap to compute and check a histogram for.
 	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private void checkHistogram(Bitmap bitmap) {
 		int [] histogram = mActivity.getApplicationInterface().getHDRProcessor().computeHistogram(bitmap, true);
 		assertEquals(256, histogram.length);
-		for(int i=0;i<histogram.length;i++) {
-			assert( histogram[i] > 0 );
+		for(int value : histogram) {
+			assertTrue(value > 0);
 		}
 	}
 
@@ -7425,8 +7428,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 *  folder (so you have DCIM/testOpenCamera/testdata/). We don't use assets/ as we'd end up with huge APK sizes which takes
 	 *  time to transfer to the device everytime we run the tests.
 	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro, HDRProcessor.TonemappingAlgorithm tonemapping_algorithm) throws IOException, InterruptedException {
 		Log.d(TAG, "subTestHDR");
+
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			Log.d(TAG, "renderscript requires Android Lollipop or better");
+			return;
+		}
 
 		Thread.sleep(1000); // wait for camera to open
 
@@ -8374,8 +8383,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	/** Tests calling the DRO routine with 0.0 factor - and that the resultant image is identical.
 	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	public void testDROZero() throws IOException, InterruptedException {
 		Log.d(TAG, "testDROZero");
+
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			Log.d(TAG, "renderscript requires Android Lollipop or better");
+			return;
+		}
 
 		setToDefault();
 

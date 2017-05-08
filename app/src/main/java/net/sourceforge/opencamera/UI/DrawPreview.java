@@ -1493,7 +1493,7 @@ public class DrawPreview {
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 		p.setAlpha(64);
 		float radius = (45 * scale + 0.5f); // convert dps to pixels
-		canvas.drawCircle(canvas.getWidth()/2 + distance_x, canvas.getHeight()/2 + distance_y, radius, p);
+		canvas.drawCircle(canvas.getWidth()/2.0f + distance_x, canvas.getHeight()/2.0f + distance_y, radius, p);
 		p.setAlpha(255);
 	}
 }
