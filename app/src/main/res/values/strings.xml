@@ -101,7 +101,7 @@
     <string name="preference_timer_beep_summary">Beep when timer is counting down or for burst mode delay</string>
     <string name="preference_timer_speak">Voice timer countdown</string>
     <string name="preference_timer_speak_summary">Speak the countdown for timer or burst mode delay (from 60 seconds)</string>
-    <string name="preference_burst_mode">Burst</string>
+    <string name="preference_burst_mode">Burst</string> <!-- also used in popup menu, so shouldn't be too long a string -->
     <string name="preference_burst_mode_summary">Take multiple photos in succession</string>
     <string name="preference_burst_interval">Burst mode interval</string>
     <string name="preference_burst_interval_summary">Delay (if any) between taking photos in burst mode</string>
