@@ -101,7 +101,7 @@
     <string name="preference_timer_beep_summary">Подавати звуковий сигнал, коли таймер закінчить відлік</string>
     <string name="preference_timer_speak">Озвучення таймеру</string>
     <string name="preference_timer_speak_summary">Озвучувати зворотній відлік для таймера чи пакетного режиму (від 60 секунд)</string>
-    <string name="preference_burst_mode">Пакетний режим</string>
+    <string name="preference_burst_mode">повторення</string>
     <string name="preference_burst_mode_summary">Зйомка декілька фото</string>
     <string name="preference_burst_interval">Інтервал в пакетному режимі</string>
     <string name="preference_burst_interval_summary">Затримка між зняттям фото</string>

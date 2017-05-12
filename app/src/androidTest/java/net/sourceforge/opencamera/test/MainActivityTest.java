@@ -7407,14 +7407,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	/** Checks for the resultant histogram.
+	 *  We check that we have a single range of non-zero values.
 	 * @param bitmap The bitmap to compute and check a histogram for.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private void checkHistogram(Bitmap bitmap) {
 		int [] histogram = mActivity.getApplicationInterface().getHDRProcessor().computeHistogram(bitmap, true);
 		assertEquals(256, histogram.length);
+		for(int i=0;i<histogram.length;i++) {
+			Log.d(TAG, "histogram[" + i + "]: " + histogram[i]);
+		}
+		boolean started = false, ended = false;
 		for(int value : histogram) {
-			assertTrue(value > 0);
+			if( !started ) {
+				started = value != 0;
+			}
+			else {
+				ended = value == 0;
+				if( ended ) {
+					assertTrue(value == 0);
+				}
+			}
 		}
 	}
 
