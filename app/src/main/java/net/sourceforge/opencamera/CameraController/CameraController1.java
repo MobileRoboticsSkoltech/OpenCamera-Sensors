@@ -328,11 +328,11 @@ public class CameraController1 extends CameraController {
 
         camera_features.is_video_stabilization_supported = parameters.isVideoStabilizationSupported();
         
-		camera_features.supports_expo_bracketing = true;
-		camera_features.max_expo_bracketing_n_images = max_expo_bracketing_n_images;
         camera_features.min_exposure = parameters.getMinExposureCompensation();
         camera_features.max_exposure = parameters.getMaxExposureCompensation();
 		camera_features.exposure_step = getExposureCompensationStep();
+		camera_features.supports_expo_bracketing = ( camera_features.min_exposure != 0 && camera_features.max_exposure != 0 ); // require both a darker and brighter exposure, in order to support expo bracketing
+		camera_features.max_expo_bracketing_n_images = max_expo_bracketing_n_images;
 
 		List<Camera.Size> camera_video_sizes = parameters.getSupportedVideoSizes();
     	if( camera_video_sizes == null ) {
