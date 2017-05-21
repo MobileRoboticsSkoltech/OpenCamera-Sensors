@@ -4,7 +4,6 @@ import net.sourceforge.opencamera.MyDebug;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
@@ -30,16 +29,11 @@ public class CameraControllerManager2 extends CameraControllerManager {
 		try {
 			return manager.getCameraIdList().length;
 		}
-		catch(CameraAccessException e) {
+		catch(Exception e) {
+			// in theory we should only get CameraAccessException, but Google Play shows we can get a variety of exceptions
+			// from some devices, e.g., AssertionError, IllegalArgumentException, RuntimeException, so just catch everything!
 			if( MyDebug.LOG )
 				Log.e(TAG, "exception trying to get camera ids");
-			e.printStackTrace();
-		}
-		catch(AssertionError e) {
-			// had reported java.lang.AssertionError on Google Play, "Expected to get non-empty characteristics" from CameraManager.getOrCreateDeviceIdListLocked(CameraManager.java:465)
-			// yes, in theory we shouldn't catch AssertionError as it represents a programming error, however it's a programming error in the camera driver (a condition they thought couldn't happen)
-			if( MyDebug.LOG )
-				Log.e(TAG, "assertion error trying to get camera ids");
 			e.printStackTrace();
 		}
 		return 0;
@@ -53,7 +47,9 @@ public class CameraControllerManager2 extends CameraControllerManager {
 			CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
 			return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT;
 		}
-		catch(CameraAccessException e) {
+		catch(Exception e) {
+			// in theory we should only get CameraAccessException, but Google Play shows we can get a variety of exceptions
+			// from some devices, e.g., AssertionError, IllegalArgumentException, RuntimeException, so just catch everything!
 			if( MyDebug.LOG )
 				Log.e(TAG, "exception trying to get camera characteristics");
 			e.printStackTrace();
@@ -99,6 +95,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
 		catch(Exception e) {
 			// in theory we should only get CameraAccessException, but Google Play shows we can get a variety of exceptions
 			// from some devices, e.g., NumberFormatException, NullPointerException, so just catch everything!
+			// also AssertionError, IllegalArgumentException, RuntimeException from getCameraIdList
 			if( MyDebug.LOG )
 				Log.e(TAG, "exception trying to get camera characteristics");
 			e.printStackTrace();
