@@ -53,6 +53,8 @@ public class DrawPreview {
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
 
 	private final static double close_level_angle = 1.0f;
+	private String angle_string; // cached for UI performance
+	private long last_angle_string_time;
 
 	private float free_memory_gb = -1.0f;
 	private long last_free_memory_time;
@@ -552,7 +554,8 @@ public class DrawPreview {
 
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
 			long time_now = System.currentTimeMillis();
-			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 5000 ) {
+			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 10000 ) {
+				// don't call this too often, for UI performance
 				long free_mb = main_activity.freeMemory();
 				if( free_mb >= 0 ) {
 					free_memory_gb = free_mb/1024.0f;
@@ -749,6 +752,8 @@ public class DrawPreview {
 	}
 
     /** Formats the level_angle double into a string.
+	 *  Beware of calling this too often - shouldn't be every frame due to performance of DecimalFormat
+	 *  (see http://stackoverflow.com/questions/8553672/a-faster-alternative-to-decimalformat-format ).
      */
 	public static String formatLevelAngle(double level_angle) {
         String number_string = decimalFormat.format(level_angle);
@@ -835,9 +840,17 @@ public class DrawPreview {
 					color = getAngleHighlightColor();
 					p.setUnderlineText(true);
 				}
-				String number_string = formatLevelAngle(level_angle);
-				String string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
-				applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+				if( angle_string == null || System.currentTimeMillis() > this.last_angle_string_time + 500 ) {
+					// update cached string
+					/*if( MyDebug.LOG )
+						Log.d(TAG, "update angle_string: " + angle_string);*/
+					last_angle_string_time = System.currentTimeMillis();
+					String number_string = formatLevelAngle(level_angle);
+					//String number_string = "" + level_angle;
+					angle_string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
+					//String angle_string = "" + level_angle;
+				}
+				applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
 				p.setUnderlineText(false);
 			}
 			if( draw_geo_direction ) {
