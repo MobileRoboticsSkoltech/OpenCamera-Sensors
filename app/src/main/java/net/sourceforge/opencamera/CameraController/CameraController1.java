@@ -39,6 +39,13 @@ public class CameraController1 extends CameraController {
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
 
+	// we keep track of some camera settings rather than reading from Camera.getParameters() every time. Firstly this is important
+	// for performance (affects UI rendering times, e.g., see profiling of GPU rendering). Secondly runtimeexceptions from
+	// Camera.getParameters() seem to be common in Google Play, particularly for getZoom().
+	private int current_zoom_value;
+	private int picture_width;
+	private int picture_height;
+
 	/** Opens the camera device.
 	 * @param cameraId Which camera to open (must be between 0 and CameraControllerManager1.getNumberOfCameras()-1).
 	 * @param camera_error_cb onError() will be called if the camera closes due to serious error. No more calls to the CameraController1 object should be made (though a new one can be created, to try reopening the camera).
@@ -627,14 +634,17 @@ public class CameraController1 extends CameraController {
 	
 	@Override
     public CameraController.Size getPictureSize() {
-    	Camera.Parameters parameters = this.getParameters();
+    	/*Camera.Parameters parameters = this.getParameters();
     	Camera.Size camera_size = parameters.getPictureSize();
-    	return new CameraController.Size(camera_size.width, camera_size.height);
+    	return new CameraController.Size(camera_size.width, camera_size.height);*/
+		return new CameraController.Size(picture_width, picture_height);
     }
 
 	@Override
 	public void setPictureSize(int width, int height) {
     	Camera.Parameters parameters = this.getParameters();
+		this.picture_width = width;
+		this.picture_height = height;
 		parameters.setPictureSize(width, height);
 		if( MyDebug.LOG )
 			Log.d(TAG, "set picture size: " + parameters.getPictureSize().width + ", " + parameters.getPictureSize().height);
@@ -742,14 +752,16 @@ public class CameraController1 extends CameraController {
 	}
 	
 	public int getZoom() {
-		Camera.Parameters parameters = this.getParameters();
-		return parameters.getZoom();
+		/*Camera.Parameters parameters = this.getParameters();
+		return parameters.getZoom();*/
+		return this.current_zoom_value;
 	}
 	
 	public void setZoom(int value) {
 		Camera.Parameters parameters = this.getParameters();
 		if( MyDebug.LOG )
 			Log.d(TAG, "zoom was: " + parameters.getZoom());
+		this.current_zoom_value = value;
 		parameters.setZoom(value);
     	setCameraParameters(parameters);
 	}

@@ -2432,6 +2432,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
      */
     @SuppressWarnings("deprecation")
 	public long freeMemory() { // return free memory in MB
+		if( MyDebug.LOG )
+			Log.d(TAG, "freeMemory");
     	try {
     		File folder = applicationInterface.getStorageUtils().getImageFolder();
     		if( folder == null ) {
