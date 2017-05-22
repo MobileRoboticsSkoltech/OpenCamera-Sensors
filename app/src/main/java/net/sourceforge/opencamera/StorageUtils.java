@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteException;
 //import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -636,10 +635,10 @@ public class StorageUtils {
 				media = new Media(id, video, uri, date, orientation);
 			}
 		}
-		catch(SQLiteException e) {
-			// had this reported on Google Play from getContentResolver().query() call
+		catch(Exception e) {
+			// have had exceptions such as SQLiteException, NullPointerException reported on Google Play from within getContentResolver().query() call
 			if( MyDebug.LOG )
-				Log.e(TAG, "SQLiteException trying to find latest media");
+				Log.e(TAG, "Exception trying to find latest media");
 			e.printStackTrace();
 		}
 		finally {

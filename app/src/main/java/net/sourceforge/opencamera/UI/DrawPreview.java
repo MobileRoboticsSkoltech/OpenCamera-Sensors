@@ -92,7 +92,6 @@ public class DrawPreview {
 
     private boolean taking_picture; // true iff camera is in process of capturing a picture (including any necessary prior steps such as autofocus, flash/precapture)
 	private boolean capture_started; // true iff the camera is capturing
-	private long capture_started_time_ms; // time whe capture_started was set to true
     private boolean front_screen_flash; // true iff the front screen display should maximise to simulate flash
     
 	private boolean continuous_focus_moving;
@@ -204,7 +203,6 @@ public class DrawPreview {
     		taking_picture = false;
     		front_screen_flash = false;
 			capture_started = false;
-			capture_started_time_ms = 0;
     	}
     }
 	
@@ -218,7 +216,6 @@ public class DrawPreview {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCaptureStarted");
 		capture_started = true;
-		capture_started_time_ms = System.currentTimeMillis();
 	}
 
 	public void onContinuousFocusMove(boolean start) {
@@ -912,7 +909,6 @@ public class DrawPreview {
 					// only show "capturing" text with time for manual exposure time >= 0.5s
 					long exposure_time = camera_controller.getExposureTime();
 					if( exposure_time >= 500000000L ) {
-						long time_ms = System.currentTimeMillis() - capture_started_time_ms;
 						if( ((int)(System.currentTimeMillis() / 500)) % 2 == 0 ) {
 							p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 							p.setTextAlign(Paint.Align.CENTER);

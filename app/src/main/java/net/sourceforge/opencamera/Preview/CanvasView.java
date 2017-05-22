@@ -36,7 +36,8 @@ public class CanvasView extends View {
 					Log.d(TAG, "invalidate()");*/
 				preview.test_ticker_called = true;
 		        invalidate();
-		        handler.postDelayed(this, 100);
+				// avoid overloading ui thread when taking photo
+				handler.postDelayed(this, preview.isTakingPhoto() ? 500 : 100);
 		    }
 		};
 	}

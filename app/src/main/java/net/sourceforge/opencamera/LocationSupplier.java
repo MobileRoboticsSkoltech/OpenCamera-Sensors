@@ -57,7 +57,8 @@ public class LocationSupplier {
 				Log.d(TAG, "onLocationChanged");
 			this.test_has_received_location = true;
     		// Android camera source claims we need to check lat/long != 0.0d
-    		if( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) {
+			// also check for not being null just in case - had a nullpointerexception on Google Play!
+    		if( location != null && ( location.getLatitude() != 0.0d || location.getLongitude() != 0.0d ) ) {
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "received location:");
 	    			Log.d(TAG, "lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
