@@ -64,10 +64,15 @@ public class PopupView extends LinearLayout {
 		if( MyDebug.LOG )
 			Log.d(TAG, "new PopupView: " + this);
 
+		final long debug_time = System.currentTimeMillis();
+		if( MyDebug.LOG )
+			Log.d(TAG, "PopupView time 1: " + (System.currentTimeMillis() - debug_time));
 		this.setOrientation(LinearLayout.VERTICAL);
 
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
+		if( MyDebug.LOG )
+			Log.d(TAG, "PopupView time 2: " + (System.currentTimeMillis() - debug_time));
 		{
 	        List<String> supported_flash_values = preview.getSupportedFlashValues();
 	    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
@@ -81,7 +86,9 @@ public class PopupView extends LinearLayout {
 				}
 			});
 		}
-    	
+		if( MyDebug.LOG )
+			Log.d(TAG, "PopupView time 3: " + (System.currentTimeMillis() - debug_time));
+
 		if( preview.isVideo() && preview.isTakingPhoto() ) {
     		// don't add any more options
     	}
@@ -107,7 +114,9 @@ public class PopupView extends LinearLayout {
     				main_activity.closePopup();
     			}
     		});
-            
+			if( MyDebug.LOG )
+				Log.d(TAG, "PopupView time 4: " + (System.currentTimeMillis() - debug_time));
+
     		List<String> supported_isos;
 			final String manual_value = "m";
 			if( preview.supportsISORange() ) {
@@ -193,6 +202,8 @@ public class PopupView extends LinearLayout {
     				main_activity.closePopup();
     			}
     		});
+			if( MyDebug.LOG )
+				Log.d(TAG, "PopupView time 5: " + (System.currentTimeMillis() - debug_time));
 
 			final List<String> photo_modes = new ArrayList<>();
 			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<>();
@@ -226,7 +237,9 @@ public class PopupView extends LinearLayout {
     			}
 
         		addTitleToPopup(getResources().getString(R.string.photo_mode));
-        		
+				if( MyDebug.LOG )
+					Log.d(TAG, "PopupView time 6: " + (System.currentTimeMillis() - debug_time));
+
             	addButtonOptionsToPopup(photo_modes, -1, -1, "", current_mode, "TEST_PHOTO_MODE", new ButtonOptionsPopupListener() {
         			@Override
         			public void onClick(String option) {
@@ -289,7 +302,9 @@ public class PopupView extends LinearLayout {
         			}
         		});
     		}
-        	
+			if( MyDebug.LOG )
+				Log.d(TAG, "PopupView time 7: " + (System.currentTimeMillis() - debug_time));
+
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
@@ -324,6 +339,8 @@ public class PopupView extends LinearLayout {
 
         		this.addView(checkBox);
         	}
+			if( MyDebug.LOG )
+				Log.d(TAG, "PopupView time 8: " + (System.currentTimeMillis() - debug_time));
 
     		final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes();
     		picture_size_index = preview.getCurrentPictureSizeIndex();
@@ -376,6 +393,8 @@ public class PopupView extends LinearLayout {
 					return -1;
 				}
     		});
+			if( MyDebug.LOG )
+				Log.d(TAG, "PopupView time 9: " + (System.currentTimeMillis() - debug_time));
 
     		final List<String> video_sizes = preview.getVideoQualityHander().getSupportedVideoQuality();
     		video_size_index = preview.getVideoQualityHander().getCurrentVideoQualityIndex();
@@ -427,6 +446,8 @@ public class PopupView extends LinearLayout {
 					return -1;
 				}
     		});
+			if( MyDebug.LOG )
+				Log.d(TAG, "PopupView time 10: " + (System.currentTimeMillis() - debug_time));
 
     		final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
         	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
@@ -466,6 +487,8 @@ public class PopupView extends LinearLayout {
 					return -1;
 				}
     		});
+			if( MyDebug.LOG )
+				Log.d(TAG, "PopupView time 11: " + (System.currentTimeMillis() - debug_time));
 
         	final String [] burst_mode_values = getResources().getStringArray(R.array.preference_burst_mode_values);
         	String [] burst_mode_entries = getResources().getStringArray(R.array.preference_burst_mode_entries);
@@ -505,6 +528,8 @@ public class PopupView extends LinearLayout {
 					return -1;
 				}
     		});
+			if( MyDebug.LOG )
+				Log.d(TAG, "PopupView time 12: " + (System.currentTimeMillis() - debug_time));
 
         	final String [] grid_values = getResources().getStringArray(R.array.preference_grid_values);
         	String [] grid_entries = getResources().getStringArray(R.array.preference_grid_entries);
@@ -548,6 +573,8 @@ public class PopupView extends LinearLayout {
 					return -1;
 				}
     		});
+			if( MyDebug.LOG )
+				Log.d(TAG, "PopupView time 13: " + (System.currentTimeMillis() - debug_time));
 
 			// popup should only be opened if we have a camera controller, but check just to be safe
 			if( preview.getCameraController() != null ) {
@@ -578,12 +605,18 @@ public class PopupView extends LinearLayout {
 						}
 					}
 				});
+				if( MyDebug.LOG )
+					Log.d(TAG, "PopupView time 14: " + (System.currentTimeMillis() - debug_time));
 
 				List<String> supported_scene_modes = preview.getSupportedSceneModes();
 				addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", null);
+				if( MyDebug.LOG )
+					Log.d(TAG, "PopupView time 15: " + (System.currentTimeMillis() - debug_time));
 
 				List<String> supported_color_effects = preview.getSupportedColorEffects();
 				addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", null);
+				if( MyDebug.LOG )
+					Log.d(TAG, "PopupView time 16: " + (System.currentTimeMillis() - debug_time));
 			}
 
 		}
