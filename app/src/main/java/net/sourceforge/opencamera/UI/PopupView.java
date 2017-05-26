@@ -51,6 +51,9 @@ public class PopupView extends LinearLayout {
 	public static final float ALPHA_BUTTON_SELECTED = 1.0f;
 	public static final float ALPHA_BUTTON = 0.6f;
 
+	private int total_width_dp;
+	private final int total_width;
+
 	private int picture_size_index = -1;
 	private int video_size_index = -1;
 	private int timer_index = -1;
@@ -64,15 +67,36 @@ public class PopupView extends LinearLayout {
 		if( MyDebug.LOG )
 			Log.d(TAG, "new PopupView: " + this);
 
-		final long debug_time = System.currentTimeMillis();
+		final long debug_time = System.nanoTime();
 		if( MyDebug.LOG )
-			Log.d(TAG, "PopupView time 1: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "PopupView time 1: " + (System.nanoTime() - debug_time));
 		this.setOrientation(LinearLayout.VERTICAL);
+
+
+		final float scale = getResources().getDisplayMetrics().density;
+		total_width_dp = 280;
+		{
+			Activity activity = (Activity)this.getContext();
+			Display display = activity.getWindowManager().getDefaultDisplay();
+			DisplayMetrics outMetrics = new DisplayMetrics();
+			display.getMetrics(outMetrics);
+
+			// the height should limit the width, due to when held in portrait
+			int dpHeight = (int)(outMetrics.heightPixels / scale);
+			if( MyDebug.LOG )
+				Log.d(TAG, "dpHeight: " + dpHeight);
+			dpHeight -= 50; // allow space for the icons at top/right of screen
+			if( total_width_dp > dpHeight )
+				total_width_dp = dpHeight;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "total_width_dp: " + total_width_dp);
+		total_width = (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
 
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
 		if( MyDebug.LOG )
-			Log.d(TAG, "PopupView time 2: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "PopupView time 2: " + (System.nanoTime() - debug_time));
 		{
 	        List<String> supported_flash_values = preview.getSupportedFlashValues();
 	    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
@@ -87,7 +111,7 @@ public class PopupView extends LinearLayout {
 			});
 		}
 		if( MyDebug.LOG )
-			Log.d(TAG, "PopupView time 3: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "PopupView time 3: " + (System.nanoTime() - debug_time));
 
 		if( preview.isVideo() && preview.isTakingPhoto() ) {
     		// don't add any more options
@@ -115,7 +139,7 @@ public class PopupView extends LinearLayout {
     			}
     		});
 			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 4: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "PopupView time 4: " + (System.nanoTime() - debug_time));
 
     		List<String> supported_isos;
 			final String manual_value = "m";
@@ -203,7 +227,7 @@ public class PopupView extends LinearLayout {
     			}
     		});
 			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 5: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "PopupView time 5: " + (System.nanoTime() - debug_time));
 
 			final List<String> photo_modes = new ArrayList<>();
 			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<>();
@@ -238,7 +262,7 @@ public class PopupView extends LinearLayout {
 
         		addTitleToPopup(getResources().getString(R.string.photo_mode));
 				if( MyDebug.LOG )
-					Log.d(TAG, "PopupView time 6: " + (System.currentTimeMillis() - debug_time));
+					Log.d(TAG, "PopupView time 6: " + (System.nanoTime() - debug_time));
 
             	addButtonOptionsToPopup(photo_modes, -1, -1, "", current_mode, "TEST_PHOTO_MODE", new ButtonOptionsPopupListener() {
         			@Override
@@ -303,7 +327,7 @@ public class PopupView extends LinearLayout {
         		});
     		}
 			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 7: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "PopupView time 7: " + (System.nanoTime() - debug_time));
 
         	if( main_activity.supportsAutoStabilise() ) {
         		CheckBox checkBox = new CheckBox(main_activity);
@@ -340,7 +364,7 @@ public class PopupView extends LinearLayout {
         		this.addView(checkBox);
         	}
 			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 8: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "PopupView time 8: " + (System.nanoTime() - debug_time));
 
     		final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes();
     		picture_size_index = preview.getCurrentPictureSizeIndex();
@@ -394,7 +418,7 @@ public class PopupView extends LinearLayout {
 				}
     		});
 			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 9: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "PopupView time 9: " + (System.nanoTime() - debug_time));
 
     		final List<String> video_sizes = preview.getVideoQualityHander().getSupportedVideoQuality();
     		video_size_index = preview.getVideoQualityHander().getCurrentVideoQualityIndex();
@@ -447,7 +471,7 @@ public class PopupView extends LinearLayout {
 				}
     		});
 			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 10: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "PopupView time 10: " + (System.nanoTime() - debug_time));
 
     		final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
         	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
@@ -488,7 +512,7 @@ public class PopupView extends LinearLayout {
 				}
     		});
 			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 11: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "PopupView time 11: " + (System.nanoTime() - debug_time));
 
         	final String [] burst_mode_values = getResources().getStringArray(R.array.preference_burst_mode_values);
         	String [] burst_mode_entries = getResources().getStringArray(R.array.preference_burst_mode_entries);
@@ -529,7 +553,7 @@ public class PopupView extends LinearLayout {
 				}
     		});
 			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 12: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "PopupView time 12: " + (System.nanoTime() - debug_time));
 
         	final String [] grid_values = getResources().getStringArray(R.array.preference_grid_values);
         	String [] grid_entries = getResources().getStringArray(R.array.preference_grid_entries);
@@ -574,7 +598,10 @@ public class PopupView extends LinearLayout {
 				}
     		});
 			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 13: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "PopupView time 13: " + (System.nanoTime() - debug_time));
+
+			if( true )
+				return;
 
 			// popup should only be opened if we have a camera controller, but check just to be safe
 			if( preview.getCameraController() != null ) {
@@ -606,17 +633,17 @@ public class PopupView extends LinearLayout {
 					}
 				});
 				if( MyDebug.LOG )
-					Log.d(TAG, "PopupView time 14: " + (System.currentTimeMillis() - debug_time));
+					Log.d(TAG, "PopupView time 14: " + (System.nanoTime() - debug_time));
 
 				List<String> supported_scene_modes = preview.getSupportedSceneModes();
 				addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", null);
 				if( MyDebug.LOG )
-					Log.d(TAG, "PopupView time 15: " + (System.currentTimeMillis() - debug_time));
+					Log.d(TAG, "PopupView time 15: " + (System.nanoTime() - debug_time));
 
 				List<String> supported_color_effects = preview.getSupportedColorEffects();
 				addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", null);
 				if( MyDebug.LOG )
-					Log.d(TAG, "PopupView time 16: " + (System.currentTimeMillis() - debug_time));
+					Log.d(TAG, "PopupView time 16: " + (System.nanoTime() - debug_time));
 			}
 
 		}
@@ -630,35 +657,19 @@ public class PopupView extends LinearLayout {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addButtonOptionsToPopup");
     	if( supported_options != null ) {
-	    	final long debug_time = System.currentTimeMillis();
-        	LinearLayout ll2 = new LinearLayout(this.getContext());
-            ll2.setOrientation(LinearLayout.HORIZONTAL);
+	    	final long debug_time = System.nanoTime();
+			LinearLayout ll2 = new LinearLayout(this.getContext());
+			ll2.setOrientation(LinearLayout.HORIZONTAL);
 			if( MyDebug.LOG )
-				Log.d(TAG, "addButtonOptionsToPopup time 1: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "addButtonOptionsToPopup time 1: " + (System.nanoTime() - debug_time));
         	String [] icons = icons_id != -1 ? getResources().getStringArray(icons_id) : null;
         	String [] values = values_id != -1 ? getResources().getStringArray(values_id) : null;
 			if( MyDebug.LOG )
-				Log.d(TAG, "addButtonOptionsToPopup time 2: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "addButtonOptionsToPopup time 2: " + (System.nanoTime() - debug_time));
 
 			final float scale = getResources().getDisplayMetrics().density;
-			int total_width_dp = 280;
-			{
-				Activity activity = (Activity)this.getContext();
-			    Display display = activity.getWindowManager().getDefaultDisplay();
-			    DisplayMetrics outMetrics = new DisplayMetrics();
-			    display.getMetrics(outMetrics);
-
-			    // the height should limit the width, due to when held in portrait
-			    int dpHeight = (int)(outMetrics.heightPixels / scale);
-    			if( MyDebug.LOG )
-    				Log.d(TAG, "dpHeight: " + dpHeight);
-    			dpHeight -= 50; // allow space for the icons at top/right of screen
-    			if( total_width_dp > dpHeight )
-					total_width_dp = dpHeight;
-			}
 			if( MyDebug.LOG )
-				Log.d(TAG, "total_width_dp: " + total_width_dp);
-			final int total_width = (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
+				Log.d(TAG, "addButtonOptionsToPopup time 2.04: " + (System.nanoTime() - debug_time));
 			int button_width_dp = total_width_dp/supported_options.size();
 			boolean use_scrollview = false;
 			if( button_width_dp < 40 ) {
@@ -666,12 +677,28 @@ public class PopupView extends LinearLayout {
 				use_scrollview = true;
 			}
 			final int button_width = (int)(button_width_dp * scale + 0.5f); // convert dps to pixels
+
+			View.OnClickListener on_click_listener = new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						String supported_option = (String)v.getTag();
+						if( MyDebug.LOG )
+							Log.d(TAG, "clicked: " + supported_option);
+						listener.onClick(supported_option);
+					}
+    			};
 			View current_view = null;
+			if( MyDebug.LOG )
+				Log.d(TAG, "addButtonOptionsToPopup time 2.05: " + (System.nanoTime() - debug_time));
 
 			for(final String supported_option : supported_options) {
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.06: " + (System.nanoTime() - debug_time));
         		if( MyDebug.LOG )
         			Log.d(TAG, "supported_option: " + supported_option);
         		int resource = -1;
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.08: " + (System.nanoTime() - debug_time));
         		if( icons != null && values != null ) {
             		int index = -1;
             		for(int i=0;i<values.length && index==-1;i++) {
@@ -685,7 +712,7 @@ public class PopupView extends LinearLayout {
             		}
         		}
     			if( MyDebug.LOG )
-    				Log.d(TAG, "addButtonOptionsToPopup time 2.1: " + (System.currentTimeMillis() - debug_time));
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.1: " + (System.nanoTime() - debug_time));
 
         		String button_string;
     			// hacks for ISO mode ISO_HJR (e.g., on Samsung S5)
@@ -704,15 +731,17 @@ public class PopupView extends LinearLayout {
     			}
     			if( MyDebug.LOG )
     				Log.d(TAG, "button_string: " + button_string);
+				if( MyDebug.LOG )
+					Log.d(TAG, "addButtonOptionsToPopup time 2.105: " + (System.nanoTime() - debug_time));
         		View view;
         		if( resource != -1 ) {
         			ImageButton image_button = new ImageButton(this.getContext());
         			if( MyDebug.LOG )
-        				Log.d(TAG, "addButtonOptionsToPopup time 2.11: " + (System.currentTimeMillis() - debug_time));
+        				Log.d(TAG, "addButtonOptionsToPopup time 2.11: " + (System.nanoTime() - debug_time));
         			view = image_button;
         			ll2.addView(view);
         			if( MyDebug.LOG )
-        				Log.d(TAG, "addButtonOptionsToPopup time 2.12: " + (System.currentTimeMillis() - debug_time));
+        				Log.d(TAG, "addButtonOptionsToPopup time 2.12: " + (System.nanoTime() - debug_time));
 
         			//image_button.setImageResource(resource);
         			final MainActivity main_activity = (MainActivity)this.getContext();
@@ -724,7 +753,7 @@ public class PopupView extends LinearLayout {
             				Log.d(TAG, "failed to find bitmap for resource " + resource + "!");
         			}
         			if( MyDebug.LOG )
-        				Log.d(TAG, "addButtonOptionsToPopup time 2.13: " + (System.currentTimeMillis() - debug_time));
+        				Log.d(TAG, "addButtonOptionsToPopup time 2.13: " + (System.nanoTime() - debug_time));
         			image_button.setScaleType(ScaleType.FIT_CENTER);
         			final int padding = (int) (10 * scale + 0.5f); // convert dps to pixels
         			view.setPadding(padding, padding, padding, padding);
@@ -743,7 +772,7 @@ public class PopupView extends LinearLayout {
         			view.setPadding(padding, padding, padding, padding);
         		}
     			if( MyDebug.LOG )
-    				Log.d(TAG, "addButtonOptionsToPopup time 2.2: " + (System.currentTimeMillis() - debug_time));
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.2: " + (System.nanoTime() - debug_time));
 
     			ViewGroup.LayoutParams params = view.getLayoutParams();
     			params.width = button_width;
@@ -759,24 +788,20 @@ public class PopupView extends LinearLayout {
     				view.setAlpha(ALPHA_BUTTON);
     			}
     			if( MyDebug.LOG )
-    				Log.d(TAG, "addButtonOptionsToPopup time 2.3: " + (System.currentTimeMillis() - debug_time));
-    			view.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "clicked: " + supported_option);
-						listener.onClick(supported_option);
-					}
-    			});
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.3: " + (System.nanoTime() - debug_time));
+				view.setTag(supported_option);
+    			view.setOnClickListener(on_click_listener);
+    			if( MyDebug.LOG )
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.35: " + (System.nanoTime() - debug_time));
     			this.popup_buttons.put(test_key + "_" + supported_option, view);
     			if( MyDebug.LOG ) {
-    				Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.currentTimeMillis() - debug_time));
+    				Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.nanoTime() - debug_time));
     				Log.d(TAG, "added to popup_buttons: " + test_key + "_" + supported_option + " view: " + view);
     				Log.d(TAG, "popup_buttons is now: " + popup_buttons);
     			}
     		}
 			if( MyDebug.LOG )
-				Log.d(TAG, "addButtonOptionsToPopup time 3: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "addButtonOptionsToPopup time 3: " + (System.nanoTime() - debug_time));
 			if( use_scrollview ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "using scrollview");
@@ -813,10 +838,10 @@ public class PopupView extends LinearLayout {
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "not using scrollview");
-	    		this.addView(ll2);
+				this.addView(ll2);
 			}
 			if( MyDebug.LOG )
-				Log.d(TAG, "addButtonOptionsToPopup time 4: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "addButtonOptionsToPopup time 4: " + (System.nanoTime() - debug_time));
         }
     }
     
@@ -844,31 +869,50 @@ public class PopupView extends LinearLayout {
 			Log.d(TAG, "addOptionsToPopup: " + title);
     	if( supported_options != null ) {
     		final MainActivity main_activity = (MainActivity)this.getContext();
+	    	final long debug_time = System.nanoTime();
 
     		addTitleToPopup(title);
-    		
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToPopup time 1: " + (System.nanoTime() - debug_time));
+
     		RadioGroup rg = new RadioGroup(this.getContext()); 
         	rg.setOrientation(RadioGroup.VERTICAL);
         	this.popup_buttons.put(test_key, rg);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToPopup time 2: " + (System.nanoTime() - debug_time));
 
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 			String current_option = sharedPreferences.getString(preference_key, default_option);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToPopup time 3: " + (System.nanoTime() - debug_time));
         	for(final String supported_option : supported_options) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "supported_option: " + supported_option);
+				if( MyDebug.LOG )
+					Log.d(TAG, "addRadioOptionsToPopup time 3.1: " + (System.nanoTime() - debug_time));
         		//Button button = new Button(this);
         		RadioButton button = new RadioButton(this.getContext());
+				if( MyDebug.LOG )
+					Log.d(TAG, "addRadioOptionsToPopup time 3.2: " + (System.nanoTime() - debug_time));
         		button.setText(supported_option);
         		button.setTextColor(Color.WHITE);
+				if( MyDebug.LOG )
+					Log.d(TAG, "addRadioOptionsToPopup time 3.3: " + (System.nanoTime() - debug_time));
         		if( supported_option.equals(current_option) ) {
         			button.setChecked(true);
         		}
         		else {
         			button.setChecked(false);
         		}
+				if( MyDebug.LOG )
+					Log.d(TAG, "addRadioOptionsToPopup time 3.4: " + (System.nanoTime() - debug_time));
     			//ll.addView(button);
     			rg.addView(button);
+				if( MyDebug.LOG )
+					Log.d(TAG, "addRadioOptionsToPopup time 3.5: " + (System.nanoTime() - debug_time));
     			button.setContentDescription(supported_option);
+				if( MyDebug.LOG )
+					Log.d(TAG, "addRadioOptionsToPopup time 3.6: " + (System.nanoTime() - debug_time));
     			button.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -886,9 +930,17 @@ public class PopupView extends LinearLayout {
 						main_activity.closePopup();
 					}
     			});
+				if( MyDebug.LOG )
+					Log.d(TAG, "addRadioOptionsToPopup time 3.7: " + (System.nanoTime() - debug_time));
     			this.popup_buttons.put(test_key + "_" + supported_option, button);
+				if( MyDebug.LOG )
+					Log.d(TAG, "addRadioOptionsToPopup time 3.8: " + (System.nanoTime() - debug_time));
         	}
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToPopup time 4: " + (System.nanoTime() - debug_time));
         	this.addView(rg);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToPopup time 5: " + (System.nanoTime() - debug_time));
         }
     }
     
