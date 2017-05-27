@@ -145,6 +145,8 @@ public class CameraController1 extends CameraController {
 	}
 
 	private Camera.Parameters getParameters() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getParameters");
 		return camera.getParameters();
 	}
 	
