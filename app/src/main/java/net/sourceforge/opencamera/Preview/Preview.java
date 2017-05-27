@@ -2226,7 +2226,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( camera_controller == null )
 			return "";
 		CamcorderProfile profile = getCamcorderProfile(quality);
-		return profile.videoFrameWidth + "x" + profile.videoFrameHeight + " " + getMPString(profile.videoFrameWidth, profile.videoFrameHeight);
+		// don't display MP here, as call to Preview.getMPString() here would contribute to poor performance (in PopupView)!
+		// this is meant to be a quick simple string
+		return profile.videoFrameWidth + "x" + profile.videoFrameHeight;
 	}
 
 	public String getCamcorderProfileDescription(String quality) {
