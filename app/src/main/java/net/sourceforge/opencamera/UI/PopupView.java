@@ -601,9 +601,6 @@ public class PopupView extends LinearLayout {
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 13: " + (System.nanoTime() - debug_time));
 
-			if( true )
-				return;
-
 			// popup should only be opened if we have a camera controller, but check just to be safe
 			if( preview.getCameraController() != null ) {
 				List<String> supported_white_balances = preview.getSupportedWhiteBalances();
