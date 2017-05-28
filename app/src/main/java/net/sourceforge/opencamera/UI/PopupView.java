@@ -335,7 +335,8 @@ public class PopupView extends LinearLayout {
         		checkBox.setTextColor(Color.WHITE);
 
         		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
-        		checkBox.setChecked(auto_stabilise);
+				if( auto_stabilise )
+	        		checkBox.setChecked(auto_stabilise);
         		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
@@ -604,7 +605,7 @@ public class PopupView extends LinearLayout {
 			// popup should only be opened if we have a camera controller, but check just to be safe
 			if( preview.getCameraController() != null ) {
 				List<String> supported_white_balances = preview.getSupportedWhiteBalances();
-				addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE", new RadioOptionsListener() {
+				addRadioOptionsToPopup(sharedPreferences, supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_option) {
 						if( selected_option.equals("manual") ) {
@@ -634,12 +635,12 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "PopupView time 14: " + (System.nanoTime() - debug_time));
 
 				List<String> supported_scene_modes = preview.getSupportedSceneModes();
-				addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", null);
+				addRadioOptionsToPopup(sharedPreferences, supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", null);
 				if( MyDebug.LOG )
 					Log.d(TAG, "PopupView time 15: " + (System.nanoTime() - debug_time));
 
 				List<String> supported_color_effects = preview.getSupportedColorEffects();
-				addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", null);
+				addRadioOptionsToPopup(sharedPreferences, supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", null);
 				if( MyDebug.LOG )
 					Log.d(TAG, "PopupView time 16: " + (System.nanoTime() - debug_time));
 			}
@@ -862,7 +863,7 @@ public class PopupView extends LinearLayout {
 		public abstract void onClick(String selected_option);
 	}
 
-	private void addRadioOptionsToPopup(List<String> supported_options, final String title, final String preference_key, final String default_option, final String test_key, final RadioOptionsListener listener) {
+	private void addRadioOptionsToPopup(SharedPreferences sharedPreferences, List<String> supported_options, final String title, final String preference_key, final String default_option, final String test_key, final RadioOptionsListener listener) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addOptionsToPopup: " + title);
     	if( supported_options != null ) {
@@ -879,7 +880,6 @@ public class PopupView extends LinearLayout {
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToPopup time 2: " + (System.nanoTime() - debug_time));
 
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 			String current_option = sharedPreferences.getString(preference_key, default_option);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToPopup time 3: " + (System.nanoTime() - debug_time));
@@ -898,9 +898,6 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "addRadioOptionsToPopup time 3.3: " + (System.nanoTime() - debug_time));
         		if( supported_option.equals(current_option) ) {
         			button.setChecked(true);
-        		}
-        		else {
-        			button.setChecked(false);
         		}
 				if( MyDebug.LOG )
 					Log.d(TAG, "addRadioOptionsToPopup time 3.4: " + (System.nanoTime() - debug_time));
