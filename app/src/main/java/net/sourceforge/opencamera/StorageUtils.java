@@ -509,12 +509,21 @@ public class StorageUtils {
 			Uri fileUri = DocumentsContract.createDocument(context.getContentResolver(), docUri, mimeType, filename);
 			if( MyDebug.LOG )
 				Log.d(TAG, "returned fileUri: " + fileUri);
+			/*if( true )
+				throw new SecurityException(); // test*/
 			if( fileUri == null )
 				throw new IOException();
 			return fileUri;
 		}
 		catch(IllegalArgumentException e) {
 			// DocumentsContract.getTreeDocumentId throws this if URI is invalid
+			if( MyDebug.LOG )
+				Log.e(TAG, "createOutputMediaFileSAF failed");
+			e.printStackTrace();
+			throw new IOException();
+		}
+		catch(SecurityException e) {
+			// Have reports of this from GooglePlay - better to fail gracefully and tell user rather than crash!
 			if( MyDebug.LOG )
 				Log.e(TAG, "createOutputMediaFileSAF failed");
 			e.printStackTrace();
