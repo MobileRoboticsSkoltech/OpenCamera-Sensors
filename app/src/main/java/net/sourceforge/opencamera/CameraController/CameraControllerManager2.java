@@ -29,9 +29,11 @@ public class CameraControllerManager2 extends CameraControllerManager {
 		try {
 			return manager.getCameraIdList().length;
 		}
-		catch(Exception e) {
+		catch(Throwable e) {
 			// in theory we should only get CameraAccessException, but Google Play shows we can get a variety of exceptions
 			// from some devices, e.g., AssertionError, IllegalArgumentException, RuntimeException, so just catch everything!
+			// We don't want users to experience a crash just because of buggy camera2 drivers - instead the user can switch
+			// back to old camera API.
 			if( MyDebug.LOG )
 				Log.e(TAG, "exception trying to get camera ids");
 			e.printStackTrace();
@@ -47,9 +49,11 @@ public class CameraControllerManager2 extends CameraControllerManager {
 			CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
 			return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT;
 		}
-		catch(Exception e) {
+		catch(Throwable e) {
 			// in theory we should only get CameraAccessException, but Google Play shows we can get a variety of exceptions
 			// from some devices, e.g., AssertionError, IllegalArgumentException, RuntimeException, so just catch everything!
+			// We don't want users to experience a crash just because of buggy camera2 drivers - instead the user can switch
+			// back to old camera API.
 			if( MyDebug.LOG )
 				Log.e(TAG, "exception trying to get camera characteristics");
 			e.printStackTrace();
@@ -92,10 +96,11 @@ public class CameraControllerManager2 extends CameraControllerManager {
 			CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
 			return isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
 		}
-		catch(Exception e) {
+		catch(Throwable e) {
 			// in theory we should only get CameraAccessException, but Google Play shows we can get a variety of exceptions
-			// from some devices, e.g., NumberFormatException, NullPointerException, so just catch everything!
-			// also AssertionError, IllegalArgumentException, RuntimeException from getCameraIdList
+			// from some devices, e.g., AssertionError, IllegalArgumentException, RuntimeException, so just catch everything!
+			// We don't want users to experience a crash just because of buggy camera2 drivers - instead the user can switch
+			// back to old camera API.
 			if( MyDebug.LOG )
 				Log.e(TAG, "exception trying to get camera characteristics");
 			e.printStackTrace();
