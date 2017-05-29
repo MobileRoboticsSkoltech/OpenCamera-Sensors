@@ -926,8 +926,12 @@ public class PopupView extends LinearLayout {
 										}
 
 										// so that the user sees the options appear, if the button is at the bottom of the current scrollview position
-										if( rg.getChildCount() > 0 )
-											popup_container.smoothScrollBy(0, rg.getChildAt(0).getHeight());
+										if( rg.getChildCount() > 0 ) {
+											int id = rg.getCheckedRadioButtonId();
+											if( id >= 0 && id < rg.getChildCount() ) {
+												popup_container.smoothScrollBy(0, rg.getChildAt(id).getBottom());
+											}
+										}
 									}
 								}
 						);
