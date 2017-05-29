@@ -800,7 +800,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		waitUntilImageQueueEmpty(); // so we don't risk losing any images
         super.onPause(); // docs say to call this before freeing other things
-        mainUI.destroyPopup();
+        mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
         mSensorManager.unregisterListener(accelerometerListener);
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
