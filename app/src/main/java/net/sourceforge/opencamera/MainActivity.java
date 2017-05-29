@@ -2153,7 +2153,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "zoom onProgressChanged: " + progress);
-						preview.zoomTo(preview.getMaxZoom()-progress);
+						// if fromUser==false, this might be due to the zoom slider being set from MyApplicationInterface.multitouchZoom() - we don't need to zoom, as the preview has already done so
+						if( fromUser ) {
+							preview.zoomTo(preview.getMaxZoom() - progress);
+						}
 					}
 
 					@Override

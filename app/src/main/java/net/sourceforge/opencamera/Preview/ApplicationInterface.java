@@ -124,7 +124,7 @@ public interface ApplicationInterface {
 
 	// methods that request actions
 	void layoutUI(); // application should layout UI that's on top of the preview
-	void multitouchZoom(int new_zoom); // zoom has changed due to multitouch gesture on preview
+	void multitouchZoom(int new_zoom); // indicates that the zoom has changed due to multitouch gesture on preview
 	// the set/clear*Pref() methods are called if Preview decides to override the requested pref (because Camera device doesn't support requested pref) (clear*Pref() is called if the feature isn't supported at all)
 	// the application can use this information to update its preferences
 	void setCameraIdPref(int cameraId);
