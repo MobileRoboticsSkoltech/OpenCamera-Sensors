@@ -800,7 +800,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		waitUntilImageQueueEmpty(); // so we don't risk losing any images
         super.onPause(); // docs say to call this before freeing other things
-        mainUI.destroyPopup();
+        mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
         mSensorManager.unregisterListener(accelerometerListener);
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
@@ -1498,10 +1498,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
 			    		}
 		    		}
-		    		catch(NoClassDefFoundError exception) {
-		    			// have had Google Play crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn)
-		    			if( MyDebug.LOG )
-		    				Log.e(TAG, "exif orientation NoClassDefFoundError");
+		    		catch(Throwable exception) {
+		    			// have had Google Play NoClassDefFoundError crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn)
+						// also NegativeArraySizeException - best to catch everything
+ 		    			if( MyDebug.LOG )
+		    				Log.e(TAG, "exif orientation exception");
 		    			exception.printStackTrace();
 		    		}
 		    		if( thumbnail != null ) {
@@ -1693,20 +1694,40 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    		final int takeFlags = resultData.getFlags()
 	    	            & (Intent.FLAG_GRANT_READ_URI_PERMISSION
 	    	            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-		    	// Check for the freshest data.
-		    	getContentResolver().takePersistableUriPermission(treeUri, takeFlags);
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), treeUri.toString());
-				editor.apply();
-	
-				if( MyDebug.LOG )
-					Log.d(TAG, "update folder history for saf");
-				updateFolderHistorySAF(treeUri.toString());
+				try {
+					/*if( true )
+						throw new SecurityException(); // test*/
+					// Check for the freshest data.
+					getContentResolver().takePersistableUriPermission(treeUri, takeFlags);
 
-				File file = applicationInterface.getStorageUtils().getImageFolder();
-				if( file != null ) {
-					preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + file.getAbsolutePath());
+					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), treeUri.toString());
+					editor.apply();
+
+					if( MyDebug.LOG )
+						Log.d(TAG, "update folder history for saf");
+					updateFolderHistorySAF(treeUri.toString());
+
+					File file = applicationInterface.getStorageUtils().getImageFolder();
+					if( file != null ) {
+						preview.showToast(null, getResources().getString(R.string.changed_save_location) + "\n" + file.getAbsolutePath());
+					}
+				}
+				catch(SecurityException e) {
+					Log.e(TAG, "SecurityException failed to take permission");
+					e.printStackTrace();
+					// failed - if the user had yet to set a save location, make sure we switch SAF back off
+					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+					String uri = sharedPreferences.getString(PreferenceKeys.getSaveLocationSAFPreferenceKey(), "");
+					if( uri.length() == 0 ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "no SAF save location was set");
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false);
+						editor.apply();
+						preview.showToast(null, R.string.saf_permission_failed);
+					}
 				}
 	        }
 	        else {
@@ -2152,7 +2173,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "zoom onProgressChanged: " + progress);
-						preview.zoomTo(preview.getMaxZoom()-progress);
+						// if fromUser==false, this might be due to the zoom slider being set from MyApplicationInterface.multitouchZoom() - we don't need to zoom, as the preview has already done so
+						if( fromUser ) {
+							preview.zoomTo(preview.getMaxZoom() - progress);
+						}
 					}
 
 					@Override

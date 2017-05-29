@@ -790,6 +790,7 @@ public class MainUI {
 			 *     See test testSwitchResolution().
 			 */
 			destroyPopup();
+			//popup_view.setVisibility(View.GONE);
 			main_activity.initImmersiveMode(); // to reset the timer when closing the popup
 		}
     }
@@ -802,6 +803,8 @@ public class MainUI {
 		if( popupIsOpen() ) {
 			closePopup();
 		}
+		ViewGroup popup_container = (ViewGroup)main_activity.findViewById(R.id.popup_container);
+		popup_container.removeAllViews();
 		popup_view = null;
     }
 
@@ -836,10 +839,12 @@ public class MainUI {
 			if( MyDebug.LOG )
 				Log.d(TAG, "create new popup_view");
     		popup_view = new PopupView(main_activity);
+			//popup_container.addView(popup_view);
     	}
     	else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "use cached popup_view");
+			//popup_view.setVisibility(View.VISIBLE);
     	}
 		popup_container.addView(popup_view);
 		popup_view_is_open = true;
@@ -848,7 +853,7 @@ public class MainUI {
 		// but need to do after the layout has been done, so we have a valid width/height to use
 		// n.b., even though we only need the portion of layoutUI for the popup container, there
 		// doesn't seem to be any performance benefit in only calling that part
-		popup_container.getViewTreeObserver().addOnGlobalLayoutListener( 
+		popup_container.getViewTreeObserver().addOnGlobalLayoutListener(
 			new OnGlobalLayoutListener() {
 				@SuppressWarnings("deprecation")
 				@Override

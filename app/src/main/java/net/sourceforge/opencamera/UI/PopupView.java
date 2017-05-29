@@ -22,6 +22,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
@@ -40,6 +41,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
 
@@ -335,7 +337,8 @@ public class PopupView extends LinearLayout {
         		checkBox.setTextColor(Color.WHITE);
 
         		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
-        		checkBox.setChecked(auto_stabilise);
+				if( auto_stabilise )
+	        		checkBox.setChecked(auto_stabilise);
         		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
@@ -604,7 +607,7 @@ public class PopupView extends LinearLayout {
 			// popup should only be opened if we have a camera controller, but check just to be safe
 			if( preview.getCameraController() != null ) {
 				List<String> supported_white_balances = preview.getSupportedWhiteBalances();
-				addRadioOptionsToPopup(supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE", new RadioOptionsListener() {
+				addRadioOptionsToPopup(sharedPreferences, supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_option) {
 						if( selected_option.equals("manual") ) {
@@ -634,12 +637,12 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "PopupView time 14: " + (System.nanoTime() - debug_time));
 
 				List<String> supported_scene_modes = preview.getSupportedSceneModes();
-				addRadioOptionsToPopup(supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", null);
+				addRadioOptionsToPopup(sharedPreferences, supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", null);
 				if( MyDebug.LOG )
 					Log.d(TAG, "PopupView time 15: " + (System.nanoTime() - debug_time));
 
 				List<String> supported_color_effects = preview.getSupportedColorEffects();
-				addRadioOptionsToPopup(supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", null);
+				addRadioOptionsToPopup(sharedPreferences, supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", null);
 				if( MyDebug.LOG )
 					Log.d(TAG, "PopupView time 16: " + (System.nanoTime() - debug_time));
 			}
@@ -862,85 +865,150 @@ public class PopupView extends LinearLayout {
 		public abstract void onClick(String selected_option);
 	}
 
-	private void addRadioOptionsToPopup(List<String> supported_options, final String title, final String preference_key, final String default_option, final String test_key, final RadioOptionsListener listener) {
+	private void addRadioOptionsToPopup(final SharedPreferences sharedPreferences, final List<String> supported_options, final String title, final String preference_key, final String default_option, final String test_key, final RadioOptionsListener listener) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "addOptionsToPopup: " + title);
+			Log.d(TAG, "addRadioOptionsToPopup: " + title);
     	if( supported_options != null ) {
-    		final MainActivity main_activity = (MainActivity)this.getContext();
+			final MainActivity main_activity = (MainActivity)this.getContext();
 	    	final long debug_time = System.nanoTime();
 
-    		addTitleToPopup(title);
+    		//addTitleToPopup(title);
+			final Button button = new Button(this.getContext());
+			button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
+			button.setText(title + "...");
+			this.addView(button);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToPopup time 1: " + (System.nanoTime() - debug_time));
 
-    		RadioGroup rg = new RadioGroup(this.getContext()); 
+    		final RadioGroup rg = new RadioGroup(this.getContext());
         	rg.setOrientation(RadioGroup.VERTICAL);
+			rg.setVisibility(View.GONE);
         	this.popup_buttons.put(test_key, rg);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToPopup time 2: " + (System.nanoTime() - debug_time));
 
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-			String current_option = sharedPreferences.getString(preference_key, default_option);
-			if( MyDebug.LOG )
-				Log.d(TAG, "addRadioOptionsToPopup time 3: " + (System.nanoTime() - debug_time));
-        	for(final String supported_option : supported_options) {
-        		if( MyDebug.LOG )
-        			Log.d(TAG, "supported_option: " + supported_option);
-				if( MyDebug.LOG )
-					Log.d(TAG, "addRadioOptionsToPopup time 3.1: " + (System.nanoTime() - debug_time));
-        		//Button button = new Button(this);
-        		RadioButton button = new RadioButton(this.getContext());
-				if( MyDebug.LOG )
-					Log.d(TAG, "addRadioOptionsToPopup time 3.2: " + (System.nanoTime() - debug_time));
-        		button.setText(supported_option);
-        		button.setTextColor(Color.WHITE);
-				if( MyDebug.LOG )
-					Log.d(TAG, "addRadioOptionsToPopup time 3.3: " + (System.nanoTime() - debug_time));
-        		if( supported_option.equals(current_option) ) {
-        			button.setChecked(true);
-        		}
-        		else {
-        			button.setChecked(false);
-        		}
-				if( MyDebug.LOG )
-					Log.d(TAG, "addRadioOptionsToPopup time 3.4: " + (System.nanoTime() - debug_time));
-    			//ll.addView(button);
-    			rg.addView(button);
-				if( MyDebug.LOG )
-					Log.d(TAG, "addRadioOptionsToPopup time 3.5: " + (System.nanoTime() - debug_time));
-    			button.setContentDescription(supported_option);
-				if( MyDebug.LOG )
-					Log.d(TAG, "addRadioOptionsToPopup time 3.6: " + (System.nanoTime() - debug_time));
-    			button.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "clicked current_option: " + supported_option);
-						if( listener != null ) {
-							listener.onClick(supported_option);
-						}
-						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putString(preference_key, supported_option);
-						editor.apply();
+			button.setOnClickListener(new OnClickListener() {
+				private boolean opened = false;
+				private boolean created = false;
 
-						main_activity.updateForSettings(title + ": " + supported_option);
-						main_activity.closePopup();
+				@Override
+				public void onClick(View view) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "clicked to open radio buttons menu: " + title);
+					if( opened ) {
+						//rg.removeAllViews();
+						rg.setVisibility(View.GONE);
+						final ScrollView popup_container = (ScrollView) main_activity.findViewById(R.id.popup_container);
+						// need to invalidate/requestLayout so that the scrollview's scroll positions update - otherwise scrollBy below doesn't work properly, when the user reopens the radio buttons
+						popup_container.invalidate();
+						popup_container.requestLayout();
 					}
-    			});
-				if( MyDebug.LOG )
-					Log.d(TAG, "addRadioOptionsToPopup time 3.7: " + (System.nanoTime() - debug_time));
-    			this.popup_buttons.put(test_key + "_" + supported_option, button);
-				if( MyDebug.LOG )
-					Log.d(TAG, "addRadioOptionsToPopup time 3.8: " + (System.nanoTime() - debug_time));
-        	}
-			if( MyDebug.LOG )
-				Log.d(TAG, "addRadioOptionsToPopup time 4: " + (System.nanoTime() - debug_time));
+					else {
+						if( !created ) {
+							addRadioOptionsToGroup(rg, sharedPreferences, supported_options, title, preference_key, default_option, test_key, listener);
+							created = true;
+						}
+						rg.setVisibility(View.VISIBLE);
+						final ScrollView popup_container = (ScrollView) main_activity.findViewById(R.id.popup_container);
+						popup_container.getViewTreeObserver().addOnGlobalLayoutListener(
+								new OnGlobalLayoutListener() {
+									@SuppressWarnings("deprecation")
+									@Override
+									public void onGlobalLayout() {
+										if( MyDebug.LOG )
+											Log.d(TAG, "onGlobalLayout()");
+										// stop listening - only want to call this once!
+										if( Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 ) {
+											popup_container.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+										}
+										else {
+											popup_container.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+										}
+
+										// so that the user sees the options appear, if the button is at the bottom of the current scrollview position
+										if( rg.getChildCount() > 0 ) {
+											int id = rg.getCheckedRadioButtonId();
+											if( id >= 0 && id < rg.getChildCount() ) {
+												popup_container.smoothScrollBy(0, rg.getChildAt(id).getBottom());
+											}
+										}
+									}
+								}
+						);
+					}
+					opened = !opened;
+				}
+			});
+
         	this.addView(rg);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToPopup time 5: " + (System.nanoTime() - debug_time));
         }
     }
+
+    private void addRadioOptionsToGroup(final RadioGroup rg, SharedPreferences sharedPreferences, List<String> supported_options, final String title, final String preference_key, final String default_option, final String test_key, final RadioOptionsListener listener) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "addRadioOptionsToGroup: " + title);
+		String current_option = sharedPreferences.getString(preference_key, default_option);
+		final long debug_time = System.nanoTime();
+		final MainActivity main_activity = (MainActivity)this.getContext();
+		int count = 0;
+		for(final String supported_option : supported_options) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "supported_option: " + supported_option);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToGroup time 1: " + (System.nanoTime() - debug_time));
+			RadioButton button = new RadioButton(this.getContext());
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToGroup time 2: " + (System.nanoTime() - debug_time));
+
+			button.setId(count);
+
+			button.setText(supported_option);
+			button.setTextColor(Color.WHITE);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToGroup time 3: " + (System.nanoTime() - debug_time));
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToGroup time 4: " + (System.nanoTime() - debug_time));
+			rg.addView(button);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToGroup time 5: " + (System.nanoTime() - debug_time));
+
+			if( supported_option.equals(current_option) ) {
+				//button.setChecked(true);
+				rg.check(count);
+			}
+			count++;
+
+			button.setContentDescription(supported_option);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToGroup time 6: " + (System.nanoTime() - debug_time));
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "clicked current_option: " + supported_option);
+					if( listener != null ) {
+						listener.onClick(supported_option);
+					}
+					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+					SharedPreferences.Editor editor = sharedPreferences.edit();
+					editor.putString(preference_key, supported_option);
+					editor.apply();
+
+					main_activity.updateForSettings(title + ": " + supported_option);
+					main_activity.closePopup();
+				}
+			});
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToGroup time 7: " + (System.nanoTime() - debug_time));
+			this.popup_buttons.put(test_key + "_" + supported_option, button);
+			if( MyDebug.LOG )
+				Log.d(TAG, "addRadioOptionsToGroup time 8: " + (System.nanoTime() - debug_time));
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "addRadioOptionsToGroup time total: " + (System.nanoTime() - debug_time));
+	}
     
     private abstract class ArrayOptionsPopupListener {
 		public abstract int onClickPrev();

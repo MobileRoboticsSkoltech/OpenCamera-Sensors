@@ -469,7 +469,9 @@ public class CameraController1 extends CameraController {
 		}
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
-			if( !parameters.getWhiteBalance().equals(supported_values.selected_value) ) {
+			String white_balance = parameters.getWhiteBalance();
+			// if white balance is null, it should mean white balances aren't supported anyway
+			if( white_balance != null && !white_balance.equals(supported_values.selected_value) ) {
 	        	parameters.setWhiteBalance(supported_values.selected_value);
 	        	setCameraParameters(parameters);
 			}
@@ -806,9 +808,17 @@ public class CameraController1 extends CameraController {
 	public void setPreviewFpsRange(int min, int max) {
     	if( MyDebug.LOG )
     		Log.d(TAG, "setPreviewFpsRange: " + min + " to " + max);
-		Camera.Parameters parameters = this.getParameters();
-        parameters.setPreviewFpsRange(min, max);
-    	setCameraParameters(parameters);
+		try {
+			Camera.Parameters parameters = this.getParameters();
+			parameters.setPreviewFpsRange(min, max);
+			setCameraParameters(parameters);
+		}
+		catch(RuntimeException e) {
+			// can get RuntimeException from getParameters - we don't catch within that function because callers may not be able to recover,
+			// but here it doesn't really matter if we fail to set the fps range
+    		Log.e(TAG, "setPreviewFpsRange failed to get parameters");
+			e.printStackTrace();
+		}
 	}
 	
 	public List<int []> getSupportedPreviewFpsRange() {
