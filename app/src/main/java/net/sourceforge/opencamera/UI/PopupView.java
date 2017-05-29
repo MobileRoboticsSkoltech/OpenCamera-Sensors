@@ -948,6 +948,7 @@ public class PopupView extends LinearLayout {
 		String current_option = sharedPreferences.getString(preference_key, default_option);
 		final long debug_time = System.nanoTime();
 		final MainActivity main_activity = (MainActivity)this.getContext();
+		int count = 0;
 		for(final String supported_option : supported_options) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "supported_option: " + supported_option);
@@ -956,18 +957,25 @@ public class PopupView extends LinearLayout {
 			RadioButton button = new RadioButton(this.getContext());
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToGroup time 2: " + (System.nanoTime() - debug_time));
+
+			button.setId(count);
+
 			button.setText(supported_option);
 			button.setTextColor(Color.WHITE);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToGroup time 3: " + (System.nanoTime() - debug_time));
-			if( supported_option.equals(current_option) ) {
-				button.setChecked(true);
-			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToGroup time 4: " + (System.nanoTime() - debug_time));
 			rg.addView(button);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToGroup time 5: " + (System.nanoTime() - debug_time));
+
+			if( supported_option.equals(current_option) ) {
+				//button.setChecked(true);
+				rg.check(count);
+			}
+			count++;
+
 			button.setContentDescription(supported_option);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToGroup time 6: " + (System.nanoTime() - debug_time));
