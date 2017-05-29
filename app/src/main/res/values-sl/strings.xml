@@ -282,6 +282,8 @@
 
     <string name="saf_select_save_location">Izberite mesto za shranjevanje</string>
     <string name="saf_cancelled">Ogrodje za dostop do pomnilniške naprave preklicano</string>
+	
+	<string name="saf_permission_failed">Ni mogoče shraniti v to mapo</string>
     
     <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
     <string name="permission_record_audio_not_available">Dovoljenje za mikrofon ni na voljo</string>
