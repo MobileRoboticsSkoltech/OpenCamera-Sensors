@@ -1498,10 +1498,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
 			    		}
 		    		}
-		    		catch(NoClassDefFoundError exception) {
-		    			// have had Google Play crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn)
-		    			if( MyDebug.LOG )
-		    				Log.e(TAG, "exif orientation NoClassDefFoundError");
+		    		catch(Throwable exception) {
+		    			// have had Google Play NoClassDefFoundError crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn)
+						// also NegativeArraySizeException - best to catch everything
+ 		    			if( MyDebug.LOG )
+		    				Log.e(TAG, "exif orientation exception");
 		    			exception.printStackTrace();
 		    		}
 		    		if( thumbnail != null ) {
