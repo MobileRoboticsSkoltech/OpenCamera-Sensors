@@ -7034,7 +7034,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    TextView photoResolutionButton = (TextView)mActivity.getPopupButton("PHOTO_RESOLUTIONS");
 	    assertTrue(photoResolutionButton != null);
-		String exp_size_string = old_picture_size.width + " x " + old_picture_size.height + " " + Preview.getMPString(old_picture_size.width, old_picture_size.height);
+		//String exp_size_string = old_picture_size.width + " x " + old_picture_size.height + " " + Preview.getMPString(old_picture_size.width, old_picture_size.height);
+		String exp_size_string = old_picture_size.width + " x " + old_picture_size.height;
 		Log.d(TAG, "size string: " + photoResolutionButton.getText());
 	    assertTrue( photoResolutionButton.getText().equals(exp_size_string) );
 
@@ -7052,7 +7053,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue( !new_picture_size.equals(old_picture_size) );
 		assertTrue( mActivity.popupIsOpen() );
 
-		exp_size_string = new_picture_size.width + " x " + new_picture_size.height + " " + Preview.getMPString(new_picture_size.width, new_picture_size.height);
+		//exp_size_string = new_picture_size.width + " x " + new_picture_size.height + " " + Preview.getMPString(new_picture_size.width, new_picture_size.height);
+		exp_size_string = new_picture_size.width + " x " + new_picture_size.height;
 		Log.d(TAG, "size string: " + photoResolutionButton.getText());
 	    assertTrue( photoResolutionButton.getText().equals(exp_size_string) );
 
