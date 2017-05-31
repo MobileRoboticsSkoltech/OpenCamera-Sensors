@@ -518,14 +518,14 @@ public class StorageUtils {
 		catch(IllegalArgumentException e) {
 			// DocumentsContract.getTreeDocumentId throws this if URI is invalid
 			if( MyDebug.LOG )
-				Log.e(TAG, "createOutputMediaFileSAF failed");
+				Log.e(TAG, "createOutputMediaFileSAF failed with IllegalArgumentException");
 			e.printStackTrace();
 			throw new IOException();
 		}
 		catch(SecurityException e) {
 			// Have reports of this from GooglePlay - better to fail gracefully and tell user rather than crash!
 			if( MyDebug.LOG )
-				Log.e(TAG, "createOutputMediaFileSAF failed");
+				Log.e(TAG, "createOutputMediaFileSAF failed with SecurityException");
 			e.printStackTrace();
 			throw new IOException();
 		}
