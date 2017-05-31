@@ -6328,16 +6328,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+
 	    final ZoomControls zoomControls = (ZoomControls) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom);
 		assertTrue(zoomControls.getVisibility() == View.INVISIBLE);
 
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), true);
-		editor.apply();
-		updateForSettings();
-
-		assertTrue(zoomControls.getVisibility() == View.VISIBLE);
 	    final SeekBar zoomSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
 		assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 		int max_zoom = mPreview.getMaxZoom();
@@ -6362,7 +6358,80 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    int zoom = mPreview.getCameraController().getZoom();
 
-	    // use buttons to zoom
+	    // now test multitouch zoom
+	    mPreview.scaleZoom(2.0f);
+		this.getInstrumentation().waitForIdleSync();
+	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() > zoom);
+		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
+
+	    mPreview.scaleZoom(0.5f);
+		this.getInstrumentation().waitForIdleSync();
+	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() == zoom);
+		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
+
+		// test to max/min
+	    mPreview.scaleZoom(10000.0f);
+		this.getInstrumentation().waitForIdleSync();
+	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to max_zoom " + max_zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
+		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
+		
+	    mPreview.scaleZoom(1.0f/10000.0f);
+		this.getInstrumentation().waitForIdleSync();
+	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zero");
+	    assertTrue(mPreview.getCameraController().getZoom() == 0);
+		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
+
+		// use seekbar to zoom
+		Log.d(TAG, "zoom to max");
+		Log.d(TAG, "progress was: " + zoomSeekBar.getProgress());
+	    zoomSeekBar.setProgress(0);
+		this.getInstrumentation().waitForIdleSync();
+	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to max_zoom " + max_zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
+		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
+	    if( mPreview.supportsFocus() ) {
+	    	// check that focus areas cleared
+			assertTrue(!mPreview.hasFocusArea());
+		    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
+		    assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
+	    }
+
+		Log.d(TAG, "zoom to min");
+		Log.d(TAG, "progress was: " + zoomSeekBar.getProgress());
+	    zoomSeekBar.setProgress(zoomSeekBar.getMax());
+		this.getInstrumentation().waitForIdleSync();
+	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() == zoom);
+		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
+
+	    // use volume keys to zoom in/out
+		editor.putString(PreferenceKeys.getVolumeKeysPreferenceKey(), "volume_zoom");
+		editor.apply();
+
+		Log.d(TAG, "zoom in with volume keys");
+		this.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_VOLUME_UP);
+		this.getInstrumentation().waitForIdleSync();
+	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() == zoom+1);
+		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
+
+		Log.d(TAG, "zoom out with volume keys");
+		this.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_VOLUME_DOWN);
+		this.getInstrumentation().waitForIdleSync();
+	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() == zoom);
+		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
+
+		// now test with -/+ controls
+
+		editor.putBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), true);
+		editor.apply();
+		updateForSettings();
+		assertTrue(zoomControls.getVisibility() == View.VISIBLE);
+
 		Log.d(TAG, "zoom in");
 	    mActivity.zoomIn();
 		this.getInstrumentation().waitForIdleSync();
@@ -6405,46 +6474,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
 	    }
 
-	    // now test multitouch zoom
-	    mPreview.scaleZoom(2.0f);
+	    // now test with slider invisible
+
+		editor.putBoolean(PreferenceKeys.getShowZoomSliderControlsPreferenceKey(), false);
+		editor.apply();
+		updateForSettings();
+		assertTrue(zoomSeekBar.getVisibility() == View.INVISIBLE);
+
+		Log.d(TAG, "zoom in");
+	    mActivity.zoomIn();
 		this.getInstrumentation().waitForIdleSync();
 	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
-	    assertTrue(mPreview.getCameraController().getZoom() > zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() == zoom+1);
 		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
 
-	    mPreview.scaleZoom(0.5f);
+		Log.d(TAG, "zoom out");
+		mActivity.zoomOut();
 		this.getInstrumentation().waitForIdleSync();
 	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + zoom);
 	    assertTrue(mPreview.getCameraController().getZoom() == zoom);
 		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
-
-		// test to max/min
-	    mPreview.scaleZoom(10000.0f);
-		this.getInstrumentation().waitForIdleSync();
-	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to max_zoom " + max_zoom);
-	    assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
-		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
-		
-	    mPreview.scaleZoom(1.0f/10000.0f);
-		this.getInstrumentation().waitForIdleSync();
-	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zero");
-	    assertTrue(mPreview.getCameraController().getZoom() == 0);
-		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
-
-		// use seekbar to zoom
-		Log.d(TAG, "zoom to max");
-		Log.d(TAG, "progress was: " + zoomSeekBar.getProgress());
-	    zoomSeekBar.setProgress(0);
-		this.getInstrumentation().waitForIdleSync();
-	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to max_zoom " + max_zoom);
-	    assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
-		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
-	    if( mPreview.supportsFocus() ) {
-	    	// check that focus areas cleared
-			assertTrue(!mPreview.hasFocusArea());
-		    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
-		    assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
-	    }
 	}
 
 	public void testZoomIdle() {
