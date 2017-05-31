@@ -2661,7 +2661,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "    old zoom_factor " + zoom_factor + " ratio " + zoom_ratios.get(zoom_factor)/100.0f);
 				Log.d(TAG, "    chosen new zoom_factor " + new_zoom_factor + " ratio " + zoom_ratios.get(new_zoom_factor)/100.0f);
 			}
-			zoomTo(new_zoom_factor);
+			// n.b., don't call zoomTo; this should be called indirectly by applicationInterface.multitouchZoom()
 			applicationInterface.multitouchZoom(new_zoom_factor);
 		}
 	}

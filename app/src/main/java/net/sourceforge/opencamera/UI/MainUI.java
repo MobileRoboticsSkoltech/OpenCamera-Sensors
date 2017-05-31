@@ -706,11 +706,13 @@ public class MainUI {
 		}
     }
 
-	public void setSeekbarZoom() {
+	public void setSeekbarZoom(int new_zoom) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setSeekbarZoom");
+			Log.d(TAG, "setSeekbarZoom: " + new_zoom);
 	    SeekBar zoomSeekBar = (SeekBar) main_activity.findViewById(R.id.zoom_seekbar);
-		zoomSeekBar.setProgress(main_activity.getPreview().getMaxZoom()-main_activity.getPreview().getCameraController().getZoom());
+		if( MyDebug.LOG )
+			Log.d(TAG, "progress was: " + zoomSeekBar.getProgress());
+		zoomSeekBar.setProgress(main_activity.getPreview().getMaxZoom()-new_zoom);
 		if( MyDebug.LOG )
 			Log.d(TAG, "progress is now: " + zoomSeekBar.getProgress());
 	}
