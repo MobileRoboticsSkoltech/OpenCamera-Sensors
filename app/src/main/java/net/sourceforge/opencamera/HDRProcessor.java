@@ -43,8 +43,10 @@ public class HDRProcessor {
 
 	public enum TonemappingAlgorithm {
 		TONEMAPALGORITHM_CLAMP,
+		TONEMAPALGORITHM_EXPONENTIAL,
 		TONEMAPALGORITHM_REINHARD,
-		TONEMAPALGORITHM_FILMIC
+		TONEMAPALGORITHM_FILMIC,
+		TONEMAPALGORITHM_ACES
 	}
 	
 	public HDRProcessor(Context context) {
@@ -576,6 +578,11 @@ public class HDRProcessor {
 					Log.d(TAG, "tonemapping algorithm: clamp");
 				processHDRScript.set_tonemap_algorithm( processHDRScript.get_tonemap_algorithm_clamp_c() );
 				break;
+            case TONEMAPALGORITHM_EXPONENTIAL:
+				if( MyDebug.LOG )
+					Log.d(TAG, "tonemapping algorithm: exponential");
+				processHDRScript.set_tonemap_algorithm( processHDRScript.get_tonemap_algorithm_exponential_c() );
+				break;
 			case TONEMAPALGORITHM_REINHARD:
 				if( MyDebug.LOG )
 					Log.d(TAG, "tonemapping algorithm: reinhard");
@@ -585,6 +592,11 @@ public class HDRProcessor {
 				if( MyDebug.LOG )
 					Log.d(TAG, "tonemapping algorithm: filmic");
 				processHDRScript.set_tonemap_algorithm( processHDRScript.get_tonemap_algorithm_filmic_c() );
+				break;
+			case TONEMAPALGORITHM_ACES:
+				if( MyDebug.LOG )
+					Log.d(TAG, "tonemapping algorithm: aces");
+				processHDRScript.set_tonemap_algorithm( processHDRScript.get_tonemap_algorithm_aces_c() );
 				break;
 		}
 
