@@ -18,6 +18,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
+import android.renderscript.RSInvalidStateException;
 import android.renderscript.RenderScript;
 import android.renderscript.Script;
 import android.renderscript.ScriptIntrinsicHistogram;
@@ -57,7 +58,12 @@ public class HDRProcessor {
 			// need to destroy context, otherwise this isn't necessarily garbage collected - we had tests failing with out of memory
 			// problems e.g. when running MainTests as a full set with Camera2 API. Although we now reduce the problem by creating
 			// the rs lazily, it's still good to explicitly clear.
-			rs.destroy(); // on Android M onwards this is a NOP - instead we call RenderScript.releaseAllContexts(); in MainActivity.onDestroy()
+			try {
+				rs.destroy(); // on Android M onwards this is a NOP - instead we call RenderScript.releaseAllContexts(); in MainActivity.onDestroy()
+			}
+			catch(RSInvalidStateException e) {
+				e.printStackTrace();
+	        }
 			rs = null;
 		}
 	}
