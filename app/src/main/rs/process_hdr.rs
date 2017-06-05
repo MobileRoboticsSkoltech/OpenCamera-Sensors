@@ -18,8 +18,10 @@ float parameter_B2 = 0.0f;
 const float weight_scale_c = (float)((1.0-1.0/127.5)/127.5);
 
 const int tonemap_algorithm_clamp_c = 0;
-const int tonemap_algorithm_reinhard_c = 1;
-const int tonemap_algorithm_filmic_c = 2;
+const int tonemap_algorithm_exponential_c = 1;
+const int tonemap_algorithm_reinhard_c = 2;
+const int tonemap_algorithm_filmic_c = 3;
+const int tonemap_algorithm_aces_c = 4;
 
 int tonemap_algorithm = tonemap_algorithm_reinhard_c;
 
@@ -166,8 +168,10 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 
 	// tonemap
 	uchar4 out;
+    switch( tonemap_algorithm )
 	{
-	    if( tonemap_algorithm == tonemap_algorithm_clamp_c ) {
+	    case tonemap_algorithm_clamp_c:
+	    {
             // Simple clamp
             int r = (int)hdr.r;
             int g = (int)hdr.g;
@@ -179,8 +183,19 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
             out.g = g;
             out.b = b;
             out.a = 255;
+            break;
         }
-	    else if( tonemap_algorithm == tonemap_algorithm_reinhard_c ) {
+	    case tonemap_algorithm_exponential_c:
+	    {
+	        const float exposure = 1.2f;
+        	float3 out_f = 255.0f * (1.0 - exp( - exposure * hdr / 255.0f ));
+            out.r = (uchar)clamp(out_f.r, 0.0f, 255.0f);
+            out.g = (uchar)clamp(out_f.g, 0.0f, 255.0f);
+            out.b = (uchar)clamp(out_f.b, 0.0f, 255.0f);
+            break;
+	    }
+	    case tonemap_algorithm_reinhard_c:
+	    {
             float max_hdr = fmax(hdr.r, hdr.g);
             max_hdr = fmax(max_hdr, hdr.b);
             float scale = 255.0f / ( tonemap_scale + max_hdr );
@@ -188,8 +203,10 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
             out.g = (uchar)(scale * hdr.g);
             out.b = (uchar)(scale * hdr.b);
             out.a = 255;
+            break;
         }
-	    else if( tonemap_algorithm == tonemap_algorithm_filmic_c ) {
+	    case tonemap_algorithm_filmic_c:
+	    {
             // Filmic Uncharted 2
             const float exposure_bias = 2.0f / 255.0f;
             float white_scale = 255.0f / Uncharted2Tonemap(W);
@@ -202,7 +219,22 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
             out.r = (uchar)clamp(curr_r, 0.0f, 255.0f);
             out.g = (uchar)clamp(curr_g, 0.0f, 255.0f);
             out.b = (uchar)clamp(curr_b, 0.0f, 255.0f);
+            break;
         }
+	    case tonemap_algorithm_aces_c:
+	    {
+            const float a = 2.51f;
+            const float b = 0.03f;
+            const float c = 2.43f;
+            const float d = 0.59f;
+            const float e = 0.14f;
+            float3 x = hdr/255.0;
+            float3 out_f = 255.0f * (x*(a*x+b))/(x*(c*x+d)+e);
+            out.r = (uchar)clamp(out_f.r, 0.0f, 255.0f);
+            out.g = (uchar)clamp(out_f.g, 0.0f, 255.0f);
+            out.b = (uchar)clamp(out_f.b, 0.0f, 255.0f);
+            break;
+	    }
 	}
 
     /*
