@@ -223,15 +223,15 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
         }
 	    case tonemap_algorithm_aces_c:
 	    {
-            const float a = 2.51f;
-            const float b = 0.03f;
-            const float c = 2.43f;
-            const float d = 0.59f;
-            const float e = 0.14f;
-            float3 x = hdr/255.0;
-            float3 out_f = 255.0f * (x*(a*x+b))/(x*(c*x+d)+e);
-            out.r = (uchar)clamp(out_f.r, 0.0f, 255.0f);
-            out.g = (uchar)clamp(out_f.g, 0.0f, 255.0f);
+	        const float a = 2.51f;
+	        const float b = 0.03f;
+	        const float c = 2.43f;
+	        const float d = 0.59f;
+	        const float e = 0.14f;
+	        float3 x = hdr/255.0;
+	        float3 out_f = 255.0f * (x*(a*x+b))/(x*(c*x+d)+e);
+	        out.r = (uchar)clamp(out_f.r, 0.0f, 255.0f);
+	        out.g = (uchar)clamp(out_f.g, 0.0f, 255.0f);
             out.b = (uchar)clamp(out_f.b, 0.0f, 255.0f);
             break;
 	    }
