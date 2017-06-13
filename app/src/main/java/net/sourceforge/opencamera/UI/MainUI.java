@@ -36,6 +36,7 @@ public class MainUI {
 
 	private volatile boolean popup_view_is_open; // must be volatile for test project reading the state
     private PopupView popup_view;
+	private final boolean cache_popup = false; // if false, we recreate the popup each time
 
     private int current_orientation;
 	private boolean ui_placement_right = true;
@@ -779,8 +780,6 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "close popup");
 		if( popupIsOpen() ) {
-			ViewGroup popup_container = (ViewGroup)main_activity.findViewById(R.id.popup_container);
-			popup_container.removeAllViews();
 			popup_view_is_open = false;
 			/* Not destroying the popup doesn't really gain any performance.
 			 * Also there are still outstanding bugs to fix if we wanted to do this:
@@ -791,8 +790,12 @@ public class MainUI {
 			 *     MainActivity.updateForSettings(), but doing so makes the popup close when checking photo or video resolutions!
 			 *     See test testSwitchResolution().
 			 */
-			destroyPopup();
-			//popup_view.setVisibility(View.GONE);
+			if( cache_popup ) {
+				popup_view.setVisibility(View.GONE);
+			}
+			else {
+				destroyPopup();
+			}
 			main_activity.initImmersiveMode(); // to reset the timer when closing the popup
 		}
     }
@@ -841,14 +844,13 @@ public class MainUI {
 			if( MyDebug.LOG )
 				Log.d(TAG, "create new popup_view");
     		popup_view = new PopupView(main_activity);
-			//popup_container.addView(popup_view);
+			popup_container.addView(popup_view);
     	}
     	else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "use cached popup_view");
-			//popup_view.setVisibility(View.VISIBLE);
+			popup_view.setVisibility(View.VISIBLE);
     	}
-		popup_container.addView(popup_view);
 		popup_view_is_open = true;
 		
         // need to call layoutUI to make sure the new popup is oriented correctly
