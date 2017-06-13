@@ -139,7 +139,7 @@ public class CameraController2 extends CameraController {
 	private boolean capture_result_has_exposure_time;
 	private long capture_result_exposure_time;
 	private boolean capture_result_has_frame_duration;
-	private long capture_result_frame_duration ;
+	private long capture_result_frame_duration;
 	/*private boolean capture_result_has_focus_distance;
 	private float capture_result_focus_distance_min;
 	private float capture_result_focus_distance_max;*/
@@ -2165,6 +2165,58 @@ public class CameraController2 extends CameraController {
 										take_picture_error_cb = null;
 									}
 								}
+								/*
+								// code for focus bracketing
+								try {
+									float focus_distance = burst_capture_requests.get(pending_burst_images.size()).get(CaptureRequest.LENS_FOCUS_DISTANCE);
+									if( MyDebug.LOG ) {
+										Log.d(TAG, "prepare preview for next focus_distance: " + focus_distance);
+									}
+									previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
+									previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
+
+									setRepeatingRequest(previewBuilder.build());
+									//captureSession.capture(burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+								}
+								catch(CameraAccessException e) {
+									if( MyDebug.LOG ) {
+										Log.e(TAG, "failed to take next burst");
+										Log.e(TAG, "reason: " + e.getReason());
+										Log.e(TAG, "message: " + e.getMessage());
+									}
+									e.printStackTrace();
+									jpeg_cb = null;
+									if( take_picture_error_cb != null ) {
+										take_picture_error_cb.onError();
+										take_picture_error_cb = null;
+									}
+								}
+								handler.postDelayed(new Runnable(){
+									@Override
+									public void run(){
+										if( MyDebug.LOG )
+											Log.d(TAG, "take picture after delay for next expo");
+										if( camera != null ) { // make sure camera wasn't released in the meantime
+											try {
+												captureSession.capture(burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+											}
+											catch(CameraAccessException e) {
+												if( MyDebug.LOG ) {
+													Log.e(TAG, "failed to take next burst");
+													Log.e(TAG, "reason: " + e.getReason());
+													Log.e(TAG, "message: " + e.getMessage());
+												}
+												e.printStackTrace();
+												jpeg_cb = null;
+												if( take_picture_error_cb != null ) {
+													take_picture_error_cb.onError();
+													take_picture_error_cb = null;
+												}
+											}
+										}
+								   }
+								}, 500);
+								*/
 							}
 		            	}
 		            }
@@ -3634,6 +3686,10 @@ public class CameraController2 extends CameraController {
 
 			List<CaptureRequest> requests = new ArrayList<>();
 
+			final boolean is_expo = true; // true for expo, false for focus
+
+			if( is_expo ) {
+
 			/*stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 			stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 
@@ -3709,7 +3765,7 @@ public class CameraController2 extends CameraController {
 					requests.add( stillBuilder.build() );
 				}
 			}
-			
+
 			// base image
 			if( MyDebug.LOG )
 				Log.d(TAG, "add burst request for base image");
@@ -3744,6 +3800,46 @@ public class CameraController2 extends CameraController {
 					requests.add( stillBuilder.build() );
 				}
 			}
+
+			}
+			/*else {
+				float base_focus_distance = 2.0f;
+				if( camera_settings.has_af_mode && camera_settings.af_mode == CaptureRequest.CONTROL_AF_MODE_OFF )
+					base_focus_distance = camera_settings.focus_distance;
+				else if( capture_result_has_focus_distance ) {
+					base_focus_distance = capture_result_focus_distance_min;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "capture_result_focus_distance_min: " + capture_result_focus_distance_min);
+						Log.d(TAG, "capture_result_focus_distance_max: " + capture_result_focus_distance_max);
+					}
+				}
+
+				float min_focus_distance = base_focus_distance;
+				Float minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE); // may be null on some devices
+				if( minimum_focus_distance != null ) {
+					min_focus_distance = minimum_focus_distance;
+				}
+				float max_focus_distance = 0.0f;
+
+
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "min_focus_distance: " + min_focus_distance);
+					Log.d(TAG, "base_focus_distance: " + base_focus_distance);
+				}
+
+				requests.add( stillBuilder.build() );
+
+				stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
+
+				stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, min_focus_distance);
+				requests.add( stillBuilder.build() );
+
+				stillBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, max_focus_distance);
+				stillBuilder.setTag(RequestTag.CAPTURE); // set capture tag for last only
+				requests.add( stillBuilder.build() );
+
+				use_expo_fast_burst = false;
+			}*/
 
 			/*
 			// testing:
