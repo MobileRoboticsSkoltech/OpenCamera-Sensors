@@ -1152,6 +1152,27 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				return;
 			}
 		}*/
+
+		openCameraCore();
+
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "openCamera: time after opening camera: " + (System.currentTimeMillis() - debug_time));
+		}
+
+		cameraOpened();
+
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "openCamera: total time to open camera: " + (System.currentTimeMillis() - debug_time));
+		}
+
+	}
+
+	private void openCameraCore() {
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "openCameraCore()");
+			debug_time = System.currentTimeMillis();
+		}
 		try {
 			int cameraId = applicationInterface.getCameraIdPref();
 			if( cameraId < 0 || cameraId >= camera_controller_manager.getNumberOfCameras() ) {
@@ -1187,7 +1208,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						applicationInterface.onFailedStartPreview();
 					}
 				};
-	        	camera_controller = new CameraController2(this.getContext(), cameraId, previewErrorCallback, cameraErrorCallback);
+	        	camera_controller = new CameraController2(Preview.this.getContext(), cameraId, previewErrorCallback, cameraErrorCallback);
 	    		if( applicationInterface.useCamera2FakeFlash() ) {
 	    			camera_controller.setUseCamera2FakeFlash(true);
 	    		}
@@ -1202,12 +1223,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			e.printStackTrace();
 			camera_controller = null;
 		}
+
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "openCamera: time after opening camera: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "openCamera: total time for openCameraCore: " + (System.currentTimeMillis() - debug_time));
+		}
+	}
+
+	private void cameraOpened() {
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "cameraOpened()");
+			debug_time = System.currentTimeMillis();
 		}
 		boolean take_photo = false;
 		if( camera_controller != null ) {
-			Activity activity = (Activity)this.getContext();
+			Activity activity = (Activity)Preview.this.getContext();
 			if( MyDebug.LOG )
 				Log.d(TAG, "intent: " + activity.getIntent());
 			if( activity.getIntent() != null && activity.getIntent().getExtras() != null ) {
@@ -1221,13 +1251,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "take_photo?: " + take_photo);
 
-	        this.setCameraDisplayOrientation();
-	        new OrientationEventListener(activity) {
+			setCameraDisplayOrientation();
+			new OrientationEventListener(activity) {
 				@Override
 				public void onOrientationChanged(int orientation) {
 					Preview.this.onOrientationChanged(orientation);
 				}
-	        }.enable();
+			}.enable();
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "openCamera: time after setting orientation: " + (System.currentTimeMillis() - debug_time));
 			}
@@ -1239,13 +1269,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "openCamera: time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
 
-		    setupCamera(take_photo);
+			setupCamera(take_photo);
 		}
 
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "openCamera: total time to open camera: " + (System.currentTimeMillis() - debug_time));
+			Log.d(TAG, "openCamera: total time for cameraOpened: " + (System.currentTimeMillis() - debug_time));
 		}
 	}
+
 
 	/** Try to reopen the camera, if not currently open (e.g., permission wasn't granted, but now it is).
 	 */
