@@ -108,7 +108,7 @@ public class PopupView extends LinearLayout {
 						Log.d(TAG, "clicked flash: " + option);
 					preview.updateFlash(option);
 			    	main_activity.getMainUI().setPopupIcon();
-					main_activity.closePopup();
+    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
 				}
 			});
 		}
@@ -137,7 +137,7 @@ public class PopupView extends LinearLayout {
     				if( MyDebug.LOG )
     					Log.d(TAG, "clicked focus: " + option);
     				preview.updateFocus(option, false, true);
-    				main_activity.closePopup();
+    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
     			}
     		});
 			if( MyDebug.LOG )
@@ -225,7 +225,7 @@ public class PopupView extends LinearLayout {
     				editor.apply();
 
     				main_activity.updateForSettings("ISO: " + toast_option);
-    				main_activity.closePopup();
+    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
     			}
     		});
 			if( MyDebug.LOG )
@@ -323,7 +323,7 @@ public class PopupView extends LinearLayout {
     	            		}
 
     	    				main_activity.updateForSettings(toast_message);
-    						main_activity.closePopup();
+		    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
         				}
         			}
         		});
@@ -360,7 +360,7 @@ public class PopupView extends LinearLayout {
 	            			String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
 	            			preview.showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
 	            		}
-						main_activity.closePopup();
+						main_activity.closePopup(); // don't need to destroy popup
 					}
         		});
 
@@ -384,7 +384,7 @@ public class PopupView extends LinearLayout {
 					public void run() {
 						if( MyDebug.LOG )
 							Log.d(TAG, "update settings due to resolution change");
-						main_activity.updateForSettings("");
+						main_activity.updateForSettings("", true); // keep the popupview open
 					}
 				};
 
@@ -438,7 +438,7 @@ public class PopupView extends LinearLayout {
 					public void run() {
 						if( MyDebug.LOG )
 							Log.d(TAG, "update settings due to video resolution change");
-						main_activity.updateForSettings("");
+						main_activity.updateForSettings("", true); // keep the popupview open
 					}
 				};
 

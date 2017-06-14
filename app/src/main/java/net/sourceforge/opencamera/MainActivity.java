@@ -1155,13 +1155,19 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     }
 
     public void updateForSettings() {
-    	updateForSettings(null);
+    	updateForSettings(null, false);
     }
+
+	public void updateForSettings(String toast_message) {
+		updateForSettings(toast_message, false);
+	}
 
 	/** Must be called when an settings (as stored in SharedPreferences) are made, so we can update the
 	 *  camera, and make any other necessary changes.
+     * @param keep_popup If false, the popup will be closed and destroyed. Set to true if you're sure
+	 *                   that the changed setting isn't one that requires the PopupView to be recreated
 	 */
-	public void updateForSettings(String toast_message) {
+	public void updateForSettings(String toast_message, boolean keep_popup) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings()");
 			if( toast_message != null ) {
@@ -1179,6 +1185,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "update folder history");
 		save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true);
 		// no need to update save_location_history_saf, as we always do this in onActivityResult()
+
+		if( !keep_popup ) {
+			mainUI.destroyPopup(); // important as we don't want to use a cached popup
+		}
 
 		// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
 		// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...

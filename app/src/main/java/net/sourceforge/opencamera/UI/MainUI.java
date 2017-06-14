@@ -36,6 +36,7 @@ public class MainUI {
 
 	private volatile boolean popup_view_is_open; // must be volatile for test project reading the state
     private PopupView popup_view;
+	private final boolean cache_popup = true; // if false, we recreate the popup each time
 
     private int current_orientation;
 	private boolean ui_placement_right = true;
@@ -120,6 +121,10 @@ public class MainUI {
 	}
 
     public void layoutUI() {
+		layoutUI(false);
+	}
+
+    private void layoutUI(boolean popup_container_only) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "layoutUI");
@@ -176,6 +181,7 @@ public class MainUI {
 			align_parent_bottom = RelativeLayout.ALIGN_PARENT_TOP;
 		}
 
+		if( !popup_container_only )
 		{
 			// we use a dummy button, so that the GUI buttons keep their positioning even if the Settings button is hidden (visibility set to View.GONE)
 			View view = main_activity.findViewById(R.id.gui_anchor);
@@ -344,6 +350,7 @@ public class MainUI {
 			view.setLayoutParams(layoutParams);
 		}
 
+		if( !popup_container_only )
 		{
 			// set seekbar info
 			int width_dp;
@@ -431,8 +438,10 @@ public class MainUI {
 			}
 		}
 
-		setTakePhotoIcon();
-		// no need to call setSwitchCameraContentDescription()
+		if( !popup_container_only ) {
+			setTakePhotoIcon();
+			// no need to call setSwitchCameraContentDescription()
+		}
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "layoutUI: total time: " + (System.currentTimeMillis() - debug_time));
@@ -779,8 +788,6 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "close popup");
 		if( popupIsOpen() ) {
-			ViewGroup popup_container = (ViewGroup)main_activity.findViewById(R.id.popup_container);
-			popup_container.removeAllViews();
 			popup_view_is_open = false;
 			/* Not destroying the popup doesn't really gain any performance.
 			 * Also there are still outstanding bugs to fix if we wanted to do this:
@@ -791,8 +798,12 @@ public class MainUI {
 			 *     MainActivity.updateForSettings(), but doing so makes the popup close when checking photo or video resolutions!
 			 *     See test testSwitchResolution().
 			 */
-			destroyPopup();
-			//popup_view.setVisibility(View.GONE);
+			if( cache_popup ) {
+				popup_view.setVisibility(View.GONE);
+			}
+			else {
+				destroyPopup();
+			}
 			main_activity.initImmersiveMode(); // to reset the timer when closing the popup
 		}
     }
@@ -841,14 +852,13 @@ public class MainUI {
 			if( MyDebug.LOG )
 				Log.d(TAG, "create new popup_view");
     		popup_view = new PopupView(main_activity);
-			//popup_container.addView(popup_view);
+			popup_container.addView(popup_view);
     	}
     	else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "use cached popup_view");
-			//popup_view.setVisibility(View.VISIBLE);
+			popup_view.setVisibility(View.VISIBLE);
     	}
-		popup_container.addView(popup_view);
 		popup_view_is_open = true;
 		
         // need to call layoutUI to make sure the new popup is oriented correctly
@@ -864,13 +874,14 @@ public class MainUI {
 						Log.d(TAG, "onGlobalLayout()");
 					if( MyDebug.LOG )
 						Log.d(TAG, "time after global layout: " + (System.currentTimeMillis() - time_s));
-					layoutUI();
+					layoutUI(true);
 					if( MyDebug.LOG )
 						Log.d(TAG, "time after layoutUI: " + (System.currentTimeMillis() - time_s));
 		    		// stop listening - only want to call this once!
-		            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+		            if( Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 ) {
 		            	popup_container.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-		            } else {
+		            }
+		            else {
 		            	popup_container.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 		            }
 

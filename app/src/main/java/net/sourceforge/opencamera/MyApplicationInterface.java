@@ -988,6 +988,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		view.setImageResource(R.drawable.take_video_recording);
 		view.setContentDescription( getContext().getResources().getString(R.string.stop_video) );
 		view.setTag(R.drawable.take_video_recording); // for testing
+		main_activity.getMainUI().destroyPopup(); // as the available popup options change while recording video
 	}
 
 	@Override
@@ -1168,6 +1169,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
 		pauseVideoButton.setVisibility(View.INVISIBLE);
 		main_activity.getMainUI().setPauseVideoContentDescription(); // just to be safe
+		main_activity.getMainUI().destroyPopup(); // as the available popup options change while recording video
 		if( subtitleVideoTimerTask != null ) {
 			subtitleVideoTimerTask.cancel();
 			subtitleVideoTimerTask = null;
