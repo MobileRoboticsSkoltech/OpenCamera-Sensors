@@ -916,6 +916,9 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "wait until camera opened...");
 		// need to wait until camera is opened
+		// whilst this blocks, this should be running on a background thread anyway (see Preview.openCamera()) - due to maintaining
+		// compatibility with the way the old camera API works, it's easier to handle running on a background thread at a higher level,
+		// rather than exiting here
 		synchronized( open_camera_lock ) {
 			while( !myStateCallback.callback_done ) {
 				try {
