@@ -917,6 +917,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public void clickedSwitchCamera(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchCamera");
+		if( preview.isOpeningCamera() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "already opening camera in background thread");
+			return;
+		}
 		this.closePopup();
 		if( this.preview.canSwitchCamera() ) {
 			int cameraId = getNextCameraId();
@@ -924,7 +929,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		    switchCameraButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
 			this.preview.setCamera(cameraId);
 		    switchCameraButton.setEnabled(true);
-			mainUI.setSwitchCameraContentDescription();
+			// no need to call mainUI.setSwitchCameraContentDescription - this will be called from PreviewcameraSetup when the
+			// new camera is opened
 		}
     }
 
@@ -934,7 +940,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		this.closePopup();
 	    View switchVideoButton = findViewById(R.id.switch_video);
 	    switchVideoButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
-		this.preview.switchVideo(false);
+		this.preview.switchVideo(false, true);
 		switchVideoButton.setEnabled(true);
 
 		mainUI.setTakePhotoIcon();
@@ -1245,11 +1251,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( toast_message != null && toast_message.length() > 0 )
 			preview.showToast(null, toast_message);
 
-    	if( saved_focus_value != null ) {
+		// don't need to reset to saved_focus_value, as we'll have done this when setting up the camera (or will do so when the camera is reopened, if need_reopen)
+    	/*if( saved_focus_value != null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "switch focus back to: " + saved_focus_value);
     		preview.updateFocus(saved_focus_value, true, false);
-    	}
+    	}*/
     }
 
 	private MyPreferenceFragment getPreferenceFragment() {

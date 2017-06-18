@@ -22,6 +22,7 @@
         android:onClick="clickedTakePhoto"
         android:layout_centerVertical="true"
 		android:background="@null"
+        android:visibility="invisible"
         />
 
     <ImageButton
@@ -43,6 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:alpha="0.5"
+        android:visibility="invisible"
         />
 
     <SeekBar
@@ -54,6 +56,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="0dp"
         android:layout_marginBottom="0dp"
+        android:visibility="invisible"
         />
 
     <SeekBar

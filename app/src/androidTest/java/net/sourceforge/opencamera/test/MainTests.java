@@ -14,6 +14,7 @@ public class MainTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchVideo"));
 		// other tests:
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPause"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmediatelyQuit"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testStartCameraPreviewCount"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveVideoMode"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFocusMode"));
@@ -45,6 +46,8 @@ public class MainTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testZoomIdle"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testZoomSwitchCamera"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchCameraIdle"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSwitchCameraRepeat"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTouchFocusQuick"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testGallery"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSettings"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFolderChooserNew"));

@@ -51,6 +51,7 @@ import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -108,6 +109,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private double aspect_ratio;
 	private final CameraControllerManager camera_controller_manager;
 	private CameraController camera_controller;
+	enum CameraOpenState {
+		CAMERAOPENSTATE_CLOSED, // have yet to attempt to open the camera (either at all, or since the camera was closed)
+		CAMERAOPENSTATE_OPENING, // the camera is currently being opened (on a background thread)
+		CAMERAOPENSTATE_OPENED // either the camera is open (if camera_controller!=null) or we failed to open the camera (if camera_controller==null)
+	}
+	CameraOpenState camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
+	AsyncTask<Void, Void, CameraController> open_camera_task; // background task used for opening camera
 	private boolean has_permissions = true; // whether we have permissions necessary to operate the camera (camera, storage); assume true until we've been denied one of them
 	private boolean is_video;
 	private volatile MediaRecorder video_recorder; // must be volatile for test project reading the state
@@ -446,8 +454,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         scaleGestureDetector.onTouchEvent(event);
         if( camera_controller == null ) {
     		if( MyDebug.LOG )
-    			Log.d(TAG, "try to reopen camera due to touch");
-    		this.openCamera();
+    			Log.d(TAG, "received touch event, but camera not available");
     		return true;
         }
         applicationInterface.touchEvent(event);
@@ -694,7 +701,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		this.textureview_w = width;
 		this.textureview_h = height;
 		mySurfaceCreated();
-		configureTransform();
 	}
 
 	@Override
@@ -726,26 +732,29 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private void configureTransform() { 
 		if( MyDebug.LOG )
 			Log.d(TAG, "configureTransform");
-    	if( camera_controller == null || !this.set_preview_size || !this.set_textureview_size )
-    		return;
+    	if( camera_controller == null || !this.set_preview_size || !this.set_textureview_size ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "nothing to do");
+			return;
+		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "textureview size: " + textureview_w + ", " + textureview_h);
     	int rotation = getDisplayRotation();
-    	Matrix matrix = new Matrix(); 
-		RectF viewRect = new RectF(0, 0, this.textureview_w, this.textureview_h); 
-		RectF bufferRect = new RectF(0, 0, this.preview_h, this.preview_w); 
-		float centerX = viewRect.centerX(); 
-		float centerY = viewRect.centerY(); 
-        if( Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation ) { 
-            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY()); 
-	        matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL); 
+    	Matrix matrix = new Matrix();
+		RectF viewRect = new RectF(0, 0, this.textureview_w, this.textureview_h);
+		RectF bufferRect = new RectF(0, 0, this.preview_h, this.preview_w);
+		float centerX = viewRect.centerX();
+		float centerY = viewRect.centerY();
+        if( Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation ) {
+            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY());
+	        matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
 	        float scale = Math.max(
-	        		(float) textureview_h / preview_h, 
-                    (float) textureview_w / preview_w); 
-            matrix.postScale(scale, scale, centerX, centerY); 
-            matrix.postRotate(90 * (rotation - 2), centerX, centerY); 
-        } 
-        cameraSurface.setTransform(matrix); 
+	        		(float) textureview_h / preview_h,
+                    (float) textureview_w / preview_w);
+            matrix.postScale(scale, scale, centerX, centerY);
+            matrix.postRotate(90 * (rotation - 2), centerX, centerY);
+        }
+        cameraSurface.setTransform(matrix);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -929,6 +938,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			}
     			camera_controller.release();
     			camera_controller = null;
+				camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
     			openCamera();
     		}
 		}
@@ -979,6 +989,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 				camera_controller.release();
 				camera_controller = null;
+				camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
 			}
 		}
 		if( MyDebug.LOG ) {
@@ -1039,12 +1050,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	//private int debug_count_opencamera = 0; // see usage below
 
 	/** Try to open the camera. Should only be called if camera_controller==null.
+	 *  The camera will be opened on a background thread, so won't be available upon
+	 *  exit of this function.
+	 *  If camera_open_state is already CAMERAOPENSTATE_OPENING, this method does nothing.
 	 */
 	private void openCamera() {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera()");
 			debug_time = System.currentTimeMillis();
+		}
+		if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "already opening camera in background thread");
+			return;
 		}
 		// need to init everything now, in case we don't open the camera (but these may already be initialised from an earlier call - e.g., if we are now switching to another camera)
 		// n.b., don't reset has_set_location, as we can remember the location when switching camera
@@ -1153,26 +1172,80 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}*/
 
-		openCameraCore();
+		camera_open_state = CameraOpenState.CAMERAOPENSTATE_OPENING;
+		//final boolean use_background_thread = false;
+		final boolean use_background_thread = true;
+		if( use_background_thread ) {
+			open_camera_task = new AsyncTask<Void, Void, CameraController>() {
+				private static final String TAG = "Preview/openCamera";
 
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "openCamera: time after opening camera: " + (System.currentTimeMillis() - debug_time));
+				@Override
+				protected CameraController doInBackground(Void... voids) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "doInBackground, async task: " + this);
+					return openCameraCore();
+				}
+
+				/** The system calls this to perform work in the UI thread and delivers
+				 * the result from doInBackground() */
+				protected void onPostExecute(CameraController camera_controller) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "onPostExecute, async task: " + this);
+					// see note in openCameraCore() for why we set camera_controller here
+					Preview.this.camera_controller = camera_controller;
+					cameraOpened();
+					// set camera_open_state after cameraOpened, just in case a non-UI thread is listening for this - also
+					// important for test code waitUntilCameraOpened(), as test code runs on a different thread
+					camera_open_state = CameraOpenState.CAMERAOPENSTATE_OPENED;
+					open_camera_task = null; // just to be safe
+					if( MyDebug.LOG )
+						Log.d(TAG, "onPostExecute done, async task: " + this);
+				}
+
+				protected void onCancelled(CameraController camera_controller) {
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "onCancelled, async task: " + this);
+						Log.d(TAG, "camera_controller: " + camera_controller);
+					}
+					// this typically means the application has paused whilst we were opening camera in background - so should just
+					// dispose of the camera controller
+					if( camera_controller != null ) {
+						// this is the local camera_controller, not Preview.this.camera_controller!
+						camera_controller.release();
+					}
+					camera_open_state = CameraOpenState.CAMERAOPENSTATE_OPENED; // n.b., still set OPENED state - important for test thread to know that this callback is complete
+					open_camera_task = null; // just to be safe
+					if( MyDebug.LOG )
+						Log.d(TAG, "onCancelled done, async task: " + this);
+				}
+			}.execute();
 		}
+		else {
+			openCameraCore();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "openCamera: time after opening camera: " + (System.currentTimeMillis() - debug_time));
+			}
 
-		cameraOpened();
+			cameraOpened();
+		}
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera: total time to open camera: " + (System.currentTimeMillis() - debug_time));
 		}
-
 	}
 
-	private void openCameraCore() {
+	/** Open the camera - this should be called from background thread, to avoid hogging the UI thread.
+	 */
+	private CameraController openCameraCore() {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCameraCore()");
 			debug_time = System.currentTimeMillis();
 		}
+		// We pass a camera controller back to the UI thread rather than assigning to camera_controller here, because:
+		// * If we set camera_controller directly, we'd need to synchronize, otherwise risk of memory barrier issues
+		// * Risk of race conditions if UI thread accesses camera_controller before we have called cameraOpened().
+		CameraController camera_controller_local = null;
 		try {
 			int cameraId = applicationInterface.getCameraIdPref();
 			if( cameraId < 0 || cameraId >= camera_controller_manager.getNumberOfCameras() ) {
@@ -1196,6 +1269,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Log.e(TAG, "error from CameraController: camera device failed");
 					if( camera_controller != null ) {
 						camera_controller = null;
+						camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
 						applicationInterface.onCameraError();
 					}
 				}
@@ -1208,27 +1282,30 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						applicationInterface.onFailedStartPreview();
 					}
 				};
-	        	camera_controller = new CameraController2(Preview.this.getContext(), cameraId, previewErrorCallback, cameraErrorCallback);
+	        	camera_controller_local = new CameraController2(Preview.this.getContext(), cameraId, previewErrorCallback, cameraErrorCallback);
 	    		if( applicationInterface.useCamera2FakeFlash() ) {
-	    			camera_controller.setUseCamera2FakeFlash(true);
+	    			camera_controller_local.setUseCamera2FakeFlash(true);
 	    		}
 	        }
 	        else
-				camera_controller = new CameraController1(cameraId, cameraErrorCallback);
+				camera_controller_local = new CameraController1(cameraId, cameraErrorCallback);
 			//throw new CameraControllerException(); // uncomment to test camera not opening
 		}
 		catch(CameraControllerException e) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "Failed to open camera: " + e.getMessage());
 			e.printStackTrace();
-			camera_controller = null;
+			camera_controller_local = null;
 		}
 
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCamera: total time for openCameraCore: " + (System.currentTimeMillis() - debug_time));
 		}
+		return camera_controller_local;
 	}
 
+	/** Called from UI thread after openCameraCore() completes on the background thread.
+	 */
 	private void cameraOpened() {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
@@ -1270,6 +1347,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 
 			setupCamera(take_photo);
+			if( this.using_android_l ) {
+				configureTransform();
+			}
 		}
 
 		if( MyDebug.LOG ) {
@@ -1279,6 +1359,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 
 	/** Try to reopen the camera, if not currently open (e.g., permission wasn't granted, but now it is).
+	 *  The camera will be opened on a background thread, so won't be available upon
+	 *  exit of this function.
+	 *  If camera_open_state is already CAMERAOPENSTATE_OPENING, or the camera is already open,
+	 *  this method does nothing.
 	 */
 	public void retryOpenCamera() {
 		if( MyDebug.LOG )
@@ -1299,7 +1383,26 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public boolean hasPermissions() {
 		return has_permissions;
 	}
-	
+
+	/** Returns true iff the camera is currently being opened on background thread (openCamera() called, but
+	 *  camera not yet available).
+	 */
+	public boolean isOpeningCamera() {
+		return camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING;
+	}
+
+	/** Returns true iff we've tried to open the camera (whether or not it was successful).
+	 */
+	public boolean openCameraAttempted() {
+		return camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENED;
+	}
+
+	/** Returns true iff we've tried to open the camera, and were unable to do so.
+	 */
+	public boolean openCameraFailed() {
+		return camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENED && camera_controller == null;
+	}
+
 	/* Should only be called after camera first opened, or after preview is paused.
 	 * take_photo is true if we have been called from the TakePhoto widget (which means
 	 * we'll take a photo immediately after startup).
@@ -1335,8 +1438,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saved_is_video: " + saved_is_video);
 		}
+		// must switch video before starting preview
 		if( saved_is_video != this.is_video ) {
-			this.switchVideo(true);
+			if( MyDebug.LOG )
+				Log.d(TAG, "switch video mode as not in correct mode");
+			this.switchVideo(true, false);
+		}
+	    if( take_photo ) {
+			if( this.is_video ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "switch to video for take_photo widget");
+				this.switchVideo(true, true);
+			}
 		}
 
 		if( do_startup_focus && using_android_l && camera_controller.supportsAutoFocus() ) {
@@ -1393,11 +1506,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 		
-	    if( take_photo ) {
+	    /*if( take_photo ) {
 			if( this.is_video ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "switch to video for take_photo widget");
 				this.switchVideo(false); // set during_startup to false, as we now need to reset the preview
 			}
-		}
+		}*/
 
 		applicationInterface.cameraSetup(); // must call this after the above take_photo code for calling switchVideo
 	    if( MyDebug.LOG ) {
@@ -2867,11 +2982,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	
 	public void setCamera(int cameraId) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setCamera()");
+			Log.d(TAG, "setCamera(): " + cameraId);
 		if( cameraId < 0 || cameraId >= camera_controller_manager.getNumberOfCameras() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "invalid cameraId: " + cameraId);
 			cameraId = 0;
+		}
+		if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "already opening camera in background thread");
+			return;
 		}
 		if( canSwitchCamera() ) {
 			closeCamera();
@@ -3036,7 +3156,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);
 	}
 	
-	public void switchVideo(boolean during_startup) {
+	public void switchVideo(boolean during_startup, boolean change_user_pref) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "switchVideo()");
 		if( camera_controller == null ) {
@@ -3074,7 +3194,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				setFocusPref(false); // first restore the saved focus for the new photo/video mode; don't do autofocus, as it'll be cancelled when restarting preview
 			}*/
 
-			if( !during_startup ) {
+			if( change_user_pref ) {
 				// now save
 				applicationInterface.setVideoPref(is_video);
 	    	}
@@ -5261,6 +5381,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPause");
 		this.app_is_paused = true;
+		if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_OPENING ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "cancel open_camera_task");
+			if( open_camera_task != null ) { // just to be safe
+				this.open_camera_task.cancel(true);
+			}
+			else {
+				Log.e(TAG, "onPause: state is CAMERAOPENSTATE_OPENING, but open_camera_task is null");
+			}
+		}
 		this.closeCamera();
 		cameraSurface.onPause();
 		if( canvasView != null )
