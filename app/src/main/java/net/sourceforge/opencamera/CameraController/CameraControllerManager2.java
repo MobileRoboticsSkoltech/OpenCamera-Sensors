@@ -87,13 +87,14 @@ public class CameraControllerManager2 extends CameraControllerManager {
 
 	/* Rather than allowing Camera2 API on all Android 5+ devices, we restrict it to cases where all cameras have at least LIMITED support.
 	 * (E.g., Nexus 6 has FULL support on back camera, LIMITED support on front camera.)
-	 * For now, devices with only LEGACY support should still with the old API.
+	 * For now, devices with only LEGACY support should still use the old API.
 	 */
 	public boolean allowCamera2Support(int cameraId) {
 		CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
 		try {
 			String cameraIdS = manager.getCameraIdList()[cameraId];
 			CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraIdS);
+			//return isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY);
 			return isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
 		}
 		catch(Throwable e) {
