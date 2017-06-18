@@ -114,8 +114,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		CAMERAOPENSTATE_OPENING, // the camera is currently being opened (on a background thread)
 		CAMERAOPENSTATE_OPENED // either the camera is open (if camera_controller!=null) or we failed to open the camera (if camera_controller==null)
 	}
-	CameraOpenState camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
-	AsyncTask<Void, Void, CameraController> open_camera_task; // background task used for opening camera
+	private CameraOpenState camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
+	private AsyncTask<Void, Void, CameraController> open_camera_task; // background task used for opening camera
 	private boolean has_permissions = true; // whether we have permissions necessary to operate the camera (camera, storage); assume true until we've been denied one of them
 	private boolean is_video;
 	private volatile MediaRecorder video_recorder; // must be volatile for test project reading the state
@@ -2359,7 +2359,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return width + ":" + height;
 	}
 	
-	public static String getMPString(int width, int height) {
+	private static String getMPString(int width, int height) {
 		float mp = (width*height)/1000000.0f;
 		return formatFloatToString(mp) + "MP";
 	}
