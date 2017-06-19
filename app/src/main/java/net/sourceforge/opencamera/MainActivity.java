@@ -254,6 +254,19 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		View pauseVideoButton = findViewById(R.id.pause_video);
 		pauseVideoButton.setVisibility(View.INVISIBLE);
 
+		// We initialise optional controls to invisible, so they don't show while the camera is opening - the actual visibility is
+		// set in cameraSetup().
+		// Note that ideally we'd set this in the xml, but doing so for R.id.zoom causes a crash on Galaxy Nexus startup beneath
+		// setContentView()!
+		// To be safe, we also do so for take_photo and zoom_seekbar (we already know we've had no reported crashes for focus_seekbar,
+		// however).
+	    View takePhotoButton = findViewById(R.id.take_photo);
+		takePhotoButton.setVisibility(View.INVISIBLE);
+	    View zoomControls = findViewById(R.id.zoom);
+		zoomControls.setVisibility(View.INVISIBLE);
+	    View zoomSeekbar = findViewById(R.id.zoom_seekbar);
+		zoomSeekbar.setVisibility(View.INVISIBLE);
+
 		// listen for orientation event change
 	    orientationEventListener = new OrientationEventListener(this) {
 			@Override
