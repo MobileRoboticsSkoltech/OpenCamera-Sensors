@@ -730,8 +730,10 @@ public class CameraController2 extends CameraController {
      */
 	public CameraController2(Context context, int cameraId, final ErrorCallback preview_error_cb, final ErrorCallback camera_error_cb) throws CameraControllerException {
 		super(cameraId);
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "create new CameraController2: " + cameraId);
+			Log.d(TAG, "this: " + this);
+		}
 
 		this.context = context;
 		this.preview_error_cb = preview_error_cb;
@@ -914,6 +916,9 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "wait until camera opened...");
 		// need to wait until camera is opened
+		// whilst this blocks, this should be running on a background thread anyway (see Preview.openCamera()) - due to maintaining
+		// compatibility with the way the old camera API works, it's easier to handle running on a background thread at a higher level,
+		// rather than exiting here
 		synchronized( open_camera_lock ) {
 			while( !myStateCallback.callback_done ) {
 				try {
@@ -962,7 +967,7 @@ public class CameraController2 extends CameraController {
 	@Override
 	public void release() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "release");
+			Log.d(TAG, "release: " + this);
 		if( thread != null ) {
 			thread.quitSafely();
 			try {
@@ -3258,7 +3263,7 @@ public class CameraController2 extends CameraController {
 	@Override
 	public void stopPreview() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "stopPreview");
+			Log.d(TAG, "stopPreview: " + this);
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "no camera or capture session");

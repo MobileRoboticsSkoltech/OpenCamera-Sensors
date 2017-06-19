@@ -79,6 +79,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    mActivity = getActivity();
 	    mPreview = mActivity.getPreview();
 
+		waitUntilCameraOpened();
+
 		//restart(); // no longer need to restart, as we reset prefs before starting up; not restarting makes tests run faster!
 
 		//Camera camera = mPreview.getCamera();
@@ -114,6 +116,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		//assertEquals(mPlanetData.getCount(),ADAPTER_COUNT);
 	}
 
+	private void waitUntilCameraOpened() {
+		Log.d(TAG, "wait until camera opened");
+		long time_s = System.currentTimeMillis();
+		while( !mPreview.openCameraAttempted() ) {
+			assertTrue( System.currentTimeMillis() - time_s < 3000 ); // shouldn't take longer than this to open camera
+		}
+		Log.d(TAG, "camera is open!");
+	}
+
 	private void restart() {
 		Log.d(TAG, "restart");
 	    mActivity.finish();
@@ -121,11 +132,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "now starting");
 	    mActivity = getActivity();
 	    mPreview = mActivity.getPreview();
+		waitUntilCameraOpened();
 		Log.d(TAG, "restart done");
 	}
 	
 	private void pauseAndResume() {
 		Log.d(TAG, "pauseAndResume");
+		pauseAndResume(true);
+	}
+
+	private void pauseAndResume(boolean wait_until_camera_opened) {
+		Log.d(TAG, "pauseAndResume: " + wait_until_camera_opened);
 	    // onResume has code that must run on UI thread
 		mActivity.runOnUiThread(new Runnable() {
 			public void run() {
@@ -137,6 +154,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 		// need to wait for UI code to finish before leaving
 		this.getInstrumentation().waitForIdleSync();
+		if( wait_until_camera_opened ) {
+			waitUntilCameraOpened();
+		}
 	}
 
 	private void updateForSettings() {
@@ -149,6 +169,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 		// need to wait for UI code to finish before leaving
 		this.getInstrumentation().waitForIdleSync();
+		waitUntilCameraOpened(); // may need to wait if camera is reopened, e.g., when changing scene mode - see testSceneMode()
 	}
 
 	private void clickView(final View view) {
@@ -263,6 +284,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "turn off video mode");
 		    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		    clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		}
 		assertTrue(!mPreview.isVideo());
 
@@ -272,6 +294,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			while( cameraId != 0 ) {
 			    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 			    clickView(switchCameraButton);
+				waitUntilCameraOpened();
 			    // camera becomes invalid when switching cameras
 				cameraId = mPreview.getCameraId();
 				Log.d(TAG, "changed cameraId to: "+ cameraId);
@@ -318,10 +341,33 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 		});
 		Thread.sleep(3000);
+		waitUntilCameraOpened();
 		assertTrue(mPreview.test_ticker_called);
 		mPreview.test_ticker_called = false;
 		Thread.sleep(300);
 		assertTrue(mPreview.test_ticker_called);
+	}
+
+	/** Tests that we clean up the background task for opening camera properly.
+	 */
+	public void testImmediatelyQuit() throws InterruptedException {
+		Log.d(TAG, "testImmediatelyQuit");
+		setToDefault();
+
+		for(int i=0;i<5;i++) {
+			// like restart, but don't wait for camera to be opened
+			Log.d(TAG, "call finish");
+			mActivity.finish();
+			setActivity(null);
+			Log.d(TAG, "now starting");
+			mActivity = getActivity();
+			mPreview = mActivity.getPreview();
+
+			// now restart straight away
+			restart();
+
+			Thread.sleep(1000);
+		}
 	}
 
 	/* Ensures that we only start the camera preview once when starting up.
@@ -354,12 +400,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Log.d(TAG, "2 count_cameraStartPreview: " + mPreview.count_cameraStartPreview);
 				assertTrue(mPreview.count_cameraStartPreview == 1);
 				getInstrumentation().callActivityOnResume(mActivity);
-				Log.d(TAG, "3 count_cameraStartPreview: " + mPreview.count_cameraStartPreview);
-				assertTrue(mPreview.count_cameraStartPreview == 2);
 			}
 		});
 		// need to wait for UI code to finish before leaving
+		Log.d(TAG, "wait for idle sync");
 		this.getInstrumentation().waitForIdleSync();
+		Log.d(TAG, "done waiting for idle sync");
+		// waiting for camera to open can't be on the ui thread, as it's on the ui thread that Open Camera sets that we've opened the camera
+		waitUntilCameraOpened();
+		Log.d(TAG, "3 count_cameraStartPreview: " + mPreview.count_cameraStartPreview);
+		assertTrue(mPreview.count_cameraStartPreview == 2);
 	}
 
 	/* Ensures that we save the video mode.
@@ -377,6 +427,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( switchVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_video) ) );
 
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    assertTrue(mPreview.isVideo());
 		assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.start_video) ) );
 		assertTrue( switchVideoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.switch_to_photo) ) );
@@ -458,10 +509,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int cameraId = mPreview.getCameraId();
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 		int new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId != new_cameraId);
 
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 		new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId == new_cameraId);
 
@@ -591,6 +644,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         //double targetRatio = mPreview.getTargetRatioForPreview(display_size);
         double targetRatio = mPreview.getTargetRatio();
         double expTargetRatio = ((double)display_size.x) / (double)display_size.y;
+		Log.d(TAG, "targetRatio: " + targetRatio);
+		Log.d(TAG, "expTargetRatio: " + expTargetRatio);
         assertTrue( Math.abs(targetRatio - expTargetRatio) <= 1.0e-5 );
         checkOptimalPreviewSize();
 		checkSquareAspectRatio();
@@ -599,9 +654,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "switch camera");
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 
 	        //targetRatio = mPreview.getTargetRatioForPreview(display_size);
 	        targetRatio = mPreview.getTargetRatio();
+			Log.d(TAG, "targetRatio: " + targetRatio);
+			Log.d(TAG, "expTargetRatio: " + expTargetRatio);
 	        assertTrue( Math.abs(targetRatio - expTargetRatio) <= 1.0e-5 );
 	        checkOptimalPreviewSize();
 			checkSquareAspectRatio();
@@ -640,6 +698,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "switch to video");
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    assertTrue(mPreview.isVideo());
     	CamcorderProfile profile = mPreview.getCamcorderProfile();
         CameraController.Size video_preview_size = mPreview.getCameraController().getPreviewSize();
@@ -654,6 +713,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkOptimalVideoPictureSize(expTargetRatio);
 
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    assertTrue(!mPreview.isVideo());
         CameraController.Size new_picture_size = mPreview.getCameraController().getPictureSize();
         CameraController.Size new_preview_size = mPreview.getCameraController().getPreviewSize();
@@ -668,6 +728,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "switch camera");
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 
 	        picture_size = mPreview.getCameraController().getPictureSize();
 	        preview_size = mPreview.getCameraController().getPreviewSize();
@@ -682,6 +743,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			
 			Log.d(TAG, "switch to video again");
 		    clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		    assertTrue(mPreview.isVideo());
 	    	profile = mPreview.getCamcorderProfile();
 	        video_preview_size = mPreview.getCameraController().getPreviewSize();
@@ -696,6 +758,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	        checkOptimalVideoPictureSize(expTargetRatio);
 
 		    clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		    assertTrue(!mPreview.isVideo());
 	        new_picture_size = mPreview.getCameraController().getPictureSize();
 	        new_preview_size = mPreview.getCameraController().getPreviewSize();
@@ -1041,6 +1104,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 		    face_detection_started = false;
 			// check face detection already started
 		    if( !mPreview.getCameraController().startFaceDetection() ) {
@@ -1177,6 +1241,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    //mActivity.clickedSwitchCamera(switchCameraButton);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			int new_cameraId = mPreview.getCameraId();
 			Log.d(TAG, "new_cameraId? "+ new_cameraId);
 			assertTrue(cameraId != new_cameraId);
@@ -1198,6 +1263,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 		assertTrue(mPreview.isVideo());
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "video focus_value: "+ focus_value);
@@ -1208,6 +1274,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    int saved_count = mPreview.count_cameraAutoFocus;
 	    Log.d(TAG, "0 count_cameraAutoFocus: " + saved_count);
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 		assertTrue(!mPreview.isVideo());
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "picture focus_value: "+ focus_value);
@@ -1223,6 +1290,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			int cameraId = mPreview.getCameraId();
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			int new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId != new_cameraId);
 		    focus_value = mPreview.getCameraController().getFocusValue();
@@ -1232,6 +1300,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    }
 
 		    clickView(switchVideoButton);
+			waitUntilCameraOpened();
 			assertTrue(mPreview.isVideo());
 		    focus_value = mPreview.getCameraController().getFocusValue();
 			Log.d(TAG, "front video focus_value: "+ focus_value);
@@ -1240,6 +1309,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    }
 
 		    clickView(switchVideoButton);
+			waitUntilCameraOpened();
 			assertTrue(!mPreview.isVideo());
 		    focus_value = mPreview.getCameraController().getFocusValue();
 			Log.d(TAG, "front picture focus_value: "+ focus_value);
@@ -1249,6 +1319,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 			// now switch back
 			clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId == new_cameraId);
 	    }
@@ -1259,6 +1330,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			switchToFocusValue("focus_mode_continuous_picture");
 
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 			assertTrue(mPreview.isVideo());
 			focus_value = mPreview.getCameraController().getFocusValue();
 			Log.d(TAG, "video focus_value: "+ focus_value);
@@ -1267,20 +1339,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			switchToFocusValue("focus_mode_macro");
 
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 			assertTrue(!mPreview.isVideo());
 			focus_value = mPreview.getCameraController().getFocusValue();
 			Log.d(TAG, "picture focus_value: "+ focus_value);
 			assertTrue(focus_value.equals("focus_mode_continuous_picture"));
 
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 			assertTrue(mPreview.isVideo());
 			focus_value = mPreview.getCameraController().getFocusValue();
 			Log.d(TAG, "video focus_value: "+ focus_value);
 			assertTrue(focus_value.equals("focus_mode_macro"));
 		}
-
-
-
 	}
 
 	/* Tests continuous picture focus, including switching to video and back.
@@ -1310,12 +1381,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// switch to video
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "video focus_value: "+ focus_value);
     	assertTrue(focus_value.equals("focus_mode_continuous_video"));
 
 		// switch to photo
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "video focus_value: "+ focus_value);
     	assertTrue(focus_value.equals("focus_mode_continuous_picture"));
@@ -1357,6 +1430,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	}
 
 	/* Tests continuous picture focus with burst mode.
@@ -1680,23 +1754,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "video focus_value: "+ focus_value);
 	    assertTrue(focus_value.equals("focus_mode_continuous_video"));
 
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 	    // camera becomes invalid when switching cameras
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "front video focus_value: "+ focus_value);
 		// don't care when focus mode is for front camera (focus may not be supported for front camera)
 
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "front focus_value: "+ focus_value);
 		// don't care when focus mode is for front camera (focus may not be supported for front camera)
 
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 	    // camera becomes invalid when switching cameras
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "end focus_value: "+ focus_value);
@@ -1726,7 +1804,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    // n.b., call twice, to switch to front then to back
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "focus_value: "+ focus_value);
@@ -1752,6 +1832,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "focus_value after switching to video mode: "+ focus_value);
 	    assertTrue(focus_value.equals("focus_mode_continuous_video"));
@@ -1759,6 +1840,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		switchToFocusValue("focus_mode_macro");
 
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "focus_value after switching to picture mode: " + focus_value);
@@ -1785,11 +1867,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "focus_value after switching to video mode: "+ focus_value);
 	    assertTrue(focus_value.equals("focus_mode_continuous_video"));
 
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "focus_value after switching to picture mode: " + focus_value);
@@ -1817,6 +1901,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    String focus_value = mPreview.getCameraController().getFocusValue();
 	    assertTrue(focus_value.equals("focus_mode_continuous_video"));
 
@@ -1925,6 +2010,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "switch camera");
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 		    assertTrue(exposureContainer.getVisibility() == View.GONE);
@@ -2072,6 +2158,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "switch camera");
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 		    assertTrue(exposureContainer.getVisibility() == View.GONE);
@@ -2962,8 +3049,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    CharSequence contentDescription = switchCameraButton.getContentDescription();
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 
 	    int new_cameraId = mPreview.getCameraId();
+		assertTrue(new_cameraId != cameraId);
 		boolean new_is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(new_cameraId);
 	    CharSequence new_contentDescription = switchCameraButton.getContentDescription();
 
@@ -3012,6 +3101,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
 		this.getInstrumentation().waitForIdleSync();
+		waitUntilCameraOpened();
 
 	    int new_cameraId = mPreview.getCameraId();
 
@@ -3214,6 +3304,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // need to switch video before going back to immersive mode
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		}
 	    // test now exited immersive mode
 	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
@@ -3261,6 +3352,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // switch back to photo mode
 		if( mPreview.isVideo() ) {
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		}
 
 		if( mPreview.usingCamera2API() && mPreview.supportsISORange() ) {
@@ -3953,6 +4045,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	// wait until photo is taken and button is visible again
 		    }
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			int new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId != new_cameraId);
 			takePhotoLoop(n_photos_c);
@@ -3960,6 +4053,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	// wait until photo is taken and button is visible again
 		    }
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId == new_cameraId);
 		}
@@ -3974,6 +4068,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	// wait until photo is taken and button is visible again
 		    }
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			int new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId != new_cameraId);
 			takePhotoLoop(n_photos_c);
@@ -3981,6 +4076,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	// wait until photo is taken and button is visible again
 		    }
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId == new_cameraId);
 		}
@@ -4042,6 +4138,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	// wait until photo is taken and button is visible again
 		    }
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			int new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId != new_cameraId);
 			takePhotoLoopAngles(angles);
@@ -4049,6 +4146,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	// wait until photo is taken and button is visible again
 		    }
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId == new_cameraId);
 		}
@@ -4063,6 +4161,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	// wait until photo is taken and button is visible again
 		    }
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			int new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId != new_cameraId);
 			takePhotoLoopAngles(angles);
@@ -4070,6 +4169,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    	// wait until photo is taken and button is visible again
 		    }
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId == new_cameraId);
 		}
@@ -4105,6 +4205,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
@@ -4979,6 +5080,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
@@ -5122,6 +5224,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
@@ -5206,6 +5309,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
@@ -5280,6 +5384,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		if( !mPreview.isVideo() ) {
 			clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
@@ -5539,6 +5644,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
 	    assertTrue(mPreview.isVideo());
 
 	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -5590,6 +5696,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    if( !mPreview.isVideo() ) {
 			View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 		    clickView(switchVideoButton);
+			waitUntilCameraOpened();
 		    assertTrue(mPreview.isVideo());
 	    }
 
@@ -5709,6 +5816,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "switch camera");
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			subTestVideoPopup(false);
 	    }
 	}
@@ -5731,6 +5839,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "switch camera");
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			subTestVideoPopup(true);
 	    }
 	}
@@ -5886,6 +5995,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int cameraId = mPreview.getCameraId();
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 		int new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId != new_cameraId);
 
@@ -5928,6 +6038,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    // switch camera to back
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 		new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId == new_cameraId);
 		
@@ -6041,6 +6152,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			assertTrue(mActivity.getLocationSupplier().hasLocationListeners());
 			// shouldn't need to wait for test_has_received_location to be true, as should remember from before switching camera
 		    assertTrue(mActivity.getLocationSupplier().getLocation() != null);
@@ -6116,10 +6228,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			this.getInstrumentation().waitForIdleSync();
 		    assertTrue(mActivity.getLocationSupplier().getLocation() == null);
 
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			this.getInstrumentation().waitForIdleSync();
 		    assertTrue(mActivity.getLocationSupplier().getLocation() == null);
 		}
@@ -6149,6 +6263,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			// shouldn't need to wait for test_has_received_location to be true, as should remember from before switching camera
 		    assertTrue(mActivity.getLocationSupplier().getLocation() != null);
 		}
@@ -6544,6 +6659,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    int cameraId = mPreview.getCameraId();
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 		int new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId != new_cameraId);
 
@@ -6566,6 +6682,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    int cameraId = mPreview.getCameraId();
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
+
 		int new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId != new_cameraId);
 
@@ -6574,6 +6692,39 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    int new2_cameraId = mPreview.getCameraId();
 		assertTrue(new2_cameraId == new_cameraId);
 
+	}
+
+	/** Tests touching the screen before camera has opened.
+	 */
+	public void testTouchFocusQuick() {
+		Log.d(TAG, "testTouchFocusQuick");
+		setToDefault();
+
+		pauseAndResume(false); // don't wait for camera to be reopened, as we want to test touch focus whilst it's opening
+
+		for(int i=0;i<10;i++) {
+			TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
+		}
+	}
+
+	/** Tests trying to switch camera repeatedly.
+	 */
+	public void testSwitchCameraRepeat() {
+		Log.d(TAG, "testSwitchCameraRepeat");
+		setToDefault();
+
+		if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
+			return;
+		}
+
+	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
+	    clickView(switchCameraButton);
+		for(int i=0;i<100;i++) {
+			clickView(switchCameraButton);
+		}
+		waitUntilCameraOpened();
+		// n.b., don't check the new camera Id, as it's ill-defined which camera will be open
+		// the main point of this test is to check we don't crash due to opening camera on background thread
 	}
 
 	/* Tests going to gallery.
@@ -7139,6 +7290,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "switch camera");
 		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		    clickView(switchCameraButton);
+			waitUntilCameraOpened();
 			assertTrue(mPreview.getCameraControllerManager() != null);
 			assertTrue(mPreview.getCameraController() == null);
 			this.getInstrumentation().waitForIdleSync();
@@ -7290,6 +7442,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    clickView(switchCameraButton);
+		waitUntilCameraOpened();
 
 	    int new_cameraId = mPreview.getCameraId();
 

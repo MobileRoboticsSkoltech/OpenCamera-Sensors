@@ -36,7 +36,7 @@ public class MainUI {
 
 	private volatile boolean popup_view_is_open; // must be volatile for test project reading the state
     private PopupView popup_view;
-	private final boolean cache_popup = true; // if false, we recreate the popup each time
+	private final static boolean cache_popup = true; // if false, we recreate the popup each time
 
     private int current_orientation;
 	private boolean ui_placement_right = true;
