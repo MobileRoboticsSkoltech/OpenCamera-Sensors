@@ -182,6 +182,15 @@ public abstract class CameraController {
 	public int getCameraId() {
 		return cameraId;
 	}
+
+	/** For CameraController2 only. Applications should cover the preview textureview if either camera_controller==null, or if this
+	 *  method returns true. Otherwise there is a risk when opening the camera that the textureview still shows an image from when
+	 *  the camera was previously opened (e.g., from pausing and resuming the application). This returns false (for CameraController2)
+	 *  when the camera has received its first frame.
+	 */
+	public boolean shouldCoverPreview() {
+		return false;
+	}
 	public abstract SupportedValues setSceneMode(String value);
 	/**
 	 * @return The current scene mode. Will be null if scene mode not supported.
