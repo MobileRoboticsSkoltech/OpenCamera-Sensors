@@ -1173,9 +1173,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}*/
 
 		camera_open_state = CameraOpenState.CAMERAOPENSTATE_OPENING;
+		int cameraId = applicationInterface.getCameraIdPref();
+		if( cameraId < 0 || cameraId >= camera_controller_manager.getNumberOfCameras() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "invalid cameraId: " + cameraId);
+			cameraId = 0;
+			applicationInterface.setCameraIdPref(cameraId);
+		}
+
 		//final boolean use_background_thread = false;
 		final boolean use_background_thread = true;
 		if( use_background_thread ) {
+			final int cameraId_f = cameraId;
+
 			open_camera_task = new AsyncTask<Void, Void, CameraController>() {
 				private static final String TAG = "Preview/openCamera";
 
@@ -1183,7 +1193,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				protected CameraController doInBackground(Void... voids) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "doInBackground, async task: " + this);
-					return openCameraCore();
+					return openCameraCore(cameraId_f);
 				}
 
 				/** The system calls this to perform work in the UI thread and delivers
@@ -1221,12 +1231,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}.execute();
 		}
 		else {
-			openCameraCore();
+			this.camera_controller = openCameraCore(cameraId);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "openCamera: time after opening camera: " + (System.currentTimeMillis() - debug_time));
 			}
 
 			cameraOpened();
+			camera_open_state = CameraOpenState.CAMERAOPENSTATE_OPENED;
 		}
 
 		if( MyDebug.LOG ) {
@@ -1236,7 +1247,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	/** Open the camera - this should be called from background thread, to avoid hogging the UI thread.
 	 */
-	private CameraController openCameraCore() {
+	private CameraController openCameraCore(int cameraId) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "openCameraCore()");
@@ -1247,13 +1258,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// * Risk of race conditions if UI thread accesses camera_controller before we have called cameraOpened().
 		CameraController camera_controller_local = null;
 		try {
-			int cameraId = applicationInterface.getCameraIdPref();
-			if( cameraId < 0 || cameraId >= camera_controller_manager.getNumberOfCameras() ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "invalid cameraId: " + cameraId);
-				cameraId = 0;
-				applicationInterface.setCameraIdPref(cameraId);
-			}
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "try to open camera: " + cameraId);
 				Log.d(TAG, "openCamera: time before opening camera: " + (System.currentTimeMillis() - debug_time));
