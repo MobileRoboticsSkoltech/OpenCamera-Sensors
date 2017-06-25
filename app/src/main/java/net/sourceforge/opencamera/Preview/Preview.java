@@ -1182,7 +1182,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
 		//final boolean use_background_thread = false;
-		final boolean use_background_thread = true;
+		//final boolean use_background_thread = true;
+		final boolean use_background_thread = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
+		/* Opening camera on background thread is important so that we don't block the UI thread:
+		 *   - For old Camera API, this is recommended behaviour by Google for Camera.open().
+		     - For Camera2, the manager.openCamera() call is asynchronous, but CameraController2
+		       waits for it to open, so it's still important that we run that in a background thread.
+		 * In theory this works for all Android versions, but this caused problems of Galaxy Nexus
+		 * with tests testTakePhotoAutoLevel(), testTakePhotoAutoLevelAngles() (various camera
+		 * errors/exceptions, failing to taking photos). Since this is a significant change, this is
+		 * for now limited to modern devices.
+		 */
 		if( use_background_thread ) {
 			final int cameraId_f = cameraId;
 
