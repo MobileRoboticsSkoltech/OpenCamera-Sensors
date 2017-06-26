@@ -129,6 +129,7 @@ public class CameraController2 extends CameraController {
 	private final MediaActionSound media_action_sound = new MediaActionSound();
 	private boolean sounds_enabled = true;
 
+	private boolean has_received_frame;
 	private boolean capture_result_is_ae_scanning;
 	private Integer capture_result_ae; // latest ae_state, null if not available
 	private boolean is_flash_required; // whether capture_result_ae suggests FLASH_REQUIRED? Or in neither FLASH_REQUIRED nor CONVERGED, this stores the last known result
@@ -900,8 +901,12 @@ public class CameraController2 extends CameraController {
 			@Override
 			public void run() {
 				if( MyDebug.LOG )
-					Log.d(TAG, "check if camera has opened in reasonable time");
+					Log.d(TAG, "check if camera has opened in reasonable time: " + this);
 				synchronized( open_camera_lock ) {
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "synchronized on open_camera_lock");
+						Log.d(TAG, "callback_done: " + myStateCallback.callback_done);
+					}
 					if( !myStateCallback.callback_done ) {
 						// n.b., as this is potentially serious error, we always log even if MyDebug.LOG is false
 						Log.e(TAG, "timeout waiting for camera callback");
@@ -1350,6 +1355,10 @@ public class CameraController2 extends CameraController {
 		}
 
 		return camera_features;
+	}
+
+	public boolean shouldCoverPreview() {
+		return !has_received_frame;
 	}
 
 	private String convertSceneMode(int value2) {
@@ -4795,6 +4804,12 @@ public class CameraController2 extends CameraController {
 		private void processCompleted(CaptureRequest request, CaptureResult result) {
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "processCompleted");*/
+
+			if( !has_received_frame ) {
+				has_received_frame = true;
+				if( MyDebug.LOG )
+					Log.d(TAG, "has_received_frame now set to true");
+			}
 
 			if( result.get(CaptureResult.SENSOR_SENSITIVITY) != null ) {
 				capture_result_has_iso = true;

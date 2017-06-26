@@ -120,9 +120,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "wait until camera opened");
 		long time_s = System.currentTimeMillis();
 		while( !mPreview.openCameraAttempted() ) {
-			assertTrue( System.currentTimeMillis() - time_s < 3000 ); // shouldn't take longer than this to open camera
+			assertTrue( System.currentTimeMillis() - time_s < 20000 );
 		}
 		Log.d(TAG, "camera is open!");
+		this.getInstrumentation().waitForIdleSync(); // allow the onPostExecute of open camera task run
+		Log.d(TAG, "done idle sync");
+		try {
+			Thread.sleep(100); // sleep a bit just to be safe
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void restart() {
@@ -4002,12 +4009,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int start_count = mPreview.count_cameraTakePicture;
 		for(int i=0;i<count;i++) {
 		    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
-			Log.d(TAG, "about to click take photo");
+			Log.d(TAG, "about to click take photo: " + i);
 		    clickView(takePhotoButton);
-			Log.d(TAG, "wait until finished taking photo");
+			Log.d(TAG, "wait until finished taking photo: " + i);
 		    while( mPreview.isTakingPhoto() ) {
 		    }
-			Log.d(TAG, "done taking photo");
+			Log.d(TAG, "done taking photo: " + i);
 			this.getInstrumentation().waitForIdleSync();
 
 			/*int n_new_files = folder.listFiles().length - n_files;

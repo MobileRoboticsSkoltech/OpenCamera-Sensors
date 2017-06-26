@@ -1239,6 +1239,13 @@ public class DrawPreview {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
+
+		// see documentation for CameraController.shouldCoverPreview()
+		if( preview.usingCamera2API() && ( camera_controller == null || camera_controller.shouldCoverPreview() ) ) {
+			p.setColor(Color.BLACK);
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+		}
+
 		if( main_activity.getMainUI().inImmersiveMode() ) {
 			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
 			if( immersive_mode.equals("immersive_mode_everything") ) {
