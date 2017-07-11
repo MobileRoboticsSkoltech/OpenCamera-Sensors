@@ -7673,7 +7673,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
     	long time_s = System.currentTimeMillis();
 		try {
-			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, tonemapping_algorithm);
+			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, tonemapping_algorithm);
 		}
 		catch(HDRProcessorException e) {
 			e.printStackTrace();
@@ -7694,7 +7694,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			inputs.add(dro_bitmap_in);
 			time_s = System.currentTimeMillis();
 			try {
-				mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+				mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
 			}
 			catch(HDRProcessorException e) {
 				e.printStackTrace();
@@ -8626,7 +8626,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add(bitmap);
 		try {
-			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.0f, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.0f, 4, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
 		}
 		catch(HDRProcessorException e) {
 			e.printStackTrace();
