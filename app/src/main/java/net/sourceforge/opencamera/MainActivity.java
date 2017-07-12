@@ -138,7 +138,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	protected void onCreate(Bundle savedInstanceState) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "onCreate");
+			Log.d(TAG, "onCreate: " + this);
 			debug_time = System.currentTimeMillis();
 		}
 		super.onCreate(savedInstanceState);

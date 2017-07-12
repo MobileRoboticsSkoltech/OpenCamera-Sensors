@@ -432,7 +432,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 						if( MyDebug.LOG )
 							Log.d(TAG, "user clicked calibrate level option");
 						AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
-						alertDialog.setTitle(getActivity().getResources().getString(R.string.preference_about));
+						alertDialog.setTitle(getActivity().getResources().getString(R.string.preference_calibrate_level));
 						alertDialog.setMessage(R.string.preference_calibrate_level_dialog);
 						alertDialog.setPositiveButton(R.string.preference_calibrate_level_calibrate, new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
