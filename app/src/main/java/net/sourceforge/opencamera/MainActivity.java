@@ -1061,7 +1061,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	class PreferencesListener implements SharedPreferences.OnSharedPreferenceChangeListener {
 		private static final String TAG = "PreferencesListener";
 
-		private boolean any; // whether any changes have been made since startListening()
+		private boolean any; // whether any changes that require update have been made since startListening()
 
 		void startListening() {
 			if( MyDebug.LOG )
@@ -1082,10 +1082,69 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 
 		@Override
-		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "onSharedPreferenceChanged: " + s);
-			any = true;
+				Log.d(TAG, "onSharedPreferenceChanged: " + key);
+			switch( key ) {
+				// we whitelist preferences where we're sure that we don't need to call updateForSettings() if they've changed
+				case "preference_timer":
+				case "preference_touch_capture":
+				case "preference_pause_preview":
+				case "preference_shutter_sound":
+				case "preference_timer_beep":
+				case "preference_timer_speak":
+				case "preference_volume_keys":
+				case "preference_audio_noise_control_sensitivity":
+				case "preference_using_saf":
+				case "preference_save_photo_prefix":
+				case "preference_save_video_prefix":
+				case "preference_save_zulu_time":
+				case "preference_show_when_locked":
+				case "preference_startup_focus":
+				case "preference_show_zoom":
+				case "preference_show_angle":
+				case "preference_show_angle_line":
+				case "preference_show_pitch_lines":
+				case "preference_angle_highlight_color":
+				case "preference_show_geo_direction":
+				case "preference_show_geo_direction_lines":
+				case "preference_show_battery":
+				case "preference_show_time":
+				case "preference_free_memory":
+				case "preference_show_iso":
+				case "preference_grid":
+				case "preference_crop_guide":
+				case "preference_show_toasts":
+				case "preference_thumbnail_animation":
+				case "preference_take_photo_border":
+				case "preference_keep_display_on":
+				case "preference_max_brightness":
+				case "preference_hdr_save_expo":
+				case "preference_front_camera_mirror":
+				case "preference_stamp":
+				case "preference_stamp_dateformat":
+				case "preference_stamp_timeformat":
+				case "preference_stamp_gpsformat":
+				case "preference_textstamp":
+				case "preference_stamp_fontsize":
+				case "preference_stamp_font_color":
+				case "preference_stamp_style":
+				case "preference_background_photo_saving":
+				case "preference_record_audio":
+				case "preference_record_audio_src":
+				case "preference_record_audio_channels":
+				case "preference_lock_video":
+				case "preference_video_subtitle":
+				case "preference_require_location":
+					if( MyDebug.LOG )
+						Log.d(TAG, "this change doesn't require update");
+					break;
+				default:
+					if( MyDebug.LOG )
+						Log.d(TAG, "this change does require update");
+					any = true;
+					break;
+			}
 		}
 
 		boolean anyChanges() {
@@ -1374,7 +1433,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 			else {
 				if( MyDebug.LOG )
-					Log.d(TAG, "no changes made to preferences");
+					Log.d(TAG, "no need to call updateForSettings() for changes made to preferences");
 			}
         }
         else {
