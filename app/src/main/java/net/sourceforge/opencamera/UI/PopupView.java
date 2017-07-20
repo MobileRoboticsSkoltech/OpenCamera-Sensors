@@ -612,7 +612,6 @@ public class PopupView extends LinearLayout {
 					public void onClick(String selected_option) {
 						boolean close_popup = false;
 						if( selected_option.equals("manual") ) {
-							// if we used the generic "manual", then instead try to preserve the current iso if it exists
 							if( preview.getCameraController() != null ) {
 								String current_white_balance = preview.getCameraController().getWhiteBalance();
 								if( current_white_balance == null || !current_white_balance.equals("manual") ) {
