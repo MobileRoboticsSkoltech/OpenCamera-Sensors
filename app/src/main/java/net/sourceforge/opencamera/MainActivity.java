@@ -1053,6 +1053,104 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "clickedPopupSettings");
 		mainUI.togglePopupSettings();
     }
+
+    private PreferencesListener preferencesListener = new PreferencesListener();
+
+	/** Keeps track of changes to SharedPreferences.
+	 */
+	class PreferencesListener implements SharedPreferences.OnSharedPreferenceChangeListener {
+		private static final String TAG = "PreferencesListener";
+
+		private boolean any; // whether any changes that require update have been made since startListening()
+
+		void startListening() {
+			if( MyDebug.LOG )
+				Log.d(TAG, "startListening");
+			any = false;
+
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+			// n.b., registerOnSharedPreferenceChangeListener warns that we must keep a reference to the listener (which
+			// is this class) as long as we want to listen for changes, otherwise the listener may be garbage collected!
+			sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+		}
+
+		void stopListening() {
+			if( MyDebug.LOG )
+				Log.d(TAG, "stopListening");
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+			sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+		}
+
+		@Override
+		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "onSharedPreferenceChanged: " + key);
+			switch( key ) {
+				// we whitelist preferences where we're sure that we don't need to call updateForSettings() if they've changed
+				case "preference_timer":
+				case "preference_touch_capture":
+				case "preference_pause_preview":
+				case "preference_shutter_sound":
+				case "preference_timer_beep":
+				case "preference_timer_speak":
+				case "preference_volume_keys":
+				case "preference_audio_noise_control_sensitivity":
+				case "preference_using_saf":
+				case "preference_save_photo_prefix":
+				case "preference_save_video_prefix":
+				case "preference_save_zulu_time":
+				case "preference_show_when_locked":
+				case "preference_startup_focus":
+				case "preference_show_zoom":
+				case "preference_show_angle":
+				case "preference_show_angle_line":
+				case "preference_show_pitch_lines":
+				case "preference_angle_highlight_color":
+				case "preference_show_geo_direction":
+				case "preference_show_geo_direction_lines":
+				case "preference_show_battery":
+				case "preference_show_time":
+				case "preference_free_memory":
+				case "preference_show_iso":
+				case "preference_grid":
+				case "preference_crop_guide":
+				case "preference_show_toasts":
+				case "preference_thumbnail_animation":
+				case "preference_take_photo_border":
+				case "preference_keep_display_on":
+				case "preference_max_brightness":
+				case "preference_hdr_save_expo":
+				case "preference_front_camera_mirror":
+				case "preference_stamp":
+				case "preference_stamp_dateformat":
+				case "preference_stamp_timeformat":
+				case "preference_stamp_gpsformat":
+				case "preference_textstamp":
+				case "preference_stamp_fontsize":
+				case "preference_stamp_font_color":
+				case "preference_stamp_style":
+				case "preference_background_photo_saving":
+				case "preference_record_audio":
+				case "preference_record_audio_src":
+				case "preference_record_audio_channels":
+				case "preference_lock_video":
+				case "preference_video_subtitle":
+				case "preference_require_location":
+					if( MyDebug.LOG )
+						Log.d(TAG, "this change doesn't require update");
+					break;
+				default:
+					if( MyDebug.LOG )
+						Log.d(TAG, "this change does require update");
+					any = true;
+					break;
+			}
+		}
+
+		boolean anyChanges() {
+			return any;
+		}
+	};
     
     public void openSettings() {
 		if( MyDebug.LOG )
@@ -1165,6 +1263,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		putBundleExtra(bundle, "flash_values", this.preview.getSupportedFlashValues());
 		putBundleExtra(bundle, "focus_values", this.preview.getSupportedFocusValues());
 
+		preferencesListener.startListening();
+
 		setWindowFlagsForSettings();
 		MyPreferenceFragment fragment = new MyPreferenceFragment();
 		fragment.setArguments(bundle);
@@ -1193,6 +1293,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "toast_message: " + toast_message);
 			}
 		}
+		long debug_time = 0;
+		if( MyDebug.LOG ) {
+			debug_time = System.currentTimeMillis();
+		}
 		// make sure we're into continuous video mode
 		// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
 		// so to be safe, we always reset to continuous video mode, and then reset it afterwards
@@ -1204,9 +1308,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "update folder history");
 		save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true);
 		// no need to update save_location_history_saf, as we always do this in onActivityResult()
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "updateForSettings: time after update folder history: " + (System.currentTimeMillis() - debug_time));
+		}
 
 		if( !keep_popup ) {
 			mainUI.destroyPopup(); // important as we don't want to use a cached popup
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "updateForSettings: time after destroy popup: " + (System.currentTimeMillis() - debug_time));
+			}
 		}
 
 		// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
@@ -1238,8 +1348,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				}
 			}
 		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "updateForSettings: time after check need_reopen: " + (System.currentTimeMillis() - debug_time));
+		}
 
 		mainUI.layoutUI(); // needed in case we've changed left/right handed UI
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "updateForSettings: time after layoutUI: " + (System.currentTimeMillis() - debug_time));
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		if( sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none") ) {
 			// ensure icon is invisible if switching from audio control enabled to disabled
@@ -1249,16 +1365,34 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
         initSpeechRecognizer(); // in case we've enabled or disabled speech recognizer
 		initLocation(); // in case we've enabled or disabled GPS
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "updateForSettings: time after init speech and location: " + (System.currentTimeMillis() - debug_time));
+		}
 		if( toast_message != null )
 			block_startup_toast = true;
 		if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
 			preview.onPause();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "updateForSettings: time after pause: " + (System.currentTimeMillis() - debug_time));
+			}
 			preview.onResume();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "updateForSettings: time after resume: " + (System.currentTimeMillis() - debug_time));
+			}
 		}
 		else {
 			preview.setCameraDisplayOrientation(); // need to call in case the preview rotation option was changed
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "updateForSettings: time after set display orientation: " + (System.currentTimeMillis() - debug_time));
+			}
 			preview.pausePreview();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "updateForSettings: time after pause: " + (System.currentTimeMillis() - debug_time));
+			}
 			preview.setupCamera(false);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "updateForSettings: time after setup: " + (System.currentTimeMillis() - debug_time));
+			}
 		}
 		block_startup_toast = false;
 		if( toast_message != null && toast_message.length() > 0 )
@@ -1270,6 +1404,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "switch focus back to: " + saved_focus_value);
     		preview.updateFocus(saved_focus_value, true, false);
     	}*/
+
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "updateForSettings: done: " + (System.currentTimeMillis() - debug_time));
+		}
     }
 
 	private MyPreferenceFragment getPreferenceFragment() {
@@ -1287,7 +1425,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "close settings");
 			setWindowFlagsForCamera();
-			updateForSettings();
+
+			preferencesListener.stopListening();
+			//updateForSettings();
+			if( preferencesListener.anyChanges() ) {
+				updateForSettings();
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no need to call updateForSettings() for changes made to preferences");
+			}
         }
         else {
 			if( popupIsOpen() ) {

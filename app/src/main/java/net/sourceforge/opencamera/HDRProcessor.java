@@ -284,11 +284,12 @@ public class HDRProcessor {
 	 *                      called to indicate the sort order when this is known.
 	 * @param hdr_alpha     A value from 0.0f to 1.0f indicating the "strength" of the HDR effect. Specifically,
 	 *                      this controls the level of the local contrast enhancement done in adjustHistogram().
+	 * @param n_tiles       A value of 1 or greater indicating how local the contrast enhancemnt algorithm should be.
 	 * @param tonemapping_algorithm
 	 *                      Algorithm to use for tonemapping (if multiple images are received).
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, TonemappingAlgorithm tonemapping_algorithm) throws HDRProcessorException {
+	public void processHDR(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, int n_tiles, TonemappingAlgorithm tonemapping_algorithm) throws HDRProcessorException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDR");
 		if( !assume_sorted && !release_bitmaps ) {
@@ -326,10 +327,10 @@ public class HDRProcessor {
 				sort_order.add(0);
 				sort_cb.sortOrder(sort_order);
 			}
-			processSingleImage(bitmaps, release_bitmaps, output_bitmap, hdr_alpha);
+			processSingleImage(bitmaps, release_bitmaps, output_bitmap, hdr_alpha, n_tiles);
 			break;
 		case HDRALGORITHM_STANDARD:
-			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted, sort_cb, hdr_alpha, tonemapping_algorithm);
+			processHDRCore(bitmaps, release_bitmaps, output_bitmap, assume_sorted, sort_cb, hdr_alpha, n_tiles, tonemapping_algorithm);
 			break;
 		default:
 			if( MyDebug.LOG )
@@ -468,7 +469,7 @@ public class HDRProcessor {
 	 *  Android 5.0).
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, TonemappingAlgorithm tonemapping_algorithm) {
+	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, int n_tiles, TonemappingAlgorithm tonemapping_algorithm) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
 		
@@ -637,7 +638,7 @@ public class HDRProcessor {
 		}
 
 		if( hdr_alpha != 0.0f ) {
-			adjustHistogram(output_allocation, output_allocation, width, height, hdr_alpha, time_s);
+			adjustHistogram(output_allocation, output_allocation, width, height, hdr_alpha, n_tiles, time_s);
 		}
 
 		if( release_bitmaps ) {
@@ -663,7 +664,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha) {
+	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha, int n_tiles) {
 		if (MyDebug.LOG)
 			Log.d(TAG, "processSingleImage");
 
@@ -687,7 +688,7 @@ public class HDRProcessor {
 			output_allocation = Allocation.createFromBitmap(rs, output_bitmap);
 		}
 
-		adjustHistogram(allocation, output_allocation, width, height, hdr_alpha, time_s);
+		adjustHistogram(allocation, output_allocation, width, height, hdr_alpha, n_tiles, time_s);
 
 		if( release_bitmaps ) {
 			allocation.copyTo(bitmaps.get(0));
@@ -1065,7 +1066,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, float hdr_alpha, long time_s) {
+	private void adjustHistogram(Allocation allocation_in, Allocation allocation_out, int width, int height, float hdr_alpha, int n_tiles, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "adjustHistogram");
 		final boolean adjust_histogram = false;
@@ -1153,19 +1154,19 @@ public class HDRProcessor {
 			histogramScript.bind_histogram(histogramAllocation);
 
 			//final int n_tiles_c = 8;
-			final int n_tiles_c = 4;
+			//final int n_tiles_c = 4;
 			//final int n_tiles_c = 1;
-			int [] c_histogram = new int[n_tiles_c*n_tiles_c*256];
-			for(int i=0;i<n_tiles_c;i++) {
-				double a0 = ((double)i)/(double)n_tiles_c;
-				double a1 = ((double)i+1.0)/(double)n_tiles_c;
+			int [] c_histogram = new int[n_tiles*n_tiles*256];
+			for(int i=0;i<n_tiles;i++) {
+				double a0 = ((double)i)/(double)n_tiles;
+				double a1 = ((double)i+1.0)/(double)n_tiles;
 				int start_x = (int)(a0 * width);
 				int stop_x = (int)(a1 * width);
 				if( stop_x == start_x )
 					continue;
-				for(int j=0;j<n_tiles_c;j++) {
-					double b0 = ((double)j)/(double)n_tiles_c;
-					double b1 = ((double)j+1.0)/(double)n_tiles_c;
+				for(int j=0;j<n_tiles;j++) {
+					double b0 = ((double)j)/(double)n_tiles;
+					double b1 = ((double)j+1.0)/(double)n_tiles;
 					int start_y = (int)(b0 * height);
 					int stop_y = (int)(b1 * height);
 					if( stop_y == start_y )
@@ -1254,7 +1255,7 @@ public class HDRProcessor {
 						histogram[x] += n_clipped_per_bucket;
 					}
 
-					int histogram_offset = 256*(i*n_tiles_c+j);
+					int histogram_offset = 256*(i*n_tiles+j);
 					c_histogram[histogram_offset] = histogram[0];
 					for(int x=1;x<256;x++) {
 						c_histogram[histogram_offset+x] = c_histogram[histogram_offset+x-1] + histogram[x];
@@ -1270,12 +1271,12 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after creating histograms: " + (System.currentTimeMillis() - time_s));
 
-			Allocation c_histogramAllocation = Allocation.createSized(rs, Element.I32(rs), n_tiles_c*n_tiles_c*256);
+			Allocation c_histogramAllocation = Allocation.createSized(rs, Element.I32(rs), n_tiles*n_tiles*256);
 			c_histogramAllocation.copyFrom(c_histogram);
 			ScriptC_histogram_adjust histogramAdjustScript = new ScriptC_histogram_adjust(rs);
 			histogramAdjustScript.set_c_histogram(c_histogramAllocation);
 			histogramAdjustScript.set_hdr_alpha(hdr_alpha);
-			histogramAdjustScript.set_n_tiles(n_tiles_c);
+			histogramAdjustScript.set_n_tiles(n_tiles);
 			histogramAdjustScript.set_width(width);
 			histogramAdjustScript.set_height(height);
 

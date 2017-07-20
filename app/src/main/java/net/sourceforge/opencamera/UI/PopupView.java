@@ -610,6 +610,7 @@ public class PopupView extends LinearLayout {
 				addRadioOptionsToPopup(sharedPreferences, supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_option) {
+						boolean close_popup = false;
 						if( selected_option.equals("manual") ) {
 							// if we used the generic "manual", then instead try to preserve the current iso if it exists
 							if( preview.getCameraController() != null ) {
@@ -618,6 +619,7 @@ public class PopupView extends LinearLayout {
 									// try to choose a default manual white balance temperature as close as possible to the current auto
 									if( MyDebug.LOG )
 										Log.d(TAG, "changed to manual white balance");
+									close_popup = true;
 									if( preview.getCameraController().captureResultHasWhiteBalanceTemperature() ) {
 										int temperature = preview.getCameraController().captureResultWhiteBalanceTemperature();
 										if( MyDebug.LOG )
@@ -631,6 +633,16 @@ public class PopupView extends LinearLayout {
 								}
 							}
 						}
+
+						if( preview.getCameraController() != null ) {
+							preview.getCameraController().setWhiteBalance(selected_option);
+						}
+						// keep popup open, unless switching to manual
+						if( close_popup ) {
+							main_activity.closePopup();
+						}
+						//main_activity.updateForSettings(getResources().getString(R.string.white_balance) + ": " + selected_option);
+						//main_activity.closePopup();
 					}
 				});
 				if( MyDebug.LOG )
@@ -638,11 +650,21 @@ public class PopupView extends LinearLayout {
 
 				List<String> supported_scene_modes = preview.getSupportedSceneModes();
 				addRadioOptionsToPopup(sharedPreferences, supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", null);
+				// note, we don't set an RadioOptionsListener, so we default to behaviour of calling updateForSettings() and
+				// closing the popup - this is necessary, as changing scene mode can change available camera features
 				if( MyDebug.LOG )
 					Log.d(TAG, "PopupView time 15: " + (System.nanoTime() - debug_time));
 
 				List<String> supported_color_effects = preview.getSupportedColorEffects();
-				addRadioOptionsToPopup(sharedPreferences, supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", null);
+				addRadioOptionsToPopup(sharedPreferences, supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", new RadioOptionsListener() {
+					@Override
+					public void onClick(String selected_option) {
+						if( preview.getCameraController() != null ) {
+							preview.getCameraController().setColorEffect(selected_option);
+						}
+						// keep popup open
+					}
+				});
 				if( MyDebug.LOG )
 					Log.d(TAG, "PopupView time 16: " + (System.nanoTime() - debug_time));
 			}
@@ -988,16 +1010,18 @@ public class PopupView extends LinearLayout {
 				public void onClick(View v) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "clicked current_option: " + supported_option);
-					if( listener != null ) {
-						listener.onClick(supported_option);
-					}
 					SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
 					editor.putString(preference_key, supported_option);
 					editor.apply();
 
-					main_activity.updateForSettings(title + ": " + supported_option);
-					main_activity.closePopup();
+					if( listener != null ) {
+						listener.onClick(supported_option);
+					}
+					else {
+						main_activity.updateForSettings(title + ": " + supported_option);
+						main_activity.closePopup();
+					}
 				}
 			});
 			if( MyDebug.LOG )
