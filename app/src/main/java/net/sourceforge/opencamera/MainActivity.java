@@ -2494,34 +2494,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				}
 			}
 		}
-		if( preview.getSupportedWhiteBalances() != null && preview.supportsWhiteBalanceTemperature() ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "set up manual white balance");
-			SeekBar white_balance_seek_bar = ((SeekBar)findViewById(R.id.white_balance_seekbar));
-			white_balance_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-			final int minimum_temperature = preview.getMinimumWhiteBalanceTemperature();
-			final int maximum_temperature = preview.getMaximumWhiteBalanceTemperature();
-			// white balance should use linear scaling
-			white_balance_seek_bar.setMax(maximum_temperature - minimum_temperature);
-			white_balance_seek_bar.setProgress(preview.getCameraController().getWhiteBalanceTemperature() - minimum_temperature);
-			white_balance_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-				@Override
-				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "white balance seekbar onProgressChanged: " + progress);
-					int temperature = minimum_temperature + progress;
-					preview.setWhiteBalanceTemperature(temperature);
-				}
-
-				@Override
-				public void onStartTrackingTouch(SeekBar seekBar) {
-				}
-
-				@Override
-				public void onStopTrackingTouch(SeekBar seekBar) {
-				}
-			});
-		}
+		setManualWBSeekbar();
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: time after setting up iso: " + (System.currentTimeMillis() - debug_time));
 		{
@@ -2592,6 +2565,39 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: total time for cameraSetup: " + (System.currentTimeMillis() - debug_time));
     }
+
+    public void setManualWBSeekbar() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setManualWBSeekbar");
+		if( preview.getSupportedWhiteBalances() != null && preview.supportsWhiteBalanceTemperature() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up manual white balance");
+			SeekBar white_balance_seek_bar = ((SeekBar)findViewById(R.id.white_balance_seekbar));
+			white_balance_seek_bar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
+			final int minimum_temperature = preview.getMinimumWhiteBalanceTemperature();
+			final int maximum_temperature = preview.getMaximumWhiteBalanceTemperature();
+			// white balance should use linear scaling
+			white_balance_seek_bar.setMax(maximum_temperature - minimum_temperature);
+			white_balance_seek_bar.setProgress(preview.getCameraController().getWhiteBalanceTemperature() - minimum_temperature);
+			white_balance_seek_bar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "white balance seekbar onProgressChanged: " + progress);
+					int temperature = minimum_temperature + progress;
+					preview.setWhiteBalanceTemperature(temperature);
+				}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {
+				}
+
+				@Override
+				public void onStopTrackingTouch(SeekBar seekBar) {
+				}
+			});
+		}
+	}
     
     public boolean supportsAutoStabilise() {
     	return this.supports_auto_stabilise;
