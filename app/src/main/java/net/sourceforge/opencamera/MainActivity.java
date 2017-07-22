@@ -1371,13 +1371,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( toast_message != null )
 			block_startup_toast = true;
 		if( need_reopen || preview.getCameraController() == null ) { // if camera couldn't be opened before, might as well try again
-			preview.onPause();
+			preview.reopenCamera();
 			if( MyDebug.LOG ) {
-				Log.d(TAG, "updateForSettings: time after pause: " + (System.currentTimeMillis() - debug_time));
-			}
-			preview.onResume();
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "updateForSettings: time after resume: " + (System.currentTimeMillis() - debug_time));
+				Log.d(TAG, "updateForSettings: time after reopen: " + (System.currentTimeMillis() - debug_time));
 			}
 		}
 		else {
