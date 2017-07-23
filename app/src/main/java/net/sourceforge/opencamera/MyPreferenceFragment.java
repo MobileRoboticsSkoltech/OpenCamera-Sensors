@@ -718,24 +718,25 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 		else {
                             about_string.append("None");
                 		}
-                        about_string.append("\nISOs: ");
-                		String [] isos = bundle.getStringArray("isos");
-                		if( isos != null && isos.length > 0 ) {
-                			for(int i=0;i<isos.length;i++) {
-                				if( i > 0 ) {
-                    				about_string.append(", ");
-                				}
-                				about_string.append(isos[i]);
-                			}
-                		}
-                		else {
-                            about_string.append("None");
-                		}
-                		String iso_key = bundle.getString("iso_key");
-                		if( iso_key != null ) {
-							about_string.append("\nISO key: ");
-							about_string.append(iso_key);
-                		}
+                		if( !using_android_l ) {
+							about_string.append("\nISOs: ");
+							String[] isos = bundle.getStringArray("isos");
+							if (isos != null && isos.length > 0) {
+								for (int i = 0; i < isos.length; i++) {
+									if (i > 0) {
+										about_string.append(", ");
+									}
+									about_string.append(isos[i]);
+								}
+							} else {
+								about_string.append("None");
+							}
+							String iso_key = bundle.getString("iso_key");
+							if (iso_key != null) {
+								about_string.append("\nISO key: ");
+								about_string.append(iso_key);
+							}
+						}
 
 						about_string.append("\nUsing SAF?: ");
 						about_string.append(sharedPreferences.getBoolean(PreferenceKeys.getUsingSAFPreferenceKey(), false));
