@@ -41,6 +41,8 @@ public class DrawPreview {
 
 	// store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
 	private SharedPreferences sharedPreferences;
+	// also cache per frame:
+	private MyApplicationInterface.PhotoMode photoMode;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
@@ -51,6 +53,7 @@ public class DrawPreview {
 	private final float stroke_width;
 	private Calendar calendar;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
+	private final String ybounds_text;
 
 	private final static double close_level_angle = 1.0f;
 	private String angle_string; // cached for UI performance
@@ -120,6 +123,8 @@ public class DrawPreview {
 		hdr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_hdr_on_white_48dp);
 		photostamp_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_text_format_white_48dp);
 		flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
+
+		ybounds_text = getContext().getResources().getString(R.string.zoom) + getContext().getResources().getString(R.string.angle) + getContext().getResources().getString(R.string.direction);
 	}
 	
 	public void onDestroy() {
@@ -500,7 +505,7 @@ public class DrawPreview {
 		}
 	}
 
-	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size, final String ybounds_text) {
+	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size) {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -645,10 +650,10 @@ public class DrawPreview {
 			}
 
 			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
-			if( applicationInterface.isRawPref() &&
+			if( applicationInterface.isRawPref(sharedPreferences) &&
 					!applicationInterface.isVideoPref() && // RAW not relevant for video mode
-					applicationInterface.getPhotoMode() != MyApplicationInterface.PhotoMode.HDR &&
-					applicationInterface.getPhotoMode() != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
+					photoMode != MyApplicationInterface.PhotoMode.HDR &&
+					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -665,7 +670,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getAutoStabilisePref() && !applicationInterface.isVideoPref() ) {
+			if( applicationInterface.getAutoStabilisePref(sharedPreferences) && !applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -682,7 +687,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.HDR && !applicationInterface.isVideoPref() ) {
+			if( photoMode == MyApplicationInterface.PhotoMode.HDR && !applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -699,7 +704,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getStampPref().equals("preference_stamp_yes") && !applicationInterface.isVideoPref() ) {
+			if( applicationInterface.getStampPref(sharedPreferences).equals("preference_stamp_yes") && !applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -816,7 +821,6 @@ public class DrawPreview {
 		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
 		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 
-		final String ybounds_text = getContext().getResources().getString(R.string.zoom) + getContext().getResources().getString(R.string.angle) + getContext().getResources().getString(R.string.direction);
 		if( camera_controller != null && !preview.isPreviewPaused() ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
@@ -1029,7 +1033,7 @@ public class DrawPreview {
 			}
 		}
 
-		onDrawInfoLines(canvas, top_y, location_size, ybounds_text);
+		onDrawInfoLines(canvas, top_y, location_size);
 
 		canvas.restore();
 	}
@@ -1234,8 +1238,10 @@ public class DrawPreview {
 	public void onDrawPreview(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
-		// make sure sharedPreferences up to date
+		// make sure sharedPreferences etc up to date
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		photoMode = applicationInterface.getPhotoMode(sharedPreferences);
+
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();

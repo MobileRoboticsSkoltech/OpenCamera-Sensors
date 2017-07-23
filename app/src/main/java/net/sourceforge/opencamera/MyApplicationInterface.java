@@ -716,17 +716,25 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     public boolean getAutoStabilisePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return getAutoStabilisePref(sharedPreferences);
+    }
+    
+    public boolean getAutoStabilisePref(SharedPreferences sharedPreferences) {
 		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
 		if( auto_stabilise && main_activity.supportsAutoStabilise() )
 			return true;
 		return false;
     }
-    
+
     public String getStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_no");
+    	return getStampPref(sharedPreferences);
     }
     
+    public String getStampPref(SharedPreferences sharedPreferences) {
+    	return sharedPreferences.getString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_no");
+    }
+
     private String getStampDateFormatPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getStampDateFormatPreferenceKey(), "preference_stamp_dateformat_default");
@@ -858,6 +866,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     public PhotoMode getPhotoMode() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return getPhotoMode(sharedPreferences);
+    }
+
+    public PhotoMode getPhotoMode(SharedPreferences sharedPreferences) {
 		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
 		boolean dro = photo_mode_pref.equals("preference_photo_mode_dro");
 		if( dro && main_activity.supportsDRO() )
@@ -879,9 +891,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public boolean isRawPref() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+		return isRawPref(sharedPreferences);
+    }
+
+	public boolean isRawPref(SharedPreferences sharedPreferences) {
     	if( isImageCaptureIntent() )
     		return false;
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_no").equals("preference_raw_yes");
     }
 
