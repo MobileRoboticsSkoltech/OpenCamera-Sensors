@@ -1263,19 +1263,22 @@ public class DrawPreview {
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
 
-		if( main_activity.getMainUI().inImmersiveMode() ) {
-			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-			if( immersive_mode.equals("immersive_mode_everything") ) {
-				// exit, to ensure we don't display anything!
-				return;
-			}
-		}
-		final float scale = getContext().getResources().getDisplayMetrics().density;
 		if( camera_controller!= null && front_screen_flash ) {
 			p.setColor(Color.WHITE);
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
-		else if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
+		if( main_activity.getMainUI().inImmersiveMode() ) {
+			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			if( immersive_mode.equals("immersive_mode_everything") ) {
+				// exit, to ensure we don't display anything!
+				// though note we still should do the front screen flash (since the user can take photos via volume keys when
+				// in immersive_mode_everything mode)
+				return;
+			}
+		}
+
+		final float scale = getContext().getResources().getDisplayMetrics().density;
+		if( camera_controller != null && taking_picture && !front_screen_flash && getTakePhotoBorderPref() ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels
