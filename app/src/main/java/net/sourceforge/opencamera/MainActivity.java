@@ -3054,6 +3054,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         	speechRecognizerStopped();
     	    View speechRecognizerButton = findViewById(R.id.audio_control);
     	    speechRecognizerButton.setVisibility(View.GONE);
+			speechRecognizer.cancel();
 			speechRecognizer.destroy();
 			speechRecognizer = null;
 		}
