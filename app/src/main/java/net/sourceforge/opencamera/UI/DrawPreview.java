@@ -662,6 +662,7 @@ public class DrawPreview {
 
 			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
 			if( applicationInterface.isRawPref(sharedPreferences) &&
+					preview.supportsRaw() && // RAW can be enabled, even if it isn't available for this camera (e.g., user enables RAW for back camera, but then switches to front camera which doesn't support it)
 					!applicationInterface.isVideoPref() && // RAW not relevant for video mode
 					photoMode != MyApplicationInterface.PhotoMode.HDR &&
 					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
