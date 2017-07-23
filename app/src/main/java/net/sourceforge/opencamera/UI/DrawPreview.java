@@ -41,6 +41,8 @@ public class DrawPreview {
 
 	// store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
 	private SharedPreferences sharedPreferences;
+	// also cache per frame:
+	private MyApplicationInterface.PhotoMode photoMode;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
@@ -51,6 +53,7 @@ public class DrawPreview {
 	private final float stroke_width;
 	private Calendar calendar;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
+	private final String ybounds_text;
 
 	private final static double close_level_angle = 1.0f;
 	private String angle_string; // cached for UI performance
@@ -120,6 +123,8 @@ public class DrawPreview {
 		hdr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_hdr_on_white_48dp);
 		photostamp_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_text_format_white_48dp);
 		flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
+
+		ybounds_text = getContext().getResources().getString(R.string.zoom) + getContext().getResources().getString(R.string.angle) + getContext().getResources().getString(R.string.direction);
 	}
 	
 	public void onDestroy() {
@@ -269,166 +274,177 @@ public class DrawPreview {
 	private void drawGrids(Canvas canvas) {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
+		if( camera_controller == null ) {
+			return;
+		}
 		String preference_grid = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 
-		if( camera_controller != null && preference_grid.equals("preference_grid_3x3") ) {
-			p.setColor(Color.WHITE);
-			canvas.drawLine(canvas.getWidth()/3.0f, 0.0f, canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(2.0f*canvas.getWidth()/3.0f, 0.0f, 2.0f*canvas.getWidth()/3.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(0.0f, canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, canvas.getHeight()/3.0f, p);
-			canvas.drawLine(0.0f, 2.0f*canvas.getHeight()/3.0f, canvas.getWidth()-1.0f, 2.0f*canvas.getHeight()/3.0f, p);
-		}
-		else if( camera_controller != null && preference_grid.equals("preference_grid_phi_3x3") ) {
-			p.setColor(Color.WHITE);
-			canvas.drawLine(canvas.getWidth()/2.618f, 0.0f, canvas.getWidth()/2.618f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(1.618f*canvas.getWidth()/2.618f, 0.0f, 1.618f*canvas.getWidth()/2.618f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(0.0f, canvas.getHeight()/2.618f, canvas.getWidth()-1.0f, canvas.getHeight()/2.618f, p);
-			canvas.drawLine(0.0f, 1.618f*canvas.getHeight()/2.618f, canvas.getWidth()-1.0f, 1.618f*canvas.getHeight()/2.618f, p);
-		}
-		else if( camera_controller != null && preference_grid.equals("preference_grid_4x2") ) {
-			p.setColor(Color.GRAY);
-			canvas.drawLine(canvas.getWidth()/4.0f, 0.0f, canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(canvas.getWidth()/2.0f, 0.0f, canvas.getWidth()/2.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(3.0f*canvas.getWidth()/4.0f, 0.0f, 3.0f*canvas.getWidth()/4.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(0.0f, canvas.getHeight()/2.0f, canvas.getWidth()-1.0f, canvas.getHeight()/2.0f, p);
-			p.setColor(Color.WHITE);
-			int crosshairs_radius = (int) (20 * scale + 0.5f); // convert dps to pixels
-			canvas.drawLine(canvas.getWidth()/2.0f, canvas.getHeight()/2.0f - crosshairs_radius, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f + crosshairs_radius, p);
-			canvas.drawLine(canvas.getWidth()/2.0f - crosshairs_radius, canvas.getHeight()/2.0f, canvas.getWidth()/2.0f + crosshairs_radius, canvas.getHeight()/2.0f, p);
-		}
-		else if( camera_controller != null && preference_grid.equals("preference_grid_crosshair") ) {
-			p.setColor(Color.WHITE);
-			canvas.drawLine(canvas.getWidth()/2.0f, 0.0f, canvas.getWidth()/2.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(0.0f, canvas.getHeight()/2.0f, canvas.getWidth()-1.0f, canvas.getHeight()/2.0f, p);
-		}
-		else if( camera_controller != null && ( preference_grid.equals("preference_grid_golden_spiral_right") || preference_grid.equals("preference_grid_golden_spiral_left") || preference_grid.equals("preference_grid_golden_spiral_upside_down_right") || preference_grid.equals("preference_grid_golden_spiral_upside_down_left") ) ) {
-			canvas.save();
-			switch(preference_grid) {
-				case "preference_grid_golden_spiral_left":
-					canvas.scale(-1.0f, 1.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
-					break;
-				case "preference_grid_golden_spiral_right":
-					// no transformation needed
-					break;
-				case "preference_grid_golden_spiral_upside_down_left":
-					canvas.rotate(180.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
-					break;
-				case "preference_grid_golden_spiral_upside_down_right":
-					canvas.scale(1.0f, -1.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
-					break;
-			}
-			p.setColor(Color.WHITE);
-			p.setStyle(Paint.Style.STROKE);
-			int fibb = 34;
-			int fibb_n = 21;
-			int left = 0, top = 0;
-			int full_width = canvas.getWidth();
-			int full_height = canvas.getHeight();
-			int width = (int)(full_width*((double)fibb_n)/(double)(fibb));
-			int height = full_height;
+		switch( preference_grid ) {
+			case "preference_grid_3x3":
+				p.setColor(Color.WHITE);
+				canvas.drawLine(canvas.getWidth() / 3.0f, 0.0f, canvas.getWidth() / 3.0f, canvas.getHeight() - 1.0f, p);
+				canvas.drawLine(2.0f * canvas.getWidth() / 3.0f, 0.0f, 2.0f * canvas.getWidth() / 3.0f, canvas.getHeight() - 1.0f, p);
+				canvas.drawLine(0.0f, canvas.getHeight() / 3.0f, canvas.getWidth() - 1.0f, canvas.getHeight() / 3.0f, p);
+				canvas.drawLine(0.0f, 2.0f * canvas.getHeight() / 3.0f, canvas.getWidth() - 1.0f, 2.0f * canvas.getHeight() / 3.0f, p);
+				break;
+			case "preference_grid_phi_3x3":
+				p.setColor(Color.WHITE);
+				canvas.drawLine(canvas.getWidth() / 2.618f, 0.0f, canvas.getWidth() / 2.618f, canvas.getHeight() - 1.0f, p);
+				canvas.drawLine(1.618f * canvas.getWidth() / 2.618f, 0.0f, 1.618f * canvas.getWidth() / 2.618f, canvas.getHeight() - 1.0f, p);
+				canvas.drawLine(0.0f, canvas.getHeight() / 2.618f, canvas.getWidth() - 1.0f, canvas.getHeight() / 2.618f, p);
+				canvas.drawLine(0.0f, 1.618f * canvas.getHeight() / 2.618f, canvas.getWidth() - 1.0f, 1.618f * canvas.getHeight() / 2.618f, p);
+				break;
+			case "preference_grid_4x2":
+				p.setColor(Color.GRAY);
+				canvas.drawLine(canvas.getWidth() / 4.0f, 0.0f, canvas.getWidth() / 4.0f, canvas.getHeight() - 1.0f, p);
+				canvas.drawLine(canvas.getWidth() / 2.0f, 0.0f, canvas.getWidth() / 2.0f, canvas.getHeight() - 1.0f, p);
+				canvas.drawLine(3.0f * canvas.getWidth() / 4.0f, 0.0f, 3.0f * canvas.getWidth() / 4.0f, canvas.getHeight() - 1.0f, p);
+				canvas.drawLine(0.0f, canvas.getHeight() / 2.0f, canvas.getWidth() - 1.0f, canvas.getHeight() / 2.0f, p);
+				p.setColor(Color.WHITE);
+				int crosshairs_radius = (int) (20 * scale + 0.5f); // convert dps to pixels
 
-			for(int count=0;count<2;count++) {
+				canvas.drawLine(canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f - crosshairs_radius, canvas.getWidth() / 2.0f, canvas.getHeight() / 2.0f + crosshairs_radius, p);
+				canvas.drawLine(canvas.getWidth() / 2.0f - crosshairs_radius, canvas.getHeight() / 2.0f, canvas.getWidth() / 2.0f + crosshairs_radius, canvas.getHeight() / 2.0f, p);
+				break;
+			case "preference_grid_crosshair":
+				p.setColor(Color.WHITE);
+				canvas.drawLine(canvas.getWidth() / 2.0f, 0.0f, canvas.getWidth() / 2.0f, canvas.getHeight() - 1.0f, p);
+				canvas.drawLine(0.0f, canvas.getHeight() / 2.0f, canvas.getWidth() - 1.0f, canvas.getHeight() / 2.0f, p);
+				break;
+			case "preference_grid_golden_spiral_right":
+			case "preference_grid_golden_spiral_left":
+			case "preference_grid_golden_spiral_upside_down_right":
+			case "preference_grid_golden_spiral_upside_down_left":
 				canvas.save();
-				draw_rect.set(left, top, left+width, top+height);
-				canvas.clipRect(draw_rect);
-				canvas.drawRect(draw_rect, p);
-				draw_rect.set(left, top, left+2*width, top+2*height);
-				canvas.drawOval(draw_rect, p);
+				switch (preference_grid) {
+					case "preference_grid_golden_spiral_left":
+						canvas.scale(-1.0f, 1.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
+						break;
+					case "preference_grid_golden_spiral_right":
+						// no transformation needed
+						break;
+					case "preference_grid_golden_spiral_upside_down_left":
+						canvas.rotate(180.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
+						break;
+					case "preference_grid_golden_spiral_upside_down_right":
+						canvas.scale(1.0f, -1.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
+						break;
+				}
+				p.setColor(Color.WHITE);
+				p.setStyle(Paint.Style.STROKE);
+				int fibb = 34;
+				int fibb_n = 21;
+				int left = 0, top = 0;
+				int full_width = canvas.getWidth();
+				int full_height = canvas.getHeight();
+				int width = (int) (full_width * ((double) fibb_n) / (double) (fibb));
+				int height = full_height;
+
+				for (int count = 0; count < 2; count++) {
+					canvas.save();
+					draw_rect.set(left, top, left + width, top + height);
+					canvas.clipRect(draw_rect);
+					canvas.drawRect(draw_rect, p);
+					draw_rect.set(left, top, left + 2 * width, top + 2 * height);
+					canvas.drawOval(draw_rect, p);
+					canvas.restore();
+
+					int old_fibb = fibb;
+					fibb = fibb_n;
+					fibb_n = old_fibb - fibb;
+
+					left += width;
+					full_width = full_width - width;
+					width = full_width;
+					height = (int) (height * ((double) fibb_n) / (double) (fibb));
+
+					canvas.save();
+					draw_rect.set(left, top, left + width, top + height);
+					canvas.clipRect(draw_rect);
+					canvas.drawRect(draw_rect, p);
+					draw_rect.set(left - width, top, left + width, top + 2 * height);
+					canvas.drawOval(draw_rect, p);
+					canvas.restore();
+
+					old_fibb = fibb;
+					fibb = fibb_n;
+					fibb_n = old_fibb - fibb;
+
+					top += height;
+					full_height = full_height - height;
+					height = full_height;
+					width = (int) (width * ((double) fibb_n) / (double) (fibb));
+					left += full_width - width;
+
+					canvas.save();
+					draw_rect.set(left, top, left + width, top + height);
+					canvas.clipRect(draw_rect);
+					canvas.drawRect(draw_rect, p);
+					draw_rect.set(left - width, top - height, left + width, top + height);
+					canvas.drawOval(draw_rect, p);
+					canvas.restore();
+
+					old_fibb = fibb;
+					fibb = fibb_n;
+					fibb_n = old_fibb - fibb;
+
+					full_width = full_width - width;
+					width = full_width;
+					left -= width;
+					height = (int) (height * ((double) fibb_n) / (double) (fibb));
+					top += full_height - height;
+
+					canvas.save();
+					draw_rect.set(left, top, left + width, top + height);
+					canvas.clipRect(draw_rect);
+					canvas.drawRect(draw_rect, p);
+					draw_rect.set(left, top - height, left + 2 * width, top + height);
+					canvas.drawOval(draw_rect, p);
+					canvas.restore();
+
+					old_fibb = fibb;
+					fibb = fibb_n;
+					fibb_n = old_fibb - fibb;
+
+					full_height = full_height - height;
+					height = full_height;
+					top -= height;
+					width = (int) (width * ((double) fibb_n) / (double) (fibb));
+				}
+
 				canvas.restore();
+				p.setStyle(Paint.Style.FILL); // reset
 
-				int old_fibb = fibb;
-				fibb = fibb_n;
-				fibb_n = old_fibb - fibb;
-
-				left += width;
-				full_width = full_width - width;
-				width = full_width;
-				height = (int)(height*((double)fibb_n)/(double)(fibb));
-
-				canvas.save();
-				draw_rect.set(left, top, left+width, top+height);
-				canvas.clipRect(draw_rect);
-				canvas.drawRect(draw_rect, p);
-				draw_rect.set(left-width, top, left+width, top+2*height);
-				canvas.drawOval(draw_rect, p);
-				canvas.restore();
-
-				old_fibb = fibb;
-				fibb = fibb_n;
-				fibb_n = old_fibb - fibb;
-
-				top += height;
-				full_height = full_height - height;
-				height = full_height;
-				width = (int)(width*((double)fibb_n)/(double)(fibb));
-				left += full_width - width;
-
-				canvas.save();
-				draw_rect.set(left, top, left+width, top+height);
-				canvas.clipRect(draw_rect);
-				canvas.drawRect(draw_rect, p);
-				draw_rect.set(left-width, top-height, left+width, top+height);
-				canvas.drawOval(draw_rect, p);
-				canvas.restore();
-
-				old_fibb = fibb;
-				fibb = fibb_n;
-				fibb_n = old_fibb - fibb;
-
-				full_width = full_width - width;
-				width = full_width;
-				left -= width;
-				height = (int)(height*((double)fibb_n)/(double)(fibb));
-				top += full_height - height;
-
-				canvas.save();
-				draw_rect.set(left, top, left+width, top+height);
-				canvas.clipRect(draw_rect);
-				canvas.drawRect(draw_rect, p);
-				draw_rect.set(left, top-height, left+2*width, top+height);
-				canvas.drawOval(draw_rect, p);
-				canvas.restore();
-
-				old_fibb = fibb;
-				fibb = fibb_n;
-				fibb_n = old_fibb - fibb;
-
-				full_height = full_height - height;
-				height = full_height;
-				top -= height;
-				width = (int)(width*((double)fibb_n)/(double)(fibb));
-			}
-
-			canvas.restore();
-			p.setStyle(Paint.Style.FILL); // reset
-		}
-		else if( camera_controller != null && ( preference_grid.equals("preference_grid_golden_triangle_1") || preference_grid.equals("preference_grid_golden_triangle_2") ) ) {
-			p.setColor(Color.WHITE);
-			double theta = Math.atan2(canvas.getWidth(), canvas.getHeight());
-			double dist = canvas.getHeight() * Math.cos(theta);
-			float dist_x = (float)(dist * Math.sin(theta));
-			float dist_y = (float)(dist * Math.cos(theta));
-			if( preference_grid.equals("preference_grid_golden_triangle_1") ) {
-				canvas.drawLine(0.0f, canvas.getHeight()-1.0f, canvas.getWidth()-1.0f, 0.0f, p);
-				canvas.drawLine(0.0f, 0.0f, dist_x, canvas.getHeight()-dist_y, p);
-				canvas.drawLine(canvas.getWidth()-1.0f-dist_x, dist_y-1.0f, canvas.getWidth()-1.0f, canvas.getHeight()-1.0f, p);
-			}
-			else {
-				canvas.drawLine(0.0f, 0.0f, canvas.getWidth()-1.0f, canvas.getHeight()-1.0f, p);
-				canvas.drawLine(canvas.getWidth()-1.0f, 0.0f, canvas.getWidth()-1.0f-dist_x, canvas.getHeight()-dist_y, p);
-				canvas.drawLine(dist_x, dist_y-1.0f, 0.0f, canvas.getHeight()-1.0f, p);
-			}
-		}
-		else if( camera_controller != null && preference_grid.equals("preference_grid_diagonals") ) {
-			p.setColor(Color.WHITE);
-			canvas.drawLine(0.0f, 0.0f, canvas.getHeight()-1.0f, canvas.getHeight()-1.0f, p);
-			canvas.drawLine(canvas.getHeight()-1.0f, 0.0f, 0.0f, canvas.getHeight()-1.0f, p);
-			int diff = canvas.getWidth() - canvas.getHeight();
-			if( diff > 0 ) {
-				canvas.drawLine(diff, 0.0f, diff+canvas.getHeight()-1.0f, canvas.getHeight()-1.0f, p);
-				canvas.drawLine(diff+canvas.getHeight()-1.0f, 0.0f, diff, canvas.getHeight()-1.0f, p);
-			}
+				break;
+			case "preference_grid_golden_triangle_1":
+			case "preference_grid_golden_triangle_2":
+				p.setColor(Color.WHITE);
+				double theta = Math.atan2(canvas.getWidth(), canvas.getHeight());
+				double dist = canvas.getHeight() * Math.cos(theta);
+				float dist_x = (float) (dist * Math.sin(theta));
+				float dist_y = (float) (dist * Math.cos(theta));
+				if( preference_grid.equals("preference_grid_golden_triangle_1") ) {
+					canvas.drawLine(0.0f, canvas.getHeight() - 1.0f, canvas.getWidth() - 1.0f, 0.0f, p);
+					canvas.drawLine(0.0f, 0.0f, dist_x, canvas.getHeight() - dist_y, p);
+					canvas.drawLine(canvas.getWidth() - 1.0f - dist_x, dist_y - 1.0f, canvas.getWidth() - 1.0f, canvas.getHeight() - 1.0f, p);
+				}
+				else {
+					canvas.drawLine(0.0f, 0.0f, canvas.getWidth() - 1.0f, canvas.getHeight() - 1.0f, p);
+					canvas.drawLine(canvas.getWidth() - 1.0f, 0.0f, canvas.getWidth() - 1.0f - dist_x, canvas.getHeight() - dist_y, p);
+					canvas.drawLine(dist_x, dist_y - 1.0f, 0.0f, canvas.getHeight() - 1.0f, p);
+				}
+				break;
+			case "preference_grid_diagonals":
+				p.setColor(Color.WHITE);
+				canvas.drawLine(0.0f, 0.0f, canvas.getHeight() - 1.0f, canvas.getHeight() - 1.0f, p);
+				canvas.drawLine(canvas.getHeight() - 1.0f, 0.0f, 0.0f, canvas.getHeight() - 1.0f, p);
+				int diff = canvas.getWidth() - canvas.getHeight();
+				if (diff > 0) {
+					canvas.drawLine(diff, 0.0f, diff + canvas.getHeight() - 1.0f, canvas.getHeight() - 1.0f, p);
+					canvas.drawLine(diff + canvas.getHeight() - 1.0f, 0.0f, diff, canvas.getHeight() - 1.0f, p);
+				}
+				break;
 		}
 	}
 
@@ -500,7 +516,7 @@ public class DrawPreview {
 		}
 	}
 
-	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size, final String ybounds_text) {
+	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size) {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -645,10 +661,11 @@ public class DrawPreview {
 			}
 
 			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
-			if( applicationInterface.isRawPref() &&
+			if( applicationInterface.isRawPref(sharedPreferences) &&
+					preview.supportsRaw() && // RAW can be enabled, even if it isn't available for this camera (e.g., user enables RAW for back camera, but then switches to front camera which doesn't support it)
 					!applicationInterface.isVideoPref() && // RAW not relevant for video mode
-					applicationInterface.getPhotoMode() != MyApplicationInterface.PhotoMode.HDR &&
-					applicationInterface.getPhotoMode() != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
+					photoMode != MyApplicationInterface.PhotoMode.HDR &&
+					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -665,7 +682,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getAutoStabilisePref() && !applicationInterface.isVideoPref() ) {
+			if( applicationInterface.getAutoStabilisePref(sharedPreferences) && !applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -682,7 +699,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getPhotoMode() == MyApplicationInterface.PhotoMode.HDR && !applicationInterface.isVideoPref() ) {
+			if( photoMode == MyApplicationInterface.PhotoMode.HDR && !applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -699,7 +716,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getStampPref().equals("preference_stamp_yes") && !applicationInterface.isVideoPref() ) {
+			if( applicationInterface.getStampPref(sharedPreferences).equals("preference_stamp_yes") && !applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -816,7 +833,6 @@ public class DrawPreview {
 		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
 		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 
-		final String ybounds_text = getContext().getResources().getString(R.string.zoom) + getContext().getResources().getString(R.string.angle) + getContext().getResources().getString(R.string.direction);
 		if( camera_controller != null && !preview.isPreviewPaused() ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
@@ -1029,7 +1045,7 @@ public class DrawPreview {
 			}
 		}
 
-		onDrawInfoLines(canvas, top_y, location_size, ybounds_text);
+		onDrawInfoLines(canvas, top_y, location_size);
 
 		canvas.restore();
 	}
@@ -1234,8 +1250,10 @@ public class DrawPreview {
 	public void onDrawPreview(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
-		// make sure sharedPreferences up to date
+		// make sure sharedPreferences etc up to date
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+		photoMode = applicationInterface.getPhotoMode(sharedPreferences);
+
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -1246,19 +1264,22 @@ public class DrawPreview {
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
 
-		if( main_activity.getMainUI().inImmersiveMode() ) {
-			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-			if( immersive_mode.equals("immersive_mode_everything") ) {
-				// exit, to ensure we don't display anything!
-				return;
-			}
-		}
-		final float scale = getContext().getResources().getDisplayMetrics().density;
 		if( camera_controller!= null && front_screen_flash ) {
 			p.setColor(Color.WHITE);
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
-		else if( camera_controller != null && taking_picture && getTakePhotoBorderPref() ) {
+		if( main_activity.getMainUI().inImmersiveMode() ) {
+			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			if( immersive_mode.equals("immersive_mode_everything") ) {
+				// exit, to ensure we don't display anything!
+				// though note we still should do the front screen flash (since the user can take photos via volume keys when
+				// in immersive_mode_everything mode)
+				return;
+			}
+		}
+
+		final float scale = getContext().getResources().getDisplayMetrics().density;
+		if( camera_controller != null && taking_picture && !front_screen_flash && getTakePhotoBorderPref() ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels
