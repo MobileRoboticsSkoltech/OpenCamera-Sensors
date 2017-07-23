@@ -2202,11 +2202,82 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 		setToDefault();
 
+		assertTrue( mPreview.getCameraController().getWhiteBalance().equals("auto"));
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		int initial_temperature = mPreview.getCameraController().getWhiteBalanceTemperature();
+		int initial_temperature_setting = settings.getInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), 5000);
+		assertTrue(initial_temperature == initial_temperature_setting);
+		SeekBar white_balance_seek_bar = ((SeekBar)mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_seekbar));
+		int initial_white_balance_seek_bar_pos = white_balance_seek_bar.getProgress();
+
+		/*SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.getWhiteBalancePreferenceKey(), "manual");
 		editor.apply();
-		updateForSettings();
+		updateForSettings();*/
+
+		// simulate having changed this through popup view:
+		View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		clickView(popupButton);
+		Log.d(TAG, "wait for popup to open");
+		while( !mActivity.popupIsOpen() ) {
+		}
+		Log.d(TAG, "popup is now open");
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getWhiteBalancePreferenceKey(), "manual");
+		editor.apply();
+		mActivity.runOnUiThread(new Runnable() {
+			public void run() {
+				mActivity.getMainUI().getPopupView().switchToWhiteBalance("manual");
+			}
+		});
+		this.getInstrumentation().waitForIdleSync();
+
+		/*View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		clickView(popupButton);
+		Log.d(TAG, "wait for popup to open");
+		while( !mActivity.popupIsOpen() ) {
+		}
+		Log.d(TAG, "popup is now open");
+		// first need to open the white balance sub-menu
+		View wbButton = mActivity.getPopupButton("TEST_WHITE_BALANCE");
+		assertTrue(wbButton != null);
+		ScrollView popupContainer = (ScrollView)mActivity.findViewById(net.sourceforge.opencamera.R.id.popup_container);
+		popupContainer.scrollTo(0, wbButton.getBottom());
+		this.getInstrumentation().waitForIdleSync();
+		Thread.sleep(1000);
+
+		clickView(wbButton);
+		Log.d(TAG, "clicked wb button");
+		// check popup still opened
+		assertTrue( mActivity.popupIsOpen() );
+
+		RadioButton manualWBButton = (RadioButton)mActivity.getPopupButton("TEST_WHITE_BALANCE_manual");
+		assertTrue(manualWBButton != null);
+		assertTrue(!manualWBButton.isChecked());
+		clickView(manualWBButton);
+		Log.d(TAG, "clicked manual wb button");
+		// check popup still opened
+		assertTrue( mActivity.popupIsOpen() );
+		// check now selected
+		assertTrue(manualWBButton.isChecked());
+		*/
+
+		// check we switched to manual mode
+		assertTrue( mPreview.getCameraController().getWhiteBalance().equals("manual"));
+
+		// check that the wb temperature has been updated, both in preferences, and the camera controller
+		int new_temperature = mPreview.getCameraController().getWhiteBalanceTemperature();
+		int new_temperature_setting = settings.getInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), 5000);
+		assertTrue(new_temperature == new_temperature_setting);
+		Log.d(TAG, "initial_temperature: " + initial_temperature);
+		Log.d(TAG, "new_temperature: " + new_temperature);
+		assertTrue(new_temperature != initial_temperature);
+		// check we moved the wb slider too
+		int new_white_balance_seek_bar_pos = white_balance_seek_bar.getProgress();
+		Log.d(TAG, "initial_white_balance_seek_bar_pos: " + initial_white_balance_seek_bar_pos);
+		Log.d(TAG, "new_white_balance_seek_bar_pos: " + new_white_balance_seek_bar_pos);
+		assertTrue(new_white_balance_seek_bar_pos != initial_white_balance_seek_bar_pos);
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 

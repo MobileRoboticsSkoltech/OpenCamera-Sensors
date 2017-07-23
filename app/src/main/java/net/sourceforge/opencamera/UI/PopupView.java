@@ -610,39 +610,7 @@ public class PopupView extends LinearLayout {
 				addRadioOptionsToPopup(sharedPreferences, supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_option) {
-						boolean close_popup = false;
-						if( selected_option.equals("manual") ) {
-							// if we used the generic "manual", then instead try to preserve the current iso if it exists
-							if( preview.getCameraController() != null ) {
-								String current_white_balance = preview.getCameraController().getWhiteBalance();
-								if( current_white_balance == null || !current_white_balance.equals("manual") ) {
-									// try to choose a default manual white balance temperature as close as possible to the current auto
-									if( MyDebug.LOG )
-										Log.d(TAG, "changed to manual white balance");
-									close_popup = true;
-									if( preview.getCameraController().captureResultHasWhiteBalanceTemperature() ) {
-										int temperature = preview.getCameraController().captureResultWhiteBalanceTemperature();
-										if( MyDebug.LOG )
-											Log.d(TAG, "default to manual white balance temperature: " + temperature);
-										SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-										SharedPreferences.Editor editor = sharedPreferences.edit();
-										editor.putInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), temperature);
-										editor.apply();
-									}
-									// otherwise default to the saved value
-								}
-							}
-						}
-
-						if( preview.getCameraController() != null ) {
-							preview.getCameraController().setWhiteBalance(selected_option);
-						}
-						// keep popup open, unless switching to manual
-						if( close_popup ) {
-							main_activity.closePopup();
-						}
-						//main_activity.updateForSettings(getResources().getString(R.string.white_balance) + ": " + selected_option);
-						//main_activity.closePopup();
+						switchToWhiteBalance(selected_option);
 					}
 				});
 				if( MyDebug.LOG )
@@ -670,6 +638,51 @@ public class PopupView extends LinearLayout {
 			}
 
 		}
+	}
+
+	public void switchToWhiteBalance(String selected_option) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "switchToWhiteBalance: " + selected_option);
+		final MainActivity main_activity = (MainActivity)this.getContext();
+		final Preview preview = main_activity.getPreview();
+		boolean close_popup = false;
+		int temperature = -1;
+		if( selected_option.equals("manual") ) {
+			if( preview.getCameraController() != null ) {
+				String current_white_balance = preview.getCameraController().getWhiteBalance();
+				if( current_white_balance == null || !current_white_balance.equals("manual") ) {
+					// try to choose a default manual white balance temperature as close as possible to the current auto
+					if( MyDebug.LOG )
+						Log.d(TAG, "changed to manual white balance");
+					close_popup = true;
+					if( preview.getCameraController().captureResultHasWhiteBalanceTemperature() ) {
+						temperature = preview.getCameraController().captureResultWhiteBalanceTemperature();
+						if( MyDebug.LOG )
+							Log.d(TAG, "default to manual white balance temperature: " + temperature);
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), temperature);
+						editor.apply();
+					}
+					// otherwise default to the saved value
+				}
+			}
+		}
+
+		if( preview.getCameraController() != null ) {
+			preview.getCameraController().setWhiteBalance(selected_option);
+			if( temperature > 0 ) {
+				preview.getCameraController().setWhiteBalanceTemperature(temperature);
+				// also need to update the slider!
+				main_activity.setManualWBSeekbar();
+			}
+		}
+		// keep popup open, unless switching to manual
+		if( close_popup ) {
+			main_activity.closePopup();
+		}
+		//main_activity.updateForSettings(getResources().getString(R.string.white_balance) + ": " + selected_option);
+		//main_activity.closePopup();
 	}
 
     private abstract class ButtonOptionsPopupListener {

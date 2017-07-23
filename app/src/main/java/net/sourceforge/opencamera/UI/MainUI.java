@@ -1056,4 +1056,8 @@ public class MainUI {
     public View getPopupButton(String key) {
     	return popup_view.getPopupButton(key);
     }
+
+    public PopupView getPopupView() {
+		return popup_view;
+	}
 }
