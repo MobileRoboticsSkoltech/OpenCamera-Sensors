@@ -8656,6 +8656,50 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
+	/** Tests HDR algorithm on test samples "testHDR39".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR39() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR39");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR39/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR39/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR39/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR39_output.jpg", false);
+
+		int [] exp_offsets_x = {-6, 0, -2};
+		int [] exp_offsets_y = {6, 0, -8};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR40".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR40() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR40");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR40_output.jpg", false);
+
+		int [] exp_offsets_x = {5, 0, -2};
+		int [] exp_offsets_y = {13, 0, 24};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
 	/** Tests HDR algorithm on test samples "testHDRtemp".
 	 *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
 	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
