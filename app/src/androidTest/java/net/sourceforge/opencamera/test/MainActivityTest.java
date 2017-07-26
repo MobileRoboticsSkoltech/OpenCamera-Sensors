@@ -7688,19 +7688,38 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(74)), "74°");
 	}
 
+	private class HistogramDetails {
+		int min_value;
+		int median_value;
+		int max_value;
+
+		HistogramDetails(int min_value, int median_value, int max_value) {
+			this.min_value = min_value;
+			this.median_value = median_value;
+			this.max_value = max_value;
+		}
+	}
+
 	/** Checks for the resultant histogram.
 	 *  We check that we have a single range of non-zero values.
 	 * @param bitmap The bitmap to compute and check a histogram for.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void checkHistogram(Bitmap bitmap) {
+	private HistogramDetails checkHistogram(Bitmap bitmap) {
 		int [] histogram = mActivity.getApplicationInterface().getHDRProcessor().computeHistogram(bitmap, true);
 		assertEquals(256, histogram.length);
+		int total = 0;
 		for(int i=0;i<histogram.length;i++) {
 			Log.d(TAG, "histogram[" + i + "]: " + histogram[i]);
+			total += histogram[i];
 		}
+		Log.d(TAG, "total: " + total);
 		boolean started = false, ended = false;
-		for(int value : histogram) {
+		int min_value = -1, median_value = -1, max_value = -1;
+		int count = 0;
+		int middle = total/2;
+		for(int i=0;i<histogram.length;i++) {
+			int value = histogram[i];
 			if( !started ) {
 				started = value != 0;
 			}
@@ -7710,11 +7729,23 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					assertTrue(value == 0);
 				}
 			}
+			if( value != 0 ) {
+				if( min_value == -1 )
+					min_value = i;
+				max_value = i;
+				count += value;
+				if( count >= middle && median_value == -1 )
+					median_value = i;
+			}
 		}
+		Log.d(TAG, "min_value: " + min_value);
+		Log.d(TAG, "median_value: " + median_value);
+		Log.d(TAG, "max_value: " + max_value);
+		return new HistogramDetails(min_value, median_value, max_value);
 	}
 
-	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro) throws IOException, InterruptedException {
-		subTestHDR(inputs, output_name, test_dro, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
+	private HistogramDetails subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro) throws IOException, InterruptedException {
+		return subTestHDR(inputs, output_name, test_dro, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
 	}
 
 	/** The following testHDRX tests test the HDR algorithm on a given set of input images.
@@ -7724,12 +7755,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 *  time to transfer to the device everytime we run the tests.
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro, HDRProcessor.TonemappingAlgorithm tonemapping_algorithm) throws IOException, InterruptedException {
+	private HistogramDetails subTestHDR(List<Bitmap> inputs, String output_name, boolean test_dro, HDRProcessor.TonemappingAlgorithm tonemapping_algorithm) throws IOException, InterruptedException {
 		Log.d(TAG, "subTestHDR");
 
 		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
 			Log.d(TAG, "renderscript requires Android Lollipop or better");
-			return;
+			return null;
 		}
 
 		Thread.sleep(1000); // wait for camera to open
@@ -7757,7 +7788,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
         outputStream.close();
         mActivity.getStorageUtils().broadcastFile(file, true, false, true);
-		checkHistogram(inputs.get(0));
+		HistogramDetails hdrHistogramDetails = checkHistogram(inputs.get(0));
 		inputs.get(0).recycle();
 		inputs.clear();
 
@@ -7783,6 +7814,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			inputs.clear();
 		}
 		Thread.sleep(500);
+
+		return hdrHistogramDetails;
 	}
 
 	/** Checks that the HDR offsets used for auto-alignment are as expected.
@@ -7796,6 +7829,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			assertTrue( offsets_y[i] == exp_offsets_y[i] );
 		}
 	}
+
+	private void checkHistogramDetails(HistogramDetails hdrHistogramDetails, int exp_min_value, int exp_median_value, int exp_max_value) {
+		Log.d(TAG, "compare min value " + hdrHistogramDetails.min_value + " to expected " + exp_min_value);
+		Log.d(TAG, "compare median value " + hdrHistogramDetails.median_value + " to expected " + exp_median_value);
+		Log.d(TAG, "compare max value " + hdrHistogramDetails.max_value + " to expected " + exp_max_value);
+		assertTrue(exp_min_value == hdrHistogramDetails.min_value);
+		assertTrue(exp_median_value == hdrHistogramDetails.median_value);
+		assertTrue(exp_max_value == hdrHistogramDetails.max_value);
+	};
+
 	
 	final private String hdr_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/hdrsamples/";
 
@@ -7814,11 +7857,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "saintpaul/input3.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "saintpaul/input4.jpg") );
 
-		subTestHDR(inputs, "testHDR1_output.jpg", false);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR1_output.jpg", false);
 
 		int [] exp_offsets_x = {0, 0, 0};
 		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
 	}
 
 	/** Tests HDR algorithm on test samples "saintpaul".
@@ -7858,11 +7903,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR3/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR3/input2.jpg") );
 		
-		subTestHDR(inputs, "testHDR3_output.jpg", false);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR3_output.jpg", false);
 
 		int [] exp_offsets_x = {0, 0, 0};
 		int [] exp_offsets_y = {1, 0, -1};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 3, 104, 255);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR4".
@@ -8038,11 +8085,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR11/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR11/input2.jpg") );
 		
-		subTestHDR(inputs, "testHDR11_output.jpg", true);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR11_output.jpg", true);
 
 		int [] exp_offsets_x = {-2, 0, 1};
 		int [] exp_offsets_y = {1, 0, -1};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 0, 48, 255);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR12".
@@ -8196,11 +8245,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR18/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR18/input2.jpg") );
 		
-		subTestHDR(inputs, "testHDR18_output.jpg", true);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR18_output.jpg", true);
 
 		int [] exp_offsets_x = {0, 0, 0};
 		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 113, 254);
+		checkHistogramDetails(hdrHistogramDetails, 1, 119, 255);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR19".
@@ -8376,11 +8428,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR26/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR26/input2.jpg") );
 		
-		subTestHDR(inputs, "testHDR26_output.jpg", true);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR26_output.jpg", true);
 
 		int [] exp_offsets_x = {-1, 0, 1};
 		int [] exp_offsets_y = {1, 0, -1};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		//checkHistogramDetails(hdrHistogramDetails, 0, 104, 254);
+		checkHistogramDetails(hdrHistogramDetails, 0, 119, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR27".
@@ -8516,11 +8571,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR32/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR32/input2.jpg") );
 
-		subTestHDR(inputs, "testHDR32_output.jpg", true);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR32_output.jpg", true);
 
 		int [] exp_offsets_x = {1, 0, 0};
 		int [] exp_offsets_y = {13, 0, -10};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		//checkHistogramDetails(hdrHistogramDetails, 3, 101, 251);
+		checkHistogramDetails(hdrHistogramDetails, 3, 109, 251);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR33".
@@ -8671,11 +8729,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR39/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR39/input2.jpg") );
 
-		subTestHDR(inputs, "testHDR39_output.jpg", false);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR39_output.jpg", false);
 
 		int [] exp_offsets_x = {-6, 0, -2};
 		int [] exp_offsets_y = {6, 0, -8};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 0, 128, 222);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR40".
@@ -8693,11 +8753,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input2.jpg") );
 
-		subTestHDR(inputs, "testHDR40_output.jpg", false);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR40_output.jpg", false);
 
 		int [] exp_offsets_x = {5, 0, -2};
 		int [] exp_offsets_y = {13, 0, 24};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 1, 138, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDRtemp".
