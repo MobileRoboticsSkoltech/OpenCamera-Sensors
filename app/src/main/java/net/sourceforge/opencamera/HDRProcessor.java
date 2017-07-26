@@ -74,6 +74,7 @@ public class HDRProcessor {
 	 *  using linear least squares.
 	 *  We use it to modify the pixels of images taken at the brighter or darker exposure
 	 *  levels, to estimate what the pixel should be at the "base" exposure.
+	 *  We estimate as y = parameter_A * x + parameter_B.
 	 */
 	private static class ResponseFunction {
 		float parameter_A;
@@ -499,9 +500,12 @@ public class HDRProcessor {
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
-		autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, assume_sorted, sort_cb, time_s);
-		if( MyDebug.LOG )
+		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, assume_sorted, sort_cb, time_s);
+		int median_brightness = brightnessDetails.median_brightness;
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "median_brightness: " + median_brightness);
+		}
 
 		// compute response_functions
 		final int base_bitmap = 1; // index of the bitmap with the base exposure and offsets
@@ -513,8 +517,8 @@ public class HDRProcessor {
 			response_functions[i] = function;
 		}
 		if( MyDebug.LOG )
-			Log.d(TAG, "time after creating response functions: " + (System.currentTimeMillis() - time_s));
-		
+			Log.d(TAG, "### time after creating response functions: " + (System.currentTimeMillis() - time_s));
+
 		/*
 		// calculate average luminance by sampling
 		final int n_samples_c = 100;
@@ -601,14 +605,83 @@ public class HDRProcessor {
 				break;
 		}
 
+		float max_possible_value = response_functions[0].parameter_A * 255 + response_functions[0].parameter_B;
+		if( MyDebug.LOG )
+			Log.d(TAG, "max_possible_value: " + max_possible_value);
+		if( max_possible_value < 255.0f ) {
+			max_possible_value = 255.0f; // don't make dark images too bright, see below about linear_scale for more details
+			if( MyDebug.LOG )
+				Log.d(TAG, "clamp max_possible_value to: " + max_possible_value);
+		}
+
+		//hdr_alpha = 0.0f; // test
 		//final float tonemap_scale_c = avg_luminance / 0.8f; // lower values tend to result in too dark pictures; higher values risk over exposed bright areas
-		final float tonemap_scale_c = 255.0f;
+		//final float tonemap_scale_c = 255.0f;
+		//final float tonemap_scale_c = 255.0f - median_brightness;
+		float tonemap_scale_c = 255.0f;
+		if( MyDebug.LOG )
+			Log.d(TAG, "median_brightness: " + median_brightness);
+		if( 255.0f / max_possible_value < median_brightness / 255.0f ) {
+			// For Reinhard tonemapping:
+			// As noted below, we have f(V) = V.S / (V+C), where V is the HDR value, C is tonemap_scale_c
+			// and S = (Vmax + C)/Vmax (see below)
+			// Ideally we try to choose C such that we preserve the median value M:
+			// f(M) = M
+			// => M = M . (Vmax + C) / (Vmax . (M + C))
+			// => M + C = (Vmax + C) / Vmax = 1 + C/Vmax
+			// => C . ( 1 - 1/Vmax ) = 1 - M
+			// => C = (1-M) / (1 - 1/Vmax)
+			// Since we want C <= 1, we must have:
+			// 1-M <= 1 - 1/Vmax
+			// => 1/Vmax <= M
+			// If this isn't the case, we set C to 1 (to preserve the median as close as possible).
+			// Tests that enter this case (as of 20170726) are:
+			// testHDR9, testHDR18, testHDR26, testHDR30, testHDR31, testHDR32
+			// Note that if we weren't doing the linear scaling below, this would reduce to choosing
+			// C = 1-M. We also tend to that as max_possible_value tends to infinity. So even though
+			// we only sometimes enter this case, it's important for cases where max_possible_value
+			// might be estimated too large (also consider that if we ever support more than 3 images,
+			// we'd risk having too large values).
+			// I've tested that using "C = 1-M" always (and no linear scaling) also gives good results:
+			// much better compared to Open Camera 1.39, though not quite as good as doing both this
+			// and linear scaling (testHDR18, testHDR26, testHDR32 look too grey and/or bright).
+			final float tonemap_denom = 1.0f - (255.0f / max_possible_value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "tonemap_denom: " + tonemap_denom);
+			tonemap_scale_c = (255.0f - median_brightness) / tonemap_denom;
+			//throw new RuntimeException(); // test
+		}
 		// Higher tonemap_scale_c values means darker results from the Reinhard tonemapping.
 		// Colours brighter than 255-tonemap_scale_c will be made darker, colours darker than 255-tonemap_scale_c will be made brighter
 		// (tonemap_scale_c==255 means therefore that colours will only be made darker).
 		if( MyDebug.LOG )
 			Log.d(TAG, "tonemap_scale_c: " + tonemap_scale_c);
 		processHDRScript.set_tonemap_scale(tonemap_scale_c);
+
+		// For Reinhard tonemapping:
+		// The basic algorithm is f(V) = V / (V+C), where V is the HDR value, C is tonemap_scale_c
+		// This was used until Open Camera 1.39, but has the problem of making images too dark: it
+		// maps [0, infinity] to [0, 1], but since in practice we never have very large V values, we
+		// won't use the full [0, 1] range. So we apply a linear scale S:
+		// f(V) = V.S / (V+C)
+		// S is chosen such that the maximum possible value, Vmax, maps to 1. So:
+		// 1 = Vmax . S / (Vmax + C)
+		// => S = (Vmax + C)/Vmax
+		// Note that we don't actually know the maximum HDR value, but instead we estimate it with
+		// max_possible_value, which gives the maximum value we'd have if even the darkest image was
+		// 255.0.
+		// Note that if max_possible_value was less than 255, we'd end up scaling a max value less than
+		// 1, to [0, 1], i.e., making dark images brighter, which we don't want, which is why above we
+		// set max_possible_value to a minimum of 255. In practice, this is unlikely to ever happen
+		// since max_possible_value is calculated as a maximum possible based on the response functions
+		// (as opposed to the real brightest HDR value), so even for dark photos we'd expect to have
+		// max_possible_value >= 255.
+		// Note that the original Reinhard tonemapping paper describes a non-linear scaling by (1 + CV/Vmax^2),
+		// though this is poorer performance (in terms of calculation time).
+		float linear_scale = (max_possible_value+tonemap_scale_c)/max_possible_value;
+		if( MyDebug.LOG )
+			Log.d(TAG, "linear_scale: " + linear_scale);
+		processHDRScript.set_linear_scale(linear_scale);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "call processHDRScript");
@@ -621,6 +694,8 @@ public class HDRProcessor {
 		else {
 			output_allocation = Allocation.createFromBitmap(rs, output_bitmap);
 		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time before processHDRScript: " + (System.currentTimeMillis() - time_s));
 		processHDRScript.forEach_hdr(allocations[1], output_allocation);
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after processHDRScript: " + (System.currentTimeMillis() - time_s));
@@ -639,13 +714,15 @@ public class HDRProcessor {
 
 		if( hdr_alpha != 0.0f ) {
 			adjustHistogram(output_allocation, output_allocation, width, height, hdr_alpha, n_tiles, time_s);
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
 		}
 
 		if( release_bitmaps ) {
 			// must be the base_bitmap we copy to - see note above about using allocations[base_bitmap] as the output
 			allocations[base_bitmap].copyTo(bitmaps.get(base_bitmap));
 			if (MyDebug.LOG)
-				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "### time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 
 			// make it so that we store the output bitmap as first in the list
 			bitmaps.set(0, bitmaps.get(base_bitmap));
@@ -656,11 +733,11 @@ public class HDRProcessor {
 		else {
 			output_allocation.copyTo(output_bitmap);
 			if (MyDebug.LOG)
-				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "### time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 		}
 
 		if( MyDebug.LOG )
-			Log.d(TAG, "time for processHDRCore: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "### time for processHDRCore: " + (System.currentTimeMillis() - time_s));
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -716,11 +793,19 @@ public class HDRProcessor {
 		}
 	}
 
+	static class BrightnessDetails {
+		final int median_brightness; // median brightness value of the median image
+
+		BrightnessDetails(int median_brightness) {
+			this.median_brightness = median_brightness;
+		}
+	}
+
 	/**
 	 * If assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
      */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, boolean assume_sorted, SortCallback sort_cb, long time_s) {
+	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, boolean assume_sorted, SortCallback sort_cb, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoAlignment");
 		Allocation [] mtb_allocations = new Allocation[allocations.length];
@@ -800,6 +885,9 @@ public class HDRProcessor {
 				sort_cb.sortOrder(sort_order);
 			}
 		}
+		int median_brightness = luminanceInfos[1].median_value;
+		if( MyDebug.LOG )
+			Log.d(TAG, "median_brightness: " + median_brightness);
 
 		for(int i=0;i<allocations.length;i++) {
 			int median_value = luminanceInfos[i].median_value;
@@ -891,7 +979,7 @@ public class HDRProcessor {
 		if( mtb_allocations[1] == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "middle image not suitable for image alignment");
-			return;
+			return new BrightnessDetails(median_brightness);
 		}
 
 		// create RenderScript
@@ -983,6 +1071,7 @@ public class HDRProcessor {
 			offsets_x[i] = 0;
 			offsets_y[i] = 0;
 		}*/
+		return new BrightnessDetails(median_brightness);
 	}
 
 	private static class LuminanceInfo {

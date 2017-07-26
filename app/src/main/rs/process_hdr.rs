@@ -27,6 +27,7 @@ int tonemap_algorithm = tonemap_algorithm_reinhard_c;
 
 // for Reinhard:
 float tonemap_scale = 1.0f;
+float linear_scale = 1.0f;
 
 // for Filmic Uncharted 2:
 const float W = 11.2f;
@@ -196,13 +197,23 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	    }
 	    case tonemap_algorithm_reinhard_c:
 	    {
-            float max_hdr = fmax(hdr.r, hdr.g);
-            max_hdr = fmax(max_hdr, hdr.b);
-            float scale = 255.0f / ( tonemap_scale + max_hdr );
-            out.r = (uchar)(scale * hdr.r);
-            out.g = (uchar)(scale * hdr.g);
-            out.b = (uchar)(scale * hdr.b);
+            float value = fmax(hdr.r, hdr.g);
+            value = fmax(value, hdr.b);
+            float scale = 255.0f / ( tonemap_scale + value );
+            scale *= linear_scale;
+            // shouldn't need to clamp - linear_scale should be such that values don't map to more than 255
+            out.r = (uchar)(scale * hdr.r + 0.5f);
+            out.g = (uchar)(scale * hdr.g + 0.5f);
+            out.b = (uchar)(scale * hdr.b + 0.5f);
             out.a = 255;
+            /*int test_r = (int)(scale * hdr.r + 0.5f);
+            int test_g = (int)(scale * hdr.g + 0.5f);
+            int test_b = (int)(scale * hdr.b + 0.5f);
+            if( test_r > 255 || test_g > 255 || test_b > 255 ) {
+                out.r = 255;
+                out.g = 0;
+                out.b = 255;
+            }*/
             break;
         }
 	    case tonemap_algorithm_filmic_c:
