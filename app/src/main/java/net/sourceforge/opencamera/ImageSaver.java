@@ -1354,6 +1354,13 @@ public class ImageSaver extends Thread {
             e.printStackTrace();
             main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
         }
+        catch(SecurityException e) {
+			// received security exception from copyFileToUri()->openOutputStream() from Google Play
+    		if( MyDebug.LOG )
+    			Log.e(TAG, "security exception writing file: " + e.getMessage());
+            e.printStackTrace();
+            main_activity.getPreview().showToast(null, R.string.failed_to_save_photo);
+        }
 
 		if( exifTempFile != null && !exifTempFile.delete() ) {
 			if( MyDebug.LOG )
