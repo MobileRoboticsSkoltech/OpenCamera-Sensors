@@ -117,6 +117,7 @@
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:contentDescription="@string/exposure_lock"
+        android:src="@drawable/exposure_unlocked"
         android:onClick="clickedExposureLock"
         />
 
