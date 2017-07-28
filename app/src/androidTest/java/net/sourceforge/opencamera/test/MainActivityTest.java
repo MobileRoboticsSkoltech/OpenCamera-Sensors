@@ -5760,6 +5760,20 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		switchToFocusValue("focus_mode_macro");
 		switchToFocusValue("focus_mode_auto");
+
+		// now open popup, pause and resume, then reopen popup
+		// this tests against a crash, if we don't remove the popup from the popup container in MainUI.destroyPopup()
+	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
+		assertTrue(!mActivity.popupIsOpen());
+		clickView(popupButton);
+		while( !mActivity.popupIsOpen() ) {
+		}
+
+		pauseAndResume();
+		assertTrue(!mActivity.popupIsOpen());
+		clickView(popupButton);
+		while( !mActivity.popupIsOpen() ) {
+		}
 	}
 
 	/* Tests to do with video and popup menu.
