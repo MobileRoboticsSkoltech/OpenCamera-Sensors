@@ -766,15 +766,15 @@ the folders/sub-folders if necessary), that should allow saving to the SD card. 
 folder will be deleted if you uninstall Open Camera</b>, so be careful that you don't lose your photo/videos
 if you use this method, and then uninstall!</li>
 <li><b>Android 5.0 onwards</b> - The restrictions on SD cards introduced in Android 4.4 still apply, however
-instead you can enable "Settings/More camera controls/"Use Storage Access Framework", and this should allow you
+instead you can enable Settings/More camera controls/"Use Storage Access Framework", and this should allow you
 to save to external SD cards. If when choosing a folder, you only see "Recent", you may need to click on the
 three dots at the top right to open the menu, to enable showing the drives (e.g., "Show internal storage", and
 hopefully you'll see something similar for the SD card). Note that a known issue is that the on-screen "free memory"
 will still show the free internal storage rather than on the SD card (this is an Android limitation - when using
 Storage Access Framework, there doesn't seem to be a way to get the free space on the drive).</li>
-<li><b>Android 6.0</b> - On Android 6, some devices support "Adoptable Storage" allowing you to
+<li><b>Android 6.0 onwards</b> - From Android 6, some devices support "Adoptable Storage" allowing you to
 <a href="http://www.idigitaltimes.com/android-m-update-will-include-native-micro-sd-support-445463">select to use
-an SD card as internal storage</a>. Note that not all devices support this, even if running Android 6. If your device
+an SD card as internal storage</a>. Note that not all devices support this, even if running Android 6 or later. If your device
 doesn't support this, or you want to instead use an SD card as "portable storage", you'll have to use
 the Storage Access Framework method as with Android 5 (or the <small>Android/data/net.sourceforge.opencamera/</small> method as
 with Android 4.4).</li>
@@ -924,6 +924,9 @@ Open Camera bug - it's a problem that will happen on any device where the device
 <p><b>My save folder is on the SD card, so why does the free storage still show for internal memory?</b> - Open Camera tries
 to obtain the space of the drive being used, but there are no reliable ways to do this (especially Android 4.4 onwards), so
 this is an Android limitation.</p>
+
+<p><b>Does Open Camera support external USB cameras?</b> - Unfortunately Open Camera does not support USB cameras. These don't
+seem to use the standard Android camera APIs, and it would be a lot of work to add support for these.</p>
 
 <p><b>I don't like the UI!</b> - The UI for Open Camera has improved significantly over the versions (both in terms
 of having a consistent look, and the operation), so this criticism seems to have gone down, but there's always room
