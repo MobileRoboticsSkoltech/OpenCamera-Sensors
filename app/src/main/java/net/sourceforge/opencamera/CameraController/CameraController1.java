@@ -402,11 +402,13 @@ public class CameraController1 extends CameraController {
 		return 0L;
 	}
 
-	// important, from docs:
-	// "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance).
-	// For example, suppose originally flash mode is on and supported flash modes are on/off. In night
-	// scene mode, both flash mode and supported flash mode may be changed to off. After setting scene
-	// mode, applications should call getParameters to know if some parameters are changed."
+	/** Important, from docs:
+	 *  "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance).
+	 *  For example, suppose originally flash mode is on and supported flash modes are on/off. In night
+	 *  scene mode, both flash mode and supported flash mode may be changed to off. After setting scene
+	 *  mode, applications should call getParameters to know if some parameters are changed."
+	 */
+	@Override
 	public SupportedValues setSceneMode(String value) {
 		String default_value = getDefaultSceneMode();
     	Camera.Parameters parameters = this.getParameters();
@@ -428,9 +430,20 @@ public class CameraController1 extends CameraController {
 		return supported_values;
 	}
 	
+	@Override
 	public String getSceneMode() {
     	Camera.Parameters parameters = this.getParameters();
     	return parameters.getSceneMode();
+	}
+
+	@Override
+	public boolean sceneModeAffectsFunctionality() {
+		// see https://developer.android.com/reference/android/hardware/Camera.Parameters.html#setSceneMode(java.lang.String)
+		// "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance). For example,
+		// suppose originally flash mode is on and supported flash modes are on/off. In night scene mode, both flash mode and
+		// supported flash mode may be changed to off. After setting scene mode, applications should call getParameters to
+		// know if some parameters are changed."
+		return true;
 	}
 
 	public SupportedValues setColorEffect(String value) {

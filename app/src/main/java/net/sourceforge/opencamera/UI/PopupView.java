@@ -617,9 +617,22 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "PopupView time 14: " + (System.nanoTime() - debug_time));
 
 				List<String> supported_scene_modes = preview.getSupportedSceneModes();
-				addRadioOptionsToPopup(sharedPreferences, supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", null);
-				// note, we don't set an RadioOptionsListener, so we default to behaviour of calling updateForSettings() and
-				// closing the popup - this is necessary, as changing scene mode can change available camera features
+				addRadioOptionsToPopup(sharedPreferences, supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", new RadioOptionsListener() {
+					@Override
+					public void onClick(String selected_option) {
+						if( preview.getCameraController() != null ) {
+							if( preview.getCameraController().sceneModeAffectsFunctionality() ) {
+								// need to call updateForSettings() and close the popup, as changing scene mode can change available camera features
+								main_activity.updateForSettings(getResources().getString(R.string.scene_mode) + ": " + selected_option);
+								main_activity.closePopup();
+							}
+							else {
+								preview.getCameraController().setSceneMode(selected_option);
+								// keep popup open
+							}
+						}
+					}
+				});
 				if( MyDebug.LOG )
 					Log.d(TAG, "PopupView time 15: " + (System.nanoTime() - debug_time));
 

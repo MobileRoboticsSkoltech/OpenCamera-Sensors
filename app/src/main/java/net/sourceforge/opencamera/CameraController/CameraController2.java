@@ -1531,6 +1531,12 @@ public class CameraController2 extends CameraController {
 		return convertSceneMode(value2);
 	}
 
+	@Override
+	public boolean sceneModeAffectsFunctionality() {
+		// Camera2 API doesn't seem to have any warnings that changing scene mode can affect available functionality
+		return false;
+	}
+
 	private String convertColorEffect(int value2) {
 		String value;
 		switch( value2 ) {
