@@ -586,6 +586,7 @@
     </string-array>
 
     <!-- The following arrays no longer need to have translated versions, as we read directly from strings.
+         That is, they should *not* be included in the language-specific arrays.xml files.
          This means we can edit the translations via the strings.xml files in Android Studio's Translation Editor
          (see https://code.google.com/p/android/issues/detail?id=75303 ).
          A side-benefit is that we don't have to worry about a translated array missing an entry (which could
