@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="flash_icons">
         <item>drawable/flash_off</item>
@@ -61,9 +61,9 @@
         <item>focus_mode_continuous_video</item>
     </string-array>
     <string-array name="preference_lock_orientation_entries">
-        <item>Quitar Bloqueo</item>
-        <item>Bloquear Horizontalmente</item>
-        <item>Bloquear Verticalmente</item>
+        <item>No bloquear</item>
+        <item>Bloquear horizontalmente</item>
+        <item>Bloquear verticalmente</item>
     </string-array>
     <string-array name="preference_lock_orientation_values">
         <item>none</item>
@@ -71,7 +71,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Off</item>
+        <item>Apagado</item>
         <item>1s</item>
         <item>2s</item>
         <item>3s</item>
@@ -105,7 +105,7 @@
         <item>4x</item>
         <item>5x</item>
         <item>10x</item>
-        <item>Unlimited</item>
+        <item>Ilimitado</item>
     </string-array>
     <string-array name="preference_burst_mode_values">
         <item>1</item>
@@ -114,10 +114,10 @@
         <item>4</item>
         <item>5</item>
         <item>10</item>
-        <item>unlimited</item>
+        <item>Ilimitado</item>
     </string-array>
     <string-array name="preference_burst_interval_entries">
-        <item>No delay</item>
+        <item>Sin retardo</item>
         <item>1s</item>
         <item>2s</item>
         <item>3s</item>
@@ -131,9 +131,9 @@
         <item>5m</item>
         <item>10m</item>
         <item>20m</item>
-		<item>30m</item>
-		<item>1h</item>
-		<item>2h</item>
+        <item>30m</item>
+        <item>1h</item>
+        <item>2h</item>
     </string-array>
     <string-array name="preference_burst_interval_values">
         <item>0</item>
@@ -155,8 +155,8 @@
         <item>7200</item>
     </string-array>
     <string-array name="preference_preview_size_entries">
-        <item>Maximizar tamaño Preview</item>
-        <item>Igualar tamaño Foto (WYSIWYG)</item>
+        <item>Maximizar el tamaño de la vista previa</item>
+        <item>Coincidir con el tamaño de la foto (WYSIWYG)</item>
     </string-array>
     <string-array name="preference_preview_size_values">
         <item>preference_preview_size_display</item>
@@ -164,23 +164,23 @@
     </string-array>
     <string-array name="preference_touch_capture_entries">
         <item>Ninguno</item>
-        <item>Una pulsación</item>
-        <item>Doble pulsación</item>
-        </string-array>
+        <item>Un toque</item>
+        <item>Dos toques</item>
+    </string-array>
     <string-array name="preference_touch_capture_values">
         <item>none</item>
         <item>single</item>
         <item>double</item>
     </string-array>
     <string-array name="preference_volume_keys_entries">
-        <item>Tomar Foto (o Comenzar/Detener Grabacion Video)</item>
-        <item>Enfoque</item>
-        <item>Zoom</item>
-        <item>Cambiar Nivel de Exposición</item>
-        <item>Cambiar Auto-Estabilizar ON/OFF</item>
-        <item>Cambiar Volumen Dispositivo</item>
-        <item>No hacer Nada</item>
-        </string-array>
+        <item>Tomar foto (o iniciar/detener grabación de video)</item>
+        <item>Enfocar</item>
+        <item>Zoom (acercar/alejar)</item>
+        <item>Cambiar el nivel de exposición</item>
+        <item>Activar/desactivar el nivel automático</item>
+        <item>Cambiar el volumen del dispositivo</item>
+        <item>No hacer nada</item>
+    </string-array>
     <string-array name="preference_volume_keys_values">
         <item>volume_take_photo</item>
         <item>volume_focus</item>
@@ -193,14 +193,14 @@
     <string-array name="preference_rotate_preview_entries">
         <item>No rotar</item>
         <item>Rotar 180 grados</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_rotate_preview_values">
         <item>0</item>
         <item>180</item>
     </string-array>
     <string-array name="preference_ui_placement_entries">
-        <item>Interfaz usuario Zurdo</item>
-        <item>Interfaz usuario Diestro</item>
+        <item>Interfaz de usuario para zurdos</item>
+        <item>Interfaz de usuario para diestros</item>
     </string-array>
     <string-array name="preference_ui_placement_values">
         <item>ui_left</item>
@@ -208,8 +208,8 @@
     </string-array>
     <string-array name="preference_immersive_mode_entries">
         <item>Apagado</item>
-        <item>Sólo ocultar botones de navegación</item>
-        <item>Ocultar Interfaz</item>
+        <item>Sólo ocultar los botones de navegación en pantalla</item>
+        <item>Ocultar interfaz de usuario</item>
         <item>Ocultar todo</item>
     </string-array>
     <string-array name="preference_immersive_mode_values">
@@ -217,13 +217,13 @@
         <item>immersive_mode_low_profile</item>
         <item>immersive_mode_gui</item>
         <item>immersive_mode_everything</item>
-        </string-array>
+    </string-array>
     <string-array name="preference_angle_highlight_color_entries">
         <item>Rojo</item>
         <item>Verde</item>
         <item>Azul</item>
         <item>Amarillo</item>
-        <item>Morado</item>
+        <item>Púrpura</item>
         <item>Blanco</item>
     </string-array>
     <string-array name="preference_angle_highlight_color_values">
@@ -239,14 +239,14 @@
         <item>3x3</item>
         <item>Phi 3x3</item>
         <item>4x2</item>
-        <item>Crosshair</item>
-        <item>Dorado (1)</item>
-        <item>Dorado (2)</item>
-        <item>Dorado (3)</item>
-        <item>Dorado (4)</item>
-        <item>Triangulo (1)</item>
-        <item>Triangulo (2)</item>
-        <item>Diagonal</item>
+        <item>Cruzado</item>
+        <item>Golden (1)</item>
+        <item>Golden (2)</item>
+        <item>Golden (3)</item>
+        <item>Golden (4)</item>
+        <item>Triángulo (1)</item>
+        <item>Triángulo (2)</item>
+        <item>Diagonales</item>
     </string-array>
     <string-array name="preference_grid_values">
         <item>preference_grid_none</item>
@@ -288,8 +288,16 @@
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>
     </string-array>
+    <string-array name="preference_raw_entries">
+        <item>JPEG only</item>
+        <item>JPEG and DNG (RAW)</item>
+    </string-array>
+    <string-array name="preference_raw_values">
+        <item>preference_raw_no</item>
+        <item>preference_raw_yes</item>
+    </string-array>
     <string-array name="preference_stamp_entries">
-        <item>Sin estampa</item>
+        <item>No estampar</item>
         <item>Estampar fotos</item>
     </string-array>
     <string-array name="preference_stamp_values">
@@ -297,12 +305,12 @@
         <item>preference_stamp_yes</item>
     </string-array>
     <string-array name="preference_stamp_dateformat_entries">
-        <item>Predefinido</item>
+        <item>Defecto</item>
         <item>yyyy/mm/dd</item>
         <item>dd/mm/yyyy</item>
         <item>mm/dd/yyyy</item>
-        <item>None</item>
-        </string-array>
+        <item>Ninguno</item>
+    </string-array>
     <string-array name="preference_stamp_dateformat_values">
         <item>preference_stamp_dateformat_default</item>
         <item>preference_stamp_dateformat_yyyymmdd</item>
@@ -311,9 +319,9 @@
         <item>preference_stamp_dateformat_none</item>
     </string-array>
     <string-array name="preference_stamp_timeformat_entries">
-        <item>Predefinido</item>
-        <item>12 hour</item>
-        <item>24 hour</item>
+        <item>Defecto</item>
+        <item>12 horas</item>
+        <item>24 horas</item>
         <item>Ninguno</item>
     </string-array>
     <string-array name="preference_stamp_timeformat_values">
@@ -323,7 +331,7 @@
         <item>preference_stamp_timeformat_none</item>
     </string-array>
     <string-array name="preference_stamp_gpsformat_entries">
-        <item>Predefinido</item>
+        <item>Defecto</item>
         <item>Grados/minutos/segundos</item>
         <item>Ninguno</item>
     </string-array>
@@ -469,8 +477,8 @@
         <item>10</item>
     </string-array>
     <string-array name="preference_record_audio_src_entries">
-        <item>Videocámara</item>
-        <item>Micrófono Externo(si existe)</item>
+        <item>VideocÃ¡mara</item>
+        <item>MicrÃ³fono Externo(si existe)</item>
         <item>Entrada de Audio predefinida</item>
         <item>Optimizada para voz</item>
     </string-array>
@@ -483,11 +491,97 @@
     <string-array name="preference_record_audio_channels_entries">
         <item>Predefinido</item>
         <item>Mono</item>
-        <item>Estereo (sólo soportado en algunos dispositivos)</item>
+        <item>Estereo (sÃ³lo soportado en algunos dispositivos)</item>
     </string-array>
     <string-array name="preference_record_audio_channels_values">
         <item>audio_default</item>
         <item>audio_mono</item>
         <item>audio_stereo</item>
+    </string-array>
+    <string-array name="preference_audio_control_entries">
+        <item>Ninguno</item>
+        <item>Ruido fuerte</item>
+        <item>Comando de voz: \"cheese\"</item>
+    </string-array>
+    <string-array name="preference_audio_control_values">
+        <item>none</item>
+        <item>noise</item>
+        <item>voice</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_entries">
+        <item>+3 (alta sensibilidad)</item>
+        <item>+2</item>
+        <item>+1</item>
+        <item>0 (defecto)</item>
+        <item>-1</item>
+        <item>-2 (baja sensibilidad)</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_values">
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+        <item>-2</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_entries">
+        <item>Device default</item>
+        <item>100MB</item>
+        <item>200MB</item>
+        <item>300MB</item>
+        <item>500MB</item>
+        <item>1GB</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_values">
+        <item>0</item>
+        <item>104857600</item>
+        <item>209715200</item>
+        <item>314572800</item>
+        <item>524288000</item>
+        <item>1073741824</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_entries">
+        <item>Hora local</item>
+        <item>UTC (Zulu)</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_values">
+        <item>local</item>
+        <item>zulu</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_entries">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_values">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_entries">
+        <item>0.5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_values">
+        <item>0.5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="preference_front_camera_mirror_entries">
+        <item>No reflejar</item>
+        <item>Reflejar foto</item>
+    </string-array>
+    <string-array name="preference_front_camera_mirror_values">
+        <item>preference_front_camera_mirror_no</item>
+        <item>preference_front_camera_mirror_photo</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_entries">
+        <item>No subtitles</item>
+        <item>Record subtitles</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_values">
+        <item>preference_video_subtitle_no</item>
+        <item>preference_video_subtitle_yes</item>
     </string-array>
 </resources>
