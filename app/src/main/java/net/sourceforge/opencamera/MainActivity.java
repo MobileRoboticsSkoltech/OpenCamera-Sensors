@@ -1390,7 +1390,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "updateForSettings: time after setup: " + (System.currentTimeMillis() - debug_time));
 			}
 		}
-		block_startup_toast = false;
+		// don't set block_startup_toast to false yet, as camera might be closing/opening on background thread
 		if( toast_message != null && toast_message.length() > 0 )
 			preview.showToast(null, toast_message);
 
@@ -2558,6 +2558,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast(false);
 		}
+		block_startup_toast = false;
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraSetup: total time for cameraSetup: " + (System.currentTimeMillis() - debug_time));
     }
