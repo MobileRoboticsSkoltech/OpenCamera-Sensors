@@ -509,12 +509,15 @@ public class MainUI {
 		if (MyDebug.LOG)
 			Log.d(TAG, "setPauseVideoContentDescription()");
 		View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
+		ImageButton pauseButton =(ImageButton)main_activity.findViewById(R.id.pause_video);
 		int content_description;
 		if( main_activity.getPreview().isVideoRecordingPaused() ) {
 			content_description = R.string.resume_video;
+			pauseButton.setImageResource(R.drawable.ic_play_circle_outline_white);
 		}
 		else {
 			content_description = R.string.pause_video;
+			pauseButton.setImageResource(R.drawable.ic_pause_circle_outline_white_48dp);
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "content_description: " + main_activity.getResources().getString(content_description));
