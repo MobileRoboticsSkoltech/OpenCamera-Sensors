@@ -1320,7 +1320,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 
 		// update camera for changes made in prefs - do this without closing and reopening the camera app if possible for speed!
-		// but need workaround for Nexus 7 bug, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
+		// but need workaround for Nexus 7 bug on old camera API, where scene mode doesn't take effect unless the camera is restarted - I can reproduce this with other 3rd party camera apps, so may be a Nexus 7 issue...
+		// doesn't happen if we allow using Camera2 API on Nexus 7, but reopen for consistency (and changing scene modes via
+		// popup menu no longer should be calling updateForSettings() for Camera2, anyway)
 		boolean need_reopen = false;
 		if( preview.getCameraController() != null ) {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);

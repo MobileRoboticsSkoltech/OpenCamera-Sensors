@@ -196,6 +196,11 @@ public abstract class CameraController {
 	 * @return The current scene mode. Will be null if scene mode not supported.
      */
 	public abstract String getSceneMode();
+	/**
+	 * @return Returns true iff changing the scene mode can affect the available camera functionality
+	 *         (e.g., changing to Night scene mode might mean flash modes are no longer available).
+	 */
+	public abstract boolean sceneModeAffectsFunctionality();
 	public abstract SupportedValues setColorEffect(String value);
 	public abstract String getColorEffect();
 	public abstract SupportedValues setWhiteBalance(String value);

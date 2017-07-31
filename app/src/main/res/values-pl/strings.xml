@@ -298,7 +298,7 @@
     <string name="photo_mode">Tryb fotografowania</string>
     <string name="photo_mode_standard">Standard</string>
     <string name="photo_mode_hdr">HDR</string>
-    <string name="photo_mode_expo_bracketing">Bracketing</string>
+    <string name="photo_mode_expo_bracketing">Expo {}</string>
     <string name="photo_mode_expo_bracketing_full">Bracketing ekspozycji</string>
     <string name="preference_category_stamp">Stempel zdjęcia</string>
     <string name="preference_hdr_save_expo">Zapisz wszystkie zdjęcia HDR</string>

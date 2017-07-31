@@ -308,7 +308,7 @@
     <string name="photo_mode">Foto Modus</string>
     <string name="photo_mode_standard">Standard</string>
     <string name="photo_mode_hdr">HDR</string>
-    <string name="photo_mode_expo_bracketing">Expo {}</string>
+    <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- needs to not be too long, so this shows okay on the popup menu's photo mode buttons -->
     <string name="photo_mode_expo_bracketing_full">Exposure Bracketing</string>
     <string name="preference_category_stamp">Foto Stamp</string>
     <string name="preference_hdr_save_expo">Alle Bilder der HDR Aufnahme speichern</string>

@@ -1643,11 +1643,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		{
 			// get available scene modes
-			// important, from docs:
+			// important, from old Camera API docs:
 			// "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance).
 			// For example, suppose originally flash mode is on and supported flash modes are on/off. In night
 			// scene mode, both flash mode and supported flash mode may be changed to off. After setting scene
 			// mode, applications should call getParameters to know if some parameters are changed."
+			// this doesn't appear to apply to Camera2 API, but we still might as well set scene mode first
 			if( MyDebug.LOG )
 				Log.d(TAG, "set up scene mode");
 			String value = applicationInterface.getSceneModePref();
