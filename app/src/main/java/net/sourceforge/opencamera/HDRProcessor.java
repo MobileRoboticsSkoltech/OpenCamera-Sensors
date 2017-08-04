@@ -658,30 +658,62 @@ public class HDRProcessor {
 			Log.d(TAG, "tonemap_scale_c: " + tonemap_scale_c);
 		processHDRScript.set_tonemap_scale(tonemap_scale_c);
 
-		// For Reinhard tonemapping:
-		// The basic algorithm is f(V) = V / (V+C), where V is the HDR value, C is tonemap_scale_c
-		// This was used until Open Camera 1.39, but has the problem of making images too dark: it
-		// maps [0, infinity] to [0, 1], but since in practice we never have very large V values, we
-		// won't use the full [0, 1] range. So we apply a linear scale S:
-		// f(V) = V.S / (V+C)
-		// S is chosen such that the maximum possible value, Vmax, maps to 1. So:
-		// 1 = Vmax . S / (Vmax + C)
-		// => S = (Vmax + C)/Vmax
-		// Note that we don't actually know the maximum HDR value, but instead we estimate it with
-		// max_possible_value, which gives the maximum value we'd have if even the darkest image was
-		// 255.0.
-		// Note that if max_possible_value was less than 255, we'd end up scaling a max value less than
-		// 1, to [0, 1], i.e., making dark images brighter, which we don't want, which is why above we
-		// set max_possible_value to a minimum of 255. In practice, this is unlikely to ever happen
-		// since max_possible_value is calculated as a maximum possible based on the response functions
-		// (as opposed to the real brightest HDR value), so even for dark photos we'd expect to have
-		// max_possible_value >= 255.
-		// Note that the original Reinhard tonemapping paper describes a non-linear scaling by (1 + CV/Vmax^2),
-		// though this is poorer performance (in terms of calculation time).
-		float linear_scale = (max_possible_value+tonemap_scale_c)/max_possible_value;
-		if( MyDebug.LOG )
-			Log.d(TAG, "linear_scale: " + linear_scale);
-		processHDRScript.set_linear_scale(linear_scale);
+        // algorithm specific parameters
+		switch( tonemapping_algorithm ) {
+            case TONEMAPALGORITHM_EXPONENTIAL:
+            {
+                // The basic algorithm is f(V) = 1 - exp( - E * V ), where V is the HDR value, E is a
+                // constant. This maps [0, infinity] to [0, 1]. However we have an estimate of the maximum
+                // possible value, Vmax, so we can set a linear scaling S so that [0, Vmax] maps to [0, 1]
+                // f(V) = S . (1 - exp( - E * V ))
+                // so 1 = S . (1 - exp( - E * Vmax ))
+                // => S = 1 / (1 - exp( - E * Vmax ))
+                // Note that Vmax should be set to a minimum of 255, else we'll make darker images brighter.
+                float E = processHDRScript.get_exposure();
+                float linear_scale = (float)(1.0 / (1.0 - Math.exp(-E * max_possible_value / 255.0)));
+                if( MyDebug.LOG )
+                    Log.d(TAG, "linear_scale: " + linear_scale);
+                processHDRScript.set_linear_scale(linear_scale);
+                break;
+            }
+			case TONEMAPALGORITHM_REINHARD: {
+                // The basic algorithm is f(V) = V / (V+C), where V is the HDR value, C is tonemap_scale_c
+                // This was used until Open Camera 1.39, but has the problem of making images too dark: it
+                // maps [0, infinity] to [0, 1], but since in practice we never have very large V values, we
+                // won't use the full [0, 1] range. So we apply a linear scale S:
+                // f(V) = V.S / (V+C)
+                // S is chosen such that the maximum possible value, Vmax, maps to 1. So:
+                // 1 = Vmax . S / (Vmax + C)
+                // => S = (Vmax + C)/Vmax
+                // Note that we don't actually know the maximum HDR value, but instead we estimate it with
+                // max_possible_value, which gives the maximum value we'd have if even the darkest image was
+                // 255.0.
+                // Note that if max_possible_value was less than 255, we'd end up scaling a max value less than
+                // 1, to [0, 1], i.e., making dark images brighter, which we don't want, which is why above we
+                // set max_possible_value to a minimum of 255. In practice, this is unlikely to ever happen
+                // since max_possible_value is calculated as a maximum possible based on the response functions
+                // (as opposed to the real brightest HDR value), so even for dark photos we'd expect to have
+                // max_possible_value >= 255.
+                // Note that the original Reinhard tonemapping paper describes a non-linear scaling by (1 + CV/Vmax^2),
+                // though this is poorer performance (in terms of calculation time).
+                float linear_scale = (max_possible_value + tonemap_scale_c) / max_possible_value;
+                if( MyDebug.LOG )
+                    Log.d(TAG, "linear_scale: " + linear_scale);
+                processHDRScript.set_linear_scale(linear_scale);
+                break;
+            }
+			case TONEMAPALGORITHM_FILMIC:
+			{
+				// For filmic, we have f(V) = U(EV) / U(W), where V is the HDR value, U is a function.
+				// We want f(Vmax) = 1, so EVmax = W
+                float E = processHDRScript.get_filmic_exposure_bias();
+				float W = E * max_possible_value;
+				if( MyDebug.LOG )
+					Log.d(TAG, "filmic W: " + W);
+				processHDRScript.set_W(W);
+				break;
+			}
+		}
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "call processHDRScript");
