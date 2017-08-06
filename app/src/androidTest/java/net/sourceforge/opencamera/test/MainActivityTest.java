@@ -8727,7 +8727,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-		checkHistogramDetails(hdrHistogramDetails, 0, 91, 254);
+		checkHistogramDetails(hdrHistogramDetails, 0, 92, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR39".
@@ -8823,7 +8823,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int [] exp_offsets_y = {13, 0, 24};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-		checkHistogramDetails(hdrHistogramDetails, 1, 129, 254);
+		checkHistogramDetails(hdrHistogramDetails, 1, 130, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDRtemp".

@@ -180,9 +180,9 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	    case tonemap_algorithm_clamp_c:
 	    {
             // Simple clamp
-            int r = (int)hdr.r;
-            int g = (int)hdr.g;
-            int b = (int)hdr.b;
+            int r = (int)(hdr.r+0.5f);
+            int g = (int)(hdr.g+0.5f);
+            int b = (int)(hdr.b+0.5f);
             r = min(r, 255);
             g = min(g, 255);
             b = min(b, 255);
@@ -195,9 +195,9 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	    case tonemap_algorithm_exponential_c:
 	    {
         	float3 out_f = linear_scale * 255.0f * (1.0 - exp( - exposure * hdr / 255.0f ));
-            out.r = (uchar)clamp(out_f.r, 0.0f, 255.0f);
-            out.g = (uchar)clamp(out_f.g, 0.0f, 255.0f);
-            out.b = (uchar)clamp(out_f.b, 0.0f, 255.0f);
+            out.r = (uchar)clamp(out_f.r+0.5f, 0.0f, 255.0f);
+            out.g = (uchar)clamp(out_f.g+0.5f, 0.0f, 255.0f);
+            out.b = (uchar)clamp(out_f.b+0.5f, 0.0f, 255.0f);
             break;
 	    }
 	    case tonemap_algorithm_reinhard_c:
@@ -231,9 +231,9 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
             curr_r *= white_scale;
             curr_g *= white_scale;
             curr_b *= white_scale;
-            out.r = (uchar)clamp(curr_r, 0.0f, 255.0f);
-            out.g = (uchar)clamp(curr_g, 0.0f, 255.0f);
-            out.b = (uchar)clamp(curr_b, 0.0f, 255.0f);
+            out.r = (uchar)clamp(curr_r+0.5f, 0.0f, 255.0f);
+            out.g = (uchar)clamp(curr_g+0.5f, 0.0f, 255.0f);
+            out.b = (uchar)clamp(curr_b+0.5f, 0.0f, 255.0f);
             break;
         }
 	    case tonemap_algorithm_aces_c:
@@ -245,9 +245,9 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	        const float e = 0.14f;
 	        float3 x = hdr/255.0;
 	        float3 out_f = 255.0f * (x*(a*x+b))/(x*(c*x+d)+e);
-	        out.r = (uchar)clamp(out_f.r, 0.0f, 255.0f);
-	        out.g = (uchar)clamp(out_f.g, 0.0f, 255.0f);
-            out.b = (uchar)clamp(out_f.b, 0.0f, 255.0f);
+	        out.r = (uchar)clamp(out_f.r+0.5f, 0.0f, 255.0f);
+	        out.g = (uchar)clamp(out_f.g+0.5f, 0.0f, 255.0f);
+            out.b = (uchar)clamp(out_f.b+0.5f, 0.0f, 255.0f);
             break;
 	    }
 	}
