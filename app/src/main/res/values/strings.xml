@@ -409,4 +409,41 @@
 
     <string name="audio_listener_failed">Failed to initalise audio listening</string>
     <string name="failed_to_process_hdr">Failed to create HDR image</string>
+
+    <string name="white_balance_auto">Auto</string>
+    <string name="white_balance_cloudy">Cloudy</string>
+    <string name="white_balance_daylight">Daylight</string>
+    <string name="white_balance_fluorescent">Fluorescent</string>
+    <string name="white_balance_incandescent">Incandescent</string>
+    <string name="white_balance_shade">Shade</string>
+    <string name="white_balance_twilight">Twilight</string>
+    <string name="white_balance_warm">Warm</string>
+    <string name="white_balance_manual">Manual</string>
+
+    <string name="scene_mode_action">Action</string>
+    <string name="scene_mode_barcode">Barcode</string>
+    <string name="scene_mode_beach">Beach</string>
+    <string name="scene_mode_candlelight">Candlelight</string>
+    <string name="scene_mode_auto">Auto</string>
+    <string name="scene_mode_fireworks">Fireworks</string>
+    <string name="scene_mode_landscape">Landscape</string>
+    <string name="scene_mode_night">Night</string>
+    <string name="scene_mode_night_portrait">Night portrait</string>
+    <string name="scene_mode_party">Party</string>
+    <string name="scene_mode_portrait">Portrait</string>
+    <string name="scene_mode_snow">Snow</string>
+    <string name="scene_mode_sports">Sports</string>
+    <string name="scene_mode_steady_photo">Steady photo</string>
+    <string name="scene_mode_sunset">Sunset</string>
+    <string name="scene_mode_theatre">Theatre</string>
+
+    <string name="color_effect_aqua">Aqua</string>
+    <string name="color_effect_blackboard">Blackboard</string>
+    <string name="color_effect_mono">Mono</string>
+    <string name="color_effect_negative">Negative</string>
+    <string name="color_effect_none">None</string>
+    <string name="color_effect_posterize">Posterize</string>
+    <string name="color_effect_sepia">Sepia</string>
+    <string name="color_effect_solarize">Solarize</string>
+    <string name="color_effect_whiteboard">Whiteboard</string>
 </resources>

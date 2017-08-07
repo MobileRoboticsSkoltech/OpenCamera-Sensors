@@ -8710,8 +8710,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void testHDR38() throws IOException, InterruptedException {
-		Log.d(TAG, "testHDR38");
+	public void testHDR38Filmic() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR38Filmic");
 
 		setToDefault();
 
@@ -8721,11 +8721,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR38/input1.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR38/input2.jpg") );
 
-		subTestHDR(inputs, "testHDR38_output.jpg", false, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_FILMIC);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR38_filmic_output.jpg", false, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_FILMIC);
 
 		int [] exp_offsets_x = {-1, 0, 0};
 		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 0, 92, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR39".
@@ -8774,6 +8776,54 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
 		checkHistogramDetails(hdrHistogramDetails, 1, 138, 254);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR40" with Exponential tonemapping.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR40Exponential() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR40Exponential");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input2.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR40_exponential_output.jpg", false, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_EXPONENTIAL);
+
+		int [] exp_offsets_x = {5, 0, -2};
+		int [] exp_offsets_y = {13, 0, 24};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 1, 138, 254);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR40" with Filmic tonemapping.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR40Filmic() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR40Filmic");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR40/input2.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR40_filmic_output.jpg", false, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_FILMIC);
+
+		int [] exp_offsets_x = {5, 0, -2};
+		int [] exp_offsets_y = {13, 0, 24};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 1, 130, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDRtemp".

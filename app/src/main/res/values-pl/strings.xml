@@ -90,7 +90,7 @@
     <string name="preference_lock_orientation">Zablokuj orientację zdjęcia/wideo</string>
     <string name="preference_lock_orientation_summary">Jeśli ustawione, orientacja urządzenia będzie pomijana i zostanie zastosowana określona</string>
     <string name="preference_face_detection">Wykrywanie twarzy</string>
-    <string name="preference_face_detection_summary">Używa wykrywania twarzy zamiast obrzarów ostrości</string>
+    <string name="preference_face_detection_summary">Używa wykrywania twarzy zamiast obszarów ostrości</string>
     <string name="preference_category_camera_controls">Sterowanie aparatem</string>
     <string name="preference_timer">Samowyzwalacz</string>
     <string name="preference_timer_summary">Ustaw samowyzwalacz aparatu</string>

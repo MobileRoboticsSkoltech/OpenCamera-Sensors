@@ -124,6 +124,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		this.imageSaver.start();
 		
         if( savedInstanceState != null ) {
+			// load the things we saved in onSaveInstanceState().
+            if( MyDebug.LOG )
+                Log.d(TAG, "read from savedInstanceState");
     		cameraId = savedInstanceState.getInt("cameraId", 0);
 			if( MyDebug.LOG )
 				Log.d(TAG, "found cameraId: " + cameraId);
@@ -138,7 +141,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "MyApplicationInterface: total time to create MyApplicationInterface: " + (System.currentTimeMillis() - debug_time));
 	}
-	
+
+	/** Here we save states which aren't saved in preferences (we don't want them to be saved if the
+	 *  application is restarted from scratch), but we do want to preserve if Android has to recreate
+	 *  the application (e.g., configuration change, or it's destroyed while in background).
+	 */
 	void onSaveInstanceState(Bundle state) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSaveInstanceState");

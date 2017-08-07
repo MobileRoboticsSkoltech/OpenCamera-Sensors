@@ -509,12 +509,15 @@ public class MainUI {
 		if (MyDebug.LOG)
 			Log.d(TAG, "setPauseVideoContentDescription()");
 		View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
+		ImageButton pauseButton =(ImageButton)main_activity.findViewById(R.id.pause_video);
 		int content_description;
 		if( main_activity.getPreview().isVideoRecordingPaused() ) {
 			content_description = R.string.resume_video;
+			pauseButton.setImageResource(R.drawable.ic_play_circle_outline_white);
 		}
 		else {
 			content_description = R.string.pause_video;
+			pauseButton.setImageResource(R.drawable.ic_pause_circle_outline_white_48dp);
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "content_description: " + main_activity.getResources().getString(content_description));
@@ -1050,6 +1053,168 @@ public class MainUI {
 			keydown_volume_up = false;
 		else if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN )
 			keydown_volume_down = false;
+	}
+
+	/** Returns a (possibly translated) user readable string for a white balance preference value.
+	 *  If the value is not recognised (this can happen for the old Camera API, some devices can
+	 *  have device-specific options), then the received value is returned.
+	 */
+	public String getEntryForWhiteBalance(String value) {
+		int id = -1;
+		switch( value ) {
+			case "auto":
+				id = R.string.white_balance_auto;
+				break;
+			case "cloudy-daylight":
+				id = R.string.white_balance_cloudy;
+				break;
+			case "daylight":
+				id = R.string.white_balance_daylight;
+				break;
+			case "fluorescent":
+				id = R.string.white_balance_fluorescent;
+				break;
+			case "incandescent":
+				id = R.string.white_balance_incandescent;
+				break;
+			case "shade":
+				id = R.string.white_balance_shade;
+				break;
+			case "twilight":
+				id = R.string.white_balance_twilight;
+				break;
+			case "warm-fluorescent":
+				id = R.string.white_balance_warm;
+				break;
+			case "manual":
+				id = R.string.white_balance_manual;
+				break;
+			default:
+				break;
+		}
+		String entry;
+		if( id != -1 ) {
+			entry = main_activity.getResources().getString(id);
+		}
+		else {
+			entry = value;
+		}
+		return entry;
+	}
+
+	/** Returns a (possibly translated) user readable string for a scene mode preference value.
+	 *  If the value is not recognised (this can happen for the old Camera API, some devices can
+	 *  have device-specific options), then the received value is returned.
+	 */
+	public String getEntryForSceneMode(String value) {
+		int id = -1;
+		switch( value ) {
+			case "action":
+				id = R.string.scene_mode_action;
+				break;
+			case "barcode":
+				id = R.string.scene_mode_barcode;
+				break;
+			case "beach":
+				id = R.string.scene_mode_beach;
+				break;
+			case "candlelight":
+				id = R.string.scene_mode_candlelight;
+				break;
+			case "auto":
+				id = R.string.scene_mode_auto;
+				break;
+			case "fireworks":
+				id = R.string.scene_mode_fireworks;
+				break;
+			case "landscape":
+				id = R.string.scene_mode_landscape;
+				break;
+			case "night":
+				id = R.string.scene_mode_night;
+				break;
+			case "night-portrait":
+				id = R.string.scene_mode_night_portrait;
+				break;
+			case "party":
+				id = R.string.scene_mode_party;
+				break;
+			case "portrait":
+				id = R.string.scene_mode_portrait;
+				break;
+			case "snow":
+				id = R.string.scene_mode_snow;
+				break;
+			case "sports":
+				id = R.string.scene_mode_sports;
+				break;
+			case "steadyphoto":
+				id = R.string.scene_mode_steady_photo;
+				break;
+			case "sunset":
+				id = R.string.scene_mode_sunset;
+				break;
+			case "theatre":
+				id = R.string.scene_mode_theatre;
+				break;
+			default:
+				break;
+		}
+		String entry;
+		if( id != -1 ) {
+			entry = main_activity.getResources().getString(id);
+		}
+		else {
+			entry = value;
+		}
+		return entry;
+	}
+
+	/** Returns a (possibly translated) user readable string for a color effect preference value.
+	 *  If the value is not recognised (this can happen for the old Camera API, some devices can
+	 *  have device-specific options), then the received value is returned.
+	 */
+	public String getEntryForColorEffect(String value) {
+		int id = -1;
+		switch( value ) {
+			case "aqua":
+				id = R.string.color_effect_aqua;
+				break;
+			case "blackboard":
+				id = R.string.color_effect_blackboard;
+				break;
+			case "mono":
+				id = R.string.color_effect_mono;
+				break;
+			case "negative":
+				id = R.string.color_effect_negative;
+				break;
+			case "none":
+				id = R.string.color_effect_none;
+				break;
+			case "posterize":
+				id = R.string.color_effect_posterize;
+				break;
+			case "sepia":
+				id = R.string.color_effect_sepia;
+				break;
+			case "solarize":
+				id = R.string.color_effect_solarize;
+				break;
+			case "whiteboard":
+				id = R.string.color_effect_whiteboard;
+				break;
+			default:
+				break;
+		}
+		String entry;
+		if( id != -1 ) {
+			entry = main_activity.getResources().getString(id);
+		}
+		else {
+			entry = value;
+		}
+		return entry;
 	}
 
     // for testing

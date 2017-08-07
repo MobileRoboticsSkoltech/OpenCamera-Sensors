@@ -2827,12 +2827,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		String scene_mode = camera_controller.getSceneMode();
     	if( scene_mode != null && !scene_mode.equals(camera_controller.getDefaultSceneMode()) ) {
-    		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + scene_mode;
+    		toast_string += "\n" + getResources().getString(R.string.scene_mode) + ": " + mainUI.getEntryForSceneMode(scene_mode);
 			simple = false;
     	}
 		String white_balance = camera_controller.getWhiteBalance();
     	if( white_balance != null && !white_balance.equals(camera_controller.getDefaultWhiteBalance()) ) {
-    		toast_string += "\n" + getResources().getString(R.string.white_balance) + ": " + white_balance;
+    		toast_string += "\n" + getResources().getString(R.string.white_balance) + ": " + mainUI.getEntryForWhiteBalance(white_balance);
 			if( white_balance.equals("manual") && preview.supportsWhiteBalanceTemperature() ) {
 				toast_string += " " + camera_controller.getWhiteBalanceTemperature();
 			}
@@ -2840,7 +2840,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	}
 		String color_effect = camera_controller.getColorEffect();
     	if( color_effect != null && !color_effect.equals(camera_controller.getDefaultColorEffect()) ) {
-    		toast_string += "\n" + getResources().getString(R.string.color_effect) + ": " + color_effect;
+    		toast_string += "\n" + getResources().getString(R.string.color_effect) + ": " + mainUI.getEntryForColorEffect(color_effect);
 			simple = false;
     	}
 		String lock_orientation = sharedPreferences.getString(PreferenceKeys.getLockOrientationPreferenceKey(), "none");
