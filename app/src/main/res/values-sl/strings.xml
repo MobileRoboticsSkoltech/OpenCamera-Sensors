@@ -282,6 +282,8 @@
 
     <string name="saf_select_save_location">Izberite mesto za shranjevanje</string>
     <string name="saf_cancelled">Ogrodje za dostop do pomnilniške naprave preklicano</string>
+	
+	<string name="saf_permission_failed">Ni mogoče shraniti v to mapo</string>
     
     <!-- the permission names such as Microphone should match what Android calls them in the App permission settings -->
     <string name="permission_record_audio_not_available">Dovoljenje za mikrofon ni na voljo</string>
@@ -408,4 +410,41 @@
 	
 	<string name="audio_listener_failed">Začenjanje poslušanja zvoka je spodletelo</string>
 	<string name="failed_to_process_hdr">Ustvarjanje slike HDR je spodletelo</string>
+	
+	<string name="white_balance_auto">Samodejno</string>
+    <string name="white_balance_cloudy">Oblačno</string>
+    <string name="white_balance_daylight">Dnevna svetloba</string>
+    <string name="white_balance_fluorescent">Fluorescenčno</string>
+    <string name="white_balance_incandescent">Žarnica</string>
+    <string name="white_balance_shade">Osenčeno</string>
+    <string name="white_balance_twilight">Mrak</string>
+    <string name="white_balance_warm">Toplo</string>
+    <string name="white_balance_manual">Ročno</string>
+
+    <string name="scene_mode_action">Akcija</string>
+    <string name="scene_mode_barcode">Črtna koda</string>
+    <string name="scene_mode_beach">Plaža</string>
+    <string name="scene_mode_candlelight">Umetna svetloba</string>
+    <string name="scene_mode_auto">Samodejno</string>
+    <string name="scene_mode_fireworks">Ognjemet</string>
+    <string name="scene_mode_landscape">Pokrajina</string>
+    <string name="scene_mode_night">Noč</string>
+    <string name="scene_mode_night_portrait">Nočni portret</string>
+    <string name="scene_mode_party">Zabava</string>
+    <string name="scene_mode_portrait">Portret</string>
+    <string name="scene_mode_snow">Sneg</string>
+    <string name="scene_mode_sports">Šport</string>
+    <string name="scene_mode_steady_photo">Negibna fotografija</string>
+    <string name="scene_mode_sunset">Sončni zahod</string>
+    <string name="scene_mode_theatre">Gledališče</string>
+
+    <string name="color_effect_aqua">Akva</string>
+    <string name="color_effect_blackboard">Črna tabla</string>
+    <string name="color_effect_mono">Enobarvno</string>
+    <string name="color_effect_negative">Negativ</string>
+    <string name="color_effect_none">Brez</string>
+    <string name="color_effect_posterize">Posteriziraj</string>
+    <string name="color_effect_sepia">Sepija</string>
+    <string name="color_effect_solarize">Solariziraj</string>
+    <string name="color_effect_whiteboard">Bela tabla</string>
 </resources>
