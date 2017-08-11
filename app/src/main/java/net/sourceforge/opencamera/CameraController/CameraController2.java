@@ -3611,7 +3611,8 @@ public class CameraController2 extends CameraController {
 				long exposure_time = capture_result_exposure_time;
 				if( exposure_time <= fixed_exposure_time ) {
 					Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
-					if( exposure_time_range != null ) {
+					Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
+					if( exposure_time_range != null && iso_range != null ) {
 						double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
 						if (MyDebug.LOG) {
 							Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
@@ -3628,10 +3629,17 @@ public class CameraController2 extends CameraController {
 							Log.d(TAG, "exposure_time: " + exposure_time);
 						}
 						stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
-						if( capture_result_has_iso )
-							stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, capture_result_iso );
-						else
-							stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 800);
+						{
+							// set ISO
+							int iso = 800;
+							if( capture_result_has_iso )
+								iso = capture_result_iso;
+							// see https://sourceforge.net/p/opencamera/tickets/321/ - some devices may have auto ISO that's
+							// outside of the allowed manual iso range!
+							iso = Math.max(iso, iso_range.getLower());
+							iso = Math.min(iso, iso_range.getUpper());
+							stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, iso );
+						}
 						if( capture_result_has_frame_duration  )
 							stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, capture_result_frame_duration);
 						else
@@ -3727,15 +3735,26 @@ public class CameraController2 extends CameraController {
 			}
 			// else don't turn torch off, as user may be in torch on mode
 
-			// obtain current ISO/etc settings from the capture result - but if we're in manual ISO mode,
-			// might as well use the settings the user has actually requested (also useful for workaround for
-			// OnePlus 3T bug where the reported ISO and exposure_time are wrong in dark scenes)
-			if( camera_settings.has_iso )
-				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, camera_settings.iso );
-			else if( capture_result_has_iso )
-				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, capture_result_iso );
-			else
-				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, 800);
+			Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
+			if( iso_range == null ) {
+				Log.e(TAG, "takePictureBurstExpoBracketing called but null iso_range");
+			}
+			else {
+				// set ISO
+				int iso = 800;
+				// obtain current ISO/etc settings from the capture result - but if we're in manual ISO mode,
+				// might as well use the settings the user has actually requested (also useful for workaround for
+				// OnePlus 3T bug where the reported ISO and exposure_time are wrong in dark scenes)
+				if( camera_settings.has_iso )
+					iso = camera_settings.iso;
+				else if( capture_result_has_iso )
+					iso = capture_result_iso;
+				// see https://sourceforge.net/p/opencamera/tickets/321/ - some devices may have auto ISO that's
+				// outside of the allowed manual iso range!
+				iso = Math.max(iso, iso_range.getLower());
+				iso = Math.min(iso, iso_range.getUpper());
+				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, iso );
+			}
 			if( capture_result_has_frame_duration  )
 				stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, capture_result_frame_duration);
 			else
