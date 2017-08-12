@@ -1054,7 +1054,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		mainUI.togglePopupSettings();
     }
 
-    private PreferencesListener preferencesListener = new PreferencesListener();
+    private final PreferencesListener preferencesListener = new PreferencesListener();
 
 	/** Keeps track of changes to SharedPreferences.
 	 */
@@ -1150,7 +1150,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		boolean anyChanges() {
 			return any;
 		}
-	};
+	}
     
     public void openSettings() {
 		if( MyDebug.LOG )

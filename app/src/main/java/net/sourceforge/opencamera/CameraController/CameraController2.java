@@ -526,8 +526,7 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "green: " + green);
 			Log.d(TAG, "blue: " + blue);
 		}
-		RggbChannelVector rggbChannelVector = new RggbChannelVector((red/255)*2,(green/255),(green/255),(blue/255)*2);
-		return rggbChannelVector;
+		return new RggbChannelVector((red/255)*2,(green/255),(green/255),(blue/255)*2);
 	}
 
 	/** Converts a red, green even, green odd and blue components to a white balance temperature.
@@ -4294,8 +4293,7 @@ public class CameraController2 extends CameraController {
 	@Override
 	public int captureResultWhiteBalanceTemperature() {
 		// for performance reasons, we don't convert from rggb to temperature in every frame, rather only when requested
-		int temperature = convertRggbToTemperature(capture_result_white_balance_rggb);
-		return temperature;
+		return convertRggbToTemperature(capture_result_white_balance_rggb);
 	}
 
 	@Override

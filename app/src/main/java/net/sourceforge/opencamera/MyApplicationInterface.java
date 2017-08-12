@@ -721,7 +721,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getString(PreferenceKeys.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
     }
 
-    public boolean getAutoStabilisePref() {
+    private boolean getAutoStabilisePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return getAutoStabilisePref(sharedPreferences);
     }
@@ -733,7 +733,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return false;
     }
 
-    public String getStampPref() {
+    private String getStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return getStampPref(sharedPreferences);
     }

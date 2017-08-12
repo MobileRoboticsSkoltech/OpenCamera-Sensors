@@ -7703,9 +7703,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	private class HistogramDetails {
-		int min_value;
-		int median_value;
-		int max_value;
+		final int min_value;
+		final int median_value;
+		final int max_value;
 
 		HistogramDetails(int min_value, int median_value, int max_value) {
 			this.min_value = min_value;
@@ -7851,9 +7851,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(exp_min_value == hdrHistogramDetails.min_value);
 		assertTrue(exp_median_value == hdrHistogramDetails.median_value);
 		assertTrue(exp_max_value == hdrHistogramDetails.max_value);
-	};
+	}
 
-	
 	final private String hdr_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/hdrsamples/";
 
 	/** Tests HDR algorithm on test samples "saintpaul".
