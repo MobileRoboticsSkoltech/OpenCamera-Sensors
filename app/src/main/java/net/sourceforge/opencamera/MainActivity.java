@@ -92,6 +92,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private MyApplicationInterface applicationInterface;
 	private Preview preview;
 	private OrientationEventListener orientationEventListener;
+	private int large_heap_memory;
 	private boolean supports_auto_stabilise;
 	private boolean supports_force_video_4k;
 	private boolean supports_camera2;
@@ -167,8 +168,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "standard max memory = " + activityManager.getMemoryClass() + "MB");
 			Log.d(TAG, "large max memory = " + activityManager.getLargeMemoryClass() + "MB");
 		}
-		//if( activityManager.getMemoryClass() >= 128 ) { // test
-		if( activityManager.getLargeMemoryClass() >= 128 ) {
+		large_heap_memory = activityManager.getLargeMemoryClass();
+		if( large_heap_memory >= 128 ) {
 			supports_auto_stabilise = true;
 		}
 		if( MyDebug.LOG )
@@ -2624,6 +2625,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public boolean supportsExpoBracketing() {
 		return preview.supportsExpoBracketing();
     }
+
+    public boolean supportsNoiseReduction() {
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsExpoBracketing() );
+	}
     
     private int maxExpoBracketingNImages() {
 		return preview.maxExpoBracketingNImages();

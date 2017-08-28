@@ -7854,6 +7854,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	final private String hdr_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/hdrsamples/";
+	final private String avg_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/avgsamples/";
 
 	/** Tests HDR algorithm on test samples "saintpaul".
 	 * @throws IOException
@@ -8907,4 +8908,542 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Thread.sleep(500);
 
 	}
+
+	private interface TestAvgCallback {
+		void doneProcessAvg(int index); // called after every call to HDRProcessor.processAvg()
+	}
+
+	/** The following testAvgX tests test the Avg noise reduction algorithm on a given set of input images.
+	 *  By testing on a fixed sample, this makes it easier to finetune the algorithm for quality and performance.
+	 *  To use these tests, the testdata/ subfolder should be manually copied to the test device in the DCIM/testOpenCamera/
+	 *  folder (so you have DCIM/testOpenCamera/testdata/). We don't use assets/ as we'd end up with huge APK sizes which takes
+	 *  time to transfer to the device everytime we run the tests.
+	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	private HistogramDetails subTestAvg(List<Bitmap> inputs, String output_name, TestAvgCallback cb) throws IOException, InterruptedException {
+		Log.d(TAG, "subTestAvg");
+
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			Log.d(TAG, "renderscript requires Android Lollipop or better");
+			return null;
+		}
+
+		Thread.sleep(1000); // wait for camera to open
+
+    	long time_s = System.currentTimeMillis();
+		try {
+			float hdr_strength = 0.0f;
+			for(int i=1;i<inputs.size();i++) {
+				Log.d(TAG, "processAvg for image: " + i);
+				float avg_factor = (float)i;
+				mActivity.getApplicationInterface().getHDRProcessor().processAvg(inputs.get(0), inputs.get(i), avg_factor, true, hdr_strength, 4);
+				if( cb != null ) {
+					cb.doneProcessAvg(i);
+				}
+				//break; // test
+			}
+			//mActivity.getApplicationInterface().getHDRProcessor().processAvgMulti(inputs, hdr_strength, 4);
+		}
+		catch(HDRProcessorException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+		Log.d(TAG, "Avg time: " + (System.currentTimeMillis() - time_s));
+
+        {
+            mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(inputs.get(0));
+            Log.d(TAG, "time after brighten: " + (System.currentTimeMillis() - time_s));
+        }
+
+		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
+		OutputStream outputStream = new FileOutputStream(file);
+		inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+        outputStream.close();
+        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+		HistogramDetails hdrHistogramDetails = checkHistogram(inputs.get(0));
+		inputs.get(0).recycle();
+		System.gc();
+		inputs.clear();
+
+		Thread.sleep(500);
+
+		return hdrHistogramDetails;
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg1".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg1() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg1");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg1/input0.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg1/input1.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg1/input2.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg1_output.jpg", new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					int [] exp_offsets_x = {0, 3, 0};
+					int [] exp_offsets_y = {0, 1, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 2 ) {
+					int [] exp_offsets_x = {0, 6, 0};
+					int [] exp_offsets_y = {0, 0, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else {
+					assertTrue(false);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg2".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg2() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg2");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg2/input0.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg2/input1.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg2/input2.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg2_output.jpg", new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					int [] exp_offsets_x = {0, -15, 0};
+					int [] exp_offsets_y = {0, -10, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 2 ) {
+					int [] exp_offsets_x = {0, -15, 0};
+					int [] exp_offsets_y = {0, -10, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else {
+					assertTrue(false);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg3".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg3() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg3");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input0.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input1.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input2.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input3.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input4.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg3_output.jpg", new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					int [] exp_offsets_x = {0, 2, 0};
+					int [] exp_offsets_y = {0, -18, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 2 ) {
+					int [] exp_offsets_x = {0, -18, 0};
+					int [] exp_offsets_y = {0, 17, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 3 ) {
+					int [] exp_offsets_x = {0, -12, 0};
+					int [] exp_offsets_y = {0, -25, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 4 ) {
+					int [] exp_offsets_x = {0, -29, 0};
+					int [] exp_offsets_y = {0, -22, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else {
+					assertTrue(false);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg4".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg4() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg4");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input0.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input1.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input2.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input3.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input4.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg4_output.jpg", new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					int [] exp_offsets_x = {0, 5, 0};
+					int [] exp_offsets_y = {0, 2, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 2 ) {
+					int [] exp_offsets_x = {0, 3, 0};
+					int [] exp_offsets_y = {0, 5, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 3 ) {
+					int [] exp_offsets_x = {0, 0, 0};
+					int [] exp_offsets_y = {0, 7, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 4 ) {
+					int [] exp_offsets_x = {0, 4, 0};
+					int [] exp_offsets_y = {0, 8, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else {
+					assertTrue(false);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg5".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg5() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg5");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input0.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input1.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input2.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input3.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input4.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg5_output.jpg", new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					int [] exp_offsets_x = {0, 4, 0};
+					int [] exp_offsets_y = {0, -1, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 2 ) {
+					int [] exp_offsets_x = {0, 7, 0};
+					int [] exp_offsets_y = {0, -2, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 3 ) {
+					int [] exp_offsets_x = {0, 9, 0};
+					int [] exp_offsets_y = {0, -2, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 4 ) {
+					int [] exp_offsets_x = {0, 10, 0};
+					int [] exp_offsets_y = {0, -4, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else {
+					assertTrue(false);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg6".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg6() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg6");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input0.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input1.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input2.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input3.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input4.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input5.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input6.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input7.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg6_output.jpg", new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					int [] exp_offsets_x = {0, -1, 0};
+					int [] exp_offsets_y = {0, 0, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 2 ) {
+					int [] exp_offsets_x = {0, -1, 0};
+					int [] exp_offsets_y = {0, -1, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 3 ) {
+					int [] exp_offsets_x = {0, 0, 0};
+					int [] exp_offsets_y = {0, -1, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 4 ) {
+					int [] exp_offsets_x = {0, 0, 0};
+					int [] exp_offsets_y = {0, -1, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 5 ) {
+					int [] exp_offsets_x = {0, 0, 0};
+					int [] exp_offsets_y = {0, -2, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 6 ) {
+					int [] exp_offsets_x = {0, -1, 0};
+					int [] exp_offsets_y = {0, -2, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else if( index == 7 ) {
+					int [] exp_offsets_x = {0, -1, 0};
+					int [] exp_offsets_y = {0, -2, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+				}
+				else {
+					assertTrue(false);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg7".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg7() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg7");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input0.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input1.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input2.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input3.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input4.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input5.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input6.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input7.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg7_output.jpg", new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg8".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg8() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg8");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input0.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input1.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input2.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input3.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input4.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input5.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input6.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input7.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg8_output.jpg", new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg9".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg9() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg9");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		final boolean use_auto_photos = true;
+
+		if( use_auto_photos ) {
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto0.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto1.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto2.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto3.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto4.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto5.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto6.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto7.jpg") );
+		}
+		else {
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input0.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input1.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input2.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input3.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input4.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input5.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input6.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input7.jpg") );
+		}
+
+		String out_filename = use_auto_photos ? "testAvg9_auto_output.jpg" : "testAvg9_output.jpg";
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg10".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg10() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg10");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		final boolean use_auto_photos = false;
+
+		if( use_auto_photos ) {
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto0.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto1.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto2.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto3.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto4.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto5.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto6.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto7.jpg") );
+		}
+		else {
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input0.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input1.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input2.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input3.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input4.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input5.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input6.jpg") );
+			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input7.jpg") );
+		}
+
+		String out_filename = use_auto_photos ? "testAvg10_auto_output.jpg" : "testAvg10_output.jpg";
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, out_filename, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg11".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg11() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg11");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input0.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input1.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input2.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input3.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input4.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input5.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input6.jpg") );
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input7.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg11_output.jpg", new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
 }

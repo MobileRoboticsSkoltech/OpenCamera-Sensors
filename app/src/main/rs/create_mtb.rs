@@ -28,3 +28,10 @@ void __attribute__((kernel)) create_mtb(uchar4 in, uint32_t x, uint32_t y) {
     rsSetElementAt_uchar(out_bitmap, out, x - start_x, y - start_y);
 	//return out;
 }
+
+void __attribute__((kernel)) create_greyscale(uchar4 in, uint32_t x, uint32_t y) {
+	uchar value = max(in.r, in.g);
+	value = max(value, in.b);
+
+    rsSetElementAt_uchar(out_bitmap, value, x - start_x, y - start_y);
+}

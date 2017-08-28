@@ -247,6 +247,10 @@ public class PopupView extends LinearLayout {
     			photo_modes.add( getResources().getString(R.string.photo_mode_expo_bracketing) );
     			photo_mode_values.add( MyApplicationInterface.PhotoMode.ExpoBracketing );
     		}
+    		if( main_activity.supportsNoiseReduction() ) {
+				photo_modes.add(getResources().getString(R.string.photo_mode_noise_reduction));
+				photo_mode_values.add(MyApplicationInterface.PhotoMode.NoiseReduction);
+			}
     		if( photo_modes.size() > 1 ) {
     			MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
     			String current_mode = null;
@@ -302,6 +306,9 @@ public class PopupView extends LinearLayout {
     						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
         						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_expo_bracketing");
     						}
+							else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
+								editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_noise_reduction");
+							}
     						else {
                 				if( MyDebug.LOG )
                 					Log.e(TAG, "unknown new_photo_mode: " + new_photo_mode);

@@ -285,7 +285,7 @@ public class HDRProcessor {
 	 *                      called to indicate the sort order when this is known.
 	 * @param hdr_alpha     A value from 0.0f to 1.0f indicating the "strength" of the HDR effect. Specifically,
 	 *                      this controls the level of the local contrast enhancement done in adjustHistogram().
-	 * @param n_tiles       A value of 1 or greater indicating how local the contrast enhancemnt algorithm should be.
+	 * @param n_tiles       A value of 1 or greater indicating how local the contrast enhancement algorithm should be.
 	 * @param tonemapping_algorithm
 	 *                      Algorithm to use for tonemapping (if multiple images are received).
 	 */
@@ -500,7 +500,7 @@ public class HDRProcessor {
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
-		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, assume_sorted, sort_cb, time_s);
+		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, 1, assume_sorted, sort_cb, false, time_s);
 		int median_brightness = brightnessDetails.median_brightness;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
@@ -825,6 +825,227 @@ public class HDRProcessor {
 		}
 	}
 
+	/** Combines two images by averaging them. Each pixel of bitmap_avg is modified to contain:
+	 *      (avg_factor * bitmap_avg + bitmap_new)/(avg_factor+1)
+	 *  A simple average is therefore obtained by calling this function with avg_factor = 1.0f.
+	 *  For averaging multiple images, call this function repeatedly, with avg_factor increasing by
+	 *  1.0 each time.
+	 *  The reason we do it this way (rather than just receiving a list of bitmaps) is so that we
+	 *  can average multiple images without having to keep them all in memory simultaneously.
+	 * @param bitmap_avg     One of the input images; the result is written to this bitmap.
+	 * @param bitmap_new     The other input image.
+	 * @param avg_factor     The weighting factor for bitmap_avg.
+	 * @param release_bitmap If true, bitmap_new will be recycled.
+	 * @param hdr_alpha      A value from 0.0f to 1.0f indicating the "strength" of the local
+	 *                       contrast enhancement done in adjustHistogram().
+	 * @param n_tiles        A value of 1 or greater indicating how local the contrast enhancement
+	 *                       algorithm should be.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	public void processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, boolean release_bitmap, float hdr_alpha, int n_tiles) throws HDRProcessorException {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "processAvg");
+			Log.d(TAG, "avg_factor: " + avg_factor);
+			Log.d(TAG, "hdr_alpha: " + hdr_alpha);
+		}
+		if( bitmap_avg.getWidth() != bitmap_new.getWidth() ||
+				bitmap_avg.getHeight() != bitmap_new.getHeight() ) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "bitmaps not of same resolution");
+				}
+				throw new HDRProcessorException(HDRProcessorException.UNEQUAL_SIZES);
+		}
+
+    	long time_s = System.currentTimeMillis();
+
+		int width = bitmap_avg.getWidth();
+		int height = bitmap_avg.getHeight();
+
+		initRenderscript();
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
+		// create allocations
+		Allocation allocation_avg = Allocation.createFromBitmap(rs, bitmap_avg);
+		Allocation allocation_new = Allocation.createFromBitmap(rs, bitmap_new);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+
+		{
+			// perform auto-alignment
+			List<Bitmap> bitmaps = new ArrayList<>();
+			bitmaps.add(bitmap_avg);
+			bitmaps.add(bitmap_new);
+			Allocation [] allocations = new Allocation[2];
+			allocations[0] = allocation_avg;
+			allocations[1] = allocation_new;
+			BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, 0, true, null, true, time_s);
+			int median_brightness = brightnessDetails.median_brightness;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "median_brightness: " + median_brightness);
+			}
+		}
+
+		// write new avg image
+
+		// create RenderScript
+		ScriptC_process_avg processAvgScript = new ScriptC_process_avg(rs);
+
+		// set allocations
+		processAvgScript.set_bitmap_new(allocation_new);
+
+		// set offsets
+		processAvgScript.set_offset_x_new(offsets_x[1]);
+		processAvgScript.set_offset_y_new(offsets_y[1]);
+
+		//hdr_alpha = 0.0f; // test
+
+		// set globals
+
+		processAvgScript.set_avg_factor(avg_factor);
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "call processAvgScript");
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time before processAvgScript: " + (System.currentTimeMillis() - time_s));
+		processAvgScript.forEach_avg(allocation_avg, allocation_avg);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after processAvgScript: " + (System.currentTimeMillis() - time_s));
+
+		if( release_bitmap ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "release bitmap");
+			bitmap_new.recycle();
+		}
+
+		if( hdr_alpha != 0.0f ) {
+			adjustHistogram(allocation_avg, allocation_avg, width, height, hdr_alpha, n_tiles, time_s);
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
+		}
+
+		allocation_avg.copyTo(bitmap_avg);
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time for processAvg: " + (System.currentTimeMillis() - time_s));
+	}
+
+	/** Combines multiple images by averaging them.
+	 * @param bitmaps Input bitmaps. The resultant bitmap will be stored as the first bitmap on exit,
+	 *                the other input bitmaps will be recycled.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	public void processAvgMulti(List<Bitmap> bitmaps, float hdr_alpha, int n_tiles) throws HDRProcessorException {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "processAvgMulti");
+			Log.d(TAG, "hdr_alpha: " + hdr_alpha);
+		}
+		int n_bitmaps = bitmaps.size();
+		if( n_bitmaps != 8 ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "n_bitmaps should be 8, not " + n_bitmaps);
+			throw new HDRProcessorException(HDRProcessorException.INVALID_N_IMAGES);
+		}
+		for(int i=1;i<n_bitmaps;i++) {
+			if( bitmaps.get(i).getWidth() != bitmaps.get(0).getWidth() ||
+				bitmaps.get(i).getHeight() != bitmaps.get(0).getHeight() ) {
+				if( MyDebug.LOG ) {
+					Log.e(TAG, "bitmaps not of same resolution");
+					for(int j=0;j<n_bitmaps;j++) {
+						Log.e(TAG, "bitmaps " + j + " : " + bitmaps.get(j).getWidth() + " x " + bitmaps.get(j).getHeight());
+					}
+				}
+				throw new HDRProcessorException(HDRProcessorException.UNEQUAL_SIZES);
+			}
+		}
+
+    	long time_s = System.currentTimeMillis();
+
+		int width = bitmaps.get(0).getWidth();
+		int height = bitmaps.get(0).getHeight();
+
+		initRenderscript();
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
+		// create allocations
+		Allocation allocation0 = Allocation.createFromBitmap(rs, bitmaps.get(0));
+		Allocation allocation1 = Allocation.createFromBitmap(rs, bitmaps.get(1));
+		Allocation allocation2 = Allocation.createFromBitmap(rs, bitmaps.get(2));
+		Allocation allocation3 = Allocation.createFromBitmap(rs, bitmaps.get(3));
+		Allocation allocation4 = Allocation.createFromBitmap(rs, bitmaps.get(4));
+		Allocation allocation5 = Allocation.createFromBitmap(rs, bitmaps.get(5));
+		Allocation allocation6 = Allocation.createFromBitmap(rs, bitmaps.get(6));
+		Allocation allocation7 = Allocation.createFromBitmap(rs, bitmaps.get(7));
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+
+		// perform auto-alignment
+		/*for(int i=1;i<bitmaps.size();i++) {
+		{
+			List<Bitmap> bitmaps2 = new ArrayList<>();
+			bitmaps2.add(bitmaps.get(0));
+			bitmaps2.add(bitmap.get(i));
+			Allocation [] allocations = new Allocation[2];
+			allocations[0] = allocation_avg;
+			allocations[1] = allocation_new;
+			BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, 0, true, null, true, time_s);
+			int median_brightness = brightnessDetails.median_brightness;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
+				Log.d(TAG, "median_brightness: " + median_brightness);
+			}
+		}*/
+
+		// write new avg image
+
+		// create RenderScript
+		ScriptC_process_avg processAvgScript = new ScriptC_process_avg(rs);
+
+		// set allocations
+		processAvgScript.set_bitmap1(allocation1);
+		processAvgScript.set_bitmap2(allocation2);
+		processAvgScript.set_bitmap3(allocation3);
+		processAvgScript.set_bitmap4(allocation4);
+		processAvgScript.set_bitmap5(allocation5);
+		processAvgScript.set_bitmap6(allocation6);
+		processAvgScript.set_bitmap7(allocation7);
+
+		// set offsets
+		//processAvgScript.set_offset_x_new(offsets_x[1]);
+		//processAvgScript.set_offset_y_new(offsets_y[1]);
+
+		//hdr_alpha = 0.0f; // test
+
+		// set globals
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "call processAvgScript");
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time before processAvgScript: " + (System.currentTimeMillis() - time_s));
+		processAvgScript.forEach_avg_multi(allocation0, allocation0);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after processAvgScript: " + (System.currentTimeMillis() - time_s));
+
+		{
+			if( MyDebug.LOG )
+				Log.d(TAG, "release bitmaps");
+			for(int i=1;i<bitmaps.size();i++) {
+				bitmaps.get(i).recycle();
+			}
+		}
+
+		if( hdr_alpha != 0.0f ) {
+			adjustHistogram(allocation0, allocation0, width, height, hdr_alpha, n_tiles, time_s);
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
+		}
+
+		allocation0.copyTo(bitmaps.get(0));
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time for processAvgMulti: " + (System.currentTimeMillis() - time_s));
+	}
+
 	static class BrightnessDetails {
 		final int median_brightness; // median brightness value of the median image
 
@@ -834,12 +1055,25 @@ public class HDRProcessor {
 	}
 
 	/**
-	 * If assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
+	 *
+	 * @param base_bitmap   Index of bitmap in bitmaps that should be kept fixed; the other bitmaps
+	 *                      will be aligned relative to this.
+	 * @param assume_sorted If assume_sorted if false, this function will also sort the allocations
+	 *                      and bitmaps from darkest to brightest.
+	 * @param allow_noisy   If false, then don't auto-align for an image where things are too noisy
+	 *                      to safely compute the auto-alignment.
      */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, boolean assume_sorted, SortCallback sort_cb, long time_s) {
+	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean assume_sorted, SortCallback sort_cb, boolean allow_noisy, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoAlignment");
+
+		// initialise
+		for(int i=0;i<offsets_x.length;i++) {
+			offsets_x[i] = 0;
+			offsets_y[i] = 0;
+		}
+
 		Allocation [] mtb_allocations = new Allocation[allocations.length];
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating mtb_allocations: " + (System.currentTimeMillis() - time_s));
@@ -917,7 +1151,7 @@ public class HDRProcessor {
 				sort_cb.sortOrder(sort_order);
 			}
 		}
-		int median_brightness = luminanceInfos[1].median_value;
+		int median_brightness = luminanceInfos[base_bitmap].median_value;
 		if( MyDebug.LOG )
 			Log.d(TAG, "median_brightness: " + median_brightness);
 
@@ -933,7 +1167,7 @@ public class HDRProcessor {
 				mtb_allocations[i] = null;
 				continue;
 			}*/
-			if( luminanceInfos[i].noisy ) {
+			if( !allow_noisy && luminanceInfos[i].noisy ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "unable to compute median luminance safely");
 				mtb_allocations[i] = null;
@@ -957,6 +1191,7 @@ public class HDRProcessor {
 			launch_options.setX(mtb_x, mtb_x+mtb_width);
 			launch_options.setY(mtb_y, mtb_y+mtb_height);
 			createMTBScript.forEach_create_mtb(allocations[i], launch_options);
+			//createMTBScript.forEach_create_greyscale(allocations[i], launch_options);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after createMTBScript: " + (System.currentTimeMillis() - time_s));
 
@@ -982,7 +1217,6 @@ public class HDRProcessor {
 					e.printStackTrace();
 				}
 				mtb_bitmap.recycle();
-				mtb_bitmap = null;
 			}*/
 		}
 		if( MyDebug.LOG )
@@ -1008,9 +1242,9 @@ public class HDRProcessor {
 			Log.d(TAG, "initial_step_size: " + initial_step_size);
 		}
 
-		if( mtb_allocations[1] == null ) {
+		if( mtb_allocations[base_bitmap] == null ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "middle image not suitable for image alignment");
+				Log.d(TAG, "base image not suitable for image alignment");
 			return new BrightnessDetails(median_brightness);
 		}
 
@@ -1018,11 +1252,11 @@ public class HDRProcessor {
 		ScriptC_align_mtb alignMTBScript = new ScriptC_align_mtb(rs);
 
 		// set parameters
-		alignMTBScript.set_bitmap0(mtb_allocations[1]);
+		alignMTBScript.set_bitmap0(mtb_allocations[base_bitmap]);
 		// bitmap1 set below
 
-		for(int i=0;i<3;i++)  {
-			if( i == 1 ) {
+		for(int i=0;i<bitmaps.size();i++)  {
+			if( i == base_bitmap ) {
 				// don't need to align the "base" reference image
 				continue;
 			}
@@ -1042,6 +1276,7 @@ public class HDRProcessor {
 				alignMTBScript.set_step_size( step_size );
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "call alignMTBScript for image: " + i);
+					Log.d(TAG, "    versus base image: " + base_bitmap);
 					Log.d(TAG, "step_size: " + step_size);
 				}
 				Allocation errorsAllocation = Allocation.createSized(rs, Element.I32(rs), 9);
@@ -1060,8 +1295,8 @@ public class HDRProcessor {
 				//launch_options.setY((int)(stop_y*0.25), (int)(stop_y*0.75));
 				launch_options.setX(0, stop_x);
 				launch_options.setY(0, stop_y);
-				//alignMTBScript.forEach_align_mtb(mtb_allocations[1]);
-				alignMTBScript.forEach_align_mtb(mtb_allocations[1], launch_options);
+				//alignMTBScript.forEach_align_mtb(mtb_allocations[base_bitmap]);
+				alignMTBScript.forEach_align_mtb(mtb_allocations[base_bitmap], launch_options);
 				if( MyDebug.LOG )
 					Log.d(TAG, "time after alignMTBScript: " + (System.currentTimeMillis() - time_s));
 
@@ -1099,7 +1334,7 @@ public class HDRProcessor {
 			}
 		}
 
-		/*for(int i=0;i<3;i++) {
+		/*for(int i=0;i<bitmaps.size();i++) {
 			offsets_x[i] = 0;
 			offsets_y[i] = 0;
 		}*/
@@ -1468,4 +1703,78 @@ public class HDRProcessor {
 		histogramAllocation.copyTo(histogram);
 		return histogram;
 	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	public void avgBrighten(Bitmap bitmap) {
+        initRenderscript();
+
+		int[] histo = computeHistogram(bitmap, false);
+		int total = 0;
+		for(int value : histo)
+			total += value;
+		int middle = total / 2;
+		int count = 0;
+		int median_brightness = -1;
+		int max_brightness = 0;
+		for(int i = 0; i < histo.length; i++) {
+			count += histo[i];
+			if( count >= middle && median_brightness == -1 ) {
+				median_brightness = i;
+			}
+			if( histo[i] > 0 ) {
+				max_brightness = i;
+			}
+		}
+		if( median_brightness <= 0 )
+			median_brightness = 1;
+		int median_target = Math.min(127, 2*median_brightness);
+		//int median_target = Math.min(127, 4*median_brightness);
+		int max_target = Math.min(255, (int)((max_brightness*median_target)/(float)median_brightness + 0.5f) );
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "median brightness " + median_brightness);
+			Log.d(TAG, "max brightness " + max_brightness);
+			Log.d(TAG, "median target " + median_target);
+			Log.d(TAG, "max target " + max_target);
+		}
+		//float gamma = (float)(Math.log(median_target/255.0f) / Math.log(median_brightness/255.0f));
+		//float gain = median_target / (float)median_brightness;
+		/*float gamma = (float)(Math.log(max_target/(float)median_target) / Math.log(max_brightness/(float)median_brightness));
+		float gain = median_target / ((float)Math.pow(median_brightness/255.0f, gamma) * 255.0f);
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "gamma " + gamma);
+			Log.d(TAG, "gain " + gain);
+			Log.d(TAG, "gain2 " + max_target / ((float)Math.pow(max_brightness/255.0f, gamma) * 255.0f));
+		}*/
+		float gain = median_target / (float)median_brightness;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "gain " + gain);
+		}
+
+        Allocation input = Allocation.createFromBitmap(rs, bitmap);
+		ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
+		script.invoke_setBlackLevel(8.0f);
+		//script.set_gamma(gamma);
+		script.set_gain(gain);
+
+		float tonemap_scale_c = 255.0f;
+		if( MyDebug.LOG )
+			Log.d(TAG, "tonemap_scale_c: " + tonemap_scale_c);
+		script.set_tonemap_scale(tonemap_scale_c);
+
+		float max_possible_value = gain*max_brightness;
+		if( MyDebug.LOG )
+			Log.d(TAG, "max_possible_value: " + max_possible_value);
+		if( max_possible_value < 255.0f ) {
+			max_possible_value = 255.0f; // don't make dark images too bright
+			if( MyDebug.LOG )
+				Log.d(TAG, "clamp max_possible_value to: " + max_possible_value);
+		}
+		float linear_scale = (max_possible_value + tonemap_scale_c) / max_possible_value;
+		if( MyDebug.LOG )
+			Log.d(TAG, "linear_scale: " + linear_scale);
+		script.set_linear_scale(linear_scale);
+
+        script.forEach_avg_brighten(input, input);
+        input.copyTo(bitmap);
+    }
 }

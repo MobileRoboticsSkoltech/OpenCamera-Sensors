@@ -71,12 +71,17 @@ public class ImageSaver extends Thread {
 			DUMMY
 		}
 		Type type = Type.JPEG;
-		final boolean is_hdr; // for jpeg
-		final boolean save_expo; // for is_hdr
+		enum ProcessType {
+			NORMAL,
+			HDR,
+			AVERAGE
+		}
+		final ProcessType process_type; // for jpeg
+		final boolean save_expo; // for process_type HDR
 		/* jpeg_images: for jpeg (may be null otherwise).
-		 * If is_hdr==true, this should be 1 or 3 images, and the images are combined/converted to a HDR image (if there's only 1
+		 * If process_type==HDR, this should be 1 or 3 images, and the images are combined/converted to a HDR image (if there's only 1
 		 * image, this uses fake HDR or "DRO").
-		 * If is_hdr==false, then multiple images are saved sequentially.
+		 * If process_type==NORMAL, then multiple images are saved sequentially.
 		 */
 		final List<byte []> jpeg_images;
 		final DngCreator dngCreator; // for raw
@@ -105,7 +110,7 @@ public class ImageSaver extends Thread {
 		int sample_factor = 1; // sampling factor for thumbnail, higher means lower quality
 		
 		Request(Type type,
-			boolean is_hdr,
+			ProcessType process_type,
 			boolean save_expo,
 			List<byte []> jpeg_images,
 			DngCreator dngCreator, Image image,
@@ -119,7 +124,7 @@ public class ImageSaver extends Thread {
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
 			int sample_factor) {
 			this.type = type;
-			this.is_hdr = is_hdr;
+			this.process_type = process_type;
 			this.save_expo = save_expo;
 			this.jpeg_images = jpeg_images;
 			this.dngCreator = dngCreator;
@@ -296,6 +301,61 @@ public class ImageSaver extends Thread {
 				1);
 	}
 
+	privateRequest pending_image_average_request = null;
+
+	void startImageAverage(boolean do_in_background,
+			boolean image_capture_intent, Uri image_capture_intent_uri,
+			boolean using_camera2, int image_quality,
+			boolean do_auto_stabilise, double level_angle,
+			boolean is_front_facing,
+			boolean mirror,
+			Date current_date,
+			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
+			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+			int sample_factor) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "startImageAverage");
+			Log.d(TAG, "do_in_background? " + do_in_background);
+		}
+		pending_image_average_request = new Request(Request.Type.JPEG,
+				Request.ProcessType.AVERAGE,
+				false,
+				new ArrayList<byte[]>(),
+				null, null,
+				image_capture_intent, image_capture_intent_uri,
+				using_camera2, image_quality,
+				do_auto_stabilise, level_angle,
+				is_front_facing,
+				mirror,
+				current_date,
+				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+				store_location, location, store_geo_direction, geo_direction,
+				sample_factor);
+	}
+
+	void addImageAverage(byte [] image) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "addImageAverage");
+		if( pending_image_average_request == null ) {
+			Log.e(TAG, "addImageAverage called but no pending_image_average_request");
+			return;
+		}
+		pending_image_average_request.jpeg_images.add(image);
+		if( MyDebug.LOG )
+			Log.d(TAG, "image average request images: " + pending_image_average_request.jpeg_images.size());
+	}
+
+	void finishImageAverage() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "finishImageAverage");
+		if( pending_image_average_request == null ) {
+			Log.e(TAG, "finishImageAverage called but no pending_image_average_request");
+			return;
+		}
+		addRequest(pending_image_average_request);
+		pending_image_average_request = null;
+	}
+
 	/** Internal saveImage method to handle both JPEG and RAW.
 	 */
 	private boolean saveImage(boolean do_in_background,
@@ -322,7 +382,7 @@ public class ImageSaver extends Thread {
 		//do_in_background = false;
 		
 		Request request = new Request(is_raw ? Request.Type.RAW : Request.Type.JPEG,
-				is_hdr,
+				is_hdr ? Request.ProcessType.HDR : Request.ProcessType.NORMAL,
 				save_expo,
 				jpeg_images,
 				dngCreator, image,
@@ -340,13 +400,13 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
 			addRequest(request);
-			if( ( request.is_hdr && request.jpeg_images.size() > 1 ) || ( !is_raw && request.jpeg_images.size() > 1 ) ) {
+			if( ( request.process_type == Request.ProcessType.HDR && request.jpeg_images.size() > 1 ) || ( !is_raw && request.jpeg_images.size() > 1 ) ) {
 				// For (multi-image) HDR, we also add a dummy request, effectively giving it a cost of 2 - to reflect the fact that HDR is more memory intensive
 				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
 				// of 2, due to RAW and JPEG each needing their own request).
 				// Similarly for saving multiple images (expo-bracketing)
 				Request dummy_request = new Request(Request.Type.DUMMY,
-					false,
+					Request.ProcessType.NORMAL,
 					false,
 					null,
 					null, null,
@@ -585,7 +645,58 @@ public class ImageSaver extends Thread {
 		}
 
 		boolean success;
-		if( request.is_hdr ) {
+		if( request.process_type == Request.ProcessType.AVERAGE ) {
+			if (MyDebug.LOG)
+				Log.d(TAG, "average");
+
+			main_activity.savingImage(true);
+
+			/*List<Bitmap> bitmaps = loadBitmaps(request.jpeg_images, 0);
+			if (bitmaps == null) {
+				if (MyDebug.LOG)
+					Log.e(TAG, "failed to load bitmaps");
+				main_activity.savingImage(false);
+				return false;
+			}*/
+			Bitmap nr_bitmap = loadBitmap(request.jpeg_images.get(0), true);
+
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+				try {
+					for(int i = 1; i < request.jpeg_images.size(); i++) {
+						Log.d(TAG, "processAvg for image: " + i);
+						Bitmap new_bitmap = loadBitmap(request.jpeg_images.get(i), false);
+						float avg_factor = (float) i;
+						hdrProcessor.processAvg(nr_bitmap, new_bitmap, avg_factor, true, 0.0f, 4);
+						// processAvg recycles new_bitmap
+					}
+					//hdrProcessor.processAvgMulti(bitmaps, hdr_strength, 4);
+					hdrProcessor.avgBrighten(nr_bitmap);
+				}
+				catch(HDRProcessorException e) {
+					e.printStackTrace();
+					throw new RuntimeException();
+				}
+			}
+			else {
+				Log.e(TAG, "shouldn't have offered NoiseReduction as an option if not on Android 5");
+				throw new RuntimeException();
+			}
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "nr_bitmap: " + nr_bitmap + " is mutable? " + nr_bitmap.isMutable());
+	        System.gc();
+			main_activity.savingImage(false);
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "save HDR image");
+			String suffix = "_NR";
+			success = saveSingleImageNow(request, request.jpeg_images.get(0), nr_bitmap, suffix, true, true);
+			if( MyDebug.LOG && !success )
+				Log.e(TAG, "saveSingleImageNow failed for nr image");
+			nr_bitmap.recycle();
+	        System.gc();
+		}
+		else if( request.process_type == Request.ProcessType.HDR ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "hdr");
 			if( request.jpeg_images.size() != 1 && request.jpeg_images.size() != 3 ) {
@@ -631,6 +742,7 @@ public class ImageSaver extends Thread {
 			if( bitmaps == null ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "failed to load bitmaps");
+				main_activity.savingImage(false);
 		        return false;
 			}
     		if( MyDebug.LOG ) {
