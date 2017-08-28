@@ -301,7 +301,7 @@ public class ImageSaver extends Thread {
 				1);
 	}
 
-	privateRequest pending_image_average_request = null;
+	private Request pending_image_average_request = null;
 
 	void startImageAverage(boolean do_in_background,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
