@@ -58,7 +58,8 @@ public class MyApplicationInterface implements ApplicationInterface {
     	Standard,
 		DRO, // single image "fake" HDR
     	HDR, // HDR created from multiple (expo bracketing) images
-    	ExpoBracketing // take multiple expo bracketed images, without combining to a single image
+    	ExpoBracketing, // take multiple expo bracketed images, without combining to a single image
+		NoiseReduction
     }
     
 	private final MainActivity main_activity;
@@ -404,6 +405,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		PhotoMode photo_mode = getPhotoMode();
 		if( photo_mode == PhotoMode.DRO )
 			return 100;
+		else if( photo_mode == PhotoMode.NoiseReduction )
+			return 100;
 		return getSaveImageQualityPref();
     }
     
@@ -721,7 +724,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getString(PreferenceKeys.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
     }
 
-    public boolean getAutoStabilisePref() {
+    private boolean getAutoStabilisePref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return getAutoStabilisePref(sharedPreferences);
     }
@@ -733,7 +736,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return false;
     }
 
-    public String getStampPref() {
+    private String getStampPref() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return getStampPref(sharedPreferences);
     }
@@ -818,6 +821,14 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
     @Override
+    public boolean isCameraBurstPref() {
+    	PhotoMode photo_mode = getPhotoMode();
+    	if( photo_mode == PhotoMode.NoiseReduction )
+			return true;
+		return false;
+	}
+
+    @Override
     public int getExpoBracketingNImagesPref() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getExpoBracketingNImagesPref");
@@ -887,6 +898,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		boolean expo_bracketing = photo_mode_pref.equals("preference_photo_mode_expo_bracketing");
 		if( expo_bracketing && main_activity.supportsExpoBracketing() )
 			return PhotoMode.ExpoBracketing;
+		boolean noise_reduction = photo_mode_pref.equals("preference_photo_mode_noise_reduction");
+		if( noise_reduction && main_activity.supportsNoiseReduction() )
+			return PhotoMode.NoiseReduction;
 		return PhotoMode.Standard;
     }
 
@@ -1446,10 +1460,13 @@ public class MyApplicationInterface implements ApplicationInterface {
     	drawPreview.turnFrontScreenFlashOn();
     }
 
+    private int n_capture_images = 0; // how many calls to onPictureTaken() since the last call to onCaptureStarted()
+
 	@Override
 	public void onCaptureStarted() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCaptureStarted");
+		n_capture_images = 0;
 		drawPreview.onCaptureStarted();
 	}
 
@@ -1865,16 +1882,38 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "sample_factor: " + sample_factor);
 
-		boolean success = imageSaver.saveImageJpeg(do_in_background, is_hdr, save_expo, images,
-				image_capture_intent, image_capture_intent_uri,
-				using_camera2, image_quality,
-				do_auto_stabilise, level_angle,
-				is_front_facing,
-				mirror,
-				current_date,
-				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
-				store_location, location, store_geo_direction, geo_direction,
-				sample_factor);
+		boolean success = false;
+		PhotoMode photo_mode = getPhotoMode();
+		if( photo_mode == PhotoMode.NoiseReduction ) {
+			if( n_capture_images == 1 ) {
+				imageSaver.startImageAverage(true,
+					image_capture_intent, image_capture_intent_uri,
+					using_camera2, image_quality,
+					do_auto_stabilise, level_angle,
+					is_front_facing,
+					mirror,
+					current_date,
+					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+					store_location, location, store_geo_direction, geo_direction,
+					sample_factor);
+			}
+			imageSaver.addImageAverage(images.get(0));
+			if( n_capture_images == 8 ) {
+				imageSaver.finishImageAverage();
+			}
+		}
+		else {
+			success = imageSaver.saveImageJpeg(do_in_background, is_hdr, save_expo, images,
+					image_capture_intent, image_capture_intent_uri,
+					using_camera2, image_quality,
+					do_auto_stabilise, level_angle,
+					is_front_facing,
+					mirror,
+					current_date,
+					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
+					store_location, location, store_geo_direction, geo_direction,
+					sample_factor);
+		}
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "saveImage complete, success: " + success);
@@ -1887,6 +1926,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken");
 
+		n_capture_images++;
+		if( MyDebug.LOG )
+			Log.d(TAG, "n_capture_images is now " + n_capture_images);
+
 		List<byte []> images = new ArrayList<>();
 		images.add(data);
 
@@ -1898,7 +1941,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			is_hdr = true;
 		}
 		boolean success = saveImage(is_hdr, false, images, current_date);
-        
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureTaken complete, success: " + success);
 		

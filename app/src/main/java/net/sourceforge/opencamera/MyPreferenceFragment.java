@@ -199,20 +199,40 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			Log.d(TAG, "max_expo_bracketing_n_images: " + max_expo_bracketing_n_images);
 
 		final boolean supports_exposure_compensation = bundle.getBoolean("supports_exposure_compensation");
-		if( MyDebug.LOG )
+		final int exposure_compensation_min = bundle.getInt("exposure_compensation_min");
+		final int exposure_compensation_max = bundle.getInt("exposure_compensation_max");
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "supports_exposure_compensation: " + supports_exposure_compensation);
+			Log.d(TAG, "exposure_compensation_min: " + exposure_compensation_min);
+			Log.d(TAG, "exposure_compensation_max: " + exposure_compensation_max);
+		}
 
 		final boolean supports_iso_range = bundle.getBoolean("supports_iso_range");
-		if( MyDebug.LOG )
+		final int iso_range_min = bundle.getInt("iso_range_min");
+		final int iso_range_max = bundle.getInt("iso_range_max");
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "supports_iso_range: " + supports_iso_range);
+			Log.d(TAG, "iso_range_min: " + iso_range_min);
+			Log.d(TAG, "iso_range_max: " + iso_range_max);
+		}
 
 		final boolean supports_exposure_time = bundle.getBoolean("supports_exposure_time");
-		if( MyDebug.LOG )
+		final long exposure_time_min = bundle.getLong("exposure_time_min");
+		final long exposure_time_max = bundle.getLong("exposure_time_max");
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "supports_exposure_time: " + supports_exposure_time);
+			Log.d(TAG, "exposure_time_min: " + exposure_time_min);
+			Log.d(TAG, "exposure_time_max: " + exposure_time_max);
+		}
 
 		final boolean supports_white_balance_temperature = bundle.getBoolean("supports_white_balance_temperature");
-		if( MyDebug.LOG )
+		final int white_balance_temperature_min = bundle.getInt("white_balance_temperature_min");
+		final int white_balance_temperature_max = bundle.getInt("white_balance_temperature_max");
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "supports_white_balance_temperature: " + supports_white_balance_temperature);
+			Log.d(TAG, "white_balance_temperature_min: " + white_balance_temperature_min);
+			Log.d(TAG, "white_balance_temperature_max: " + white_balance_temperature_max);
+		}
 
 		if( !supports_expo_bracketing || max_expo_bracketing_n_images <= 3 ) {
 			Preference pref = findPreference("preference_expo_bracketing_n_images");
@@ -643,12 +663,36 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append(getString(supports_expo_bracketing ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nExpo compensation?: ");
                         about_string.append(getString(supports_exposure_compensation ? R.string.about_available : R.string.about_not_available));
+						if( supports_exposure_compensation ) {
+	                        about_string.append("\nExposure compensation range: ");
+	                        about_string.append(exposure_compensation_min);
+	                        about_string.append(" to ");
+	                        about_string.append(exposure_compensation_max);
+						}
                         about_string.append("\nManual ISO?: ");
                         about_string.append(getString(supports_iso_range ? R.string.about_available : R.string.about_not_available));
+						if( supports_iso_range ) {
+	                        about_string.append("\nISO range: ");
+	                        about_string.append(iso_range_min);
+	                        about_string.append(" to ");
+	                        about_string.append(iso_range_max);
+						}
                         about_string.append("\nManual exposure?: ");
                         about_string.append(getString(supports_exposure_time ? R.string.about_available : R.string.about_not_available));
+						if( supports_exposure_time ) {
+	                        about_string.append("\nExposure range: ");
+	                        about_string.append(exposure_time_min);
+	                        about_string.append(" to ");
+	                        about_string.append(exposure_time_max);
+						}
                         about_string.append("\nManual WB?: ");
                         about_string.append(getString(supports_white_balance_temperature ? R.string.about_available : R.string.about_not_available));
+						if( supports_white_balance_temperature ) {
+	                        about_string.append("\nWB temperature: ");
+	                        about_string.append(white_balance_temperature_min);
+	                        about_string.append(" to ");
+	                        about_string.append(white_balance_temperature_max);
+						}
                         about_string.append("\nVideo stabilization?: ");
                         about_string.append(getString(supports_video_stabilization ? R.string.about_available : R.string.about_not_available));
 						about_string.append("\nCan disable shutter sound?: ");

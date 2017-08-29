@@ -587,8 +587,6 @@ public class StorageUtils {
 		}
     	Media media = null;
 		Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-		//Uri query = baseUri.buildUpon().appendQueryParameter("limit", "1").build();
-		Uri query = baseUri;
 		final int column_id_c = 0;
 		final int column_date_taken_c = 1;
 		final int column_data_c = 2;
@@ -598,7 +596,7 @@ public class StorageUtils {
 		String order = video ? VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC" : ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
 		Cursor cursor = null;
 		try {
-			cursor = context.getContentResolver().query(query, projection, selection, null, order);
+			cursor = context.getContentResolver().query(baseUri, projection, selection, null, order);
 			if( cursor != null && cursor.moveToFirst() ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "found: " + cursor.getCount());

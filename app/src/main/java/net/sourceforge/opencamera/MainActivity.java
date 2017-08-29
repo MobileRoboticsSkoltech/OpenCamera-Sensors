@@ -92,6 +92,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private MyApplicationInterface applicationInterface;
 	private Preview preview;
 	private OrientationEventListener orientationEventListener;
+	private int large_heap_memory;
 	private boolean supports_auto_stabilise;
 	private boolean supports_force_video_4k;
 	private boolean supports_camera2;
@@ -167,8 +168,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "standard max memory = " + activityManager.getMemoryClass() + "MB");
 			Log.d(TAG, "large max memory = " + activityManager.getLargeMemoryClass() + "MB");
 		}
-		//if( activityManager.getMemoryClass() >= 128 ) { // test
-		if( activityManager.getLargeMemoryClass() >= 128 ) {
+		large_heap_memory = activityManager.getLargeMemoryClass();
+		if( large_heap_memory >= 128 ) {
 			supports_auto_stabilise = true;
 		}
 		if( MyDebug.LOG )
@@ -1054,7 +1055,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		mainUI.togglePopupSettings();
     }
 
-    private PreferencesListener preferencesListener = new PreferencesListener();
+    private final PreferencesListener preferencesListener = new PreferencesListener();
 
 	/** Keeps track of changes to SharedPreferences.
 	 */
@@ -1150,7 +1151,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		boolean anyChanges() {
 			return any;
 		}
-	};
+	}
     
     public void openSettings() {
 		if( MyDebug.LOG )
@@ -1175,9 +1176,17 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putBoolean("supports_expo_bracketing", this.supportsExpoBracketing());
 		bundle.putInt("max_expo_bracketing_n_images", this.maxExpoBracketingNImages());
 		bundle.putBoolean("supports_exposure_compensation", this.preview.supportsExposures());
+		bundle.putInt("exposure_compensation_min", this.preview.getMinimumExposure());
+		bundle.putInt("exposure_compensation_max", this.preview.getMaximumExposure());
 		bundle.putBoolean("supports_iso_range", this.preview.supportsISORange());
+		bundle.putInt("iso_range_min", this.preview.getMinimumISO());
+		bundle.putInt("iso_range_max", this.preview.getMaximumISO());
 		bundle.putBoolean("supports_exposure_time", this.preview.supportsExposureTime());
+		bundle.putLong("exposure_time_min", this.preview.getMinimumExposureTime());
+		bundle.putLong("exposure_time_max", this.preview.getMaximumExposureTime());
 		bundle.putBoolean("supports_white_balance_temperature", this.preview.supportsWhiteBalanceTemperature());
+		bundle.putInt("white_balance_temperature_min", this.preview.getMinimumWhiteBalanceTemperature());
+		bundle.putInt("white_balance_temperature_max", this.preview.getMaximumWhiteBalanceTemperature());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
 		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
 
@@ -2616,6 +2625,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public boolean supportsExpoBracketing() {
 		return preview.supportsExpoBracketing();
     }
+
+    public boolean supportsNoiseReduction() {
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsExpoBracketing() );
+	}
     
     private int maxExpoBracketingNImages() {
 		return preview.maxExpoBracketingNImages();
