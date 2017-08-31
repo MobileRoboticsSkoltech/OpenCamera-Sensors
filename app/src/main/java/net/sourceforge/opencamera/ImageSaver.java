@@ -890,9 +890,15 @@ public class ImageSaver extends Thread {
 			float rotated_size = (float)(w0*h0);
 			float scale = (float)Math.sqrt(orig_size/rotated_size);
 			if( main_activity.test_low_memory ) {
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "TESTING LOW MEMORY");
-				scale *= 2.0f; // test 20MP on Galaxy Nexus or Nexus 7; 52MP on Nexus 6
+					Log.d(TAG, "scale was: " + scale);
+				}
+				// test 20MP on Galaxy Nexus or Nexus 7; 29.25MP on Nexus 6 and OnePlus 3T
+				if( width*height >= 7500 )
+					scale *= 1.5f;
+				else
+					scale *= 2.0f;
 			}
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "w0 = " + w0 + " , h0 = " + h0);
