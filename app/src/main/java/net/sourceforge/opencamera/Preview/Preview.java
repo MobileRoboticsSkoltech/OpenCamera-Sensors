@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -117,6 +118,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	private CameraOpenState camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
 	private AsyncTask<Void, Void, CameraController> open_camera_task; // background task used for opening camera
+	private CloseCameraTask close_camera_task; // background task used for closing camera
 	private boolean has_permissions = true; // whether we have permissions necessary to operate the camera (camera, storage); assume true until we've been denied one of them
 	private boolean is_video;
 	private volatile MediaRecorder video_recorder; // must be volatile for test project reading the state
@@ -642,11 +644,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
     
     private void mySurfaceCreated() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "mySurfaceCreated");
 		this.has_surface = true;
 		this.openCamera();
     }
     
     private void mySurfaceDestroyed() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "mySurfaceDestroyed");
 		this.has_surface = false;
 		this.closeCamera(false, null);
     }
@@ -949,10 +955,64 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		void onClosed();
 	}
 
+	private class CloseCameraTask extends AsyncTask<Void, Void, Void> {
+		private static final String TAG = "CloseCameraTask";
+
+		boolean reopen; // if set to true, reopen the camera once closed
+
+		final CameraController camera_controller_local;
+		final CloseCameraCallback closeCameraCallback;
+
+		CloseCameraTask(CameraController camera_controller_local, CloseCameraCallback closeCameraCallback) {
+			this.camera_controller_local = camera_controller_local;
+			this.closeCameraCallback = closeCameraCallback;
+		}
+
+		@Override
+		protected Void doInBackground(Void... voids) {
+			long debug_time = 0;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "doInBackground, async task: " + this);
+				debug_time = System.currentTimeMillis();
+			}
+			camera_controller_local.stopPreview();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "time to stop preview: " + (System.currentTimeMillis() - debug_time));
+			}
+			camera_controller_local.release();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "time to release camera controller: " + (System.currentTimeMillis() - debug_time));
+			}
+			return null;
+		}
+
+		/** The system calls this to perform work in the UI thread and delivers
+		 * the result from doInBackground() */
+		protected void onPostExecute(Void result) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "onPostExecute, async task: " + this);
+			camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
+			close_camera_task = null; // just to be safe
+			if( closeCameraCallback != null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onPostExecute, calling closeCameraCallback.onClosed");
+				closeCameraCallback.onClosed();
+			}
+			if( reopen ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "onPostExecute, reopen camera");
+				openCamera();
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "onPostExecute done, async task: " + this);
+		}
+	}
+
 	private void closeCamera(boolean async, final CloseCameraCallback closeCameraCallback) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "closeCamera()");
+			Log.d(TAG, "async: " + async);
 			debug_time = System.currentTimeMillis();
 		}
 		removePendingContinuousFocusReset();
@@ -975,6 +1035,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		applicationInterface.cameraClosed();
 		cancelTimer();
 		if( camera_controller != null ) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "close camera_controller");
+			}
 			if( video_recorder != null ) {
 				stopVideo(false);
 			}
@@ -988,51 +1051,34 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "closeCamera: about to pause preview: " + (System.currentTimeMillis() - debug_time));
 				}
-				pausePreview();
+				pausePreview(false);
 				// we set camera_controller to null before starting background thread, so that other callers won't try
 				// to use it
 				final CameraController camera_controller_local = camera_controller;
 				camera_controller = null;
 				if( async ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "close camera on background async");
 					camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSING;
-					new AsyncTask<Void, Void, Void>() {
-						private static final String TAG = "Preview/closeCamera";
-
-						@Override
-						protected Void doInBackground(Void... voids) {
-							long debug_time = 0;
-							if( MyDebug.LOG ) {
-								Log.d(TAG, "doInBackground, async task: " + this);
-								debug_time = System.currentTimeMillis();
-							}
-							camera_controller_local.release();
-							if( MyDebug.LOG ) {
-								Log.d(TAG, "time to release camera controller: " + (System.currentTimeMillis() - debug_time));
-							}
-							return null;
-						}
-
-						/** The system calls this to perform work in the UI thread and delivers
-						 * the result from doInBackground() */
-						protected void onPostExecute(Void result) {
-							if( MyDebug.LOG )
-								Log.d(TAG, "onPostExecute, async task: " + this);
-							camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
-							if( closeCameraCallback != null ) {
-								closeCameraCallback.onClosed();
-							}
-							if( MyDebug.LOG )
-								Log.d(TAG, "onPostExecute done, async task: " + this);
-						}
-					}.execute();
+					close_camera_task = new CloseCameraTask(camera_controller_local, closeCameraCallback);
+					close_camera_task.execute();
 				}
 				else {
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "closeCamera: about to release camera controller: " + (System.currentTimeMillis() - debug_time));
 					}
+					camera_controller_local.stopPreview();
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "time to stop preview: " + (System.currentTimeMillis() - debug_time));
+					}
 					camera_controller_local.release();
 					camera_open_state = CameraOpenState.CAMERAOPENSTATE_CLOSED;
 				}
+			}
+		}
+		else {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "camera_controller isn't open");
 			}
 		}
 		if( MyDebug.LOG ) {
@@ -1057,8 +1103,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "cancelled camera timer");
 		}
 	}
-	
-	public void pausePreview() {
+
+	/**
+	 * @param stop_preview Whether to call camera_controller.stopPreview(). Normally this should be
+	 *                     true, but can be set to false if the callers is going to handle calling
+	 *                     that (e.g., on a background thread).
+	 */
+	public void pausePreview(boolean stop_preview) {
 		long debug_time = 0;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "pausePreview()");
@@ -1075,10 +1126,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// although I've now fixed this at the level where we close the settings, I've put this guard here, just in case the problem occurs from elsewhere
 		this.updateFocusForVideo();
 		this.setPreviewPaused(false);
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "pausePreview: about to stop preview: " + (System.currentTimeMillis() - debug_time));
+		if( stop_preview ) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "pausePreview: about to stop preview: " + (System.currentTimeMillis() - debug_time));
+			}
+			camera_controller.stopPreview();
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "pausePreview: time to stop preview: " + (System.currentTimeMillis() - debug_time));
+			}
 		}
-		camera_controller.stopPreview();
 		this.phase = PHASE_NORMAL;
 		this.is_preview_started = false;
 		if( MyDebug.LOG ) {
@@ -5458,7 +5514,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		return "None";
     	return camera_controller.getAPI();
     }
-    
+
     public void onResume() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onResume");
@@ -5466,7 +5522,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		cameraSurface.onResume();
 		if( canvasView != null )
 			canvasView.onResume();
-		this.openCamera();
+
+		if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_CLOSING ) {
+			// when pausing, we close the camera on a background thread - so if this is still happening when we resume,
+			// we won't be able to open the camera, so need to open camera when it's closed
+			if( MyDebug.LOG )
+				Log.d(TAG, "camera still closing");
+			if( close_camera_task != null ) { // just to be safe
+				close_camera_task.reopen = true;
+			}
+			else {
+				Log.e(TAG, "onResume: state is CAMERAOPENSTATE_CLOSING, but close_camera_task is null");
+			}
+		}
+		else {
+			this.openCamera();
+		}
     }
 
     public void onPause() {
@@ -5483,11 +5554,36 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.e(TAG, "onPause: state is CAMERAOPENSTATE_OPENING, but open_camera_task is null");
 			}
 		}
-		this.closeCamera(false, null);
+		//final boolean use_background_thread = false;
+		final boolean use_background_thread = true;
+		this.closeCamera(use_background_thread, null);
 		cameraSurface.onPause();
 		if( canvasView != null )
 			canvasView.onPause();
     }
+
+    public void onDestroy() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDestroy");
+		if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_CLOSING ) {
+			// If the camera is currently closing on a background thread, then wait until the camera has closed to be safe
+			if( MyDebug.LOG )
+				Log.d(TAG, "wait for close_camera_task");
+			if( close_camera_task != null ) { // just to be safe
+				try {
+					close_camera_task.get();
+				}
+				catch(ExecutionException | InterruptedException e) {
+					e.printStackTrace();
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "done waiting for close_camera_task");
+			}
+			else {
+				Log.e(TAG, "onResume: state is CAMERAOPENSTATE_CLOSING, but close_camera_task is null");
+			}
+		}
+	}
     
     /*void updateUIPlacement() {
     	// we cache the preference_ui_placement to save having to check it in the draw() method
