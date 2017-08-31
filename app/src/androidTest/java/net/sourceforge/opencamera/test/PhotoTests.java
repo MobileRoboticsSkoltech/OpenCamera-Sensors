@@ -13,6 +13,11 @@ public class PhotoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationDirectionOn"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationOff"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testDirectionOn"));
+		// then do memory intensive tests:
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoLevel"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoLevelLowMemory"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoLevelAngles"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoLevelAnglesLowMemory"));
 		// other tests:
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhoto"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoContinuous"));
@@ -45,8 +50,6 @@ public class PhotoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoSingleTap"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDoubleTap"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAlt"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoLevel"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoLevelAngles"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTimerBackground"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTimerSettings"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTimerPopup"));

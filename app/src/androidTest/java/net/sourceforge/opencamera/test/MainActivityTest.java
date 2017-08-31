@@ -65,6 +65,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		super.setUp();
 
 	    setActivityInitialTouchMode(false);
+		Log.d(TAG, "setUp: 1");
 
 	    // use getTargetContext() as we haven't started the activity yet (and don't want to, as we want to set prefs before starting)
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
@@ -72,12 +73,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.clear();
 		//editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
 		editor.apply();
-		
+		Log.d(TAG, "setUp: 2");
+
 	    Intent intent = new Intent();
 	    intent.putExtra("test_project", true);
 	    setActivityIntent(intent);
+		Log.d(TAG, "setUp: about to get activity");
 	    mActivity = getActivity();
+		Log.d(TAG, "setUp: activity: " + mActivity);
 	    mPreview = mActivity.getPreview();
+		Log.d(TAG, "setUp: preview: " + mPreview);
 
 		waitUntilCameraOpened();
 
@@ -95,8 +100,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	protected void tearDown() throws Exception {
 		Log.d(TAG, "tearDown");
 
-		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_camera_parameters_exception == 0 );
-		assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
+		// shouldn't have assertions in tearDown, otherwise we'll never cleanup properly - when run as suite, the next test will either fail or hang!
+		//assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_camera_parameters_exception == 0 );
+		//assertTrue( mPreview.getCameraController() == null || mPreview.getCameraController().count_precapture_timeout == 0 );
 
 		// reset back to defaults
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -4100,11 +4106,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(n_new_files == count);
 	}
 
-	/* Tests taking photos repeatedly with auto-stabilise enabled.
-	 * Tests with front and back; and then tests again with test_low_memory set.
-	 */
-	public void testTakePhotoAutoLevel() {
-		Log.d(TAG, "testTakePhotoAutoLevel");
+	private void subTestTakePhotoAutoLevel() {
+		Log.d(TAG, "subTestTakePhotoAutoLevel");
 		setToDefault();
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -4135,29 +4138,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId == new_cameraId);
 		}
+	}
+
+	/* Tests taking photos repeatedly with auto-stabilise enabled.
+	 * Tests with front and back.
+	 */
+	public void testTakePhotoAutoLevel() {
+		Log.d(TAG, "testTakePhotoAutoLevel");
+
+		subTestTakePhotoAutoLevel();
+	}
+
+	/* As testTakePhotoAutoLevel(), but with test_low_memory set.
+	 */
+	public void testTakePhotoAutoLevelLowMemory() {
+		Log.d(TAG, "testTakePhotoAutoLevelLowMemory");
 
 		mActivity.test_low_memory = true;
 
-		takePhotoLoop(n_photos_c);
-		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
-			int cameraId = mPreview.getCameraId();
-		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-		    while( switchCameraButton.getVisibility() != View.VISIBLE ) {
-		    	// wait until photo is taken and button is visible again
-		    }
-		    clickView(switchCameraButton);
-			waitUntilCameraOpened();
-			int new_cameraId = mPreview.getCameraId();
-			assertTrue(cameraId != new_cameraId);
-			takePhotoLoop(n_photos_c);
-		    while( switchCameraButton.getVisibility() != View.VISIBLE ) {
-		    	// wait until photo is taken and button is visible again
-		    }
-		    clickView(switchCameraButton);
-			waitUntilCameraOpened();
-			new_cameraId = mPreview.getCameraId();
-			assertTrue(cameraId == new_cameraId);
-		}
+		subTestTakePhotoAutoLevel();
 	}
 
 	private void takePhotoLoopAngles(int [] angles) {
@@ -4193,11 +4192,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		mActivity.test_have_angle = false;
 	}
 
-	/* Tests taking photos repeatedly with auto-stabilise enabled, at various angles.
-	 * Tests with front and back; and then tests again with test_low_memory set.
-	 */
-	public void testTakePhotoAutoLevelAngles() {
-		Log.d(TAG, "testTakePhotoAutoLevel");
+	private void subTestTakePhotoAutoLevelAngles() {
+		Log.d(TAG, "subTestTakePhotoAutoLevelAngles");
 		setToDefault();
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -4228,29 +4224,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			new_cameraId = mPreview.getCameraId();
 			assertTrue(cameraId == new_cameraId);
 		}
+	}
+
+	/* Tests taking photos repeatedly with auto-stabilise enabled, at various angles.
+	 * Tests with front and back.
+	 */
+	public void testTakePhotoAutoLevelAngles() {
+		Log.d(TAG, "testTakePhotoAutoLevel");
+
+		subTestTakePhotoAutoLevelAngles();
+	}
+
+	/* As testTakePhotoAutoLevelAngles(), but with test_low_memory set.
+	 */
+	public void testTakePhotoAutoLevelAnglesLowMemory() {
+		Log.d(TAG, "testTakePhotoAutoLevelAnglesLowMemory");
 
 		mActivity.test_low_memory = true;
 
-		takePhotoLoopAngles(angles);
-		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
-			int cameraId = mPreview.getCameraId();
-		    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
-		    while( switchCameraButton.getVisibility() != View.VISIBLE ) {
-		    	// wait until photo is taken and button is visible again
-		    }
-		    clickView(switchCameraButton);
-			waitUntilCameraOpened();
-			int new_cameraId = mPreview.getCameraId();
-			assertTrue(cameraId != new_cameraId);
-			takePhotoLoopAngles(angles);
-		    while( switchCameraButton.getVisibility() != View.VISIBLE ) {
-		    	// wait until photo is taken and button is visible again
-		    }
-		    clickView(switchCameraButton);
-			waitUntilCameraOpened();
-			new_cameraId = mPreview.getCameraId();
-			assertTrue(cameraId == new_cameraId);
-		}
+		subTestTakePhotoAutoLevelAngles();
 	}
 
 	private interface VideoTestCallback {
