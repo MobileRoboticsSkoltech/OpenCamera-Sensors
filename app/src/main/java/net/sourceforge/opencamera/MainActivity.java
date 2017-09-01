@@ -538,6 +538,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onDestroy");
 			Log.d(TAG, "size of preloaded_bitmap_resources: " + preloaded_bitmap_resources.size());
 		}
+		preview.onDestroy();
 		if( applicationInterface != null ) {
 			applicationInterface.onDestroy();
 		}
@@ -1392,7 +1393,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "updateForSettings: time after set display orientation: " + (System.currentTimeMillis() - debug_time));
 			}
-			preview.pausePreview();
+			preview.pausePreview(true);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "updateForSettings: time after pause: " + (System.currentTimeMillis() - debug_time));
 			}
