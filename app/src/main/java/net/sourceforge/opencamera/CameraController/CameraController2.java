@@ -3721,8 +3721,8 @@ public class CameraController2 extends CameraController {
 			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
 			clearPending();
-        	Surface surface = getPreviewSurface();
-        	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
+			// shouldn't add preview surface as a target - no known benefit to doing so, and it means we have problems with long manual
+			// shutter speeds (photos take twice as long)
     		stillBuilder.addTarget(imageReader.getSurface());
         	if( imageReaderRaw != null )
     			stillBuilder.addTarget(imageReaderRaw.getSurface());
@@ -3778,8 +3778,8 @@ public class CameraController2 extends CameraController {
 			// n.b., don't set RequestTag.CAPTURE here - we only do it for the last of the burst captures (see below)
 			camera_settings.setupBuilder(stillBuilder, true);
 			clearPending();
-        	Surface surface = getPreviewSurface();
-        	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
+			// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
+			// but also, adding the preview surface causes the dark/light exposures to be visible, which we don't want
 			stillBuilder.addTarget(imageReader.getSurface());
 			// don't add target imageReaderRaw, as Raw not supported for burst
 
@@ -4035,8 +4035,7 @@ public class CameraController2 extends CameraController {
 			stillBuilder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
 
 			clearPending();
-        	Surface surface = getPreviewSurface();
-        	stillBuilder.addTarget(surface); // Google Camera adds the preview surface as well as capture surface, for still capture
+			// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
 			stillBuilder.addTarget(imageReader.getSurface());
 			// don't add target imageReaderRaw, as Raw not supported for burst
 
