@@ -201,9 +201,39 @@
         >
 
         <RelativeLayout
+            android:id="@+id/iso_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            >
+
+            <TextView
+                android:id="@+id/iso_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:text="@string/iso"
+                android:textStyle="bold"
+                />
+
+            <RelativeLayout
+                android:id="@+id/iso_buttons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:layout_below="@+id/iso_text"
+                >
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <RelativeLayout
             android:id="@+id/exposure_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             >
 
             <TextView
@@ -255,6 +285,7 @@
             android:id="@+id/manual_exposure_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             >
 
             <TextView
@@ -298,6 +329,7 @@
             android:id="@+id/manual_white_balance_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             >
 
             <TextView

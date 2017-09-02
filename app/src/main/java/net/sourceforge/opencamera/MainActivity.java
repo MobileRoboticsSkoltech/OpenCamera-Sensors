@@ -2451,6 +2451,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						int max_iso = preview.getMaximumISO();
 						int iso = (int)exponentialScaling(frac, min_iso, max_iso);
 						preview.setISO(iso);
+						mainUI.updateSelectedISOButton();
 					}
 
 					@Override
