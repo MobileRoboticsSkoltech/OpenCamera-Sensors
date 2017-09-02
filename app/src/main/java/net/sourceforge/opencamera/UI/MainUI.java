@@ -895,7 +895,8 @@ public class MainUI {
 				Button button = (Button)view;
 				if( MyDebug.LOG )
 					Log.d(TAG, "button: " + button.getText());
-				if( button.getText().equals(current_iso) ) {
+				String button_text = "" + button.getText();
+				if( button_text.contains(current_iso) ) {
 					PopupView.setButtonSelected(button, true);
 					found = true;
 				}
