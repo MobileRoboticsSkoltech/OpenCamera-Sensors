@@ -755,10 +755,12 @@ public class MainUI {
 							Log.d(TAG, "switched from manual to auto iso");
 						// also reset exposure time when changing from manual to auto from the popup menu:
 						editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
+						editor.apply();
+						main_activity.updateForSettings("ISO: " + toast_option);
 					}
-					else {
+					else if( old_iso.equals("auto") ) {
 						if( MyDebug.LOG )
-							Log.d(TAG, "switched to manual iso");
+							Log.d(TAG, "switched from auto to manual iso");
 						if( option.equals("m") ) {
 							// if we used the generic "manual", then instead try to preserve the current iso if it exists
 							if( preview.getCameraController() != null && preview.getCameraController().captureResultHasIso() ) {
@@ -789,14 +791,32 @@ public class MainUI {
 							if( MyDebug.LOG )
 								Log.d(TAG, "no existing exposure time available");
 						}
-					}
 
-					editor.apply();
-					main_activity.updateForSettings("ISO: " + toast_option);
+						editor.apply();
+						main_activity.updateForSettings("ISO: " + toast_option);
+					}
+					else {
+						if( MyDebug.LOG )
+							Log.d(TAG, "changed manual iso");
+						if( option.equals("m") ) {
+							// if user selected the generic "manual", then just keep the previous non-ISO option
+							if( MyDebug.LOG )
+								Log.d(TAG, "keep existing iso of " + old_iso);
+							editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + old_iso);
+						}
+
+						editor.apply();
+						int iso = preview.parseManualISOValue(option);
+						if( iso >= 0 ) {
+							// if changing between manual ISOs, no need to call updateForSettings, just change the ISO directly (as with changing the ISO via manual slider)
+							preview.setISO(iso);
+							updateSelectedISOButton();
+						}
+					}
 				}
 				else {
 					editor.apply();
-					main_activity.updateForSettings("ISO: " + toast_option);
+					preview.getCameraController().setISO(option);
 				}
 
 				setupExposureUI();
