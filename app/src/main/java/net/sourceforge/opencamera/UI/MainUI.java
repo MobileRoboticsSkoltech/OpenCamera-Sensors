@@ -33,7 +33,9 @@ import android.widget.SeekBar;
 import android.widget.ZoomControls;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 /** This contains functionality related to the main UI.
  */
@@ -54,6 +56,9 @@ public class MainUI {
 
 	private boolean keydown_volume_up;
 	private boolean keydown_volume_down;
+
+	// for testing:
+	private final Map<String, View> test_ui_buttons = new Hashtable<>();
 
 	public MainUI(MainActivity main_activity) {
 		if( MyDebug.LOG )
@@ -737,7 +742,7 @@ public class MainUI {
 		if( !current_iso.equals("auto") && supported_isos != null && supported_isos.contains(manual_iso_value) && !supported_isos.contains(current_iso) )
 			current_iso = manual_iso_value;
 		// n.b., we hardcode the string "ISO" as this isn't a user displayed string, rather it's used to filter out "ISO" included in old Camera API parameters
-		iso_buttons = PopupView.createButtonOptions(iso_buttons_container, main_activity, 280, null, supported_isos, -1, -1, "ISO", false, current_iso, "TEST_ISO", new PopupView.ButtonOptionsPopupListener() {
+		iso_buttons = PopupView.createButtonOptions(iso_buttons_container, main_activity, 280, test_ui_buttons, supported_isos, -1, -1, "ISO", false, current_iso, "TEST_ISO", new PopupView.ButtonOptionsPopupListener() {
 			@Override
 			public void onClick(String option) {
 				if( MyDebug.LOG )
@@ -1417,9 +1422,18 @@ public class MainUI {
 	}
 
     // for testing
-    public View getPopupButton(String key) {
-    	return popup_view.getPopupButton(key);
+    public View getUIButton(String key) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "getPopupButton(" + key + "): " + test_ui_buttons.get(key));
+			Log.d(TAG, "this: " + this);
+			Log.d(TAG, "popup_buttons: " + test_ui_buttons);
+		}
+    	return test_ui_buttons.get(key);
     }
+
+	Map<String, View> getTestUIButtonsMap() {
+		return test_ui_buttons;
+	}
 
     public PopupView getPopupView() {
 		return popup_view;

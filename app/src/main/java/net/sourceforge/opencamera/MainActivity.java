@@ -1038,8 +1038,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     }
 	
     // for testing
-    public View getPopupButton(String key) {
-    	return mainUI.getPopupButton(key);
+    public View getUIButton(String key) {
+    	return mainUI.getUIButton(key);
     }
     
     public void closePopup() {
