@@ -40,3 +40,30 @@ void __attribute__((kernel)) align_mtb(uchar in, uint32_t x, uint32_t y) {
         }
     }
 }
+
+void __attribute__((kernel)) align(uchar in, uint32_t x, uint32_t y) {
+    /* We want to sample every step_size'th pixel. Because renderscript can't do this directly, instead
+       we fake it by sampling over an input allocation of size (width/step_size, height/step_size), and
+       then scaling the coordinates by step_size.
+
+       The reason we want to sample every step_size'th pixel is it's good enough for the algorithm to work,
+       and is much faster.
+       */
+    x *= step_size;
+    y *= step_size;
+    if( x+off_x >= step_size && x+off_x < rsAllocationGetDimX(bitmap1)-step_size && y+off_y >= step_size && y+off_y < rsAllocationGetDimY(bitmap1)-step_size ) {
+        float pixel0 = (float)rsGetElementAt_uchar(bitmap0, x, y);
+        int c=0;
+        for(int dy=-1;dy<=1;dy++) {
+            for(int dx=-1;dx<=1;dx++) {
+            	float pixel1 = (float)rsGetElementAt_uchar(bitmap1, x+off_x+dx*step_size, y+off_y+dy*step_size);
+            	float diff = pixel1 - pixel0;
+            	float diff2 = diff*diff;
+            	if( errors[c] < 2000000000 ) { // avoid risk of overflow
+                	rsAtomicAdd(&errors[c], diff2);
+                }
+                c++;
+            }
+        }
+    }
+}
