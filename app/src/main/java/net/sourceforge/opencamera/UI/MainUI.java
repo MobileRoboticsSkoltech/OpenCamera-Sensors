@@ -1,8 +1,10 @@
 package net.sourceforge.opencamera.UI;
 
+import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.R;
 
 import android.content.Context;
@@ -22,10 +24,16 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
+import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.ZoomControls;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** This contains functionality related to the main UI.
  */
@@ -669,53 +677,243 @@ public class MainUI {
 		view.setContentDescription( main_activity.getResources().getString(R.string.audio_control_start) );
     }
 
-    public void toggleExposureUI() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "toggleExposureUI");
-		closePopup();
+    private boolean isExposureUIOpen() {
 		View exposure_seek_bar = main_activity.findViewById(R.id.exposure_container);
 		int exposure_visibility = exposure_seek_bar.getVisibility();
 		View manual_exposure_seek_bar = main_activity.findViewById(R.id.manual_exposure_container);
 		int manual_exposure_visibility = manual_exposure_seek_bar.getVisibility();
-		boolean is_open = exposure_visibility == View.VISIBLE || manual_exposure_visibility == View.VISIBLE;
-		if( is_open ) {
+		return exposure_visibility == View.VISIBLE || manual_exposure_visibility == View.VISIBLE;
+	}
+
+    public void toggleExposureUI() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "toggleExposureUI");
+		closePopup();
+		if( isExposureUIOpen() ) {
 			clearSeekBar();
 		}
 		else if( main_activity.getPreview().getCameraController() != null ) {
-			String iso_value = main_activity.getApplicationInterface().getISOPref();
-			if( main_activity.getPreview().usingCamera2API() && !iso_value.equals("auto") ) {
-				// with Camera2 API, when using manual ISO we instead show sliders for ISO range and exposure time
-				if( main_activity.getPreview().supportsISORange()) {
-					manual_exposure_seek_bar.setVisibility(View.VISIBLE);
-					SeekBar exposure_time_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar));
-					if( main_activity.getPreview().supportsExposureTime() ) {
-						exposure_time_seek_bar.setVisibility(View.VISIBLE);
+			setupExposureUI();
+		}
+    }
+
+    private List<View> iso_buttons;
+	private int iso_button_manual_index = -1;
+	private final String manual_iso_value = "m";
+
+    private void setupExposureUI() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setupExposureUI");
+		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+		final Preview preview = main_activity.getPreview();
+		ViewGroup iso_buttons_container = (ViewGroup)main_activity.findViewById(R.id.iso_buttons);
+		iso_buttons_container.removeAllViews();
+		List<String> supported_isos;
+		if( preview.supportsISORange() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "supports ISO range");
+			int min_iso = preview.getMinimumISO();
+			int max_iso = preview.getMaximumISO();
+			List<String> values = new ArrayList<>();
+			values.add("auto");
+			values.add(manual_iso_value);
+			iso_button_manual_index = 1; // must match where we place the manual button!
+			int [] iso_values = {50, 100, 200, 400, 800, 1600, 3200, 6400};
+			values.add("" + min_iso);
+			for(int iso_value : iso_values) {
+				if( iso_value > min_iso && iso_value < max_iso ) {
+					values.add("" + iso_value);
+				}
+			}
+			values.add("" + max_iso);
+			supported_isos = values;
+		}
+		else {
+			supported_isos = preview.getSupportedISOs();
+			iso_button_manual_index = -1;
+		}
+		String current_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
+		// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
+		if( !current_iso.equals("auto") && supported_isos != null && supported_isos.contains(manual_iso_value) && !supported_isos.contains(current_iso) )
+			current_iso = manual_iso_value;
+		// n.b., we hardcode the string "ISO" as this isn't a user displayed string, rather it's used to filter out "ISO" included in old Camera API parameters
+		iso_buttons = PopupView.createButtonOptions(iso_buttons_container, main_activity, 280, null, supported_isos, -1, -1, "ISO", false, current_iso, "TEST_ISO", new PopupView.ButtonOptionsPopupListener() {
+			@Override
+			public void onClick(String option) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "clicked iso: " + option);
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				String old_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
+				if( MyDebug.LOG )
+					Log.d(TAG, "old_iso: " + old_iso);
+				editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
+				String toast_option = option;
+
+				if( preview.supportsISORange() ) {
+					if( option.equals("auto") ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "switched from manual to auto iso");
+						// also reset exposure time when changing from manual to auto from the popup menu:
+						editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
+						editor.apply();
+						main_activity.updateForSettings("ISO: " + toast_option);
+					}
+					else if( old_iso.equals("auto") ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "switched from auto to manual iso");
+						if( option.equals("m") ) {
+							// if we used the generic "manual", then instead try to preserve the current iso if it exists
+							if( preview.getCameraController() != null && preview.getCameraController().captureResultHasIso() ) {
+								int iso = preview.getCameraController().captureResultIso();
+								if( MyDebug.LOG )
+									Log.d(TAG, "apply existing iso of " + iso);
+								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
+								toast_option = "" + iso;
+							}
+							else {
+								if( MyDebug.LOG )
+									Log.d(TAG, "no existing iso available");
+								// use a default
+								final int iso = 800;
+								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
+								toast_option = "" + iso;
+							}
+						}
+
+						// if changing from auto to manual, preserve the current exposure time if it exists
+						if( preview.getCameraController() != null && preview.getCameraController().captureResultHasExposureTime() ) {
+							long exposure_time = preview.getCameraController().captureResultExposureTime();
+							if( MyDebug.LOG )
+								Log.d(TAG, "apply existing exposure time of " + exposure_time);
+							editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
+						}
+						else {
+							if( MyDebug.LOG )
+								Log.d(TAG, "no existing exposure time available");
+						}
+
+						editor.apply();
+						main_activity.updateForSettings("ISO: " + toast_option);
 					}
 					else {
-						exposure_time_seek_bar.setVisibility(View.GONE);
+						if( MyDebug.LOG )
+							Log.d(TAG, "changed manual iso");
+						if( option.equals("m") ) {
+							// if user selected the generic "manual", then just keep the previous non-ISO option
+							if( MyDebug.LOG )
+								Log.d(TAG, "keep existing iso of " + old_iso);
+							editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + old_iso);
+						}
+
+						editor.apply();
+						int iso = preview.parseManualISOValue(option);
+						if( iso >= 0 ) {
+							// if changing between manual ISOs, no need to call updateForSettings, just change the ISO directly (as with changing the ISO via manual slider)
+							preview.setISO(iso);
+							updateSelectedISOButton();
+						}
 					}
+				}
+				else {
+					editor.apply();
+					preview.getCameraController().setISO(option);
+				}
+
+				setupExposureUI();
+			}
+		});
+		if( supported_isos != null ) {
+			View iso_container_view = main_activity.findViewById(R.id.iso_container);
+			iso_container_view.setVisibility(View.VISIBLE);
+		}
+
+		View exposure_seek_bar = main_activity.findViewById(R.id.exposure_container);
+		View manual_exposure_seek_bar = main_activity.findViewById(R.id.manual_exposure_container);
+		String iso_value = main_activity.getApplicationInterface().getISOPref();
+		if( main_activity.getPreview().usingCamera2API() && !iso_value.equals("auto") ) {
+			exposure_seek_bar.setVisibility(View.GONE);
+
+			// with Camera2 API, when using manual ISO we instead show sliders for ISO range and exposure time
+			if( main_activity.getPreview().supportsISORange()) {
+				manual_exposure_seek_bar.setVisibility(View.VISIBLE);
+				SeekBar exposure_time_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar));
+				if( main_activity.getPreview().supportsExposureTime() ) {
+					exposure_time_seek_bar.setVisibility(View.VISIBLE);
+				}
+				else {
+					exposure_time_seek_bar.setVisibility(View.GONE);
 				}
 			}
 			else {
-				if( main_activity.getPreview().supportsExposures() ) {
-					exposure_seek_bar.setVisibility(View.VISIBLE);
-					ZoomControls seek_bar_zoom = (ZoomControls)main_activity.findViewById(R.id.exposure_seekbar_zoom);
-					seek_bar_zoom.setVisibility(View.VISIBLE);
+				manual_exposure_seek_bar.setVisibility(View.GONE);
+			}
+		}
+		else {
+			manual_exposure_seek_bar.setVisibility(View.GONE);
+
+			if( main_activity.getPreview().supportsExposures() ) {
+				exposure_seek_bar.setVisibility(View.VISIBLE);
+				ZoomControls seek_bar_zoom = (ZoomControls)main_activity.findViewById(R.id.exposure_seekbar_zoom);
+				seek_bar_zoom.setVisibility(View.VISIBLE);
+			}
+			else {
+				exposure_seek_bar.setVisibility(View.GONE);
+			}
+		}
+
+		View manual_white_balance_seek_bar = main_activity.findViewById(R.id.manual_white_balance_container);
+		if( main_activity.getPreview().supportsWhiteBalanceTemperature()) {
+			// we also show slider for manual white balance, if in that mode
+			String white_balance_value = main_activity.getApplicationInterface().getWhiteBalancePref();
+			if( main_activity.getPreview().usingCamera2API() && white_balance_value.equals("manual") ) {
+				manual_white_balance_seek_bar.setVisibility(View.VISIBLE);
+			}
+			else {
+				manual_white_balance_seek_bar.setVisibility(View.GONE);
+			}
+		}
+		else {
+			manual_white_balance_seek_bar.setVisibility(View.GONE);
+		}
+	}
+
+	/** If the exposure panel is open, updates the selected ISO button to match the current ISO value,
+	 *  if a continuous range of ISO values are supported by the camera.
+	 */
+	public void updateSelectedISOButton() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateSelectedISOButton");
+		Preview preview = main_activity.getPreview();
+		if( preview.supportsISORange() && isExposureUIOpen() ) {
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+			String current_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
+			// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
+			if( MyDebug.LOG )
+				Log.d(TAG, "current_iso: " + current_iso);
+			boolean found = false;
+			for(View view : iso_buttons) {
+				Button button = (Button)view;
+				if( MyDebug.LOG )
+					Log.d(TAG, "button: " + button.getText());
+				String button_text = "" + button.getText();
+				if( button_text.contains(current_iso) ) {
+					PopupView.setButtonSelected(button, true);
+					found = true;
+				}
+				else {
+					PopupView.setButtonSelected(button, false);
 				}
 			}
-
-			if( main_activity.getPreview().supportsWhiteBalanceTemperature()) {
-				// we also show slider for manual white balance, if in that mode
-				String white_balance_value = main_activity.getApplicationInterface().getWhiteBalancePref();
-				View manual_white_balance_seek_bar = main_activity.findViewById(R.id.manual_white_balance_container);
-				if (main_activity.getPreview().usingCamera2API() && white_balance_value.equals("manual")) {
-					manual_white_balance_seek_bar.setVisibility(View.VISIBLE);
-				} else {
-					manual_white_balance_seek_bar.setVisibility(View.GONE);
+			if( !found && !current_iso.equals("auto") ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "must be manual");
+				if( iso_button_manual_index >= 0 && iso_button_manual_index < iso_buttons.size() ) {
+					Button button = (Button)iso_buttons.get(iso_button_manual_index);
+					PopupView.setButtonSelected(button, true);
 				}
 			}
 		}
-    }
+	}
 
 	public void setSeekbarZoom(int new_zoom) {
 		if( MyDebug.LOG )
@@ -749,7 +947,9 @@ public class MainUI {
 	}
 
     public void clearSeekBar() {
-		View view = main_activity.findViewById(R.id.exposure_container);
+		View view = main_activity.findViewById(R.id.iso_container);
+		view.setVisibility(View.GONE);
+		view = main_activity.findViewById(R.id.exposure_container);
 		view.setVisibility(View.GONE);
 		view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
 		view.setVisibility(View.GONE);

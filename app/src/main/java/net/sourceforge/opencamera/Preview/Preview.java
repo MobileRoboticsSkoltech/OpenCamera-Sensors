@@ -1886,19 +1886,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				camera_controller.setManualISO(false, 0);
 			}
 			else {
-				// try to parse the supplied manual ISO value
-				try {
-					if( MyDebug.LOG )
-						Log.d(TAG, "setting manual iso");
+				int iso = parseManualISOValue(value);
+				if( iso >= 0 ) {
 					is_manual_iso = true;
-					int iso = Integer.parseInt(value);
 					if( MyDebug.LOG )
 						Log.d(TAG, "iso: " + iso);
 					camera_controller.setManualISO(true, iso);
 				}
-				catch(NumberFormatException exception) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "iso invalid format, can't parse to int");
+				else {
+					// failed to parse
 					camera_controller.setManualISO(false, 0);
 					value = "auto"; // so we switch the preferences back to auto mode, rather than the invalid value
 				}
@@ -3025,6 +3021,26 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				showToast(seekbar_toast, getResources().getString(R.string.white_balance) + " " + new_temperature, 96);
 			}
 		}
+	}
+
+	/** Try to parse the supplied manual ISO value
+	 * @return The manual ISO value, or -1 if not recognised as a number.
+	 */
+	public int parseManualISOValue(String value) {
+		int iso;
+		try {
+			if( MyDebug.LOG )
+				Log.d(TAG, "setting manual iso");
+			iso = Integer.parseInt(value);
+			if( MyDebug.LOG )
+				Log.d(TAG, "iso: " + iso);
+		}
+		catch(NumberFormatException exception) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "iso invalid format, can't parse to int");
+			iso = -1;
+		}
+		return iso;
 	}
 
 	public void setISO(int new_iso) {

@@ -54,7 +54,6 @@ public class PopupView extends LinearLayout {
 	public static final float ALPHA_BUTTON = 0.6f;
 
 	private int total_width_dp;
-	private final int total_width;
 
 	private int picture_size_index = -1;
 	private int video_size_index = -1;
@@ -62,6 +61,7 @@ public class PopupView extends LinearLayout {
 	private int burst_mode_index = -1;
 	private int grid_index = -1;
 
+	// for testing:
 	private final Map<String, View> popup_buttons = new Hashtable<>();
 
 	public PopupView(Context context) {
@@ -93,7 +93,6 @@ public class PopupView extends LinearLayout {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "total_width_dp: " + total_width_dp);
-		total_width = (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
 
 		final MainActivity main_activity = (MainActivity)this.getContext();
 		final Preview preview = main_activity.getPreview();
@@ -143,7 +142,9 @@ public class PopupView extends LinearLayout {
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 4: " + (System.nanoTime() - debug_time));
 
-    		List<String> supported_isos;
+    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+
+    		/*List<String> supported_isos;
 			final String manual_value = "m";
 			if( preview.supportsISORange() ) {
 				if( MyDebug.LOG )
@@ -166,7 +167,6 @@ public class PopupView extends LinearLayout {
 			else {
 				supported_isos = preview.getSupportedISOs();
 			}
-    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     		String current_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
 			// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
 			if( !current_iso.equals("auto") && supported_isos != null && supported_isos.contains(manual_value) && !supported_isos.contains(current_iso) )
@@ -230,6 +230,7 @@ public class PopupView extends LinearLayout {
     		});
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 5: " + (System.nanoTime() - debug_time));
+			*/
 
 			final List<String> photo_modes = new ArrayList<>();
 			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<>();
@@ -729,25 +730,32 @@ public class PopupView extends LinearLayout {
 		//main_activity.closePopup();
 	}
 
-    private abstract class ButtonOptionsPopupListener {
+    static abstract class ButtonOptionsPopupListener {
 		public abstract void onClick(String option);
     }
     
     private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String prefix_string, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
-		if( MyDebug.LOG )
+		if(MyDebug.LOG)
 			Log.d(TAG, "addButtonOptionsToPopup");
+		createButtonOptions(this, this.getContext(), total_width_dp, popup_buttons, supported_options, icons_id, values_id, prefix_string, true, current_value, test_key, listener);
+	}
+
+    static List<View> createButtonOptions(ViewGroup parent, Context context, int total_width_dp, Map<String, View> test_popup_buttons, List<String> supported_options, int icons_id, int values_id, String prefix_string, boolean include_prefix, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "createButtonOptions");
+		final List<View> buttons = new ArrayList<>();
     	if( supported_options != null ) {
 	    	final long debug_time = System.nanoTime();
-			LinearLayout ll2 = new LinearLayout(this.getContext());
+			LinearLayout ll2 = new LinearLayout(context);
 			ll2.setOrientation(LinearLayout.HORIZONTAL);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 1: " + (System.nanoTime() - debug_time));
-        	String [] icons = icons_id != -1 ? getResources().getStringArray(icons_id) : null;
-        	String [] values = values_id != -1 ? getResources().getStringArray(values_id) : null;
+        	String [] icons = icons_id != -1 ? context.getResources().getStringArray(icons_id) : null;
+        	String [] values = values_id != -1 ? context.getResources().getStringArray(values_id) : null;
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 2: " + (System.nanoTime() - debug_time));
 
-			final float scale = getResources().getDisplayMetrics().density;
+			final float scale = context.getResources().getDisplayMetrics().density;
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 2.04: " + (System.nanoTime() - debug_time));
 			int button_width_dp = total_width_dp/supported_options.size();
@@ -788,7 +796,7 @@ public class PopupView extends LinearLayout {
             		if( MyDebug.LOG )
             			Log.d(TAG, "index: " + index);
             		if( index != -1 ) {
-            			resource = getResources().getIdentifier(icons[index], null, this.getContext().getApplicationContext().getPackageName());
+            			resource = context.getResources().getIdentifier(icons[index], null, context.getApplicationContext().getPackageName());
             		}
         		}
     			if( MyDebug.LOG )
@@ -801,13 +809,13 @@ public class PopupView extends LinearLayout {
     				button_string = supported_option;
         		}
         		else if( prefix_string.equalsIgnoreCase("ISO") && supported_option.length() >= 4 && supported_option.substring(0, 4).equalsIgnoreCase("ISO_") ) {
-        			button_string = prefix_string + "\n" + supported_option.substring(4);
+        			button_string = (include_prefix ? prefix_string : "") + "\n" + supported_option.substring(4);
     			}
     			else if( prefix_string.equalsIgnoreCase("ISO") && supported_option.length() >= 3 && supported_option.substring(0, 3).equalsIgnoreCase("ISO") ) {
-    				button_string = prefix_string + "\n" + supported_option.substring(3);
+    				button_string = (include_prefix ? prefix_string : "") + "\n" + supported_option.substring(3);
     			}
     			else {
-    				button_string = prefix_string + "\n" + supported_option;
+    				button_string = (include_prefix ? prefix_string : "") + "\n" + supported_option;
     			}
     			if( MyDebug.LOG )
     				Log.d(TAG, "button_string: " + button_string);
@@ -815,16 +823,17 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "addButtonOptionsToPopup time 2.105: " + (System.nanoTime() - debug_time));
         		View view;
         		if( resource != -1 ) {
-        			ImageButton image_button = new ImageButton(this.getContext());
+        			ImageButton image_button = new ImageButton(context);
         			if( MyDebug.LOG )
         				Log.d(TAG, "addButtonOptionsToPopup time 2.11: " + (System.nanoTime() - debug_time));
         			view = image_button;
+					buttons.add(view);
         			ll2.addView(view);
         			if( MyDebug.LOG )
         				Log.d(TAG, "addButtonOptionsToPopup time 2.12: " + (System.nanoTime() - debug_time));
 
         			//image_button.setImageResource(resource);
-        			final MainActivity main_activity = (MainActivity)this.getContext();
+        			final MainActivity main_activity = (MainActivity)context;
         			Bitmap bm = main_activity.getPreloadedBitmap(resource);
         			if( bm != null )
         				image_button.setImageBitmap(bm);
@@ -839,9 +848,10 @@ public class PopupView extends LinearLayout {
         			view.setPadding(padding, padding, padding, padding);
         		}
         		else {
-        			Button button = new Button(this.getContext());
+        			Button button = new Button(context);
         			button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
         			view = button;
+					buttons.add(view);
         			ll2.addView(view);
 
         			button.setText(button_string);
@@ -861,11 +871,11 @@ public class PopupView extends LinearLayout {
 
     			view.setContentDescription(button_string);
     			if( supported_option.equals(current_value) ) {
-    				view.setAlpha(ALPHA_BUTTON_SELECTED);
+					setButtonSelected(view, true);
     				current_view = view;
     			}
     			else {
-    				view.setAlpha(ALPHA_BUTTON);
+					setButtonSelected(view, false);
     			}
     			if( MyDebug.LOG )
     				Log.d(TAG, "addButtonOptionsToPopup time 2.3: " + (System.nanoTime() - debug_time));
@@ -873,11 +883,13 @@ public class PopupView extends LinearLayout {
     			view.setOnClickListener(on_click_listener);
     			if( MyDebug.LOG )
     				Log.d(TAG, "addButtonOptionsToPopup time 2.35: " + (System.nanoTime() - debug_time));
-    			this.popup_buttons.put(test_key + "_" + supported_option, view);
+				if( test_popup_buttons != null )
+	    			test_popup_buttons.put(test_key + "_" + supported_option, view);
     			if( MyDebug.LOG ) {
     				Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.nanoTime() - debug_time));
     				Log.d(TAG, "added to popup_buttons: " + test_key + "_" + supported_option + " view: " + view);
-    				Log.d(TAG, "popup_buttons is now: " + popup_buttons);
+					if( test_popup_buttons != null )
+    					Log.d(TAG, "test_popup_buttons is now: " + test_popup_buttons);
     			}
     		}
 			if( MyDebug.LOG )
@@ -885,7 +897,8 @@ public class PopupView extends LinearLayout {
 			if( use_scrollview ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "using scrollview");
-	        	final HorizontalScrollView scroll = new HorizontalScrollView(this.getContext());
+				final int total_width = (int) (total_width_dp * scale + 0.5f); // convert dps to pixels;
+	        	final HorizontalScrollView scroll = new HorizontalScrollView(context);
 	        	scroll.addView(ll2);
 	        	{
 	    			ViewGroup.LayoutParams params = new LayoutParams(
@@ -893,11 +906,11 @@ public class PopupView extends LinearLayout {
 	    			        LayoutParams.WRAP_CONTENT);
 	    			scroll.setLayoutParams(params);
 	        	}
-	        	this.addView(scroll);
+	        	parent.addView(scroll);
 	        	if( current_view != null ) {
 	        		// scroll to the selected button
 	        		final View final_current_view = current_view;
-	        		this.getViewTreeObserver().addOnGlobalLayoutListener( 
+	        		parent.getViewTreeObserver().addOnGlobalLayoutListener(
 	        			new OnGlobalLayoutListener() {
 							@Override
 							public void onGlobalLayout() {
@@ -906,8 +919,6 @@ public class PopupView extends LinearLayout {
 								// scrollTo should automatically clamp to the bounds of the view, but just in case
 								jump_x = Math.min(jump_x, total_width-1);
 								if( jump_x > 0 ) {
-									/*if( MyDebug.LOG )
-										Log.d(TAG, "jump to " + jump_X);*/
 									scroll.scrollTo(jump_x, 0);
 								}
 							}
@@ -918,12 +929,17 @@ public class PopupView extends LinearLayout {
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "not using scrollview");
-				this.addView(ll2);
+				parent.addView(ll2);
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "addButtonOptionsToPopup time 4: " + (System.nanoTime() - debug_time));
         }
+        return buttons;
     }
+
+    static void setButtonSelected(View view, boolean selected) {
+		view.setAlpha(selected ? ALPHA_BUTTON_SELECTED : ALPHA_BUTTON);
+	}
     
     private void addTitleToPopup(final String title) {
 		TextView text_view = new TextView(this.getContext());
