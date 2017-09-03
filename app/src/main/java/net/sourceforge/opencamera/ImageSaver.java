@@ -894,7 +894,7 @@ public class ImageSaver extends Thread {
 					Log.d(TAG, "TESTING LOW MEMORY");
 					Log.d(TAG, "scale was: " + scale);
 				}
-				// test 20MP on Galaxy Nexus or Nexus 7; 29.25MP on Nexus 6 and OnePlus 3T
+				// test 20MP on Galaxy Nexus or Nexus 7; 29MP on Nexus 6 and 36MP OnePlus 3T
 				if( width*height >= 7500 )
 					scale *= 1.5f;
 				else
