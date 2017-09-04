@@ -872,13 +872,10 @@ public class HDRProcessor {
 
 		{
 			// perform auto-alignment
-			List<Bitmap> bitmaps = new ArrayList<>();
-			bitmaps.add(bitmap_avg);
-			bitmaps.add(bitmap_new);
 			Allocation [] allocations = new Allocation[2];
 			allocations[0] = allocation_avg;
 			allocations[1] = allocation_new;
-			autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, 0, true, null, false, time_s);
+			autoAlignment(offsets_x, offsets_y, allocations, width, height, null, 0, true, null, false, time_s);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
 			}
@@ -1054,6 +1051,7 @@ public class HDRProcessor {
 
 	/**
 	 *
+	 * @param bitmaps       Only required if use_mtb is true, otherwise may be null.
 	 * @param base_bitmap   Index of bitmap in bitmaps that should be kept fixed; the other bitmaps
 	 *                      will be aligned relative to this.
 	 * @param assume_sorted If assume_sorted if false, and use_mtb is true, this function will also
@@ -1266,7 +1264,7 @@ public class HDRProcessor {
 		alignMTBScript.set_bitmap0(mtb_allocations[base_bitmap]);
 		// bitmap1 set below
 
-		for(int i=0;i<bitmaps.size();i++)  {
+		for(int i=0;i<allocations.length;i++)  {
 			if( i == base_bitmap ) {
 				// don't need to align the "base" reference image
 				continue;
@@ -1347,7 +1345,7 @@ public class HDRProcessor {
 			}
 		}
 
-		/*for(int i=0;i<bitmaps.size();i++) {
+		/*for(int i=0;i<allocations.length;i++) {
 			offsets_x[i] = 0;
 			offsets_y[i] = 0;
 		}*/
