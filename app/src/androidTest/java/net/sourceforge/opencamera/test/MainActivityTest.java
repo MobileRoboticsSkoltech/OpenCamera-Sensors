@@ -8924,7 +8924,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 *  time to transfer to the device everytime we run the tests.
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private HistogramDetails subTestAvg(List<Bitmap> inputs, String output_name, TestAvgCallback cb) throws IOException, InterruptedException {
+	private HistogramDetails subTestAvg(List<String> inputs, String output_name, TestAvgCallback cb) throws IOException, InterruptedException {
 		Log.d(TAG, "subTestAvg");
 
 		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
@@ -8934,13 +8934,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		Thread.sleep(1000); // wait for camera to open
 
+		Bitmap nr_bitmap = getBitmapFromFile(inputs.get(0));
     	long time_s = System.currentTimeMillis();
 		try {
 			float hdr_strength = 0.0f;
 			for(int i=1;i<inputs.size();i++) {
 				Log.d(TAG, "processAvg for image: " + i);
+				Bitmap new_bitmap = getBitmapFromFile(inputs.get(i));
 				float avg_factor = (float)i;
-				mActivity.getApplicationInterface().getHDRProcessor().processAvg(inputs.get(0), inputs.get(i), avg_factor, true, hdr_strength, 4);
+				mActivity.getApplicationInterface().getHDRProcessor().processAvg(nr_bitmap, new_bitmap, avg_factor, true, hdr_strength, 4);
+				// processAvg recycles new_bitmap
 				if( cb != null ) {
 					cb.doneProcessAvg(i);
 				}
@@ -8955,17 +8958,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "Avg time: " + (System.currentTimeMillis() - time_s));
 
         {
-            mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(inputs.get(0));
+            mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(nr_bitmap);
             Log.d(TAG, "time after brighten: " + (System.currentTimeMillis() - time_s));
         }
 
 		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
 		OutputStream outputStream = new FileOutputStream(file);
-		inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+		nr_bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
         outputStream.close();
         mActivity.getStorageUtils().broadcastFile(file, true, false, true);
-		HistogramDetails hdrHistogramDetails = checkHistogram(inputs.get(0));
-		inputs.get(0).recycle();
+		HistogramDetails hdrHistogramDetails = checkHistogram(nr_bitmap);
+		nr_bitmap.recycle();
 		System.gc();
 		inputs.clear();
 
@@ -8984,10 +8987,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg1/input0.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg1/input1.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg1/input2.jpg") );
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg1/input0.jpg");
+		inputs.add(avg_images_path + "testAvg1/input1.jpg");
+		inputs.add(avg_images_path + "testAvg1/input2.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg1_output.jpg", new TestAvgCallback() {
 			@Override
@@ -9026,10 +9029,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg2/input0.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg2/input1.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg2/input2.jpg") );
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg2/input0.jpg");
+		inputs.add(avg_images_path + "testAvg2/input1.jpg");
+		inputs.add(avg_images_path + "testAvg2/input2.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg2_output.jpg", new TestAvgCallback() {
 			@Override
@@ -9068,12 +9071,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input0.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input1.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input2.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input3.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input4.jpg") );
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg3/input0.jpg");
+		inputs.add(avg_images_path + "testAvg3/input1.jpg");
+		inputs.add(avg_images_path + "testAvg3/input2.jpg");
+		inputs.add(avg_images_path + "testAvg3/input3.jpg");
+		inputs.add(avg_images_path + "testAvg3/input4.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg3_output.jpg", new TestAvgCallback() {
 			@Override
@@ -9126,12 +9129,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input0.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input1.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input2.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input3.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg4/input4.jpg") );
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg4/input0.jpg");
+		inputs.add(avg_images_path + "testAvg4/input1.jpg");
+		inputs.add(avg_images_path + "testAvg4/input2.jpg");
+		inputs.add(avg_images_path + "testAvg4/input3.jpg");
+		inputs.add(avg_images_path + "testAvg4/input4.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg4_output.jpg", new TestAvgCallback() {
 			@Override
@@ -9184,12 +9187,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input0.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input1.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input2.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input3.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg5/input4.jpg") );
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg5/input0.jpg");
+		inputs.add(avg_images_path + "testAvg5/input1.jpg");
+		inputs.add(avg_images_path + "testAvg5/input2.jpg");
+		inputs.add(avg_images_path + "testAvg5/input3.jpg");
+		inputs.add(avg_images_path + "testAvg5/input4.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg5_output.jpg", new TestAvgCallback() {
 			@Override
@@ -9242,15 +9245,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input0.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input1.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input2.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input3.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input4.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input5.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input6.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg6/input7.jpg") );
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg6/input0.jpg");
+		inputs.add(avg_images_path + "testAvg6/input1.jpg");
+		inputs.add(avg_images_path + "testAvg6/input2.jpg");
+		inputs.add(avg_images_path + "testAvg6/input3.jpg");
+		inputs.add(avg_images_path + "testAvg6/input4.jpg");
+		inputs.add(avg_images_path + "testAvg6/input5.jpg");
+		inputs.add(avg_images_path + "testAvg6/input6.jpg");
+		inputs.add(avg_images_path + "testAvg6/input7.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg6_output.jpg", new TestAvgCallback() {
 			@Override
@@ -9310,15 +9313,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input0.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input1.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input2.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input3.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input4.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input5.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input6.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg7/input7.jpg") );
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg7/input0.jpg");
+		inputs.add(avg_images_path + "testAvg7/input1.jpg");
+		inputs.add(avg_images_path + "testAvg7/input2.jpg");
+		inputs.add(avg_images_path + "testAvg7/input3.jpg");
+		inputs.add(avg_images_path + "testAvg7/input4.jpg");
+		inputs.add(avg_images_path + "testAvg7/input5.jpg");
+		inputs.add(avg_images_path + "testAvg7/input6.jpg");
+		inputs.add(avg_images_path + "testAvg7/input7.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg7_output.jpg", new TestAvgCallback() {
 			@Override
@@ -9340,15 +9343,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input0.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input1.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input2.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input3.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input4.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input5.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input6.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input7.jpg") );
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg8/input0.jpg");
+		inputs.add(avg_images_path + "testAvg8/input1.jpg");
+		inputs.add(avg_images_path + "testAvg8/input2.jpg");
+		inputs.add(avg_images_path + "testAvg8/input3.jpg");
+		inputs.add(avg_images_path + "testAvg8/input4.jpg");
+		inputs.add(avg_images_path + "testAvg8/input5.jpg");
+		inputs.add(avg_images_path + "testAvg8/input6.jpg");
+		inputs.add(avg_images_path + "testAvg8/input7.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg8_output.jpg", new TestAvgCallback() {
 			@Override
@@ -9370,28 +9373,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
+		List<String> inputs = new ArrayList<>();
 		final boolean use_auto_photos = true;
 
 		if( use_auto_photos ) {
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto0.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto1.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto2.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto3.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto4.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto5.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto6.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input_auto7.jpg") );
+			inputs.add(avg_images_path + "testAvg9/input_auto0.jpg");
+			inputs.add(avg_images_path + "testAvg9/input_auto1.jpg");
+			inputs.add(avg_images_path + "testAvg9/input_auto2.jpg");
+			inputs.add(avg_images_path + "testAvg9/input_auto3.jpg");
+			inputs.add(avg_images_path + "testAvg9/input_auto4.jpg");
+			inputs.add(avg_images_path + "testAvg9/input_auto5.jpg");
+			inputs.add(avg_images_path + "testAvg9/input_auto6.jpg");
+			inputs.add(avg_images_path + "testAvg9/input_auto7.jpg");
 		}
 		else {
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input0.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input1.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input2.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input3.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input4.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input5.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input6.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg9/input7.jpg") );
+			inputs.add(avg_images_path + "testAvg9/input0.jpg");
+			inputs.add(avg_images_path + "testAvg9/input1.jpg");
+			inputs.add(avg_images_path + "testAvg9/input2.jpg");
+			inputs.add(avg_images_path + "testAvg9/input3.jpg");
+			inputs.add(avg_images_path + "testAvg9/input4.jpg");
+			inputs.add(avg_images_path + "testAvg9/input5.jpg");
+			inputs.add(avg_images_path + "testAvg9/input6.jpg");
+			inputs.add(avg_images_path + "testAvg9/input7.jpg");
 		}
 
 		String out_filename = use_auto_photos ? "testAvg9_auto_output.jpg" : "testAvg9_output.jpg";
@@ -9416,28 +9419,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
+		List<String> inputs = new ArrayList<>();
 		final boolean use_auto_photos = false;
 
 		if( use_auto_photos ) {
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto0.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto1.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto2.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto3.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto4.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto5.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto6.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input_auto7.jpg") );
+			inputs.add(avg_images_path + "testAvg10/input_auto0.jpg");
+			inputs.add(avg_images_path + "testAvg10/input_auto1.jpg");
+			inputs.add(avg_images_path + "testAvg10/input_auto2.jpg");
+			inputs.add(avg_images_path + "testAvg10/input_auto3.jpg");
+			inputs.add(avg_images_path + "testAvg10/input_auto4.jpg");
+			inputs.add(avg_images_path + "testAvg10/input_auto5.jpg");
+			inputs.add(avg_images_path + "testAvg10/input_auto6.jpg");
+			inputs.add(avg_images_path + "testAvg10/input_auto7.jpg");
 		}
 		else {
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input0.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input1.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input2.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input3.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input4.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input5.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input6.jpg") );
-			inputs.add( getBitmapFromFile(avg_images_path + "testAvg10/input7.jpg") );
+			inputs.add(avg_images_path + "testAvg10/input0.jpg");
+			inputs.add(avg_images_path + "testAvg10/input1.jpg");
+			inputs.add(avg_images_path + "testAvg10/input2.jpg");
+			inputs.add(avg_images_path + "testAvg10/input3.jpg");
+			inputs.add(avg_images_path + "testAvg10/input4.jpg");
+			inputs.add(avg_images_path + "testAvg10/input5.jpg");
+			inputs.add(avg_images_path + "testAvg10/input6.jpg");
+			inputs.add(avg_images_path + "testAvg10/input7.jpg");
 		}
 
 		String out_filename = use_auto_photos ? "testAvg10_auto_output.jpg" : "testAvg10_output.jpg";
@@ -9462,15 +9465,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		// list assets
-		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input0.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input1.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input2.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input3.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input4.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input5.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input6.jpg") );
-		inputs.add( getBitmapFromFile(avg_images_path + "testAvg11/input7.jpg") );
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg11/input0.jpg");
+		inputs.add(avg_images_path + "testAvg11/input1.jpg");
+		inputs.add(avg_images_path + "testAvg11/input2.jpg");
+		inputs.add(avg_images_path + "testAvg11/input3.jpg");
+		inputs.add(avg_images_path + "testAvg11/input4.jpg");
+		inputs.add(avg_images_path + "testAvg11/input5.jpg");
+		inputs.add(avg_images_path + "testAvg11/input6.jpg");
+		inputs.add(avg_images_path + "testAvg11/input7.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg11_output.jpg", new TestAvgCallback() {
 			@Override
