@@ -836,27 +836,22 @@ public class HDRProcessor {
 	 * @param bitmap_new     The other input image.
 	 * @param avg_factor     The weighting factor for bitmap_avg.
 	 * @param release_bitmap If true, bitmap_new will be recycled.
-	 * @param hdr_alpha      A value from 0.0f to 1.0f indicating the "strength" of the local
-	 *                       contrast enhancement done in adjustHistogram().
-	 * @param n_tiles        A value of 1 or greater indicating how local the contrast enhancement
-	 *                       algorithm should be.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, boolean release_bitmap, float hdr_alpha, int n_tiles) throws HDRProcessorException {
+	public void processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, boolean release_bitmap) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
-			Log.d(TAG, "hdr_alpha: " + hdr_alpha);
 		}
 		if( bitmap_avg.getWidth() != bitmap_new.getWidth() ||
 				bitmap_avg.getHeight() != bitmap_new.getHeight() ) {
-				if( MyDebug.LOG ) {
-					Log.e(TAG, "bitmaps not of same resolution");
-				}
-				throw new HDRProcessorException(HDRProcessorException.UNEQUAL_SIZES);
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "bitmaps not of same resolution");
+			}
+			throw new HDRProcessorException(HDRProcessorException.UNEQUAL_SIZES);
 		}
 
-    	long time_s = System.currentTimeMillis();
+		long time_s = System.currentTimeMillis();
 
 		int width = bitmap_avg.getWidth();
 		int height = bitmap_avg.getHeight();
@@ -867,8 +862,29 @@ public class HDRProcessor {
 		// create allocations
 		Allocation allocation_avg = Allocation.createFromBitmap(rs, bitmap_avg);
 		Allocation allocation_new = Allocation.createFromBitmap(rs, bitmap_new);
+		//Allocation allocation_out = Allocation.createTyped(rs, Type.createXY(rs, Element.F32_4(rs), width, height));
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+
+		processAvgCore(allocation_avg, allocation_new, width, height, avg_factor);
+
+		if( release_bitmap ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "release bitmap");
+			bitmap_new.recycle();
+		}
+
+		allocation_avg.copyTo(bitmap_avg);
+
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time for processAvg: " + (System.currentTimeMillis() - time_s));
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private void processAvgCore(Allocation allocation_avg, Allocation allocation_new, int width, int height, float avg_factor) throws HDRProcessorException {
+		if( MyDebug.LOG )
+			Log.d(TAG, "processAvgCore");
+		long time_s = System.currentTimeMillis();
 
 		{
 			// perform auto-alignment
@@ -893,8 +909,6 @@ public class HDRProcessor {
 		processAvgScript.set_offset_x_new(offsets_x[1]);
 		processAvgScript.set_offset_y_new(offsets_y[1]);
 
-		//hdr_alpha = 0.0f; // test
-
 		// set globals
 
 		processAvgScript.set_avg_factor(avg_factor);
@@ -907,22 +921,8 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after processAvgScript: " + (System.currentTimeMillis() - time_s));
 
-		if( release_bitmap ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "release bitmap");
-			bitmap_new.recycle();
-		}
-
-		if( hdr_alpha != 0.0f ) {
-			adjustHistogram(allocation_avg, allocation_avg, width, height, hdr_alpha, n_tiles, time_s);
-			if( MyDebug.LOG )
-				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
-		}
-
-		allocation_avg.copyTo(bitmap_avg);
-
 		if( MyDebug.LOG )
-			Log.d(TAG, "### time for processAvg: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "### time for processAvgCore: " + (System.currentTimeMillis() - time_s));
 	}
 
 	/** Combines multiple images by averaging them.

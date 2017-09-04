@@ -8937,12 +8937,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Bitmap nr_bitmap = getBitmapFromFile(inputs.get(0));
     	long time_s = System.currentTimeMillis();
 		try {
-			float hdr_strength = 0.0f;
 			for(int i=1;i<inputs.size();i++) {
 				Log.d(TAG, "processAvg for image: " + i);
 				Bitmap new_bitmap = getBitmapFromFile(inputs.get(i));
 				float avg_factor = (float)i;
-				mActivity.getApplicationInterface().getHDRProcessor().processAvg(nr_bitmap, new_bitmap, avg_factor, true, hdr_strength, 4);
+				mActivity.getApplicationInterface().getHDRProcessor().processAvg(nr_bitmap, new_bitmap, avg_factor, true);
 				// processAvg recycles new_bitmap
 				if( cb != null ) {
 					cb.doneProcessAvg(i);
