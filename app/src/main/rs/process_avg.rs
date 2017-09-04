@@ -7,17 +7,16 @@ rs_allocation bitmap_new;
 int offset_x_new = 0, offset_y_new = 0;
 float avg_factor = 1.0f;
 
-uchar4 __attribute__((kernel)) avg(uchar4 in, uint32_t x, uint32_t y) {
+uchar4 __attribute__((kernel)) avg(uchar4 pixel_avg, uint32_t x, uint32_t y) {
     int32_t ix = x;
     int32_t iy = y;
-    uchar4 pixel_avg = in;
     uchar4 pixel_new;
 
 	if( ix+offset_x_new >= 0 && iy+offset_y_new >= 0 && ix+offset_x_new < rsAllocationGetDimX(bitmap_new) && iy+offset_y_new < rsAllocationGetDimY(bitmap_new) ) {
     	pixel_new = rsGetElementAt_uchar4(bitmap_new, x+offset_x_new, y+offset_y_new);
 	}
 	else {
-    	pixel_new = in;
+	    return pixel_avg;
 	}
 
     /*{
@@ -34,21 +33,15 @@ uchar4 __attribute__((kernel)) avg(uchar4 in, uint32_t x, uint32_t y) {
         }
     }*/
 
-	float r = pixel_avg.r;
-	float g = pixel_avg.g;
-	float b = pixel_avg.b;
-	float r_new = pixel_new.r;
-	float g_new = pixel_new.g;
-	float b_new = pixel_new.b;
+    float3 pixel_avg_f = convert_float3(pixel_avg.rgb);
+    float3 pixel_new_f = convert_float3(pixel_new.rgb);
 
-	r = (avg_factor*r + r_new)/(avg_factor+1.0f);
-	g = (avg_factor*g + g_new)/(avg_factor+1.0f);
-	b = (avg_factor*b + b_new)/(avg_factor+1.0f);
+    pixel_avg_f = (avg_factor*pixel_avg_f + pixel_new_f)/(avg_factor+1.0f);
 
 	uchar4 out;
-    out.r = (uchar)clamp(r+0.5f, 0.0f, 255.0f);
-    out.g = (uchar)clamp(g+0.5f, 0.0f, 255.0f);
-    out.b = (uchar)clamp(b+0.5f, 0.0f, 255.0f);
+    out.r = (uchar)clamp(pixel_avg_f.r+0.5f, 0.0f, 255.0f);
+    out.g = (uchar)clamp(pixel_avg_f.g+0.5f, 0.0f, 255.0f);
+    out.b = (uchar)clamp(pixel_avg_f.b+0.5f, 0.0f, 255.0f);
 
 	return out;
 }

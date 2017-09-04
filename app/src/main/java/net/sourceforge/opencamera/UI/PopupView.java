@@ -10,7 +10,6 @@ import net.sourceforge.opencamera.Preview.Preview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -60,9 +59,6 @@ public class PopupView extends LinearLayout {
 	private int timer_index = -1;
 	private int burst_mode_index = -1;
 	private int grid_index = -1;
-
-	// for testing:
-	private final Map<String, View> popup_buttons = new Hashtable<>();
 
 	public PopupView(Context context) {
 		super(context);
@@ -143,94 +139,6 @@ public class PopupView extends LinearLayout {
 				Log.d(TAG, "PopupView time 4: " + (System.nanoTime() - debug_time));
 
     		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-
-    		/*List<String> supported_isos;
-			final String manual_value = "m";
-			if( preview.supportsISORange() ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "supports ISO range");
-				int min_iso = preview.getMinimumISO();
-				int max_iso = preview.getMaximumISO();
-				List<String> values = new ArrayList<>();
-				values.add("auto");
-				values.add(manual_value);
-				int [] iso_values = {50, 100, 200, 400, 800, 1600, 3200, 6400};
-				values.add("" + min_iso);
-				for(int iso_value : iso_values) {
-					if( iso_value > min_iso && iso_value < max_iso ) {
-						values.add("" + iso_value);
-					}
-				}
-				values.add("" + max_iso);
-				supported_isos = values;
-			}
-			else {
-				supported_isos = preview.getSupportedISOs();
-			}
-    		String current_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
-			// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
-			if( !current_iso.equals("auto") && supported_isos != null && supported_isos.contains(manual_value) && !supported_isos.contains(current_iso) )
-				current_iso = manual_value;
-    		// n.b., we hardcode the string "ISO" as we don't want it translated - firstly more consistent with the ISO values returned by the driver, secondly need to worry about the size of the buttons, so don't want risk of a translated string being too long
-        	addButtonOptionsToPopup(supported_isos, -1, -1, "ISO", current_iso, "TEST_ISO", new ButtonOptionsPopupListener() {
-    			@Override
-    			public void onClick(String option) {
-    				if( MyDebug.LOG )
-    					Log.d(TAG, "clicked iso: " + option);
-    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-    				SharedPreferences.Editor editor = sharedPreferences.edit();
-    				editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
-					String toast_option = option;
-    				if( option.equals("auto") ) {
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "switched from manual to auto iso");
-        				// also reset exposure time when changing from manual to auto from the popup menu:
-    					editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
-    				}
-    				else {
-        				if( MyDebug.LOG )
-        					Log.d(TAG, "switched from auto to manual iso");
-						if( option.equals("m") ) {
-							// if we used the generic "manual", then instead try to preserve the current iso if it exists
-							if( preview.getCameraController() != null && preview.getCameraController().captureResultHasIso() ) {
-								int iso = preview.getCameraController().captureResultIso();
-								if( MyDebug.LOG )
-									Log.d(TAG, "apply existing iso of " + iso);
-								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
-								toast_option = "" + iso;
-							}
-							else {
-								if( MyDebug.LOG )
-									Log.d(TAG, "no existing iso available");
-								// use a default
-								final int iso = 800;
-								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
-								toast_option = "" + iso;
-							}
-						}
-        				if( preview.usingCamera2API() ) {
-        					// if changing from auto to manual, preserve the current exposure time if it exists
-        					if( preview.getCameraController() != null && preview.getCameraController().captureResultHasExposureTime() ) {
-        						long exposure_time = preview.getCameraController().captureResultExposureTime();
-                				if( MyDebug.LOG )
-                					Log.d(TAG, "apply existing exposure time of " + exposure_time);
-            					editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
-        					}
-        					else {
-                				if( MyDebug.LOG )
-                					Log.d(TAG, "no existing exposure time available");
-        					}
-        				}
-    				}
-    				editor.apply();
-
-    				main_activity.updateForSettings("ISO: " + toast_option);
-    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
-    			}
-    		});
-			if( MyDebug.LOG )
-				Log.d(TAG, "PopupView time 5: " + (System.nanoTime() - debug_time));
-			*/
 
 			final List<String> photo_modes = new ArrayList<>();
 			final List<MyApplicationInterface.PhotoMode> photo_mode_values = new ArrayList<>();
@@ -737,10 +645,11 @@ public class PopupView extends LinearLayout {
     private void addButtonOptionsToPopup(List<String> supported_options, int icons_id, int values_id, String prefix_string, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
 		if(MyDebug.LOG)
 			Log.d(TAG, "addButtonOptionsToPopup");
-		createButtonOptions(this, this.getContext(), total_width_dp, popup_buttons, supported_options, icons_id, values_id, prefix_string, true, current_value, test_key, listener);
+		MainActivity main_activity = (MainActivity)this.getContext();
+		createButtonOptions(this, this.getContext(), total_width_dp, main_activity.getMainUI().getTestUIButtonsMap(), supported_options, icons_id, values_id, prefix_string, true, current_value, test_key, listener);
 	}
 
-    static List<View> createButtonOptions(ViewGroup parent, Context context, int total_width_dp, Map<String, View> test_popup_buttons, List<String> supported_options, int icons_id, int values_id, String prefix_string, boolean include_prefix, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
+    static List<View> createButtonOptions(ViewGroup parent, Context context, int total_width_dp, Map<String, View> test_ui_buttons, List<String> supported_options, int icons_id, int values_id, String prefix_string, boolean include_prefix, String current_value, String test_key, final ButtonOptionsPopupListener listener) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "createButtonOptions");
 		final List<View> buttons = new ArrayList<>();
@@ -883,13 +792,13 @@ public class PopupView extends LinearLayout {
     			view.setOnClickListener(on_click_listener);
     			if( MyDebug.LOG )
     				Log.d(TAG, "addButtonOptionsToPopup time 2.35: " + (System.nanoTime() - debug_time));
-				if( test_popup_buttons != null )
-	    			test_popup_buttons.put(test_key + "_" + supported_option, view);
+				if( test_ui_buttons != null )
+	    			test_ui_buttons.put(test_key + "_" + supported_option, view);
     			if( MyDebug.LOG ) {
     				Log.d(TAG, "addButtonOptionsToPopup time 2.4: " + (System.nanoTime() - debug_time));
     				Log.d(TAG, "added to popup_buttons: " + test_key + "_" + supported_option + " view: " + view);
-					if( test_popup_buttons != null )
-    					Log.d(TAG, "test_popup_buttons is now: " + test_popup_buttons);
+					if( test_ui_buttons != null )
+    					Log.d(TAG, "test_ui_buttons is now: " + test_ui_buttons);
     			}
     		}
 			if( MyDebug.LOG )
@@ -996,7 +905,7 @@ public class PopupView extends LinearLayout {
     		final RadioGroup rg = new RadioGroup(this.getContext());
         	rg.setOrientation(RadioGroup.VERTICAL);
 			rg.setVisibility(View.GONE);
-        	this.popup_buttons.put(test_key, rg);
+        	main_activity.getMainUI().getTestUIButtonsMap().put(test_key, rg);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToPopup time 2: " + (System.nanoTime() - debug_time));
 
@@ -1123,7 +1032,7 @@ public class PopupView extends LinearLayout {
 			});
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToGroup time 7: " + (System.nanoTime() - debug_time));
-			this.popup_buttons.put(test_key + "_" + supported_option_value, button);
+			main_activity.getMainUI().getTestUIButtonsMap().put(test_key + "_" + supported_option_value, button);
 			if( MyDebug.LOG )
 				Log.d(TAG, "addRadioOptionsToGroup time 8: " + (System.nanoTime() - debug_time));
 		}
@@ -1142,6 +1051,7 @@ public class PopupView extends LinearLayout {
 				addTitleToPopup(title);
 			}
 
+			final MainActivity main_activity = (MainActivity)this.getContext();
 			/*final Button prev_button = new Button(this.getContext());
 			//prev_button.setBackgroundResource(R.drawable.exposure);
 			prev_button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
@@ -1176,10 +1086,10 @@ public class PopupView extends LinearLayout {
 			vg_params.height = button_h;
 			prev_button.setLayoutParams(vg_params);
 			prev_button.setVisibility( (cyclic || current_index > 0) ? View.VISIBLE : View.INVISIBLE);
-			this.popup_buttons.put(test_key + "_PREV", prev_button);
+			main_activity.getMainUI().getTestUIButtonsMap().put(test_key + "_PREV", prev_button);
 
         	ll2.addView(resolution_text_view);
-			this.popup_buttons.put(test_key, resolution_text_view);
+			main_activity.getMainUI().getTestUIButtonsMap().put(test_key, resolution_text_view);
 
 			final Button next_button = new Button(this.getContext());
 			next_button.setBackgroundColor(Color.TRANSPARENT); // workaround for Android 6 crash!
@@ -1192,7 +1102,7 @@ public class PopupView extends LinearLayout {
 			vg_params.height = button_h;
 			next_button.setLayoutParams(vg_params);
 			next_button.setVisibility( (cyclic || current_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
-			this.popup_buttons.put(test_key + "_NEXT", next_button);
+			main_activity.getMainUI().getTestUIButtonsMap().put(test_key + "_NEXT", next_button);
 
 			prev_button.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -1260,15 +1170,5 @@ public class PopupView extends LinearLayout {
 			}
         });
 		alert.show();
-    }
-
-    // for testing
-    public View getPopupButton(String key) {
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "getPopupButton(" + key + "): " + popup_buttons.get(key));
-			Log.d(TAG, "this: " + this);
-			Log.d(TAG, "popup_buttons: " + popup_buttons);
-		}
-    	return popup_buttons.get(key);
     }
 }

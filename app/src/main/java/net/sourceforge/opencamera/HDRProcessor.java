@@ -500,7 +500,7 @@ public class HDRProcessor {
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
-		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, 1, assume_sorted, sort_cb, false, time_s);
+		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, 1, assume_sorted, sort_cb, true, time_s);
 		int median_brightness = brightnessDetails.median_brightness;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
@@ -878,11 +878,9 @@ public class HDRProcessor {
 			Allocation [] allocations = new Allocation[2];
 			allocations[0] = allocation_avg;
 			allocations[1] = allocation_new;
-			BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, 0, true, null, true, time_s);
-			int median_brightness = brightnessDetails.median_brightness;
+			autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, 0, true, null, false, time_s);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
-				Log.d(TAG, "median_brightness: " + median_brightness);
 			}
 		}
 
@@ -1058,13 +1056,12 @@ public class HDRProcessor {
 	 *
 	 * @param base_bitmap   Index of bitmap in bitmaps that should be kept fixed; the other bitmaps
 	 *                      will be aligned relative to this.
-	 * @param assume_sorted If assume_sorted if false, this function will also sort the allocations
-	 *                      and bitmaps from darkest to brightest.
-	 * @param allow_noisy   If false, then don't auto-align for an image where things are too noisy
-	 *                      to safely compute the auto-alignment.
+	 * @param assume_sorted If assume_sorted if false, and use_mtb is true, this function will also
+	 *                      sort the allocations and bitmaps from darkest to brightest.
+	 * @param use_mtb       Whether to align based on the median threshold bitmaps or not.
      */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean assume_sorted, SortCallback sort_cb, boolean allow_noisy, long time_s) {
+	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean assume_sorted, SortCallback sort_cb, boolean use_mtb, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "autoAlignment");
 
@@ -1092,16 +1089,19 @@ public class HDRProcessor {
 		// create RenderScript
 		ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
 
-		LuminanceInfo [] luminanceInfos = new LuminanceInfo[allocations.length];
-		for(int i=0;i<allocations.length;i++) {
-			luminanceInfos[i] = computeMedianLuminance(bitmaps.get(i), mtb_x, mtb_y, mtb_width, mtb_height);
+		LuminanceInfo [] luminanceInfos = null;
+		if( use_mtb ) {
+			luminanceInfos = new LuminanceInfo[allocations.length];
+			for(int i = 0; i < allocations.length; i++) {
+				luminanceInfos[i] = computeMedianLuminance(bitmaps.get(i), mtb_x, mtb_y, mtb_width, mtb_height);
+				if( MyDebug.LOG )
+					Log.d(TAG, i + ": median_value: " + luminanceInfos[i].median_value);
+			}
 			if( MyDebug.LOG )
-				Log.d(TAG, i + ": median_value: " + luminanceInfos[i].median_value);
+				Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
 		}
-		if( MyDebug.LOG )
-			Log.d(TAG, "time after computeMedianLuminance: " + (System.currentTimeMillis() - time_s));
 
-		if( !assume_sorted ) {
+		if( !assume_sorted && use_mtb ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "sort bitmaps");
 			class BitmapInfo {
@@ -1151,23 +1151,31 @@ public class HDRProcessor {
 				sort_cb.sortOrder(sort_order);
 			}
 		}
-		int median_brightness = luminanceInfos[base_bitmap].median_value;
-		if( MyDebug.LOG )
-			Log.d(TAG, "median_brightness: " + median_brightness);
+
+		int median_brightness = -1;
+		if( use_mtb ) {
+			median_brightness = luminanceInfos[base_bitmap].median_value;
+			if( MyDebug.LOG )
+				Log.d(TAG, "median_brightness: " + median_brightness);
+		}
 
 		for(int i=0;i<allocations.length;i++) {
-			int median_value = luminanceInfos[i].median_value;
-			if( MyDebug.LOG )
-				Log.d(TAG, i + ": median_value: " + median_value);
-
-			/*if( median_value < 16 ) {
-				// needed for testHDR2, testHDR28
+			int median_value = -1;
+			if( use_mtb ) {
+				median_value = luminanceInfos[i].median_value;
 				if( MyDebug.LOG )
-					Log.d(TAG, "image too dark to do alignment");
-				mtb_allocations[i] = null;
-				continue;
-			}*/
-			if( !allow_noisy && luminanceInfos[i].noisy ) {
+					Log.d(TAG, i + ": median_value: " + median_value);
+
+				/*if( median_value < 16 ) {
+					// needed for testHDR2, testHDR28
+					if( MyDebug.LOG )
+						Log.d(TAG, "image too dark to do alignment");
+					mtb_allocations[i] = null;
+					continue;
+				}*/
+			}
+
+			if( use_mtb && luminanceInfos[i].noisy ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "unable to compute median luminance safely");
 				mtb_allocations[i] = null;
@@ -1177,7 +1185,8 @@ public class HDRProcessor {
 			mtb_allocations[i] = Allocation.createTyped(rs, Type.createXY(rs, Element.U8(rs), mtb_width, mtb_height));
 
 			// set parameters
-			createMTBScript.set_median_value(median_value);
+			if( use_mtb )
+				createMTBScript.set_median_value(median_value);
 			createMTBScript.set_start_x(mtb_x);
 			createMTBScript.set_start_y(mtb_y);
 			createMTBScript.set_out_bitmap(mtb_allocations[i]);
@@ -1190,8 +1199,10 @@ public class HDRProcessor {
 			//createMTBScript.forEach_create_mtb(allocations[i], mtb_allocations[i], launch_options);
 			launch_options.setX(mtb_x, mtb_x+mtb_width);
 			launch_options.setY(mtb_y, mtb_y+mtb_height);
-			createMTBScript.forEach_create_mtb(allocations[i], launch_options);
-			//createMTBScript.forEach_create_greyscale(allocations[i], launch_options);
+			if( use_mtb )
+				createMTBScript.forEach_create_mtb(allocations[i], launch_options);
+			else
+				createMTBScript.forEach_create_greyscale(allocations[i], launch_options);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after createMTBScript: " + (System.currentTimeMillis() - time_s));
 
@@ -1295,8 +1306,10 @@ public class HDRProcessor {
 				//launch_options.setY((int)(stop_y*0.25), (int)(stop_y*0.75));
 				launch_options.setX(0, stop_x);
 				launch_options.setY(0, stop_y);
-				//alignMTBScript.forEach_align_mtb(mtb_allocations[base_bitmap]);
-				alignMTBScript.forEach_align_mtb(mtb_allocations[base_bitmap], launch_options);
+				if( use_mtb )
+					alignMTBScript.forEach_align_mtb(mtb_allocations[base_bitmap], launch_options);
+				else
+					alignMTBScript.forEach_align(mtb_allocations[base_bitmap], launch_options);
 				if( MyDebug.LOG )
 					Log.d(TAG, "time after alignMTBScript: " + (System.currentTimeMillis() - time_s));
 

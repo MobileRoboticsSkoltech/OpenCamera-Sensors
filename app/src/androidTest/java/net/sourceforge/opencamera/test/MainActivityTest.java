@@ -212,10 +212,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			    while( !mActivity.popupIsOpen() ) {
 			    }
 				Log.d(TAG, "popup is now open");
-			    View currentFlashButton = mActivity.getPopupButton("TEST_FLASH_" + flash_value);
+			    View currentFlashButton = mActivity.getUIButton("TEST_FLASH_" + flash_value);
 			    assertTrue(currentFlashButton != null);
 			    assertTrue(currentFlashButton.getAlpha() == PopupView.ALPHA_BUTTON_SELECTED);
-			    View flashButton = mActivity.getPopupButton("TEST_FLASH_" + required_flash_value);
+			    View flashButton = mActivity.getUIButton("TEST_FLASH_" + required_flash_value);
 			    assertTrue(flashButton != null);
 			    assertTrue(flashButton.getAlpha() == PopupView.ALPHA_BUTTON);
 			    clickView(flashButton);
@@ -248,7 +248,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			    clickView(popupButton);
 			    while( !mActivity.popupIsOpen() ) {
 			    }
-			    View focusButton = mActivity.getPopupButton("TEST_FOCUS_" + required_focus_value);
+			    View focusButton = mActivity.getUIButton("TEST_FOCUS_" + required_focus_value);
 			    assertTrue(focusButton != null);
 			    clickView(focusButton);
 			    focus_value = mPreview.getCurrentFocusValue();
@@ -271,16 +271,28 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int iso = mPreview.getCameraController().getISO();
 		Log.d(TAG, "start iso: "+ iso);
 		if( iso != required_iso ) {
-			assertFalse( mActivity.popupIsOpen() );
+			/*assertFalse( mActivity.popupIsOpen() );
 			View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
 			clickView(popupButton);
 			while( !mActivity.popupIsOpen() ) {
 			}
-			View isoButton = mActivity.getPopupButton("TEST_ISO_" + required_iso);
+			View isoButton = mActivity.getUIButton("TEST_ISO_" + required_iso);
+			assertTrue(isoButton != null);
+			clickView(isoButton);
+			iso = mPreview.getCameraController().getISO();
+			Log.d(TAG, "changed iso to: "+ iso);*/
+			View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+			View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_container);
+			assertTrue(exposureContainer.getVisibility() == View.GONE);
+			clickView(exposureButton);
+			assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
+			View isoButton = mActivity.getUIButton("TEST_ISO_" + required_iso);
 			assertTrue(isoButton != null);
 			clickView(isoButton);
 			iso = mPreview.getCameraController().getISO();
 			Log.d(TAG, "changed iso to: "+ iso);
+		    clickView(exposureButton);
+			assertTrue(exposureContainer.getVisibility() == View.GONE);
 		}
 		assertTrue(iso == required_iso);
 	}
@@ -1128,7 +1140,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	private void subTestPopupButtonAvailability(String test_key, String option, boolean expected) {
-		View button = mActivity.getPopupButton(test_key + "_" + option);
+		View button = mActivity.getUIButton(test_key + "_" + option);
 		if( expected ) {
 			boolean is_video = mPreview.isVideo();
 			if( option.equals("focus_mode_continuous_picture") && is_video ) {
@@ -1155,7 +1167,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 	
 	private void subTestPopupButtonAvailability(String option, boolean expected) {
-	    View button = mActivity.getPopupButton(option);
+	    View button = mActivity.getUIButton(option);
 	    if( expected ) {
 	    	assertTrue(button != null);
 	    }
@@ -2246,7 +2258,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 		Log.d(TAG, "popup is now open");
 		// first need to open the white balance sub-menu
-		View wbButton = mActivity.getPopupButton("TEST_WHITE_BALANCE");
+		View wbButton = mActivity.getUIButton("TEST_WHITE_BALANCE");
 		assertTrue(wbButton != null);
 		ScrollView popupContainer = (ScrollView)mActivity.findViewById(net.sourceforge.opencamera.R.id.popup_container);
 		popupContainer.scrollTo(0, wbButton.getBottom());
@@ -2258,7 +2270,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// check popup still opened
 		assertTrue( mActivity.popupIsOpen() );
 
-		RadioButton manualWBButton = (RadioButton)mActivity.getPopupButton("TEST_WHITE_BALANCE_manual");
+		RadioButton manualWBButton = (RadioButton)mActivity.getUIButton("TEST_WHITE_BALANCE_manual");
 		assertTrue(manualWBButton != null);
 		assertTrue(!manualWBButton.isChecked());
 		clickView(manualWBButton);
@@ -7316,7 +7328,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    while( !mActivity.popupIsOpen() ) {
 	    }
 
-	    TextView photoResolutionButton = (TextView)mActivity.getPopupButton("PHOTO_RESOLUTIONS");
+	    TextView photoResolutionButton = (TextView)mActivity.getUIButton("PHOTO_RESOLUTIONS");
 	    assertTrue(photoResolutionButton != null);
 		//String exp_size_string = old_picture_size.width + " x " + old_picture_size.height + " " + Preview.getMPString(old_picture_size.width, old_picture_size.height);
 		String exp_size_string = old_picture_size.width + " x " + old_picture_size.height;
@@ -7324,7 +7336,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue( photoResolutionButton.getText().equals(exp_size_string) );
 
 	    // change photo resolution
-	    View photoResolutionNextButton = mActivity.getPopupButton("PHOTO_RESOLUTIONS_NEXT");
+	    View photoResolutionNextButton = mActivity.getUIButton("PHOTO_RESOLUTIONS_NEXT");
 	    assertTrue(photoResolutionNextButton != null);
 		this.getInstrumentation().waitForIdleSync();
 	    clickView(photoResolutionNextButton);
@@ -7342,12 +7354,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "size string: " + photoResolutionButton.getText());
 	    assertTrue( photoResolutionButton.getText().equals(exp_size_string) );
 
-	    TextView videoResolutionButton = (TextView)mActivity.getPopupButton("VIDEO_RESOLUTIONS");
+	    TextView videoResolutionButton = (TextView)mActivity.getUIButton("VIDEO_RESOLUTIONS");
 	    assertTrue(videoResolutionButton != null);
 	    CharSequence oldVideoResolutionString = videoResolutionButton.getText();
 
 	    // change video resolution
-	    View videoResolutionNextButton = mActivity.getPopupButton("VIDEO_RESOLUTIONS_NEXT");
+	    View videoResolutionNextButton = mActivity.getUIButton("VIDEO_RESOLUTIONS_NEXT");
 	    assertTrue(videoResolutionNextButton != null);
 	    clickView(videoResolutionNextButton);
 
@@ -8982,13 +8994,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
 				if( index == 1 ) {
-					int [] exp_offsets_x = {0, 3, 0};
+					//int [] exp_offsets_x = {0, 3, 0};
+					//int [] exp_offsets_y = {0, 1, 0};
+					int [] exp_offsets_x = {0, 4, 0};
 					int [] exp_offsets_y = {0, 1, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
-					int [] exp_offsets_x = {0, 6, 0};
-					int [] exp_offsets_y = {0, 0, 0};
+					//int [] exp_offsets_x = {0, 6, 0};
+					//int [] exp_offsets_y = {0, 0, 0};
+					int [] exp_offsets_x = {0, 8, 0};
+					int [] exp_offsets_y = {0, 1, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else {
@@ -9020,13 +9036,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
 				if( index == 1 ) {
+					//int [] exp_offsets_x = {0, -15, 0};
+					//int [] exp_offsets_y = {0, -10, 0};
 					int [] exp_offsets_x = {0, -15, 0};
-					int [] exp_offsets_y = {0, -10, 0};
+					int [] exp_offsets_y = {0, -11, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
-					int [] exp_offsets_x = {0, -15, 0};
-					int [] exp_offsets_y = {0, -10, 0};
+					//int [] exp_offsets_x = {0, -15, 0};
+					//int [] exp_offsets_y = {0, -10, 0};
+					int [] exp_offsets_x = {0, -13, 0};
+					int [] exp_offsets_y = {0, -12, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else {
@@ -9060,23 +9080,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
 				if( index == 1 ) {
-					int [] exp_offsets_x = {0, 2, 0};
-					int [] exp_offsets_y = {0, -18, 0};
+					//int [] exp_offsets_x = {0, 2, 0};
+					//int [] exp_offsets_y = {0, -18, 0};
+					int [] exp_offsets_x = {0, -1, 0};
+					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
-					int [] exp_offsets_x = {0, -18, 0};
-					int [] exp_offsets_y = {0, 17, 0};
+					//int [] exp_offsets_x = {0, -18, 0};
+					//int [] exp_offsets_y = {0, 17, 0};
+					int [] exp_offsets_x = {0, -2, 0};
+					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 3 ) {
-					int [] exp_offsets_x = {0, -12, 0};
-					int [] exp_offsets_y = {0, -25, 0};
+					//int [] exp_offsets_x = {0, -12, 0};
+					//int [] exp_offsets_y = {0, -25, 0};
+					int [] exp_offsets_x = {0, -2, 0};
+					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 4 ) {
-					int [] exp_offsets_x = {0, -29, 0};
-					int [] exp_offsets_y = {0, -22, 0};
+					//int [] exp_offsets_x = {0, -29, 0};
+					//int [] exp_offsets_y = {0, -22, 0};
+					int [] exp_offsets_x = {0, -2, 0};
+					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else {
@@ -9110,23 +9138,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
 				if( index == 1 ) {
+					//int [] exp_offsets_x = {0, 5, 0};
+					//int [] exp_offsets_y = {0, 2, 0};
 					int [] exp_offsets_x = {0, 5, 0};
-					int [] exp_offsets_y = {0, 2, 0};
+					int [] exp_offsets_y = {0, 1, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
-					int [] exp_offsets_x = {0, 3, 0};
-					int [] exp_offsets_y = {0, 5, 0};
+					//int [] exp_offsets_x = {0, 3, 0};
+					//int [] exp_offsets_y = {0, 5, 0};
+					int [] exp_offsets_x = {0, 4, 0};
+					int [] exp_offsets_y = {0, 4, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 3 ) {
-					int [] exp_offsets_x = {0, 0, 0};
-					int [] exp_offsets_y = {0, 7, 0};
+					//int [] exp_offsets_x = {0, 0, 0};
+					//int [] exp_offsets_y = {0, 7, 0};
+					int [] exp_offsets_x = {0, 1, 0};
+					int [] exp_offsets_y = {0, 6, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 4 ) {
-					int [] exp_offsets_x = {0, 4, 0};
-					int [] exp_offsets_y = {0, 8, 0};
+					//int [] exp_offsets_x = {0, 4, 0};
+					//int [] exp_offsets_y = {0, 8, 0};
+					int [] exp_offsets_x = {0, 3, 0};
+					int [] exp_offsets_y = {0, 7, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else {
@@ -9160,23 +9196,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
 				if( index == 1 ) {
-					int [] exp_offsets_x = {0, 4, 0};
-					int [] exp_offsets_y = {0, -1, 0};
+					//int [] exp_offsets_x = {0, 4, 0};
+					//int [] exp_offsets_y = {0, -1, 0};
+					int [] exp_offsets_x = {0, 5, 0};
+					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
-					int [] exp_offsets_x = {0, 7, 0};
-					int [] exp_offsets_y = {0, -2, 0};
+					//int [] exp_offsets_x = {0, 7, 0};
+					//int [] exp_offsets_y = {0, -2, 0};
+					int [] exp_offsets_x = {0, 8, 0};
+					int [] exp_offsets_y = {0, -1, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 3 ) {
+					//int [] exp_offsets_x = {0, 9, 0};
+					//int [] exp_offsets_y = {0, -2, 0};
 					int [] exp_offsets_x = {0, 9, 0};
-					int [] exp_offsets_y = {0, -2, 0};
+					int [] exp_offsets_y = {0, -1, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 4 ) {
-					int [] exp_offsets_x = {0, 10, 0};
-					int [] exp_offsets_y = {0, -4, 0};
+					//int [] exp_offsets_x = {0, 10, 0};
+					//int [] exp_offsets_y = {0, -4, 0};
+					int [] exp_offsets_x = {0, 11, 0};
+					int [] exp_offsets_y = {0, -3, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else {
@@ -9212,7 +9256,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
-				if( index == 1 ) {
+				/*if( index == 1 ) {
 					int [] exp_offsets_x = {0, -1, 0};
 					int [] exp_offsets_y = {0, 0, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
@@ -9249,7 +9293,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				}
 				else {
 					assertTrue(false);
-				}
+				}*/
 			}
 		});
 

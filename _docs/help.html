@@ -104,17 +104,35 @@ device has two cameras).</p>
 recording video mode. When in video mode, the take photo icon will change to the record video icon
 <img src="take_video.png" alt="Record Video icon" width="32" height="32">.</p>
 
-<p><img src="ic_exposure_white_48dp.png" alt="Exposure Compensation icon" width="32" height="32"><b>Exposure compensation and ISO</b> - Clicking this will bring
-up a slider and plus/minus buttons which can be used to control the exposure compensation. A higher value increases
-the exposure, so that pictures come out brighter in low light; a lower value makes pictures darker. One unit of
-EV changes the brightness of the captured image by a factor of two. +1 EV doubles the image brightness, while -1
-EV halves the image brightness. Set to 0 for the default exposure. To get rid of the slider and buttons, either
-click the Exposure button again, or click elsewhere on the screen. See
-<a href="http://en.wikipedia.org/wiki/Exposure_compensation">Exposure compensation</a>.
-(Only available if the camera supports control of the exposure, and ISO is "auto".) If Camera2 API is used, and
-a non-auto ISO mode is selected, then instead clicking this icon will bring up sliders allowing you to control the ISO
-setting and (if supported) the exposure time. If Camera2 API is used, and manual white balance is enabled, then this
-icon will also bring up a slider allowing you to control the white balance temperature.</p>
+<p><img src="ic_exposure_white_48dp.png" alt="Exposure Compensation icon" width="32" height="32"><b>Exposure compensation, ISO and Manual White Balance</b> - Clicking this will bring
+a panel with various controls:</p><ul>
+	<li>
+		<b>ISO</b> - (Not supported on all devices.) A higher ISO setting means the camera is more sensitive to light, though may
+		also result in more noise. This mimics the film speed on traditional film cameras. Select "AUTO" to switch back to
+		automatic ISO mode. See
+		<a href="http://digital-photography-school.com/iso-settings">here</a> for more details on ISO.
+		If Camera2 API is used, then selecting a non-auto ISO will bring up sliders allowing direct control over the ISO and exposure
+		time (in place of the exposure compensation slider). You can also select "M" to switch straight to manual mode, keeping to the
+		current ISO value.
+	</li>
+	<li>
+		<b>Exposure compensation</b> - A higher value increases the exposure, so that pictures come out brighter in low light; a
+		lower value makes pictures darker. One unit of EV changes the brightness of the captured image by a factor of two. +1 EV
+		doubles the image brightness, while -1 EV halves the image brightness. Set to 0 for the default exposure.
+		See <a href="http://en.wikipedia.org/wiki/Exposure_compensation">Exposure compensation</a>.
+		(Only available if the camera supports control of the exposure.)
+	</li>
+	<li>
+		<b>ISO and shutter speed sliders</b> - 	If Camera2 API is used, and a non-auto ISO mode is selected, instead of the exposure
+		compensation sliders, two sliders will appear allowing you to control the ISO more finely, and (if supported) the exposure
+		(shutter speed) time.
+	</li>
+	<li>
+		<b>Manual white balance</b> - If Camera2 API is used, and manual white balance is enabled (from the popup menu), then this
+		will also show a slider allowing you to control the white balance temperature.
+	</li>
+</ul>
+<p>To get rid of this panel, either click the Exposure button again, or click elsewhere on the screen.</p>
 
 <p><img src="exposure_unlocked.png" alt="Lock Exposure icon" width="32" height="32"><b>Exposure lock</b> - Click to lock or unlock the exposure.
 When locked, the icon will change to <img src="exposure_locked.png" alt="Exposure Locked icon" width="32" height="32">. Locking the exposure means
@@ -122,7 +140,7 @@ the exposure doesn't change based on the brightness of the current scene (though
 compensation). Note that this isn't guaranteed to work on all devices (doesn't seem to work on Galaxy S3, Nexus 6).</p>
 
 <p><img src="popup.png" alt="Popup icon" width="32" height="32"><b>Popop menu</b> - Opens the popup menu for quick access to changing
-flash, focus, ISO, camera/video resolution, timer, burst mode, grid, white balance, scene mode, color effect:</p><ul>
+flash, focus, camera/video resolution, timer, burst mode, grid, white balance, scene mode, color effect:</p><ul>
 <li><b>Flash</b> - Typical options are off, auto, on and torch mode. For front cameras without a real flash, flash options
 will be available which instead work by making the screen flash (note, front screen flash "auto" is only available with Camera2 API).</li>
 <li><b>Focus</b> - Default is "auto" (camera will focus before taking a photo or when you touch to focus). Other options include
@@ -131,13 +149,6 @@ If Camera2 API is used, then "Focus Manual" will display an on-screen slider, al
 you to directly control the focus distance.
 Lastly, continuous focus mode means that the camera will continually focus - this option is generally best for taking photos as
 quickly as possible.</li>
-<li><b>ISO</b> - A higher ISO setting means the camera is more sensitive to light, though may also
-result in more noise. This mimics the film speed on traditional film cameras. Select "AUTO" to switch
-back to automatic ISO mode. Note that this setting may not be supported on all cameras. See
-<a href="http://digital-photography-school.com/iso-settings">here</a> for more details on ISO.
-If Camera2 API is used, then if a non-auto ISO is used, then selecting the exposure compensation icon
-<img src="ic_exposure_white_48dp.png" alt="Exposure Compensation icon" width="32" height="32"> will bring up sliders allowing direct control over the ISO and exposure
-time. You can also select "M" to switch straight to manual mode, keeping to the current ISO value.</li>
 <li><b>Photo Mode</b> - You can also choose different photo modes:<ul>
 	<li><b>Standard</b> - Ordinary operation: takes a single photo.</li>
 	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode (requires Android 5).</li>
