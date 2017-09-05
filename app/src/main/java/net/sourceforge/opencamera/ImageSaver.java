@@ -666,7 +666,7 @@ public class ImageSaver extends Thread {
 						Log.d(TAG, "processAvg for image: " + i);
 						Bitmap new_bitmap = loadBitmap(request.jpeg_images.get(i), false);
 						float avg_factor = (float) i;
-						hdrProcessor.processAvg(nr_bitmap, new_bitmap, avg_factor, true, 0.0f, 4);
+						hdrProcessor.processAvg(nr_bitmap, new_bitmap, avg_factor, true);
 						// processAvg recycles new_bitmap
 					}
 					//hdrProcessor.processAvgMulti(bitmaps, hdr_strength, 4);
