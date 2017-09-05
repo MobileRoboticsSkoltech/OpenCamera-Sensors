@@ -23,18 +23,18 @@ float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y)
 
     float3 pixel_new_f = convert_float3(pixel_new.rgb);
 
-    /*{
+    {
         // temporal merging
         const float C = 32.0f*32.0f;
         float3 diff = pixel_avg_f - pixel_new_f;
         float L = dot(diff, diff);
-        //if( L > C ) {
-        //    // error too large, so no contribution for new image pixel
-        //    return pixel_avg_f;
-        //}
+        /*if( L > C ) {
+            // error too large, so no contribution for new image pixel
+            return pixel_avg_f;
+        }*/
         float weight = L/(L+C);
         pixel_new_f = weight * pixel_avg_f + (1.0-weight) * pixel_new_f;
-    }*/
+    }
 
     pixel_avg_f = (avg_factor*pixel_avg_f + pixel_new_f)/(avg_factor+1.0f);
 

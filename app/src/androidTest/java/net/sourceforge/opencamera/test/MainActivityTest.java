@@ -9198,10 +9198,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				else if( index == 4 ) {
 					//int [] exp_offsets_x = {0, 4, 0};
 					//int [] exp_offsets_y = {0, 8, 0};
-					int [] exp_offsets_x = {0, 3, 0};
-					int [] exp_offsets_y = {0, 7, 0};
 					//int [] exp_offsets_x = {0, 3, 0};
-					//int [] exp_offsets_y = {0, 8, 0};
+					//int [] exp_offsets_y = {0, 7, 0};
+					int [] exp_offsets_x = {0, 3, 0};
+					int [] exp_offsets_y = {0, 8, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else {
