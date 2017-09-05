@@ -37,6 +37,7 @@ import android.media.ExifInterface;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
+import android.renderscript.Allocation;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
@@ -658,7 +659,7 @@ public class ImageSaver extends Thread {
 				main_activity.savingImage(false);
 				return false;
 			}*/
-			Bitmap nr_bitmap = loadBitmap(request.jpeg_images.get(0), true);
+			/*Bitmap nr_bitmap = loadBitmap(request.jpeg_images.get(0), true);
 
 			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
 				try {
@@ -670,7 +671,39 @@ public class ImageSaver extends Thread {
 						// processAvg recycles new_bitmap
 					}
 					//hdrProcessor.processAvgMulti(bitmaps, hdr_strength, 4);
-					hdrProcessor.avgBrighten(nr_bitmap);
+					//hdrProcessor.avgBrighten(nr_bitmap);
+				}
+				catch(HDRProcessorException e) {
+					e.printStackTrace();
+					throw new RuntimeException();
+				}
+			}
+			else {
+				Log.e(TAG, "shouldn't have offered NoiseReduction as an option if not on Android 5");
+				throw new RuntimeException();
+			}*/
+			Bitmap nr_bitmap;
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+				try {
+					// initialise allocation from first two bitmaps
+					Bitmap bitmap0 = loadBitmap(request.jpeg_images.get(0), false);
+					Bitmap bitmap1 = loadBitmap(request.jpeg_images.get(1), false);
+					int width = bitmap0.getWidth();
+					int height = bitmap0.getHeight();
+					float avg_factor = 1.0f;
+					Allocation allocation = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, true);
+					// processAvg recycles both bitmaps
+
+					for(int i=2;i<request.jpeg_images.size();i++) {
+						Log.d(TAG, "processAvg for image: " + i);
+
+						Bitmap new_bitmap = loadBitmap(request.jpeg_images.get(i), false);
+						avg_factor = (float)i;
+						hdrProcessor.updateAvg(allocation, width, height, new_bitmap, avg_factor, true);
+						// updateAvg recycles new_bitmap
+					}
+
+					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height);
 				}
 				catch(HDRProcessorException e) {
 					e.printStackTrace();

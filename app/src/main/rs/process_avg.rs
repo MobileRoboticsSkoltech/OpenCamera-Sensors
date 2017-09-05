@@ -7,7 +7,7 @@ rs_allocation bitmap_new;
 int offset_x_new = 0, offset_y_new = 0;
 float avg_factor = 1.0f;
 
-uchar4 __attribute__((kernel)) avg(uchar4 pixel_avg, uint32_t x, uint32_t y) {
+float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y) {
     int32_t ix = x;
     int32_t iy = y;
     uchar4 pixel_new;
@@ -16,34 +16,40 @@ uchar4 __attribute__((kernel)) avg(uchar4 pixel_avg, uint32_t x, uint32_t y) {
     	pixel_new = rsGetElementAt_uchar4(bitmap_new, x+offset_x_new, y+offset_y_new);
 	}
 	else {
-	    return pixel_avg;
+	    return pixel_avg_f;
+	    //return convert_float3(pixel_avg.rgb);
+	    //return convert_uchar4(pixel_avg);
 	}
+
+    float3 pixel_new_f = convert_float3(pixel_new.rgb);
 
     /*{
         // temporal merging
-        float3 diff = convert_float3(pixel_avg.rgb) - convert_float3(pixel_new.rgb);
+        const float C = 32.0f*32.0f;
+        float3 diff = pixel_avg_f - pixel_new_f;
         float L = dot(diff, diff);
-        if( L > 16*16 ) {
-            // error too large, so no contribution for new image pixel
-            //pixel_new.r = 255;
-            //pixel_new.g = 0;
-            //pixel_new.b = 255;
-            //pixel_avg = pixel_new;
-            pixel_new = pixel_avg;
-        }
+        //if( L > C ) {
+        //    // error too large, so no contribution for new image pixel
+        //    return pixel_avg_f;
+        //}
+        float weight = L/(L+C);
+        pixel_new_f = weight * pixel_avg_f + (1.0-weight) * pixel_new_f;
     }*/
-
-    float3 pixel_avg_f = convert_float3(pixel_avg.rgb);
-    float3 pixel_new_f = convert_float3(pixel_new.rgb);
 
     pixel_avg_f = (avg_factor*pixel_avg_f + pixel_new_f)/(avg_factor+1.0f);
 
-	uchar4 out;
+	/*uchar4 out;
     out.r = (uchar)clamp(pixel_avg_f.r+0.5f, 0.0f, 255.0f);
     out.g = (uchar)clamp(pixel_avg_f.g+0.5f, 0.0f, 255.0f);
     out.b = (uchar)clamp(pixel_avg_f.b+0.5f, 0.0f, 255.0f);
 
-	return out;
+	return out;*/
+	return pixel_avg_f;
+}
+
+float3 __attribute__((kernel)) avg(uchar4 pixel_avg, uint32_t x, uint32_t y) {
+    float3 pixel_avg_f = convert_float3(pixel_avg.rgb);
+    return avg_f(pixel_avg_f, x, y);
 }
 
 rs_allocation bitmap1;

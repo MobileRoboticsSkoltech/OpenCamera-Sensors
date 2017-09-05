@@ -38,6 +38,7 @@ import android.os.Build;
 import android.os.Environment;
 //import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.renderscript.Allocation;
 import android.support.annotation.RequiresApi;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
@@ -8934,7 +8935,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		Thread.sleep(1000); // wait for camera to open
 
-		Bitmap nr_bitmap = getBitmapFromFile(inputs.get(0));
+		/*Bitmap nr_bitmap = getBitmapFromFile(inputs.get(0));
     	long time_s = System.currentTimeMillis();
 		try {
 			for(int i=1;i<inputs.size();i++) {
@@ -8959,7 +8960,41 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         {
             mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(nr_bitmap);
             Log.d(TAG, "time after brighten: " + (System.currentTimeMillis() - time_s));
-        }
+        }*/
+
+		Bitmap nr_bitmap;
+		try {
+			// initialise allocation from first two bitmaps
+			Bitmap bitmap0 = getBitmapFromFile(inputs.get(0));
+			Bitmap bitmap1 = getBitmapFromFile(inputs.get(1));
+			int width = bitmap0.getWidth();
+			int height = bitmap0.getHeight();
+			float avg_factor = 1.0f;
+			Allocation allocation = mActivity.getApplicationInterface().getHDRProcessor().processAvg(bitmap0, bitmap1, avg_factor, true);
+			// processAvg recycles both bitmaps
+			if( cb != null ) {
+				cb.doneProcessAvg(1);
+			}
+
+			for(int i=2;i<inputs.size();i++) {
+				Log.d(TAG, "processAvg for image: " + i);
+
+				Bitmap new_bitmap = getBitmapFromFile(inputs.get(i));
+				avg_factor = (float)i;
+				mActivity.getApplicationInterface().getHDRProcessor().updateAvg(allocation, width, height, new_bitmap, avg_factor, true);
+				// updateAvg recycles new_bitmap
+				if( cb != null ) {
+					cb.doneProcessAvg(i);
+				}
+			}
+
+            nr_bitmap = mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(allocation, width, height);
+		}
+		catch(HDRProcessorException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+		Log.d(TAG, "Avg time: " + (System.currentTimeMillis() - time_s));
 
 		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
 		OutputStream outputStream = new FileOutputStream(file);
@@ -9165,6 +9200,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 8, 0};
 					int [] exp_offsets_x = {0, 3, 0};
 					int [] exp_offsets_y = {0, 7, 0};
+					//int [] exp_offsets_x = {0, 3, 0};
+					//int [] exp_offsets_y = {0, 8, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else {
