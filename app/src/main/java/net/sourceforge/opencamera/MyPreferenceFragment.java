@@ -198,6 +198,16 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		if( MyDebug.LOG )
 			Log.d(TAG, "max_expo_bracketing_n_images: " + max_expo_bracketing_n_images);
 
+		final boolean supports_nr = bundle.getBoolean("supports_nr");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_nr: " + supports_nr);
+
+		if( !supports_nr ) {
+			Preference pref = findPreference("preference_nr_save");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+        	pg.removePreference(pref);
+		}
+
 		final boolean supports_exposure_compensation = bundle.getBoolean("supports_exposure_compensation");
 		final int exposure_compensation_min = bundle.getInt("exposure_compensation_min");
 		final int exposure_compensation_max = bundle.getInt("exposure_compensation_max");

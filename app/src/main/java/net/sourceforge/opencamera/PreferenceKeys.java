@@ -123,6 +123,10 @@ public class PreferenceKeys {
     	return "preference_hdr_save_expo";
     }
 
+    public static String getNRSaveExpoPreferenceKey() {
+    	return "preference_nr_save";
+    }
+
     public static String getLocationPreferenceKey() {
     	return "preference_location";
     }

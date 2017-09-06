@@ -1886,7 +1886,19 @@ public class MyApplicationInterface implements ApplicationInterface {
 		PhotoMode photo_mode = getPhotoMode();
 		if( photo_mode == PhotoMode.NoiseReduction ) {
 			if( n_capture_images == 1 ) {
+				ImageSaver.Request.SaveBase save_base = ImageSaver.Request.SaveBase.SAVEBASE_NONE;
+				String save_base_preference = sharedPreferences.getString(PreferenceKeys.getNRSaveExpoPreferenceKey(), "preference_nr_save_no");
+				switch( save_base_preference ) {
+					case "preference_nr_save_single":
+						save_base = ImageSaver.Request.SaveBase.SAVEBASE_FIRST;
+						break;
+					case "preference_nr_save_all":
+						save_base = ImageSaver.Request.SaveBase.SAVEBASE_ALL;
+						break;
+				}
+
 				imageSaver.startImageAverage(true,
+					save_base,
 					image_capture_intent, image_capture_intent_uri,
 					using_camera2, image_quality,
 					do_auto_stabilise, level_angle,
@@ -1959,7 +1971,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			if( MyDebug.LOG )
 				Log.d(TAG, "HDR mode");
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-			boolean save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
+			boolean save_expo = sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
 			if( MyDebug.LOG )
 				Log.d(TAG, "save_expo: " + save_expo);
 

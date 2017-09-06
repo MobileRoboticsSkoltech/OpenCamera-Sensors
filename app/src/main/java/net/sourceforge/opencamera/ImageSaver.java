@@ -65,7 +65,7 @@ public class ImageSaver extends Thread {
 	private int n_images_to_save = 0;
 	private final BlockingQueue<Request> queue = new ArrayBlockingQueue<>(1); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
 	
-	private static class Request {
+	static class Request {
 		enum Type {
 			JPEG,
 			RAW,
@@ -78,7 +78,12 @@ public class ImageSaver extends Thread {
 			AVERAGE
 		}
 		final ProcessType process_type; // for jpeg
-		final boolean save_expo; // for process_type HDR
+		enum SaveBase {
+			SAVEBASE_NONE,
+			SAVEBASE_FIRST,
+			SAVEBASE_ALL
+		}
+		final SaveBase save_base; // whether to save the base images, for process_type HDR or AVERAGE
 		/* jpeg_images: for jpeg (may be null otherwise).
 		 * If process_type==HDR, this should be 1 or 3 images, and the images are combined/converted to a HDR image (if there's only 1
 		 * image, this uses fake HDR or "DRO").
@@ -112,7 +117,7 @@ public class ImageSaver extends Thread {
 		
 		Request(Type type,
 			ProcessType process_type,
-			boolean save_expo,
+			SaveBase save_base,
 			List<byte []> jpeg_images,
 			DngCreator dngCreator, Image image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
@@ -126,7 +131,7 @@ public class ImageSaver extends Thread {
 			int sample_factor) {
 			this.type = type;
 			this.process_type = process_type;
-			this.save_expo = save_expo;
+			this.save_base = save_base;
 			this.jpeg_images = jpeg_images;
 			this.dngCreator = dngCreator;
 			this.image = image;
@@ -305,6 +310,7 @@ public class ImageSaver extends Thread {
 	private Request pending_image_average_request = null;
 
 	void startImageAverage(boolean do_in_background,
+			Request.SaveBase save_base,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
@@ -320,7 +326,7 @@ public class ImageSaver extends Thread {
 		}
 		pending_image_average_request = new Request(Request.Type.JPEG,
 				Request.ProcessType.AVERAGE,
-				false,
+				save_base,
 				new ArrayList<byte[]>(),
 				null, null,
 				image_capture_intent, image_capture_intent_uri,
@@ -355,6 +361,7 @@ public class ImageSaver extends Thread {
 		}
 		addRequest(pending_image_average_request);
 		pending_image_average_request = null;
+		addDummyRequest();
 	}
 
 	/** Internal saveImage method to handle both JPEG and RAW.
@@ -384,7 +391,7 @@ public class ImageSaver extends Thread {
 		
 		Request request = new Request(is_raw ? Request.Type.RAW : Request.Type.JPEG,
 				is_hdr ? Request.ProcessType.HDR : Request.ProcessType.NORMAL,
-				save_expo,
+				save_expo ? Request.SaveBase.SAVEBASE_ALL : Request.SaveBase.SAVEBASE_NONE,
 				jpeg_images,
 				dngCreator, image,
 				image_capture_intent, image_capture_intent_uri,
@@ -406,23 +413,7 @@ public class ImageSaver extends Thread {
 				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
 				// of 2, due to RAW and JPEG each needing their own request).
 				// Similarly for saving multiple images (expo-bracketing)
-				Request dummy_request = new Request(Request.Type.DUMMY,
-					Request.ProcessType.NORMAL,
-					false,
-					null,
-					null, null,
-					false, null,
-					false, 0,
-					false, 0.0,
-					false,
-					false,
-					null,
-					null, null, 0, 0, null, null, null, null,
-					false, null, false, 0.0,
-					1);
-				if( MyDebug.LOG )
-					Log.d(TAG, "add dummy request");
-				addRequest(dummy_request);
+				addDummyRequest();
 			}
 			success = true; // always return true when done in background
 		}
@@ -475,6 +466,26 @@ public class ImageSaver extends Thread {
 					Log.e(TAG, "interrupted while trying to add to ImageSaver queue");
 			}
 		}
+	}
+
+	private void addDummyRequest() {
+		Request dummy_request = new Request(Request.Type.DUMMY,
+			Request.ProcessType.NORMAL,
+            Request.SaveBase.SAVEBASE_NONE,
+			null,
+			null, null,
+			false, null,
+			false, 0,
+			false, 0.0,
+			false,
+			false,
+			null,
+			null, null, 0, 0, null, null, null, null,
+			false, null, false, 0.0,
+			1);
+		if( MyDebug.LOG )
+			Log.d(TAG, "add dummy request");
+		addRequest(dummy_request);
 	}
 
 	/** Wait until the queue is empty and all pending images have been saved.
@@ -650,6 +661,7 @@ public class ImageSaver extends Thread {
 			if (MyDebug.LOG)
 				Log.d(TAG, "average");
 
+			saveBaseImages(request, "_");
 			main_activity.savingImage(true);
 
 			/*List<Bitmap> bitmaps = loadBitmaps(request.jpeg_images, 0);
@@ -740,21 +752,9 @@ public class ImageSaver extends Thread {
 			}
 
         	long time_s = System.currentTimeMillis();
-			if( request.jpeg_images.size() > 1 && !request.image_capture_intent && request.save_expo ) {
-				if( MyDebug.LOG )
-					Log.e(TAG, "save exposures");
-				for(int i=0;i<request.jpeg_images.size();i++) {
-					// note, even if one image fails, we still try saving the other images - might as well give the user as many images as we can...
-					byte [] image = request.jpeg_images.get(i);
-					String filename_suffix = "_EXP" + i;
-					// don't update the thumbnails, only do this for the final HDR image - so user doesn't think it's complete, click gallery, then wonder why the final image isn't there
-					// also don't mark these images as being shared
-					if( !saveSingleImageNow(request, image, null, filename_suffix, false, false) ) {
-						if( MyDebug.LOG )
-							Log.e(TAG, "saveSingleImageNow failed for exposure image");
-						// we don't set success to false here - as for deciding whether to pause preview or not (which is all we use the success return for), all that matters is whether we saved the final HDR image
-					}
-				}
+			if( request.jpeg_images.size() > 1 ) {
+				// if there's only 1 image, we're in DRO mode, and shouldn't save the base image
+				saveBaseImages(request, "_EXP");
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "HDR performance: time after saving base exposures: " + (System.currentTimeMillis() - time_s));
 				}
@@ -860,6 +860,31 @@ public class ImageSaver extends Thread {
 		}
 
 		return success;
+	}
+
+	/** Saves all the images in request.jpeg_images, depending on the save_base option.
+	 */
+	private void saveBaseImages(Request request, String suffix) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "saveBaseImages");
+		if( !request.image_capture_intent && request.save_base != Request.SaveBase.SAVEBASE_NONE ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "save base images");
+			for(int i=0;i<request.jpeg_images.size();i++) {
+				// note, even if one image fails, we still try saving the other images - might as well give the user as many images as we can...
+				byte [] image = request.jpeg_images.get(i);
+				String filename_suffix = suffix + i;
+				// don't update the thumbnails, only do this for the final image - so user doesn't think it's complete, click gallery, then wonder why the final image isn't there
+				// also don't mark these images as being shared
+				if( !saveSingleImageNow(request, image, null, filename_suffix, false, false) ) {
+					if( MyDebug.LOG )
+						Log.e(TAG, "saveSingleImageNow failed for exposure image");
+					// we don't set success to false here - as for deciding whether to pause preview or not (which is all we use the success return for), all that matters is whether we saved the final HDR image
+				}
+				if( request.save_base == Request.SaveBase.SAVEBASE_FIRST )
+					break; // only requested the first
+			}
+		}
 	}
 
 	/** Performs the auto-stabilise algorithm on the image.
