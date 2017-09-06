@@ -42,7 +42,7 @@
         <item>Messa a fuoco Auto</item>
         <item>Messa a fuoco Infinita</item>
         <item>Messa a fuoco Macro</item>
-        <item>Messa a fuoco Locked</item>
+        <item>Messa a fuoco Bloccata</item>
         <item>Messa a fuoco Manuale</item>
         <item>Messa a fuoco Fissa</item>
         <item>Messa a fuoco EDOF</item>
@@ -105,7 +105,7 @@
         <item>4x</item>
         <item>5x</item>
         <item>10x</item>
-        <item>Unlimited</item>
+        <item>Illimitato</item>
     </string-array>
     <string-array name="preference_burst_mode_values">
         <item>1</item>
@@ -162,6 +162,16 @@
         <item>preference_preview_size_display</item>
         <item>preference_preview_size_wysiwyg</item>
     </string-array>
+    <string-array name="preference_touch_capture_entries">
+        <item>Nessuno</item>
+        <item>Tap singolo</item>
+        <item>Doppio tap</item>
+    </string-array>
+    <string-array name="preference_touch_capture_values">
+        <item>none</item>
+        <item>single</item>
+        <item>double</item>
+    </string-array>
     <string-array name="preference_volume_keys_entries">
         <item>Scatta foto (o fai partire/interrompere il video)</item>
         <item>Messa a fuoco</item>
@@ -190,11 +200,39 @@
     </string-array>
     <string-array name="preference_ui_placement_entries">
         <item>Interfaccia utente mancini</item>
-        <item>Interfaccia utente destrimani</item>
+        <item>Interfaccia utente destrorsi</item>
     </string-array>
     <string-array name="preference_ui_placement_values">
         <item>ui_left</item>
         <item>ui_right</item>
+    </string-array>
+    <string-array name="preference_immersive_mode_entries">
+        <item>Off</item>
+        <item>Nascondi solamente i bottoni di navigazione virtuali on-screen</item>
+        <item>Nascondi GUI</item>
+        <item>Nascondi tutto</item>
+    </string-array>
+    <string-array name="preference_immersive_mode_values">
+        <item>immersive_mode_off</item>
+        <item>immersive_mode_low_profile</item>
+        <item>immersive_mode_gui</item>
+        <item>immersive_mode_everything</item>
+    </string-array>
+    <string-array name="preference_angle_highlight_color_entries">
+        <item>Rosso</item>
+        <item>Verde</item>
+        <item>Blu</item>
+        <item>Giallo</item>
+        <item>Viola</item>
+        <item>Bianco</item>
+    </string-array>
+    <string-array name="preference_angle_highlight_color_values">
+        <item>#f44336</item> <!-- Red 500 -->
+        <item>#14e715</item> <!-- Green A400 -->
+        <item>#2196f3</item> <!-- Blue 500 -->
+        <item>#ffeb3b</item> <!-- Yellow 500 -->
+        <item>#9c27b0</item> <!-- Purple 500 -->
+        <item>#ffffff</item> <!-- White -->
     </string-array>
     <string-array name="preference_grid_entries">
         <item>Nessuna</item>
@@ -250,6 +288,94 @@
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>
         </string-array>
+    <string-array name="preference_raw_entries">
+        <item>Solo JPEG</item>
+        <item>JPEG e DNG (RAW)</item>
+    </string-array>
+    <string-array name="preference_raw_values">
+        <item>preference_raw_no</item>
+        <item>preference_raw_yes</item>
+    </string-array>
+    <string-array name="preference_stamp_entries">
+        <item>No timbro</item>
+        <item>Timbro foto</item>
+    </string-array>
+    <string-array name="preference_stamp_values">
+        <item>preference_stamp_no</item>
+        <item>preference_stamp_yes</item>
+    </string-array>
+    <string-array name="preference_stamp_dateformat_entries">
+        <item>Default</item>
+        <item>yyyy/mm/dd</item>
+        <item>dd/mm/yyyy</item>
+        <item>mm/dd/yyyy</item>
+        <item>Nessuno</item>
+    </string-array>
+    <string-array name="preference_stamp_dateformat_values">
+        <item>preference_stamp_dateformat_default</item>
+        <item>preference_stamp_dateformat_yyyymmdd</item>
+        <item>preference_stamp_dateformat_ddmmyyyy</item>
+        <item>preference_stamp_dateformat_mmddyyyy</item>
+        <item>preference_stamp_dateformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_timeformat_entries">
+        <item>Default</item>
+        <item>12 ore</item>
+        <item>24 ore</item>
+        <item>Nessuno</item>
+    </string-array>
+    <string-array name="preference_stamp_timeformat_values">
+        <item>preference_stamp_timeformat_default</item>
+        <item>preference_stamp_timeformat_12hour</item>
+        <item>preference_stamp_timeformat_24hour</item>
+        <item>preference_stamp_timeformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_gpsformat_entries">
+        <item>Default</item>
+        <item>Gradi/minuti/secondi</item>
+        <item>Nessuno</item>
+    </string-array>
+    <string-array name="preference_stamp_gpsformat_values">
+        <item>preference_stamp_gpsformat_default</item>
+        <item>preference_stamp_gpsformat_dms</item>
+        <item>preference_stamp_gpsformat_none</item>
+    </string-array>
+    <string-array name="preference_stamp_fontsize_entries">
+        <item>6</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
+        <item>24</item>
+    </string-array>
+    <string-array name="preference_stamp_fontsize_values">
+        <item>6</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+        <item>22</item>
+        <item>24</item>
+    </string-array>
+    <string-array name="preference_stamp_style_entries">
+        <item>Testo ombreggiato</item>
+        <item>Testo piano</item>
+    </string-array>
+    <string-array name="preference_stamp_style_values">
+        <item>preference_stamp_style_shadowed</item>
+        <item>preference_stamp_style_plain</item>
+    </string-array>
     <string-array name="preference_video_bitrate_entries">
         <item>Predefinito</item>
         <item>100kbps</item>
@@ -353,8 +479,8 @@
     <string-array name="preference_record_audio_src_entries">
         <item>Videocamera</item>
         <item>Microfono esterno (se presente)</item>
-        <item>Default audio source</item>
-        <item>Optimised for voice</item>
+        <item>Sorgente audio predefinita</item>
+        <item>Ottimizzato per voce</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>
@@ -362,4 +488,100 @@
         <item>audio_src_default</item>
         <item>audio_src_voice_communication</item>
     </string-array>
+    <string-array name="preference_record_audio_channels_entries">
+        <item>Default</item>
+        <item>Mono</item>
+        <item>Stereo (supportato solamente da alcuni dispositivi)</item>
+    </string-array>
+    <string-array name="preference_record_audio_channels_values">
+        <item>audio_default</item>
+        <item>audio_mono</item>
+        <item>audio_stereo</item>
+    </string-array>
+    <string-array name="preference_audio_control_entries">
+        <item>Nessuno</item>
+        <item>Rumore forte</item>
+        <item>Comando vocale: \"cheese\"</item>
+    </string-array>
+    <string-array name="preference_audio_control_values">
+        <item>none</item>
+        <item>noise</item>
+        <item>voice</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_entries">
+        <item>+3 (alta sensibilità)</item>
+        <item>+2</item>
+        <item>+1</item>
+        <item>0 (default)</item>
+        <item>-1</item>
+        <item>-2 (bassa sensibilità)</item>
+    </string-array>
+    <string-array name="preference_audio_noise_control_sensitivity_values">
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+        <item>-2</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_entries">
+        <item>Default dispositivo</item>
+        <item>100MB</item>
+        <item>200MB</item>
+        <item>300MB</item>
+        <item>500MB</item>
+        <item>1GB</item>
+    </string-array>
+    <string-array name="preference_video_max_filesize_values">
+        <item>0</item>
+        <item>104857600</item>
+        <item>209715200</item>
+        <item>314572800</item>
+        <item>524288000</item>
+        <item>1073741824</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_entries">
+        <item>Orario locale</item>
+        <item>UTC (Zulu)</item>
+    </string-array>
+    <string-array name="preference_save_zulu_time_values">
+        <item>local</item>
+        <item>zulu</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_entries">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_n_images_values">
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_entries">
+        <item>0.5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="preference_expo_bracketing_stops_values">
+        <item>0.5</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="preference_front_camera_mirror_entries">
+        <item>No mirror</item>
+        <item>Mirror photo</item>
+    </string-array>
+    <string-array name="preference_front_camera_mirror_values">
+        <item>preference_front_camera_mirror_no</item>
+        <item>preference_front_camera_mirror_photo</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_entries">
+        <item>No sottotitoli</item>
+        <item>Registra sottotitoli</item>
+    </string-array>
+    <string-array name="preference_video_subtitle_values">
+        <item>preference_video_subtitle_no</item>
+        <item>preference_video_subtitle_yes</item>
+    </string-array>    
 </resources>
