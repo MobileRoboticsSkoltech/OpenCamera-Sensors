@@ -1913,6 +1913,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			if( n_capture_images == 8 ) {
 				imageSaver.finishImageAverage();
 			}
+			success = true;
 		}
 		else {
 			success = imageSaver.saveImageJpeg(do_in_background, is_hdr, save_expo, images,
