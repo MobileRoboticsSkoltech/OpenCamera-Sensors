@@ -4076,7 +4076,9 @@ public class CameraController2 extends CameraController {
 				requests.add(last_request);
 				if( MyDebug.LOG )
 					Log.d(TAG, "captureBurst");
-				captureSession.captureBurst(requests, previewCaptureCallback, handler);
+				int sequenceId = captureSession.captureBurst(requests, previewCaptureCallback, handler);
+				if( MyDebug.LOG )
+					Log.d(TAG, "sequenceId: " + sequenceId);
 			}
 			else {
 				final int burst_delay = 100;
@@ -4555,8 +4557,12 @@ public class CameraController2 extends CameraController {
 
 		@Override
 		public void onCaptureFailed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "onCaptureFailed: " + failure);
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "onCaptureFailed: " + failure);
+				Log.d(TAG, "reason: " + failure.getReason());
+				Log.d(TAG, "was image captured?: " + failure.wasImageCaptured());
+				Log.d(TAG, "sequenceId: " + failure.getSequenceId());
+			}
 			super.onCaptureFailed(session, request, failure); // API docs say this does nothing, but call it just to be safe
 		}
 
