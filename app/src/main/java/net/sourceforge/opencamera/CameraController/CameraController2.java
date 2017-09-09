@@ -88,6 +88,7 @@ public class CameraController2 extends CameraController {
 	private PictureCallback raw_cb;
 	//private CaptureRequest pending_request_when_ready;
 	private int n_burst; // number of expected burst images in this capture
+	private boolean burst_single_request; // if n_burst > 1: if true then the burst images are returned in a single call to onBurstPictureTaken(), if false, then multiple calls to onPictureTaken() are made as soon as the image is available
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
 	private List<CaptureRequest> slow_burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
 	private long slow_burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using fast burst)
@@ -2205,7 +2206,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "read " + bytes.length + " bytes");
 		            buffer.get(bytes);
 		            image.close();
-		            if( want_expo_bracketing && n_burst > 1 ) {
+		            if( burst_single_request && n_burst > 1 ) {
 		            	pending_burst_images.add(bytes);
 		            	if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
 							if( MyDebug.LOG )
@@ -2351,6 +2352,7 @@ public class CameraController2 extends CameraController {
 		}
 		slow_burst_capture_requests = null;
 		n_burst = 0;
+		burst_single_request = false;
 		slow_burst_start_ms = 0;
 	}
 	
@@ -3728,6 +3730,7 @@ public class CameraController2 extends CameraController {
     			stillBuilder.addTarget(imageReaderRaw.getSurface());
 
 			n_burst = 1;
+			burst_single_request = false;
 			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
 			if( jpeg_cb != null ) {
 				if( MyDebug.LOG )
@@ -3964,6 +3967,7 @@ public class CameraController2 extends CameraController {
 			*/
 
 			n_burst = requests.size();
+			burst_single_request = true;
 			if( MyDebug.LOG )
 				Log.d(TAG, "n_burst: " + n_burst);
 
@@ -4050,6 +4054,7 @@ public class CameraController2 extends CameraController {
 			final CaptureRequest last_request = stillBuilder.build();
 
 			n_burst = 8;
+			burst_single_request = false;
 			if( MyDebug.LOG )
 				Log.d(TAG, "n_burst: " + n_burst);
 
@@ -4061,42 +4066,56 @@ public class CameraController2 extends CameraController {
 				jpeg_cb.onStarted();
 			}
 
-			final int burst_delay = 100;
-			new Runnable() {
-				int n_remaining = n_burst;
+			final boolean use_burst = true;
+			//final boolean use_burst = false;
 
-				@Override
-				public void run() {
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "takePictureBurst runnable");
-						if( n_remaining == 1 ) {
-							Log.d(TAG, "    is last request");
-						}
-					}
-					try {
-						captureSession.capture(n_remaining == 1 ? last_request : request, previewCaptureCallback, handler);
-						n_remaining--;
-						if( MyDebug.LOG )
-							Log.d(TAG, "takePictureBurst n_remaining: " + n_remaining);
-						if( n_remaining > 0 ) {
-							handler.postDelayed(this, burst_delay);
-						}
-					}
-					catch(CameraAccessException e) {
+			if( use_burst ) {
+				List<CaptureRequest> requests = new ArrayList<>();
+				for(int i=0;i<n_burst-1;i++)
+					requests.add(request);
+				requests.add(last_request);
+				if( MyDebug.LOG )
+					Log.d(TAG, "captureBurst");
+				captureSession.captureBurst(requests, previewCaptureCallback, handler);
+			}
+			else {
+				final int burst_delay = 100;
+				new Runnable() {
+					int n_remaining = n_burst;
+
+					@Override
+					public void run() {
 						if( MyDebug.LOG ) {
-							Log.e(TAG, "failed to take picture burst");
-							Log.e(TAG, "reason: " + e.getReason());
-							Log.e(TAG, "message: " + e.getMessage());
+							Log.d(TAG, "takePictureBurst runnable");
+							if( n_remaining == 1 ) {
+								Log.d(TAG, "    is last request");
+							}
 						}
-						e.printStackTrace();
-						jpeg_cb = null;
-						if( take_picture_error_cb != null ) {
-							take_picture_error_cb.onError();
-							take_picture_error_cb = null;
+						try {
+							captureSession.capture(n_remaining == 1 ? last_request : request, previewCaptureCallback, handler);
+							n_remaining--;
+							if( MyDebug.LOG )
+								Log.d(TAG, "takePictureBurst n_remaining: " + n_remaining);
+							if( n_remaining > 0 ) {
+								handler.postDelayed(this, burst_delay);
+							}
+						}
+						catch(CameraAccessException e) {
+							if( MyDebug.LOG ) {
+								Log.e(TAG, "failed to take picture burst");
+								Log.e(TAG, "reason: " + e.getReason());
+								Log.e(TAG, "message: " + e.getMessage());
+							}
+							e.printStackTrace();
+							jpeg_cb = null;
+							if( take_picture_error_cb != null ) {
+								take_picture_error_cb.onError();
+								take_picture_error_cb = null;
+							}
 						}
 					}
-				}
-			}.run();
+				}.run();
+			}
 
 			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
 				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
