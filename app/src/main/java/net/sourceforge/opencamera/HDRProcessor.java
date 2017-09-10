@@ -872,9 +872,12 @@ public class HDRProcessor {
 		if( sharpness_new > sharpness_avg ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "use new image as reference");
-			Allocation dummy = allocation_avg;
+			Allocation dummy_allocation = allocation_avg;
 			allocation_avg = allocation_new;
-			allocation_new = dummy;
+			allocation_new = dummy_allocation;
+			Bitmap dummy_bitmap = bitmap_avg;
+			bitmap_avg = bitmap_new;
+			bitmap_new = dummy_bitmap;
 			sharp_index = 1;
 		}
 		else {
@@ -882,6 +885,10 @@ public class HDRProcessor {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "sharp_index: " + sharp_index);
+
+		/*LuminanceInfo luminanceInfo = computeMedianLuminance(bitmap_avg, 0, 0, width, height);
+		if( MyDebug.LOG )
+			Log.d(TAG, "median: " + luminanceInfo.median_value);*/
 
 		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, true);
 
