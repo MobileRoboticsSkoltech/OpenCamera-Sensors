@@ -36,6 +36,7 @@ uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) 
         int width = rsAllocationGetDimX(bitmap);
         int height = rsAllocationGetDimY(bitmap);
         int count = 0;
+        //float C = 0.1f*rgb.g*rgb.g;
         for(int cy=y-radius;cy<=y+radius;cy++) {
             for(int cx=x-radius;cx<=x+radius;cx++) {
                 if( cx >= 0 && cx < width && cy >= 0 && y < height ) {
