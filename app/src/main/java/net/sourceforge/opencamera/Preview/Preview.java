@@ -1928,10 +1928,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				long exposure_time_value = applicationInterface.getExposureTimePref();
 				if( MyDebug.LOG )
 					Log.d(TAG, "saved exposure_time: " + exposure_time_value);
-				if( exposure_time_value < min_exposure_time )
-					exposure_time_value = min_exposure_time;
-				else if( exposure_time_value > max_exposure_time )
-					exposure_time_value = max_exposure_time;
+				if( exposure_time_value < getMinimumExposureTime() )
+					exposure_time_value = getMinimumExposureTime();
+				else if( exposure_time_value > getMaximumExposureTime() )
+					exposure_time_value = getMaximumExposureTime();
 				camera_controller.setExposureTime(exposure_time_value);
 				// now save
 				applicationInterface.setExposureTimePref(exposure_time_value);
@@ -3063,10 +3063,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExposureTime(): " + new_exposure_time);
 		if( camera_controller != null && supports_exposure_time ) {
-			if( new_exposure_time < min_exposure_time )
-				new_exposure_time = min_exposure_time;
-			else if( new_exposure_time > max_exposure_time )
-				new_exposure_time = max_exposure_time;
+			if( new_exposure_time < getMinimumExposureTime() )
+				new_exposure_time = getMinimumExposureTime();
+			else if( new_exposure_time > getMaximumExposureTime() )
+				new_exposure_time = getMaximumExposureTime();
 			if( camera_controller.setExposureTime(new_exposure_time) ) {
 				// now save
 				applicationInterface.setExposureTimePref(new_exposure_time);
@@ -5411,7 +5411,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public long getMaximumExposureTime() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getMaximumExposureTime");
-    	return this.max_exposure_time;
+		long max = max_exposure_time;
+		if( applicationInterface.isExpoBracketingPref() || applicationInterface.isCameraBurstPref() ) {
+			// doesn't make sense to allow exposure times more than 0.5s in these modes
+			max = Math.min(max_exposure_time, 1000000000L/2);
+		}
+    	return max;
     }
     
     public boolean supportsExposures() {

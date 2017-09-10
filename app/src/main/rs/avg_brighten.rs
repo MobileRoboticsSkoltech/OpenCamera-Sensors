@@ -26,8 +26,7 @@ float linear_scale;
     return out;
 }*/
 
-uchar4 __attribute__((kernel)) avg_brighten(uchar4 in) {
-    float3 rgb = convert_float3(in.rgb);
+uchar4 __attribute__((kernel)) avg_brighten(float3 rgb) {
     rgb = rgb - black_level;
     rgb = rgb * white_level;
     rgb = clamp(rgb, 0.0f, 255.0f);
