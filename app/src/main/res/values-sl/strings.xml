@@ -312,6 +312,7 @@
     <string name="photo_mode_hdr">HDR</string>
 	<string name="photo_mode_expo_bracketing">Kor. sam. osvetlitve</string>
     <string name="photo_mode_expo_bracketing_full">Korektura samodejne osvetlitve</string>
+	<string name="photo_mode_noise_reduction">Zmanjševanje šuma</string>
     <string name="preference_category_stamp">Dodaj žig</string>
     <string name="preference_hdr_save_expo">Shrani vse slike za način HDR</string>
     <string name="preference_hdr_save_expo_summary">Če je omogočeno, bodo ob uporabi načina HDR posnete tri osnovne slike kot tudi končna slika HDR. Upoštevajte, da bo shranevanje počasnejše, posebno, če uporabljate možnosti, kot sta \"Dodaj žig\" ali samodejno izravnavo.</string>
@@ -332,6 +333,13 @@
     <string name="preference_expo_bracketing_n_images_summary">Število slik korekture samodejne osvetlitve</string>
     <string name="preference_expo_bracketing_stops">Korak kor. sam. osvetlitve</string>
     <string name="preference_expo_bracketing_stops_summary">Število pozitivnih/negativnih korakov za najtemnejšo/najsvetlejšo sliko</string>
+	
+	<string name="preference_nr_save">Izvirne slike zmanjševanja šuma</string>
+    <string name="preference_nr_save_summary">Ali naj se izvirne slike shranijo v načinu zmanjševanja šuma. Upoštevajte, da se bodo pri tem slike shranjevale dalj časa.</string>
+
+    <string name="preference_nr_save_no">Ne shrani izvirnih slik</string>
+    <string name="preference_nr_save_single">Shrani eno izvirno sliko</string>
+    <string name="preference_nr_save_all">Shrani vse izvirne slike (počasno)</string>
 	
 	<string name="seconds_abbreviation">s</string> <!-- short for seconds -->
 
