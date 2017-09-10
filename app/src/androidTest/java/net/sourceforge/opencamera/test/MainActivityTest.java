@@ -8994,7 +8994,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			e.printStackTrace();
 			throw new RuntimeException();
 		}
-		Log.d(TAG, "Avg time: " + (System.currentTimeMillis() - time_s));
 
 		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
 		OutputStream outputStream = new FileOutputStream(file);
@@ -9035,6 +9034,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 1, 0};
 					int [] exp_offsets_x = {0, 4, 0};
 					int [] exp_offsets_y = {0, 1, 0};
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
@@ -9077,6 +9077,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, -10, 0};
 					int [] exp_offsets_x = {0, -15, 0};
 					int [] exp_offsets_y = {0, -11, 0};
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
@@ -9121,6 +9122,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, -18, 0};
 					int [] exp_offsets_x = {0, -1, 0};
 					int [] exp_offsets_y = {0, 0, 0};
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
@@ -9179,6 +9181,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 2, 0};
 					int [] exp_offsets_x = {0, 5, 0};
 					int [] exp_offsets_y = {0, 1, 0};
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
@@ -9239,6 +9242,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, -1, 0};
 					int [] exp_offsets_x = {0, 5, 0};
 					int [] exp_offsets_y = {0, 0, 0};
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
 				}
 				else if( index == 2 ) {
@@ -9295,12 +9299,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
-				/*if( index == 1 ) {
-					int [] exp_offsets_x = {0, -1, 0};
+				if( index == 1 ) {
+					/*int [] exp_offsets_x = {0, -1, 0};
 					int [] exp_offsets_y = {0, 0, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y);*/
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
 				}
-				else if( index == 2 ) {
+				/*else if( index == 2 ) {
 					int [] exp_offsets_x = {0, -1, 0};
 					int [] exp_offsets_y = {0, -1, 0};
 					checkHDROffsets(exp_offsets_x, exp_offsets_y);
@@ -9363,6 +9368,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
 			}
 		});
 
@@ -9393,6 +9401,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
 			}
 		});
 
@@ -9439,6 +9450,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
 			}
 		});
 
@@ -9485,6 +9499,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
 			}
 		});
 
@@ -9515,6 +9532,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 1);
+				}
 			}
 		});
 
