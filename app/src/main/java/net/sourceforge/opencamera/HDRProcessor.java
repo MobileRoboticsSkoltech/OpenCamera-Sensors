@@ -1841,6 +1841,7 @@ public class HDRProcessor {
 		}
 
 		ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
+		script.set_bitmap(input);
 		script.invoke_setBlackLevel(8.0f);
 		//script.set_gamma(gamma);
 		script.set_gain(gain);

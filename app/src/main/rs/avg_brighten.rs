@@ -2,6 +2,8 @@
 #pragma rs java_package_name(net.sourceforge.opencamera)
 #pragma rs_fp_relaxed
 
+rs_allocation bitmap;
+
 static float black_level;
 static float white_level;
 
@@ -26,7 +28,39 @@ float linear_scale;
     return out;
 }*/
 
-uchar4 __attribute__((kernel)) avg_brighten(float3 rgb) {
+uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) {
+    {
+        // spatial noise reduction filter
+        float3 sum = 0.0;
+        int radius = 4;
+        int width = rsAllocationGetDimX(bitmap);
+        int height = rsAllocationGetDimY(bitmap);
+        int count = 0;
+        for(int cy=y-radius;cy<=y+radius;cy++) {
+            for(int cx=x-radius;cx<=x+radius;cx++) {
+                if( cx >= 0 && cx < width && cy >= 0 && y < height ) {
+                    float3 this_pixel = rsGetElementAt_float3(bitmap, cx, cy);
+                    {
+                        // use a wiener filter, so that more similar pixels have greater contribution
+                        //const float C = 32.0f*32.0f;
+                        //const float C = 32.0f*32.0f/8.0f;
+                        //const float C = 64.0f;
+                        const float C = 16.0f*16.0f/8.0f;
+                        float3 diff = rgb - this_pixel;
+                        float L = dot(diff, diff);
+                        float weight = L/(L+C);
+                        //weight = 0.0;
+                        this_pixel = weight * rgb + (1.0-weight) * this_pixel;
+                    }
+                    sum += this_pixel;
+                    count++;
+                }
+            }
+        }
+
+        rgb = sum / count;
+    }
+
     rgb = rgb - black_level;
     rgb = rgb * white_level;
     rgb = clamp(rgb, 0.0f, 255.0f);
