@@ -353,6 +353,9 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "actually using exposure_time of: " + actual_exposure_time);
 				}
 				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, actual_exposure_time);
+				//builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
+				//builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L);
+				//builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 0L);
 				// for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
 				builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 				// set flash via CaptureRequest.FLASH
@@ -3741,6 +3744,8 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "capture with stillBuilder");
 			//pending_request_when_ready = stillBuilder.build();
 			captureSession.capture(stillBuilder.build(), previewCaptureCallback, handler);
+			//captureSession.capture(stillBuilder.build(), new CameraCaptureSession.CaptureCallback() {
+			//}, handler);
 			if( sounds_enabled ) // play shutter sound asap, otherwise user has the illusion of being slow to take photos
 				media_action_sound.play(MediaActionSound.SHUTTER_CLICK);
 		}
@@ -4596,6 +4601,13 @@ public class CameraController2 extends CameraController {
 				// n.b., we don't play the shutter sound here, as it typically sounds "too late"
 				// (if ever we changed this, would also need to fix for burst, where we only set the RequestTag.CAPTURE for the last image)
 			}
+			/*else {
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "onCaptureStarted:");
+					Log.d(TAG, "frameNumber: " + frameNumber);
+					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
+				}
+			}*/
 			super.onCaptureStarted(session, request, timestamp, frameNumber);
 		}
 
@@ -4621,8 +4633,19 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "sequenceId: " + result.getSequenceId());
 					Log.d(TAG, "frameNumber: " + result.getFrameNumber());
 					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
+					Log.d(TAG, "frame duration: " + request.get(CaptureRequest.SENSOR_FRAME_DURATION));
 				}
+				//return;
 			}
+			/*else {
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "onCaptureCompleted:");
+					Log.d(TAG, "sequenceId: " + result.getSequenceId());
+					Log.d(TAG, "frameNumber: " + result.getFrameNumber());
+					Log.d(TAG, "exposure time: " + request.get(CaptureRequest.SENSOR_EXPOSURE_TIME));
+					Log.d(TAG, "frame duration: " + request.get(CaptureRequest.SENSOR_FRAME_DURATION));
+				}
+			}*/
 			process(request, result);
 			processCompleted(request, result);
 			super.onCaptureCompleted(session, request, result); // API docs say this does nothing, but call it just to be safe (as with Google Camera)
