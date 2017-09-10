@@ -1824,7 +1824,8 @@ public class HDRProcessor {
 		}
 		if( median_brightness <= 0 )
 			median_brightness = 1;
-		int median_target = Math.min(127, 2*median_brightness);
+		//int median_target = Math.min(127, 2*median_brightness);
+		int median_target = Math.min(127, 3*median_brightness);
 		//int median_target = Math.min(127, 4*median_brightness);
 		int max_target = Math.min(255, (int)((max_brightness*median_target)/(float)median_brightness + 0.5f) );
 		if( MyDebug.LOG ) {
