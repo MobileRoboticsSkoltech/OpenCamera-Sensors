@@ -35,6 +35,7 @@ public class HDRProcessor {
 	// public for access by testing
 	public final int [] offsets_x = {0, 0, 0};
 	public final int [] offsets_y = {0, 0, 0};
+	public int sharp_index = 0;
 
 	private enum HDRAlgorithm {
 		HDRALGORITHM_STANDARD,
@@ -865,6 +866,22 @@ public class HDRProcessor {
 		Allocation allocation_out = Allocation.createTyped(rs, Type.createXY(rs, Element.F32_3(rs), width, height));
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+
+		float sharpness_avg = computeSharpness(allocation_avg, width, time_s);
+		float sharpness_new = computeSharpness(allocation_new, width, time_s);
+		if( sharpness_new > sharpness_avg ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "use new image as reference");
+			Allocation dummy = allocation_avg;
+			allocation_avg = allocation_new;
+			allocation_new = dummy;
+			sharp_index = 1;
+		}
+		else {
+			sharp_index = 0;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "sharp_index: " + sharp_index);
 
 		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, true);
 
@@ -1854,4 +1871,43 @@ public class HDRProcessor {
         allocation_out.copyTo(bitmap);
 		return bitmap;
     }
+
+	/**
+	 * Computes a value for how sharp the image is perceived to be. The higher the value, the
+	 * sharper the image.
+	 * @param allocation_in The input allocation.
+	 * @param width         The width of the allocation.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private float computeSharpness(Allocation allocation_in, int width, long time_s) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "computeSharpness");
+		Allocation sumsAllocation = Allocation.createSized(rs, Element.I32(rs), width);
+		ScriptC_calculate_sharpness sharpnessScript = new ScriptC_calculate_sharpness(rs);
+		if( MyDebug.LOG )
+			Log.d(TAG, "bind sums allocation");
+		sharpnessScript.bind_sums(sumsAllocation);
+		sharpnessScript.set_bitmap(allocation_in);
+		sharpnessScript.set_width(width);
+		sharpnessScript.invoke_init_sums();
+		if( MyDebug.LOG )
+			Log.d(TAG, "call sharpnessScript");
+		if( MyDebug.LOG )
+			Log.d(TAG, "time before sharpnessScript: " + (System.currentTimeMillis() - time_s));
+		sharpnessScript.forEach_calculate_sharpness(allocation_in);
+		if( MyDebug.LOG )
+			Log.d(TAG, "time after sharpnessScript: " + (System.currentTimeMillis() - time_s));
+
+		int [] sums = new int[width];
+		sumsAllocation.copyTo(sums);
+		float total_sum = 0.0f;
+		for(int i=0;i<width;i++) {
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "sums[" + i + "] = " + sums[i]);*/
+			total_sum += (float)sums[i];
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "total_sum: " + total_sum);
+		return total_sum;
+	}
 }
