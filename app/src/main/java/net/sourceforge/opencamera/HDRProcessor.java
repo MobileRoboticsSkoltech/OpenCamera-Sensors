@@ -839,7 +839,7 @@ public class HDRProcessor {
 	 * @param release_bitmap If true, bitmap_new will be recycled.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public Allocation processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, boolean release_bitmap) throws HDRProcessorException {
+	public Allocation processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, int iso, boolean release_bitmap) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
@@ -890,7 +890,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "median: " + luminanceInfo.median_value);*/
 
-		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, true);
+		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, iso, true);
 
 		if( release_bitmap ) {
 			if( MyDebug.LOG )
@@ -908,7 +908,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void updateAvg(Allocation allocation, int width, int height, Bitmap bitmap_new, float avg_factor, boolean release_bitmap) throws HDRProcessorException {
+	public void updateAvg(Allocation allocation, int width, int height, Bitmap bitmap_new, float avg_factor, int iso, boolean release_bitmap) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
@@ -928,7 +928,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
 
-		processAvgCore(allocation, allocation, allocation_new, width, height, avg_factor, false);
+		processAvgCore(allocation, allocation, allocation_new, width, height, avg_factor, iso, false);
 
 		if( release_bitmap ) {
 			if( MyDebug.LOG )
@@ -941,7 +941,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void processAvgCore(Allocation allocation_out, Allocation allocation_avg, Allocation allocation_new, int width, int height, float avg_factor, boolean first) throws HDRProcessorException {
+	private void processAvgCore(Allocation allocation_out, Allocation allocation_avg, Allocation allocation_new, int width, int height, float avg_factor, int iso, boolean first) throws HDRProcessorException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processAvgCore");
 		long time_s = System.currentTimeMillis();
@@ -972,6 +972,13 @@ public class HDRProcessor {
 		// set globals
 
 		processAvgScript.set_avg_factor(avg_factor);
+
+		float limited_iso = Math.min(iso, 800);
+		limited_iso = Math.max(limited_iso, 100);
+		float wiener_C = 10.0f * limited_iso;
+		if( MyDebug.LOG )
+			Log.d(TAG, "wiener_C: " + wiener_C);
+		processAvgScript.set_wiener_C(wiener_C);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "call processAvgScript");
