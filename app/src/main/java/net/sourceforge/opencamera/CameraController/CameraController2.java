@@ -3675,7 +3675,8 @@ public class CameraController2 extends CameraController {
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setting torch for capture");
-				stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+				if( !camera_settings.has_iso )
+					stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 				test_fake_flash_photo++;
 			}
@@ -3808,6 +3809,8 @@ public class CameraController2 extends CameraController {
 
 			stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting torch for capture");
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
 				test_fake_flash_photo++;
 			}
@@ -3920,6 +3923,15 @@ public class CameraController2 extends CameraController {
 
 			}
 			/*else {
+				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "setting torch for capture");
+					if( !camera_settings.has_iso )
+						stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+					stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+					test_fake_flash_photo++;
+				}
+
 				float base_focus_distance = 2.0f;
 				if( camera_settings.has_af_mode && camera_settings.af_mode == CaptureRequest.CONTROL_AF_MODE_OFF )
 					base_focus_distance = camera_settings.focus_distance;
@@ -4037,6 +4049,14 @@ public class CameraController2 extends CameraController {
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 			// n.b., don't set RequestTag.CAPTURE here - we only do it for the last of the burst captures (see below)
 			camera_settings.setupBuilder(stillBuilder, true);
+			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "setting torch for capture");
+				if( !camera_settings.has_iso )
+					stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
+				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+				test_fake_flash_photo++;
+			}
 
 			stillBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
 			stillBuilder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF);
