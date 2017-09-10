@@ -3726,8 +3726,7 @@ public class CameraController2 extends CameraController {
 			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
 			clearPending();
-			// shouldn't add preview surface as a target - no known benefit to doing so, and it means we have problems with long manual
-			// shutter speeds (photos take twice as long)
+			// shouldn't add preview surface as a target - no known benefit to doing so
     		stillBuilder.addTarget(imageReader.getSurface());
         	if( imageReaderRaw != null )
     			stillBuilder.addTarget(imageReaderRaw.getSurface());
