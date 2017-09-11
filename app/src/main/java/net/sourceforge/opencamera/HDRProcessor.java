@@ -1810,9 +1810,15 @@ public class HDRProcessor {
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public Bitmap avgBrighten(Allocation input, int width, int height) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "avgBrighten");
         initRenderscript();
 
+    	long time_s = System.currentTimeMillis();
+
 		int[] histo = computeHistogram(input, false, true);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
 		int total = 0;
 		for(int value : histo)
 			total += value;
@@ -1881,10 +1887,16 @@ public class HDRProcessor {
 
 		Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		Allocation allocation_out = Allocation.createFromBitmap(rs, bitmap);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after creating allocation_out: " + (System.currentTimeMillis() - time_s));
 
         script.forEach_avg_brighten(input, allocation_out);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
 
         allocation_out.copyTo(bitmap);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### total time for avgBrighten: " + (System.currentTimeMillis() - time_s));
 		return bitmap;
     }
 
