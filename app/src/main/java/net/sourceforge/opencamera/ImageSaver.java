@@ -356,7 +356,8 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "finishImageAverage");
 		if( pending_image_average_request == null ) {
-			Log.e(TAG, "finishImageAverage called but no pending_image_average_request");
+			if( MyDebug.LOG )
+				Log.d(TAG, "finishImageAverage called but no pending_image_average_request");
 			return;
 		}
 		addRequest(pending_image_average_request);

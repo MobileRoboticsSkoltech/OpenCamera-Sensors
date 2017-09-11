@@ -1474,6 +1474,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void onPictureCompleted() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onPictureCompleted");
+
+		PhotoMode photo_mode = getPhotoMode();
+		if( photo_mode == PhotoMode.NoiseReduction ) {
+			imageSaver.finishImageAverage();
+		}
+
 		// call this, so that if pause-preview-after-taking-photo option is set, we remove the "taking photo" border indicator straight away
 		// also even for normal (not pausing) behaviour, good to remove the border asap
     	drawPreview.cameraInOperation(false);
@@ -1882,7 +1888,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "sample_factor: " + sample_factor);
 
-		boolean success = false;
+		boolean success;
 		PhotoMode photo_mode = getPhotoMode();
 		if( photo_mode == PhotoMode.NoiseReduction ) {
 			if( n_capture_images == 1 ) {
@@ -1910,9 +1916,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 					sample_factor);
 			}
 			imageSaver.addImageAverage(images.get(0));
-			if( n_capture_images == 8 ) {
-				imageSaver.finishImageAverage();
-			}
 			success = true;
 		}
 		else {
