@@ -31,6 +31,8 @@ float linear_scale;
 uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) {
     {
         // spatial noise reduction filter
+        /*float old_value = fmax(rgb.r, rgb.g);
+        old_value = fmax(old_value, rgb.b);*/
         float3 sum = 0.0;
         int radius = 4;
         int width = rsAllocationGetDimX(bitmap);
@@ -42,13 +44,18 @@ uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) 
                 if( cx >= 0 && cx < width && cy >= 0 && y < height ) {
                     float3 this_pixel = rsGetElementAt_float3(bitmap, cx, cy);
                     {
+                        /*float this_value = fmax(this_pixel.r, this_pixel.g);
+                        this_value = fmax(this_value, this_pixel.b);*/
                         // use a wiener filter, so that more similar pixels have greater contribution
+                        //const float C = 64.0f*64.0f;
                         //const float C = 32.0f*32.0f;
                         //const float C = 32.0f*32.0f/8.0f;
                         //const float C = 64.0f;
                         const float C = 16.0f*16.0f/8.0f;
                         float3 diff = rgb - this_pixel;
                         float L = dot(diff, diff);
+                        /*float diff = this_value - old_value;
+                        float L = diff*diff;*/
                         float weight = L/(L+C);
                         //weight = 0.0;
                         this_pixel = weight * rgb + (1.0-weight) * this_pixel;
@@ -60,6 +67,11 @@ uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) 
         }
 
         rgb = sum / count;
+
+        /*float new_value = fmax(rgb.r, rgb.g);
+        new_value = fmax(new_value, rgb.b);
+        // preserve value - we want denoise only for chrominance
+        rgb *= old_value/new_value;*/
     }
 
     rgb = rgb - black_level;
