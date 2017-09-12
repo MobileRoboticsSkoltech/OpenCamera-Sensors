@@ -1809,7 +1809,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public Bitmap avgBrighten(Allocation input, int width, int height) {
+	public Bitmap avgBrighten(Allocation input, int width, int height, int iso) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "avgBrighten");
         initRenderscript();
@@ -1858,12 +1858,19 @@ public class HDRProcessor {
 		}*/
 		float gain = median_target / (float)median_brightness;
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "gain " + gain);
+			Log.d(TAG, "gain: " + gain);
 		}
 
 		ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
 		script.set_bitmap(input);
-		script.invoke_setBlackLevel(8.0f);
+		float black_level = 0.0f;
+		if( iso >= 700 ) {
+			black_level = 8.0f;
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "black_level: " + black_level);
+		}
+		script.invoke_setBlackLevel(black_level);
 		//script.set_gamma(gamma);
 		script.set_gain(gain);
 
