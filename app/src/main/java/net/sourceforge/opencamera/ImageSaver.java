@@ -356,7 +356,8 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "finishImageAverage");
 		if( pending_image_average_request == null ) {
-			Log.e(TAG, "finishImageAverage called but no pending_image_average_request");
+			if( MyDebug.LOG )
+				Log.d(TAG, "finishImageAverage called but no pending_image_average_request");
 			return;
 		}
 		addRequest(pending_image_average_request);
@@ -658,7 +659,7 @@ public class ImageSaver extends Thread {
 
 		boolean success;
 		if( request.process_type == Request.ProcessType.AVERAGE ) {
-			if (MyDebug.LOG)
+			if( MyDebug.LOG )
 				Log.d(TAG, "average");
 
 			saveBaseImages(request, "_");
@@ -703,15 +704,24 @@ public class ImageSaver extends Thread {
 					int width = bitmap0.getWidth();
 					int height = bitmap0.getHeight();
 					float avg_factor = 1.0f;
-					Allocation allocation = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, true);
+					int iso = 800;
+					if( main_activity.getPreview().getCameraController() != null ) {
+						if( main_activity.getPreview().getCameraController().captureResultHasIso() ) {
+							iso = main_activity.getPreview().getCameraController().captureResultIso();
+							if( MyDebug.LOG )
+								Log.d(TAG, "iso: " + iso);
+						}
+					}
+					Allocation allocation = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, iso, true);
 					// processAvg recycles both bitmaps
 
 					for(int i=2;i<request.jpeg_images.size();i++) {
-						Log.d(TAG, "processAvg for image: " + i);
+						if( MyDebug.LOG )
+							Log.d(TAG, "processAvg for image: " + i);
 
 						Bitmap new_bitmap = loadBitmap(request.jpeg_images.get(i), false);
 						avg_factor = (float)i;
-						hdrProcessor.updateAvg(allocation, width, height, new_bitmap, avg_factor, true);
+						hdrProcessor.updateAvg(allocation, width, height, new_bitmap, avg_factor, iso, true);
 						// updateAvg recycles new_bitmap
 					}
 

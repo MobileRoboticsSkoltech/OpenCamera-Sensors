@@ -35,6 +35,7 @@ public class HDRProcessor {
 	// public for access by testing
 	public final int [] offsets_x = {0, 0, 0};
 	public final int [] offsets_y = {0, 0, 0};
+	public int sharp_index = 0;
 
 	private enum HDRAlgorithm {
 		HDRALGORITHM_STANDARD,
@@ -838,7 +839,7 @@ public class HDRProcessor {
 	 * @param release_bitmap If true, bitmap_new will be recycled.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public Allocation processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, boolean release_bitmap) throws HDRProcessorException {
+	public Allocation processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, int iso, boolean release_bitmap) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
@@ -866,7 +867,30 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
 
-		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, true);
+		float sharpness_avg = computeSharpness(allocation_avg, width, time_s);
+		float sharpness_new = computeSharpness(allocation_new, width, time_s);
+		if( sharpness_new > sharpness_avg ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "use new image as reference");
+			Allocation dummy_allocation = allocation_avg;
+			allocation_avg = allocation_new;
+			allocation_new = dummy_allocation;
+			Bitmap dummy_bitmap = bitmap_avg;
+			bitmap_avg = bitmap_new;
+			bitmap_new = dummy_bitmap;
+			sharp_index = 1;
+		}
+		else {
+			sharp_index = 0;
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "sharp_index: " + sharp_index);
+
+		/*LuminanceInfo luminanceInfo = computeMedianLuminance(bitmap_avg, 0, 0, width, height);
+		if( MyDebug.LOG )
+			Log.d(TAG, "median: " + luminanceInfo.median_value);*/
+
+		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, iso, true);
 
 		if( release_bitmap ) {
 			if( MyDebug.LOG )
@@ -884,7 +908,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void updateAvg(Allocation allocation, int width, int height, Bitmap bitmap_new, float avg_factor, boolean release_bitmap) throws HDRProcessorException {
+	public void updateAvg(Allocation allocation, int width, int height, Bitmap bitmap_new, float avg_factor, int iso, boolean release_bitmap) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
@@ -904,7 +928,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
 
-		processAvgCore(allocation, allocation, allocation_new, width, height, avg_factor, false);
+		processAvgCore(allocation, allocation, allocation_new, width, height, avg_factor, iso, false);
 
 		if( release_bitmap ) {
 			if( MyDebug.LOG )
@@ -917,7 +941,7 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void processAvgCore(Allocation allocation_out, Allocation allocation_avg, Allocation allocation_new, int width, int height, float avg_factor, boolean first) throws HDRProcessorException {
+	private void processAvgCore(Allocation allocation_out, Allocation allocation_avg, Allocation allocation_new, int width, int height, float avg_factor, int iso, boolean first) throws HDRProcessorException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processAvgCore");
 		long time_s = System.currentTimeMillis();
@@ -948,6 +972,13 @@ public class HDRProcessor {
 		// set globals
 
 		processAvgScript.set_avg_factor(avg_factor);
+
+		float limited_iso = Math.min(iso, 800);
+		limited_iso = Math.max(limited_iso, 100);
+		float wiener_C = 10.0f * limited_iso;
+		if( MyDebug.LOG )
+			Log.d(TAG, "wiener_C: " + wiener_C);
+		processAvgScript.set_wiener_C(wiener_C);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "call processAvgScript");
@@ -1779,9 +1810,15 @@ public class HDRProcessor {
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public Bitmap avgBrighten(Allocation input, int width, int height) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "avgBrighten");
         initRenderscript();
 
+    	long time_s = System.currentTimeMillis();
+
 		int[] histo = computeHistogram(input, false, true);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
 		int total = 0;
 		for(int value : histo)
 			total += value;
@@ -1800,8 +1837,9 @@ public class HDRProcessor {
 		}
 		if( median_brightness <= 0 )
 			median_brightness = 1;
-		int median_target = Math.min(127, 2*median_brightness);
-		//int median_target = Math.min(127, 4*median_brightness);
+		//int median_target = Math.min(127, 2*median_brightness);
+		//int median_target = Math.min(127, 3*median_brightness);
+		int median_target = Math.min(127, 4*median_brightness);
 		int max_target = Math.min(255, (int)((max_brightness*median_target)/(float)median_brightness + 0.5f) );
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "median brightness " + median_brightness);
@@ -1824,6 +1862,7 @@ public class HDRProcessor {
 		}
 
 		ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
+		script.set_bitmap(input);
 		script.invoke_setBlackLevel(8.0f);
 		//script.set_gamma(gamma);
 		script.set_gain(gain);
@@ -1848,10 +1887,55 @@ public class HDRProcessor {
 
 		Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		Allocation allocation_out = Allocation.createFromBitmap(rs, bitmap);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after creating allocation_out: " + (System.currentTimeMillis() - time_s));
 
         script.forEach_avg_brighten(input, allocation_out);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
 
         allocation_out.copyTo(bitmap);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### total time for avgBrighten: " + (System.currentTimeMillis() - time_s));
 		return bitmap;
     }
+
+	/**
+	 * Computes a value for how sharp the image is perceived to be. The higher the value, the
+	 * sharper the image.
+	 * @param allocation_in The input allocation.
+	 * @param width         The width of the allocation.
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+	private float computeSharpness(Allocation allocation_in, int width, long time_s) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "computeSharpness");
+		Allocation sumsAllocation = Allocation.createSized(rs, Element.I32(rs), width);
+		ScriptC_calculate_sharpness sharpnessScript = new ScriptC_calculate_sharpness(rs);
+		if( MyDebug.LOG )
+			Log.d(TAG, "bind sums allocation");
+		sharpnessScript.bind_sums(sumsAllocation);
+		sharpnessScript.set_bitmap(allocation_in);
+		sharpnessScript.set_width(width);
+		sharpnessScript.invoke_init_sums();
+		if( MyDebug.LOG )
+			Log.d(TAG, "call sharpnessScript");
+		if( MyDebug.LOG )
+			Log.d(TAG, "time before sharpnessScript: " + (System.currentTimeMillis() - time_s));
+		sharpnessScript.forEach_calculate_sharpness(allocation_in);
+		if( MyDebug.LOG )
+			Log.d(TAG, "time after sharpnessScript: " + (System.currentTimeMillis() - time_s));
+
+		int [] sums = new int[width];
+		sumsAllocation.copyTo(sums);
+		float total_sum = 0.0f;
+		for(int i=0;i<width;i++) {
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "sums[" + i + "] = " + sums[i]);*/
+			total_sum += (float)sums[i];
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "total_sum: " + total_sum);
+		return total_sum;
+	}
 }
