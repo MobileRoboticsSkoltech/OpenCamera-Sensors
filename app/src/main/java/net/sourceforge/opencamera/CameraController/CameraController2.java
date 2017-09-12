@@ -3641,6 +3641,44 @@ public class CameraController2 extends CameraController {
 		return (1.0 - alpha) + alpha * full_exposure_time_scale;
 	}
 
+	/** Sets up a builder to have manual exposure time, if supported. The exposure time will be
+	 *  clamped to the allowed values, and manual ISO will also be set based on the current ISO value.
+	 */
+	private void setManualExposureTime(CaptureRequest.Builder stillBuilder, long exposure_time) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setManualExposureTime: " + exposure_time);
+		Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
+		Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
+		if( exposure_time_range != null && iso_range != null ) {
+			long min_exposure_time = exposure_time_range.getLower();
+			long max_exposure_time = exposure_time_range.getUpper();
+			if( exposure_time < min_exposure_time )
+				exposure_time = min_exposure_time;
+			if( exposure_time > max_exposure_time )
+				exposure_time = max_exposure_time;
+			if (MyDebug.LOG) {
+				Log.d(TAG, "exposure_time: " + exposure_time);
+			}
+			stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
+			{
+				// set ISO
+				int iso = 800;
+				if( capture_result_has_iso )
+					iso = capture_result_iso;
+				// see https://sourceforge.net/p/opencamera/tickets/321/ - some devices may have auto ISO that's
+				// outside of the allowed manual iso range!
+				iso = Math.max(iso, iso_range.getLower());
+				iso = Math.min(iso, iso_range.getUpper());
+				stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, iso );
+			}
+			if( capture_result_has_frame_duration  )
+				stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, capture_result_frame_duration);
+			else
+				stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
+			stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+		}
+	}
+
 	private void takePictureAfterPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureAfterPrecapture");
@@ -3686,42 +3724,13 @@ public class CameraController2 extends CameraController {
 				final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
 				long exposure_time = capture_result_exposure_time;
 				if( exposure_time <= fixed_exposure_time ) {
-					Range<Long> exposure_time_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE); // may be null on some devices
-					Range<Integer> iso_range = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE); // may be null on some devices
-					if( exposure_time_range != null && iso_range != null ) {
-						double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
-						if (MyDebug.LOG) {
-							Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
-							Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
-						}
-						long min_exposure_time = exposure_time_range.getLower();
-						long max_exposure_time = exposure_time_range.getUpper();
-						exposure_time *= exposure_time_scale;
-						if( exposure_time < min_exposure_time )
-							exposure_time = min_exposure_time;
-						if( exposure_time > max_exposure_time )
-							exposure_time = max_exposure_time;
-						if (MyDebug.LOG) {
-							Log.d(TAG, "exposure_time: " + exposure_time);
-						}
-						stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF);
-						{
-							// set ISO
-							int iso = 800;
-							if( capture_result_has_iso )
-								iso = capture_result_iso;
-							// see https://sourceforge.net/p/opencamera/tickets/321/ - some devices may have auto ISO that's
-							// outside of the allowed manual iso range!
-							iso = Math.max(iso, iso_range.getLower());
-							iso = Math.min(iso, iso_range.getUpper());
-							stillBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, iso );
-						}
-						if( capture_result_has_frame_duration  )
-							stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, capture_result_frame_duration);
-						else
-							stillBuilder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
-						stillBuilder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure_time);
+					double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
+					exposure_time *= exposure_time_scale;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
+						Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
 					}
+					setManualExposureTime(stillBuilder, exposure_time);
 				}
 			}
 			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
@@ -4073,14 +4082,49 @@ public class CameraController2 extends CameraController {
 			}
 			// else don't turn torch off, as user may be in torch on mode
 
+			n_burst = 4;
+			burst_single_request = false;
+
+			if( capture_result_has_iso ) {
+				if( capture_result_iso >= 700 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "optimise for dark scene");
+					n_burst = 8;
+					if( !camera_settings.has_iso ) {
+						long exposure_time = 1000000000L/10;
+						if( MyDebug.LOG )
+							Log.d(TAG, "also set 100ms exposure time");
+						setManualExposureTime(stillBuilder, exposure_time);
+					}
+				}
+				else if( capture_result_has_exposure_time ) {
+					final double full_exposure_time_scale = 0.5;
+					final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
+					final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
+					long exposure_time = capture_result_exposure_time;
+					if( exposure_time <= fixed_exposure_time ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "optimise for bright scene");
+						n_burst = 2;
+						if( !camera_settings.has_iso ) {
+							double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
+							exposure_time *= exposure_time_scale;
+							if (MyDebug.LOG) {
+								Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
+								Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
+							}
+							setManualExposureTime(stillBuilder, exposure_time);
+						}
+					}
+				}
+			}
+
+			if( MyDebug.LOG )
+				Log.d(TAG, "n_burst: " + n_burst);
+
 			final CaptureRequest request = stillBuilder.build();
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			final CaptureRequest last_request = stillBuilder.build();
-
-			n_burst = 8;
-			burst_single_request = false;
-			if( MyDebug.LOG )
-				Log.d(TAG, "n_burst: " + n_burst);
 
 			captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
 
