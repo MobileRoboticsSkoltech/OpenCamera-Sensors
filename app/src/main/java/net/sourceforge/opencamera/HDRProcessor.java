@@ -1860,6 +1860,12 @@ public class HDRProcessor {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "gain: " + gain);
 		}
+		if( gain < 1.0f ) {
+			gain = 1.0f;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "clamped gain to : " + gain);
+			}
+		}
 
 		ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
 		script.set_bitmap(input);
