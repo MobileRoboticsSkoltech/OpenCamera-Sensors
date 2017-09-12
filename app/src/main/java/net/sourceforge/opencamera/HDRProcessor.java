@@ -1810,6 +1810,13 @@ public class HDRProcessor {
 		return histogram;
 	}
 
+	/**
+	 * @param input         The allocation in floating point format.
+	 * @param width         Width of the input.
+	 * @param height        Height of the input.
+	 * @param iso           ISO used for the original images.
+	 * @return              Resultant bitmap.
+	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	public Bitmap avgBrighten(Allocation input, int width, int height, int iso) {
 		if( MyDebug.LOG ) {
@@ -1915,6 +1922,14 @@ public class HDRProcessor {
         script.forEach_avg_brighten(input, allocation_out);
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
+
+		if( iso <= 100 ) {
+			// for bright scenes, local contrast enhancement helps improve the quality of images (especially where we may have both
+			// dark and bright regions, e.g., testAvg12); but for dark scenes, it just blows up the noise too much
+			adjustHistogram(allocation_out, allocation_out, width, height, 0.5f, 4, time_s);
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
+		}
 
         allocation_out.copyTo(bitmap);
 		if( MyDebug.LOG )
