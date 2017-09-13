@@ -116,8 +116,8 @@ public class DrawPreview {
 		this.stroke_width = (1.0f * scale + 0.5f); // convert dps to pixels
 		p.setStrokeWidth(stroke_width);
 
-        location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth);
-    	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.earth_off);
+        location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_gps_fixed_white_48dp);
+    	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_gps_off_white_48dp);
 		raw_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.raw_icon);
 		auto_stabilise_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.auto_stabilise_icon);
 		hdr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_hdr_on_white_48dp);
