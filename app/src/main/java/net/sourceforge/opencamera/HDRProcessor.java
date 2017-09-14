@@ -1851,7 +1851,7 @@ public class HDRProcessor {
 		//int median_target = Math.min(127, 2*median_brightness);
 		//int median_target = Math.min(127, 3*median_brightness);
 		int max_gain_factor = 4;
-		if( iso <= 100 ) {
+		if( iso <= 150 ) {
 			max_gain_factor = 8;
 		}
 		int median_target = Math.min(127, max_gain_factor*median_brightness);
@@ -1923,7 +1923,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
 
-		if( iso <= 100 ) {
+		if( iso <= 150 ) {
 			// for bright scenes, local contrast enhancement helps improve the quality of images (especially where we may have both
 			// dark and bright regions, e.g., testAvg12); but for dark scenes, it just blows up the noise too much
 			adjustHistogram(allocation_out, allocation_out, width, height, 0.5f, 4, time_s);
