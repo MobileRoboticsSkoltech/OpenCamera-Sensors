@@ -1002,17 +1002,6 @@ public class CameraController2 extends CameraController {
 	public void release() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "release: " + this);
-		if( thread != null ) {
-			thread.quitSafely();
-			try {
-				thread.join();
-				thread = null;
-				handler = null;
-			}
-			catch(InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
 		if( captureSession != null ) {
 			captureSession.close();
 			captureSession = null;
@@ -1028,6 +1017,19 @@ public class CameraController2 extends CameraController {
 			previewImageReader.close();
 			previewImageReader = null;
 		}*/
+		if( thread != null ) {
+			// should only close thread after closing the camera, otherwise we get messages "sending message to a Handler on a dead thread"
+			// see https://sourceforge.net/p/opencamera/discussion/general/thread/32c2b01b/?limit=25
+			thread.quitSafely();
+			try {
+				thread.join();
+				thread = null;
+				handler = null;
+			}
+			catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private void closePictureImageReader() {
