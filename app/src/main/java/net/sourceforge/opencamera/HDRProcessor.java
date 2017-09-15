@@ -942,8 +942,10 @@ public class HDRProcessor {
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private void processAvgCore(Allocation allocation_out, Allocation allocation_avg, Allocation allocation_new, int width, int height, float avg_factor, int iso, boolean first) throws HDRProcessorException {
-		if( MyDebug.LOG )
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvgCore");
+			Log.d(TAG, "iso: " + iso);
+		}
 		long time_s = System.currentTimeMillis();
 
 		{
@@ -1808,10 +1810,19 @@ public class HDRProcessor {
 		return histogram;
 	}
 
+	/**
+	 * @param input         The allocation in floating point format.
+	 * @param width         Width of the input.
+	 * @param height        Height of the input.
+	 * @param iso           ISO used for the original images.
+	 * @return              Resultant bitmap.
+	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public Bitmap avgBrighten(Allocation input, int width, int height) {
-		if( MyDebug.LOG )
+	public Bitmap avgBrighten(Allocation input, int width, int height, int iso) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "avgBrighten");
+			Log.d(TAG, "iso: " + iso);
+		}
         initRenderscript();
 
     	long time_s = System.currentTimeMillis();
@@ -1839,13 +1850,18 @@ public class HDRProcessor {
 			median_brightness = 1;
 		//int median_target = Math.min(127, 2*median_brightness);
 		//int median_target = Math.min(127, 3*median_brightness);
-		int median_target = Math.min(127, 4*median_brightness);
+		int max_gain_factor = 4;
+		if( iso <= 150 ) {
+			max_gain_factor = 8;
+		}
+		int median_target = Math.min(127, max_gain_factor*median_brightness);
 		int max_target = Math.min(255, (int)((max_brightness*median_target)/(float)median_brightness + 0.5f) );
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "median brightness " + median_brightness);
-			Log.d(TAG, "max brightness " + max_brightness);
-			Log.d(TAG, "median target " + median_target);
-			Log.d(TAG, "max target " + max_target);
+			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
+			Log.d(TAG, "median brightness: " + median_brightness);
+			Log.d(TAG, "max brightness: " + max_brightness);
+			Log.d(TAG, "median target: " + median_target);
+			Log.d(TAG, "max target: " + max_target);
 		}
 		//float gamma = (float)(Math.log(median_target/255.0f) / Math.log(median_brightness/255.0f));
 		//float gain = median_target / (float)median_brightness;
@@ -1858,12 +1874,25 @@ public class HDRProcessor {
 		}*/
 		float gain = median_target / (float)median_brightness;
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "gain " + gain);
+			Log.d(TAG, "gain: " + gain);
+		}
+		if( gain < 1.0f ) {
+			gain = 1.0f;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "clamped gain to : " + gain);
+			}
 		}
 
 		ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
 		script.set_bitmap(input);
-		script.invoke_setBlackLevel(8.0f);
+		float black_level = 0.0f;
+		if( iso >= 700 ) {
+			black_level = 8.0f;
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "black_level: " + black_level);
+		}
+		script.invoke_setBlackLevel(black_level);
 		//script.set_gamma(gamma);
 		script.set_gain(gain);
 
@@ -1893,6 +1922,14 @@ public class HDRProcessor {
         script.forEach_avg_brighten(input, allocation_out);
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
+
+		if( iso <= 150 ) {
+			// for bright scenes, local contrast enhancement helps improve the quality of images (especially where we may have both
+			// dark and bright regions, e.g., testAvg12); but for dark scenes, it just blows up the noise too much
+			adjustHistogram(allocation_out, allocation_out, width, height, 0.5f, 4, time_s);
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
+		}
 
         allocation_out.copyTo(bitmap);
 		if( MyDebug.LOG )

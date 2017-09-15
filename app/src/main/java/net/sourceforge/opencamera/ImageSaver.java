@@ -725,7 +725,7 @@ public class ImageSaver extends Thread {
 						// updateAvg recycles new_bitmap
 					}
 
-					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height);
+					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height, iso);
 				}
 				catch(HDRProcessorException e) {
 					e.printStackTrace();

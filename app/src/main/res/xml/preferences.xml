@@ -800,14 +800,14 @@
 		<PreferenceScreen
 	        android:key="preference_screen_location_settings"
 	        android:title="@string/preference_screen_location_settings"
-	        android:icon="@drawable/earth"
+	        android:icon="@drawable/ic_gps_fixed_white_48dp"
 	        android:persistent="false">
 
 	        <CheckBoxPreference
 	            android:key="preference_location"
 	            android:title="@string/preference_location"
 	            android:summary="@string/preference_location_summary"
-		        android:icon="@drawable/earth"
+		        android:icon="@drawable/ic_gps_fixed_white_48dp"
 	            android:defaultValue="false"
 	            />
 		    
