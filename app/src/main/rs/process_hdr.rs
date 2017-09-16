@@ -88,25 +88,42 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	float3 hdr = (float3){0.0f, 0.0f, 0.0f};
 	float sum_weight = 0.0f;
 
-	// calculateHDR	
-	/*for(int i=0;i<n_bitmaps;i++) {
-		float r = (float)pixels[i].r;
-		float g = (float)pixels[i].g;
-		float b = (float)pixels[i].b;
-		float avg = (r+g+b) / 3.0f;
-		// weight_scale_c chosen so that 0 and 255 map to a non-zero weight of 1.0/127.5
-		float weight = 1.0f - weight_scale_c * fabs( 127.5f - avg );
+	// calculateHDR
+	if( false )
+	{
+        for(int i=0;i<n_bitmaps;i++) {
+            float3 rgb = (float3){ (float)pixels[i].r, (float)pixels[i].g, (float)pixels[i].b };
+            /*if( pixels[i].r == 255 || pixels[i].g == 255 || pixels[i].b == 255 ) {
+                // images should be ordered from dark to bright
+                // if we reach a saturated pixel, then don't want any contribution from it; also we
+                // assume that all brighter images have saturated pixels (if they don't, it must be noise)
+                // if this is the first image, all pixels are saturated
+                if( i == 0 ) {
+                    // response function
+                    rgb = parameter_A[1] * rgb + parameter_B[1];
+                    hdr = rgb;
+                    sum_weight = 1.0f;
+                }
+                break;
+            }*/
+            float avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
+            // weight_scale_c chosen so that 0 and 255 map to a non-zero weight of 1.0/127.5
+            float weight = 1.0f - weight_scale_c * fabs( 127.5f - avg );
+            /*const float safe_range_c = 96.0f;
+            float diff = fabs( avg - 127.5f );
+            float weight = 1.0f;
+            if( diff > safe_range_c ) {
+                // scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
+                weight = 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
+            }*/
 
-		// response function
-		r = parameter_A[i] * r + parameter_B[i];
-		g = parameter_A[i] * g + parameter_B[i];
-		b = parameter_A[i] * b + parameter_B[i];
+            // response function
+            rgb = parameter_A[i] * rgb + parameter_B[i];
 
-		hdr_r += weight * r;
-		hdr_g += weight * g;
-		hdr_b += weight * b;
-		sum_weight += weight;
-	}*/
+            hdr += weight * rgb;
+            sum_weight += weight;
+        }
+	}
 	// assumes 3 bitmaps, with middle bitmap being the "base" exposure, and first image being darker, third image being brighter
 	{
 		//const float safe_range_c = 64.0f;
@@ -134,7 +151,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
     			/* In some cases it can be that even on the neighbour image, the brightness is too
     			   dark/bright - but it should still be a better choice than the base image.
     			   If we change this (including say for handling more than 3 images), need to be
-    			   careful of unpredictable effects. In particular, image a pixel that is brightness
+    			   careful of unpredictable effects. In particular, consider a pixel that is brightness
     			   255 on the base image. As the brightness on the neighbour image increases, we
     			   should expect that the resultant image also increases (or at least, doesn't
     			   decrease). See testHDR36 for such an example.
@@ -145,7 +162,14 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 					// scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
 					weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
 				}*/
-	
+                /*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
+                diff = fabs( avg - 127.5f );
+                weight = 1.0f;
+                if( diff > safe_range_c ) {
+                    // scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
+                    weight = 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
+                }*/
+
 				rgb = parameter_A[2] * rgb + parameter_B[2];
 			}
 			else {
@@ -157,6 +181,13 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 					// scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
 					weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
 				}*/
+                /*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
+                diff = fabs( avg - 127.5f );
+                weight = 1.0f;
+                if( diff > safe_range_c ) {
+                    // scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
+                    weight = 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
+                }*/
 
 				rgb = parameter_A[0] * rgb + parameter_B[0];
 			}
