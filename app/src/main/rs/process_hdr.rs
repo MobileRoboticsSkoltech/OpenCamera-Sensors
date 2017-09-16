@@ -125,10 +125,11 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
         }
 	}
 	// assumes 3 bitmaps, with middle bitmap being the "base" exposure, and first image being darker, third image being brighter
+	const int mid_indx = (n_bitmaps-1)/2;
 	{
 		//const float safe_range_c = 64.0f;
 		const float safe_range_c = 96.0f;
-		float3 rgb = (float3){ (float)pixels[1].r, (float)pixels[1].g, (float)pixels[1].b };
+		float3 rgb = (float3){ (float)pixels[mid_indx].r, (float)pixels[mid_indx].g, (float)pixels[mid_indx].b };
 		float avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 		float diff = fabs( avg - 127.5f );
 		float weight = 1.0f;
@@ -138,7 +139,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		}
 
 		// response function
-		rgb = parameter_A[1] * rgb + parameter_B[1];
+		rgb = parameter_A[mid_indx] * rgb + parameter_B[mid_indx];
 
 		hdr += weight * rgb;
 		sum_weight += weight;
@@ -146,8 +147,16 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		if( weight < 1.0 ) {
 			// now look at a neighbour image
 			weight = 1.0f - weight;
+			int adj_indx = mid_indx;
 			if( avg <= 127.5f ) {
-				rgb = (float3){ (float)pixels[2].r, (float)pixels[2].g, (float)pixels[2].b };
+			    adj_indx = mid_indx+1;
+            }
+            else {
+			    adj_indx = mid_indx-1;
+            }
+
+            {
+				rgb = (float3){ (float)pixels[adj_indx].r, (float)pixels[adj_indx].g, (float)pixels[adj_indx].b };
     			/* In some cases it can be that even on the neighbour image, the brightness is too
     			   dark/bright - but it should still be a better choice than the base image.
     			   If we change this (including say for handling more than 3 images), need to be
@@ -170,28 +179,9 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
                     weight = 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
                 }*/
 
-				rgb = parameter_A[2] * rgb + parameter_B[2];
+				rgb = parameter_A[adj_indx] * rgb + parameter_B[adj_indx];
 			}
-			else {
-				rgb = (float3){ (float)pixels[0].r, (float)pixels[0].g, (float)pixels[0].b };
-				// see note above for why this is commented out
-				/*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
-				diff = fabs( avg - 127.5f );
-				if( diff > safe_range_c ) {
-					// scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
-					weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
-				}*/
-                /*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
-                diff = fabs( avg - 127.5f );
-                weight = 1.0f;
-                if( diff > safe_range_c ) {
-                    // scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
-                    weight = 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
-                }*/
 
-				rgb = parameter_A[0] * rgb + parameter_B[0];
-			}
-	
 			hdr += weight * rgb;
 			sum_weight += weight;
 			
