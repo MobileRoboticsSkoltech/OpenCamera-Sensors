@@ -95,7 +95,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	if( false )
 	{
         for(int i=0;i<n_bitmaps;i++) {
-            float3 rgb = (float3){ (float)pixels[i].r, (float)pixels[i].g, (float)pixels[i].b };
+            float3 rgb = convert_float3(pixels[i].rgb);
             /*if( pixels[i].r == 255 || pixels[i].g == 255 || pixels[i].b == 255 ) {
                 // images should be ordered from dark to bright
                 // if we reach a saturated pixel, then don't want any contribution from it; also we
@@ -131,7 +131,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	{
 		//const float safe_range_c = 64.0f;
 		const float safe_range_c = 96.0f;
-		float3 rgb = (float3){ (float)pixels[mid_indx].r, (float)pixels[mid_indx].g, (float)pixels[mid_indx].b };
+        float3 rgb = convert_float3(pixels[mid_indx].rgb);
 		float avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 		float diff = fabs( avg - 127.5f );
 		float weight = 1.0f;
@@ -150,7 +150,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 			// now look at a neighbour image
 			weight = 1.0f - weight;
 			if( avg <= 127.5f ) {
-				rgb = (float3){ (float)pixels[mid_indx+1].r, (float)pixels[mid_indx+1].g, (float)pixels[mid_indx+1].b };
+                rgb = convert_float3(pixels[mid_indx+1].rgb);
     			/* In some cases it can be that even on the neighbour image, the brightness is too
     			   dark/bright - but it should still be a better choice than the base image.
     			   If we change this (including say for handling more than 3 images), need to be
@@ -169,7 +169,7 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 				rgb = parameter_A[mid_indx+1] * rgb + parameter_B[mid_indx+1];
 			}
 			else {
-				rgb = (float3){ (float)pixels[mid_indx-1].r, (float)pixels[mid_indx-1].g, (float)pixels[mid_indx-1].b };
+                rgb = convert_float3(pixels[mid_indx-1].rgb);
 				// see note above for why this is commented out
 				/*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
 				diff = fabs( avg - 127.5f );
