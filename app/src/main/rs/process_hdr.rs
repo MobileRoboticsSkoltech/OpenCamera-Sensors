@@ -52,37 +52,40 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 	// If this algorithm is changed, also update the Java version in HDRProcessor.calculateHDR()
     int32_t ix = x;
     int32_t iy = y;
-	const int n_bitmaps = 3;
-	uchar4 pixels[n_bitmaps];
+    const int max_bitmaps_c = 3;
+    int n_bitmaps = 3;
+	const int mid_indx = (n_bitmaps-1)/2;
+	uchar4 pixels[max_bitmaps_c];
 
-	float parameter_A[n_bitmaps];
-	float parameter_B[n_bitmaps];
+	float parameter_A[max_bitmaps_c];
+	float parameter_B[max_bitmaps_c];
+
+    parameter_A[0] = parameter_A0;
+    parameter_B[0] = parameter_B0;
+    parameter_A[1] = parameter_A1;
+    parameter_B[1] = parameter_B1;
+    parameter_A[2] = parameter_A2;
+    parameter_B[2] = parameter_B2;
 
 	if( ix+offset_x0 >= 0 && iy+offset_y0 >= 0 && ix+offset_x0 < rsAllocationGetDimX(bitmap0) && iy+offset_y0 < rsAllocationGetDimY(bitmap0) ) {
     	pixels[0] = rsGetElementAt_uchar4(bitmap0, x+offset_x0, y+offset_y0);
-        parameter_A[0] = parameter_A0;
-        parameter_B[0] = parameter_B0;
 	}
 	else {
     	pixels[0] = in;
-        parameter_A[0] = parameter_A1;
-        parameter_B[0] = parameter_B1;
+        parameter_A[0] = parameter_A[mid_indx];
+        parameter_B[0] = parameter_B[mid_indx];
 	}
 
-	// middle image is not offset
-	pixels[1] = in;
-	parameter_A[1] = parameter_A1;
-	parameter_B[1] = parameter_B1;
+    // middle image is not offset
+    pixels[1] = in;
 
  	if( ix+offset_x2 >= 0 && iy+offset_y2 >= 0 && ix+offset_x2 < rsAllocationGetDimX(bitmap2) && iy+offset_y2 < rsAllocationGetDimY(bitmap2) ) {
     	pixels[2] = rsGetElementAt_uchar4(bitmap2, x+offset_x2, y+offset_y2);
-        parameter_A[2] = parameter_A2;
-        parameter_B[2] = parameter_B2;
 	}
 	else {
     	pixels[2] = in;
-        parameter_A[2] = parameter_A1;
-        parameter_B[2] = parameter_B1;
+        parameter_A[2] = parameter_A[mid_indx];
+        parameter_B[2] = parameter_B[mid_indx];
 	}
 
 	float3 hdr = (float3){0.0f, 0.0f, 0.0f};
@@ -125,7 +128,6 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
         }
 	}
 	// assumes 3 bitmaps, with middle bitmap being the "base" exposure, and first image being darker, third image being brighter
-	const int mid_indx = (n_bitmaps-1)/2;
 	{
 		//const float safe_range_c = 64.0f;
 		const float safe_range_c = 96.0f;

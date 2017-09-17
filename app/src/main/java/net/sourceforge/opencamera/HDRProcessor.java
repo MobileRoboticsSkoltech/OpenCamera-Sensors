@@ -33,8 +33,8 @@ public class HDRProcessor {
 	private RenderScript rs; // lazily created, so we don't take up resources if application isn't using HDR
 
 	// public for access by testing
-	public final int [] offsets_x = {0, 0, 0};
-	public final int [] offsets_y = {0, 0, 0};
+	public int [] offsets_x = null;
+	public int [] offsets_y = null;
 	public int sharp_index = 0;
 
 	private enum HDRAlgorithm {
@@ -304,7 +304,7 @@ public class HDRProcessor {
 		int n_bitmaps = bitmaps.size();
 		if( n_bitmaps != 1 && n_bitmaps != 3 ) {
 			if( MyDebug.LOG )
-				Log.e(TAG, "n_bitmaps should be 1 or 3, not " + n_bitmaps);
+				Log.e(TAG, "n_bitmaps not supported: " + n_bitmaps);
 			throw new HDRProcessorException(HDRProcessorException.INVALID_N_IMAGES);
 		}
 		for(int i=1;i<n_bitmaps;i++) {
@@ -481,6 +481,8 @@ public class HDRProcessor {
 		int width = bitmaps.get(0).getWidth();
 		int height = bitmaps.get(0).getHeight();
 		ResponseFunction [] response_functions = new ResponseFunction[n_bitmaps]; // ResponseFunction for each image (the ResponseFunction entry can be left null to indicate the Identity)
+		offsets_x = new int[n_bitmaps];
+		offsets_y = new int[n_bitmaps];
 		/*int [][] buffers = new int[n_bitmaps][];
 		for(int i=0;i<n_bitmaps;i++) {
 			buffers[i] = new int[bm.getWidth()];
@@ -509,7 +511,7 @@ public class HDRProcessor {
 		}
 
 		// compute response_functions
-		final int base_bitmap = 1; // index of the bitmap with the base exposure and offsets
+		final int base_bitmap = (n_bitmaps-1)/2; // index of the bitmap with the base exposure and offsets
 		for(int i=0;i<n_bitmaps;i++) {
 			ResponseFunction function = null;
 			if( i != base_bitmap ) {
