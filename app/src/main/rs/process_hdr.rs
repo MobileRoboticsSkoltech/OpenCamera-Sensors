@@ -147,16 +147,8 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		if( weight < 1.0 ) {
 			// now look at a neighbour image
 			weight = 1.0f - weight;
-			int adj_indx = mid_indx;
 			if( avg <= 127.5f ) {
-			    adj_indx = mid_indx+1;
-            }
-            else {
-			    adj_indx = mid_indx-1;
-            }
-
-            {
-				rgb = (float3){ (float)pixels[adj_indx].r, (float)pixels[adj_indx].g, (float)pixels[adj_indx].b };
+				rgb = (float3){ (float)pixels[mid_indx+1].r, (float)pixels[mid_indx+1].g, (float)pixels[mid_indx+1].b };
     			/* In some cases it can be that even on the neighbour image, the brightness is too
     			   dark/bright - but it should still be a better choice than the base image.
     			   If we change this (including say for handling more than 3 images), need to be
@@ -171,17 +163,22 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 					// scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
 					weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
 				}*/
-                /*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
-                diff = fabs( avg - 127.5f );
-                weight = 1.0f;
-                if( diff > safe_range_c ) {
-                    // scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
-                    weight = 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
-                }*/
 
-				rgb = parameter_A[adj_indx] * rgb + parameter_B[adj_indx];
+				rgb = parameter_A[mid_indx+1] * rgb + parameter_B[mid_indx+1];
 			}
+			else {
+				rgb = (float3){ (float)pixels[mid_indx-1].r, (float)pixels[mid_indx-1].g, (float)pixels[mid_indx-1].b };
+				// see note above for why this is commented out
+				/*avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
+				diff = fabs( avg - 127.5f );
+				if( diff > safe_range_c ) {
+					// scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
+					weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
+				}*/
 
+				rgb = parameter_A[mid_indx-1] * rgb + parameter_B[mid_indx-1];
+			}
+	
 			hdr += weight * rgb;
 			sum_weight += weight;
 			
