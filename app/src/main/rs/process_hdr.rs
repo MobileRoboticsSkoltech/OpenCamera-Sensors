@@ -147,7 +147,6 @@ static uchar4 tonemap(float3 hdr) {
 }
 
 uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
-	// If this algorithm is changed, also update the Java version in HDRProcessor.calculateHDR()
     int32_t ix = x;
     int32_t iy = y;
     const int max_bitmaps_c = 3;
