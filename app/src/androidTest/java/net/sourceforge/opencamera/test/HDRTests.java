@@ -55,7 +55,8 @@ public class HDRTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR40"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR40Exponential"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR40Filmic"));
-		// don't run testHDR41 or testHDR42 yet
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR41"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR42"));
         return suite;
     }
 }
