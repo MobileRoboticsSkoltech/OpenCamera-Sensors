@@ -622,36 +622,45 @@ public class HDRProcessor {
 		//final float tonemap_scale_c = 255.0f;
 		//final float tonemap_scale_c = 255.0f - median_brightness;
 		float tonemap_scale_c = 255.0f;
+		if( median_brightness <= 0 )
+			median_brightness = 1;
 		if( MyDebug.LOG )
 			Log.d(TAG, "median_brightness: " + median_brightness);
-		if( 255.0f / max_possible_value < median_brightness / 255.0f ) {
+		int median_target = Math.min(119, 2*median_brightness);
+		median_target = Math.max(median_brightness, median_target); // don't make median darker
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "median_target: " + median_target);
+			Log.d(TAG, "compare: " + 255.0f / max_possible_value);
+			Log.d(TAG, "to: " + (((float)median_target)/(float)median_brightness + median_target / 255.0f - 1.0f));
+		}
+		if( 255.0f / max_possible_value < ((float)median_target)/(float)median_brightness + median_target / 255.0f - 1.0f) {
 			// For Reinhard tonemapping:
 			// As noted below, we have f(V) = V.S / (V+C), where V is the HDR value, C is tonemap_scale_c
 			// and S = (Vmax + C)/Vmax (see below)
-			// Ideally we try to choose C such that we preserve the median value M:
-			// f(M) = M
-			// => M = M . (Vmax + C) / (Vmax . (M + C))
-			// => M + C = (Vmax + C) / Vmax = 1 + C/Vmax
-			// => C . ( 1 - 1/Vmax ) = 1 - M
-			// => C = (1-M) / (1 - 1/Vmax)
+			// Ideally we try to choose C such that we map median value M to target T:
+			// f(M) = T
+			// => T = M . (Vmax + C) / (Vmax . (M + C))
+			// => (T/M).(M + C) = (Vmax + C) / Vmax = 1 + C/Vmax
+			// => C . ( T/M - 1/Vmax ) = 1 - T
+			// => C = (1-T) / (T/M - 1/Vmax)
 			// Since we want C <= 1, we must have:
-			// 1-M <= 1 - 1/Vmax
-			// => 1/Vmax <= M
+			// 1-T <= T/M - 1/Vmax
+			// => 1/Vmax <= T/M + T - 1
 			// If this isn't the case, we set C to 1 (to preserve the median as close as possible).
-			// Tests that enter this case (as of 20170726) are:
-			// testHDR9, testHDR18, testHDR26, testHDR30, testHDR31, testHDR32
 			// Note that if we weren't doing the linear scaling below, this would reduce to choosing
-			// C = 1-M. We also tend to that as max_possible_value tends to infinity. So even though
+			// C = M(1-T)/T. We also tend to that as max_possible_value tends to infinity. So even though
 			// we only sometimes enter this case, it's important for cases where max_possible_value
 			// might be estimated too large (also consider that if we ever support more than 3 images,
 			// we'd risk having too large values).
+			// If T=M, then this simplifies to C = 1-M.
 			// I've tested that using "C = 1-M" always (and no linear scaling) also gives good results:
 			// much better compared to Open Camera 1.39, though not quite as good as doing both this
 			// and linear scaling (testHDR18, testHDR26, testHDR32 look too grey and/or bright).
-			final float tonemap_denom = 1.0f - (255.0f / max_possible_value);
+			final float tonemap_denom = ((float)median_target)/(float)median_brightness - (255.0f / max_possible_value);
 			if( MyDebug.LOG )
 				Log.d(TAG, "tonemap_denom: " + tonemap_denom);
-			tonemap_scale_c = (255.0f - median_brightness) / tonemap_denom;
+			if( tonemap_denom != 0.0f ) // just in case
+				tonemap_scale_c = (255.0f - median_target) / tonemap_denom;
 			//throw new RuntimeException(); // test
 		}
 		// Higher tonemap_scale_c values means darker results from the Reinhard tonemapping.
@@ -1452,6 +1461,7 @@ public class HDRProcessor {
 		for(int i=0;i<256;i++)
 			histo[i] = 0;
 		int total = 0;
+		//double sum_log_luminance = 0.0;
 		for(int y=0;y<n_h_samples;y++) {
 			double alpha = ((double) y + 1.0) / ((double) n_h_samples + 1.0);
 			//int y_coord = (int) (alpha * bitmap.getHeight());
@@ -1469,9 +1479,13 @@ public class HDRProcessor {
 				int luminance = Math.max(r, g);
 				luminance = Math.max(luminance, b);
 				histo[luminance]++;
+				//sum_log_luminance += Math.log(luminance+1.0); // add 1 so we don't take log of 0...;
 				total++;
 			}
 		}
+		/*float avg_luminance = (float)(Math.exp( sum_log_luminance / total ));
+		if( MyDebug.LOG )
+			Log.d(TAG, "avg_luminance: " + avg_luminance);*/
 		int middle = total/2;
 		int count = 0;
 		boolean noisy = false;
