@@ -8896,6 +8896,42 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestHDR(inputs, "testHDR42_output.jpg", false);
 	}
 
+	/** Tests HDR algorithm on test samples "testHDR43".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR43() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR43");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR43/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR43/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR43/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR43_output.jpg", false);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR44".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR44() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR44");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR44/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR44/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR44/input2.jpg") );
+
+		subTestHDR(inputs, "testHDR44_output.jpg", false);
+	}
+
 	/** Tests HDR algorithm on test samples "testHDRtemp".
 	 *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
 	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
@@ -9621,6 +9657,33 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg12/input1.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg12_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 1);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg13".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg13() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg13");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg13/input0.jpg");
+		inputs.add(avg_images_path + "testAvg13/input1.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg13_output.jpg", 100, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
