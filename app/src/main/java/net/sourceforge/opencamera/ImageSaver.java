@@ -1596,8 +1596,17 @@ public class ImageSaver extends Thread {
     		    matrix.postScale(scale, scale);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "    scale: " + scale);
-    		    thumbnail = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-				// don't need to rotate for exif, as we already did that when creating the bitmap
+				if( width > 0 && height > 0 ) {
+					thumbnail = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+					// don't need to rotate for exif, as we already did that when creating the bitmap
+				}
+				else {
+					// received IllegalArgumentException on Google Play from Bitmap.createBitmap; documentation suggests this
+					// means width or height are 0
+					if( MyDebug.LOG )
+						Log.e(TAG, "bitmap has zero width or height?!");
+					thumbnail = null;
+				}
 			}
 			if( thumbnail == null ) {
 				// received crashes on Google Play suggesting that thumbnail could not be created
