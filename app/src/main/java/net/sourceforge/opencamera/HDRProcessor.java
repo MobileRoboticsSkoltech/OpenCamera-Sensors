@@ -959,6 +959,8 @@ public class HDRProcessor {
 		}
 		long time_s = System.currentTimeMillis();
 
+		offsets_x = new int[2];
+		offsets_y = new int[2];
 		{
 			// perform auto-alignment
 			Allocation [] allocations = new Allocation[2];
