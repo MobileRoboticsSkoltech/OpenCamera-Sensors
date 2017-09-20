@@ -1031,12 +1031,16 @@ public class DrawPreview {
 				location_x = canvas.getWidth() - location_x - location_size;
 			}
 			location_dest.set(location_x, location_y, location_x + location_size, location_y + location_size);
+			p.setStyle(Paint.Style.FILL);
+			p.setColor(Color.BLACK);
+			p.setAlpha(64);
+			canvas.drawRect(location_dest, p);
+			p.setAlpha(255);
 			if( applicationInterface.getLocation() != null ) {
 				canvas.drawBitmap(location_bitmap, null, location_dest, p);
 				int location_radius = location_size / 10;
-				int indicator_x = location_x + location_size;
-				int indicator_y = location_y + location_radius / 2 + 1;
-				p.setStyle(Paint.Style.FILL);
+				int indicator_x = location_x + location_size - (int)(location_radius*1.5);
+				int indicator_y = location_y + (int)(location_radius*1.5);
 				p.setColor(applicationInterface.getLocation().getAccuracy() < 25.01f ? Color.rgb(37, 155, 36) : Color.rgb(255, 235, 59)); // Green 500 or Yellow 500
 				canvas.drawCircle(indicator_x, indicator_y, location_radius, p);
 			}
