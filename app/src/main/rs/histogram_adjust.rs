@@ -110,6 +110,7 @@ uchar4 __attribute__((kernel)) histogram_adjust(uchar4 in, uint32_t x, uint32_t 
 	out.r = min(255, (int)(in.r * scale + 0.5f));
 	out.g = min(255, (int)(in.g * scale + 0.5f));
 	out.b = min(255, (int)(in.b * scale + 0.5f));
+	out.a = 255;
 	
 	return out;
 }
