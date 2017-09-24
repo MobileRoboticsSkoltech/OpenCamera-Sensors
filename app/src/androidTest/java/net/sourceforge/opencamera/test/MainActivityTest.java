@@ -9698,4 +9698,37 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
 	}
+
+	/** Tests Avg algorithm on test samples "testAvg14".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg14() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg14");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg14/input0.jpg");
+		inputs.add(avg_images_path + "testAvg14/input1.jpg");
+		inputs.add(avg_images_path + "testAvg14/input2.jpg");
+		inputs.add(avg_images_path + "testAvg14/input3.jpg");
+		inputs.add(avg_images_path + "testAvg14/input4.jpg");
+		inputs.add(avg_images_path + "testAvg14/input5.jpg");
+		inputs.add(avg_images_path + "testAvg14/input6.jpg");
+		inputs.add(avg_images_path + "testAvg14/input7.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg14_output.jpg", 800, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
 }
