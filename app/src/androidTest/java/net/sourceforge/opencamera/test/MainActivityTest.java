@@ -9731,4 +9731,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
 	}
+
+	/** Tests Avg algorithm on test samples "testAvg15".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg15() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg15");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg15/input0.jpg");
+		inputs.add(avg_images_path + "testAvg15/input1.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg15_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
 }
