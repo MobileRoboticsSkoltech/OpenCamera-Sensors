@@ -1905,7 +1905,7 @@ public class HDRProcessor {
 		script.set_bitmap(input);
 		float black_level = 0.0f;
 		if( iso >= 700 ) {
-			black_level = 8.0f;
+			black_level = 4.0f;
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "black_level: " + black_level);
