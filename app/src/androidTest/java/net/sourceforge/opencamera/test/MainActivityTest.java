@@ -7883,7 +7883,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
-		checkHistogramDetails(hdrHistogramDetails, 1, 44, 253);
+		//checkHistogramDetails(hdrHistogramDetails, 1, 44, 253);
+		checkHistogramDetails(hdrHistogramDetails, 1, 42, 253);
 	}
 
     /** Tests HDR algorithm on test samples "saintpaul", but with 5 images.
@@ -8139,7 +8140,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
 		//checkHistogramDetails(hdrHistogramDetails, 0, 48, 255);
-		checkHistogramDetails(hdrHistogramDetails, 0, 65, 255);
+		//checkHistogramDetails(hdrHistogramDetails, 0, 65, 255);
+		checkHistogramDetails(hdrHistogramDetails, 0, 62, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR12".
@@ -8761,7 +8763,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-		checkHistogramDetails(hdrHistogramDetails, 0, 92, 254);
+		//checkHistogramDetails(hdrHistogramDetails, 0, 92, 254);
+		checkHistogramDetails(hdrHistogramDetails, 0, 93, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR39".
