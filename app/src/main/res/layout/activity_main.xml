@@ -37,6 +37,20 @@
         android:background="@null"
         />
 
+    <ImageButton
+        android:id="@+id/switch_video"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/switch_to_video"
+        android:src="@drawable/take_video"
+        android:alpha="0.5"
+        android:onClick="clickedSwitchVideo"
+        android:layout_below="@+id/take_photo"
+        android:background="@null"
+        />
+
     <ZoomControls
         android:id="@+id/zoom"
         android:contentDescription="@string/zoom"
@@ -132,7 +146,7 @@
         android:onClick="clickedExposure"
         />
 
-    <ImageButton
+    <!--<ImageButton
         android:id="@+id/switch_video"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -141,7 +155,7 @@
         android:contentDescription="@string/switch_to_video"
         android:src="@drawable/switch_video"
         android:onClick="clickedSwitchVideo"
-        />
+        />-->
 
     <ImageButton
         android:id="@+id/switch_camera"

@@ -72,7 +72,7 @@ public class MainUI {
 		this.setIcon(R.id.popup);
 		this.setIcon(R.id.exposure_lock);
 		this.setIcon(R.id.exposure);
-		this.setIcon(R.id.switch_video);
+		//this.setIcon(R.id.switch_video);
 		this.setIcon(R.id.switch_camera);
 		this.setIcon(R.id.audio_control);
 		this.setIcon(R.id.trash);
@@ -253,14 +253,14 @@ public class MainUI {
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
 	
-			view = main_activity.findViewById(R.id.switch_video);
+			/*view = main_activity.findViewById(R.id.switch_video);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
 			layoutParams.addRule(left_of, R.id.exposure);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
+			setViewRotation(view, ui_rotation);*/
 	
 			view = main_activity.findViewById(R.id.switch_camera);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -268,7 +268,8 @@ public class MainUI {
 			layoutParams.addRule(align_parent_right, 0);
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.switch_video);
+			//layoutParams.addRule(left_of, R.id.switch_video);
+			layoutParams.addRule(left_of, R.id.exposure);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
@@ -310,6 +311,13 @@ public class MainUI {
 			setViewRotation(view, ui_rotation);
 
 			view = main_activity.findViewById(R.id.pause_video);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+			view.setLayoutParams(layoutParams);
+			setViewRotation(view, ui_rotation);
+
+			view = main_activity.findViewById(R.id.switch_video);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
@@ -461,7 +469,7 @@ public class MainUI {
 		}
     }
 
-    /** Set icon for taking photos vs videos.
+    /** Set icons for taking photos vs videos.
 	 *  Also handles content descriptions for the take photo button and switch video button.
      */
     public void setTakePhotoIcon() {
@@ -492,6 +500,9 @@ public class MainUI {
 
 			view = (ImageButton)main_activity.findViewById(R.id.switch_video);
 			view.setContentDescription( main_activity.getResources().getString(switch_video_content_description) );
+			resource = main_activity.getPreview().isVideo() ? R.drawable.take_photo : R.drawable.take_video;
+			view.setImageResource(resource);
+			view.setTag(resource); // for testing
 		}
     }
 
@@ -653,8 +664,7 @@ public class MainUI {
 			    View popupButton = main_activity.findViewById(R.id.popup);
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
-			    if( !main_activity.getPreview().isVideo() )
-			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
+				switchVideoButton.setVisibility(visibility);
 			    if( main_activity.supportsExposureButton() && !main_activity.getPreview().isVideo() ) // still allow exposure when recording video
 			    	exposureButton.setVisibility(visibility);
 			    if( main_activity.getPreview().supportsExposureLock() && !main_activity.getPreview().isVideo() ) // still allow exposure lock when recording video
