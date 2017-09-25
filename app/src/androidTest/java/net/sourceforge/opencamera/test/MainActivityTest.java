@@ -1141,6 +1141,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	private void subTestPopupButtonAvailability(String test_key, String option, boolean expected) {
+		Log.d(TAG, "test_key: "+ test_key);
+		Log.d(TAG, "option: "+ option);
+		Log.d(TAG, "expected?: "+ expected);
 		View button = mActivity.getUIButton(test_key + "_" + option);
 		if( expected ) {
 			boolean is_video = mPreview.isVideo();
@@ -1179,6 +1182,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	
 	private void subTestPopupButtonAvailability() {
 		List<String> supported_flash_values = mPreview.getSupportedFlashValues();
+		Log.d(TAG, "supported_flash_values: "+ supported_flash_values);
 		subTestPopupButtonAvailability("TEST_FLASH", "flash_off", supported_flash_values);
 		subTestPopupButtonAvailability("TEST_FLASH", "flash_auto", supported_flash_values);
 		subTestPopupButtonAvailability("TEST_FLASH", "flash_on", supported_flash_values);
@@ -1193,23 +1197,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_edof", supported_focus_values);		
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_continuous_picture", supported_focus_values);
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_continuous_video", supported_focus_values);
-		if( mPreview.supportsISORange() ) {
-			subTestPopupButtonAvailability("TEST_ISO", "auto", true);
-			subTestPopupButtonAvailability("TEST_ISO", "100", true);
-			subTestPopupButtonAvailability("TEST_ISO", "200", true);
-			subTestPopupButtonAvailability("TEST_ISO", "400", true);
-			subTestPopupButtonAvailability("TEST_ISO", "800", true);
-			subTestPopupButtonAvailability("TEST_ISO", "1600", true);
-		}
-		else {
-			List<String> supported_iso_values = mPreview.getSupportedISOs();
-			subTestPopupButtonAvailability("TEST_ISO", "auto", supported_iso_values);
-			subTestPopupButtonAvailability("TEST_ISO", "100", supported_iso_values);
-			subTestPopupButtonAvailability("TEST_ISO", "200", supported_iso_values);
-			subTestPopupButtonAvailability("TEST_ISO", "400", supported_iso_values);
-			subTestPopupButtonAvailability("TEST_ISO", "800", supported_iso_values);
-			subTestPopupButtonAvailability("TEST_ISO", "1600", supported_iso_values);
-		}
 		subTestPopupButtonAvailability("TEST_WHITE_BALANCE", mPreview.getSupportedWhiteBalances() != null);
 		subTestPopupButtonAvailability("TEST_SCENE_MODE", mPreview.getSupportedSceneModes() != null);
 		subTestPopupButtonAvailability("TEST_COLOR_EFFECT", mPreview.getSupportedColorEffects() != null);
@@ -1954,6 +1941,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(focus_value.equals("focus_mode_auto"));
 	}
 
+	private void subTestISOButtonAvailability() {
+		if( mPreview.supportsISORange() ) {
+			subTestPopupButtonAvailability("TEST_ISO", "auto", true);
+			subTestPopupButtonAvailability("TEST_ISO", "100", true);
+			subTestPopupButtonAvailability("TEST_ISO", "200", true);
+			subTestPopupButtonAvailability("TEST_ISO", "400", true);
+			subTestPopupButtonAvailability("TEST_ISO", "800", true);
+			subTestPopupButtonAvailability("TEST_ISO", "1600", true);
+		}
+		else {
+			List<String> supported_iso_values = mPreview.getSupportedISOs();
+			subTestPopupButtonAvailability("TEST_ISO", "auto", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "100", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "200", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "400", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "800", supported_iso_values);
+			subTestPopupButtonAvailability("TEST_ISO", "1600", supported_iso_values);
+		}
+	}
+
 	public void testTakePhotoExposureCompensation() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExposureCompensation");
 		setToDefault();
@@ -1974,6 +1981,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
 	    assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
+
+		subTestISOButtonAvailability();
 
 	    assertTrue( mPreview.getMaximumExposure() - mPreview.getMinimumExposure() == seekBar.getMax() );
 	    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
@@ -2102,6 +2111,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
 		assertTrue(isoSeekBar.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureTimeSeekBar.getVisibility() == (mPreview.supportsExposureTime() ? View.VISIBLE : View.GONE));
+		subTestISOButtonAvailability();
 
 		final int manual_n = 1000; // should match MainActivity.manual_n
 	    assertTrue( isoSeekBar.getMax() == manual_n );
@@ -2317,6 +2327,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		clickView(exposureButton);
+		subTestISOButtonAvailability();
 
 		assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 		assertTrue(exposureContainer.getVisibility() == View.VISIBLE);

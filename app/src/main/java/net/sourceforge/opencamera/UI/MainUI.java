@@ -719,6 +719,7 @@ public class MainUI {
     private void setupExposureUI() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setupExposureUI");
+		test_ui_buttons.clear();
 		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		final Preview preview = main_activity.getPreview();
 		ViewGroup iso_buttons_container = (ViewGroup)main_activity.findViewById(R.id.iso_buttons);
@@ -1068,6 +1069,7 @@ public class MainUI {
     	if( popup_view == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "create new popup_view");
+			test_ui_buttons.clear();
     		popup_view = new PopupView(main_activity);
 			popup_container.addView(popup_view);
     	}
