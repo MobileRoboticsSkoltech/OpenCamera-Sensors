@@ -376,7 +376,7 @@ public class MainUI {
 			// set seekbar info
 			int width_dp;
 			if( ui_rotation == 0 || ui_rotation == 180 ) {
-				width_dp = 300;
+				width_dp = 350;
 			}
 			else {
 				width_dp = 200;
@@ -385,10 +385,14 @@ public class MainUI {
 			final float scale = main_activity.getResources().getDisplayMetrics().density;
 			int width_pixels = (int) (width_dp * scale + 0.5f); // convert dps to pixels
 			int height_pixels = (int) (height_dp * scale + 0.5f); // convert dps to pixels
-			int exposure_zoom_gap = (int) (4 * scale + 0.5f); // convert dps to pixels
 
 			View view = main_activity.findViewById(R.id.sliders_container);
 			setViewRotation(view, ui_rotation);
+			view.setTranslationX(0.0f);
+			view.setTranslationY(0.0f);
+			if( ui_rotation == 90 || ui_rotation == 270 ) {
+				view.setTranslationX(2*height_pixels);
+			}
 
 			view = main_activity.findViewById(R.id.exposure_seekbar);
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)view.getLayoutParams();
