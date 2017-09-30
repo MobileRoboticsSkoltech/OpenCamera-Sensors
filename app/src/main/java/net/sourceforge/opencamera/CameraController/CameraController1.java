@@ -329,6 +329,8 @@ public class CameraController1 extends CameraController {
         camera_features.is_exposure_lock_supported = parameters.isAutoExposureLockSupported();
 
         camera_features.is_video_stabilization_supported = parameters.isVideoStabilizationSupported();
+
+		camera_features.is_photo_video_recording_supported = parameters.isVideoSnapshotSupported();
         
         camera_features.min_exposure = parameters.getMinExposureCompensation();
         camera_features.max_exposure = parameters.getMaxExposureCompensation();

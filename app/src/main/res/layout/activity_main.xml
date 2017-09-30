@@ -51,6 +51,19 @@
         android:background="@null"
         />
 
+    <ImageButton
+        android:id="@+id/take_photo_when_video_recording"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/take_photo"
+        android:src="@drawable/take_photo_when_video_recording"
+        android:onClick="clickedTakePhotoVideoSnapshot"
+        android:layout_below="@+id/take_photo"
+        android:background="@null"
+        />
+
     <ZoomControls
         android:id="@+id/zoom"
         android:contentDescription="@string/zoom"

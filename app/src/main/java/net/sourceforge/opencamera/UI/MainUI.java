@@ -324,6 +324,13 @@ public class MainUI {
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
 
+			view = main_activity.findViewById(R.id.take_photo_when_video_recording);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+			view.setLayoutParams(layoutParams);
+			setViewRotation(view, ui_rotation);
+
 			view = main_activity.findViewById(R.id.zoom);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
@@ -633,6 +640,10 @@ public class MainUI {
 					if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && main_activity.getPreview().isVideoRecording() ) {
 						View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
 						pauseVideoButton.setVisibility(visibility);
+					}
+					if( main_activity.getPreview().supportsPhotoVideoRecording() && main_activity.getPreview().isVideoRecording() ) {
+						View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
+						takePhotoVideoButton.setVisibility(visibility);
 					}
         		}
 				if( !immersive_mode ) {
@@ -987,7 +998,7 @@ public class MainUI {
 		if( MyDebug.LOG )
 			Log.d(TAG, "flash_value: " + flash_value);
     	if( flash_value != null && flash_value.equals("flash_off") ) {
-    		popup.setImageResource(R.drawable.popup_flash_off);
+			popup.setImageResource(R.drawable.popup_flash_off);
     	}
     	else if( flash_value != null && flash_value.equals("flash_torch") ) {
     		popup.setImageResource(R.drawable.popup_flash_torch);
@@ -1152,13 +1163,13 @@ public class MainUI {
 
 				switch(volume_keys) {
 					case "volume_take_photo":
-						main_activity.takePicture();
+						main_activity.takePicture(false);
 						return true;
 					case "volume_focus":
 						if(keydown_volume_up && keydown_volume_down) {
 							if (MyDebug.LOG)
 								Log.d(TAG, "take photo rather than focus, as both volume keys are down");
-							main_activity.takePicture();
+							main_activity.takePicture(false);
 						}
 						else if (main_activity.getPreview().getCurrentFocusValue() != null && main_activity.getPreview().getCurrentFocusValue().equals("focus_mode_manual2")) {
 							if(keyCode == KeyEvent.KEYCODE_VOLUME_UP)
@@ -1236,7 +1247,7 @@ public class MainUI {
 			case KeyEvent.KEYCODE_CAMERA:
 			{
 				if( event.getRepeatCount() == 0 ) {
-					main_activity.takePicture();
+					main_activity.takePicture(false);
 					return true;
 				}
 			}

@@ -254,6 +254,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onCreate: time after setting button visibility: " + (System.currentTimeMillis() - debug_time));
 		View pauseVideoButton = findViewById(R.id.pause_video);
 		pauseVideoButton.setVisibility(View.INVISIBLE);
+		View takePhotoVideoButton = findViewById(R.id.take_photo_when_video_recording);
+		takePhotoVideoButton.setVisibility(View.INVISIBLE);
 
 		// We initialise optional controls to invisible, so they don't show while the camera is opening - the actual visibility is
 		// set in cameraSetup().
@@ -687,6 +689,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "ignore audio trigger due to already taking photo or on timer");
 		}
+		else if( preview.isVideoRecording() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "ignore audio trigger due to already recording video");
+		}
 		else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "schedule take picture due to loud noise");
@@ -695,7 +701,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				public void run() {
 					if( MyDebug.LOG )
 						Log.d(TAG, "taking picture due to audio trigger");
-					takePicture();
+					takePicture(false);
 				}
 			});
 		}
@@ -850,8 +856,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public void clickedTakePhoto(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTakePhoto");
-    	this.takePicture();
+    	this.takePicture(false);
     }
+
+	/** User has clicked button to take a photo snapshot whilst video recording.
+	 */
+	public void clickedTakePhotoVideoSnapshot(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedTakePhotoVideoSnapshot");
+    	this.takePicture(true);
+	}
 
 	public void clickedPauseVideo(View view) {
 		if( MyDebug.LOG )
@@ -953,12 +967,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchVideo");
 		this.closePopup();
+		mainUI.destroyPopup(); // important as we don't want to use a cached popup, as we can show different options depending on whether we're in photo or video mode
 	    View switchVideoButton = findViewById(R.id.switch_video);
 	    switchVideoButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
 		this.preview.switchVideo(false, true);
 		switchVideoButton.setEnabled(true);
 
 		mainUI.setTakePhotoIcon();
+	    mainUI.setPopupIcon(); // needed as turning to video mode or back can turn flash mode off or back on
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast(true);
 		}
@@ -2170,8 +2186,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	/** User has pressed the take picture button, or done an equivalent action to request this (e.g.,
 	 *  volume buttons, audio trigger).
+	 * @param photo_snapshot If true, then the user has requested taking a photo whilst video
+	 *                       recording. If false, either take a photo or start/stop video depending
+	 *                       on the current mode.
 	 */
-    public void takePicture() {
+    public void takePicture(boolean photo_snapshot) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
 
@@ -2188,10 +2207,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 		}
 
-		this.takePicturePressed();
+		this.takePicturePressed(photo_snapshot);
     }
 
-    void takePicturePressed() {
+	/**
+	 * @param photo_snapshot If true, then the user has requested taking a photo whilst video
+	 *                       recording. If false, either take a photo or start/stop video depending
+	 *                       on the current mode.
+	 */
+	void takePicturePressed(boolean photo_snapshot) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicturePressed");
 
@@ -2203,7 +2227,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			applicationInterface.setNextPanoramaPoint();
 		}
 
-    	this.preview.takePicturePressed();
+    	this.preview.takePicturePressed(photo_snapshot);
 	}
     
     /** Lock the screen - this is Open Camera's own lock to guard against accidental presses,
