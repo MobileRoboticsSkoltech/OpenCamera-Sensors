@@ -118,7 +118,7 @@ public interface ApplicationInterface {
 	void onFailedReconnectError(); // failed to reconnect camera after stopping video recording
 	void onFailedCreateVideoFileError(); // callback if unable to create file for recording video
 	void hasPausedPreview(boolean paused); // called when the preview is paused or unpaused (due to getPausePreviewPref())
-	void cameraInOperation(boolean in_operation); // called when the camera starts/stops being operation (taking photos or recording video, including if preview is paused after taking a photo), use to disable GUI elements during camera operation
+	void cameraInOperation(boolean in_operation, boolean is_video); // called when the camera starts/stops being operation (taking photos or recording video, including if preview is paused after taking a photo), use to disable GUI elements during camera operation
 	void turnFrontScreenFlashOn(); // called when front-screen "flash" required (for modes flash_frontscreen_auto, flash_frontscreen_on); the application should light up the screen, until cameraInOperation(false) is called
 	void cameraClosed();
 	void timerBeep(long remaining_time); // n.b., called once per second on timer countdown - so application can beep, or do whatever it likes

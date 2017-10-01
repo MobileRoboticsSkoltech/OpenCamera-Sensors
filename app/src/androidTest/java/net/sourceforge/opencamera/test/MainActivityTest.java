@@ -1155,6 +1155,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				// not allowed in picture mode
 				assertTrue(button == null);
 			}
+			else if( option.equals("flash_auto") && is_video ) {
+				// not allowed in video mode
+				assertTrue(button == null);
+			}
+			else if( option.equals("flash_on") && is_video ) {
+				// not allowed in video mode
+				assertTrue(button == null);
+			}
+			else if( option.equals("flash_red_eye") && is_video ) {
+				// not allowed in video mode
+				assertTrue(button == null);
+			}
+			else if( option.equals("flash_frontscreen_auto") && is_video ) {
+				// not allowed in video mode
+				assertTrue(button == null);
+			}
+			else if( option.equals("flash_frontscreen_on") && is_video ) {
+				// not allowed in video mode
+				assertTrue(button == null);
+			}
 			else {
 				assertTrue(button != null);
 			}
@@ -4350,7 +4370,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "after idle sync");
 
 		int exp_n_new_files = 0;
-	    if( mPreview.isTakingPhoto() ) {
+	    if( mPreview.isVideoRecording() ) {
 		    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_recording );
             assertTrue( (Integer)switchVideoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_photo );
 			assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
@@ -4602,7 +4622,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}, 5000, false, true);
 	}
 
-	/** Set pausing and resuming video.
+	/** Test pausing and resuming video.
 	 */
 	public void testTakeVideoPause() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoPause");
@@ -4614,11 +4634,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
+		final View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
+		assertTrue( pauseVideoButton.getVisibility() == View.INVISIBLE );
+
 		subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
 			@Override
 			public int doTest() {
 				View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
-				View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
 				final long time_tol_ms = 1000;
 
 				Log.d(TAG, "wait before pausing");
@@ -4708,7 +4730,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}, 5000, false, false);
 	}
 
-	/** Set pausing and stopping video.
+	/** Test pausing and stopping video.
 	 */
 	public void testTakeVideoPauseStop() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoPauseStop");
@@ -4720,11 +4742,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		setToDefault();
 
+		final View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
+		assertTrue( pauseVideoButton.getVisibility() == View.INVISIBLE );
+
 		subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
 			@Override
 			public int doTest() {
 				View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
-				View pauseVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.pause_video);
 				final long time_tol_ms = 1000;
 
 				Log.d(TAG, "wait before pausing");
@@ -4782,6 +4806,74 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Log.d(TAG, "after idle sync");
 
 				return 1;
+			}
+		}, 5000, false, false);
+	}
+
+	/** Test taking photo while recording video.
+	 */
+	public void testTakeVideoSnapshot() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSnapshot");
+
+		if( !mPreview.supportsPhotoVideoRecording() ) {
+			Log.d(TAG, "video snapshot not supported");
+			return;
+		}
+
+		setToDefault();
+
+		final View takePhotoVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo_when_video_recording);
+		assertTrue( takePhotoVideoButton.getVisibility() == View.INVISIBLE );
+
+		subTestTakeVideo(false, false, false, false, new VideoTestCallback() {
+			@Override
+			public int doTest() {
+				View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
+
+				Log.d(TAG, "wait before taking photo");
+				try {
+					Thread.sleep(3000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
+				assertTrue( takePhotoVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( !mPreview.isVideoRecordingPaused() );
+
+				Log.d(TAG, "about to click take photo snapshot");
+				clickView(takePhotoVideoButton);
+				Log.d(TAG, "done clicking take photo snapshot");
+				getInstrumentation().waitForIdleSync();
+				Log.d(TAG, "after idle sync");
+
+				waitForTakePhoto();
+
+				assertTrue( takePhotoVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+				assertTrue( !mPreview.isVideoRecordingPaused() );
+
+				Log.d(TAG, "wait before stopping");
+				try {
+					Thread.sleep(3000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+				assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
+				assertTrue( takePhotoVideoButton.getVisibility() == View.VISIBLE );
+				assertTrue( mPreview.isVideoRecording() );
+
+				Log.d(TAG, "about to click stop video");
+				clickView(takePhotoButton);
+				Log.d(TAG, "done clicking stop video");
+				getInstrumentation().waitForIdleSync();
+				Log.d(TAG, "after idle sync");
+
+				return 2;
 			}
 		}, 5000, false, false);
 	}
@@ -5225,10 +5317,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 
-		assertTrue( mPreview.isTakingPhoto() );
+		assertTrue( mPreview.isVideoRecording() );
 
 		assertTrue(switchCameraButton.getVisibility() == View.GONE);
-	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
+	    assertTrue(switchVideoButton.getVisibility() == View.GONE);
 	    //assertTrue(flashButton.getVisibility() == flashVisibility);
 	    //assertTrue(focusButton.getVisibility() == View.GONE);
 	    assertTrue(exposureButton.getVisibility() == exposureVisibility);
@@ -5240,7 +5332,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    Thread.sleep(10000);
 		Log.d(TAG, "check still taking video");
-		assertTrue( mPreview.isTakingPhoto() );
+		assertTrue( mPreview.isVideoRecording() );
 
 		int n_new_files = folder.listFiles().length - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
@@ -5258,7 +5350,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			else {
 			    Thread.sleep(10000);
 				Log.d(TAG, "check restarted video");
-				assertTrue( mPreview.isTakingPhoto() );
+				assertTrue( mPreview.isVideoRecording() );
 				assertTrue( folder.exists() );
 				n_new_files = folder.listFiles().length - n_files;
 				Log.d(TAG, "n_new_files: " + n_new_files);
@@ -5271,7 +5363,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    Thread.sleep(8000);
 		}
 		Log.d(TAG, "check stopped taking video");
-		assertTrue( !mPreview.isTakingPhoto() );
+		assertTrue( !mPreview.isVideoRecording() );
 		
 		assertTrue( folder.exists() );
 		n_new_files = folder.listFiles().length - n_files;
@@ -5346,11 +5438,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 
-		assertTrue( mPreview.isTakingPhoto() );
+		assertTrue( mPreview.isVideoRecording() );
 
 	    Thread.sleep(2000);
 		Log.d(TAG, "check still taking video");
-		assertTrue( mPreview.isTakingPhoto() );
+		assertTrue( mPreview.isVideoRecording() );
 
 		int n_new_files = folder.listFiles().length - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
@@ -5363,7 +5455,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "done clicking settings");
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
-		assertTrue( !mPreview.isTakingPhoto() );
+		assertTrue( !mPreview.isVideoRecording() );
 
 		assertTrue( folder.exists() );
 		n_new_files = folder.listFiles().length - n_files;
@@ -5380,7 +5472,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// need to wait for UI code to finish before leaving
 		this.getInstrumentation().waitForIdleSync();
 	    Thread.sleep(500);
-		assertTrue( !mPreview.isTakingPhoto() );
+		assertTrue( !mPreview.isVideoRecording() );
 		
 		Log.d(TAG, "about to click take video");
 	    clickView(takePhotoButton);
@@ -5388,7 +5480,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 
-		assertTrue( mPreview.isTakingPhoto() );
+		assertTrue( mPreview.isVideoRecording() );
 
 		assertTrue( folder.exists() );
 		n_new_files = folder.listFiles().length - n_files;
@@ -5426,7 +5518,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "done clicking settings");
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
-		assertTrue( !mPreview.isTakingPhoto() );
+		assertTrue( !mPreview.isVideoRecording() );
 
 		Thread.sleep(500);
 
@@ -5456,11 +5548,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 
-		assertTrue( mPreview.isTakingPhoto() );
+		assertTrue( mPreview.isVideoRecording() );
 
 	    Thread.sleep(2000);
 		Log.d(TAG, "check still taking video");
-		assertTrue( mPreview.isTakingPhoto() );
+		assertTrue( mPreview.isVideoRecording() );
 
 		int n_new_files = folder.listFiles().length - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
@@ -5499,11 +5591,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 
-		assertTrue( mPreview.isTakingPhoto() );
+		assertTrue( mPreview.isVideoRecording() );
 
 	    Thread.sleep(1500);
 		Log.d(TAG, "check still taking video");
-		assertTrue( mPreview.isTakingPhoto() );
+		assertTrue( mPreview.isVideoRecording() );
 
 		// wait until flash off
 		long time_s = System.currentTimeMillis();
@@ -5849,7 +5941,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 				// now check we still aren't recording, and that popup is still open
 				assertTrue( mPreview.isVideo() );
-				assertTrue( !mPreview.isTakingPhoto() );
+				assertTrue( !mPreview.isVideoRecording() );
 				assertTrue( !mPreview.isOnTimer() );
 				assertTrue( mActivity.popupIsOpen() );
 			}
@@ -5858,7 +5950,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 				// now check we are recording video, and that popup is closed
 				assertTrue( mPreview.isVideo() );
-				assertTrue( mPreview.isTakingPhoto() );
+				assertTrue( mPreview.isVideoRecording() );
 				assertTrue( !mActivity.popupIsOpen() );
 			}
 
@@ -5879,6 +5971,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					subTestPopupButtonAvailability("TEST_FLASH", "flash_on", supported_flash_values);
 					subTestPopupButtonAvailability("TEST_FLASH", "flash_torch", supported_flash_values);
 					subTestPopupButtonAvailability("TEST_FLASH", "flash_red_eye", supported_flash_values);
+					subTestPopupButtonAvailability("TEST_FLASH", "flash_frontscreen_auto", supported_flash_values);
+					subTestPopupButtonAvailability("TEST_FLASH", "flash_frontscreen_on", supported_flash_values);
 					// only flash should be available
 					subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_auto", null);
 					subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_locked", null);
@@ -5905,7 +5999,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "done clicking stop video");
 			this.getInstrumentation().waitForIdleSync();
 			Log.d(TAG, "after idle sync");
-			assertTrue( !mPreview.isTakingPhoto() );
+			assertTrue( !mPreview.isVideoRecording() );
 			assertTrue( !mActivity.popupIsOpen() );
 
 		}

@@ -842,6 +842,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		video_recorder.release(); 
     		video_recorder = null;
 			video_recorder_is_paused = false;
+			applicationInterface.cameraInOperation(false, true);
 			reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
 			applicationInterface.stoppedVideo(video_method, video_uri, video_filename);
     		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
@@ -1137,7 +1138,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "pausePreview: about to call cameraInOperation: " + (System.currentTimeMillis() - debug_time));
 		}
-		applicationInterface.cameraInOperation(false);
+		/*applicationInterface.cameraInOperation(false, false);
+		if( is_video )
+			applicationInterface.cameraInOperation(false, true);*/
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "pausePreview: total time: " + (System.currentTimeMillis() - debug_time));
 		}
@@ -1222,9 +1225,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		supported_focus_values = null;
 		current_focus_index = -1;
 		max_num_focus_areas = 0;
-		applicationInterface.cameraInOperation(false);
-		if( MyDebug.LOG )
-			Log.d(TAG, "done showGUI");
+		applicationInterface.cameraInOperation(false, false);
+		if( is_video )
+			applicationInterface.cameraInOperation(false, true);
 		if( !this.has_surface ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "preview surface not yet available");
@@ -4036,14 +4039,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			this.phase = PHASE_NORMAL;
-			applicationInterface.cameraInOperation(false);
+			applicationInterface.cameraInOperation(false, false);
+			if( is_video )
+				applicationInterface.cameraInOperation(false, true);
 			return;
 		}
 		if( !this.has_surface ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview surface not yet available");
 			this.phase = PHASE_NORMAL;
-			applicationInterface.cameraInOperation(false);
+			applicationInterface.cameraInOperation(false, false);
+			if( is_video )
+				applicationInterface.cameraInOperation(false, true);
 			return;
 		}
 
@@ -4060,7 +4067,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    	    showToast(null, R.string.location_not_available);
 					if( !is_video || photo_snapshot )
 						this.phase = PHASE_NORMAL;
-					applicationInterface.cameraInOperation(false);
+					applicationInterface.cameraInOperation(false, false);
+					if( is_video )
+						applicationInterface.cameraInOperation(false, true);
 		    	    return;
 				}
 			}
@@ -4118,7 +4127,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	            Log.e(TAG, "Couldn't create media video file; check storage permissions?");
 			e.printStackTrace();
             applicationInterface.onFailedCreateVideoFileError();
-			applicationInterface.cameraInOperation(false);
+			applicationInterface.cameraInOperation(false, true);
 		}
 		if( created_video_file ) {
         	CamcorderProfile profile = getCamcorderProfile();
@@ -4290,7 +4299,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
 				}
 
-				applicationInterface.cameraInOperation(true);
+				applicationInterface.cameraInOperation(true, true);
 				told_app_starting = true;
 				applicationInterface.startingVideo();
         		/*if( true ) // test
@@ -4331,7 +4340,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				video_recorder.release();
 				video_recorder = null;
 				video_recorder_is_paused = false;
-				applicationInterface.cameraInOperation(false);
+				applicationInterface.cameraInOperation(false, true);
 				this.reconnectCamera(true);
 			}
 			catch(RuntimeException e) {
@@ -4364,7 +4373,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				video_recorder.release();
 				video_recorder = null;
 				video_recorder_is_paused = false;
-				applicationInterface.cameraInOperation(false);
+				applicationInterface.cameraInOperation(false, true);
 				this.reconnectCamera(true);
 				this.showToast(null, R.string.video_no_free_space);
 			}
@@ -4461,7 +4470,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		video_recorder.release(); 
 		video_recorder = null;
 		video_recorder_is_paused = false;
-		applicationInterface.cameraInOperation(false);
+		applicationInterface.cameraInOperation(false, true);
 		this.reconnectCamera(true);
 	}
 
@@ -4507,7 +4516,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void takePhoto(boolean skip_autofocus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhoto");
-		applicationInterface.cameraInOperation(true);
+		applicationInterface.cameraInOperation(true, false);
         String current_ui_focus_value = getCurrentFocusValue();
 		if( MyDebug.LOG )
 			Log.d(TAG, "current_ui_focus_value is " + current_ui_focus_value);
@@ -4619,7 +4628,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	/** Take photo, assumes any autofocus has already been taken care of, and that applicationInterface.cameraInOperation(true) has
+	/** Take photo, assumes any autofocus has already been taken care of, and that applicationInterface.cameraInOperation(true, false) has
 	 *  already been called.
 	 *  Note that even if a caller wants to take a photo without focusing, you probably want to call takePhoto() with skip_autofocus
 	 *  set to true (so that things work okay in continuous picture focus mode).
@@ -4632,14 +4641,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			this.phase = PHASE_NORMAL;
-			applicationInterface.cameraInOperation(false);
+			applicationInterface.cameraInOperation(false, false);
 			return;
 		}
 		if( !this.has_surface ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview surface not yet available");
 			this.phase = PHASE_NORMAL;
-			applicationInterface.cameraInOperation(false);
+			applicationInterface.cameraInOperation(false, false);
 			return;
 		}
 
@@ -4712,7 +4721,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		    	    	// (otherwise this can fail, at least on Nexus 7)
     			            startCameraPreview();
     	            	}
-    	        		applicationInterface.cameraInOperation(false);
+    	        		applicationInterface.cameraInOperation(false, false);
     	        		if( MyDebug.LOG )
     	        			Log.d(TAG, "onPictureTaken started preview");
     				}
@@ -4808,7 +4817,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	            applicationInterface.onPhotoError();
 				phase = PHASE_NORMAL;
 	            startCameraPreview();
-	    		applicationInterface.cameraInOperation(false);
+	    		applicationInterface.cameraInOperation(false, false);
     	    }
 		};
     	{
@@ -5088,11 +5097,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		applicationInterface.hasPausedPreview(paused);
 	    if( paused ) {
 	    	this.phase = PHASE_PREVIEW_PAUSED;
-		    // shouldn't call applicationInterface.cameraInOperation(true), as should already have done when we started to take a photo (or above when exiting immersive mode)
+		    // shouldn't call applicationInterface.cameraInOperation(true, ...), as should already have done when we started to take a photo (or above when exiting immersive mode)
 		}
 		else {
 	    	this.phase = PHASE_NORMAL;
-			applicationInterface.cameraInOperation(false);
+			/*applicationInterface.cameraInOperation(false, false);
+			if( is_video )
+				applicationInterface.cameraInOperation(false, true);*/
+			applicationInterface.cameraInOperation(false, false); // needed for when taking photo with pause preview option
 		}
     }
 

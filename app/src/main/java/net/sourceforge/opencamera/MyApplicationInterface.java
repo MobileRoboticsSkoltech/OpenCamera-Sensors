@@ -1449,9 +1449,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		    this.clearLastImages();
 	    }
 	}
-    
+
     @Override
-    public void cameraInOperation(boolean in_operation) {
+    public void cameraInOperation(boolean in_operation, boolean is_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraInOperation: " + in_operation);
     	if( !in_operation && used_front_screen_flash ) {
@@ -1459,7 +1459,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     		used_front_screen_flash = false;
     	}
     	drawPreview.cameraInOperation(in_operation);
-    	main_activity.getMainUI().showGUI(!in_operation);
+    	main_activity.getMainUI().showGUI(!in_operation, is_video);
     }
     
     @Override

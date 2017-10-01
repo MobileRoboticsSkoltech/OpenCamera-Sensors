@@ -52,7 +52,8 @@ public class MainUI {
 	private boolean ui_placement_right = true;
 
 	private boolean immersive_mode;
-    private boolean show_gui = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
+    private boolean show_gui_photo = true; // result of call to showGUI() - false means a "reduced" GUI is displayed, whilst taking photo or video
+    private boolean show_gui_video = true;
 
 	private boolean keydown_volume_up;
 	private boolean keydown_volume_down;
@@ -648,7 +649,7 @@ public class MainUI {
         		}
 				if( !immersive_mode ) {
 					// make sure the GUI is set up as expected
-					showGUI(show_gui);
+					showGUI();
 				}
 			}
 		});
@@ -658,19 +659,34 @@ public class MainUI {
     	return immersive_mode;
     }
 
-    public void showGUI(final boolean show) {
-		if( MyDebug.LOG )
+    public void showGUI(final boolean show, final boolean is_video) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "showGUI: " + show);
-		this.show_gui = show;
+			Log.d(TAG, "is_video: " + is_video);
+		}
+		if( is_video )
+			this.show_gui_video = show;
+		else
+			this.show_gui_photo = show;
+		showGUI();
+	}
+
+	private void showGUI() {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "showGUI");
+			Log.d(TAG, "show_gui_photo: " + show_gui_photo);
+			Log.d(TAG, "show_gui_video: " + show_gui_video);
+		}
 		if( inImmersiveMode() )
 			return;
-		if( show && main_activity.usingKitKatImmersiveMode() ) {
+		if( (show_gui_photo || show_gui_video) && main_activity.usingKitKatImmersiveMode() ) {
 			// call to reset the timer
 			main_activity.initImmersiveMode();
 		}
 		main_activity.runOnUiThread(new Runnable() {
 			public void run() {
-		    	final int visibility = show ? View.VISIBLE : View.GONE;
+		    	final int visibility = (show_gui_photo && show_gui_video) ? View.VISIBLE : View.GONE; // for UI that is hidden while taking photo or video
+		    	final int visibility_video = show_gui_photo ? View.VISIBLE : View.GONE; // for UI that is only hidden while taking photo
 			    View switchCameraButton = main_activity.findViewById(R.id.switch_camera);
 			    View switchVideoButton = main_activity.findViewById(R.id.switch_video);
 			    View exposureButton = main_activity.findViewById(R.id.exposure);
@@ -680,17 +696,16 @@ public class MainUI {
 			    if( main_activity.getPreview().getCameraControllerManager().getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
 				switchVideoButton.setVisibility(visibility);
-			    if( main_activity.supportsExposureButton() && !main_activity.getPreview().isVideo() ) // still allow exposure when recording video
-			    	exposureButton.setVisibility(visibility);
-			    if( main_activity.getPreview().supportsExposureLock() && !main_activity.getPreview().isVideo() ) // still allow exposure lock when recording video
-			    	exposureLockButton.setVisibility(visibility);
+			    if( main_activity.supportsExposureButton() )
+			    	exposureButton.setVisibility(visibility_video); // still allow exposure when recording video
+			    if( main_activity.getPreview().supportsExposureLock() )
+			    	exposureLockButton.setVisibility(visibility_video); // still allow exposure lock when recording video
 			    if( main_activity.hasAudioControl() )
 			    	audioControlButton.setVisibility(visibility);
-			    if( !show ) {
+			    if( !(show_gui_photo && show_gui_video) ) {
 			    	closePopup(); // we still allow the popup when recording video, but need to update the UI (so it only shows flash options), so easiest to just close
 			    }
-			    if( !main_activity.getPreview().isVideo() || !main_activity.getPreview().supportsFlash() )
-			    	popupButton.setVisibility(visibility); // still allow popup in order to change flash mode when recording video
+				popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
 			}
 		});
     }
