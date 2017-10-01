@@ -74,7 +74,7 @@ public class MainUI {
 		this.setIcon(R.id.exposure_lock);
 		this.setIcon(R.id.exposure);
 		//this.setIcon(R.id.switch_video);
-		this.setIcon(R.id.switch_camera);
+		//this.setIcon(R.id.switch_camera);
 		this.setIcon(R.id.audio_control);
 		this.setIcon(R.id.trash);
 		this.setIcon(R.id.share);
@@ -263,7 +263,7 @@ public class MainUI {
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);*/
 	
-			view = main_activity.findViewById(R.id.switch_camera);
+			/*view = main_activity.findViewById(R.id.switch_camera);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, 0);
@@ -273,7 +273,7 @@ public class MainUI {
 			layoutParams.addRule(left_of, R.id.exposure);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
-			setViewRotation(view, ui_rotation);
+			setViewRotation(view, ui_rotation);*/
 
 			view = main_activity.findViewById(R.id.audio_control);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
@@ -281,7 +281,8 @@ public class MainUI {
 			layoutParams.addRule(align_parent_right, 0);
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.switch_camera);
+			//layoutParams.addRule(left_of, R.id.switch_camera);
+			layoutParams.addRule(left_of, R.id.exposure);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			setViewRotation(view, ui_rotation);
@@ -305,6 +306,13 @@ public class MainUI {
 			setViewRotation(view, ui_rotation);
 
 			view = main_activity.findViewById(R.id.take_photo);
+			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+			layoutParams.addRule(align_parent_left, 0);
+			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+			view.setLayoutParams(layoutParams);
+			setViewRotation(view, ui_rotation);
+
+			view = main_activity.findViewById(R.id.switch_camera);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);

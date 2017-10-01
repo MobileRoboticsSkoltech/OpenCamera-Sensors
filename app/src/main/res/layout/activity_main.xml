@@ -25,6 +25,19 @@
         />
 
     <ImageButton
+        android:id="@+id/switch_camera"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/switch_to_front_camera"
+        android:src="@drawable/switch_camera"
+        android:onClick="clickedSwitchCamera"
+        android:layout_above="@+id/take_photo"
+        android:background="@null"
+        />
+
+    <ImageButton
         android:id="@+id/pause_video"
         android:layout_width="70dp"
         android:layout_height="70dp"
@@ -170,7 +183,7 @@
         android:onClick="clickedSwitchVideo"
         />-->
 
-    <ImageButton
+    <!--<ImageButton
         android:id="@+id/switch_camera"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -179,7 +192,7 @@
         android:contentDescription="@string/switch_to_front_camera"
         android:src="@drawable/switch_camera"
         android:onClick="clickedSwitchCamera"
-        />
+        />-->
 
     <ImageButton
         android:id="@+id/audio_control"
