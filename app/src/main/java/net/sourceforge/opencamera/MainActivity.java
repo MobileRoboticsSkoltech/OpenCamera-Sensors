@@ -378,8 +378,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					Log.d(TAG, "version_code: " + version_code);
 					Log.d(TAG, "latest_version: " + latest_version);
 				}
+				final boolean force_whats_new = false;
+				//final boolean force_whats_new = true; // for testing
 				// don't show What's New if this is the first time the user has run
-				if( has_done_first_time && version_code > latest_version ) {
+				if( has_done_first_time && ( force_whats_new || version_code > latest_version ) ) {
 					AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 					alertDialog.setTitle(R.string.whats_new);
 					alertDialog.setMessage(R.string.whats_new_text);
