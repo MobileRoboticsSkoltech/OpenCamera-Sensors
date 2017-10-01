@@ -4810,17 +4810,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}, 5000, false, false);
 	}
 
-	/** Test taking photo while recording video.
-	 */
-	public void testTakeVideoSnapshot() throws InterruptedException {
-		Log.d(TAG, "testTakeVideoSnapshot");
-
-		if( !mPreview.supportsPhotoVideoRecording() ) {
-			Log.d(TAG, "video snapshot not supported");
-			return;
-		}
-
-		setToDefault();
+	private void subTestTakeVideoSnapshot() throws InterruptedException {
+		Log.d(TAG, "subTestTakeVideoSnapshot");
 
 		final View takePhotoVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo_when_video_recording);
 		assertTrue( takePhotoVideoButton.getVisibility() == View.INVISIBLE );
@@ -4876,6 +4867,41 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				return 2;
 			}
 		}, 5000, false, false);
+	}
+
+	/** Test taking photo while recording video.
+	 */
+	public void testTakeVideoSnapshot() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSnapshot");
+
+		if( !mPreview.supportsPhotoVideoRecording() ) {
+			Log.d(TAG, "video snapshot not supported");
+			return;
+		}
+
+		setToDefault();
+
+		subTestTakeVideoSnapshot();
+	}
+
+	/** Test taking photo while recording video at max video quality.
+	 */
+	public void testTakeVideoSnapshotMax() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSnapshotMax");
+
+		if( !mPreview.supportsPhotoVideoRecording() ) {
+			Log.d(TAG, "video snapshot not supported");
+			return;
+		}
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId()), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6 or OnePlus 3T)
+		editor.apply();
+		updateForSettings();
+
+		subTestTakeVideoSnapshot();
 	}
 
 	/** Set available memory to make sure that we stop before running out of memory.

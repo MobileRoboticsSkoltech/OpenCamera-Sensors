@@ -2228,10 +2228,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// first set picture size (for photo mode, must be done now so we can set the picture size from this; for video, doesn't really matter when we set it)
 		CameraController.Size new_size = null;
     	if( this.is_video ) {
-    		// In theory, the picture size shouldn't matter in video mode, but the stock Android camera sets a picture size
-    		// which is the largest that matches the video's aspect ratio.
-    		// This seems necessary to work around an aspect ratio bug introduced in Android 4.4.3 (on Nexus 7 at least): http://code.google.com/p/android/issues/detail?id=70830
-    		// which results in distorted aspect ratio on preview and recorded video!
+			// see comments for getOptimalVideoPictureSize()
         	CamcorderProfile profile = getCamcorderProfile();
         	if( MyDebug.LOG )
         		Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
@@ -2591,13 +2588,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return targetRatio;
 	}
 
-	private CameraController.Size getClosestSize(List<CameraController.Size> sizes, double targetRatio) {
+	/** Returns the size in sizes that is the closest aspect ratio match to targetRatio, but (if max_size is non-null) is not
+	 *  larger than max_size (in either width or height).
+	 */
+	private CameraController.Size getClosestSize(List<CameraController.Size> sizes, double targetRatio, CameraController.Size max_size) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getClosestSize()");
 		CameraController.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
         for(CameraController.Size size : sizes) {
             double ratio = (double)size.width / size.height;
+			if( max_size != null ) {
+				if( size.width > max_size.width || size.height > max_size.height )
+					continue;
+			}
             if( Math.abs(ratio - targetRatio) < minDiff ) {
                 optimalSize = size;
                 minDiff = Math.abs(ratio - targetRatio);
@@ -2643,7 +2647,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	// can't find match for aspect ratio, so find closest one
     		if( MyDebug.LOG )
     			Log.d(TAG, "no preview size matches the aspect ratio");
-    		optimalSize = getClosestSize(sizes, targetRatio);
+    		optimalSize = getClosestSize(sizes, targetRatio, null);
         }
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "chose optimalSize: " + optimalSize.width + " x " + optimalSize.height);
@@ -2652,20 +2656,39 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return optimalSize;
     }
 
+	/** Returns a picture size to set during video mode.
+	 *  In theory, the picture size shouldn't matter in video mode, but the stock Android camera sets a picture size
+	 *  which is the largest that matches the video's aspect ratio.
+	 *  This seems necessary to work around an aspect ratio bug introduced in Android 4.4.3 (on Nexus 7 at least): http://code.google.com/p/android/issues/detail?id=70830
+	 *  which results in distorted aspect ratio on preview and recorded video!
+	 *  Setting the picture size in video mode is also needed for taking photos when recording video. We need to make sure we
+	 *  set photo resolutions that are supported by Android when recording video. For old camera API, this doesn't matter so much
+	 *  (if we request too high, it'll automatically reduce the photo resolution), but still good to match the aspect ratio. For
+	 *  Camera2 API, see notes at "https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createCaptureSession(java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler)" .
+	 */
 	public CameraController.Size getOptimalVideoPictureSize(List<CameraController.Size> sizes, double targetRatio) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getOptimalVideoPictureSize()");
 		final double ASPECT_TOLERANCE = 0.05;
         if( sizes == null )
         	return null;
+		CameraController.Size max_video_size = video_quality_handler.getMaxSupportedVideoSize();
+		if( MyDebug.LOG )
+			Log.d(TAG, "max_video_size: " + max_video_size.width + ", " + max_video_size.height);
         CameraController.Size optimalSize = null;
-        // Try to find largest size that matches aspect ratio
+        // Try to find largest size that matches aspect ratio.
+		// But don't choose a size that's larger than the max video size (as this isn't supported for taking photos when
+		// recording video for devices with LIMITED support in Camera2 mode).
+		// In theory, for devices FULL Camera2 support, if the current video resolution is smaller than the max preview resolution,
+		// we should be able to support larger photo resolutions, but this is left to future.
         for(CameraController.Size size : sizes) {
     		if( MyDebug.LOG )
     			Log.d(TAG, "    supported preview size: " + size.width + ", " + size.height);
             double ratio = (double)size.width / size.height;
             if( Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE )
             	continue;
+			if( size.width > max_video_size.width || size.height > max_video_size.height )
+				continue;
             if( optimalSize == null || size.width > optimalSize.width ) {
                 optimalSize = size;
             }
@@ -2674,7 +2697,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	// can't find match for aspect ratio, so find closest one
     		if( MyDebug.LOG )
     			Log.d(TAG, "no picture size matches the aspect ratio");
-    		optimalSize = getClosestSize(sizes, targetRatio);
+    		optimalSize = getClosestSize(sizes, targetRatio, max_video_size);
         }
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "chose optimalSize: " + optimalSize.width + " x " + optimalSize.height);
