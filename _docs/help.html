@@ -135,15 +135,37 @@ the exposure doesn't change based on the brightness of the current scene (though
 compensation). Note that this isn't guaranteed to work on all devices (doesn't seem to work on Galaxy S3, Nexus 6).</p>
 
 <p><img src="popup.png" alt="Popup icon" width="32" height="32"><b>Popop menu</b> - Opens the popup menu for quick access to changing
-flash, focus, camera/video resolution, timer, burst mode, grid, white balance, scene mode, color effect:</p><ul>
+various options:</p><ul>
 <li><b>Flash</b> - Typical options are off, auto, on and torch mode. For front cameras without a real flash, flash options
 will be available which instead work by making the screen flash (note, front screen flash "auto" is only available with Camera2 API).</li>
-<li><b>Focus</b> - Default is "auto" (camera will focus before taking a photo or when you touch to focus). Other options include
-infinity and macro. "Focus Locked" mode means focus will only occur when you touch to focus.
-If Camera2 API is used, then "Focus Manual" will display an on-screen slider, allowing
-you to directly control the focus distance.
-Lastly, continuous focus mode means that the camera will continually focus - this option is generally best for taking photos as
-quickly as possible.</li>
+<li><b>Focus</b> - Controls the focusing method used. Available options depend on your device. These may include:<ul>
+	<li><img src="focus_mode_continuous_picture.png" alt="Continuous focus icon" width="32" height="32"><b>Continuous (default)</b> -
+		The camera focuses continuously. This is generally the best mode - the preview will usually always be in focus, and taking photos
+		is quick when the preview is already in focus. Note that you can still manually focus by touching the screen.
+	</li>
+	<li><img src="focus_mode_auto.png" alt="Auto focus icon" width="32" height="32"><b>Auto</b> -
+		The camera focuses when you take a photo, or when you touch to focus.
+	</li>
+	<li><img src="focus_mode_infinity.png" alt="Infinity focus icon" width="32" height="32"><b>Infinity</b> -
+		The camera focus will be fixed for objects far away.
+	</li>
+	<li><img src="focus_mode_macro.png" alt="Macro focus icon" width="32" height="32"><b>Macro</b> -
+		This behaves similarly to auto focus, but is optimised for close-up objects.
+	</li>
+	<li><img src="focus_mode_locked.png" alt="Locked focus icon" width="32" height="32"><b>Locked</b> -
+		The camera does not focus, unless you manually touch to focus.
+	</li>
+	<li><img src="focus_mode_manual.png" alt="Manual focus icon" width="32" height="32"><b>Manual</b> -
+		A slider appears allowing you to manually control the focus distance (only available if Camera2
+        API is used).
+	</li>
+	<li><img src="focus_mode_fixed.png" alt="Fixed focus icon" width="32" height="32"><b>Fixed</b> -
+		The focus remains fixed.
+	</li>
+	<li><img src="focus_mode_edof.png" alt="Fixed focus icon" width="32" height="32"><b>EDOF</b> -
+		Extended depth of field (EDOF). Focusing is done digitally and continuously.
+	</li>
+</ul></li>
 <li><b>Photo Mode</b> - You can also choose different photo modes:<ul>
 	<li><b>Standard</b> - Ordinary operation: takes a single photo.</li>
 	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode (requires Android 5).</li>
