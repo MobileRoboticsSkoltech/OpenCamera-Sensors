@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import android.Manifest;
+import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -358,6 +359,49 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
             setFirstTimeFlag();
         }
+
+		{
+			// handle What's New dialog
+			int version_code = -1;
+			try {
+				PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+				version_code = pInfo.versionCode;
+			}
+			catch(PackageManager.NameNotFoundException e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "NameNotFoundException exception trying to get version number");
+				e.printStackTrace();
+			}
+			if( version_code != -1 ) {
+				int latest_version = sharedPreferences.getInt(PreferenceKeys.getLatestVersionPreferenceKey(), 0);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "version_code: " + version_code);
+					Log.d(TAG, "latest_version: " + latest_version);
+				}
+				// don't show What's New if this is the first time the user has run
+				if( has_done_first_time && version_code > latest_version ) {
+					AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+					alertDialog.setTitle(R.string.whats_new);
+					alertDialog.setMessage(R.string.whats_new_text);
+					alertDialog.setPositiveButton(android.R.string.ok, null);
+					alertDialog.setNegativeButton(R.string.donate, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "donate");
+							Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
+							startActivity(browserIntent);
+						}
+					});
+					alertDialog.show();
+				}
+				// we set the latest_version whether or not the dialog is shown - if we showed the irst time dialog, we don't
+				// want to then show the What's New dialog next time we run!
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putInt(PreferenceKeys.getLatestVersionPreferenceKey(), version_code);
+				editor.apply();
+			}
+		}
 
 		setModeFromIntents(savedInstanceState);
 

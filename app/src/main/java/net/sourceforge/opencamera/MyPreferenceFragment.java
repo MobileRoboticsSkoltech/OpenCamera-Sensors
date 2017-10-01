@@ -849,6 +849,16 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		                		SharedPreferences.Editor editor = sharedPreferences.edit();
 		                		editor.clear();
 		                		editor.putBoolean(PreferenceKeys.getFirstTimePreferenceKey(), true);
+								try {
+									PackageInfo pInfo = MyPreferenceFragment.this.getActivity().getPackageManager().getPackageInfo(MyPreferenceFragment.this.getActivity().getPackageName(), 0);
+			                        int version_code = pInfo.versionCode;
+									editor.putInt(PreferenceKeys.getLatestVersionPreferenceKey(), version_code);
+								}
+								catch(NameNotFoundException e) {
+									if (MyDebug.LOG)
+										Log.d(TAG, "NameNotFoundException exception trying to get version number");
+									e.printStackTrace();
+								}
 		                		editor.apply();
 								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
 								main_activity.setDeviceDefaults();
