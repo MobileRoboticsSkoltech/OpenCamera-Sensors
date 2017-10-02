@@ -4387,6 +4387,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 
+		if( mPreview.isOnTimer() ) {
+			Log.d(TAG, "wait for timer");
+			while( mPreview.isOnTimer() ) {
+			}
+			this.getInstrumentation().waitForIdleSync();
+			Log.d(TAG, "after idle sync");
+		}
+
 		int exp_n_new_files = 0;
 	    if( mPreview.isVideoRecording() ) {
 		    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_recording );
@@ -4903,6 +4911,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		setToDefault();
+
+		subTestTakeVideoSnapshot();
+	}
+
+	/** Test taking photo while recording video, with timer.
+	 */
+	public void testTakeVideoSnapshotTimer() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSnapshotTimer");
+
+		if( !mPreview.supportsPhotoVideoRecording() ) {
+			Log.d(TAG, "video snapshot not supported");
+			return;
+		}
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
+		editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
+		editor.apply();
 
 		subTestTakeVideoSnapshot();
 	}
@@ -8023,6 +8051,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	final private String hdr_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/hdrsamples/";
 	final private String avg_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/avgsamples/";
+	final private String panorama_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/panoramasamples/";
 
 	/** Tests HDR algorithm on test samples "saintpaul".
 	 * @throws IOException
@@ -9920,5 +9949,31 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests paranorama algorithm on test samples "testPanorama1".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testPanorama1() throws IOException, InterruptedException {
+		Log.d(TAG, "testPanorama1");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(panorama_images_path + "testPanorama1/input0.jpg");
+		inputs.add(panorama_images_path + "testPanorama1/input1.jpg");
+		inputs.add(panorama_images_path + "testPanorama1/input2.jpg");
+
+		List<Bitmap> bitmaps = new ArrayList<>();
+		for(String input : inputs) {
+			Bitmap bitmap = getBitmapFromFile(input);
+			bitmaps.add(bitmap);
+		}
+
+		float angle = 0.0f;
+		for(Bitmap bitmap : bitmaps) {
+		}
 	}
 }
