@@ -883,6 +883,9 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
     public PhotoMode getPhotoMode() {
+		// Note, this always should return the true photo mode - if we're in video mode and taking a photo snapshot while
+		// video recording, the caller should override. We don't override here, as this preference may be used to affect how
+		// the CameraController is set up, and we don't always re-setup the camera when switching between photo and video modes.
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return getPhotoMode(sharedPreferences);
     }
@@ -992,7 +995,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				if( MyDebug.LOG )
 					Log.d(TAG, "TargetCallback.onAchieved");
 				clearPanoramaPoint();
-				main_activity.takePicturePressed();
+				main_activity.takePicturePressed(false);
 			}
 		});
 		drawPreview.setGyroDirectionMarker(x, y, z);
@@ -1038,6 +1041,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 				pauseVideoButton.setVisibility(View.VISIBLE);
 			}
 			main_activity.getMainUI().setPauseVideoContentDescription();
+		}
+		if( main_activity.getPreview().supportsPhotoVideoRecording() ) {
+			if( !( main_activity.getMainUI().inImmersiveMode() && main_activity.usingKitKatImmersiveModeEverything() ) ) {
+				View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
+				takePhotoVideoButton.setVisibility(View.VISIBLE);
+			}
 		}
 		final int video_method = this.createOutputVideoMethod();
 		boolean dategeo_subtitles = getVideoSubtitlePref().equals("preference_video_subtitle_yes");
@@ -1205,6 +1214,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
 		pauseVideoButton.setVisibility(View.INVISIBLE);
+		View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
+		takePhotoVideoButton.setVisibility(View.INVISIBLE);
 		main_activity.getMainUI().setPauseVideoContentDescription(); // just to be safe
 		main_activity.getMainUI().destroyPopup(); // as the available popup options change while recording video
 		if( subtitleVideoTimerTask != null ) {
@@ -1438,9 +1449,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		    this.clearLastImages();
 	    }
 	}
-    
+
     @Override
-    public void cameraInOperation(boolean in_operation) {
+    public void cameraInOperation(boolean in_operation, boolean is_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraInOperation: " + in_operation);
     	if( !in_operation && used_front_screen_flash ) {
@@ -1448,7 +1459,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     		used_front_screen_flash = false;
     	}
     	drawPreview.cameraInOperation(in_operation);
-    	main_activity.getMainUI().showGUI(!in_operation);
+    	main_activity.getMainUI().showGUI(!in_operation, is_video);
     }
     
     @Override
@@ -1476,6 +1487,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "onPictureCompleted");
 
 		PhotoMode photo_mode = getPhotoMode();
+		if( main_activity.getPreview().isVideo() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "snapshop mode");
+			// must be in photo snapshot while recording video mode, only support standard photo mode
+			photo_mode = PhotoMode.Standard;
+		}
 		if( photo_mode == PhotoMode.NoiseReduction ) {
 			imageSaver.finishImageAverage();
 		}
@@ -1890,6 +1907,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 		boolean success;
 		PhotoMode photo_mode = getPhotoMode();
+		if( main_activity.getPreview().isVideo() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "snapshop mode");
+			// must be in photo snapshot while recording video mode, only support standard photo mode
+			photo_mode = PhotoMode.Standard;
+		}
 		if( photo_mode == PhotoMode.NoiseReduction ) {
 			if( n_capture_images == 1 ) {
 				ImageSaver.Request.SaveBase save_base = ImageSaver.Request.SaveBase.SAVEBASE_NONE;
@@ -1953,6 +1976,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		// note, multi-image HDR and expo is handled under onBurstPictureTaken; here we look for DRO, as that's the photo mode to set
 		// single image HDR
 		PhotoMode photo_mode = getPhotoMode();
+		if( main_activity.getPreview().isVideo() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "snapshop mode");
+			// must be in photo snapshot while recording video mode, only support standard photo mode
+			photo_mode = PhotoMode.Standard;
+		}
 		if( photo_mode == PhotoMode.DRO ) {
 			is_hdr = true;
 		}
@@ -1971,6 +2000,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 		boolean success;
 		PhotoMode photo_mode = getPhotoMode();
+		if( main_activity.getPreview().isVideo() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "snapshop mode");
+			// must be in photo snapshot while recording video mode, only support standard photo mode
+			photo_mode = PhotoMode.Standard;
+		}
 		if( photo_mode == PhotoMode.HDR ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "HDR mode");

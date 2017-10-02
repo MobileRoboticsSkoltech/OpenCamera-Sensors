@@ -30,6 +30,7 @@ public class CameraController1 extends CameraController {
 	private String iso_key;
 	private boolean frontscreen_flash;
 	private final ErrorCallback camera_error_cb;
+	private boolean sounds_enabled = true;
 
 	private int n_burst; // number of expected burst images in this capture
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
@@ -329,6 +330,8 @@ public class CameraController1 extends CameraController {
         camera_features.is_exposure_lock_supported = parameters.isAutoExposureLockSupported();
 
         camera_features.is_video_stabilization_supported = parameters.isVideoStabilizationSupported();
+
+		camera_features.is_photo_video_recording_supported = parameters.isVideoSnapshotSupported();
         
         camera_features.min_exposure = parameters.getMinExposureCompensation();
         camera_features.max_exposure = parameters.getMaxExposureCompensation();
@@ -1121,6 +1124,7 @@ public class CameraController1 extends CameraController {
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
         	camera.enableShutterSound(enabled);
         }
+		sounds_enabled = enabled;
 	}
 	
 	public boolean setFocusAndMeteringArea(List<CameraController.Area> areas) {
@@ -1432,7 +1436,8 @@ public class CameraController1 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureNow");
 
-    	final Camera.ShutterCallback shutter = new TakePictureShutterCallback();
+		// only set the shutter callback if sounds enabled
+    	final Camera.ShutterCallback shutter = sounds_enabled ? new TakePictureShutterCallback() : null;
         final Camera.PictureCallback camera_jpeg = picture == null ? null : new Camera.PictureCallback() {
     	    public void onPictureTaken(byte[] data, Camera cam) {
 				if( MyDebug.LOG )

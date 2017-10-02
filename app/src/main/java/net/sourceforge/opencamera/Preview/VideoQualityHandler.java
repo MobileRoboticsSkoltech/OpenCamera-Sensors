@@ -151,6 +151,19 @@ public class VideoQualityHandler {
         return this.video_sizes;
     }
 
+    /** Returns the maximum supported video size.
+     */
+    CameraController.Size getMaxSupportedVideoSize() {
+        int max_width = -1, max_height = -1;
+        for(CameraController.Size size : video_sizes) {
+            if( max_width == -1 || size.width*size.height > max_width*max_height ) {
+                max_width = size.width;
+                max_height = size.height;
+            }
+        }
+        return new CameraController.Size(max_width, max_height);
+    }
+
     public void setVideoSizes(List<CameraController.Size> video_sizes) {
         this.video_sizes = video_sizes;
         this.sortVideoSizes();

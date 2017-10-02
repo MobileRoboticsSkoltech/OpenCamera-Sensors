@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import android.Manifest;
+import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -254,6 +255,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onCreate: time after setting button visibility: " + (System.currentTimeMillis() - debug_time));
 		View pauseVideoButton = findViewById(R.id.pause_video);
 		pauseVideoButton.setVisibility(View.INVISIBLE);
+		View takePhotoVideoButton = findViewById(R.id.take_photo_when_video_recording);
+		takePhotoVideoButton.setVisibility(View.INVISIBLE);
 
 		// We initialise optional controls to invisible, so they don't show while the camera is opening - the actual visibility is
 		// set in cameraSetup().
@@ -356,6 +359,51 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
             setFirstTimeFlag();
         }
+
+		{
+			// handle What's New dialog
+			int version_code = -1;
+			try {
+				PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+				version_code = pInfo.versionCode;
+			}
+			catch(PackageManager.NameNotFoundException e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "NameNotFoundException exception trying to get version number");
+				e.printStackTrace();
+			}
+			if( version_code != -1 ) {
+				int latest_version = sharedPreferences.getInt(PreferenceKeys.getLatestVersionPreferenceKey(), 0);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "version_code: " + version_code);
+					Log.d(TAG, "latest_version: " + latest_version);
+				}
+				final boolean force_whats_new = false;
+				//final boolean force_whats_new = true; // for testing
+				// don't show What's New if this is the first time the user has run
+				if( has_done_first_time && ( force_whats_new || version_code > latest_version ) ) {
+					AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+					alertDialog.setTitle(R.string.whats_new);
+					alertDialog.setMessage(R.string.whats_new_text);
+					alertDialog.setPositiveButton(android.R.string.ok, null);
+					alertDialog.setNegativeButton(R.string.donate, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "donate");
+							Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MainActivity.getDonateLink()));
+							startActivity(browserIntent);
+						}
+					});
+					alertDialog.show();
+				}
+				// we set the latest_version whether or not the dialog is shown - if we showed the irst time dialog, we don't
+				// want to then show the What's New dialog next time we run!
+				SharedPreferences.Editor editor = sharedPreferences.edit();
+				editor.putInt(PreferenceKeys.getLatestVersionPreferenceKey(), version_code);
+				editor.apply();
+			}
+		}
 
 		setModeFromIntents(savedInstanceState);
 
@@ -687,6 +735,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "ignore audio trigger due to already taking photo or on timer");
 		}
+		else if( preview.isVideoRecording() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "ignore audio trigger due to already recording video");
+		}
 		else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "schedule take picture due to loud noise");
@@ -695,7 +747,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				public void run() {
 					if( MyDebug.LOG )
 						Log.d(TAG, "taking picture due to audio trigger");
-					takePicture();
+					takePicture(false);
 				}
 			});
 		}
@@ -850,8 +902,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public void clickedTakePhoto(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTakePhoto");
-    	this.takePicture();
+    	this.takePicture(false);
     }
+
+	/** User has clicked button to take a photo snapshot whilst video recording.
+	 */
+	public void clickedTakePhotoVideoSnapshot(View view) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clickedTakePhotoVideoSnapshot");
+    	this.takePicture(true);
+	}
 
 	public void clickedPauseVideo(View view) {
 		if( MyDebug.LOG )
@@ -953,12 +1013,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedSwitchVideo");
 		this.closePopup();
+		mainUI.destroyPopup(); // important as we don't want to use a cached popup, as we can show different options depending on whether we're in photo or video mode
 	    View switchVideoButton = findViewById(R.id.switch_video);
 	    switchVideoButton.setEnabled(false); // prevent slowdown if user repeatedly clicks
 		this.preview.switchVideo(false, true);
 		switchVideoButton.setEnabled(true);
 
 		mainUI.setTakePhotoIcon();
+	    mainUI.setPopupIcon(); // needed as turning to video mode or back can turn flash mode off or back on
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast(true);
 		}
@@ -2170,8 +2232,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	/** User has pressed the take picture button, or done an equivalent action to request this (e.g.,
 	 *  volume buttons, audio trigger).
+	 * @param photo_snapshot If true, then the user has requested taking a photo whilst video
+	 *                       recording. If false, either take a photo or start/stop video depending
+	 *                       on the current mode.
 	 */
-    public void takePicture() {
+    public void takePicture(boolean photo_snapshot) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicture");
 
@@ -2188,10 +2253,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 		}
 
-		this.takePicturePressed();
+		this.takePicturePressed(photo_snapshot);
     }
 
-    void takePicturePressed() {
+	/**
+	 * @param photo_snapshot If true, then the user has requested taking a photo whilst video
+	 *                       recording. If false, either take a photo or start/stop video depending
+	 *                       on the current mode.
+	 */
+	void takePicturePressed(boolean photo_snapshot) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePicturePressed");
 
@@ -2203,7 +2273,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			applicationInterface.setNextPanoramaPoint();
 		}
 
-    	this.preview.takePicturePressed();
+    	this.preview.takePicturePressed(photo_snapshot);
 	}
     
     /** Lock the screen - this is Open Camera's own lock to guard against accidental presses,

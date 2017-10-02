@@ -96,6 +96,15 @@ public class PopupView extends LinearLayout {
 			Log.d(TAG, "PopupView time 2: " + (System.nanoTime() - debug_time));
 		{
 	        List<String> supported_flash_values = preview.getSupportedFlashValues();
+			if( preview.isVideo() ) {
+				// filter flash modes we don't want to show
+				List<String> filter = new ArrayList<>();
+				for(String flash_value : supported_flash_values) {
+					if( Preview.isFlashSupportedForVideo(flash_value) )
+						filter.add(flash_value);
+				}
+				supported_flash_values = filter;
+			}
 	    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
 				@Override
 				public void onClick(String option) {
@@ -110,7 +119,8 @@ public class PopupView extends LinearLayout {
 		if( MyDebug.LOG )
 			Log.d(TAG, "PopupView time 3: " + (System.nanoTime() - debug_time));
 
-		if( preview.isVideo() && preview.isTakingPhoto() ) {
+		//if( preview.isVideo() && preview.isTakingPhoto() ) {
+		if( preview.isVideo() && preview.isVideoRecording() ) {
     		// don't add any more options
     	}
     	else {
@@ -160,7 +170,11 @@ public class PopupView extends LinearLayout {
 				photo_modes.add(getResources().getString(R.string.photo_mode_noise_reduction));
 				photo_mode_values.add(MyApplicationInterface.PhotoMode.NoiseReduction);
 			}
-    		if( photo_modes.size() > 1 ) {
+			if( preview.isVideo() ) {
+				// only show photo modes when in photo mode, not video mode!
+				// (photo modes not supported for photo snapshop whilst recording video)
+			}
+    		else if( photo_modes.size() > 1 ) {
     			MyApplicationInterface.PhotoMode photo_mode = main_activity.getApplicationInterface().getPhotoMode();
     			String current_mode = null;
     			for(int i=0;i<photo_modes.size() && current_mode==null;i++) {
@@ -285,111 +299,122 @@ public class PopupView extends LinearLayout {
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 8: " + (System.nanoTime() - debug_time));
 
-    		final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes();
-    		picture_size_index = preview.getCurrentPictureSizeIndex();
-    		final List<String> picture_size_strings = new ArrayList<>();
-    		for(CameraController.Size picture_size : picture_sizes) {
-				// don't display MP here, as call to Preview.getMPString() here would contribute to poor performance!
-    			String size_string = picture_size.width + " x " + picture_size.height;
-    			picture_size_strings.add(size_string);
-    		}
-    		addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), false, picture_size_index, false, "PHOTO_RESOLUTIONS", new ArrayOptionsPopupListener() {
-		    	final Handler handler = new Handler();
-				final Runnable update_runnable = new Runnable() {
-					@Override
-					public void run() {
-						if( MyDebug.LOG )
-							Log.d(TAG, "update settings due to resolution change");
-						main_activity.updateForSettings("", true); // keep the popupview open
+			if( !preview.isVideo() ) {
+				// only show photo resolutions in photo mode - even if photo snapshots whilst recording video is supported, the
+				// resolutions for that won't match what the user has requested for photo mode resolutions
+				final List<CameraController.Size> picture_sizes = preview.getSupportedPictureSizes();
+				picture_size_index = preview.getCurrentPictureSizeIndex();
+				final List<String> picture_size_strings = new ArrayList<>();
+				for(CameraController.Size picture_size : picture_sizes) {
+					// don't display MP here, as call to Preview.getMPString() here would contribute to poor performance!
+					String size_string = picture_size.width + " x " + picture_size.height;
+					picture_size_strings.add(size_string);
+				}
+				addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), false, picture_size_index, false, "PHOTO_RESOLUTIONS", new ArrayOptionsPopupListener() {
+					final Handler handler = new Handler();
+					final Runnable update_runnable = new Runnable() {
+						@Override
+						public void run() {
+							if (MyDebug.LOG)
+								Log.d(TAG, "update settings due to resolution change");
+							main_activity.updateForSettings("", true); // keep the popupview open
+						}
+					};
+
+					private void update() {
+						if( picture_size_index == -1 )
+							return;
+						CameraController.Size new_size = picture_sizes.get(picture_size_index);
+						String resolution_string = new_size.width + " " + new_size.height;
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(PreferenceKeys.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
+						editor.apply();
+
+						// make it easier to scroll through the list of resolutions without a pause each time
+						handler.removeCallbacks(update_runnable);
+						handler.postDelayed(update_runnable, 400);
 					}
-				};
 
-				private void update() {
-    				if( picture_size_index == -1 )
-    					return;
-    				CameraController.Size new_size = picture_sizes.get(picture_size_index);
-	                String resolution_string = new_size.width + " " + new_size.height;
-    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(PreferenceKeys.getResolutionPreferenceKey(preview.getCameraId()), resolution_string);
-					editor.apply();
+					@Override
+					public int onClickPrev() {
+						if( picture_size_index != -1 && picture_size_index > 0 ) {
+							picture_size_index--;
+							update();
+							return picture_size_index;
+						}
+						return -1;
+					}
 
-					// make it easier to scroll through the list of resolutions without a pause each time
-					handler.removeCallbacks(update_runnable);
-					handler.postDelayed(update_runnable, 400);
-    			}
-				@Override
-				public int onClickPrev() {
-	        		if( picture_size_index != -1 && picture_size_index > 0 ) {
-	        			picture_size_index--;
-	        			update();
-	    				return picture_size_index;
-	        		}
-					return -1;
-				}
-				@Override
-				public int onClickNext() {
-	                if( picture_size_index != -1 && picture_size_index < picture_sizes.size()-1 ) {
-	                	picture_size_index++;
-	        			update();
-	    				return picture_size_index;
-	        		}
-					return -1;
-				}
-    		});
+					@Override
+					public int onClickNext() {
+						if( picture_size_index != -1 && picture_size_index < picture_sizes.size() - 1 ) {
+							picture_size_index++;
+							update();
+							return picture_size_index;
+						}
+						return -1;
+					}
+				});
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 9: " + (System.nanoTime() - debug_time));
 
-    		final List<String> video_sizes = preview.getVideoQualityHander().getSupportedVideoQuality();
-    		video_size_index = preview.getVideoQualityHander().getCurrentVideoQualityIndex();
-    		final List<String> video_size_strings = new ArrayList<>();
-    		for(String video_size : video_sizes) {
-    			String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
-    			video_size_strings.add(quality_string);
-    		}
-    		addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), false, video_size_index, false, "VIDEO_RESOLUTIONS", new ArrayOptionsPopupListener() {
-		    	final Handler handler = new Handler();
-				final Runnable update_runnable = new Runnable() {
-					@Override
-					public void run() {
-						if( MyDebug.LOG )
-							Log.d(TAG, "update settings due to video resolution change");
-						main_activity.updateForSettings("", true); // keep the popupview open
+			if( preview.isVideo() ) {
+				// only show video resolutions in video mode
+				final List<String> video_sizes = preview.getVideoQualityHander().getSupportedVideoQuality();
+				video_size_index = preview.getVideoQualityHander().getCurrentVideoQualityIndex();
+				final List<String> video_size_strings = new ArrayList<>();
+				for(String video_size : video_sizes) {
+					String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
+					video_size_strings.add(quality_string);
+				}
+				addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), false, video_size_index, false, "VIDEO_RESOLUTIONS", new ArrayOptionsPopupListener() {
+					final Handler handler = new Handler();
+					final Runnable update_runnable = new Runnable() {
+						@Override
+						public void run() {
+							if( MyDebug.LOG )
+								Log.d(TAG, "update settings due to video resolution change");
+							main_activity.updateForSettings("", true); // keep the popupview open
+						}
+					};
+
+					private void update() {
+						if( video_size_index == -1 )
+							return;
+						String quality = video_sizes.get(video_size_index);
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(preview.getCameraId()), quality);
+						editor.apply();
+
+						// make it easier to scroll through the list of resolutions without a pause each time
+						handler.removeCallbacks(update_runnable);
+						handler.postDelayed(update_runnable, 400);
 					}
-				};
 
-				private void update() {
-    				if( video_size_index == -1 )
-    					return;
-    				String quality = video_sizes.get(video_size_index);
-    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(preview.getCameraId()), quality);
-					editor.apply();
+					@Override
+					public int onClickPrev() {
+						if( video_size_index != -1 && video_size_index > 0 ) {
+							video_size_index--;
+							update();
+							return video_size_index;
+						}
+						return -1;
+					}
 
-					// make it easier to scroll through the list of resolutions without a pause each time
-					handler.removeCallbacks(update_runnable);
-					handler.postDelayed(update_runnable, 400);
-    			}
-				@Override
-				public int onClickPrev() {
-	        		if( video_size_index != -1 && video_size_index > 0 ) {
-	        			video_size_index--;
-	        			update();
-	    				return video_size_index;
-	        		}
-					return -1;
-				}
-				@Override
-				public int onClickNext() {
-	                if( video_size_index != -1 && video_size_index < video_sizes.size()-1 ) {
-	                	video_size_index++;
-	        			update();
-	    				return video_size_index;
-	        		}
-					return -1;
-				}
-    		});
+					@Override
+					public int onClickNext() {
+						if( video_size_index != -1 && video_size_index < video_sizes.size() - 1 ) {
+							video_size_index++;
+							update();
+							return video_size_index;
+						}
+						return -1;
+					}
+				});
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 10: " + (System.nanoTime() - debug_time));
 

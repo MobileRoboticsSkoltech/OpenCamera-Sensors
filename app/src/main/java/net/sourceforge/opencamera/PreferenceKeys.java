@@ -13,6 +13,12 @@ public class PreferenceKeys {
         return "done_first_time";
     }
     
+	/** This preference stores the version number seen by the user - used to show "What's New" dialog.
+	 */
+    public static String getLatestVersionPreferenceKey() {
+        return "latest_version";
+    }
+
 	/** If this preference is set, no longer show the auto-stabilise info dialog.
 	 */
     public static String getAutoStabiliseInfoPreferenceKey() {

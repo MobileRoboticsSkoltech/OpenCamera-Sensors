@@ -77,8 +77,7 @@
 <p><a name="quickstart"></a><b>Quickstart</b></p>
 
 <p>Simply point, and press the blue camera icon <img src="take_photo.png" alt="Take Photo icon" width="32" height="32"> to take a photo.
-The camera will automatically focus before taking the picture. You can also focus at any time by touching on the screen. If
-your device supports focus areas, you can touch the part of the screen you want to focus. Touching an area will also
+If your device supports focus areas, you can touch the part of the screen you want to focus. Touching an area will also
 (if your device supports it) control the exposure level (e.g., so clicking on a bright area will adjust the exposure
 so that it becomes less bright). To zoom, use the slider next to the take photo button, or do a multi-touch "pinch"
 gesture. You can also control via the volume keys on your phone or tablet - by default, pressing them will take a
@@ -93,16 +92,12 @@ you want to switch off the display, do so on your device manually).</p>
 
 <p><a name="user_interface"></a><b>On-Screen User Interface</b></p>
 
-<p>A white square is shown (depending on the focus mode), which turns green to indicate that the auto-focus was
-successful, or red if it was not. In continuous focus mode, an white circle shows to indicate that the camera
-is focusing.</p>
+<p><img src="take_video.png" alt="Switch to video icon" width="32" height="32"><b>Switch to video mode</b> - Clicking the
+	smaller video icon will switch to video mode. The photo and video icons will then swap: click the larger video icon to
+	start/stop video recording, and click the smaller photo icon to switch back to photo mode.</p>
 
 <p><img src="switch_camera.png" alt="Switch Camera icon" width="32" height="32"><b>Switch camera</b> - Switches between front and back camera (if your
 device has two cameras).</p>
-
-<p><img src="switch_video.png" alt="Switch Video icon" width="32" height="32"><b>Switch to/from video</b> - Switches between taking photo mode, and
-recording video mode. When in video mode, the take photo icon will change to the record video icon
-<img src="take_video.png" alt="Record Video icon" width="32" height="32">.</p>
 
 <p><img src="ic_exposure_white_48dp.png" alt="Exposure Compensation icon" width="32" height="32"><b>Exposure compensation, ISO and Manual White Balance</b> - Clicking this will bring
 a panel with various controls:</p><ul>
@@ -140,15 +135,37 @@ the exposure doesn't change based on the brightness of the current scene (though
 compensation). Note that this isn't guaranteed to work on all devices (doesn't seem to work on Galaxy S3, Nexus 6).</p>
 
 <p><img src="popup.png" alt="Popup icon" width="32" height="32"><b>Popop menu</b> - Opens the popup menu for quick access to changing
-flash, focus, camera/video resolution, timer, burst mode, grid, white balance, scene mode, color effect:</p><ul>
+various options:</p><ul>
 <li><b>Flash</b> - Typical options are off, auto, on and torch mode. For front cameras without a real flash, flash options
 will be available which instead work by making the screen flash (note, front screen flash "auto" is only available with Camera2 API).</li>
-<li><b>Focus</b> - Default is "auto" (camera will focus before taking a photo or when you touch to focus). Other options include
-infinity and macro. "Focus Locked" mode means focus will only occur when you touch to focus.
-If Camera2 API is used, then "Focus Manual" will display an on-screen slider, allowing
-you to directly control the focus distance.
-Lastly, continuous focus mode means that the camera will continually focus - this option is generally best for taking photos as
-quickly as possible.</li>
+<li><b>Focus</b> - Controls the focusing method used. Available options depend on your device. These may include:<ul>
+	<li><img src="focus_mode_continuous_picture.png" alt="Continuous focus icon" width="32" height="32"><b>Continuous (default)</b> -
+		The camera focuses continuously. This is generally the best mode - the preview will usually always be in focus, and taking photos
+		is quick when the preview is already in focus. Note that you can still manually focus by touching the screen.
+	</li>
+	<li><img src="focus_mode_auto.png" alt="Auto focus icon" width="32" height="32"><b>Auto</b> -
+		The camera focuses when you take a photo, or when you touch to focus.
+	</li>
+	<li><img src="focus_mode_infinity.png" alt="Infinity focus icon" width="32" height="32"><b>Infinity</b> -
+		The camera focus will be fixed for objects far away.
+	</li>
+	<li><img src="focus_mode_macro.png" alt="Macro focus icon" width="32" height="32"><b>Macro</b> -
+		This behaves similarly to auto focus, but is optimised for close-up objects.
+	</li>
+	<li><img src="focus_mode_locked.png" alt="Locked focus icon" width="32" height="32"><b>Locked</b> -
+		The camera does not focus, unless you manually touch to focus.
+	</li>
+	<li><img src="focus_mode_manual.png" alt="Manual focus icon" width="32" height="32"><b>Manual</b> -
+		A slider appears allowing you to manually control the focus distance (only available if Camera2
+        API is used).
+	</li>
+	<li><img src="focus_mode_fixed.png" alt="Fixed focus icon" width="32" height="32"><b>Fixed</b> -
+		The focus remains fixed.
+	</li>
+	<li><img src="focus_mode_edof.png" alt="Fixed focus icon" width="32" height="32"><b>EDOF</b> -
+		Extended depth of field (EDOF). Focusing is done digitally and continuously.
+	</li>
+</ul></li>
 <li><b>Photo Mode</b> - You can also choose different photo modes:<ul>
 	<li><b>Standard</b> - Ordinary operation: takes a single photo.</li>
 	<li><b>DRO</b> - Enables <a href="#dro">Dynamic Range Optimisation</a> mode (requires Android 5).</li>
@@ -196,6 +213,16 @@ file dialog to choose a save location if additional locations have yet been defi
 
 <p><b><img src="ic_pause_circle_outline_white_48dp.png" alt="Pause video icon" width="32" height="32">Pause video</b> - When recording
 video, this icon allows you to pause and then resume video recording. (Requires Android 7.0 or higher.)</p>
+
+<p><b><img src="take_photo_when_video_recording.png" alt="Take photo snapshot icon" width="32" height="32">Take photo snapshot</b> - When recording
+video, the switch to photo mode icon turns white - selecting it will now take a photo while recording video. Note that different
+	photo modes are not supported when taking photos while recording video, nor is RAW supported. The photo resolution will not
+	in general match the resolution set in preferences, rather it will be set automatically (usually to match the aspect ratio
+	of the video resolution).</p>
+
+<p>In continuous focus mode, a white circle shows to indicate that the camera is focusing. When touching to focus, or in
+	autofocus mode, a white square is shown (depending on the focus mode), which turns green to indicate that the auto-focus was
+	successful, or red if it was not.</p>
 
 <p>The on-screen display also shows the remaining battery left (green/red status bar in the corner), and optionally
 the zoom level (if zoomed in), the remaining free storage space on the device, and the current angle orientation

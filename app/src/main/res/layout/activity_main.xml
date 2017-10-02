@@ -25,6 +25,19 @@
         />
 
     <ImageButton
+        android:id="@+id/switch_camera"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/switch_to_front_camera"
+        android:src="@drawable/switch_camera"
+        android:onClick="clickedSwitchCamera"
+        android:layout_above="@+id/take_photo"
+        android:background="@null"
+        />
+
+    <ImageButton
         android:id="@+id/pause_video"
         android:layout_width="70dp"
         android:layout_height="70dp"
@@ -34,6 +47,33 @@
         android:src="@drawable/ic_pause_circle_outline_white_48dp"
         android:onClick="clickedPauseVideo"
         android:layout_above="@+id/take_photo"
+        android:background="@null"
+        />
+
+    <ImageButton
+        android:id="@+id/switch_video"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/switch_to_video"
+        android:src="@drawable/take_video"
+        android:alpha="0.5"
+        android:onClick="clickedSwitchVideo"
+        android:layout_below="@+id/take_photo"
+        android:background="@null"
+        />
+
+    <ImageButton
+        android:id="@+id/take_photo_when_video_recording"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/take_photo"
+        android:src="@drawable/take_photo_when_video_recording"
+        android:onClick="clickedTakePhotoVideoSnapshot"
+        android:layout_below="@+id/take_photo"
         android:background="@null"
         />
 
@@ -132,7 +172,7 @@
         android:onClick="clickedExposure"
         />
 
-    <ImageButton
+    <!--<ImageButton
         android:id="@+id/switch_video"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -141,9 +181,9 @@
         android:contentDescription="@string/switch_to_video"
         android:src="@drawable/switch_video"
         android:onClick="clickedSwitchVideo"
-        />
+        />-->
 
-    <ImageButton
+    <!--<ImageButton
         android:id="@+id/switch_camera"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -152,7 +192,7 @@
         android:contentDescription="@string/switch_to_front_camera"
         android:src="@drawable/switch_camera"
         android:onClick="clickedSwitchCamera"
-        />
+        />-->
 
     <ImageButton
         android:id="@+id/audio_control"

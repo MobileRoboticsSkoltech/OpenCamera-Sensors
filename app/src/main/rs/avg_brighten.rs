@@ -90,6 +90,16 @@ uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) 
         out.g = (uchar)(scale * hdr.g + 0.5f);
         out.b = (uchar)(scale * hdr.b + 0.5f);
         out.a = 255;
+
+        {
+            hdr = convert_float3(out.rgb);
+            // reduce saturation
+            const float saturation_factor = 0.7f;
+            float grey = (hdr.r + hdr.g + hdr.b)/3.0f;
+            hdr = grey + saturation_factor*(hdr - grey);
+            out.rgb = convert_uchar3(clamp(hdr, 0.f, 255.f));
+        }
+
     }
     return out;
 }

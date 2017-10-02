@@ -663,7 +663,7 @@ public class DrawPreview {
 			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
 			if( applicationInterface.isRawPref(sharedPreferences) &&
 					preview.supportsRaw() && // RAW can be enabled, even if it isn't available for this camera (e.g., user enables RAW for back camera, but then switches to front camera which doesn't support it)
-					!applicationInterface.isVideoPref() && // RAW not relevant for video mode
+					!applicationInterface.isVideoPref() && // RAW not supported for video mode
 					photoMode != MyApplicationInterface.PhotoMode.HDR &&
 					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
@@ -682,7 +682,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getAutoStabilisePref(sharedPreferences) && !applicationInterface.isVideoPref() ) {
+			if( applicationInterface.getAutoStabilisePref(sharedPreferences) ) { // auto-level is supported for photos taken in video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -699,7 +699,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( photoMode == MyApplicationInterface.PhotoMode.HDR && !applicationInterface.isVideoPref() ) {
+			if( photoMode == MyApplicationInterface.PhotoMode.HDR && !applicationInterface.isVideoPref() ) { // HDR not supported for video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -716,7 +716,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getStampPref(sharedPreferences).equals("preference_stamp_yes") && !applicationInterface.isVideoPref() ) {
+			if( applicationInterface.getStampPref(sharedPreferences).equals("preference_stamp_yes") ) { // photo-stamp is supported for photos taken in video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -737,7 +737,7 @@ public class DrawPreview {
 			// note, flash_frontscreen_auto not yet support for the flash symbol (as camera_controller.needsFlash() only returns info on the built-in actual flash, not frontscreen flash)
 			if( flash_value != null &&
 					( flash_value.equals("flash_on") || flash_value.equals("flash_red_eye") || ( flash_value.equals("flash_auto") && camera_controller.needsFlash() ) ) &&
-					!applicationInterface.isVideoPref() ) {
+					!applicationInterface.isVideoPref() ) { // flash-indicator not supported for photos taken in video mode
 				long time_now = System.currentTimeMillis();
 				if( needs_flash_time != -1 ) {
 					final long fade_ms = 500;

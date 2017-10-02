@@ -1866,13 +1866,11 @@ public class HDRProcessor {
 		}
 		if( median_brightness <= 0 )
 			median_brightness = 1;
-		//int median_target = Math.min(127, 2*median_brightness);
-		//int median_target = Math.min(127, 3*median_brightness);
-		int max_gain_factor = 4;
+		int max_gain_factor = 2;
 		if( iso <= 150 ) {
-			max_gain_factor = 8;
+			max_gain_factor = 4;
 		}
-		int median_target = Math.min(127, max_gain_factor*median_brightness);
+		int median_target = Math.min(119, max_gain_factor*median_brightness);
 		int max_target = Math.min(255, (int)((max_brightness*median_target)/(float)median_brightness + 0.5f) );
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
@@ -1905,7 +1903,7 @@ public class HDRProcessor {
 		script.set_bitmap(input);
 		float black_level = 0.0f;
 		if( iso >= 700 ) {
-			black_level = 8.0f;
+			black_level = 4.0f;
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "black_level: " + black_level);

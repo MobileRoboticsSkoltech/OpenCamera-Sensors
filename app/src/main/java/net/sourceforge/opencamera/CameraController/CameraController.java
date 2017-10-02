@@ -54,6 +54,7 @@ public abstract class CameraController {
 		public float minimum_focus_distance;
 		public boolean is_exposure_lock_supported;
 		public boolean is_video_stabilization_supported;
+		public boolean is_photo_video_recording_supported;
 		public boolean supports_white_balance_temperature;
 		public int min_temperature;
 		public int max_temperature;

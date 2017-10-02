@@ -66,7 +66,7 @@ public class CameraControllerManager2 extends CameraControllerManager {
 	 * From Android N, higher levels than "FULL" are possible, that will have higher integer values.
 	 * Also see https://sourceforge.net/p/opencamera/tickets/141/ .
 	 */
-	private boolean isHardwareLevelSupported(CameraCharacteristics c, int requiredLevel) {
+	static boolean isHardwareLevelSupported(CameraCharacteristics c, int requiredLevel) {
 		int deviceLevel = c.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
 		if( MyDebug.LOG ) {
 			if( deviceLevel == CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY )

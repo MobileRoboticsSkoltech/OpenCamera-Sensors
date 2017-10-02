@@ -244,6 +244,8 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 		sum_weight += weight;
 
 		if( weight < 1.0 ) {
+    		float3 base_rgb = rgb;
+
 			// now look at a neighbour image
 			weight = 1.0f - weight;
 			if( avg <= 127.5f ) {
@@ -277,7 +279,33 @@ uchar4 __attribute__((kernel)) hdr(uchar4 in, uint32_t x, uint32_t y) {
 
 				rgb = parameter_A[mid_indx-1] * rgb + parameter_B[mid_indx-1];
 			}
-	
+
+            float value = fmax(rgb.r, rgb.g);
+            value = fmax(value, rgb.b);
+			if( value <= 250.0f )
+			{
+                // deghosting
+                // for overexposed pixels, we don't have a reliable value for that pixel, so we can't distinguish between
+                // pixels that are overexposed, and those that need deghosting, so we limit to value <= 250.0f
+                // tests that benefit from deghosting for dark pixels: testHDR2, testHDR9, testHDR19, testHDR21, testHDR30,
+                // testHDR35, testHDR37, testHDR40, testHDR41, testHDR42, testHDR44
+                // tests that benefit from deghosting for bright pixels: testHDR2, testHDR41, testHDR42
+                // for 127.5-avg = 96.0, we want wiener_C = wiener_C_lo
+                // for 127.5-avg = 127.5f, we want wiener_C = wiener_C_hi
+                const float wiener_C_lo = 2000.0f;
+                const float wiener_C_hi = 8000.0f;
+                float wiener_C = wiener_C_lo; // higher value means more HDR but less ghosting
+                float x = fabs( value - 127.5f ) - 96.0f;
+                if( x > 0.0f ) {
+                    const float scale = (wiener_C_hi-wiener_C_lo)/(127.5f-96.0f);
+                    wiener_C = wiener_C_lo + x*scale;
+                }
+                float3 diff = base_rgb - rgb;
+                float L = dot(diff, diff);
+                float ghost_weight = L/(L+wiener_C);
+                rgb = ghost_weight * base_rgb + (1.0-ghost_weight) * rgb;
+            }
+
 			hdr += weight * rgb;
 			sum_weight += weight;
 			

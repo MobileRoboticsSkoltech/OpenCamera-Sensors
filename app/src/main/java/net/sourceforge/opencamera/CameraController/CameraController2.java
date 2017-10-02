@@ -61,10 +61,12 @@ public class CameraController2 extends CameraController {
 	private int current_zoom_value;
 	private boolean supports_face_detect_mode_simple;
 	private boolean supports_face_detect_mode_full;
+	private boolean supports_photo_video_recording;
 	private final ErrorCallback preview_error_cb;
 	private final ErrorCallback camera_error_cb;
 	private CameraCaptureSession captureSession;
 	private CaptureRequest.Builder previewBuilder;
+	private boolean previewIsVideoMode;
 	private AutoFocusCallback autofocus_cb;
 	private boolean capture_follows_autofocus_hint;
 	private FaceDetectionListener face_detection_listener;
@@ -489,7 +491,7 @@ public class CameraController2 extends CameraController {
 		private void setRawMode(CaptureRequest.Builder builder) {
 			// DngCreator says "For best quality DNG files, it is strongly recommended that lens shading map output is enabled if supported"
 			// docs also say "ON is always supported on devices with the RAW capability", so we don't check for STATISTICS_LENS_SHADING_MAP_MODE_ON being available
-			if( want_raw ) {
+			if( want_raw && !previewIsVideoMode ) {
 				builder.set(CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE, CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE_ON);
 			}
 		}
@@ -1008,6 +1010,7 @@ public class CameraController2 extends CameraController {
 			//pending_request_when_ready = null;
 		}
 		previewBuilder = null;
+		previewIsVideoMode = false;
 		if( camera != null ) {
 			camera.close();
 			camera = null;
@@ -1345,6 +1348,11 @@ public class CameraController2 extends CameraController {
 		camera_features.is_exposure_lock_supported = true;
 		
         camera_features.is_video_stabilization_supported = true;
+
+		// although we currently require at least LIMITED to offer Camera2, we explicitly check here in case we do ever support
+		// LEGACY devices
+		camera_features.is_photo_video_recording_supported = CameraControllerManager2.isHardwareLevelSupported(characteristics, CameraMetadata.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED);
+		supports_photo_video_recording = camera_features.is_photo_video_recording_supported;
 
 		int [] white_balance_modes = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
 		if( white_balance_modes != null ) {
@@ -2336,7 +2344,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "done onImageAvailable");
 			}
 		}, null);
-		if( want_raw && raw_size != null ) {
+		if( want_raw && raw_size != null&& !previewIsVideoMode  ) {
 			imageReaderRaw = ImageReader.newInstance(raw_size.getWidth(), raw_size.getHeight(), ImageFormat.RAW_SENSOR, 2);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "created new imageReaderRaw: " + imageReaderRaw.toString());
@@ -3090,6 +3098,7 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "camera: " + camera);
 		try {
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+			previewIsVideoMode = false;
 			previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW);
 			camera_settings.setupBuilder(previewBuilder, false);
 			if( MyDebug.LOG )
@@ -3135,7 +3144,12 @@ public class CameraController2 extends CameraController {
 
 		try {
 			if( video_recorder != null ) {
-				closePictureImageReader();
+				if( supports_photo_video_recording ) {
+					createPictureImageReader();
+				}
+				else {
+					closePictureImageReader();
+				}
 			}
 			else {
 				// in some cases need to recreate picture imageReader and the texture default buffer size (e.g., see test testTakePhotoPreviewPaused())
@@ -3263,7 +3277,13 @@ public class CameraController2 extends CameraController {
         	Surface preview_surface = getPreviewSurface();
         	List<Surface> surfaces;
         	if( video_recorder != null ) {
-        		surfaces = Arrays.asList(preview_surface, video_recorder.getSurface());
+				if( supports_photo_video_recording ) {
+					surfaces = Arrays.asList(preview_surface, video_recorder.getSurface(), imageReader.getSurface());
+				}
+				else {
+					surfaces = Arrays.asList(preview_surface, video_recorder.getSurface());
+				}
+				// n.b., raw not supported for photo snapshots while video recording
         	}
     		else if( imageReaderRaw != null ) {
         		surfaces = Arrays.asList(preview_surface, imageReader.getSurface(), imageReaderRaw.getSurface());
@@ -3684,13 +3704,16 @@ public class CameraController2 extends CameraController {
 	private void takePictureAfterPrecapture() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureAfterPrecapture");
-		if( want_expo_bracketing ) {
-			takePictureBurstExpoBracketing();
-			return;
-		}
-		else if( want_burst ) {
-			takePictureBurst();
-			return;
+		if( !previewIsVideoMode ) {
+			// special burst modes not supported for photo snapshots when recording video
+			if( want_expo_bracketing ) {
+				takePictureBurstExpoBracketing();
+				return;
+			}
+			else if( want_burst ) {
+				takePictureBurst();
+				return;
+			}
 		}
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
@@ -3708,7 +3731,7 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
 				}
 			}
-			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			camera_settings.setupBuilder(stillBuilder, true);
@@ -3745,7 +3768,11 @@ public class CameraController2 extends CameraController {
 
 			n_burst = 1;
 			burst_single_request = false;
-			captureSession.stopRepeating(); // need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
+			if( !previewIsVideoMode ) {
+				// need to stop preview before capture (as done in Camera2Basic; otherwise we get bugs such as flash remaining on after taking a photo with flash)
+				// but don't do this in video mode - if we're taking photo snapshots while video recording, we don't want to pause video!
+				captureSession.stopRepeating();
+			}
 			if( jpeg_cb != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "call onStarted() in callback");
@@ -3792,7 +3819,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
 			}
 
-			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 			// n.b., don't set RequestTag.CAPTURE here - we only do it for the last of the burst captures (see below)
 			camera_settings.setupBuilder(stillBuilder, true);
@@ -3998,7 +4025,9 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "n_burst: " + n_burst);
 
-			captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
+			if( !previewIsVideoMode ) {
+				captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
+			}
 
 			if( jpeg_cb != null ) {
 				if( MyDebug.LOG )
@@ -4056,7 +4085,7 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
 			}
 
-			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			CaptureRequest.Builder stillBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
 			stillBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 			// n.b., don't set RequestTag.CAPTURE here - we only do it for the last of the burst captures (see below)
 			camera_settings.setupBuilder(stillBuilder, true);
@@ -4092,7 +4121,10 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG )
 						Log.d(TAG, "optimise for dark scene");
 					n_burst = 8;
-					if( !camera_settings.has_iso ) {
+					boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
+					// OnePlus 3T at least has bug where manual ISO can't be set to about 800, so dark images end up too dark -
+					// so no point enabling this code, which is meant to brighten the scene, not make it darker!
+					if( !camera_settings.has_iso && !is_oneplus ) {
 						long exposure_time = 1000000000L/10;
 						if( MyDebug.LOG )
 							Log.d(TAG, "also set 100ms exposure time");
@@ -4128,7 +4160,9 @@ public class CameraController2 extends CameraController {
 			stillBuilder.setTag(RequestTag.CAPTURE);
 			final CaptureRequest last_request = stillBuilder.build();
 
-			captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
+			if( !previewIsVideoMode ) {
+				captureSession.stopRepeating(); // see note under takePictureAfterPrecapture()
+			}
 
 			if( jpeg_cb != null ) {
 				if( MyDebug.LOG )
@@ -4219,7 +4253,7 @@ public class CameraController2 extends CameraController {
 		}
 		try {
 			// use a separate builder for precapture - otherwise have problem that if we take photo with flash auto/on of dark scene, then point to a bright scene, the autoexposure isn't running until we autofocus again
-			final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+			final CaptureRequest.Builder precaptureBuilder = camera.createCaptureRequest(previewIsVideoMode ? CameraDevice.TEMPLATE_VIDEO_SNAPSHOT : CameraDevice.TEMPLATE_STILL_CAPTURE);
 			precaptureBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
 
 			camera_settings.setupBuilder(precaptureBuilder, false);
@@ -4508,6 +4542,7 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "done");
 			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+			previewIsVideoMode = true;
 			previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
 			camera_settings.setupBuilder(previewBuilder, false);
 			createCaptureSession(video_recorder);
