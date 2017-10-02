@@ -139,13 +139,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
+	/** Restarts Open Camera.
+	 *  WARNING: Make sure that any assigned variables related to the activity, e.g., anything
+	 *  returned by findViewById(), is updated to the new mActivity after calling this method!
+	 */
 	private void restart() {
 		Log.d(TAG, "restart");
 	    mActivity.finish();
 	    setActivity(null);
 		Log.d(TAG, "now starting");
 	    mActivity = getActivity();
+		Log.d(TAG, "mActivity is now: " + mActivity);
 	    mPreview = mActivity.getPreview();
+		Log.d(TAG, "mPreview is now: " + mPreview);
 		waitUntilCameraOpened();
 		Log.d(TAG, "restart done");
 	}
@@ -511,6 +517,65 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    String flash_value = mPreview.getCurrentFlashValue();
 		Log.d(TAG, "flash_value: " + flash_value);
 	    assertTrue(flash_value.equals("flash_torch"));
+	}
+
+	/* Ensures that the flash mode changes as expected when switching between photo and video modes.
+	 */
+	public void testFlashVideoMode() throws InterruptedException {
+		Log.d(TAG, "testSaveVideoMode");
+		setToDefault();
+
+		if( !mPreview.supportsFlash() ) {
+			return;
+		}
+
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    assertTrue(!mPreview.isVideo());
+
+		switchToFlashValue("flash_auto");
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_auto"));
+
+		Log.d(TAG, "switch to video");
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(mPreview.isVideo());
+
+		// flash should turn off when in video mode, so that flash doesn't fire for photo snapshot while recording video
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_off"));
+
+		restart();
+	    switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    assertTrue(mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_off"));
+
+		// switch back to photo mode, should return to flash auto
+		Log.d(TAG, "switch to photo");
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(!mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_auto"));
+
+		// turn on torch, check it remains on for video
+		switchToFlashValue("flash_torch");
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_torch"));
+
+		Log.d(TAG, "switch to video");
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_torch"));
+
+		restart();
+	    switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    assertTrue(mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_torch"));
+
+		// switch back to photo mode, should remain in flash torch
+		Log.d(TAG, "switch to photo");
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(!mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_torch"));
 	}
 
 	/* Ensures that we save the flash mode torch when switching to front camera and then to back

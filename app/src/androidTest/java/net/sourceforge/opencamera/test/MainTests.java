@@ -19,6 +19,7 @@ public class MainTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveVideoMode"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFocusMode"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFlashTorchQuit"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFlashVideoMode"));
 		//suite.addTest(TestSuite.createTest(MainActivityTest.class, "testSaveFlashTorchSwitchCamera"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFlashStartup"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testFlashStartup2"));
