@@ -1617,7 +1617,7 @@ public class ImageSaver extends Thread {
 	    		final Bitmap thumbnail_f = thumbnail;
 		    	main_activity.runOnUiThread(new Runnable() {
 					public void run() {
-						applicationInterface.updateThumbnail(thumbnail_f);
+						applicationInterface.updateThumbnail(thumbnail_f, false);
 					}
 				});
         		if( MyDebug.LOG ) {

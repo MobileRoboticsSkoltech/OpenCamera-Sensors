@@ -1327,7 +1327,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				final Bitmap thumbnail_f = thumbnail;
 				main_activity.runOnUiThread(new Runnable() {
 					public void run() {
-						updateThumbnail(thumbnail_f);
+						updateThumbnail(thumbnail_f, true);
 					}
 				});
 			}
@@ -1510,12 +1510,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		drawPreview.clearContinuousFocusMove();
 	}
 	
-	void updateThumbnail(Bitmap thumbnail) {
+	void updateThumbnail(Bitmap thumbnail, boolean is_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateThumbnail");
 		main_activity.updateGalleryIcon(thumbnail);
 		drawPreview.updateThumbnail(thumbnail);
-		if( this.getPausePreviewPref() ) {
+		if( !is_video && this.getPausePreviewPref() ) {
 			drawPreview.showLastImage();
 		}
 	}
