@@ -69,6 +69,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private final DrawPreview drawPreview;
 	private final ImageSaver imageSaver;
 
+	private final float panorama_pics_per_screen = 2.0f;
+
 	private File last_video_file = null;
 	private Uri last_video_file_saf = null;
 
@@ -980,8 +982,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		float camera_angle_y = main_activity.getPreview().getViewAngleY();
 		n_panorama_pics++;
 		float angle = (float) Math.toRadians(camera_angle_y) * n_panorama_pics;
-		final float pics_per_screen = 2.0f;
-		setNextPanoramaPoint((float) Math.sin(angle / pics_per_screen), 0.0f, (float) -Math.cos(angle / pics_per_screen));
+		setNextPanoramaPoint((float) Math.sin(angle / panorama_pics_per_screen), 0.0f, (float) -Math.cos(angle / panorama_pics_per_screen));
 	}
 
 	private void setNextPanoramaPoint(float x, float y, float z) {
