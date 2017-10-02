@@ -624,6 +624,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public boolean getPausePreviewPref() {
+		if( main_activity.getPreview().isVideoRecording() ) {
+			// don't pause preview when taking photos while recording video!
+			return false;
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), false);
     }

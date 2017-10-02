@@ -4935,6 +4935,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakeVideoSnapshot();
 	}
 
+	/** Test taking photo while recording video, with pause preview.
+	 */
+	public void testTakeVideoSnapshotPausePreview() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSnapshotPausePreview");
+
+		if( !mPreview.supportsPhotoVideoRecording() ) {
+			Log.d(TAG, "video snapshot not supported");
+			return;
+		}
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), true);
+		editor.apply();
+
+		subTestTakeVideoSnapshot();
+	}
+
 	/** Test taking photo while recording video at max video quality.
 	 */
 	public void testTakeVideoSnapshotMax() throws InterruptedException {

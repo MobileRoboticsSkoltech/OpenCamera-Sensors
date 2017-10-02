@@ -27,6 +27,7 @@ public class VideoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoPauseStop"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshot"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotTimer"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotPausePreview"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotMax"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFlashVideo"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoTimerInterrupt"));
