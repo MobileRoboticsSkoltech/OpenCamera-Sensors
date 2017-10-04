@@ -29,7 +29,8 @@ float hdr_alpha = 0.5f; // 0.0 means no change, 1.0 means fully equalise
 	out.r = min(255, (int)(in.r * scale));
 	out.g = min(255, (int)(in.g * scale));
 	out.b = min(255, (int)(in.b * scale));
-	
+    out.a = 255;
+
 	return out;
 }*/
 

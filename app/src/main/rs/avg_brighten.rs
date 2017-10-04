@@ -25,6 +25,7 @@ float linear_scale;
 
 	uchar4 out;
     out.rgb = convert_uchar3(clamp(value+0.5f, 0.f, 255.f));
+    out.a = 255;
     return out;
 }*/
 

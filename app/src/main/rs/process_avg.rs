@@ -43,6 +43,7 @@ float3 __attribute__((kernel)) avg_f(float3 pixel_avg_f, uint32_t x, uint32_t y)
     out.r = (uchar)clamp(pixel_avg_f.r+0.5f, 0.0f, 255.0f);
     out.g = (uchar)clamp(pixel_avg_f.g+0.5f, 0.0f, 255.0f);
     out.b = (uchar)clamp(pixel_avg_f.b+0.5f, 0.0f, 255.0f);
+    out.a = 255;
 
 	return out;*/
 	return pixel_avg_f;
@@ -107,9 +108,7 @@ uchar4 __attribute__((kernel)) avg_multi(uchar4 in, uint32_t x, uint32_t y) {
     out.r = (uchar)clamp(result.r+0.5f, 0.0f, 255.0f);
     out.g = (uchar)clamp(result.g+0.5f, 0.0f, 255.0f);
     out.b = (uchar)clamp(result.b+0.5f, 0.0f, 255.0f);
-    /*out.r = 255;
-    out.g = 0;
-    out.b = 255;*/
+    out.a = 255;
 
 	return out;
 }
