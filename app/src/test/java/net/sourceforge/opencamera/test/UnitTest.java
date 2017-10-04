@@ -386,6 +386,53 @@ public class UnitTest {
 		compareVideoQuality(video_quality, exp_video_quality);
 	}
 
+	/** Tests for Preview.getOptimalVideoPictureSize().
+	 *  Tests the choice of photo snapshot resolutions in video mode.
+	 */
+	@Test
+	public void testVideoPhotoResolution() {
+		Log.d(TAG, "testVideoPhotoResolution");
+
+		List<CameraController.Size> sizes = new ArrayList<>();
+		sizes.add(new CameraController.Size(4640, 3480));
+		sizes.add(new CameraController.Size(4640, 2610));
+		sizes.add(new CameraController.Size(3488, 3488));
+		sizes.add(new CameraController.Size(3840, 2160));
+		sizes.add(new CameraController.Size(3456, 3456));
+		sizes.add(new CameraController.Size(1920, 1080));
+		sizes.add(new CameraController.Size(1728, 1728));
+		sizes.add(new CameraController.Size(1440, 1080));
+
+		CameraController.Size max_video_size1 = new CameraController.Size(3840, 2160);
+
+		CameraController.Size photo_size1 = Preview.getOptimalVideoPictureSize(sizes, 16.0f/9.0f, max_video_size1);
+		Log.d(TAG, "photo_size1: " + photo_size1.width + " x " + photo_size1.height);
+		assertTrue( photo_size1.equals(new CameraController.Size(3840, 2160)) );
+
+		CameraController.Size photo_size1b = Preview.getOptimalVideoPictureSize(sizes, 1.0f, max_video_size1);
+		Log.d(TAG, "photo_size1b: " + photo_size1b.width + " x " + photo_size1b.height);
+		assertTrue( photo_size1b.equals(new CameraController.Size(1728, 1728)) );
+
+		CameraController.Size photo_size1c = Preview.getOptimalVideoPictureSize(sizes, 4.0f/3.0f, max_video_size1);
+		Log.d(TAG, "photo_size1c: " + photo_size1c.width + " x " + photo_size1c.height);
+		assertTrue( photo_size1c.equals(new CameraController.Size(1440, 1080)) );
+
+		CameraController.Size max_video_size2 = new CameraController.Size(1920, 1080);
+
+		CameraController.Size photo_size2 = Preview.getOptimalVideoPictureSize(sizes, 16.0f/9.0f, max_video_size2);
+		Log.d(TAG, "photo_size2: " + photo_size2.width + " x " + photo_size2.height);
+		assertTrue( photo_size2.equals(new CameraController.Size(1920, 1080)) );
+
+		CameraController.Size photo_size2b = Preview.getOptimalVideoPictureSize(sizes, 1.0f, max_video_size2);
+		Log.d(TAG, "photo_size2b: " + photo_size2b.width + " x " + photo_size2b.height);
+		assertTrue( photo_size2b.equals(new CameraController.Size(1440, 1080)) );
+
+		CameraController.Size photo_size2c = Preview.getOptimalVideoPictureSize(sizes, 4.0f/3.0f, max_video_size2);
+		Log.d(TAG, "photo_size2c: " + photo_size2c.width + " x " + photo_size2c.height);
+		assertTrue( photo_size2c.equals(new CameraController.Size(1440, 1080)) );
+
+	}
+
 	@Test
 	public void testScaleForExposureTime() {
 		Log.d(TAG, "testScaleForExposureTime");
