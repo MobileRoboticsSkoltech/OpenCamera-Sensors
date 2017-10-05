@@ -10035,6 +10035,33 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
 	}
 
+	/** Tests Avg algorithm on test samples "testAvg16".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg16() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg16");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg16/input0.jpg");
+		inputs.add(avg_images_path + "testAvg16/input1.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg16_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 1);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
 	/** Tests paranorama algorithm on test samples "testPanorama1".
 	 * @throws IOException
 	 * @throws InterruptedException
