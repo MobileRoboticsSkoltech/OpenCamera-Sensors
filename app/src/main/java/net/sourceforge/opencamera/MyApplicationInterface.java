@@ -1442,6 +1442,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public void hasPausedPreview(boolean paused) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "hasPausedPreview: " + paused);
 	    View shareButton = main_activity.findViewById(R.id.share);
 	    View trashButton = main_activity.findViewById(R.id.trash);
 	    if( paused ) {
@@ -1499,7 +1501,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			photo_mode = PhotoMode.Standard;
 		}
 		if( photo_mode == PhotoMode.NoiseReduction ) {
-			imageSaver.finishImageAverage();
+			boolean image_capture_intent = isImageCaptureIntent();
+			boolean do_in_background = saveInBackground(image_capture_intent);
+			imageSaver.finishImageAverage(do_in_background);
 		}
 
 		// call this, so that if pause-preview-after-taking-photo option is set, we remove the "taking photo" border indicator straight away
@@ -1860,7 +1864,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			if( MyDebug.LOG )
 				Log.d(TAG, "from image capture intent");
 	        Bundle myExtras = main_activity.getIntent().getExtras();
-	        if (myExtras != null) {
+	        if( myExtras != null ) {
 	        	image_capture_intent_uri = myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
     			if( MyDebug.LOG )
     				Log.d(TAG, "save to: " + image_capture_intent_uri);
