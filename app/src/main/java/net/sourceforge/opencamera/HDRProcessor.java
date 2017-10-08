@@ -1866,20 +1866,64 @@ public class HDRProcessor {
 		}
 		if( median_brightness <= 0 )
 			median_brightness = 1;
-		int max_gain_factor = 2;
-		if( iso <= 150 ) {
+		int max_gain_factor = 4;
+		/*if( iso <= 150 ) {
 			max_gain_factor = 4;
-		}
+		}*/
 		int median_target = Math.min(119, max_gain_factor*median_brightness);
-		int max_target = Math.min(255, (int)((max_brightness*median_target)/(float)median_brightness + 0.5f) );
+		//int median_target = Math.min(90, max_gain_factor*median_brightness);
+		//int max_target = Math.min(255, (int)((max_brightness*median_target)/(float)median_brightness + 0.5f) );
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
 			Log.d(TAG, "median brightness: " + median_brightness);
 			Log.d(TAG, "max brightness: " + max_brightness);
 			Log.d(TAG, "median target: " + median_target);
-			Log.d(TAG, "max target: " + max_target);
+			//Log.d(TAG, "max target: " + max_target);
 		}
+
+		/* We use a combination of gain and gamma to brighten images if required. Gain works best for
+		 * dark images (e.g., see testAvg8), gamma works better for bright images (e.g., testAvg12).
+		 */
+		float gain = median_target / (float)median_brightness;
+		if( MyDebug.LOG )
+			Log.d(TAG, "gain " + gain);
+		if( gain < 1.0f ) {
+			gain = 1.0f;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "clamped gain to: " + gain);
+			}
+		}
+		float gamma = 1.0f;
+		float max_possible_value = gain*max_brightness;
+		if( MyDebug.LOG )
+			Log.d(TAG, "max_possible_value: " + max_possible_value);
+		if( max_possible_value > 255.0f ) {
+			gain = 255.0f / max_brightness;
+			if( MyDebug.LOG )
+				Log.d(TAG, "limit gain to: " + gain);
+			// use gamma correction for the remainder
+			if( median_target > gain * median_brightness ) {
+				gamma = (float) (Math.log(median_target / 255.0f) / Math.log(gain * median_brightness / 255.0f));
+			}
+		}
+
 		//float gamma = (float)(Math.log(median_target/255.0f) / Math.log(median_brightness/255.0f));
+		if( MyDebug.LOG )
+			Log.d(TAG, "gamma " + gamma);
+		final float min_gamma_non_bright_c = 0.75f;
+		if( gamma > 1.0f ) {
+			gamma = 1.0f;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "clamped gamma to : " + gamma);
+			}
+		}
+		else if( iso > 150 && gamma < min_gamma_non_bright_c ) {
+			// too small gamma on non-bright reduces contrast too much (e.g., see testAvg9)
+			gamma = min_gamma_non_bright_c;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "clamped gamma to : " + gamma);
+			}
+		}
 		//float gain = median_target / (float)median_brightness;
 		/*float gamma = (float)(Math.log(max_target/(float)median_target) / Math.log(max_brightness/(float)median_brightness));
 		float gain = median_target / ((float)Math.pow(median_brightness/255.0f, gamma) * 255.0f);
@@ -1888,7 +1932,7 @@ public class HDRProcessor {
 			Log.d(TAG, "gain " + gain);
 			Log.d(TAG, "gain2 " + max_target / ((float)Math.pow(max_brightness/255.0f, gamma) * 255.0f));
 		}*/
-		float gain = median_target / (float)median_brightness;
+		/*float gain = median_target / (float)median_brightness;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "gain: " + gain);
 		}
@@ -1897,7 +1941,7 @@ public class HDRProcessor {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "clamped gain to : " + gain);
 			}
-		}
+		}*/
 
 		ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
 		script.set_bitmap(input);
@@ -1909,10 +1953,10 @@ public class HDRProcessor {
 			Log.d(TAG, "black_level: " + black_level);
 		}
 		script.invoke_setBlackLevel(black_level);
-		//script.set_gamma(gamma);
+		script.set_gamma(gamma);
 		script.set_gain(gain);
 
-		float tonemap_scale_c = 255.0f;
+		/*float tonemap_scale_c = 255.0f;
 		if( MyDebug.LOG )
 			Log.d(TAG, "tonemap_scale_c: " + tonemap_scale_c);
 		script.set_tonemap_scale(tonemap_scale_c);
@@ -1928,7 +1972,7 @@ public class HDRProcessor {
 		float linear_scale = (max_possible_value + tonemap_scale_c) / max_possible_value;
 		if( MyDebug.LOG )
 			Log.d(TAG, "linear_scale: " + linear_scale);
-		script.set_linear_scale(linear_scale);
+		script.set_linear_scale(linear_scale);*/
 
 		Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		Allocation allocation_out = Allocation.createFromBitmap(rs, bitmap);

@@ -13,10 +13,10 @@ void setBlackLevel(float value) {
 }
 
 float gain;
-//float gamma;
+float gamma;
 
-float tonemap_scale;
-float linear_scale;
+//float tonemap_scale;
+//float linear_scale;
 
 /*uchar4 __attribute__((kernel)) avg_brighten(uchar4 in) {
     //float3 value = powr(convert_float3(in.rgb)/255.0f, gamma) * 255.0f;
@@ -30,6 +30,12 @@ float linear_scale;
 }*/
 
 uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) {
+    /*{
+    	uchar4 out;
+        out.rgb = convert_uchar3(clamp(rgb + 0.5f, 0.f, 255.f));
+        out.a = 255;
+        return out;
+    }*/
     {
         // spatial noise reduction filter
         /*float old_value = fmax(rgb.r, rgb.g);
@@ -78,7 +84,8 @@ uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) 
     rgb = rgb - black_level;
     rgb = rgb * white_level;
     rgb = clamp(rgb, 0.0f, 255.0f);
-    float3 hdr = gain*rgb;
+
+    /*float3 hdr = gain*rgb;
 
 	uchar4 out;
     {
@@ -95,6 +102,13 @@ uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) 
         hdr = grey + saturation_factor*(hdr - grey);
         out.rgb = convert_uchar3(clamp(hdr + 0.5f, 0.f, 255.f));
         out.a = 255;
-    }
+    }*/
+
+    rgb *= gain;
+    float3 hdr = powr(rgb/255.0f, gamma) * 255.0f;
+	uchar4 out;
+    out.rgb = convert_uchar3(clamp(hdr+0.5f, 0.f, 255.f));
+    out.a = 255;
+
     return out;
 }
