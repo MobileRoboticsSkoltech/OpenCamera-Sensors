@@ -667,11 +667,13 @@ public class DrawPreview {
 			}
 
 			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
+			// RAW not enabled in NR mode (see note in CameraController.takePictureBurst())
 			if( applicationInterface.isRawPref(sharedPreferences) &&
 					preview.supportsRaw() && // RAW can be enabled, even if it isn't available for this camera (e.g., user enables RAW for back camera, but then switches to front camera which doesn't support it)
 					!applicationInterface.isVideoPref() && // RAW not supported for video mode
 					photoMode != MyApplicationInterface.PhotoMode.HDR &&
-					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
+					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing &&
+					photoMode != MyApplicationInterface.PhotoMode.NoiseReduction ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
