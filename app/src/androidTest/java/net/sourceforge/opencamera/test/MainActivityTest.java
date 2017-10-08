@@ -10062,7 +10062,40 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
 	}
 
-	/** Tests paranorama algorithm on test samples "testPanorama1".
+	/** Tests Avg algorithm on test samples "testAvg17".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg17() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg17");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg17/input0.jpg");
+		inputs.add(avg_images_path + "testAvg17/input1.jpg");
+		inputs.add(avg_images_path + "testAvg17/input2.jpg");
+		inputs.add(avg_images_path + "testAvg17/input3.jpg");
+		inputs.add(avg_images_path + "testAvg17/input4.jpg");
+		inputs.add(avg_images_path + "testAvg17/input5.jpg");
+		inputs.add(avg_images_path + "testAvg17/input6.jpg");
+		inputs.add(avg_images_path + "testAvg17/input7.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg17_output.jpg", 800, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests panorama algorithm on test samples "testPanorama1".
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
