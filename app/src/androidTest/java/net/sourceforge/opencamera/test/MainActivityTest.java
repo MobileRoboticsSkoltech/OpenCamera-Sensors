@@ -10095,6 +10095,38 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
 	}
 
+	/** Tests Avg algorithm on test samples "testHDRtemp".
+	 *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
+	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvgtemp() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvgtemp");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvgtemp/input0.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input1.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input2.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input3.jpg");
+		/*inputs.add(avg_images_path + "testAvgtemp/input4.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input5.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input6.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input7.jpg");*/
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvgtemp_output.jpg", 250, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
 	/** Tests panorama algorithm on test samples "testPanorama1".
 	 * @throws IOException
 	 * @throws InterruptedException
