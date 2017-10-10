@@ -8062,33 +8062,35 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Bitmap dro_bitmap_in = null;
 		if( test_dro ) {
 			// save copy of input bitmap to also test DRO (since the HDR routine will free the inputs)
-			//dro_bitmap_in = inputs.get(0);
-			dro_bitmap_in = inputs.get(1);
+			int mid = (inputs.size()-1)/2;
+			dro_bitmap_in = inputs.get(mid);
 			dro_bitmap_in = dro_bitmap_in.copy(dro_bitmap_in.getConfig(), true);
 		}
 
-    	long time_s = System.currentTimeMillis();
-		try {
-			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, tonemapping_algorithm);
+		HistogramDetails hdrHistogramDetails = null;
+		if( inputs.size() > 1 ) {
+	    	long time_s = System.currentTimeMillis();
+			try {
+				mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, tonemapping_algorithm);
+			} catch (HDRProcessorException e) {
+				e.printStackTrace();
+				throw new RuntimeException();
+			}
+			Log.d(TAG, "HDR time: " + (System.currentTimeMillis() - time_s));
+
+			File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
+			OutputStream outputStream = new FileOutputStream(file);
+			inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+			outputStream.close();
+			mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+			hdrHistogramDetails = checkHistogram(inputs.get(0));
 		}
-		catch(HDRProcessorException e) {
-			e.printStackTrace();
-			throw new RuntimeException();
-		}
-		Log.d(TAG, "HDR time: " + (System.currentTimeMillis() - time_s));
-		
-		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
-		OutputStream outputStream = new FileOutputStream(file);
-		inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-        outputStream.close();
-        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
-		HistogramDetails hdrHistogramDetails = checkHistogram(inputs.get(0));
 		inputs.get(0).recycle();
 		inputs.clear();
 
 		if( test_dro ) {
 			inputs.add(dro_bitmap_in);
-			time_s = System.currentTimeMillis();
+			long time_s = System.currentTimeMillis();
 			try {
 				mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
 			}
@@ -8098,8 +8100,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 			Log.d(TAG, "DRO time: " + (System.currentTimeMillis() - time_s));
 
-			file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/dro" + output_name);
-			outputStream = new FileOutputStream(file);
+			File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/dro" + output_name);
+			OutputStream outputStream = new FileOutputStream(file);
 			inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
 			outputStream.close();
 			mActivity.getStorageUtils().broadcastFile(file, true, false, true);
@@ -9229,6 +9231,36 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDRtemp/input2.jpg") );
 		
 		subTestHDR(inputs, "testHDRtemp_output.jpg", true);
+	}
+
+	/** Tests DRO only on a dark image.
+	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	public void testDRODark0() throws IOException, InterruptedException {
+		Log.d(TAG, "testDRODark0");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input0.jpg") );
+
+		subTestHDR(inputs, "testAvg3_output.jpg", true);
+	}
+
+	/** Tests DRO only on a dark image.
+	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	public void testDRODark1() throws IOException, InterruptedException {
+		Log.d(TAG, "testDRODark1");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input0.jpg") );
+
+		subTestHDR(inputs, "testAvg8_output.jpg", true);
 	}
 
 	/** Tests calling the DRO routine with 0.0 factor - and that the resultant image is identical.
