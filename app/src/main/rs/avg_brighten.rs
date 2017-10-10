@@ -18,18 +18,18 @@ float gamma;
 //float tonemap_scale;
 //float linear_scale;
 
-/*uchar4 __attribute__((kernel)) avg_brighten(uchar4 in) {
-    //float3 value = powr(convert_float3(in.rgb)/255.0f, gamma) * 255.0f;
+/* Simplified brighten algorithm for gain only.
+ */
+uchar4 __attribute__((kernel)) avg_brighten_gain(uchar4 in) {
     float3 value = gain*convert_float3(in.rgb);
-    //float3 value = gain * powr(convert_float3(in.rgb)/255.0f, gamma) * 255.0f;
 
 	uchar4 out;
     out.rgb = convert_uchar3(clamp(value+0.5f, 0.f, 255.f));
     out.a = 255;
     return out;
-}*/
+}
 
-uchar4 __attribute__((kernel)) avg_brighten(float3 rgb, uint32_t x, uint32_t y) {
+uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y) {
     /*{
     	uchar4 out;
         out.rgb = convert_uchar3(clamp(rgb + 0.5f, 0.f, 255.f));

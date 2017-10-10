@@ -809,6 +809,42 @@ public class HDRProcessor {
 			output_allocation = Allocation.createFromBitmap(rs, output_bitmap);
 		}
 
+		/*{
+			// brighten?
+			int [] histo = computeHistogram(allocation, false, false);
+			HistogramInfo histogramInfo = getHistogramInfo(histo);
+			int median_brightness = histogramInfo.median_brightness;
+			int max_brightness = histogramInfo.max_brightness;
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
+			int median_target = getMedianTarget(median_brightness, 2);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "median brightness: " + median_brightness);
+				Log.d(TAG, "median target: " + median_target);
+				Log.d(TAG, "max brightness: " + max_brightness);
+			}
+
+			if( median_target > median_brightness && max_brightness < 255 ) {
+				float gain = median_target / (float)median_brightness;
+				if( MyDebug.LOG )
+					Log.d(TAG, "gain " + gain);
+				float max_possible_value = gain*max_brightness;
+				if( MyDebug.LOG )
+					Log.d(TAG, "max_possible_value: " + max_possible_value);
+				if( max_possible_value > 255.0f ) {
+					gain = 255.0f / max_brightness;
+					if( MyDebug.LOG )
+						Log.d(TAG, "limit gain to: " + gain);
+				}
+				ScriptC_avg_brighten script = new ScriptC_avg_brighten(rs);
+				script.set_gain(gain);
+				script.forEach_avg_brighten_gain(allocation, output_allocation);
+				allocation = output_allocation; // output is now the input for subsequent operations
+				if( MyDebug.LOG )
+					Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
+			}
+		}*/
+
 		adjustHistogram(allocation, output_allocation, width, height, hdr_alpha, n_tiles, time_s);
 
 		if( release_bitmaps ) {
@@ -1828,6 +1864,48 @@ public class HDRProcessor {
 		return histogram;
 	}
 
+	private static class HistogramInfo {
+		public final int median_brightness;
+		public final int max_brightness;
+
+		HistogramInfo(int median_brightness, int max_brightness) {
+			this.median_brightness = median_brightness;
+			this.max_brightness = max_brightness;
+		}
+	}
+
+	private HistogramInfo getHistogramInfo(int [] histo) {
+		int total = 0;
+		for(int value : histo)
+			total += value;
+		int middle = total / 2;
+		int count = 0;
+		int median_brightness = -1;
+		int max_brightness = 0;
+		for(int i = 0; i < histo.length; i++) {
+			count += histo[i];
+			if( count >= middle && median_brightness == -1 ) {
+				median_brightness = i;
+			}
+			if( histo[i] > 0 ) {
+				max_brightness = i;
+			}
+		}
+
+		return new HistogramInfo(median_brightness, max_brightness);
+	}
+
+	private int getMedianTarget(int median_brightness, int max_gain_factor) {
+		if( median_brightness <= 0 )
+			median_brightness = 1;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
+		}
+		int median_target = Math.min(119, max_gain_factor*median_brightness);
+		//int median_target = Math.min(90, max_gain_factor*median_brightness);
+		return median_target;
+	}
+
 	/**
 	 * @param input         The allocation in floating point format.
 	 * @param width         Width of the input.
@@ -1845,36 +1923,19 @@ public class HDRProcessor {
 
     	long time_s = System.currentTimeMillis();
 
-		int[] histo = computeHistogram(input, false, true);
+		int [] histo = computeHistogram(input, false, true);
+		HistogramInfo histogramInfo = getHistogramInfo(histo);
+		int median_brightness = histogramInfo.median_brightness;
+		int max_brightness = histogramInfo.max_brightness;
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after computeHistogram: " + (System.currentTimeMillis() - time_s));
-		int total = 0;
-		for(int value : histo)
-			total += value;
-		int middle = total / 2;
-		int count = 0;
-		int median_brightness = -1;
-		int max_brightness = 0;
-		for(int i = 0; i < histo.length; i++) {
-			count += histo[i];
-			if( count >= middle && median_brightness == -1 ) {
-				median_brightness = i;
-			}
-			if( histo[i] > 0 ) {
-				max_brightness = i;
-			}
-		}
-		if( median_brightness <= 0 )
-			median_brightness = 1;
 		int max_gain_factor = 4;
 		/*if( iso <= 150 ) {
 			max_gain_factor = 4;
 		}*/
-		int median_target = Math.min(119, max_gain_factor*median_brightness);
-		//int median_target = Math.min(90, max_gain_factor*median_brightness);
+		int median_target = getMedianTarget(median_brightness, max_gain_factor);
 		//int max_target = Math.min(255, (int)((max_brightness*median_target)/(float)median_brightness + 0.5f) );
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
 			Log.d(TAG, "median brightness: " + median_brightness);
 			Log.d(TAG, "max brightness: " + max_brightness);
 			Log.d(TAG, "median target: " + median_target);
@@ -1979,7 +2040,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocation_out: " + (System.currentTimeMillis() - time_s));
 
-        script.forEach_avg_brighten(input, allocation_out);
+        script.forEach_avg_brighten_f(input, allocation_out);
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after avg_brighten: " + (System.currentTimeMillis() - time_s));
 
