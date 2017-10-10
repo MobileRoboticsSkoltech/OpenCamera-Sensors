@@ -4739,7 +4739,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     				if( pause_preview && success ) {
     					if( is_preview_started ) {
     						// need to manually stop preview on Android L Camera2
-    						camera_controller.stopPreview();
+							if( camera_controller != null ) {
+								camera_controller.stopPreview();
+							}
     						is_preview_started = false;
     					}
     	    			setPreviewPaused(true);
