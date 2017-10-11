@@ -752,7 +752,7 @@ public class MainUI {
 
     private List<View> iso_buttons;
 	private int iso_button_manual_index = -1;
-	private final String manual_iso_value = "m";
+	private final static String manual_iso_value = "m";
 
     private void setupExposureUI() {
 		if( MyDebug.LOG )

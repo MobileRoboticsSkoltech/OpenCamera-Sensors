@@ -1813,7 +1813,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		else if( alignment_y == Alignment.ALIGNMENT_CENTRE ) {
 			int height = text_bounds.bottom - text_bounds.top + 2*padding;
-			int y_diff = - text_bounds.top + padding - 1;
+			//int y_diff = - text_bounds.top + padding - 1;
 			text_bounds.top = (int)(0.5 * ( (location_y - 1) + (text_bounds.top + location_y - padding) )); // average of ALIGNMENT_TOP and ALIGNMENT_BOTTOM
 			text_bounds.bottom = text_bounds.top + height;
 			location_y += (int)(0.5*top_y_diff); // average of ALIGNMENT_TOP and ALIGNMENT_BOTTOM
