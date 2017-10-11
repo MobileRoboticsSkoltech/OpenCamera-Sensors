@@ -556,7 +556,7 @@ public class MainUI {
 		int content_description;
 		if( main_activity.getPreview().isVideoRecordingPaused() ) {
 			content_description = R.string.resume_video;
-			pauseVideoButton.setImageResource(R.drawable.ic_play_circle_outline_white);
+			pauseVideoButton.setImageResource(R.drawable.ic_play_circle_outline_white_48dp);
 		}
 		else {
 			content_description = R.string.pause_video;

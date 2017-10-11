@@ -69,6 +69,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private final DrawPreview drawPreview;
 	private final ImageSaver imageSaver;
 
+	private final float panorama_pics_per_screen = 2.0f;
+
 	private File last_video_file = null;
 	private Uri last_video_file_saf = null;
 
@@ -622,6 +624,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public boolean getPausePreviewPref() {
+		if( main_activity.getPreview().isVideoRecording() ) {
+			// don't pause preview when taking photos while recording video!
+			return false;
+		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), false);
     }
@@ -980,8 +986,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		float camera_angle_y = main_activity.getPreview().getViewAngleY();
 		n_panorama_pics++;
 		float angle = (float) Math.toRadians(camera_angle_y) * n_panorama_pics;
-		final float pics_per_screen = 2.0f;
-		setNextPanoramaPoint((float) Math.sin(angle / pics_per_screen), 0.0f, (float) -Math.cos(angle / pics_per_screen));
+		setNextPanoramaPoint((float) Math.sin(angle / panorama_pics_per_screen), 0.0f, (float) -Math.cos(angle / panorama_pics_per_screen));
 	}
 
 	private void setNextPanoramaPoint(float x, float y, float z) {
@@ -1326,7 +1331,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				final Bitmap thumbnail_f = thumbnail;
 				main_activity.runOnUiThread(new Runnable() {
 					public void run() {
-						updateThumbnail(thumbnail_f);
+						updateThumbnail(thumbnail_f, true);
 					}
 				});
 			}
@@ -1437,6 +1442,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public void hasPausedPreview(boolean paused) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "hasPausedPreview: " + paused);
 	    View shareButton = main_activity.findViewById(R.id.share);
 	    View trashButton = main_activity.findViewById(R.id.trash);
 	    if( paused ) {
@@ -1494,7 +1501,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			photo_mode = PhotoMode.Standard;
 		}
 		if( photo_mode == PhotoMode.NoiseReduction ) {
-			imageSaver.finishImageAverage();
+			boolean image_capture_intent = isImageCaptureIntent();
+			boolean do_in_background = saveInBackground(image_capture_intent);
+			imageSaver.finishImageAverage(do_in_background);
 		}
 
 		// call this, so that if pause-preview-after-taking-photo option is set, we remove the "taking photo" border indicator straight away
@@ -1509,12 +1518,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		drawPreview.clearContinuousFocusMove();
 	}
 	
-	void updateThumbnail(Bitmap thumbnail) {
+	void updateThumbnail(Bitmap thumbnail, boolean is_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateThumbnail");
 		main_activity.updateGalleryIcon(thumbnail);
 		drawPreview.updateThumbnail(thumbnail);
-		if( this.getPausePreviewPref() ) {
+		if( !is_video && this.getPausePreviewPref() ) {
 			drawPreview.showLastImage();
 		}
 	}
@@ -1855,7 +1864,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			if( MyDebug.LOG )
 				Log.d(TAG, "from image capture intent");
 	        Bundle myExtras = main_activity.getIntent().getExtras();
-	        if (myExtras != null) {
+	        if( myExtras != null ) {
 	        	image_capture_intent_uri = myExtras.getParcelable(MediaStore.EXTRA_OUTPUT);
     			if( MyDebug.LOG )
     				Log.d(TAG, "save to: " + image_capture_intent_uri);

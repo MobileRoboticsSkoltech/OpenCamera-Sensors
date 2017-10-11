@@ -2230,6 +2230,7 @@ public class CameraController2 extends CameraController {
 				            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
 				            PictureCallback cb = jpeg_cb;
 				            jpeg_cb = null;
+							// no need to check raw_cb, as raw not supported for burst
 				            // take a copy, so that we can clear pending_burst_images
 				            List<byte []> images = new ArrayList<>(pending_burst_images);
 				            cb.onBurstPictureTaken(images);
@@ -3828,6 +3829,7 @@ public class CameraController2 extends CameraController {
 			// but also, adding the preview surface causes the dark/light exposures to be visible, which we don't want
 			stillBuilder.addTarget(imageReader.getSurface());
 			// don't add target imageReaderRaw, as Raw not supported for burst
+			raw_cb = null; // raw not supported for burst
 
 			List<CaptureRequest> requests = new ArrayList<>();
 
@@ -4106,6 +4108,7 @@ public class CameraController2 extends CameraController {
 			// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
 			stillBuilder.addTarget(imageReader.getSurface());
 			// don't add target imageReaderRaw, as Raw not supported for burst
+			raw_cb = null; // raw not supported for burst
 
 			if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
 				stillBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);

@@ -2591,7 +2591,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	/** Returns the size in sizes that is the closest aspect ratio match to targetRatio, but (if max_size is non-null) is not
 	 *  larger than max_size (in either width or height).
 	 */
-	private CameraController.Size getClosestSize(List<CameraController.Size> sizes, double targetRatio, CameraController.Size max_size) {
+	private static CameraController.Size getClosestSize(List<CameraController.Size> sizes, double targetRatio, CameraController.Size max_size) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getClosestSize()");
 		CameraController.Size optimalSize = null;
@@ -2656,6 +2656,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return optimalSize;
     }
 
+	public CameraController.Size getOptimalVideoPictureSize(List<CameraController.Size> sizes, double targetRatio) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getOptimalVideoPictureSize()");
+		CameraController.Size max_video_size = video_quality_handler.getMaxSupportedVideoSize();
+		return getOptimalVideoPictureSize(sizes, targetRatio, max_video_size);
+	}
+
 	/** Returns a picture size to set during video mode.
 	 *  In theory, the picture size shouldn't matter in video mode, but the stock Android camera sets a picture size
 	 *  which is the largest that matches the video's aspect ratio.
@@ -2666,13 +2673,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 *  (if we request too high, it'll automatically reduce the photo resolution), but still good to match the aspect ratio. For
 	 *  Camera2 API, see notes at "https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createCaptureSession(java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler)" .
 	 */
-	public CameraController.Size getOptimalVideoPictureSize(List<CameraController.Size> sizes, double targetRatio) {
+	public static CameraController.Size getOptimalVideoPictureSize(List<CameraController.Size> sizes, double targetRatio, CameraController.Size max_video_size) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getOptimalVideoPictureSize()");
 		final double ASPECT_TOLERANCE = 0.05;
         if( sizes == null )
         	return null;
-		CameraController.Size max_video_size = video_quality_handler.getMaxSupportedVideoSize();
 		if( MyDebug.LOG )
 			Log.d(TAG, "max_video_size: " + max_video_size.width + ", " + max_video_size.height);
         CameraController.Size optimalSize = null;
@@ -4733,7 +4739,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     				if( pause_preview && success ) {
     					if( is_preview_started ) {
     						// need to manually stop preview on Android L Camera2
-    						camera_controller.stopPreview();
+							if( camera_controller != null ) {
+								camera_controller.stopPreview();
+							}
     						is_preview_started = false;
     					}
     	    			setPreviewPaused(true);

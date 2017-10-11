@@ -352,7 +352,7 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "image average request images: " + pending_image_average_request.jpeg_images.size());
 	}
 
-	void finishImageAverage() {
+	void finishImageAverage(boolean do_in_background) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "finishImageAverage");
 		if( pending_image_average_request == null ) {
@@ -360,9 +360,18 @@ public class ImageSaver extends Thread {
 				Log.d(TAG, "finishImageAverage called but no pending_image_average_request");
 			return;
 		}
-		addRequest(pending_image_average_request);
+		if( do_in_background ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "add background request");
+			addRequest(pending_image_average_request);
+			addDummyRequest();
+		}
+		else {
+			// wait for queue to be empty
+			waitUntilDone();
+			saveImageNow(pending_image_average_request);
+		}
 		pending_image_average_request = null;
-		addDummyRequest();
 	}
 
 	/** Internal saveImage method to handle both JPEG and RAW.
@@ -1617,7 +1626,7 @@ public class ImageSaver extends Thread {
 	    		final Bitmap thumbnail_f = thumbnail;
 		    	main_activity.runOnUiThread(new Runnable() {
 					public void run() {
-						applicationInterface.updateThumbnail(thumbnail_f);
+						applicationInterface.updateThumbnail(thumbnail_f, false);
 					}
 				});
         		if( MyDebug.LOG ) {

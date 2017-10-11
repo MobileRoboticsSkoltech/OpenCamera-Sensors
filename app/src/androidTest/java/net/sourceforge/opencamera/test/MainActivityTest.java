@@ -139,13 +139,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
+	/** Restarts Open Camera.
+	 *  WARNING: Make sure that any assigned variables related to the activity, e.g., anything
+	 *  returned by findViewById(), is updated to the new mActivity after calling this method!
+	 */
 	private void restart() {
 		Log.d(TAG, "restart");
 	    mActivity.finish();
 	    setActivity(null);
 		Log.d(TAG, "now starting");
 	    mActivity = getActivity();
+		Log.d(TAG, "mActivity is now: " + mActivity);
 	    mPreview = mActivity.getPreview();
+		Log.d(TAG, "mPreview is now: " + mPreview);
 		waitUntilCameraOpened();
 		Log.d(TAG, "restart done");
 	}
@@ -511,6 +517,65 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    String flash_value = mPreview.getCurrentFlashValue();
 		Log.d(TAG, "flash_value: " + flash_value);
 	    assertTrue(flash_value.equals("flash_torch"));
+	}
+
+	/* Ensures that the flash mode changes as expected when switching between photo and video modes.
+	 */
+	public void testFlashVideoMode() throws InterruptedException {
+		Log.d(TAG, "testSaveVideoMode");
+		setToDefault();
+
+		if( !mPreview.supportsFlash() ) {
+			return;
+		}
+
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    assertTrue(!mPreview.isVideo());
+
+		switchToFlashValue("flash_auto");
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_auto"));
+
+		Log.d(TAG, "switch to video");
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(mPreview.isVideo());
+
+		// flash should turn off when in video mode, so that flash doesn't fire for photo snapshot while recording video
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_off"));
+
+		restart();
+	    switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    assertTrue(mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_off"));
+
+		// switch back to photo mode, should return to flash auto
+		Log.d(TAG, "switch to photo");
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(!mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_auto"));
+
+		// turn on torch, check it remains on for video
+		switchToFlashValue("flash_torch");
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_torch"));
+
+		Log.d(TAG, "switch to video");
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_torch"));
+
+		restart();
+	    switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    assertTrue(mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_torch"));
+
+		// switch back to photo mode, should remain in flash torch
+		Log.d(TAG, "switch to photo");
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(!mPreview.isVideo());
+		assertTrue(mPreview.getCurrentFlashValue().equals("flash_torch"));
 	}
 
 	/* Ensures that we save the flash mode torch when switching to front camera and then to back
@@ -4387,6 +4452,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 
+		if( mPreview.isOnTimer() ) {
+			Log.d(TAG, "wait for timer");
+			while( mPreview.isOnTimer() ) {
+			}
+			this.getInstrumentation().waitForIdleSync();
+			Log.d(TAG, "after idle sync");
+		}
+
 		int exp_n_new_files = 0;
 	    if( mPreview.isVideoRecording() ) {
 		    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_recording );
@@ -4903,6 +4976,45 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		setToDefault();
+
+		subTestTakeVideoSnapshot();
+	}
+
+	/** Test taking photo while recording video, with timer.
+	 */
+	public void testTakeVideoSnapshotTimer() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSnapshotTimer");
+
+		if( !mPreview.supportsPhotoVideoRecording() ) {
+			Log.d(TAG, "video snapshot not supported");
+			return;
+		}
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
+		editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
+		editor.apply();
+
+		subTestTakeVideoSnapshot();
+	}
+
+	/** Test taking photo while recording video, with pause preview.
+	 */
+	public void testTakeVideoSnapshotPausePreview() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSnapshotPausePreview");
+
+		if( !mPreview.supportsPhotoVideoRecording() ) {
+			Log.d(TAG, "video snapshot not supported");
+			return;
+		}
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), true);
+		editor.apply();
 
 		subTestTakeVideoSnapshot();
 	}
@@ -7950,33 +8062,35 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Bitmap dro_bitmap_in = null;
 		if( test_dro ) {
 			// save copy of input bitmap to also test DRO (since the HDR routine will free the inputs)
-			//dro_bitmap_in = inputs.get(0);
-			dro_bitmap_in = inputs.get(1);
+			int mid = (inputs.size()-1)/2;
+			dro_bitmap_in = inputs.get(mid);
 			dro_bitmap_in = dro_bitmap_in.copy(dro_bitmap_in.getConfig(), true);
 		}
 
-    	long time_s = System.currentTimeMillis();
-		try {
-			mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, tonemapping_algorithm);
+		HistogramDetails hdrHistogramDetails = null;
+		if( inputs.size() > 1 ) {
+	    	long time_s = System.currentTimeMillis();
+			try {
+				mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, tonemapping_algorithm);
+			} catch (HDRProcessorException e) {
+				e.printStackTrace();
+				throw new RuntimeException();
+			}
+			Log.d(TAG, "HDR time: " + (System.currentTimeMillis() - time_s));
+
+			File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
+			OutputStream outputStream = new FileOutputStream(file);
+			inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+			outputStream.close();
+			mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+			hdrHistogramDetails = checkHistogram(inputs.get(0));
 		}
-		catch(HDRProcessorException e) {
-			e.printStackTrace();
-			throw new RuntimeException();
-		}
-		Log.d(TAG, "HDR time: " + (System.currentTimeMillis() - time_s));
-		
-		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
-		OutputStream outputStream = new FileOutputStream(file);
-		inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
-        outputStream.close();
-        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
-		HistogramDetails hdrHistogramDetails = checkHistogram(inputs.get(0));
 		inputs.get(0).recycle();
 		inputs.clear();
 
 		if( test_dro ) {
 			inputs.add(dro_bitmap_in);
-			time_s = System.currentTimeMillis();
+			long time_s = System.currentTimeMillis();
 			try {
 				mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, HDRProcessor.TonemappingAlgorithm.TONEMAPALGORITHM_REINHARD);
 			}
@@ -7986,8 +8100,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			}
 			Log.d(TAG, "DRO time: " + (System.currentTimeMillis() - time_s));
 
-			file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/dro" + output_name);
-			outputStream = new FileOutputStream(file);
+			File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/dro" + output_name);
+			OutputStream outputStream = new FileOutputStream(file);
 			inputs.get(0).compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
 			outputStream.close();
 			mActivity.getStorageUtils().broadcastFile(file, true, false, true);
@@ -8023,6 +8137,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	final private String hdr_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/hdrsamples/";
 	final private String avg_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/avgsamples/";
+	final private String panorama_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/panoramasamples/";
 
 	/** Tests HDR algorithm on test samples "saintpaul".
 	 * @throws IOException
@@ -9118,6 +9233,36 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestHDR(inputs, "testHDRtemp_output.jpg", true);
 	}
 
+	/** Tests DRO only on a dark image.
+	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	public void testDRODark0() throws IOException, InterruptedException {
+		Log.d(TAG, "testDRODark0");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input0.jpg") );
+
+		subTestHDR(inputs, "testAvg3_output.jpg", true);
+	}
+
+	/** Tests DRO only on a dark image.
+	 */
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	public void testDRODark1() throws IOException, InterruptedException {
+		Log.d(TAG, "testDRODark1");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input0.jpg") );
+
+		subTestHDR(inputs, "testAvg8_output.jpg", true);
+	}
+
 	/** Tests calling the DRO routine with 0.0 factor - and that the resultant image is identical.
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -9920,5 +10065,123 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg16".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg16() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg16");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg16/input0.jpg");
+		inputs.add(avg_images_path + "testAvg16/input1.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg16_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 1);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg17".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg17() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg17");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg17/input0.jpg");
+		inputs.add(avg_images_path + "testAvg17/input1.jpg");
+		inputs.add(avg_images_path + "testAvg17/input2.jpg");
+		inputs.add(avg_images_path + "testAvg17/input3.jpg");
+		inputs.add(avg_images_path + "testAvg17/input4.jpg");
+		inputs.add(avg_images_path + "testAvg17/input5.jpg");
+		inputs.add(avg_images_path + "testAvg17/input6.jpg");
+		inputs.add(avg_images_path + "testAvg17/input7.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg17_output.jpg", 800, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testHDRtemp".
+	 *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
+	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvgtemp() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvgtemp");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvgtemp/input0.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input1.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input2.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input3.jpg");
+		/*inputs.add(avg_images_path + "testAvgtemp/input4.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input5.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input6.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input7.jpg");*/
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvgtemp_output.jpg", 250, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests panorama algorithm on test samples "testPanorama1".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testPanorama1() throws IOException, InterruptedException {
+		Log.d(TAG, "testPanorama1");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(panorama_images_path + "testPanorama1/input0.jpg");
+		inputs.add(panorama_images_path + "testPanorama1/input1.jpg");
+		inputs.add(panorama_images_path + "testPanorama1/input2.jpg");
+
+		List<Bitmap> bitmaps = new ArrayList<>();
+		for(String input : inputs) {
+			Bitmap bitmap = getBitmapFromFile(input);
+			bitmaps.add(bitmap);
+		}
+
+		float angle = 0.0f;
+		for(Bitmap bitmap : bitmaps) {
+		}
 	}
 }

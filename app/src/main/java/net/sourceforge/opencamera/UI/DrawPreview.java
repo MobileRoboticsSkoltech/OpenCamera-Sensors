@@ -74,6 +74,7 @@ public class DrawPreview {
 	private Bitmap raw_bitmap;
 	private Bitmap auto_stabilise_bitmap;
 	private Bitmap hdr_bitmap;
+	private Bitmap nr_bitmap;
 	private Bitmap photostamp_bitmap;
 	private Bitmap flash_bitmap;
 	private final Rect icon_dest = new Rect();
@@ -121,6 +122,7 @@ public class DrawPreview {
 		raw_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.raw_icon);
 		auto_stabilise_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.auto_stabilise_icon);
 		hdr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_hdr_on_white_48dp);
+		nr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.nr_icon);
 		photostamp_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_text_format_white_48dp);
 		flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
 
@@ -150,6 +152,10 @@ public class DrawPreview {
 		if( hdr_bitmap != null ) {
 			hdr_bitmap.recycle();
 			hdr_bitmap = null;
+		}
+		if( nr_bitmap != null ) {
+			nr_bitmap.recycle();
+			nr_bitmap = null;
 		}
 		if( photostamp_bitmap != null ) {
 			photostamp_bitmap.recycle();
@@ -661,11 +667,13 @@ public class DrawPreview {
 			}
 
 			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
+			// RAW not enabled in NR mode (see note in CameraController.takePictureBurst())
 			if( applicationInterface.isRawPref(sharedPreferences) &&
 					preview.supportsRaw() && // RAW can be enabled, even if it isn't available for this camera (e.g., user enables RAW for back camera, but then switches to front camera which doesn't support it)
 					!applicationInterface.isVideoPref() && // RAW not supported for video mode
 					photoMode != MyApplicationInterface.PhotoMode.HDR &&
-					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing ) {
+					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing &&
+					photoMode != MyApplicationInterface.PhotoMode.NoiseReduction ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -699,14 +707,15 @@ public class DrawPreview {
 				}
 			}
 
-			if( photoMode == MyApplicationInterface.PhotoMode.HDR && !applicationInterface.isVideoPref() ) { // HDR not supported for video mode
+			if( ( photoMode == MyApplicationInterface.PhotoMode.HDR || photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ) &&
+					!applicationInterface.isVideoPref() ) { // HDR or NR not supported for video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
 				p.setAlpha(64);
 				canvas.drawRect(icon_dest, p);
 				p.setAlpha(255);
-				canvas.drawBitmap(hdr_bitmap, null, icon_dest, p);
+				canvas.drawBitmap(photoMode == MyApplicationInterface.PhotoMode.HDR ? hdr_bitmap : nr_bitmap, null, icon_dest, p);
 
 				if( ui_rotation == 180 ) {
 					location_x2 -= icon_size + flash_padding;

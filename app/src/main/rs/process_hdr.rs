@@ -74,6 +74,7 @@ static uchar4 tonemap(float3 hdr) {
             out.r = (uchar)clamp(out_f.r+0.5f, 0.0f, 255.0f);
             out.g = (uchar)clamp(out_f.g+0.5f, 0.0f, 255.0f);
             out.b = (uchar)clamp(out_f.b+0.5f, 0.0f, 255.0f);
+            out.a = 255;
             break;
 	    }
 	    case tonemap_algorithm_reinhard_c:
@@ -110,6 +111,7 @@ static uchar4 tonemap(float3 hdr) {
             out.r = (uchar)clamp(curr_r+0.5f, 0.0f, 255.0f);
             out.g = (uchar)clamp(curr_g+0.5f, 0.0f, 255.0f);
             out.b = (uchar)clamp(curr_b+0.5f, 0.0f, 255.0f);
+            out.a = 255;
             break;
         }
 	    case tonemap_algorithm_aces_c:
@@ -124,6 +126,7 @@ static uchar4 tonemap(float3 hdr) {
 	        out.r = (uchar)clamp(out_f.r+0.5f, 0.0f, 255.0f);
 	        out.g = (uchar)clamp(out_f.g+0.5f, 0.0f, 255.0f);
             out.b = (uchar)clamp(out_f.b+0.5f, 0.0f, 255.0f);
+            out.a = 255;
             break;
 	    }
 	}
