@@ -182,7 +182,7 @@
     <string name="preference_max_brightness_summary">Tving skjermvisningen til å ha maks lysstyrke, og ikke enhetsstandarden.</string>
     
     <string name="preference_category_camera_quality">Foto- og video-innstillinger</string>
-    <string name="preference_screen_photo_settings">Fotoinnstillinger...</string>
+    <string name="preference_screen_photo_settings">Fotoinnstillinger…</string>
     <string name="preference_screen_video_settings">Videoinnstillinger…</string>
     <string name="preference_screen_location_settings">Posisjonsinnstillinger…</string>
     <string name="preference_resolution">Kameraoppløsning</string>

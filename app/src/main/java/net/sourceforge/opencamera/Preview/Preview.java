@@ -3477,7 +3477,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 *  video is corrupted.
 	 * @return If the focus mode is changed, this returns the previous focus mode; else it returns null.
 	 */
-	public String updateFocusForVideo() {
+	private String updateFocusForVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocusForVideo()");
 		String old_focus_mode = null;

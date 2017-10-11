@@ -237,9 +237,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			    assertTrue(controller_flash_value.equals("") || controller_flash_value.equals("flash_off"));
 		    }
 		    else {
-			    String expected_flash_value = flash_value;
-				Log.d(TAG, "expected_flash_value: "+ expected_flash_value);
-			    assertTrue(expected_flash_value.equals( controller_flash_value ));
+				Log.d(TAG, "expected_flash_value: "+ flash_value);
+			    assertTrue(flash_value.equals( controller_flash_value ));
 		    }
 		}
 	}

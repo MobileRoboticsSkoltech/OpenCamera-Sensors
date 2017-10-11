@@ -1901,9 +1901,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
 		}
-		int median_target = Math.min(119, max_gain_factor*median_brightness);
-		//int median_target = Math.min(90, max_gain_factor*median_brightness);
-		return median_target;
+		return Math.min(119, max_gain_factor*median_brightness);
 	}
 
 	/**
