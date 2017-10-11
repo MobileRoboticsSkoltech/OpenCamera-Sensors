@@ -501,7 +501,7 @@
     <string-array name="preference_audio_control_entries">
         <item>None</item>
         <item>Loud noise</item>
-        <item>Voice command: \"cheese\"</item>
+        <item>Voice command: \"cheese\"</item> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
     </string-array>
     <string-array name="preference_audio_control_values">
         <item>none</item>
