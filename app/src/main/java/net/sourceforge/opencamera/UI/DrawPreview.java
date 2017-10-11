@@ -533,7 +533,7 @@ public class DrawPreview {
 		p.setTextAlign(Paint.Align.LEFT);
 		int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
 		int location_y = top_y;
-		final int diff_y = (int) (16 * scale + 0.5f); // convert dps to pixels
+		final int gap_y = (int) (2 * scale + 0.5f); // convert dps to pixels
 		if( ui_rotation == 90 || ui_rotation == 270 ) {
 			int diff = canvas.getWidth() - canvas.getHeight();
 			location_x += diff/2;
@@ -561,13 +561,13 @@ public class DrawPreview {
 	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
 	        String current_time = dateFormatTimeInstance.format(calendar.getTime());
 	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
-	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
-
+	        int height = applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+			height += gap_y;
 			if( ui_rotation == 90 ) {
-				location_y -= diff_y;
+				location_y -= height;
 			}
 			else {
-				location_y += diff_y;
+				location_y += height;
 			}
 	    }
 
@@ -582,14 +582,14 @@ public class DrawPreview {
 				last_free_memory_time = time_now; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
 			}
 			if( free_memory_gb >= 0.0f ) {
-				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation), Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
-			}
-
-			if( ui_rotation == 90 ) {
-				location_y -= diff_y;
-			}
-			else {
-				location_y += diff_y;
+				int height = applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation), Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+				height += gap_y;
+				if( ui_rotation == 90 ) {
+					location_y -= height;
+				}
+				else {
+					location_y += height;
+				}
 			}
 		}
 
@@ -637,27 +637,20 @@ public class DrawPreview {
 				else {
 					ae_started_scanning_ms = -1;
 				}
-				applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
-
+				int height = applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
+				height += gap_y;
 				// only move location_y if we actually print something (because on old camera API, even if the ISO option has
 				// been enabled, we'll never be able to display the on-screen ISO)
 				if( ui_rotation == 90 ) {
-					location_y -= diff_y;
+					location_y -= height;
 				}
 				else {
-					location_y += diff_y;
+					location_y += height;
 				}
 			}
 		}
 
 		if( camera_controller != null ) {
-			final int symbols_diff_y = (int) (2 * scale + 0.5f); // convert dps to pixels;
-			if( ui_rotation == 90 ) {
-				location_y -= symbols_diff_y;
-			}
-			else {
-				location_y += symbols_diff_y;
-			}
 			// padding to align with earlier text
 			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
 			int location_x2 = location_x - flash_padding;

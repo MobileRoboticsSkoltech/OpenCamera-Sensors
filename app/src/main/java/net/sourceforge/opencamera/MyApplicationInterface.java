@@ -1767,15 +1767,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 		ALIGNMENT_BOTTOM
 	}
 
-    public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
-		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, Alignment.ALIGNMENT_BOTTOM);
+    public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
+		return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, Alignment.ALIGNMENT_BOTTOM);
 	}
 
-	public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y) {
-		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, true);
+	public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y) {
+		return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, true);
 	}
 
-	public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow) {
+	public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow) {
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
@@ -1827,6 +1827,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		paint.setColor(foreground);
 		canvas.drawText(text, location_x, location_y, paint);
+		return text_bounds.bottom - text_bounds.top;
 	}
 	
 	private boolean saveInBackground(boolean image_capture_intent) {
