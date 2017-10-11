@@ -501,7 +501,7 @@
     <string-array name="preference_audio_control_entries">
         <item>Ingen</item>
         <item>Høy støy</item>
-        <item>Stemmekommando: \"Smil!\"</item>
+        <item>Stemmekommando: \"cheese\"</item>
     </string-array>
     <string-array name="preference_audio_control_values">
         <item>none</item>
