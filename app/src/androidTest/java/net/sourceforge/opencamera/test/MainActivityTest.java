@@ -7629,6 +7629,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "size string: " + photoResolutionButton.getText());
 	    assertTrue( photoResolutionButton.getText().equals(exp_size_string) );
 
+		// switch to video mode
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(mPreview.isVideo());
+
+        // open popup
+        assertFalse( mActivity.popupIsOpen() );
+	    clickView(popupButton);
+	    while( !mActivity.popupIsOpen() ) {
+	    }
+
 	    TextView videoResolutionButton = (TextView)mActivity.getUIButton("VIDEO_RESOLUTIONS");
 	    assertTrue(videoResolutionButton != null);
 	    CharSequence oldVideoResolutionString = videoResolutionButton.getText();
