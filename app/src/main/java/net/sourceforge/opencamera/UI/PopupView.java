@@ -96,7 +96,7 @@ public class PopupView extends LinearLayout {
 			Log.d(TAG, "PopupView time 2: " + (System.nanoTime() - debug_time));
 		{
 	        List<String> supported_flash_values = preview.getSupportedFlashValues();
-			if( preview.isVideo() ) {
+			if( preview.isVideo() && supported_flash_values != null ) {
 				// filter flash modes we don't want to show
 				List<String> filter = new ArrayList<>();
 				for(String flash_value : supported_flash_values) {
