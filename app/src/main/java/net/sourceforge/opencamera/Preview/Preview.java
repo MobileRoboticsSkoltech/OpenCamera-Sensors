@@ -1036,6 +1036,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		applicationInterface.cameraClosed();
 		cancelTimer();
+		remaining_burst_photos = 0;
 		if( camera_controller != null ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "close camera_controller");
@@ -4547,6 +4548,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void takePhoto(boolean skip_autofocus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhoto");
+		if( camera_controller == null ) {
+			Log.e(TAG, "camera not opened in takePhoto!");
+			return;
+		}
 		applicationInterface.cameraInOperation(true, false);
         String current_ui_focus_value = getCurrentFocusValue();
 		if( MyDebug.LOG )
@@ -4769,19 +4774,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			if( MyDebug.LOG )
     				Log.d(TAG, "do we need to take another photo? remaining_burst_photos: " + remaining_burst_photos);
     	        if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
-    	        	if( remaining_burst_photos > 0 )
-    	        		remaining_burst_photos--;
+					if( camera_controller == null ) {
+	    				Log.e(TAG, "remaining_burst_photos still set, but camera is closed!: " + remaining_burst_photos);
+						remaining_burst_photos = 0;
+					}
+					else {
+						if( remaining_burst_photos > 0 )
+							remaining_burst_photos--;
 
-    	    		long timer_delay = applicationInterface.getRepeatIntervalPref();
-    	    		if( timer_delay == 0 ) {
-    	    			// we set skip_autofocus to go straight to taking a photo rather than refocusing, for speed
-    	    			// need to manually set the phase
-    	    	        phase = PHASE_TAKING_PHOTO;
-    	        		takePhoto(true);
-    	    		}
-    	    		else {
-    	    			takePictureOnTimer(timer_delay, true);
-    	    		}
+						long timer_delay = applicationInterface.getRepeatIntervalPref();
+						if( timer_delay == 0 ) {
+							// we set skip_autofocus to go straight to taking a photo rather than refocusing, for speed
+							// need to manually set the phase
+							phase = PHASE_TAKING_PHOTO;
+							takePhoto(true);
+						}
+						else {
+							takePictureOnTimer(timer_delay, true);
+						}
+					}
     	        }
 			}
 
