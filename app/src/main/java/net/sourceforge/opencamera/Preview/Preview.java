@@ -1036,7 +1036,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		applicationInterface.cameraClosed();
 		cancelTimer();
-		remaining_burst_photos = 0;
+		cancelBurst();
 		if( camera_controller != null ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "close camera_controller");
@@ -1103,6 +1103,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "cancelled camera timer");
 		}
+	}
+
+	public void cancelBurst() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cancelBurst()");
+		remaining_burst_photos = 0;
 	}
 
 	/**
@@ -3869,7 +3875,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "already taking a photo");
 			if( remaining_burst_photos != 0 ) {
-				remaining_burst_photos = 0;
+				cancelBurst();
 				showToast(take_photo_toast, R.string.cancelled_burst_mode);
 			}
 			return;
@@ -4776,7 +4782,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	        if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
 					if( camera_controller == null ) {
 	    				Log.e(TAG, "remaining_burst_photos still set, but camera is closed!: " + remaining_burst_photos);
-						remaining_burst_photos = 0;
+						cancelBurst();
 					}
 					else {
 						if( remaining_burst_photos > 0 )
