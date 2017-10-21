@@ -378,7 +378,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					Log.d(TAG, "version_code: " + version_code);
 					Log.d(TAG, "latest_version: " + latest_version);
 				}
-				final boolean force_whats_new = false;
+				/*final boolean force_whats_new = false;
 				//final boolean force_whats_new = true; // for testing
 				// don't show What's New if this is the first time the user has run
 				if( has_done_first_time && ( force_whats_new || version_code > latest_version ) ) {
@@ -396,7 +396,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						}
 					});
 					alertDialog.show();
-				}
+				}*/
 				// we set the latest_version whether or not the dialog is shown - if we showed the irst time dialog, we don't
 				// want to then show the What's New dialog next time we run!
 				SharedPreferences.Editor editor = sharedPreferences.edit();
