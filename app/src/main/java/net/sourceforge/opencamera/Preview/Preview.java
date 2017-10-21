@@ -26,6 +26,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -5629,17 +5631,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "onDestroy");
 		if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_CLOSING ) {
 			// If the camera is currently closing on a background thread, then wait until the camera has closed to be safe
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "wait for close_camera_task");
+			}
 			if( close_camera_task != null ) { // just to be safe
+				long time_s = System.currentTimeMillis();
 				try {
-					close_camera_task.get();
+					close_camera_task.get(3000, TimeUnit.MILLISECONDS); // set timeout to avoid ANR (camera resource should be freed by the OS when destroyed anyway)
 				}
-				catch(ExecutionException | InterruptedException e) {
+				catch(ExecutionException | InterruptedException | TimeoutException e) {
+					Log.e(TAG, "exception while waiting for close_camera_task to finish");
 					e.printStackTrace();
 				}
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "done waiting for close_camera_task");
+					Log.d(TAG, "### time after waiting for close_camera_task: " + (System.currentTimeMillis() - time_s));
+				}
 			}
 			else {
 				Log.e(TAG, "onResume: state is CAMERAOPENSTATE_CLOSING, but close_camera_task is null");
