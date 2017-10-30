@@ -40,7 +40,7 @@ public class DrawPreview {
 	private final MyApplicationInterface applicationInterface;
 
 	// store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
-	private SharedPreferences sharedPreferences;
+	private final SharedPreferences sharedPreferences;
 	// also cache per frame:
 	private MyApplicationInterface.PhotoMode photoMode;
 
@@ -60,7 +60,11 @@ public class DrawPreview {
 	private long last_angle_string_time;
 
 	private float free_memory_gb = -1.0f;
+	private String free_memory_gb_string;
 	private long last_free_memory_time;
+
+	private String current_time_string;
+	private long current_time_time;
 
 	private final IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 	private boolean has_battery_frac;
@@ -109,6 +113,7 @@ public class DrawPreview {
 		if( MyDebug.LOG )
 			Log.d(TAG, "DrawPreview");
 		this.main_activity = main_activity;
+		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		this.applicationInterface = applicationInterface;
 
 		p.setAntiAlias(true);
@@ -549,19 +554,23 @@ public class DrawPreview {
 
 		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
 			// avoid creating a new calendar object every time
+			long time_ms = System.currentTimeMillis();
 			if( calendar == null )
 		        calendar = Calendar.getInstance();
 			else
-				calendar.setTimeInMillis(System.currentTimeMillis());
+				calendar.setTimeInMillis(time_ms);
+			if( current_time_string == null || time_ms/1000 > current_time_time/1000 ) {
+				current_time_string = dateFormatTimeInstance.format(calendar.getTime());
+				//current_time_string = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
+				current_time_time = time_ms;
+			}
 	        // n.b., DateFormat.getTimeInstance() ignores user preferences such as 12/24 hour or date format, but this is an Android bug.
 	        // Whilst DateUtils.formatDateTime doesn't have that problem, it doesn't print out seconds! See:
 	        // http://stackoverflow.com/questions/15981516/simpledateformat-gettimeinstance-ignores-24-hour-format
 	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
 	        // http://code.google.com/p/android/issues/detail?id=42104
 	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
-	        String current_time = dateFormatTimeInstance.format(calendar.getTime());
-	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
-	        int height = applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+	        int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
 			height += gap_y;
 			if( ui_rotation == 90 ) {
 				location_y -= height;
@@ -577,12 +586,20 @@ public class DrawPreview {
 				// don't call this too often, for UI performance
 				long free_mb = main_activity.freeMemory();
 				if( free_mb >= 0 ) {
-					free_memory_gb = free_mb/1024.0f;
+					float new_free_memory_gb = free_mb/1024.0f;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "free_memory_gb: " + free_memory_gb);
+						Log.d(TAG, "new_free_memory_gb: " + new_free_memory_gb);
+					}
+					if( new_free_memory_gb != free_memory_gb ) {
+						free_memory_gb = new_free_memory_gb;
+						free_memory_gb_string = getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation);
+					}
 				}
 				last_free_memory_time = time_now; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
 			}
-			if( free_memory_gb >= 0.0f ) {
-				int height = applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation), Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+			if( free_memory_gb >= 0.0f && free_memory_gb_string != null ) {
+				int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
 				height += gap_y;
 				if( ui_rotation == 90 ) {
 					location_y -= height;
@@ -1133,7 +1150,7 @@ public class DrawPreview {
 				draw_rect.set(cx - hthickness, cy - radius / 2, cx + hthickness, cy + radius / 2);
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 
-				if (is_level) {
+				if( is_level ) {
 					// draw a second line
 
 					p.setColor(Color.BLACK);
@@ -1256,8 +1273,6 @@ public class DrawPreview {
 	public void onDrawPreview(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
-		// make sure sharedPreferences etc up to date
-		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		photoMode = applicationInterface.getPhotoMode(sharedPreferences);
 
 		Preview preview  = main_activity.getPreview();
