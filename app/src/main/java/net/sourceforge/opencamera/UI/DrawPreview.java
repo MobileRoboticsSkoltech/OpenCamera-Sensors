@@ -553,13 +553,14 @@ public class DrawPreview {
 		}
 
 		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
-			// avoid creating a new calendar object every time
 			long time_ms = System.currentTimeMillis();
-			if( calendar == null )
-		        calendar = Calendar.getInstance();
-			else
-				calendar.setTimeInMillis(time_ms);
 			if( current_time_string == null || time_ms/1000 > current_time_time/1000 ) {
+				// avoid creating a new calendar object every time
+				if( calendar == null )
+					calendar = Calendar.getInstance();
+				else
+					calendar.setTimeInMillis(time_ms);
+
 				current_time_string = dateFormatTimeInstance.format(calendar.getTime());
 				//current_time_string = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
 				current_time_time = time_ms;
@@ -815,46 +816,44 @@ public class DrawPreview {
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
 
-		int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
-		// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
-		int text_base_y = 0;
-		if( ui_rotation == ( ui_placement_right ? 0 : 180 ) ) {
-			text_base_y = canvas.getHeight() - (int)(0.5*text_y);
-		}
-		else if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
-			text_base_y = canvas.getHeight() - (int)(2.5*text_y); // leave room for GUI icons
-		}
-		else if( ui_rotation == 90 || ui_rotation == 270 ) {
-			//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
-			ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
-			// align with "top" of the take_photo button, but remember to take the rotation into account!
-			view.getLocationOnScreen(gui_location);
-			int view_left = gui_location[0];
-			preview.getView().getLocationOnScreen(gui_location);
-			int this_left = gui_location[0];
-			int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
-    		/*if( MyDebug.LOG ) {
-    			Log.d(TAG, "view left: " + view_left);
-    			Log.d(TAG, "this left: " + this_left);
-    			Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
-    		}*/
-			int max_x = canvas.getWidth();
-			if( ui_rotation == 90 ) {
-				// so we don't interfere with the top bar info (datetime, free memory, ISO)
-				max_x -= (int)(2.5*text_y);
-			}
-			if( canvas.getWidth()/2 + diff_x > max_x ) {
-				// in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
-				diff_x = max_x - canvas.getWidth()/2;
-			}
-			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
-		}
-		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
-		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
-
 		if( camera_controller != null && !preview.isPreviewPaused() ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
+			int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
+			// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
+			int text_base_y = 0;
+			if( ui_rotation == ( ui_placement_right ? 0 : 180 ) ) {
+				text_base_y = canvas.getHeight() - (int)(0.5*text_y);
+			}
+			else if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
+				text_base_y = canvas.getHeight() - (int)(2.5*text_y); // leave room for GUI icons
+			}
+			else if( ui_rotation == 90 || ui_rotation == 270 ) {
+				//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
+				ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+				// align with "top" of the take_photo button, but remember to take the rotation into account!
+				view.getLocationOnScreen(gui_location);
+				int view_left = gui_location[0];
+				preview.getView().getLocationOnScreen(gui_location);
+				int this_left = gui_location[0];
+				int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "view left: " + view_left);
+					Log.d(TAG, "this left: " + this_left);
+					Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
+				}*/
+				int max_x = canvas.getWidth();
+				if( ui_rotation == 90 ) {
+					// so we don't interfere with the top bar info (datetime, free memory, ISO)
+					max_x -= (int)(2.5*text_y);
+				}
+				if( canvas.getWidth()/2 + diff_x > max_x ) {
+					// in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
+					diff_x = max_x - canvas.getWidth()/2;
+				}
+				text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
+			}
+
 			boolean draw_angle = has_level_angle && sharedPreferences.getBoolean(PreferenceKeys.getShowAnglePreferenceKey(), true);
 			boolean draw_geo_direction = has_geo_direction && sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionPreferenceKey(), false);
 			if( draw_angle ) {
@@ -954,6 +953,18 @@ public class DrawPreview {
 					}
 				}
 			}
+
+			if( preview.supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {
+				float zoom_ratio = preview.getZoomRatio();
+				// only show when actually zoomed in
+				if( zoom_ratio > 1.0f + 1.0e-5f ) {
+					// Convert the dps to pixels, based on density scale
+					p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+					p.setTextAlign(Paint.Align.CENTER);
+					applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - text_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+				}
+			}
+
 		}
 		else if( camera_controller == null ) {
 			/*if( MyDebug.LOG ) {
@@ -979,16 +990,8 @@ public class DrawPreview {
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
 
-		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {
-			float zoom_ratio = preview.getZoomRatio();
-			// only show when actually zoomed in
-			if( zoom_ratio > 1.0f + 1.0e-5f ) {
-				// Convert the dps to pixels, based on density scale
-				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				p.setTextAlign(Paint.Align.CENTER);
-				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - text_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
-			}
-		}
+		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
+		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 
 		int battery_x = (int) (5 * scale + 0.5f); // convert dps to pixels
 		int battery_y = top_y;
