@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "25.0.0"
+    compileSdkVersion 25
+    buildToolsVersion '26.0.2'
     compileOptions.encoding = 'UTF-8'
 
     defaultConfig {
         applicationId "net.sourceforge.opencamera"
         minSdkVersion 15
-        targetSdkVersion 24 // can't target 25 or later due to https://issuetracker.google.com/issues/37140083 , waiting for Android Studio 2.4 for this to be fully fixed
+        targetSdkVersion 25
 
 		renderscriptTargetApi 20
 		//renderscriptSupportModeEnabled true // don't use support library as it bloats the APK, and we don't need pre-4.4 support
@@ -31,6 +31,6 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:24.0.0'
+    compile 'com.android.support:support-v4:25.4.0'
     testCompile 'junit:junit:4.12'
 }
