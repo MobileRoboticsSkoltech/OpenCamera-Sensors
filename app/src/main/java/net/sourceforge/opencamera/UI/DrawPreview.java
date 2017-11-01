@@ -48,7 +48,7 @@ public class DrawPreview {
 	private final Paint p = new Paint();
 	private final RectF face_rect = new RectF();
 	private final RectF draw_rect = new RectF();
-	private final int [] gui_location = new int[2];
+	//private final int [] gui_location = new int[2];
 	private final static DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	private final float stroke_width;
 	private Calendar calendar;
@@ -830,23 +830,35 @@ public class DrawPreview {
 			}
 			else if( ui_rotation == 90 || ui_rotation == 270 ) {
 				//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
-				ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+				/*ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
 				// align with "top" of the take_photo button, but remember to take the rotation into account!
 				view.getLocationOnScreen(gui_location);
 				int view_left = gui_location[0];
 				preview.getView().getLocationOnScreen(gui_location);
 				int this_left = gui_location[0];
+				// diff_x is the difference from the centre of the canvas to the position we want
 				int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
+				*/
 				/*if( MyDebug.LOG ) {
 					Log.d(TAG, "view left: " + view_left);
 					Log.d(TAG, "this left: " + this_left);
 					Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
 				}*/
+				// diff_x is the difference from the centre of the canvas to the position we want
+				// assumes canvas is centered
+				// avoids calling getLocationOnScreen for performance
+				int diff_x = preview.getView().getRootView().getRight()/2 - (int) (100 * scale + 0.5f); // convert dps to pixels
 				int max_x = canvas.getWidth();
 				if( ui_rotation == 90 ) {
 					// so we don't interfere with the top bar info (datetime, free memory, ISO)
 					max_x -= (int)(2.5*text_y);
 				}
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "root view right: " + preview.getView().getRootView().getRight());
+					Log.d(TAG, "diff_x: " + diff_x);
+					Log.d(TAG, "canvas.getWidth()/2 + diff_x: " + (canvas.getWidth()/2+diff_x));
+					Log.d(TAG, "max_x: " + max_x);
+				}*/
 				if( canvas.getWidth()/2 + diff_x > max_x ) {
 					// in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
 					diff_x = max_x - canvas.getWidth()/2;
