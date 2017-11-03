@@ -527,7 +527,7 @@ public class DrawPreview {
 		}
 	}
 
-	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size) {
+	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size, long time_ms) {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -553,7 +553,6 @@ public class DrawPreview {
 		}
 
 		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
-			long time_ms = System.currentTimeMillis();
 			if( current_time_string == null || time_ms/1000 > current_time_time/1000 ) {
 				// avoid creating a new calendar object every time
 				if( calendar == null )
@@ -582,8 +581,7 @@ public class DrawPreview {
 	    }
 
 		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
-			long time_now = System.currentTimeMillis();
-			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 10000 ) {
+			if( last_free_memory_time == 0 || time_ms > last_free_memory_time + 10000 ) {
 				// don't call this too often, for UI performance
 				long free_mb = main_activity.freeMemory();
 				if( free_mb >= 0 ) {
@@ -597,7 +595,7 @@ public class DrawPreview {
 						free_memory_gb_string = getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation);
 					}
 				}
-				last_free_memory_time = time_now; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
+				last_free_memory_time = time_ms; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
 			}
 			if( free_memory_gb >= 0.0f && free_memory_gb_string != null ) {
 				int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
@@ -646,9 +644,9 @@ public class DrawPreview {
 				if( is_scanning ) {
 					// we only change the color if ae scanning is at least a certain time, otherwise we get a lot of flickering of the color
 					if( ae_started_scanning_ms == -1 ) {
-						ae_started_scanning_ms = System.currentTimeMillis();
+						ae_started_scanning_ms = time_ms;
 					}
-					else if( System.currentTimeMillis() - ae_started_scanning_ms > 500 ) {
+					else if( time_ms - ae_started_scanning_ms > 500 ) {
 						text_color = Color.rgb(244, 67, 54); // Red 500
 					}
 				}
@@ -758,11 +756,10 @@ public class DrawPreview {
 			if( flash_value != null &&
 					( flash_value.equals("flash_on") || flash_value.equals("flash_red_eye") || ( flash_value.equals("flash_auto") && camera_controller.needsFlash() ) ) &&
 					!applicationInterface.isVideoPref() ) { // flash-indicator not supported for photos taken in video mode
-				long time_now = System.currentTimeMillis();
 				if( needs_flash_time != -1 ) {
 					final long fade_ms = 500;
-					float alpha = (time_now - needs_flash_time)/(float)fade_ms;
-					if( time_now - needs_flash_time >= fade_ms )
+					float alpha = (time_ms - needs_flash_time)/(float)fade_ms;
+					if( time_ms - needs_flash_time >= fade_ms )
 						alpha = 1.0f;
 					icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 
@@ -776,7 +773,7 @@ public class DrawPreview {
 					canvas.drawBitmap(flash_bitmap, null, icon_dest, p);
 				}
 				else {
-					needs_flash_time = time_now;
+					needs_flash_time = time_ms;
 				}
 			}
 			else {
@@ -802,7 +799,7 @@ public class DrawPreview {
 	/** This includes drawing of the UI that requires the canvas to be rotated according to the preview's
 	 *  current UI rotation.
 	 */
-	private void drawUI(Canvas canvas) {
+	private void drawUI(Canvas canvas, long time_ms) {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -883,11 +880,11 @@ public class DrawPreview {
 					color = getAngleHighlightColor();
 					p.setUnderlineText(true);
 				}
-				if( angle_string == null || System.currentTimeMillis() > this.last_angle_string_time + 500 ) {
+				if( angle_string == null || time_ms > this.last_angle_string_time + 500 ) {
 					// update cached string
 					/*if( MyDebug.LOG )
 						Log.d(TAG, "update angle_string: " + angle_string);*/
-					last_angle_string_time = System.currentTimeMillis();
+					last_angle_string_time = time_ms;
 					String number_string = formatLevelAngle(level_angle);
 					//String number_string = "" + level_angle;
 					angle_string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
@@ -913,7 +910,7 @@ public class DrawPreview {
 				applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
 			}
 			if( preview.isOnTimer() ) {
-				long remaining_time = (preview.getTimerEndTime() - System.currentTimeMillis() + 999)/1000;
+				long remaining_time = (preview.getTimerEndTime() - time_ms + 999)/1000;
 				if( MyDebug.LOG )
 					Log.d(TAG, "remaining_time: " + remaining_time);
 				if( remaining_time > 0 ) {
@@ -946,7 +943,7 @@ public class DrawPreview {
             		applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.screen_lock_message_1), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
             		pixels_offset_y += text_y;
             	}
-				if( !preview.isVideoRecordingPaused() || ((int)(System.currentTimeMillis() / 500)) % 2 == 0 ) { // if video is paused, then flash the video time
+				if( !preview.isVideoRecordingPaused() || ((int)(time_ms / 500)) % 2 == 0 ) { // if video is paused, then flash the video time
 					applicationInterface.drawTextWithBackground(canvas, p, time_s, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 				}
 			}
@@ -955,7 +952,7 @@ public class DrawPreview {
 					// only show "capturing" text with time for manual exposure time >= 0.5s
 					long exposure_time = camera_controller.getExposureTime();
 					if( exposure_time >= 500000000L ) {
-						if( ((int)(System.currentTimeMillis() / 500)) % 2 == 0 ) {
+						if( ((int)(time_ms / 500)) % 2 == 0 ) {
 							p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 							p.setTextAlign(Paint.Align.CENTER);
 							int pixels_offset_y = 3*text_y; // avoid overwriting the zoom, and also allow a bit extra space
@@ -1021,7 +1018,7 @@ public class DrawPreview {
 			battery_x = canvas.getWidth() - battery_x - battery_width;
 		}
 		if( sharedPreferences.getBoolean(PreferenceKeys.getShowBatteryPreferenceKey(), true) ) {
-			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
+			if( !this.has_battery_frac || time_ms > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
 				// note that it's fine to call registerReceiver repeatedly - we pass a null receiver, so this is fine as a "one shot" use
 				Intent batteryStatus = main_activity.registerReceiver(null, battery_ifilter);
@@ -1029,7 +1026,7 @@ public class DrawPreview {
 				int battery_scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 				has_battery_frac = true;
 				battery_frac = battery_level/(float)battery_scale;
-				last_battery_time = System.currentTimeMillis();
+				last_battery_time = time_ms;
 				if( MyDebug.LOG )
 					Log.d(TAG, "Battery status is " + battery_level + " / " + battery_scale + " : " + battery_frac);
 			}
@@ -1037,7 +1034,7 @@ public class DrawPreview {
 			boolean draw_battery = true;
 			if( battery_frac <= 0.05f ) {
 				// flash icon at this low level
-				draw_battery = ((( System.currentTimeMillis() / 1000 )) % 2) == 0;
+				draw_battery = ((( time_ms / 1000 )) % 2) == 0;
 			}
 			if( draw_battery ) {
 				p.setColor(Color.WHITE);
@@ -1083,7 +1080,7 @@ public class DrawPreview {
 			}
 		}
 
-		onDrawInfoLines(canvas, top_y, location_size);
+		onDrawInfoLines(canvas, top_y, location_size, time_ms);
 
 		canvas.restore();
 	}
@@ -1294,6 +1291,8 @@ public class DrawPreview {
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
 
+		final long time_ms = System.currentTimeMillis();
+
 		// see documentation for CameraController.shouldCoverPreview()
 		if( preview.usingCamera2API() && ( camera_controller == null || camera_controller.shouldCoverPreview() ) ) {
 			p.setColor(Color.BLACK);
@@ -1362,7 +1361,7 @@ public class DrawPreview {
 		
 		// note, no need to check preferences here, as we do that when setting thumbnail_anim
 		if( camera_controller != null && this.thumbnail_anim && last_thumbnail != null ) {
-			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
+			long time = time_ms - this.thumbnail_anim_start_ms;
 			final long duration = 500;
 			if( time > duration ) {
 				if( MyDebug.LOG )
@@ -1410,14 +1409,14 @@ public class DrawPreview {
 			}
 		}
 
-		drawUI(canvas);
+		drawUI(canvas, time_ms);
 
 		drawAngleLines(canvas);
 
 		if( camera_controller != null && continuous_focus_moving && !taking_picture ) {
 			// we don't display the continuous focusing animation when taking a photo - and can also ive the impression of having
 			// frozen if we pause because the image saver queue is full
-			long dt = System.currentTimeMillis() - continuous_focus_moving_ms;
+			long dt = time_ms - continuous_focus_moving_ms;
 			final long length = 1000;
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "continuous focus moving, dt: " + dt);*/
