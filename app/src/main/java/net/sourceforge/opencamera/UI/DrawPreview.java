@@ -54,9 +54,15 @@ public class DrawPreview {
 	private Calendar calendar;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
 	private final String ybounds_text;
+	// cached Rects for drawTextWithBackground() calls
+	private Rect text_bounds_time;
+	private Rect text_bounds_free_memory;
+	private Rect text_bounds_angle_single;
+	private Rect text_bounds_angle_double;
 
 	private final static double close_level_angle = 1.0f;
 	private String angle_string; // cached for UI performance
+	private double cached_angle; // the angle that we used for the cached angle_string
 	private long last_angle_string_time;
 
 	private float free_memory_gb = -1.0f;
@@ -570,7 +576,15 @@ public class DrawPreview {
 	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
 	        // http://code.google.com/p/android/issues/detail?id=42104
 	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
-	        int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+	        //int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+			if( text_bounds_time == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "compute text_bounds_time");
+				text_bounds_time = new Rect();
+				String bounds_time_string = "00:00:00";
+				p.getTextBounds(bounds_time_string, 0, bounds_time_string.length(), text_bounds_time);
+			}
+	        int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, null, true, text_bounds_time);
 			height += gap_y;
 			if( ui_rotation == 90 ) {
 				location_y -= height;
@@ -598,7 +612,14 @@ public class DrawPreview {
 				last_free_memory_time = time_ms; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
 			}
 			if( free_memory_gb >= 0.0f && free_memory_gb_string != null ) {
-				int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+				//int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+				if( text_bounds_free_memory == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "compute text_bounds_free_memory");
+					text_bounds_free_memory = new Rect();
+					p.getTextBounds(free_memory_gb_string, 0, free_memory_gb_string.length(), text_bounds_free_memory);
+				}
+				int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, null, true, text_bounds_free_memory);
 				height += gap_y;
 				if( ui_rotation == 90 ) {
 					location_y -= height;
@@ -653,6 +674,7 @@ public class DrawPreview {
 				else {
 					ae_started_scanning_ms = -1;
 				}
+				// can't cache the bounds rect, as the width may change significantly as the ISO or exposure values change
 				int height = applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
 				height += gap_y;
 				// only move location_y if we actually print something (because on old camera API, even if the ISO option has
@@ -889,9 +911,25 @@ public class DrawPreview {
 					String number_string = formatLevelAngle(level_angle);
 					//String number_string = "" + level_angle;
 					angle_string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
+					cached_angle = level_angle;
 					//String angle_string = "" + level_angle;
 				}
-				applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+				//applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+				if( text_bounds_angle_single == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "compute text_bounds_angle_single");
+					text_bounds_angle_single = new Rect();
+					String bounds_angle_string = getContext().getResources().getString(R.string.angle) + ": -9.0" + (char)0x00B0;
+					p.getTextBounds(bounds_angle_string, 0, bounds_angle_string.length(), text_bounds_angle_single);
+				}
+				if( text_bounds_angle_double == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "compute text_bounds_angle_double");
+					text_bounds_angle_double = new Rect();
+					String bounds_angle_string = getContext().getResources().getString(R.string.angle) + ": -45.0" + (char)0x00B0;
+					p.getTextBounds(bounds_angle_string, 0, bounds_angle_string.length(), text_bounds_angle_double);
+				}
+				applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, true, Math.abs(cached_angle) < 10.0 ? text_bounds_angle_single : text_bounds_angle_double);
 				p.setUnderlineText(false);
 			}
 			if( draw_geo_direction ) {

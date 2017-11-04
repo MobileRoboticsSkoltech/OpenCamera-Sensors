@@ -1698,18 +1698,27 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow) {
+		return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, true, null);
+	}
+
+	public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow, Rect bounds) {
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
 		paint.setAlpha(64);
-		int alt_height = 0;
-		if( ybounds_text != null ) {
-			paint.getTextBounds(ybounds_text, 0, ybounds_text.length(), text_bounds);
-			alt_height = text_bounds.bottom - text_bounds.top;
+		if( bounds != null ) {
+			text_bounds.set(bounds);
 		}
-		paint.getTextBounds(text, 0, text.length(), text_bounds);
-		if( ybounds_text != null ) {
-			text_bounds.bottom = text_bounds.top + alt_height;
+		else {
+			int alt_height = 0;
+			if( ybounds_text != null ) {
+				paint.getTextBounds(ybounds_text, 0, ybounds_text.length(), text_bounds);
+				alt_height = text_bounds.bottom - text_bounds.top;
+			}
+			paint.getTextBounds(text, 0, text.length(), text_bounds);
+			if( ybounds_text != null ) {
+				text_bounds.bottom = text_bounds.top + alt_height;
+			}
 		}
 		final int padding = (int) (2 * scale + 0.5f); // convert dps to pixels
 		if( paint.getTextAlign() == Paint.Align.RIGHT || paint.getTextAlign() == Paint.Align.CENTER ) {
