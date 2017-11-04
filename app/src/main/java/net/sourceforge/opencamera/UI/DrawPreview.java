@@ -891,13 +891,16 @@ public class DrawPreview {
 			if( draw_angle ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				int pixels_offset_x = 0;
+				int pixels_offset_x;
 				if( draw_geo_direction ) {
 					pixels_offset_x = - (int) (82 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				else {
-					p.setTextAlign(Paint.Align.CENTER);
+					//p.setTextAlign(Paint.Align.CENTER);
+					// slightly better for performance to use Align.LEFT, due to avoid measureText() call in drawTextWithBackground()
+					pixels_offset_x = - (int) (35 * scale + 0.5f); // convert dps to pixels
+					p.setTextAlign(Paint.Align.LEFT);
 				}
 				if( Math.abs(level_angle) <= close_level_angle ) {
 					color = getAngleHighlightColor();
@@ -935,18 +938,22 @@ public class DrawPreview {
 			if( draw_geo_direction ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+				int pixels_offset_x = 0;
 				if( draw_angle ) {
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				else {
-					p.setTextAlign(Paint.Align.CENTER);
+					//p.setTextAlign(Paint.Align.CENTER);
+					// slightly better for performance to use Align.LEFT, due to avoid measureText() call in drawTextWithBackground()
+					pixels_offset_x = - (int) (45 * scale + 0.5f); // convert dps to pixels
+					p.setTextAlign(Paint.Align.LEFT);
 				}
 				float geo_angle = (float)Math.toDegrees(geo_direction);
 				if( geo_angle < 0.0f ) {
 					geo_angle += 360.0f;
 				}
 				String string = " " + getContext().getResources().getString(R.string.direction) + ": " + Math.round(geo_angle) + (char)0x00B0;
-				applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+				applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
 			}
 			if( preview.isOnTimer() ) {
 				long remaining_time = (preview.getTimerEndTime() - time_ms + 999)/1000;
