@@ -5527,8 +5527,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     public boolean supportsRaw() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "supportsRaw");
     	return this.supports_raw;
     }
 
