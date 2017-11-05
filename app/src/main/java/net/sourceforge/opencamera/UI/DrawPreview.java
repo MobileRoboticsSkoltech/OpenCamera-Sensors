@@ -654,7 +654,7 @@ public class DrawPreview {
 					}
 					if( new_free_memory_gb != free_memory_gb ) {
 						free_memory_gb = new_free_memory_gb;
-						free_memory_gb_string = getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation);
+						free_memory_gb_string = decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation);
 					}
 				}
 				last_free_memory_time = time_ms; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
@@ -941,13 +941,13 @@ public class DrawPreview {
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				int pixels_offset_x;
 				if( draw_geo_direction ) {
-					pixels_offset_x = - (int) (82 * scale + 0.5f); // convert dps to pixels
+					pixels_offset_x = - (int) (35 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				else {
 					//p.setTextAlign(Paint.Align.CENTER);
 					// slightly better for performance to use Align.LEFT, due to avoid measureText() call in drawTextWithBackground()
-					pixels_offset_x = - (int) (35 * scale + 0.5f); // convert dps to pixels
+					pixels_offset_x = - (int) (18 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				if( Math.abs(level_angle) <= close_level_angle ) {
@@ -961,7 +961,7 @@ public class DrawPreview {
 					last_angle_string_time = time_ms;
 					String number_string = formatLevelAngle(level_angle);
 					//String number_string = "" + level_angle;
-					angle_string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
+					angle_string = number_string + (char)0x00B0;
 					cached_angle = level_angle;
 					//String angle_string = "" + level_angle;
 				}
@@ -970,14 +970,14 @@ public class DrawPreview {
 					if( MyDebug.LOG )
 						Log.d(TAG, "compute text_bounds_angle_single");
 					text_bounds_angle_single = new Rect();
-					String bounds_angle_string = getContext().getResources().getString(R.string.angle) + ": -9.0" + (char)0x00B0;
+					String bounds_angle_string = "-9.0" + (char)0x00B0;
 					p.getTextBounds(bounds_angle_string, 0, bounds_angle_string.length(), text_bounds_angle_single);
 				}
 				if( text_bounds_angle_double == null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "compute text_bounds_angle_double");
 					text_bounds_angle_double = new Rect();
-					String bounds_angle_string = getContext().getResources().getString(R.string.angle) + ": -45.0" + (char)0x00B0;
+					String bounds_angle_string = "-45.0" + (char)0x00B0;
 					p.getTextBounds(bounds_angle_string, 0, bounds_angle_string.length(), text_bounds_angle_double);
 				}
 				applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, true, Math.abs(cached_angle) < 10.0 ? text_bounds_angle_single : text_bounds_angle_double);
@@ -988,19 +988,20 @@ public class DrawPreview {
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 				int pixels_offset_x = 0;
 				if( draw_angle ) {
+					pixels_offset_x = (int) (10 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				else {
 					//p.setTextAlign(Paint.Align.CENTER);
 					// slightly better for performance to use Align.LEFT, due to avoid measureText() call in drawTextWithBackground()
-					pixels_offset_x = - (int) (45 * scale + 0.5f); // convert dps to pixels
+					pixels_offset_x = - (int) (14 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				float geo_angle = (float)Math.toDegrees(geo_direction);
 				if( geo_angle < 0.0f ) {
 					geo_angle += 360.0f;
 				}
-				String string = " " + getContext().getResources().getString(R.string.direction) + ": " + Math.round(geo_angle) + (char)0x00B0;
+				String string = "" + Math.round(geo_angle) + (char)0x00B0;
 				applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
 			}
 			if( preview.isOnTimer() ) {
@@ -1131,12 +1132,9 @@ public class DrawPreview {
 				draw_battery = ((( time_ms / 1000 )) % 2) == 0;
 			}
 			if( draw_battery ) {
-				p.setColor(Color.WHITE);
-				p.setStyle(Paint.Style.STROKE);
-				canvas.drawRect(battery_x, battery_y, battery_x+battery_width, battery_y+battery_height, p);
 				p.setColor(battery_frac > 0.15f ? Color.rgb(37, 155, 36) : Color.rgb(244, 67, 54)); // Green 500 or Red 500
 				p.setStyle(Paint.Style.FILL);
-				canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
+				canvas.drawRect(battery_x, battery_y+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width, battery_y+battery_height, p);
 			}
 		}
 
