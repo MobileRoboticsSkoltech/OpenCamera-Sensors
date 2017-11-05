@@ -254,11 +254,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting button visibility: " + (System.currentTimeMillis() - debug_time));
 		View pauseVideoButton = findViewById(R.id.pause_video);
-		pauseVideoButton.setVisibility(View.INVISIBLE);
+		pauseVideoButton.setVisibility(View.GONE);
 		View takePhotoVideoButton = findViewById(R.id.take_photo_when_video_recording);
-		takePhotoVideoButton.setVisibility(View.INVISIBLE);
+		takePhotoVideoButton.setVisibility(View.GONE);
 
-		// We initialise optional controls to invisible, so they don't show while the camera is opening - the actual visibility is
+		// We initialise optional controls to invisible/gone, so they don't show while the camera is opening - the actual visibility is
 		// set in cameraSetup().
 		// Note that ideally we'd set this in the xml, but doing so for R.id.zoom causes a crash on Galaxy Nexus startup beneath
 		// setContentView()!
@@ -267,7 +267,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    View takePhotoButton = findViewById(R.id.take_photo);
 		takePhotoButton.setVisibility(View.INVISIBLE);
 	    View zoomControls = findViewById(R.id.zoom);
-		zoomControls.setVisibility(View.INVISIBLE);
+		zoomControls.setVisibility(View.GONE);
 	    View zoomSeekbar = findViewById(R.id.zoom_seekbar);
 		zoomSeekbar.setVisibility(View.INVISIBLE);
 
@@ -1344,7 +1344,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		fragment.setArguments(bundle);
 		// use commitAllowingStateLoss() instead of commit(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
 		// see http://stackoverflow.com/questions/7575921/illegalstateexception-can-not-perform-this-action-after-onsaveinstancestate-wit
-        getFragmentManager().beginTransaction().add(R.id.prefs_container, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commitAllowingStateLoss();
+        getFragmentManager().beginTransaction().add(android.R.id.content, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commitAllowingStateLoss();
     }
 
     public void updateForSettings() {
@@ -1688,8 +1688,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "showPreview: " + show);
 		final ViewGroup container = (ViewGroup)findViewById(R.id.hide_container);
-		container.setBackgroundColor(Color.BLACK);
-		container.setAlpha(show ? 0.0f : 1.0f);
+		container.setVisibility(show ? View.GONE : View.VISIBLE);
     }
     
     /** Shows the default "blank" gallery icon, when we don't have a thumbnail available.
@@ -2427,7 +2426,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					}
 				}
 				else {
-					zoomControls.setVisibility(View.INVISIBLE); // must be INVISIBLE not GONE, so we can still position the zoomSeekBar relative to it
+					zoomControls.setVisibility(View.GONE);
 				}
 				
 				zoomSeekBar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
@@ -2458,7 +2457,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					}
 				}
 				else {
-					zoomSeekBar.setVisibility(View.INVISIBLE);
+					zoomSeekBar.setVisibility(View.INVISIBLE); // should be INVISIBLE not GONE, as the focus_seekbar is aligned to be left to this
 				}
 			}
 			else {
@@ -2501,7 +2500,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				public void onStopTrackingTouch(SeekBar seekBar) {
 				}
 			});
-	    	final int visibility = preview.getCurrentFocusValue() != null && this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
+	    	final int visibility = preview.getCurrentFocusValue() != null && this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.GONE;
 		    focusSeekBar.setVisibility(visibility);
 		}
 		if( MyDebug.LOG )

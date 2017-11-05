@@ -1150,9 +1150,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "filename " + filename);
 		}
 		View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
-		pauseVideoButton.setVisibility(View.INVISIBLE);
+		pauseVideoButton.setVisibility(View.GONE);
 		View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
-		takePhotoVideoButton.setVisibility(View.INVISIBLE);
+		takePhotoVideoButton.setVisibility(View.GONE);
 		main_activity.getMainUI().setPauseVideoContentDescription(); // just to be safe
 		main_activity.getMainUI().destroyPopup(); // as the available popup options change while recording video
 		if( subtitleVideoTimerTask != null ) {
