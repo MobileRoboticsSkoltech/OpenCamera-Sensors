@@ -297,7 +297,7 @@ public class DrawPreview {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateSettings");
 
-		photoMode = applicationInterface.getPhotoMode(sharedPreferences);
+		photoMode = applicationInterface.getPhotoMode();
 
 		show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowTimePreferenceKey, true);
 		show_free_memory_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowFreeMemoryPreferenceKey, true);
@@ -321,10 +321,10 @@ public class DrawPreview {
 		String immersive_mode = sharedPreferences.getString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_low_profile");
 		immersive_mode_everything_pref = immersive_mode.equals("immersive_mode_everything");
 
-		has_stamp_pref = applicationInterface.getStampPref(sharedPreferences).equals("preference_stamp_yes");
-		is_raw_pref = applicationInterface.isRawPref(sharedPreferences);
+		has_stamp_pref = applicationInterface.getStampPref().equals("preference_stamp_yes");
+		is_raw_pref = applicationInterface.isRawPref();
 
-		auto_stabilise_pref = applicationInterface.getAutoStabilisePref(sharedPreferences);
+		auto_stabilise_pref = applicationInterface.getAutoStabilisePref();
 	}
 
     private String getTimeStringFromSeconds(long time) {

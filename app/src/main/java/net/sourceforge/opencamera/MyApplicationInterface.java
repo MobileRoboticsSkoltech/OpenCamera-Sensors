@@ -695,22 +695,14 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getString(PreferenceKeys.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
     }
 
-    private boolean getAutoStabilisePref() {
-		return getAutoStabilisePref(sharedPreferences);
-    }
-    
-    public boolean getAutoStabilisePref(SharedPreferences sharedPreferences) {
+    public boolean getAutoStabilisePref() {
 		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false);
 		if( auto_stabilise && main_activity.supportsAutoStabilise() )
 			return true;
 		return false;
     }
 
-    private String getStampPref() {
-    	return getStampPref(sharedPreferences);
-    }
-    
-    public String getStampPref(SharedPreferences sharedPreferences) {
+    public String getStampPref() {
     	return sharedPreferences.getString(PreferenceKeys.StampPreferenceKey, "preference_stamp_no");
     }
 
@@ -845,10 +837,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		// Note, this always should return the true photo mode - if we're in video mode and taking a photo snapshot while
 		// video recording, the caller should override. We don't override here, as this preference may be used to affect how
 		// the CameraController is set up, and we don't always re-setup the camera when switching between photo and video modes.
-		return getPhotoMode(sharedPreferences);
-    }
-
-    public PhotoMode getPhotoMode(SharedPreferences sharedPreferences) {
 		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
 		boolean dro = photo_mode_pref.equals("preference_photo_mode_dro");
 		if( dro && main_activity.supportsDRO() )
@@ -873,10 +861,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public boolean isRawPref() {
-		return isRawPref(sharedPreferences);
-    }
-
-	public boolean isRawPref(SharedPreferences sharedPreferences) {
     	if( isImageCaptureIntent() )
     		return false;
     	return sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no").equals("preference_raw_yes");
