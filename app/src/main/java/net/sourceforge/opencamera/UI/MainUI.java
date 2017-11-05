@@ -144,7 +144,7 @@ public class MainUI {
 		}
 		//main_activity.getPreview().updateUIPlacement();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
+		String ui_placement = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_right");
     	// we cache the preference_ui_placement to save having to check it in the draw() method
 		this.ui_placement_right = ui_placement.equals("ui_right");
 		if( MyDebug.LOG )
@@ -350,7 +350,7 @@ public class MainUI {
 			view = main_activity.findViewById(R.id.zoom_seekbar);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			// if we are showing the zoom control, the align next to that; otherwise have it aligned close to the edge of screen
-			if( sharedPreferences.getBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), false) ) {
+			if( sharedPreferences.getBoolean(PreferenceKeys.ShowZoomControlsPreferenceKey, false) ) {
 				layoutParams.addRule(align_left, 0);
 				layoutParams.addRule(align_right, R.id.zoom);
 				layoutParams.addRule(above, R.id.zoom);
@@ -632,15 +632,15 @@ public class MainUI {
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "has_zoom: " + main_activity.getPreview().supportsZoom());
 				}
-				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), false) ) {
+				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.ShowZoomControlsPreferenceKey, false) ) {
 					zoomControls.setVisibility(visibility);
 				}
-				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomSliderControlsPreferenceKey(), true) ) {
+				if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.ShowZoomSliderControlsPreferenceKey, true) ) {
 					zoomSeekBar.setVisibility(visibility);
 				}
-        		String pref_immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+        		String pref_immersive_mode = sharedPreferences.getString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_low_profile");
         		if( pref_immersive_mode.equals("immersive_mode_everything") ) {
-					if( sharedPreferences.getBoolean(PreferenceKeys.getShowTakePhotoPreferenceKey(), true) ) {
+					if( sharedPreferences.getBoolean(PreferenceKeys.ShowTakePhotoPreferenceKey, true) ) {
 						View takePhotoButton = main_activity.findViewById(R.id.take_photo);
 						takePhotoButton.setVisibility(visibility);
 					}
@@ -784,7 +784,7 @@ public class MainUI {
 			supported_isos = preview.getSupportedISOs();
 			iso_button_manual_index = -1;
 		}
-		String current_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
+		String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, "auto");
 		// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
 		if( !current_iso.equals("auto") && supported_isos != null && supported_isos.contains(manual_iso_value) && !supported_isos.contains(current_iso) )
 			current_iso = manual_iso_value;
@@ -795,10 +795,10 @@ public class MainUI {
 				if( MyDebug.LOG )
 					Log.d(TAG, "clicked iso: " + option);
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				String old_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
+				String old_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, "auto");
 				if( MyDebug.LOG )
 					Log.d(TAG, "old_iso: " + old_iso);
-				editor.putString(PreferenceKeys.getISOPreferenceKey(), option);
+				editor.putString(PreferenceKeys.ISOPreferenceKey, option);
 				String toast_option = option;
 
 				if( preview.supportsISORange() ) {
@@ -806,7 +806,7 @@ public class MainUI {
 						if( MyDebug.LOG )
 							Log.d(TAG, "switched from manual to auto iso");
 						// also reset exposure time when changing from manual to auto from the popup menu:
-						editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
+						editor.putLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
 						editor.apply();
 						main_activity.updateForSettings("ISO: " + toast_option);
 					}
@@ -819,7 +819,7 @@ public class MainUI {
 								int iso = preview.getCameraController().captureResultIso();
 								if( MyDebug.LOG )
 									Log.d(TAG, "apply existing iso of " + iso);
-								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
+								editor.putString(PreferenceKeys.ISOPreferenceKey, "" + iso);
 								toast_option = "" + iso;
 							}
 							else {
@@ -827,7 +827,7 @@ public class MainUI {
 									Log.d(TAG, "no existing iso available");
 								// use a default
 								final int iso = 800;
-								editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + iso);
+								editor.putString(PreferenceKeys.ISOPreferenceKey, "" + iso);
 								toast_option = "" + iso;
 							}
 						}
@@ -837,7 +837,7 @@ public class MainUI {
 							long exposure_time = preview.getCameraController().captureResultExposureTime();
 							if( MyDebug.LOG )
 								Log.d(TAG, "apply existing exposure time of " + exposure_time);
-							editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
+							editor.putLong(PreferenceKeys.ExposureTimePreferenceKey, exposure_time);
 						}
 						else {
 							if( MyDebug.LOG )
@@ -854,7 +854,7 @@ public class MainUI {
 							// if user selected the generic "manual", then just keep the previous non-ISO option
 							if( MyDebug.LOG )
 								Log.d(TAG, "keep existing iso of " + old_iso);
-							editor.putString(PreferenceKeys.getISOPreferenceKey(), "" + old_iso);
+							editor.putString(PreferenceKeys.ISOPreferenceKey, "" + old_iso);
 						}
 
 						editor.apply();
@@ -938,7 +938,7 @@ public class MainUI {
 		Preview preview = main_activity.getPreview();
 		if( preview.supportsISORange() && isExposureUIOpen() ) {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-			String current_iso = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
+			String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, "auto");
 			// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
 			if( MyDebug.LOG )
 				Log.d(TAG, "current_iso: " + current_iso);
@@ -1141,7 +1141,7 @@ public class MainUI {
 		            }
 
 		    		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-		    		String ui_placement = sharedPreferences.getString(PreferenceKeys.getUIPlacementPreferenceKey(), "ui_right");
+		    		String ui_placement = sharedPreferences.getString(PreferenceKeys.UIPlacementPreferenceKey, "ui_right");
 		    		boolean ui_placement_right = ui_placement.equals("ui_right");
 		            ScaleAnimation animation = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, ui_placement_right ? 0.0f : 1.0f);
 		    		animation.setDuration(100);
@@ -1171,7 +1171,7 @@ public class MainUI {
 					keydown_volume_down = true;
 
 				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-				String volume_keys = sharedPreferences.getString(PreferenceKeys.getVolumeKeysPreferenceKey(), "volume_take_photo");
+				String volume_keys = sharedPreferences.getString(PreferenceKeys.VolumeKeysPreferenceKey, "volume_take_photo");
 
 				if((keyCode==KeyEvent.KEYCODE_MEDIA_PREVIOUS
 						||keyCode==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
@@ -1216,7 +1216,7 @@ public class MainUI {
 						return true;
 					case "volume_exposure":
 						if(main_activity.getPreview().getCameraController() != null) {
-							String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
+							String value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, main_activity.getPreview().getCameraController().getDefaultISO());
 							boolean manual_iso = !value.equals("auto");
 							if(keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 								if(manual_iso) {
@@ -1238,10 +1238,10 @@ public class MainUI {
 						return true;
 					case "volume_auto_stabilise":
 						if(main_activity.supportsAutoStabilise()) {
-							boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
+							boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false);
 							auto_stabilise = !auto_stabilise;
 							SharedPreferences.Editor editor = sharedPreferences.edit();
-							editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), auto_stabilise);
+							editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, auto_stabilise);
 							editor.apply();
 							String message = main_activity.getResources().getString(R.string.preference_auto_stabilise) + ": " + main_activity.getResources().getString(auto_stabilise ? R.string.on : R.string.off);
 							main_activity.getPreview().showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);

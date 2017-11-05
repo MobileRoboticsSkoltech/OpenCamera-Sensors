@@ -218,19 +218,19 @@ public class PopupView extends LinearLayout {
     	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     						SharedPreferences.Editor editor = sharedPreferences.edit();
     						if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard ) {
-        						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+        						editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
     						}
 							else if( new_photo_mode == MyApplicationInterface.PhotoMode.DRO ) {
-								editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_dro");
+								editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_dro");
 							}
 							else if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
-								editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
+								editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
 							}
     						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
-        						editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_expo_bracketing");
+        						editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
     						}
 							else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
-								editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_noise_reduction");
+								editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_noise_reduction");
 							}
     						else {
                 				if( MyDebug.LOG )
@@ -240,9 +240,9 @@ public class PopupView extends LinearLayout {
 
     						boolean done_dialog = false;
     						if( new_photo_mode == MyApplicationInterface.PhotoMode.HDR ) {
-    	            			boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.getHDRInfoPreferenceKey());
+    	            			boolean done_hdr_info = sharedPreferences.contains(PreferenceKeys.HDRInfoPreferenceKey);
     	            			if( !done_hdr_info ) {
-    	            				showInfoDialog(R.string.photo_mode_hdr, R.string.hdr_info, PreferenceKeys.getHDRInfoPreferenceKey());
+    	            				showInfoDialog(R.string.photo_mode_hdr, R.string.hdr_info, PreferenceKeys.HDRInfoPreferenceKey);
     		        	    		done_dialog = true;
     	            			}
     	                    }
@@ -267,7 +267,7 @@ public class PopupView extends LinearLayout {
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
         		checkBox.setTextColor(Color.WHITE);
 
-        		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
+        		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false);
 				if( auto_stabilise )
 	        		checkBox.setChecked(auto_stabilise);
         		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -275,14 +275,14 @@ public class PopupView extends LinearLayout {
 							boolean isChecked) {
 	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), isChecked);
+						editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, isChecked);
 						editor.apply();
 
 						boolean done_dialog = false;
 	            		if( isChecked ) {
-	            			boolean done_auto_stabilise_info = sharedPreferences.contains(PreferenceKeys.getAutoStabiliseInfoPreferenceKey());
+	            			boolean done_auto_stabilise_info = sharedPreferences.contains(PreferenceKeys.AutoStabiliseInfoPreferenceKey);
 	            			if( !done_auto_stabilise_info ) {
-	            				showInfoDialog(R.string.preference_auto_stabilise, R.string.auto_stabilise_info, PreferenceKeys.getAutoStabiliseInfoPreferenceKey());
+	            				showInfoDialog(R.string.preference_auto_stabilise, R.string.auto_stabilise_info, PreferenceKeys.AutoStabiliseInfoPreferenceKey);
 		        	    		done_dialog = true;
 	            			}
 	                    }
@@ -504,7 +504,7 @@ public class PopupView extends LinearLayout {
 
         	final String [] grid_values = getResources().getStringArray(R.array.preference_grid_values);
         	String [] grid_entries = getResources().getStringArray(R.array.preference_grid_entries);
-    		String grid_value = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
+    		String grid_value = sharedPreferences.getString(PreferenceKeys.ShowGridPreferenceKey, "preference_grid_none");
     		grid_index = Arrays.asList(grid_values).indexOf(grid_value);
     		if( grid_index == -1 ) {
 				if( MyDebug.LOG )
@@ -518,7 +518,7 @@ public class PopupView extends LinearLayout {
     				String new_grid_value = grid_values[grid_index];
     				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(PreferenceKeys.getShowGridPreferenceKey(), new_grid_value);
+					editor.putString(PreferenceKeys.ShowGridPreferenceKey, new_grid_value);
 					editor.apply();
     			}
 				@Override
@@ -558,7 +558,7 @@ public class PopupView extends LinearLayout {
 						supported_white_balances_entries.add(entry);
 					}
 				}
-				addRadioOptionsToPopup(sharedPreferences, supported_white_balances_entries, supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.getWhiteBalancePreferenceKey(), preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE", new RadioOptionsListener() {
+				addRadioOptionsToPopup(sharedPreferences, supported_white_balances_entries, supported_white_balances, getResources().getString(R.string.white_balance), PreferenceKeys.WhiteBalancePreferenceKey, preview.getCameraController().getDefaultWhiteBalance(), "TEST_WHITE_BALANCE", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_value) {
 						switchToWhiteBalance(selected_value);
@@ -576,7 +576,7 @@ public class PopupView extends LinearLayout {
 						supported_scene_modes_entries.add(entry);
 					}
 				}
-				addRadioOptionsToPopup(sharedPreferences, supported_scene_modes_entries, supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.getSceneModePreferenceKey(), preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", new RadioOptionsListener() {
+				addRadioOptionsToPopup(sharedPreferences, supported_scene_modes_entries, supported_scene_modes, getResources().getString(R.string.scene_mode), PreferenceKeys.SceneModePreferenceKey, preview.getCameraController().getDefaultSceneMode(), "TEST_SCENE_MODE", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_value) {
 						if( preview.getCameraController() != null ) {
@@ -604,7 +604,7 @@ public class PopupView extends LinearLayout {
 						supported_color_effects_entries.add(entry);
 					}
 				}
-				addRadioOptionsToPopup(sharedPreferences, supported_color_effects_entries, supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.getColorEffectPreferenceKey(), preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", new RadioOptionsListener() {
+				addRadioOptionsToPopup(sharedPreferences, supported_color_effects_entries, supported_color_effects, getResources().getString(R.string.color_effect), PreferenceKeys.ColorEffectPreferenceKey, preview.getCameraController().getDefaultColorEffect(), "TEST_COLOR_EFFECT", new RadioOptionsListener() {
 					@Override
 					public void onClick(String selected_value) {
 						if( preview.getCameraController() != null ) {
@@ -641,7 +641,7 @@ public class PopupView extends LinearLayout {
 							Log.d(TAG, "default to manual white balance temperature: " + temperature);
 						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), temperature);
+						editor.putInt(PreferenceKeys.WhiteBalanceTemperaturePreferenceKey, temperature);
 						editor.apply();
 					}
 					// otherwise default to the saved value

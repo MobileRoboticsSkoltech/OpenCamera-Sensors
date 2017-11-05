@@ -299,26 +299,26 @@ public class DrawPreview {
 
 		photoMode = applicationInterface.getPhotoMode(sharedPreferences);
 
-		show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true);
-		show_free_memory_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true);
-		show_iso_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true);
-		show_zoom_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true);
-		show_battery_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowBatteryPreferenceKey(), true);
+		show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowTimePreferenceKey, true);
+		show_free_memory_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowFreeMemoryPreferenceKey, true);
+		show_iso_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowISOPreferenceKey, true);
+		show_zoom_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowZoomPreferenceKey, true);
+		show_battery_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowBatteryPreferenceKey, true);
 
-		show_angle_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowAnglePreferenceKey(), true);
-		String angle_highlight_color = sharedPreferences.getString(PreferenceKeys.getShowAngleHighlightColorPreferenceKey(), "#14e715");
+		show_angle_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowAnglePreferenceKey, true);
+		String angle_highlight_color = sharedPreferences.getString(PreferenceKeys.ShowAngleHighlightColorPreferenceKey, "#14e715");
 		angle_highlight_color_pref = Color.parseColor(angle_highlight_color);
-		show_geo_direction_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionPreferenceKey(), false);
+		show_geo_direction_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionPreferenceKey, false);
 
-		take_photo_border_pref = sharedPreferences.getBoolean(PreferenceKeys.getTakePhotoBorderPreferenceKey(), true);
-		preview_size_wysiwyg_pref = sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg");
-		store_location_pref = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
+		take_photo_border_pref = sharedPreferences.getBoolean(PreferenceKeys.TakePhotoBorderPreferenceKey, true);
+		preview_size_wysiwyg_pref = sharedPreferences.getString(PreferenceKeys.PreviewSizePreferenceKey, "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg");
+		store_location_pref = sharedPreferences.getBoolean(PreferenceKeys.LocationPreferenceKey, false);
 
-		show_angle_line_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false);
-		show_pitch_lines_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowPitchLinesPreferenceKey(), false);
-		show_geo_direction_lines_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionLinesPreferenceKey(), false);
+		show_angle_line_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowAngleLinePreferenceKey, false);
+		show_pitch_lines_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowPitchLinesPreferenceKey, false);
+		show_geo_direction_lines_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionLinesPreferenceKey, false);
 
-		String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+		String immersive_mode = sharedPreferences.getString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_low_profile");
 		immersive_mode_everything_pref = immersive_mode.equals("immersive_mode_everything");
 
 		has_stamp_pref = applicationInterface.getStampPref(sharedPreferences).equals("preference_stamp_yes");
@@ -342,7 +342,7 @@ public class DrawPreview {
 		if( camera_controller == null ) {
 			return;
 		}
-		String preference_grid = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
+		String preference_grid = sharedPreferences.getString(PreferenceKeys.ShowGridPreferenceKey, "preference_grid_none");
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 
 		switch( preference_grid ) {
@@ -517,7 +517,7 @@ public class DrawPreview {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		if( preview.isVideo() || preview_size_wysiwyg_pref ) {
-			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.getShowCropGuidePreferenceKey(), "crop_guide_none");
+			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.ShowCropGuidePreferenceKey, "crop_guide_none");
 			if( camera_controller != null && preview.getTargetRatio() > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
 				p.setStyle(Paint.Style.STROKE);
 				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
@@ -703,7 +703,7 @@ public class DrawPreview {
 				if( camera_controller.captureResultIsAEScanning() ) {
 					// only show as scanning if in auto ISO mode (problem on Nexus 6 at least that if we're in manual ISO mode, after pausing and
 					// resuming, the camera driver continually reports CONTROL_AE_STATE_SEARCHING)
-					String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
+					String value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, main_activity.getPreview().getCameraController().getDefaultISO());
 					if( value.equals("auto") ) {
 						is_scanning = true;
 					}

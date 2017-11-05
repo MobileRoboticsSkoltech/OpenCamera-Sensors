@@ -206,7 +206,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public boolean useCamera2() {
         if( main_activity.supportsCamera2() ) {
-    		return sharedPreferences.getBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), false);
+    		return sharedPreferences.getBoolean(PreferenceKeys.UseCamera2PreferenceKey, false);
         }
         return false;
     }
@@ -289,37 +289,37 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public boolean isVideoPref() {
-		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.IsVideoPreferenceKey, false);
     }
 
     @Override
 	public String getSceneModePref() {
-		return sharedPreferences.getString(PreferenceKeys.getSceneModePreferenceKey(), "auto");
+		return sharedPreferences.getString(PreferenceKeys.SceneModePreferenceKey, "auto");
     }
     
     @Override
     public String getColorEffectPref() {
-		return sharedPreferences.getString(PreferenceKeys.getColorEffectPreferenceKey(), "none");
+		return sharedPreferences.getString(PreferenceKeys.ColorEffectPreferenceKey, "none");
     }
 
     @Override
     public String getWhiteBalancePref() {
-		return sharedPreferences.getString(PreferenceKeys.getWhiteBalancePreferenceKey(), "auto");
+		return sharedPreferences.getString(PreferenceKeys.WhiteBalancePreferenceKey, "auto");
     }
 
 	@Override
 	public int getWhiteBalanceTemperaturePref() {
-		return sharedPreferences.getInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), 5000);
+		return sharedPreferences.getInt(PreferenceKeys.WhiteBalanceTemperaturePreferenceKey, 5000);
 	}
 
 	@Override
 	public String getISOPref() {
-    	return sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
+    	return sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, "auto");
     }
     
     @Override
 	public int getExposureCompensationPref() {
-		String value = sharedPreferences.getString(PreferenceKeys.getExposurePreferenceKey(), "0");
+		String value = sharedPreferences.getString(PreferenceKeys.ExposurePreferenceKey, "0");
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved exposure value: " + value);
 		int exposure = 0;
@@ -380,7 +380,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private int getSaveImageQualityPref() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSaveImageQualityPref");
-		String image_quality_s = sharedPreferences.getString(PreferenceKeys.getQualityPreferenceKey(), "90");
+		String image_quality_s = sharedPreferences.getString(PreferenceKeys.QualityPreferenceKey, "90");
 		int image_quality;
 		try {
 			image_quality = Integer.parseInt(image_quality_s);
@@ -410,7 +410,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     
 	@Override
 	public boolean getFaceDetectionPref() {
-		return sharedPreferences.getBoolean(PreferenceKeys.getFaceDetectionPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.FaceDetectionPreferenceKey, false);
     }
     
 	@Override
@@ -576,7 +576,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public String getPreviewSizePref() {
-		return sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg");
+		return sharedPreferences.getString(PreferenceKeys.PreviewSizePreferenceKey, "preference_preview_size_wysiwyg");
     }
     
     @Override
@@ -591,13 +591,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public boolean getTouchCapturePref() {
-    	String value = sharedPreferences.getString(PreferenceKeys.getTouchCapturePreferenceKey(), "none");
+    	String value = sharedPreferences.getString(PreferenceKeys.TouchCapturePreferenceKey, "none");
     	return value.equals("single");
     }
     
     @Override
 	public boolean getDoubleTapCapturePref() {
-    	String value = sharedPreferences.getString(PreferenceKeys.getTouchCapturePreferenceKey(), "none");
+    	String value = sharedPreferences.getString(PreferenceKeys.TouchCapturePreferenceKey, "none");
     	return value.equals("double");
     }
 
@@ -607,16 +607,16 @@ public class MyApplicationInterface implements ApplicationInterface {
 			// don't pause preview when taking photos while recording video!
 			return false;
 		}
-    	return sharedPreferences.getBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.PausePreviewPreferenceKey, false);
     }
 
     @Override
 	public boolean getShowToastsPref() {
-    	return sharedPreferences.getBoolean(PreferenceKeys.getShowToastsPreferenceKey(), true);
+    	return sharedPreferences.getBoolean(PreferenceKeys.ShowToastsPreferenceKey, true);
     }
 
     public boolean getThumbnailAnimationPref() {
-    	return sharedPreferences.getBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), true);
+    	return sharedPreferences.getBoolean(PreferenceKeys.ThumbnailAnimationPreferenceKey, true);
     }
     
     @Override
@@ -668,16 +668,16 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
     public boolean getGeotaggingPref() {
-    	return sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.LocationPreferenceKey, false);
     }
     
     @Override
     public boolean getRequireLocationPref() {
-    	return sharedPreferences.getBoolean(PreferenceKeys.getRequireLocationPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.RequireLocationPreferenceKey, false);
     }
     
     private boolean getGeodirectionPref() {
-    	return sharedPreferences.getBoolean(PreferenceKeys.getGPSDirectionPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.GPSDirectionPreferenceKey, false);
     }
     
     @Override
@@ -700,7 +700,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
     
     public boolean getAutoStabilisePref(SharedPreferences sharedPreferences) {
-		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
+		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false);
 		if( auto_stabilise && main_activity.supportsAutoStabilise() )
 			return true;
 		return false;
@@ -711,28 +711,28 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
     
     public String getStampPref(SharedPreferences sharedPreferences) {
-    	return sharedPreferences.getString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_no");
+    	return sharedPreferences.getString(PreferenceKeys.StampPreferenceKey, "preference_stamp_no");
     }
 
     private String getStampDateFormatPref() {
-    	return sharedPreferences.getString(PreferenceKeys.getStampDateFormatPreferenceKey(), "preference_stamp_dateformat_default");
+    	return sharedPreferences.getString(PreferenceKeys.StampDateFormatPreferenceKey, "preference_stamp_dateformat_default");
     }
     
     private String getStampTimeFormatPref() {
-    	return sharedPreferences.getString(PreferenceKeys.getStampTimeFormatPreferenceKey(), "preference_stamp_timeformat_default");
+    	return sharedPreferences.getString(PreferenceKeys.StampTimeFormatPreferenceKey, "preference_stamp_timeformat_default");
     }
     
     private String getStampGPSFormatPref() {
-    	return sharedPreferences.getString(PreferenceKeys.getStampGPSFormatPreferenceKey(), "preference_stamp_gpsformat_default");
+    	return sharedPreferences.getString(PreferenceKeys.StampGPSFormatPreferenceKey, "preference_stamp_gpsformat_default");
     }
     
     private String getTextStampPref() {
-    	return sharedPreferences.getString(PreferenceKeys.getTextStampPreferenceKey(), "");
+    	return sharedPreferences.getString(PreferenceKeys.TextStampPreferenceKey, "");
     }
     
     private int getTextStampFontSizePref() {
     	int font_size = 12;
-		String value = sharedPreferences.getString(PreferenceKeys.getStampFontSizePreferenceKey(), "12");
+		String value = sharedPreferences.getString(PreferenceKeys.StampFontSizePreferenceKey, "12");
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved font size: " + value);
 		try {
@@ -748,7 +748,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
 	private String getVideoSubtitlePref() {
-		return sharedPreferences.getString(PreferenceKeys.getVideoSubtitlePref(), "preference_video_subtitle_no");
+		return sharedPreferences.getString(PreferenceKeys.VideoSubtitlePref, "preference_video_subtitle_no");
 	}
 
 	@Override
@@ -760,12 +760,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public double getCalibratedLevelAngle() {
-		return sharedPreferences.getFloat(PreferenceKeys.getCalibratedLevelAnglePreferenceKey(), 0.0f);
+		return sharedPreferences.getFloat(PreferenceKeys.CalibratedLevelAnglePreferenceKey, 0.0f);
 	}
 
 	@Override
     public long getExposureTimePref() {
-    	return sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
+    	return sharedPreferences.getLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
     }
     
     @Override
@@ -800,7 +800,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     		n_images = 3;
     	}
     	else {
-			String n_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
+			String n_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
 			try {
 				n_images = Integer.parseInt(n_images_s);
 			}
@@ -826,7 +826,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     		n_stops = 2.0;
     	}
     	else {
-			String n_stops_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingStopsPreferenceKey(), "2");
+			String n_stops_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingStopsPreferenceKey, "2");
 			try {
 				n_stops = Double.parseDouble(n_stops_s);
 			}
@@ -849,7 +849,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
     public PhotoMode getPhotoMode(SharedPreferences sharedPreferences) {
-		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
 		boolean dro = photo_mode_pref.equals("preference_photo_mode_dro");
 		if( dro && main_activity.supportsDRO() )
 			return PhotoMode.DRO;
@@ -879,17 +879,17 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public boolean isRawPref(SharedPreferences sharedPreferences) {
     	if( isImageCaptureIntent() )
     		return false;
-    	return sharedPreferences.getString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_no").equals("preference_raw_yes");
+    	return sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no").equals("preference_raw_yes");
     }
 
     @Override
 	public boolean useCamera2FakeFlash() {
-		return sharedPreferences.getBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.Camera2FakeFlashPreferenceKey, false);
 	}
 
 	@Override
 	public boolean useCamera2FastBurst() {
-		return sharedPreferences.getBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), true);
+		return sharedPreferences.getBoolean(PreferenceKeys.Camera2FastBurstPreferenceKey, true);
 	}
 
 	@Override
@@ -1531,84 +1531,84 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public void setVideoPref(boolean is_video) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putBoolean(PreferenceKeys.getIsVideoPreferenceKey(), is_video);
+		editor.putBoolean(PreferenceKeys.IsVideoPreferenceKey, is_video);
 		editor.apply();
     }
 
     @Override
     public void setSceneModePref(String scene_mode) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getSceneModePreferenceKey(), scene_mode);
+		editor.putString(PreferenceKeys.SceneModePreferenceKey, scene_mode);
 		editor.apply();
     }
     
     @Override
 	public void clearSceneModePref() {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getSceneModePreferenceKey());
+		editor.remove(PreferenceKeys.SceneModePreferenceKey);
 		editor.apply();
     }
 	
     @Override
 	public void setColorEffectPref(String color_effect) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getColorEffectPreferenceKey(), color_effect);
+		editor.putString(PreferenceKeys.ColorEffectPreferenceKey, color_effect);
 		editor.apply();
     }
 	
     @Override
 	public void clearColorEffectPref() {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getColorEffectPreferenceKey());
+		editor.remove(PreferenceKeys.ColorEffectPreferenceKey);
 		editor.apply();
     }
 	
     @Override
 	public void setWhiteBalancePref(String white_balance) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getWhiteBalancePreferenceKey(), white_balance);
+		editor.putString(PreferenceKeys.WhiteBalancePreferenceKey, white_balance);
 		editor.apply();
     }
 
     @Override
 	public void clearWhiteBalancePref() {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getWhiteBalancePreferenceKey());
+		editor.remove(PreferenceKeys.WhiteBalancePreferenceKey);
 		editor.apply();
     }
 
 	@Override
 	public void setWhiteBalanceTemperaturePref(int white_balance_temperature) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), white_balance_temperature);
+		editor.putInt(PreferenceKeys.WhiteBalanceTemperaturePreferenceKey, white_balance_temperature);
 		editor.apply();
 	}
 
 	@Override
 	public void setISOPref(String iso) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getISOPreferenceKey(), iso);
+		editor.putString(PreferenceKeys.ISOPreferenceKey, iso);
 		editor.apply();
     }
 
     @Override
 	public void clearISOPref() {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getISOPreferenceKey());
+		editor.remove(PreferenceKeys.ISOPreferenceKey);
 		editor.apply();
     }
 	
     @Override
 	public void setExposureCompensationPref(int exposure) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getExposurePreferenceKey(), "" + exposure);
+		editor.putString(PreferenceKeys.ExposurePreferenceKey, "" + exposure);
 		editor.apply();
     }
 
     @Override
 	public void clearExposureCompensationPref() {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getExposurePreferenceKey());
+		editor.remove(PreferenceKeys.ExposurePreferenceKey);
 		editor.apply();
     }
 	
@@ -1661,14 +1661,14 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public void setExposureTimePref(long exposure_time) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
+		editor.putLong(PreferenceKeys.ExposureTimePreferenceKey, exposure_time);
 		editor.apply();
 	}
 
     @Override
 	public void clearExposureTimePref() {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getExposureTimePreferenceKey());
+		editor.remove(PreferenceKeys.ExposureTimePreferenceKey);
 		editor.apply();
     }
 
@@ -1678,7 +1678,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
     private int getStampFontColor() {
-		String color = sharedPreferences.getString(PreferenceKeys.getStampFontColorPreferenceKey(), "#ffffff");
+		String color = sharedPreferences.getString(PreferenceKeys.StampFontColorPreferenceKey, "#ffffff");
 		return Color.parseColor(color);
     }
 
@@ -1767,7 +1767,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	private boolean saveInBackground(boolean image_capture_intent) {
 		boolean do_in_background = true;
-		if( !sharedPreferences.getBoolean(PreferenceKeys.getBackgroundPhotoSavingPreferenceKey(), true) )
+		if( !sharedPreferences.getBoolean(PreferenceKeys.BackgroundPhotoSavingPreferenceKey, true) )
 			do_in_background = false;
 		else if( image_capture_intent )
 			do_in_background = false;
@@ -1818,12 +1818,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    	level_angle = 45.0;
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
 		boolean is_front_facing = main_activity.getPreview().getCameraController() != null && main_activity.getPreview().getCameraController().isFrontFacing();
-		boolean mirror = is_front_facing && sharedPreferences.getString(PreferenceKeys.getFrontCameraMirrorKey(), "preference_front_camera_mirror_no").equals("preference_front_camera_mirror_photo");
+		boolean mirror = is_front_facing && sharedPreferences.getString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_no").equals("preference_front_camera_mirror_photo");
 		String preference_stamp = this.getStampPref();
 		String preference_textstamp = this.getTextStampPref();
 		int font_size = getTextStampFontSizePref();
         int color = getStampFontColor();
-		String pref_style = sharedPreferences.getString(PreferenceKeys.getStampStyleKey(), "preference_stamp_style_shadowed");
+		String pref_style = sharedPreferences.getString(PreferenceKeys.StampStyleKey, "preference_stamp_style_shadowed");
 		String preference_stamp_dateformat = this.getStampDateFormatPref();
 		String preference_stamp_timeformat = this.getStampTimeFormatPref();
 		String preference_stamp_gpsformat = this.getStampGPSFormatPref();
@@ -1859,7 +1859,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( photo_mode == PhotoMode.NoiseReduction ) {
 			if( n_capture_images == 1 ) {
 				ImageSaver.Request.SaveBase save_base = ImageSaver.Request.SaveBase.SAVEBASE_NONE;
-				String save_base_preference = sharedPreferences.getString(PreferenceKeys.getNRSaveExpoPreferenceKey(), "preference_nr_save_no");
+				String save_base_preference = sharedPreferences.getString(PreferenceKeys.NRSaveExpoPreferenceKey, "preference_nr_save_no");
 				switch( save_base_preference ) {
 					case "preference_nr_save_single":
 						save_base = ImageSaver.Request.SaveBase.SAVEBASE_FIRST;
@@ -1952,7 +1952,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( photo_mode == PhotoMode.HDR ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "HDR mode");
-			boolean save_expo = sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
+			boolean save_expo = sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false);
 			if( MyDebug.LOG )
 				Log.d(TAG, "save_expo: " + save_expo);
 

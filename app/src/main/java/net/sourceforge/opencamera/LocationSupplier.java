@@ -105,7 +105,7 @@ public class LocationSupplier {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		// Define a listener that responds to location updates
 		// we only set it up if store_location is true, to avoid unnecessarily wasting battery
-		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
+		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.LocationPreferenceKey, false);
 		if( store_location && locationListeners == null ) {
 			// Note, ContextCompat.checkSelfPermission is meant to handle being called on any Android version, i.e., pre
 			// Android Marshmallow it should return true as permissions are set an installation, and can't be switched off by
