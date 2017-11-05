@@ -194,6 +194,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return imageSaver;
 	}
 
+	public DrawPreview getDrawPreview() {
+		return drawPreview;
+	}
+
     @Override
 	public Context getContext() {
     	return main_activity;

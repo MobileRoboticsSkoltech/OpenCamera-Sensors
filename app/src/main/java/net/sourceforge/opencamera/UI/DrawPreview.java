@@ -41,8 +41,27 @@ public class DrawPreview {
 
 	// store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
 	private final SharedPreferences sharedPreferences;
-	// also cache per frame:
+
+	// cached preferences (need to call updateSettings() to refresh):
 	private MyApplicationInterface.PhotoMode photoMode;
+	private boolean show_time_pref;
+	private boolean show_free_memory_pref;
+	private boolean show_iso_pref;
+	private boolean show_zoom_pref;
+	private boolean show_battery_pref;
+	private boolean show_angle_pref;
+	private int angle_highlight_color_pref;
+	private boolean show_geo_direction_pref;
+	private boolean take_photo_border_pref;
+	private boolean preview_size_wysiwyg_pref;
+	private boolean store_location_pref;
+	private boolean show_angle_line_pref;
+	private boolean show_pitch_lines_pref;
+	private boolean show_geo_direction_lines_pref;
+	private boolean immersive_mode_everything_pref;
+	private boolean has_stamp_pref;
+	private boolean is_raw_pref;
+	private boolean auto_stabilise_pref;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
@@ -121,6 +140,7 @@ public class DrawPreview {
 		this.main_activity = main_activity;
 		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		this.applicationInterface = applicationInterface;
+		updateSettings();
 
 		p.setAntiAlias(true);
         p.setStrokeCap(Paint.Cap.ROUND);
@@ -270,14 +290,42 @@ public class DrawPreview {
 		enable_gyro_target_spot = false;
 	}
 
-	private boolean getTakePhotoBorderPref() {
-    	return sharedPreferences.getBoolean(PreferenceKeys.getTakePhotoBorderPreferenceKey(), true);
-    }
-    
-    private int getAngleHighlightColor() {
-		String color = sharedPreferences.getString(PreferenceKeys.getShowAngleHighlightColorPreferenceKey(), "#14e715");
-		return Color.parseColor(color);
-    }
+	/** For performance reasons, some of the SharedPreferences settings are cached. This method
+	 *  should be used when the settings may have changed.
+	 */
+	public void updateSettings() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateSettings");
+
+		photoMode = applicationInterface.getPhotoMode(sharedPreferences);
+
+		show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true);
+		show_free_memory_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true);
+		show_iso_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true);
+		show_zoom_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true);
+		show_battery_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowBatteryPreferenceKey(), true);
+
+		show_angle_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowAnglePreferenceKey(), true);
+		String angle_highlight_color = sharedPreferences.getString(PreferenceKeys.getShowAngleHighlightColorPreferenceKey(), "#14e715");
+		angle_highlight_color_pref = Color.parseColor(angle_highlight_color);
+		show_geo_direction_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionPreferenceKey(), false);
+
+		take_photo_border_pref = sharedPreferences.getBoolean(PreferenceKeys.getTakePhotoBorderPreferenceKey(), true);
+		preview_size_wysiwyg_pref = sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg");
+		store_location_pref = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
+
+		show_angle_line_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false);
+		show_pitch_lines_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowPitchLinesPreferenceKey(), false);
+		show_geo_direction_lines_pref = sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionLinesPreferenceKey(), false);
+
+		String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+		immersive_mode_everything_pref = immersive_mode.equals("immersive_mode_everything");
+
+		has_stamp_pref = applicationInterface.getStampPref(sharedPreferences).equals("preference_stamp_yes");
+		is_raw_pref = applicationInterface.isRawPref(sharedPreferences);
+
+		auto_stabilise_pref = applicationInterface.getAutoStabilisePref(sharedPreferences);
+	}
 
     private String getTimeStringFromSeconds(long time) {
     	int secs = (int)(time % 60);
@@ -468,7 +516,7 @@ public class DrawPreview {
 	private void drawCropGuides(Canvas canvas) {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
-		if( preview.isVideo() || sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
+		if( preview.isVideo() || preview_size_wysiwyg_pref ) {
 			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.getShowCropGuidePreferenceKey(), "crop_guide_none");
 			if( camera_controller != null && preview.getTargetRatio() > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
 				p.setStyle(Paint.Style.STROKE);
@@ -558,7 +606,7 @@ public class DrawPreview {
 			p.setTextAlign(Paint.Align.RIGHT);
 		}
 
-		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
+		if( show_time_pref ) {
 			if( current_time_string == null || time_ms/1000 > current_time_time/1000 ) {
 				// avoid creating a new calendar object every time
 				if( calendar == null )
@@ -594,7 +642,7 @@ public class DrawPreview {
 			}
 	    }
 
-		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
+		if( camera_controller != null && show_free_memory_pref ) {
 			if( last_free_memory_time == 0 || time_ms > last_free_memory_time + 10000 ) {
 				// don't call this too often, for UI performance
 				long free_mb = main_activity.freeMemory();
@@ -630,7 +678,7 @@ public class DrawPreview {
 			}
 		}
 
-		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
+		if( camera_controller != null && show_iso_pref ) {
 			String string = "";
 			if( camera_controller.captureResultHasIso() ) {
 				int iso = camera_controller.captureResultIso();
@@ -700,8 +748,8 @@ public class DrawPreview {
 			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
 			// RAW not enabled in NR mode (see note in CameraController.takePictureBurst())
 			if(
+					is_raw_pref &&
 					preview.supportsRaw() && // RAW can be enabled, even if it isn't available for this camera (e.g., user enables RAW for back camera, but then switches to front camera which doesn't support it)
-					applicationInterface.isRawPref(sharedPreferences) && // check this after preview.supportsRaw() for better performance (preview.supportsRaw() is a much faster check)
 					!applicationInterface.isVideoPref() && // RAW not supported for video mode
 					photoMode != MyApplicationInterface.PhotoMode.HDR &&
 					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing &&
@@ -722,7 +770,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getAutoStabilisePref(sharedPreferences) ) { // auto-level is supported for photos taken in video mode
+			if( auto_stabilise_pref ) { // auto-level is supported for photos taken in video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -757,7 +805,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getStampPref(sharedPreferences).equals("preference_stamp_yes") ) { // photo-stamp is supported for photos taken in video mode
+			if( has_stamp_pref ) { // photo-stamp is supported for photos taken in video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -886,8 +934,8 @@ public class DrawPreview {
 				text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
 			}
 
-			boolean draw_angle = has_level_angle && sharedPreferences.getBoolean(PreferenceKeys.getShowAnglePreferenceKey(), true);
-			boolean draw_geo_direction = has_geo_direction && sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionPreferenceKey(), false);
+			boolean draw_angle = has_level_angle && show_angle_pref;
+			boolean draw_geo_direction = has_geo_direction && show_geo_direction_pref;
 			if( draw_angle ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
@@ -903,7 +951,7 @@ public class DrawPreview {
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				if( Math.abs(level_angle) <= close_level_angle ) {
-					color = getAngleHighlightColor();
+					color = angle_highlight_color_pref;
 					p.setUnderlineText(true);
 				}
 				if( angle_string == null || time_ms > this.last_angle_string_time + 500 ) {
@@ -1009,7 +1057,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( preview.supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {
+			if( preview.supportsZoom() && show_zoom_pref ) {
 				float zoom_ratio = preview.getZoomRatio();
 				// only show when actually zoomed in
 				if( zoom_ratio > 1.0f + 1.0e-5f ) {
@@ -1063,7 +1111,7 @@ public class DrawPreview {
 		if( ui_rotation == 180 ) {
 			battery_x = canvas.getWidth() - battery_x - battery_width;
 		}
-		if( sharedPreferences.getBoolean(PreferenceKeys.getShowBatteryPreferenceKey(), true) ) {
+		if( show_battery_pref ) {
 			if( !this.has_battery_frac || time_ms > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
 				// note that it's fine to call registerReceiver repeatedly - we pass a null receiver, so this is fine as a "one shot" use
@@ -1092,8 +1140,7 @@ public class DrawPreview {
 			}
 		}
 
-		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
-		if( store_location ) {
+		if( store_location_pref ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
 			int location_y = top_y;
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
@@ -1135,10 +1182,7 @@ public class DrawPreview {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		boolean has_level_angle = preview.hasLevelAngle();
-		boolean show_angle_line = sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false);
-		boolean show_pitch_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowPitchLinesPreferenceKey(), false);
-		boolean show_geo_direction_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionLinesPreferenceKey(), false);
-		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line || show_pitch_lines || show_geo_direction_lines ) ) {
+		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line_pref || show_pitch_lines_pref || show_geo_direction_lines_pref ) ) {
 			final float scale = getContext().getResources().getDisplayMetrics().density;
 			int ui_rotation = preview.getUIRotation();
 			double level_angle = preview.getLevelAngle();
@@ -1184,7 +1228,7 @@ public class DrawPreview {
 			final int line_alpha = 96;
 			float hthickness = (0.5f * scale + 0.5f); // convert dps to pixels
 			p.setStyle(Paint.Style.FILL);
-			if( show_angle_line ) {
+			if( show_angle_line_pref ) {
 				// draw outline
 				p.setColor(Color.BLACK);
 				p.setAlpha(64);
@@ -1195,9 +1239,10 @@ public class DrawPreview {
 				draw_rect.set(cx - 2 * hthickness, cy - radius / 2 - hthickness, cx + 2 * hthickness, cy + radius / 2 + hthickness);
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 				// draw inner portion
-				if (is_level) {
-					p.setColor(getAngleHighlightColor());
-				} else {
+				if( is_level ) {
+					p.setColor(angle_highlight_color_pref);
+				}
+				else {
 					p.setColor(Color.WHITE);
 				}
 				p.setAlpha(line_alpha);
@@ -1216,7 +1261,7 @@ public class DrawPreview {
 					draw_rect.set(cx - radius - hthickness, cy - 7 * hthickness, cx + radius + hthickness, cy - 3 * hthickness);
 					canvas.drawRoundRect(draw_rect, 2 * hthickness, 2 * hthickness, p);
 
-					p.setColor(getAngleHighlightColor());
+					p.setColor(angle_highlight_color_pref);
 					p.setAlpha(line_alpha);
 					draw_rect.set(cx - radius, cy - 6 * hthickness, cx + radius, cy - 4 * hthickness);
 					canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
@@ -1240,7 +1285,7 @@ public class DrawPreview {
 			}*/
 			float angle_scale = (float)Math.sqrt( angle_scale_x*angle_scale_x + angle_scale_y*angle_scale_y );
 			angle_scale *= preview.getZoomRatio();
-			if( has_pitch_angle && show_pitch_lines ) {
+			if( has_pitch_angle && show_pitch_lines_pref ) {
 				int pitch_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 100 : 80;
 				int pitch_radius = (int) (pitch_radius_dps * scale + 0.5f); // convert dps to pixels
 				int angle_step = 10;
@@ -1276,7 +1321,7 @@ public class DrawPreview {
 					}
 				}
 			}
-			if( has_geo_direction && has_pitch_angle && show_geo_direction_lines ) {
+			if( has_geo_direction && has_pitch_angle && show_geo_direction_lines_pref ) {
 				int geo_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 80 : 100;
 				int geo_radius = (int) (geo_radius_dps * scale + 0.5f); // convert dps to pixels
 				float geo_angle = (float)Math.toDegrees(geo_direction);
@@ -1331,8 +1376,6 @@ public class DrawPreview {
 	public void onDrawPreview(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
-		photoMode = applicationInterface.getPhotoMode(sharedPreferences);
-
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -1350,8 +1393,7 @@ public class DrawPreview {
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
 		if( main_activity.getMainUI().inImmersiveMode() ) {
-			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-			if( immersive_mode.equals("immersive_mode_everything") ) {
+			if( immersive_mode_everything_pref ) {
 				// exit, to ensure we don't display anything!
 				// though note we still should do the front screen flash (since the user can take photos via volume keys when
 				// in immersive_mode_everything mode)
@@ -1360,7 +1402,7 @@ public class DrawPreview {
 		}
 
 		final float scale = getContext().getResources().getDisplayMetrics().density;
-		if( camera_controller != null && taking_picture && !front_screen_flash && getTakePhotoBorderPref() ) {
+		if( camera_controller != null && taking_picture && !front_screen_flash && take_photo_border_pref ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels

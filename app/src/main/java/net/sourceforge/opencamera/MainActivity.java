@@ -1499,7 +1499,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			setWindowFlagsForCamera();
 
 			preferencesListener.stopListening();
-			//updateForSettings();
+
+			// Update the cached settings in DrawPreview
+			// Note that some GUI related settings won't trigger preferencesListener.anyChanges(), so
+			// we always call this. Perhaps we could add more classifications to PreferencesListener
+			// to mark settings that need us to update DrawPreview but not call updateForSettings().
+			// However, DrawPreview.updateSettings() should be a quick function (the main point is
+			// to avoid reading the preferences in every single frame).
+			applicationInterface.getDrawPreview().updateSettings();
+
 			if( preferencesListener.anyChanges() ) {
 				updateForSettings();
 			}
@@ -2701,8 +2709,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     }
 
     public boolean supportsNoiseReduction() {
-		//return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsExpoBracketing() );
-		return false; // currently blocked for release
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsExpoBracketing() );
+		//return false; // currently blocked for release
 	}
     
     private int maxExpoBracketingNImages() {

@@ -252,6 +252,7 @@ public class PopupView extends LinearLayout {
     	            			toast_message = null;
     	            		}
 
+							main_activity.getApplicationInterface().getDrawPreview().updateSettings(); // because we cache the photomode
     	    				main_activity.updateForSettings(toast_message);
 		    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
         				}
@@ -290,6 +291,7 @@ public class PopupView extends LinearLayout {
 	            			String message = getResources().getString(R.string.preference_auto_stabilise) + ": " + getResources().getString(isChecked ? R.string.on : R.string.off);
 	            			preview.showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
 	            		}
+						main_activity.getApplicationInterface().getDrawPreview().updateSettings(); // because we cache the auto-stabilise setting
 						main_activity.closePopup(); // don't need to destroy popup
 					}
         		});
