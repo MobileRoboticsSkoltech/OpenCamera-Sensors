@@ -1083,6 +1083,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "camera_controller isn't open");
 			}
+			if( closeCameraCallback != null ) {
+				// still need to call the callback though! (otherwise if camera fails to open, switch camera button won't work!)
+				if( MyDebug.LOG )
+					Log.d(TAG, "calling closeCameraCallback.onClosed");
+				closeCameraCallback.onClosed();
+			}
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "closeCamera: total time: " + (System.currentTimeMillis() - debug_time));
