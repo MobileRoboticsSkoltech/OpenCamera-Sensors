@@ -242,6 +242,7 @@
         android:layout_centerVertical="true"
         android:orientation="vertical"
         android:background="@color/seekbar_background"
+        android:visibility="gone"
         >
 
         <RelativeLayout

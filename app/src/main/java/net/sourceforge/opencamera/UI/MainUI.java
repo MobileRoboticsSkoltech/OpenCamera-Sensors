@@ -758,6 +758,8 @@ public class MainUI {
 		test_ui_buttons.clear();
 		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		final Preview preview = main_activity.getPreview();
+		View sliders_container = main_activity.findViewById(R.id.sliders_container);
+		sliders_container.setVisibility(View.VISIBLE);
 		ViewGroup iso_buttons_container = (ViewGroup)main_activity.findViewById(R.id.iso_buttons);
 		iso_buttons_container.removeAllViews();
 		List<String> supported_isos;
@@ -999,11 +1001,11 @@ public class MainUI {
 	}
 
     public void clearSeekBar() {
-		View view = main_activity.findViewById(R.id.iso_container);
+		View view = main_activity.findViewById(R.id.sliders_container);
+		view.setVisibility(View.GONE);
+		view = main_activity.findViewById(R.id.iso_container);
 		view.setVisibility(View.GONE);
 		view = main_activity.findViewById(R.id.exposure_container);
-		view.setVisibility(View.GONE);
-		view = main_activity.findViewById(R.id.exposure_seekbar_zoom);
 		view.setVisibility(View.GONE);
 		view = main_activity.findViewById(R.id.manual_exposure_container);
 		view.setVisibility(View.GONE);
