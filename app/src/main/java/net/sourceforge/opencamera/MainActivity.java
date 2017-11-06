@@ -128,6 +128,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	private final int manual_n = 1000; // the number of values on the seekbar used for manual focus distance, ISO or exposure speed
 
+	// application shortcuts:
+	static private final String ACTION_SHORTCUT_CAMERA = "net.sourceforge.opencamera.SHORTCUT_CAMERA";
+	static private final String ACTION_SHORTCUT_SELFIE = "net.sourceforge.opencamera.SHORTCUT_SELFIE";
+	static private final String ACTION_SHORTCUT_VIDEO = "net.sourceforge.opencamera.SHORTCUT_VIDEO";
+	static private final String ACTION_SHORTCUT_GALLERY = "net.sourceforge.opencamera.SHORTCUT_GALLERY";
+	static private final String ACTION_SHORTCUT_SETTINGS = "net.sourceforge.opencamera.SHORTCUT_SETTINGS";
+
 	// for testing; must be volatile for test project reading the state
 	public boolean is_test; // whether called from OpenCamera.test testing
 	public volatile Bitmap gallery_bitmap;
@@ -160,6 +167,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "take_photo?: " + getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO));
 		}
+        if( getIntent() != null && getIntent().getAction() != null ) {
+            // invoked via the manifest shortcut?
+			if( MyDebug.LOG )
+				Log.d(TAG, "shortcut: " + getIntent().getAction());
+        }
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		// determine whether we should support "auto stabilise" feature
@@ -510,19 +522,19 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     			Log.d(TAG, "launching from photo intent");
 			applicationInterface.setVideoPref(false);
 		}
-		else if( MyTileService.TILE_ID.equals(action) ) {
+		else if( MyTileService.TILE_ID.equals(action) || ACTION_SHORTCUT_CAMERA.equals(action) ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "launching from quick settings tile for Open Camera: photo mode");
+				Log.d(TAG, "launching from quick settings tile or application shortcut for Open Camera: photo mode");
 			applicationInterface.setVideoPref(false);
 		}
-		else if( MyTileServiceVideo.TILE_ID.equals(action) ) {
+		else if( MyTileServiceVideo.TILE_ID.equals(action) || ACTION_SHORTCUT_VIDEO.equals(action) ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "launching from quick settings tile for Open Camera: video mode");
+				Log.d(TAG, "launching from quick settings tile or application shortcut for Open Camera: video mode");
 			applicationInterface.setVideoPref(true);
 		}
-		else if( MyTileServiceFrontCamera.TILE_ID.equals(action) ) {
+		else if( MyTileServiceFrontCamera.TILE_ID.equals(action) || ACTION_SHORTCUT_SELFIE.equals(action) ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "launching from quick settings tile for Open Camera: selfie mode");
+				Log.d(TAG, "launching from quick settings tile or application shortcut for Open Camera: selfie mode");
 			for(int i=0;i<preview.getCameraControllerManager().getNumberOfCameras();i++) {
 				if( preview.getCameraControllerManager().isFrontFacing(i) ) {
 					if (MyDebug.LOG)
@@ -531,6 +543,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					break;
 				}
 			}
+		}
+		else if( ACTION_SHORTCUT_GALLERY.equals(action) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "launching from application shortcut for Open Camera: gallery");
+			openGallery();
+		}
+		else if( ACTION_SHORTCUT_SETTINGS.equals(action) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "launching from application shortcut for Open Camera: settings");
+			openSettings();
 		}
 	}
 
@@ -1845,6 +1867,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public void clickedGallery(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedGallery");
+		openGallery();
+	}
+
+	private void openGallery() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "openGallery");
 		//Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 		Uri uri = applicationInterface.getStorageUtils().getLastMediaScanned();
 		if( uri == null ) {

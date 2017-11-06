@@ -61,6 +61,7 @@
 				<action android:name="android.media.action.VIDEO_CAPTURE"/>
 				<category android:name="android.intent.category.DEFAULT"/>
 			</intent-filter>
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts"/>
         </activity>
        	<!-- should not change the android:name, including moving to a subpackage - see http://android-developers.blogspot.co.uk/2011/06/things-that-cannot-change.html -->
         <activity
