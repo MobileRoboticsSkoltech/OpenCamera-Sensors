@@ -43,6 +43,7 @@ public class DrawPreview {
 	private final SharedPreferences sharedPreferences;
 
 	// cached preferences (need to call updateSettings() to refresh):
+	private boolean has_settings;
 	private MyApplicationInterface.PhotoMode photoMode;
 	private boolean show_time_pref;
 	private boolean show_free_memory_pref;
@@ -140,7 +141,8 @@ public class DrawPreview {
 		this.main_activity = main_activity;
 		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		this.applicationInterface = applicationInterface;
-		updateSettings();
+		// n.b., don't call updateSettings() here, as it may rely on things that aren't yet initialise (e.g., the prevew)
+		// see testHDRRestart
 
 		p.setAntiAlias(true);
         p.setStrokeCap(Paint.Cap.ROUND);
@@ -325,6 +327,8 @@ public class DrawPreview {
 		is_raw_pref = applicationInterface.isRawPref();
 
 		auto_stabilise_pref = applicationInterface.getAutoStabilisePref();
+
+		has_settings = true;
 	}
 
     private String getTimeStringFromSeconds(long time) {
@@ -1374,6 +1378,9 @@ public class DrawPreview {
 	public void onDrawPreview(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
+		if( !has_settings ) {
+			updateSettings();
+		}
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();

@@ -7761,6 +7761,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
 	}
 
+	/** Tests restarting in HDR mode.
+	 */
+	public void testHDRRestart() {
+		Log.d(TAG, "testHDRRestart");
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
+		editor.apply();
+
+		restart();
+	}
+
 	public void testTakePhotoHDR() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDR");
 		if( !mActivity.supportsHDR() ) {
