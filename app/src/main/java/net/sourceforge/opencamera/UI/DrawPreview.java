@@ -947,7 +947,7 @@ public class DrawPreview {
 				else {
 					//p.setTextAlign(Paint.Align.CENTER);
 					// slightly better for performance to use Align.LEFT, due to avoid measureText() call in drawTextWithBackground()
-					pixels_offset_x = - (int) (18 * scale + 0.5f); // convert dps to pixels
+					pixels_offset_x = - (int) ((level_angle<0 ? 16 : 14) * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				if( Math.abs(level_angle) <= close_level_angle ) {
