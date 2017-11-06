@@ -721,7 +721,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_display");
+		editor.putString(PreferenceKeys.PreviewSizePreferenceKey, "preference_preview_size_display");
 		editor.apply();
 		updateForSettings();
 
@@ -764,7 +764,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg");
+		editor.putString(PreferenceKeys.PreviewSizePreferenceKey, "preference_preview_size_wysiwyg");
 		editor.apply();
 		updateForSettings();
 
@@ -1158,7 +1158,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getFaceDetectionPreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.FaceDetectionPreferenceKey, true);
 		editor.apply();
 		updateForSettings();
 
@@ -2318,7 +2318,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.getCameraController().getWhiteBalance().equals("auto"));
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		int initial_temperature = mPreview.getCameraController().getWhiteBalanceTemperature();
-		int initial_temperature_setting = settings.getInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), 5000);
+		int initial_temperature_setting = settings.getInt(PreferenceKeys.WhiteBalanceTemperaturePreferenceKey, 5000);
 		assertTrue(initial_temperature == initial_temperature_setting);
 		SeekBar white_balance_seek_bar = ((SeekBar)mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_seekbar));
 		int initial_white_balance_seek_bar_pos = white_balance_seek_bar.getProgress();
@@ -2337,7 +2337,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 		Log.d(TAG, "popup is now open");
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getWhiteBalancePreferenceKey(), "manual");
+		editor.putString(PreferenceKeys.WhiteBalancePreferenceKey, "manual");
 		editor.apply();
 		mActivity.runOnUiThread(new Runnable() {
 			public void run() {
@@ -2381,7 +2381,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// check that the wb temperature has been updated, both in preferences, and the camera controller
 		int new_temperature = mPreview.getCameraController().getWhiteBalanceTemperature();
-		int new_temperature_setting = settings.getInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), 5000);
+		int new_temperature_setting = settings.getInt(PreferenceKeys.WhiteBalanceTemperaturePreferenceKey, 5000);
 		assertTrue(new_temperature == new_temperature_setting);
 		Log.d(TAG, "initial_temperature: " + initial_temperature);
 		Log.d(TAG, "new_temperature: " + new_temperature);
@@ -2433,7 +2433,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getAudioControlPreferenceKey(), "noise");
+		editor.putString(PreferenceKeys.AudioControlPreferenceKey, "noise");
 		editor.apply();
 		updateForSettings();
 	    assertTrue( audioControlButton.getVisibility() == View.VISIBLE );
@@ -2446,18 +2446,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		assertTrue( audioControlButton.getVisibility() == View.VISIBLE );
 
-		editor.putString(PreferenceKeys.getAudioControlPreferenceKey(), "none");
+		editor.putString(PreferenceKeys.AudioControlPreferenceKey, "none");
 		editor.apply();
 		updateForSettings();
 		Log.d(TAG, "visibility is now: " + audioControlButton.getVisibility());
 	    assertTrue( audioControlButton.getVisibility() == View.GONE );
 
-		editor.putString(PreferenceKeys.getAudioControlPreferenceKey(), "voice");
+		editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
 		editor.apply();
 		updateForSettings();
 	    assertTrue( audioControlButton.getVisibility() == View.VISIBLE );
 
-		editor.putString(PreferenceKeys.getAudioControlPreferenceKey(), "none");
+		editor.putString(PreferenceKeys.AudioControlPreferenceKey, "none");
 		editor.apply();
 		updateForSettings();
 		Log.d(TAG, "visibility is now: " + audioControlButton.getVisibility());
@@ -2602,10 +2602,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	private int getExpNNewFiles(final boolean is_raw) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
-		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
-		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
+		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false);
+		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
 
 		int exp_n_new_files;
@@ -2623,9 +2623,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	private void checkFilenames(final boolean is_raw, final File [] files, final File [] files2) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
-		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false);
+		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 
 		// check files have names as expected
 		String filename_jpeg = null;
@@ -2714,7 +2714,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	private void postTakePhotoChecks(final boolean immersive_mode, final int exposureVisibility, final int exposureLockVisibility) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
+		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
 		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -2747,12 +2747,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(mPreview.isPreviewStarted());
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean has_thumbnail_anim = sharedPreferences.getBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), true);
-		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
-		boolean is_dro = mActivity.supportsDRO() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_dro");
-		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_hdr");
-		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
-		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
+		boolean has_thumbnail_anim = sharedPreferences.getBoolean(PreferenceKeys.ThumbnailAnimationPreferenceKey, true);
+		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
+		boolean is_dro = mActivity.supportsDRO() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_dro");
+		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
 		
 		int saved_count_cameraTakePicture = mPreview.count_cameraTakePicture;
@@ -2894,7 +2894,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_yes");
+		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
 		editor.apply();
 		updateForSettings();
 		
@@ -2911,7 +2911,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_yes");
+		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
 		editor.apply();
 		updateForSettings();
 		
@@ -2929,7 +2929,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_yes");
+		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
 		editor.apply();
 		updateForSettings();
 
@@ -2967,7 +2967,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 		editor.apply();
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
@@ -3058,7 +3058,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.Camera2FakeFlashPreferenceKey, true);
 		editor.apply();
 		updateForSettings();
 
@@ -3095,7 +3095,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.Camera2FakeFlashPreferenceKey, true);
 		editor.apply();
 		updateForSettings();
 
@@ -3170,7 +3170,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getTouchCapturePreferenceKey(), "single");
+		editor.putString(PreferenceKeys.TouchCapturePreferenceKey, "single");
 		editor.apply();
 		updateForSettings();
 
@@ -3182,7 +3182,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getTouchCapturePreferenceKey(), "double");
+		editor.putString(PreferenceKeys.TouchCapturePreferenceKey, "double");
 		editor.apply();
 		updateForSettings();
 
@@ -3200,7 +3200,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), false);
+		editor.putBoolean(PreferenceKeys.ThumbnailAnimationPreferenceKey, false);
 		editor.apply();
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
@@ -3272,7 +3272,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// now test mirror mode
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getFrontCameraMirrorKey(), "preference_front_camera_mirror_photo");
+		editor.putString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_photo");
 		editor.apply();
 		updateForSettings();
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
@@ -3386,7 +3386,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getAudioControlPreferenceKey(), "voice");
+		editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
 		editor.apply();
 		updateForSettings();
 
@@ -3405,8 +3405,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_gui");
-		editor.putString(PreferenceKeys.getAudioControlPreferenceKey(), "voice");
+		editor.putString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_gui");
+		editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
 		editor.apply();
 		updateForSettings();
 
@@ -3589,7 +3589,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_everything");
+		editor.putString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_everything");
 		editor.apply();
 		updateForSettings();
 
@@ -3672,11 +3672,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, true);
 		editor.apply();
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
+		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
 		Log.d(TAG, "check if preview is started");
 		assertTrue(mPreview.isPreviewStarted());
@@ -3780,7 +3780,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getAudioControlPreferenceKey(), "voice");
+		editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
 		editor.apply();
 		updateForSettings();
 
@@ -3815,11 +3815,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, true);
 		editor.apply();
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
+		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
 	    assertTrue(mPreview.isPreviewStarted());
 		
@@ -3961,7 +3961,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_yes");
+		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
 		editor.apply();
 		updateForSettings();
 
@@ -3980,7 +3980,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_yes");
+		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
 		editor.apply();
 		updateForSettings();
 
@@ -3988,7 +3988,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		editor = settings.edit();
-		editor.putString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_no");
+		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_no");
 		editor.apply();
 		updateForSettings();
 		mPreview.count_cameraTakePicture = 0; // need to reset
@@ -4116,12 +4116,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), false);
+		editor.putBoolean(PreferenceKeys.ThumbnailAnimationPreferenceKey, false);
 		editor.putBoolean(PreferenceKeys.getShutterSoundPreferenceKey(), false);
 		editor.apply();
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
+		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
 	    assertTrue(mPreview.isPreviewStarted());
 		
@@ -4235,7 +4235,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 		editor.apply();
 
 		assertTrue(mPreview.isPreviewStarted());
@@ -4321,7 +4321,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 		editor.apply();
 
 		assertTrue(mPreview.isPreviewStarted());
@@ -4421,7 +4421,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "n_files at start: " + n_files);
 		
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
+		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
@@ -4619,7 +4619,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getAudioControlPreferenceKey(), "voice");
+		editor.putString(PreferenceKeys.AudioControlPreferenceKey, "voice");
 		editor.apply();
 		updateForSettings();
 
@@ -4653,7 +4653,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getVideoSubtitlePref(), "preference_video_subtitle_yes");
+			editor.putString(PreferenceKeys.VideoSubtitlePref, "preference_video_subtitle_yes");
 			editor.apply();
 			updateForSettings();
 		}
@@ -4670,8 +4670,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getVideoSubtitlePref(), "preference_video_subtitle_yes");
-			editor.putBoolean(PreferenceKeys.getLocationPreferenceKey(), true);
+			editor.putString(PreferenceKeys.VideoSubtitlePref, "preference_video_subtitle_yes");
+			editor.putBoolean(PreferenceKeys.LocationPreferenceKey, true);
 			editor.apply();
 			updateForSettings();
 		}
@@ -5012,7 +5012,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, true);
 		editor.apply();
 
 		subTestTakeVideoSnapshot();
@@ -5446,7 +5446,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "n_files at start: " + n_files);
 		
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none");
+		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
 		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
@@ -5888,7 +5888,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			
 			// now set timer to 5s, and turn on pause_preview
 			editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
-			editor.putBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, true);
 			editor.apply();
 
 			Log.d(TAG, "about to click take photo");
@@ -6266,7 +6266,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			{
 				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 				SharedPreferences.Editor editor = settings.edit();
-				editor.putBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), true);
+				editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, true);
 				editor.apply();
 			}
 		    clickView(takePhotoButton);
@@ -6286,7 +6286,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			{
 				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 				SharedPreferences.Editor editor = settings.edit();
-				editor.putBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), false);
+				editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, false);
 				editor.apply();
 			}
 
@@ -6461,9 +6461,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean(PreferenceKeys.getLocationPreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.LocationPreferenceKey, true);
 			if( gps_direction ) {
-				editor.putBoolean(PreferenceKeys.getGPSDirectionPreferenceKey(), true);
+				editor.putBoolean(PreferenceKeys.GPSDirectionPreferenceKey, true);
 			}
 			editor.apply();
 			Log.d(TAG, "update settings after turning on location");
@@ -6504,7 +6504,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 			editor.apply();
 		}
 		mActivity.test_last_saved_image = null;
@@ -6554,7 +6554,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( gps_direction ) {
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean(PreferenceKeys.getGPSDirectionPreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.GPSDirectionPreferenceKey, true);
 			editor.apply();
 			updateForSettings();
 		}
@@ -6580,7 +6580,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 			editor.apply();
 		}
 		mActivity.test_last_saved_image = null;
@@ -6614,7 +6614,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean(PreferenceKeys.getLocationPreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.LocationPreferenceKey, true);
 			editor.apply();
 			restart(); // need to restart for this preference to take effect
 		}
@@ -6667,7 +6667,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_yes");
+			editor.putString(PreferenceKeys.StampPreferenceKey, "preference_stamp_yes");
 			editor.apply();
 			updateForSettings();
 		}
@@ -6688,7 +6688,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean(PreferenceKeys.getLocationPreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.LocationPreferenceKey, true);
 			editor.apply();
 			updateForSettings();
 		}
@@ -6718,7 +6718,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getTextStampPreferenceKey(), "Test stamp!£$");
+			editor.putString(PreferenceKeys.TextStampPreferenceKey, "Test stamp!£$");
 			editor.apply();
 			updateForSettings();
 		}
@@ -6742,7 +6742,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 			editor.apply();
 		}
 
@@ -6767,7 +6767,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getTextStampPreferenceKey(), "Test stamp!£$");
+			editor.putString(PreferenceKeys.TextStampPreferenceKey, "Test stamp!£$");
 			editor.apply();
 			updateForSettings();
 		}
@@ -6788,7 +6788,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 			editor.apply();
 		}
 
@@ -6894,7 +6894,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
 
 	    // use volume keys to zoom in/out
-		editor.putString(PreferenceKeys.getVolumeKeysPreferenceKey(), "volume_zoom");
+		editor.putString(PreferenceKeys.VolumeKeysPreferenceKey, "volume_zoom");
 		editor.apply();
 
 		Log.d(TAG, "zoom in with volume keys");
@@ -6913,7 +6913,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// now test with -/+ controls
 
-		editor.putBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.ShowZoomControlsPreferenceKey, true);
 		editor.apply();
 		updateForSettings();
 		assertTrue(zoomControls.getVisibility() == View.VISIBLE);
@@ -6962,7 +6962,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    // now test with slider invisible
 
-		editor.putBoolean(PreferenceKeys.getShowZoomSliderControlsPreferenceKey(), false);
+		editor.putBoolean(PreferenceKeys.ShowZoomSliderControlsPreferenceKey, false);
 		editor.apply();
 		updateForSettings();
 		assertTrue(zoomSeekBar.getVisibility() == View.INVISIBLE);
@@ -7492,7 +7492,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getSceneModePreferenceKey(), scene_mode);
+		editor.putString(PreferenceKeys.SceneModePreferenceKey, scene_mode);
 		editor.apply();
 		updateForSettings();
 
@@ -7528,7 +7528,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getColorEffectPreferenceKey(), color_effect);
+		editor.putString(PreferenceKeys.ColorEffectPreferenceKey, color_effect);
 		editor.apply();
 		updateForSettings();
 
@@ -7564,7 +7564,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getWhiteBalancePreferenceKey(), white_balance);
+		editor.putString(PreferenceKeys.WhiteBalancePreferenceKey, white_balance);
 		editor.apply();
 		updateForSettings();
 
@@ -7580,7 +7580,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getQualityPreferenceKey(), "100");
+		editor.putString(PreferenceKeys.QualityPreferenceKey, "100");
 		editor.apply();
 		updateForSettings();
 
@@ -7697,7 +7697,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getVolumeKeysPreferenceKey(), "volume_exposure");
+		editor.putString(PreferenceKeys.VolumeKeysPreferenceKey, "volume_exposure");
 		editor.apply();
 		this.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_VOLUME_UP);
 	}
@@ -7714,7 +7714,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_dro");
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_dro");
 		editor.apply();
 		updateForSettings();
 
@@ -7724,7 +7724,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
 
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
 		editor.apply();
 		updateForSettings();
 
@@ -7743,8 +7743,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_dro");
-		editor.putString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_yes");
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_dro");
+		editor.putString(PreferenceKeys.StampPreferenceKey, "preference_stamp_yes");
 		editor.apply();
 		updateForSettings();
 
@@ -7754,7 +7754,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 100 );
 
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
 		editor.apply();
 		updateForSettings();
 
@@ -7770,7 +7770,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
 		editor.apply();
 		updateForSettings();
 
@@ -7790,8 +7790,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
-		editor.putBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), true);
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
+		editor.putBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, true);
 		editor.apply();
 		updateForSettings();
 
@@ -7817,7 +7817,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
 		editor.apply();
 		updateForSettings();
 
@@ -7850,8 +7850,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
-		editor.putBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), true);
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
+		editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 		editor.apply();
 		updateForSettings();
 
@@ -7871,8 +7871,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_hdr");
-		editor.putString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_yes");
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
+		editor.putString(PreferenceKeys.StampPreferenceKey, "preference_stamp_yes");
 		editor.apply();
 		updateForSettings();
 
@@ -7894,7 +7894,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_expo_bracketing");
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
 		editor.apply();
 		updateForSettings();
 
@@ -7916,9 +7916,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_expo_bracketing");
-		editor.putString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "5");
-		editor.putString(PreferenceKeys.getExpoBracketingStopsPreferenceKey(), "1");
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
+		editor.putString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "5");
+		editor.putString(PreferenceKeys.ExpoBracketingStopsPreferenceKey, "1");
 		editor.apply();
 		updateForSettings();
 
