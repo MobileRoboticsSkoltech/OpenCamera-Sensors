@@ -6818,7 +6818,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences.Editor editor = settings.edit();
 
 	    final ZoomControls zoomControls = (ZoomControls) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom);
-		assertTrue(zoomControls.getVisibility() == View.INVISIBLE);
+		assertTrue(zoomControls.getVisibility() == View.GONE);
 
 	    final SeekBar zoomSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
 		assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
