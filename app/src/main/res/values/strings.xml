@@ -458,6 +458,13 @@
     <string name="whats_new">What\'s New:</string>
     <string name="donate">Donate</string>
 
+    <!-- for accessibility, these strings for face detection will typically be spoken, e.g., through Google Talkback -->
+    <string name="faces_detected">faces detected</string>
+    <string name="left_of_screen">at left of screen</string>
+    <string name="right_of_screen">at right of screen</string>
+    <string name="top_of_screen">at top of screen</string>
+    <string name="bottom_of_screen">at bottom of screen</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>
