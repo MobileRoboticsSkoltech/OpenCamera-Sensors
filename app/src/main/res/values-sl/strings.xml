@@ -455,4 +455,12 @@
     <string name="color_effect_sepia">Sepija</string>
     <string name="color_effect_solarize">Solariziraj</string>
     <string name="color_effect_whiteboard">Bela tabla</string>
+	
+    <!-- for accessibility, these strings for face detection will typically be spoken, e.g., through Google Talkback -->
+    <string name="faces_detected">obrazi zaznani</string>
+    <string name="left_of_screen">na levi strani zaslona</string>
+    <string name="right_of_screen">na desni strani zaslona</string>
+    <string name="top_of_screen">na zgornji strani zaslona</string>
+    <string name="bottom_of_screen">na spodnji strani zaslona</string>
+
 </resources>
