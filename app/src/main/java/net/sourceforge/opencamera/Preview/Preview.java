@@ -274,7 +274,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		FACELOCATION_LEFT,
 		FACELOCATION_RIGHT,
 		FACELOCATION_TOP,
-		FACELOCATION_BOTTOM
+		FACELOCATION_BOTTOM,
+		FACELOCATION_CENTRE
 	}
 
 	// for testing; must be volatile for test project reading the state
@@ -1840,51 +1841,64 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 							if( n_faces > 0 ) {
 								// set face_location
 								float avg_x = 0, avg_y = 0;
+								final float bdry_frac_c = 0.3f;
+								boolean all_centre = true;
 								for(CameraController.Face face : faces_detected) {
-									avg_x += face.rect.centerX();
-									avg_y += face.rect.centerY();
+									float face_x = face.rect.centerX();
+									float face_y = face.rect.centerY();
+									face_x /= (float)cameraSurface.getView().getWidth();
+									face_y /= (float)cameraSurface.getView().getHeight();
+									if( all_centre ) {
+										if( face_x < bdry_frac_c || face_x > 1.0f-bdry_frac_c || face_y < bdry_frac_c || face_y > 1.0f-bdry_frac_c )
+											all_centre = false;
+									}
+									avg_x += face_x;
+									avg_y += face_y;
 								}
 								avg_x /= n_faces;
 								avg_y /= n_faces;
-								avg_x /= (float)cameraSurface.getView().getWidth();
-								avg_y /= (float)cameraSurface.getView().getHeight();
 								if( MyDebug.LOG ) {
 									Log.d(TAG, "    avg_x: " + avg_x);
 									Log.d(TAG, "    avg_y: " + avg_y);
 									Log.d(TAG, "    ui_rotation: " + ui_rotation);
 								}
-								switch( ui_rotation ) {
-									case 0:
-										break;
-									case 90: {
-										float temp = avg_x;
-										avg_x = avg_y;
-										avg_y = 1.0f-temp;
-										break;
-									}
-									case 180:
-										avg_x = 1.0f-avg_x;
-										avg_y = 1.0f-avg_y;
-										break;
-									case 270: {
-										float temp = avg_x;
-										avg_x = 1.0f-avg_y;
-										avg_y = temp;
-										break;
-									}
+								if( all_centre ) {
+									face_location = FaceLocation.FACELOCATION_CENTRE;
 								}
-								if( MyDebug.LOG ) {
-									Log.d(TAG, "    avg_x: " + avg_x);
-									Log.d(TAG, "    avg_y: " + avg_y);
+								else {
+									switch( ui_rotation ) {
+										case 0:
+											break;
+										case 90: {
+											float temp = avg_x;
+											avg_x = avg_y;
+											avg_y = 1.0f-temp;
+											break;
+										}
+										case 180:
+											avg_x = 1.0f-avg_x;
+											avg_y = 1.0f-avg_y;
+											break;
+										case 270: {
+											float temp = avg_x;
+											avg_x = 1.0f-avg_y;
+											avg_y = temp;
+											break;
+										}
+									}
+									if( MyDebug.LOG ) {
+										Log.d(TAG, "    avg_x: " + avg_x);
+										Log.d(TAG, "    avg_y: " + avg_y);
+									}
+									if( avg_x < bdry_frac_c )
+										face_location = FaceLocation.FACELOCATION_LEFT;
+									else if( avg_x > 1.0f-bdry_frac_c )
+										face_location = FaceLocation.FACELOCATION_RIGHT;
+									else if( avg_y < bdry_frac_c )
+										face_location = FaceLocation.FACELOCATION_TOP;
+									else if( avg_y > 1.0f-bdry_frac_c )
+										face_location = FaceLocation.FACELOCATION_BOTTOM;
 								}
-								if( avg_x < 0.25f )
-									face_location = FaceLocation.FACELOCATION_LEFT;
-								else if( avg_x > 0.75f )
-									face_location = FaceLocation.FACELOCATION_RIGHT;
-								else if( avg_y < 0.25f )
-									face_location = FaceLocation.FACELOCATION_TOP;
-								else if( avg_y > 0.75f )
-									face_location = FaceLocation.FACELOCATION_BOTTOM;
 							}
 
 							if( n_faces != last_n_faces || face_location != last_face_location ) {
@@ -1895,6 +1909,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 									String string = n_faces + " " + getContext().getResources().getString(R.string.faces_detected);
 									if( n_faces > 0 && face_location != FaceLocation.FACELOCATION_UNKNOWN ) {
 										switch( face_location ) {
+											case FACELOCATION_CENTRE:
+												string += " " + getContext().getResources().getString(R.string.centre_of_screen);
+												break;
 											case FACELOCATION_LEFT:
 												string += " " + getContext().getResources().getString(R.string.left_of_screen);
 												break;

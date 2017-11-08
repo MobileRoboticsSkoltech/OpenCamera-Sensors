@@ -464,6 +464,7 @@
     <string name="right_of_screen">at right of screen</string>
     <string name="top_of_screen">at top of screen</string>
     <string name="bottom_of_screen">at bottom of screen</string>
+    <string name="centre_of_screen">at centre</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
