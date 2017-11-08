@@ -101,7 +101,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     private final Matrix camera_to_preview_matrix = new Matrix();
     private final Matrix preview_to_camera_matrix = new Matrix();
-	//private RectF face_rect = new RectF();
     private double preview_targetRatio;
 
 	//private boolean ui_placement_right = true;
@@ -226,6 +225,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean supports_face_detection;
 	private boolean using_face_detection;
 	private CameraController.Face [] faces_detected;
+	private final RectF face_rect = new RectF();
 	private boolean supports_video_stabilization;
 	private boolean supports_photo_video_recording;
 	private boolean can_disable_shutter_sound;
@@ -1821,36 +1821,69 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 				    @Override
 				    public void onFaceDetection(CameraController.Face[] faces) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "onFaceDetection: " + faces);
+						/*if( MyDebug.LOG )
+							Log.d(TAG, "onFaceDetection: " + faces);*/
 				    	faces_detected = new CameraController.Face[faces.length];
 				    	System.arraycopy(faces, 0, faces_detected, 0, faces.length);
+				    	// convert rects to preview screen space
+						for(CameraController.Face face : faces_detected) {
+							face_rect.set(face.rect);
+							getCameraToPreviewMatrix().mapRect(face_rect);
+							face_rect.round(face.rect);
+						}
 
 						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
 							// accessibility: report number of faces for talkback etc
 
-							int n_faces = faces.length;
+							int n_faces = faces_detected.length;
 							FaceLocation face_location = FaceLocation.FACELOCATION_UNKNOWN;
 							if( n_faces > 0 ) {
 								// set face_location
-								int avg_x = 0, avg_y = 0;
-								for(CameraController.Face face : faces) {
+								float avg_x = 0, avg_y = 0;
+								for(CameraController.Face face : faces_detected) {
 									avg_x += face.rect.centerX();
 									avg_y += face.rect.centerY();
 								}
 								avg_x /= n_faces;
 								avg_y /= n_faces;
+								avg_x /= (float)cameraSurface.getView().getWidth();
+								avg_y /= (float)cameraSurface.getView().getHeight();
+								if( MyDebug.LOG ) {
+									Log.d(TAG, "    avg_x: " + avg_x);
+									Log.d(TAG, "    avg_y: " + avg_y);
+									Log.d(TAG, "    ui_rotation: " + ui_rotation);
+								}
+								switch( ui_rotation ) {
+									case 0:
+										break;
+									case 90: {
+										float temp = avg_x;
+										avg_x = avg_y;
+										avg_y = 1.0f-temp;
+										break;
+									}
+									case 180:
+										avg_x = 1.0f-avg_x;
+										avg_y = 1.0f-avg_y;
+										break;
+									case 270: {
+										float temp = avg_x;
+										avg_x = 1.0f-avg_y;
+										avg_y = temp;
+										break;
+									}
+								}
 								if( MyDebug.LOG ) {
 									Log.d(TAG, "    avg_x: " + avg_x);
 									Log.d(TAG, "    avg_y: " + avg_y);
 								}
-								if( avg_x < -500 )
+								if( avg_x < 0.25f )
 									face_location = FaceLocation.FACELOCATION_LEFT;
-								else if( avg_x > 500 )
+								else if( avg_x > 0.75f )
 									face_location = FaceLocation.FACELOCATION_RIGHT;
-								else if( avg_y < -500 )
+								else if( avg_y < 0.25f )
 									face_location = FaceLocation.FACELOCATION_TOP;
-								else if( avg_y > 500 )
+								else if( avg_y > 0.75f )
 									face_location = FaceLocation.FACELOCATION_BOTTOM;
 							}
 

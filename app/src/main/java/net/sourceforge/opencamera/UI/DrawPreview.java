@@ -66,7 +66,6 @@ public class DrawPreview {
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
-	private final RectF face_rect = new RectF();
 	private final RectF draw_rect = new RectF();
 	//private final int [] gui_location = new int[2];
 	private final static DecimalFormat decimalFormat = new DecimalFormat("#0.0");
@@ -1602,29 +1601,7 @@ public class DrawPreview {
 			for(CameraController.Face face : faces_detected) {
 				// Android doc recommends filtering out faces with score less than 50 (same for both Camera and Camera2 APIs)
 				if( face.score >= 50 ) {
-					face_rect.set(face.rect);
-					preview.getCameraToPreviewMatrix().mapRect(face_rect);
-					/*int eye_radius = (int) (5 * scale + 0.5f); // convert dps to pixels
-					int mouth_radius = (int) (10 * scale + 0.5f); // convert dps to pixels
-					float [] top_left = {face.rect.left, face.rect.top};
-					float [] bottom_right = {face.rect.right, face.rect.bottom};
-					canvas.drawRect(top_left[0], top_left[1], bottom_right[0], bottom_right[1], p);*/
-					canvas.drawRect(face_rect, p);
-					/*if( face.leftEye != null ) {
-						float [] left_point = {face.leftEye.x, face.leftEye.y};
-						cameraToPreview(left_point);
-						canvas.drawCircle(left_point[0], left_point[1], eye_radius, p);
-					}
-					if( face.rightEye != null ) {
-						float [] right_point = {face.rightEye.x, face.rightEye.y};
-						cameraToPreview(right_point);
-						canvas.drawCircle(right_point[0], right_point[1], eye_radius, p);
-					}
-					if( face.mouth != null ) {
-						float [] mouth_point = {face.mouth.x, face.mouth.y};
-						cameraToPreview(mouth_point);
-						canvas.drawCircle(mouth_point[0], mouth_point[1], mouth_radius, p);
-					}*/
+					canvas.drawRect(face.rect, p);
 				}
 			}
 			p.setStyle(Paint.Style.FILL); // reset
