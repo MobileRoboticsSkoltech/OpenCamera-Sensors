@@ -30,7 +30,7 @@ public abstract class CameraController {
 	public static final long EXPOSURE_TIME_DEFAULT = 1000000000L/30;
 
 	// for testing:
-	public int count_camera_parameters_exception;
+	int count_camera_parameters_exception;
 	public int count_precapture_timeout;
 	public boolean test_wait_capture_result; // whether to test delayed capture result in Camera2 API
 	public volatile int test_capture_results; // for Camera2 API, how many capture requests completed with RequestTag.CAPTURE

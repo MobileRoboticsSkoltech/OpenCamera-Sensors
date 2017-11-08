@@ -128,6 +128,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 	private final int manual_n = 1000; // the number of values on the seekbar used for manual focus distance, ISO or exposure speed
 
+	// application shortcuts:
+	static private final String ACTION_SHORTCUT_CAMERA = "net.sourceforge.opencamera.SHORTCUT_CAMERA";
+	static private final String ACTION_SHORTCUT_SELFIE = "net.sourceforge.opencamera.SHORTCUT_SELFIE";
+	static private final String ACTION_SHORTCUT_VIDEO = "net.sourceforge.opencamera.SHORTCUT_VIDEO";
+	static private final String ACTION_SHORTCUT_GALLERY = "net.sourceforge.opencamera.SHORTCUT_GALLERY";
+	static private final String ACTION_SHORTCUT_SETTINGS = "net.sourceforge.opencamera.SHORTCUT_SETTINGS";
+
 	// for testing; must be volatile for test project reading the state
 	public boolean is_test; // whether called from OpenCamera.test testing
 	public volatile Bitmap gallery_bitmap;
@@ -160,6 +167,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "take_photo?: " + getIntent().getExtras().getBoolean(TakePhoto.TAKE_PHOTO));
 		}
+        if( getIntent() != null && getIntent().getAction() != null ) {
+            // invoked via the manifest shortcut?
+			if( MyDebug.LOG )
+				Log.d(TAG, "shortcut: " + getIntent().getAction());
+        }
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		// determine whether we should support "auto stabilise" feature
@@ -254,11 +266,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "onCreate: time after setting button visibility: " + (System.currentTimeMillis() - debug_time));
 		View pauseVideoButton = findViewById(R.id.pause_video);
-		pauseVideoButton.setVisibility(View.INVISIBLE);
+		pauseVideoButton.setVisibility(View.GONE);
 		View takePhotoVideoButton = findViewById(R.id.take_photo_when_video_recording);
-		takePhotoVideoButton.setVisibility(View.INVISIBLE);
+		takePhotoVideoButton.setVisibility(View.GONE);
 
-		// We initialise optional controls to invisible, so they don't show while the camera is opening - the actual visibility is
+		// We initialise optional controls to invisible/gone, so they don't show while the camera is opening - the actual visibility is
 		// set in cameraSetup().
 		// Note that ideally we'd set this in the xml, but doing so for R.id.zoom causes a crash on Galaxy Nexus startup beneath
 		// setContentView()!
@@ -267,7 +279,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    View takePhotoButton = findViewById(R.id.take_photo);
 		takePhotoButton.setVisibility(View.INVISIBLE);
 	    View zoomControls = findViewById(R.id.zoom);
-		zoomControls.setVisibility(View.INVISIBLE);
+		zoomControls.setVisibility(View.GONE);
 	    View zoomSeekbar = findViewById(R.id.zoom_seekbar);
 		zoomSeekbar.setVisibility(View.INVISIBLE);
 
@@ -334,7 +346,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onCreate: time after setting immersive mode listener: " + (System.currentTimeMillis() - debug_time));
 
 		// show "about" dialog for first time use; also set some per-device defaults
-		boolean has_done_first_time = sharedPreferences.contains(PreferenceKeys.getFirstTimePreferenceKey());
+		boolean has_done_first_time = sharedPreferences.contains(PreferenceKeys.FirstTimePreferenceKey);
 		if( MyDebug.LOG )
 			Log.d(TAG, "has_done_first_time: " + has_done_first_time);
 		if( !has_done_first_time ) {
@@ -373,12 +385,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				e.printStackTrace();
 			}
 			if( version_code != -1 ) {
-				int latest_version = sharedPreferences.getInt(PreferenceKeys.getLatestVersionPreferenceKey(), 0);
+				int latest_version = sharedPreferences.getInt(PreferenceKeys.LatestVersionPreferenceKey, 0);
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "version_code: " + version_code);
 					Log.d(TAG, "latest_version: " + latest_version);
 				}
-				final boolean force_whats_new = false;
+				/*final boolean force_whats_new = false;
 				//final boolean force_whats_new = true; // for testing
 				// don't show What's New if this is the first time the user has run
 				if( has_done_first_time && ( force_whats_new || version_code > latest_version ) ) {
@@ -396,11 +408,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 						}
 					});
 					alertDialog.show();
-				}
+				}*/
 				// we set the latest_version whether or not the dialog is shown - if we showed the irst time dialog, we don't
 				// want to then show the What's New dialog next time we run!
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putInt(PreferenceKeys.getLatestVersionPreferenceKey(), version_code);
+				editor.putInt(PreferenceKeys.LatestVersionPreferenceKey, version_code);
 				editor.apply();
 			}
 		}
@@ -473,7 +485,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "set fake flash for camera2");
 			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), true);
+			editor.putBoolean(PreferenceKeys.Camera2FakeFlashPreferenceKey, true);
 			editor.apply();
 		}
 		/*if( is_nexus6 ) {
@@ -510,19 +522,19 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     			Log.d(TAG, "launching from photo intent");
 			applicationInterface.setVideoPref(false);
 		}
-		else if( MyTileService.TILE_ID.equals(action) ) {
+		else if( MyTileService.TILE_ID.equals(action) || ACTION_SHORTCUT_CAMERA.equals(action) ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "launching from quick settings tile for Open Camera: photo mode");
+				Log.d(TAG, "launching from quick settings tile or application shortcut for Open Camera: photo mode");
 			applicationInterface.setVideoPref(false);
 		}
-		else if( MyTileServiceVideo.TILE_ID.equals(action) ) {
+		else if( MyTileServiceVideo.TILE_ID.equals(action) || ACTION_SHORTCUT_VIDEO.equals(action) ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "launching from quick settings tile for Open Camera: video mode");
+				Log.d(TAG, "launching from quick settings tile or application shortcut for Open Camera: video mode");
 			applicationInterface.setVideoPref(true);
 		}
-		else if( MyTileServiceFrontCamera.TILE_ID.equals(action) ) {
+		else if( MyTileServiceFrontCamera.TILE_ID.equals(action) || ACTION_SHORTCUT_SELFIE.equals(action) ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "launching from quick settings tile for Open Camera: selfie mode");
+				Log.d(TAG, "launching from quick settings tile or application shortcut for Open Camera: selfie mode");
 			for(int i=0;i<preview.getCameraControllerManager().getNumberOfCameras();i++) {
 				if( preview.getCameraControllerManager().isFrontFacing(i) ) {
 					if (MyDebug.LOG)
@@ -531,6 +543,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					break;
 				}
 			}
+		}
+		else if( ACTION_SHORTCUT_GALLERY.equals(action) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "launching from application shortcut for Open Camera: gallery");
+			openGallery();
+		}
+		else if( ACTION_SHORTCUT_SETTINGS.equals(action) ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "launching from application shortcut for Open Camera: settings");
+			openSettings();
 		}
 	}
 
@@ -624,7 +646,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "setFirstTimeFlag");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putBoolean(PreferenceKeys.getFirstTimePreferenceKey(), true);
+		editor.putBoolean(PreferenceKeys.FirstTimePreferenceKey, true);
 		editor.apply();
 	}
 
@@ -697,7 +719,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			// but also need to check we're not currently taking a photo or on timer, so we don't repeatedly queue up takePicture() calls, or cancel a timer
 			long time_now = System.currentTimeMillis();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			boolean want_audio_listener = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("noise");
+			boolean want_audio_listener = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("noise");
 			if( time_last_audio_trigger_photo != -1 && time_now - time_last_audio_trigger_photo < 5000 ) {
 				// avoid risk of repeatedly being triggered - as well as problem of being triggered again by the camera's own "beep"!
 				if( MyDebug.LOG )
@@ -933,7 +955,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 		this.closePopup();
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String audio_control = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none");
+		String audio_control = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none");
         if( audio_control.equals("voice") && speechRecognizer != null ) {
         	if( speechRecognizerIsStarted ) {
             	speechRecognizer.stopListening();
@@ -1222,6 +1244,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		waitUntilImageQueueEmpty(); // in theory not needed as we could continue running in the background, but best to be safe
 		closePopup();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
+		preview.cancelBurst(); // similarly cancel the auto-repeat burst mode!
 		preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
 		stopAudioListeners();
 		
@@ -1343,7 +1366,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		fragment.setArguments(bundle);
 		// use commitAllowingStateLoss() instead of commit(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
 		// see http://stackoverflow.com/questions/7575921/illegalstateexception-can-not-perform-this-action-after-onsaveinstancestate-wit
-        getFragmentManager().beginTransaction().add(R.id.prefs_container, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commitAllowingStateLoss();
+        getFragmentManager().beginTransaction().add(android.R.id.content, fragment, "PREFERENCE_FRAGMENT").addToBackStack(null).commitAllowingStateLoss();
     }
 
     public void updateForSettings() {
@@ -1373,9 +1396,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		// make sure we're into continuous video mode
 		// workaround for bug on Samsung Galaxy S5 with UHD, where if the user switches to another (non-continuous-video) focus mode, then goes to Settings, then returns and records video, the preview freezes and the video is corrupted
 		// so to be safe, we always reset to continuous video mode, and then reset it afterwards
-    	String saved_focus_value = preview.updateFocusForVideo(); // n.b., may be null if focus mode not changed
+    	/*String saved_focus_value = preview.updateFocusForVideo(); // n.b., may be null if focus mode not changed
 		if( MyDebug.LOG )
-			Log.d(TAG, "saved_focus_value: " + saved_focus_value);
+			Log.d(TAG, "saved_focus_value: " + saved_focus_value);*/
     	
 		if( MyDebug.LOG )
 			Log.d(TAG, "update folder history");
@@ -1402,7 +1425,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			String scene_mode = preview.getCameraController().getSceneMode();
 			if( MyDebug.LOG )
 				Log.d(TAG, "scene mode was: " + scene_mode);
-			String key = PreferenceKeys.getSceneModePreferenceKey();
+			String key = PreferenceKeys.SceneModePreferenceKey;
 			String value = sharedPreferences.getString(key, preview.getCameraController().getDefaultSceneMode());
 			if( !value.equals(scene_mode) ) {
 				if( MyDebug.LOG )
@@ -1432,7 +1455,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "updateForSettings: time after layoutUI: " + (System.currentTimeMillis() - debug_time));
 		}
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		if( sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("none") ) {
+		if( sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none") ) {
 			// ensure icon is invisible if switching from audio control enabled to disabled
 			// (if enabling it, we'll make the icon visible later on)
 			View speechRecognizerButton = findViewById(R.id.audio_control);
@@ -1498,7 +1521,15 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			setWindowFlagsForCamera();
 
 			preferencesListener.stopListening();
-			//updateForSettings();
+
+			// Update the cached settings in DrawPreview
+			// Note that some GUI related settings won't trigger preferencesListener.anyChanges(), so
+			// we always call this. Perhaps we could add more classifications to PreferencesListener
+			// to mark settings that need us to update DrawPreview but not call updateForSettings().
+			// However, DrawPreview.updateSettings() should be a quick function (the main point is
+			// to avoid reading the preferences in every single frame).
+			applicationInterface.getDrawPreview().updateSettings();
+
 			if( preferencesListener.anyChanges() ) {
 				updateForSettings();
 			}
@@ -1520,7 +1551,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		// whether we are using a Kit Kat style immersive mode (either hiding GUI, or everything)
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			String immersive_mode = sharedPreferences.getString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_low_profile");
 			if( immersive_mode.equals("immersive_mode_gui") || immersive_mode.equals("immersive_mode_everything") )
 				return true;
 		}
@@ -1530,7 +1561,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		// whether we are using a Kit Kat style immersive mode for everything
 		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ) {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+			String immersive_mode = sharedPreferences.getString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_low_profile");
 			if( immersive_mode.equals("immersive_mode_everything") )
 				return true;
 		}
@@ -1577,7 +1608,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     		}
     		else {
         		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        		String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
+        		String immersive_mode = sharedPreferences.getString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_low_profile");
         		if( immersive_mode.equals("immersive_mode_low_profile") )
         			getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         		else
@@ -1679,8 +1710,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( MyDebug.LOG )
 			Log.d(TAG, "showPreview: " + show);
 		final ViewGroup container = (ViewGroup)findViewById(R.id.hide_container);
-		container.setBackgroundColor(Color.BLACK);
-		container.setAlpha(show ? 0.0f : 1.0f);
+		container.setVisibility(show ? View.GONE : View.VISIBLE);
     }
     
     /** Shows the default "blank" gallery icon, when we don't have a thumbnail available.
@@ -1837,6 +1867,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public void clickedGallery(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedGallery");
+		openGallery();
+	}
+
+	private void openGallery() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "openGallery");
 		//Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 		Uri uri = applicationInterface.getStorageUtils().getLastMediaScanned();
 		if( uri == null ) {
@@ -2360,7 +2396,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( preview.getCameraController() == null )
 			return false;
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), preview.getCameraController().getDefaultISO());
+		String iso_value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, preview.getCameraController().getDefaultISO());
 		boolean manual_iso = !iso_value.equals("auto");
 		return preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
 	}
@@ -2398,7 +2434,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		    SeekBar zoomSeekBar = (SeekBar) findViewById(R.id.zoom_seekbar);
 
 			if( preview.supportsZoom() ) {
-				if( sharedPreferences.getBoolean(PreferenceKeys.getShowZoomControlsPreferenceKey(), false) ) {
+				if( sharedPreferences.getBoolean(PreferenceKeys.ShowZoomControlsPreferenceKey, false) ) {
 				    zoomControls.setIsZoomInEnabled(true);
 			        zoomControls.setIsZoomOutEnabled(true);
 			        zoomControls.setZoomSpeed(20);
@@ -2418,7 +2454,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					}
 				}
 				else {
-					zoomControls.setVisibility(View.INVISIBLE); // must be INVISIBLE not GONE, so we can still position the zoomSeekBar relative to it
+					zoomControls.setVisibility(View.GONE);
 				}
 				
 				zoomSeekBar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
@@ -2443,13 +2479,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					}
 				});
 
-				if( sharedPreferences.getBoolean(PreferenceKeys.getShowZoomSliderControlsPreferenceKey(), true) ) {
+				if( sharedPreferences.getBoolean(PreferenceKeys.ShowZoomSliderControlsPreferenceKey, true) ) {
 					if( !mainUI.inImmersiveMode() ) {
 						zoomSeekBar.setVisibility(View.VISIBLE);
 					}
 				}
 				else {
-					zoomSeekBar.setVisibility(View.INVISIBLE);
+					zoomSeekBar.setVisibility(View.INVISIBLE); // should be INVISIBLE not GONE, as the focus_seekbar is aligned to be left to this
 				}
 			}
 			else {
@@ -2460,7 +2496,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "cameraSetup: time after setting up zoom: " + (System.currentTimeMillis() - debug_time));
 
 			View takePhotoButton = findViewById(R.id.take_photo);
-			if( sharedPreferences.getBoolean(PreferenceKeys.getShowTakePhotoPreferenceKey(), true) ) {
+			if( sharedPreferences.getBoolean(PreferenceKeys.ShowTakePhotoPreferenceKey, true) ) {
 				if( !mainUI.inImmersiveMode() ) {
 					takePhotoButton.setVisibility(View.VISIBLE);
 				}
@@ -2492,7 +2528,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				public void onStopTrackingTouch(SeekBar seekBar) {
 				}
 			});
-	    	final int visibility = preview.getCurrentFocusValue() != null && this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.INVISIBLE;
+	    	final int visibility = preview.getCurrentFocusValue() != null && this.getPreview().getCurrentFocusValue().equals("focus_mode_manual2") ? View.VISIBLE : View.GONE;
 		    focusSeekBar.setVisibility(visibility);
 		}
 		if( MyDebug.LOG )
@@ -2701,6 +2737,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
     public boolean supportsNoiseReduction() {
 		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsExpoBracketing() );
+		//return false; // currently blocked for release
 	}
     
     private int maxExpoBracketingNImages() {
@@ -2871,7 +2908,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					}
 				}
 			}
-			if( sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false) ) {
+			if( sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false) ) {
 				// important as users are sometimes confused at the behaviour if they don't realise the option is on
 				toast_string += "\n" + getResources().getString(R.string.preference_auto_stabilise);
 				simple = false;
@@ -2897,11 +2934,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			toast_string += "\n" + getResources().getString(R.string.preference_face_detection);
 			simple = false;
 		}
-		String iso_value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), camera_controller.getDefaultISO());
+		String iso_value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, camera_controller.getDefaultISO());
 		if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
 			toast_string += "\nISO: " + iso_value;
 			if( preview.supportsExposureTime() ) {
-				long exposure_time_value = sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), camera_controller.getDefaultExposureTime());
+				long exposure_time_value = sharedPreferences.getLong(PreferenceKeys.ExposureTimePreferenceKey, camera_controller.getDefaultExposureTime());
 				toast_string += " " + preview.getExposureTimeString(exposure_time_value);
 			}
 			simple = false;
@@ -2991,7 +3028,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( audio_listener.status() ) {
 			audio_listener.start();
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.getAudioNoiseControlSensitivityPreferenceKey(), "0");
+			String sensitivity_pref = sharedPreferences.getString(PreferenceKeys.AudioNoiseControlSensitivityPreferenceKey, "0");
 			switch(sensitivity_pref) {
 				case "3":
 					audio_noise_sensitivity = 50;
@@ -3027,7 +3064,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "initSpeechRecognizer");
 		// in theory we could create the speech recognizer always (hopefully it shouldn't use battery when not listening?), though to be safe, we only do this when the option is enabled (e.g., just in case this doesn't work on some devices!)
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean want_speech_recognizer = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none").equals("voice");
+		boolean want_speech_recognizer = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("voice");
 		if( speechRecognizer == null && want_speech_recognizer ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "create new speechRecognizer");
@@ -3151,7 +3188,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	
 	public boolean hasAudioControl() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		String audio_control = sharedPreferences.getString(PreferenceKeys.getAudioControlPreferenceKey(), "none");
+		String audio_control = sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none");
 		if( audio_control.equals("voice") ) {
 			return speechRecognizer != null;
 		}
@@ -3509,7 +3546,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		    		preview.showToast(null, R.string.permission_location_not_available);
 					SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 					SharedPreferences.Editor editor = settings.edit();
-					editor.putBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
+					editor.putBoolean(PreferenceKeys.LocationPreferenceKey, false);
 					editor.apply();
 	            }
 	            return;

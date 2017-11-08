@@ -26,6 +26,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -265,6 +267,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private final Handler reset_continuous_focus_handler = new Handler();
 	private Runnable reset_continuous_focus_runnable;
 	private boolean autofocus_in_continuous_mode;
+
+	enum FaceLocation {
+		FACELOCATION_UNSET,
+		FACELOCATION_UNKNOWN,
+		FACELOCATION_LEFT,
+		FACELOCATION_RIGHT,
+		FACELOCATION_TOP,
+		FACELOCATION_BOTTOM
+	}
 
 	// for testing; must be volatile for test project reading the state
 	private boolean is_test; // whether called from OpenCamera.test testing
@@ -1034,6 +1045,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		applicationInterface.cameraClosed();
 		cancelTimer();
+		cancelBurst();
 		if( camera_controller != null ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "close camera_controller");
@@ -1080,6 +1092,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "camera_controller isn't open");
 			}
+			if( closeCameraCallback != null ) {
+				// still need to call the callback though! (otherwise if camera fails to open, switch camera button won't work!)
+				if( MyDebug.LOG )
+					Log.d(TAG, "calling closeCameraCallback.onClosed");
+				closeCameraCallback.onClosed();
+			}
 		}
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "closeCamera: total time: " + (System.currentTimeMillis() - debug_time));
@@ -1100,6 +1118,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "cancelled camera timer");
 		}
+	}
+
+	public void cancelBurst() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cancelBurst()");
+		remaining_burst_photos = 0;
 	}
 
 	/**
@@ -1791,10 +1815,89 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			if( this.using_face_detection ) {
 				class MyFaceDetectionListener implements CameraController.FaceDetectionListener {
+					final Handler handler = new Handler();
+					int last_n_faces = -1;
+					FaceLocation last_face_location = FaceLocation.FACELOCATION_UNSET;
+
 				    @Override
 				    public void onFaceDetection(CameraController.Face[] faces) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "onFaceDetection: " + faces);
 				    	faces_detected = new CameraController.Face[faces.length];
-				    	System.arraycopy(faces, 0, faces_detected, 0, faces.length);				    	
+				    	System.arraycopy(faces, 0, faces_detected, 0, faces.length);
+
+						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
+							// accessibility: report number of faces for talkback etc
+
+							int n_faces = faces.length;
+							FaceLocation face_location = FaceLocation.FACELOCATION_UNKNOWN;
+							if( n_faces > 0 ) {
+								// set face_location
+								int avg_x = 0, avg_y = 0;
+								for(CameraController.Face face : faces) {
+									avg_x += face.rect.centerX();
+									avg_y += face.rect.centerY();
+								}
+								avg_x /= n_faces;
+								avg_y /= n_faces;
+								if( MyDebug.LOG ) {
+									Log.d(TAG, "    avg_x: " + avg_x);
+									Log.d(TAG, "    avg_y: " + avg_y);
+								}
+								if( avg_x < -500 )
+									face_location = FaceLocation.FACELOCATION_LEFT;
+								else if( avg_x > 500 )
+									face_location = FaceLocation.FACELOCATION_RIGHT;
+								else if( avg_y < -500 )
+									face_location = FaceLocation.FACELOCATION_TOP;
+								else if( avg_y > 500 )
+									face_location = FaceLocation.FACELOCATION_BOTTOM;
+							}
+
+							if( n_faces != last_n_faces || face_location != last_face_location ) {
+								if( n_faces == 0 && last_n_faces == -1 ) {
+									// only say 0 faces detected if previously the number was non-zero
+								}
+								else {
+									String string = n_faces + " " + getContext().getResources().getString(R.string.faces_detected);
+									if( n_faces > 0 && face_location != FaceLocation.FACELOCATION_UNKNOWN ) {
+										switch( face_location ) {
+											case FACELOCATION_LEFT:
+												string += " " + getContext().getResources().getString(R.string.left_of_screen);
+												break;
+											case FACELOCATION_RIGHT:
+												string += " " + getContext().getResources().getString(R.string.right_of_screen);
+												break;
+											case FACELOCATION_TOP:
+												string += " " + getContext().getResources().getString(R.string.top_of_screen);
+												break;
+											case FACELOCATION_BOTTOM:
+												string += " " + getContext().getResources().getString(R.string.bottom_of_screen);
+												break;
+										}
+									}
+									final String string_f = string;
+									if( MyDebug.LOG )
+										Log.d(TAG, string);
+									// to avoid having a big queue of saying "one face detected, two faces detected" etc, we only report
+									// after a delay, cancelling any that were previously queued
+									handler.removeCallbacksAndMessages(null);
+									handler.postDelayed(new Runnable() {
+										@Override
+										public void run() {
+											if( MyDebug.LOG )
+												Log.d(TAG, "announceForAccessibility: " + string_f);
+											if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
+												Preview.this.getView().announceForAccessibility(string_f);
+											}
+										}
+									}, 500);
+								}
+
+								last_n_faces = n_faces;
+								last_face_location = face_location;
+							}
+						}
 				    }
 				}
 				camera_controller.setFaceDetectionListener(new MyFaceDetectionListener());
@@ -3477,7 +3580,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 *  video is corrupted.
 	 * @return If the focus mode is changed, this returns the previous focus mode; else it returns null.
 	 */
-	public String updateFocusForVideo() {
+	private String updateFocusForVideo() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateFocusForVideo()");
 		String old_focus_mode = null;
@@ -3866,7 +3969,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "already taking a photo");
 			if( remaining_burst_photos != 0 ) {
-				remaining_burst_photos = 0;
+				cancelBurst();
 				showToast(take_photo_toast, R.string.cancelled_burst_mode);
 			}
 			return;
@@ -4545,6 +4648,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void takePhoto(boolean skip_autofocus) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhoto");
+		if( camera_controller == null ) {
+			Log.e(TAG, "camera not opened in takePhoto!");
+			return;
+		}
 		applicationInterface.cameraInOperation(true, false);
         String current_ui_focus_value = getCurrentFocusValue();
 		if( MyDebug.LOG )
@@ -4767,19 +4874,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			if( MyDebug.LOG )
     				Log.d(TAG, "do we need to take another photo? remaining_burst_photos: " + remaining_burst_photos);
     	        if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
-    	        	if( remaining_burst_photos > 0 )
-    	        		remaining_burst_photos--;
+					if( camera_controller == null ) {
+	    				Log.e(TAG, "remaining_burst_photos still set, but camera is closed!: " + remaining_burst_photos);
+						cancelBurst();
+					}
+					else {
+						if( remaining_burst_photos > 0 )
+							remaining_burst_photos--;
 
-    	    		long timer_delay = applicationInterface.getRepeatIntervalPref();
-    	    		if( timer_delay == 0 ) {
-    	    			// we set skip_autofocus to go straight to taking a photo rather than refocusing, for speed
-    	    			// need to manually set the phase
-    	    	        phase = PHASE_TAKING_PHOTO;
-    	        		takePhoto(true);
-    	    		}
-    	    		else {
-    	    			takePictureOnTimer(timer_delay, true);
-    	    		}
+						long timer_delay = applicationInterface.getRepeatIntervalPref();
+						if( timer_delay == 0 ) {
+							// we set skip_autofocus to go straight to taking a photo rather than refocusing, for speed
+							// need to manually set the phase
+							phase = PHASE_TAKING_PHOTO;
+							takePhoto(true);
+						}
+						else {
+							takePictureOnTimer(timer_delay, true);
+						}
+					}
     	        }
 			}
 
@@ -5508,8 +5621,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     public boolean supportsRaw() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "supportsRaw");
     	return this.supports_raw;
     }
 
@@ -5629,17 +5740,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "onDestroy");
 		if( camera_open_state == CameraOpenState.CAMERAOPENSTATE_CLOSING ) {
 			// If the camera is currently closing on a background thread, then wait until the camera has closed to be safe
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "wait for close_camera_task");
+			}
 			if( close_camera_task != null ) { // just to be safe
+				long time_s = System.currentTimeMillis();
 				try {
-					close_camera_task.get();
+					close_camera_task.get(3000, TimeUnit.MILLISECONDS); // set timeout to avoid ANR (camera resource should be freed by the OS when destroyed anyway)
 				}
-				catch(ExecutionException | InterruptedException e) {
+				catch(ExecutionException | InterruptedException | TimeoutException e) {
+					Log.e(TAG, "exception while waiting for close_camera_task to finish");
 					e.printStackTrace();
 				}
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
 					Log.d(TAG, "done waiting for close_camera_task");
+					Log.d(TAG, "### time after waiting for close_camera_task: " + (System.currentTimeMillis() - time_s));
+				}
 			}
 			else {
 				Log.e(TAG, "onResume: state is CAMERAOPENSTATE_CLOSING, but close_camera_task is null");

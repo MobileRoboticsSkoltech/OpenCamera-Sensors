@@ -156,7 +156,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             			Log.d(TAG, "clicked raw: " + newValue);
             		if( newValue.equals("preference_raw_yes") ) {
             			// we check done_raw_info every time, so that this works if the user selects RAW again without leaving and returning to Settings
-            			boolean done_raw_info = sharedPreferences.contains(PreferenceKeys.getRawInfoPreferenceKey());
+            			boolean done_raw_info = sharedPreferences.contains(PreferenceKeys.RawInfoPreferenceKey);
             			if( !done_raw_info ) {
 	        		        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
 	        	            alertDialog.setTitle(R.string.preference_raw);
@@ -168,7 +168,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 				            		if( MyDebug.LOG )
 				            			Log.d(TAG, "user clicked dont_show_again for raw info dialog");
 				            		SharedPreferences.Editor editor = sharedPreferences.edit();
-				            		editor.putBoolean(PreferenceKeys.getRawInfoPreferenceKey(), true);
+				            		editor.putBoolean(PreferenceKeys.RawInfoPreferenceKey, true);
 				            		editor.apply();
 								}
 	        	            });
@@ -472,7 +472,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 								if( main_activity.getPreview().hasLevelAngle() ) {
 									double current_level_angle = main_activity.getPreview().getLevelAngleUncalibrated();
 									SharedPreferences.Editor editor = sharedPreferences.edit();
-									editor.putFloat(PreferenceKeys.getCalibratedLevelAnglePreferenceKey(), (float)current_level_angle);
+									editor.putFloat(PreferenceKeys.CalibratedLevelAnglePreferenceKey, (float)current_level_angle);
 									editor.apply();
 									main_activity.getPreview().updateLevelAngles();
 									Toast.makeText(main_activity, R.string.preference_calibrate_level_calibrated, Toast.LENGTH_SHORT).show();
@@ -485,7 +485,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 									Log.d(TAG, "user clicked reset calibration level");
 								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
 								SharedPreferences.Editor editor = sharedPreferences.edit();
-								editor.putFloat(PreferenceKeys.getCalibratedLevelAnglePreferenceKey(), 0.0f);
+								editor.putFloat(PreferenceKeys.CalibratedLevelAnglePreferenceKey, 0.0f);
 								editor.apply();
 								main_activity.getPreview().updateLevelAngles();
 								Toast.makeText(main_activity, R.string.preference_calibrate_level_calibration_reset, Toast.LENGTH_SHORT).show();
@@ -662,7 +662,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append("\nAuto-stabilise?: ");
                         about_string.append(getString(supports_auto_stabilise ? R.string.about_available : R.string.about_not_available));
 						about_string.append("\nAuto-stabilise enabled?: ");
-						about_string.append(sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false));
+						about_string.append(sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false));
                         about_string.append("\nFace detection?: ");
                         about_string.append(getString(supports_face_detection ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nRAW?: ");
@@ -848,11 +848,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		                			Log.d(TAG, "user confirmed reset");
 		                		SharedPreferences.Editor editor = sharedPreferences.edit();
 		                		editor.clear();
-		                		editor.putBoolean(PreferenceKeys.getFirstTimePreferenceKey(), true);
+		                		editor.putBoolean(PreferenceKeys.FirstTimePreferenceKey, true);
 								try {
 									PackageInfo pInfo = MyPreferenceFragment.this.getActivity().getPackageManager().getPackageInfo(MyPreferenceFragment.this.getActivity().getPackageName(), 0);
 			                        int version_code = pInfo.versionCode;
-									editor.putInt(PreferenceKeys.getLatestVersionPreferenceKey(), version_code);
+									editor.putInt(PreferenceKeys.LatestVersionPreferenceKey, version_code);
 								}
 								catch(NameNotFoundException e) {
 									if (MyDebug.LOG)

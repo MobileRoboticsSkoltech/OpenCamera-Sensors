@@ -41,13 +41,30 @@
 <p>&lt; <small><a href="index.html">Main Page.</a></small></p>
 
 <pre>
-Version 1.41 (Work in progress)
+Version 1.42 (Work in progress)
+
+FIXED   Bug in 1.40 where if camera failed to open, it wasn't possible to switch to other cameras.
+ADDED   Application shortcuts (requires Android 7.1).
+ADDED   Face detection now supports accessibility services (e.g., if using Google Talkback,
+        information on the number and position of detected faces will be spoken).
+UPDATED Performance improvements.
+UPDATED "Show angle" no longer enabled by default.
+
+Version 1.41.1 (2017/10/21)
+
+FIXED   Crash in 1.41 when opening popup menu in video mode on devices without flash.
+FIXED   Crash in 1.41 related to taking photos on burst mode with no delay when camera closing.
+UPDATED Auto-repeat burst mode now closes when going to settings (not safe to be taking photos in
+        background when settings may change).
+
+Version 1.41 (2017/10/15)
 
 FIXED   No longer shows exposure flashes on the screen when taking HDR photos with Camera2 API.
 FIXED   "Pause after taking photo" option was pausing preview after stopping video recording.
 FIXED   Minor bug in HDR auto-alignment.
 ADDED   Take photos while recording video.
 ADDED   What's New dialog now displays to user new features/changes.
+ADDED   Norwegian Bokmål translation (thanks to Imre Kristoffer Eilertsen).
 UPDATED Switch camera icon now next to take photo button, for easier one-handed use.
 UPDATED Switching to video mode now done by selecting the smaller video icon next to the take photo
         button; similarly switch back to photo mode by selecting the smaller photo icon next to the

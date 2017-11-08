@@ -3381,7 +3381,16 @@ public class CameraController2 extends CameraController {
 		try {
 			//pending_request_when_ready = null;
 
-			captureSession.stopRepeating();
+			try {
+				captureSession.stopRepeating();
+			}
+			catch(IllegalStateException e) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "captureSession already closed!");
+				e.printStackTrace();
+				// got this as a Google Play exception
+				// we still call close() below, as it has no effect if captureSession is already closed
+			}
 			// although stopRepeating() alone will pause the preview, seems better to close captureSession altogether - this allows the app to make changes such as changing the picture size
 			if( MyDebug.LOG )
 				Log.d(TAG, "close capture session");

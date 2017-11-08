@@ -40,27 +40,57 @@ public class DrawPreview {
 	private final MyApplicationInterface applicationInterface;
 
 	// store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
-	private SharedPreferences sharedPreferences;
-	// also cache per frame:
+	private final SharedPreferences sharedPreferences;
+
+	// cached preferences (need to call updateSettings() to refresh):
+	private boolean has_settings;
 	private MyApplicationInterface.PhotoMode photoMode;
+	private boolean show_time_pref;
+	private boolean show_free_memory_pref;
+	private boolean show_iso_pref;
+	private boolean show_zoom_pref;
+	private boolean show_battery_pref;
+	private boolean show_angle_pref;
+	private int angle_highlight_color_pref;
+	private boolean show_geo_direction_pref;
+	private boolean take_photo_border_pref;
+	private boolean preview_size_wysiwyg_pref;
+	private boolean store_location_pref;
+	private boolean show_angle_line_pref;
+	private boolean show_pitch_lines_pref;
+	private boolean show_geo_direction_lines_pref;
+	private boolean immersive_mode_everything_pref;
+	private boolean has_stamp_pref;
+	private boolean is_raw_pref;
+	private boolean auto_stabilise_pref;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
 	private final RectF face_rect = new RectF();
 	private final RectF draw_rect = new RectF();
-	private final int [] gui_location = new int[2];
+	//private final int [] gui_location = new int[2];
 	private final static DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	private final float stroke_width;
 	private Calendar calendar;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
 	private final String ybounds_text;
+	// cached Rects for drawTextWithBackground() calls
+	private Rect text_bounds_time;
+	private Rect text_bounds_free_memory;
+	private Rect text_bounds_angle_single;
+	private Rect text_bounds_angle_double;
 
 	private final static double close_level_angle = 1.0f;
 	private String angle_string; // cached for UI performance
+	private double cached_angle; // the angle that we used for the cached angle_string
 	private long last_angle_string_time;
 
 	private float free_memory_gb = -1.0f;
+	private String free_memory_gb_string;
 	private long last_free_memory_time;
+
+	private String current_time_string;
+	private long current_time_time;
 
 	private final IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 	private boolean has_battery_frac;
@@ -109,7 +139,10 @@ public class DrawPreview {
 		if( MyDebug.LOG )
 			Log.d(TAG, "DrawPreview");
 		this.main_activity = main_activity;
+		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		this.applicationInterface = applicationInterface;
+		// n.b., don't call updateSettings() here, as it may rely on things that aren't yet initialise (e.g., the prevew)
+		// see testHDRRestart
 
 		p.setAntiAlias(true);
         p.setStrokeCap(Paint.Cap.ROUND);
@@ -259,14 +292,44 @@ public class DrawPreview {
 		enable_gyro_target_spot = false;
 	}
 
-	private boolean getTakePhotoBorderPref() {
-    	return sharedPreferences.getBoolean(PreferenceKeys.getTakePhotoBorderPreferenceKey(), true);
-    }
-    
-    private int getAngleHighlightColor() {
-		String color = sharedPreferences.getString(PreferenceKeys.getShowAngleHighlightColorPreferenceKey(), "#14e715");
-		return Color.parseColor(color);
-    }
+	/** For performance reasons, some of the SharedPreferences settings are cached. This method
+	 *  should be used when the settings may have changed.
+	 */
+	public void updateSettings() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "updateSettings");
+
+		photoMode = applicationInterface.getPhotoMode();
+
+		show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowTimePreferenceKey, true);
+		show_free_memory_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowFreeMemoryPreferenceKey, true);
+		show_iso_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowISOPreferenceKey, true);
+		show_zoom_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowZoomPreferenceKey, true);
+		show_battery_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowBatteryPreferenceKey, true);
+
+		show_angle_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowAnglePreferenceKey, true);
+		String angle_highlight_color = sharedPreferences.getString(PreferenceKeys.ShowAngleHighlightColorPreferenceKey, "#14e715");
+		angle_highlight_color_pref = Color.parseColor(angle_highlight_color);
+		show_geo_direction_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionPreferenceKey, false);
+
+		take_photo_border_pref = sharedPreferences.getBoolean(PreferenceKeys.TakePhotoBorderPreferenceKey, true);
+		preview_size_wysiwyg_pref = sharedPreferences.getString(PreferenceKeys.PreviewSizePreferenceKey, "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg");
+		store_location_pref = sharedPreferences.getBoolean(PreferenceKeys.LocationPreferenceKey, false);
+
+		show_angle_line_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowAngleLinePreferenceKey, false);
+		show_pitch_lines_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowPitchLinesPreferenceKey, false);
+		show_geo_direction_lines_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowGeoDirectionLinesPreferenceKey, false);
+
+		String immersive_mode = sharedPreferences.getString(PreferenceKeys.ImmersiveModePreferenceKey, "immersive_mode_low_profile");
+		immersive_mode_everything_pref = immersive_mode.equals("immersive_mode_everything");
+
+		has_stamp_pref = applicationInterface.getStampPref().equals("preference_stamp_yes");
+		is_raw_pref = applicationInterface.isRawPref();
+
+		auto_stabilise_pref = applicationInterface.getAutoStabilisePref();
+
+		has_settings = true;
+	}
 
     private String getTimeStringFromSeconds(long time) {
     	int secs = (int)(time % 60);
@@ -283,7 +346,7 @@ public class DrawPreview {
 		if( camera_controller == null ) {
 			return;
 		}
-		String preference_grid = sharedPreferences.getString(PreferenceKeys.getShowGridPreferenceKey(), "preference_grid_none");
+		String preference_grid = sharedPreferences.getString(PreferenceKeys.ShowGridPreferenceKey, "preference_grid_none");
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 
 		switch( preference_grid ) {
@@ -457,8 +520,8 @@ public class DrawPreview {
 	private void drawCropGuides(Canvas canvas) {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
-		if( preview.isVideo() || sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg").equals("preference_preview_size_wysiwyg") ) {
-			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.getShowCropGuidePreferenceKey(), "crop_guide_none");
+		if( preview.isVideo() || preview_size_wysiwyg_pref ) {
+			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.ShowCropGuidePreferenceKey, "crop_guide_none");
 			if( camera_controller != null && preview.getTargetRatio() > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
 				p.setStyle(Paint.Style.STROKE);
 				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
@@ -522,7 +585,7 @@ public class DrawPreview {
 		}
 	}
 
-	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size) {
+	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size, long time_ms) {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -533,7 +596,7 @@ public class DrawPreview {
 		p.setTextAlign(Paint.Align.LEFT);
 		int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
 		int location_y = top_y;
-		final int diff_y = (int) (16 * scale + 0.5f); // convert dps to pixels
+		final int gap_y = (int) (2 * scale + 0.5f); // convert dps to pixels
 		if( ui_rotation == 90 || ui_rotation == 270 ) {
 			int diff = canvas.getWidth() - canvas.getHeight();
 			location_x += diff/2;
@@ -547,53 +610,79 @@ public class DrawPreview {
 			p.setTextAlign(Paint.Align.RIGHT);
 		}
 
-		if( sharedPreferences.getBoolean(PreferenceKeys.getShowTimePreferenceKey(), true) ) {
-			// avoid creating a new calendar object every time
-			if( calendar == null )
-		        calendar = Calendar.getInstance();
-			else
-				calendar.setTimeInMillis(System.currentTimeMillis());
+		if( show_time_pref ) {
+			if( current_time_string == null || time_ms/1000 > current_time_time/1000 ) {
+				// avoid creating a new calendar object every time
+				if( calendar == null )
+					calendar = Calendar.getInstance();
+				else
+					calendar.setTimeInMillis(time_ms);
+
+				current_time_string = dateFormatTimeInstance.format(calendar.getTime());
+				//current_time_string = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
+				current_time_time = time_ms;
+			}
 	        // n.b., DateFormat.getTimeInstance() ignores user preferences such as 12/24 hour or date format, but this is an Android bug.
 	        // Whilst DateUtils.formatDateTime doesn't have that problem, it doesn't print out seconds! See:
 	        // http://stackoverflow.com/questions/15981516/simpledateformat-gettimeinstance-ignores-24-hour-format
 	        // http://daniel-codes.blogspot.co.uk/2013/06/how-to-correctly-format-datetime.html
 	        // http://code.google.com/p/android/issues/detail?id=42104
 	        // also possibly related https://code.google.com/p/android/issues/detail?id=181201
-	        String current_time = dateFormatTimeInstance.format(calendar.getTime());
-	        //String current_time = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
-	        applicationInterface.drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
-
+	        //int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+			if( text_bounds_time == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "compute text_bounds_time");
+				text_bounds_time = new Rect();
+				String bounds_time_string = "00:00:00";
+				p.getTextBounds(bounds_time_string, 0, bounds_time_string.length(), text_bounds_time);
+			}
+	        int height = applicationInterface.drawTextWithBackground(canvas, p, current_time_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, null, true, text_bounds_time);
+			height += gap_y;
 			if( ui_rotation == 90 ) {
-				location_y -= diff_y;
+				location_y -= height;
 			}
 			else {
-				location_y += diff_y;
+				location_y += height;
 			}
 	    }
 
-		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowFreeMemoryPreferenceKey(), true) ) {
-			long time_now = System.currentTimeMillis();
-			if( last_free_memory_time == 0 || time_now > last_free_memory_time + 10000 ) {
+		if( camera_controller != null && show_free_memory_pref ) {
+			if( last_free_memory_time == 0 || time_ms > last_free_memory_time + 10000 ) {
 				// don't call this too often, for UI performance
 				long free_mb = main_activity.freeMemory();
 				if( free_mb >= 0 ) {
-					free_memory_gb = free_mb/1024.0f;
+					float new_free_memory_gb = free_mb/1024.0f;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "free_memory_gb: " + free_memory_gb);
+						Log.d(TAG, "new_free_memory_gb: " + new_free_memory_gb);
+					}
+					if( new_free_memory_gb != free_memory_gb ) {
+						free_memory_gb = new_free_memory_gb;
+						free_memory_gb_string = decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation);
+					}
 				}
-				last_free_memory_time = time_now; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
+				last_free_memory_time = time_ms; // always set this, so that in case of free memory not being available, we aren't calling freeMemory() every frame
 			}
-			if( free_memory_gb >= 0.0f ) {
-				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation), Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
-			}
-
-			if( ui_rotation == 90 ) {
-				location_y -= diff_y;
-			}
-			else {
-				location_y += diff_y;
+			if( free_memory_gb >= 0.0f && free_memory_gb_string != null ) {
+				//int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP);
+				if( text_bounds_free_memory == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "compute text_bounds_free_memory");
+					text_bounds_free_memory = new Rect();
+					p.getTextBounds(free_memory_gb_string, 0, free_memory_gb_string.length(), text_bounds_free_memory);
+				}
+				int height = applicationInterface.drawTextWithBackground(canvas, p, free_memory_gb_string, Color.WHITE, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, null, true, text_bounds_free_memory);
+				height += gap_y;
+				if( ui_rotation == 90 ) {
+					location_y -= height;
+				}
+				else {
+					location_y += height;
+				}
 			}
 		}
 
-		if( camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowISOPreferenceKey(), true) ) {
+		if( camera_controller != null && show_iso_pref ) {
 			String string = "";
 			if( camera_controller.captureResultHasIso() ) {
 				int iso = camera_controller.captureResultIso();
@@ -618,7 +707,7 @@ public class DrawPreview {
 				if( camera_controller.captureResultIsAEScanning() ) {
 					// only show as scanning if in auto ISO mode (problem on Nexus 6 at least that if we're in manual ISO mode, after pausing and
 					// resuming, the camera driver continually reports CONTROL_AE_STATE_SEARCHING)
-					String value = sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), main_activity.getPreview().getCameraController().getDefaultISO());
+					String value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, main_activity.getPreview().getCameraController().getDefaultISO());
 					if( value.equals("auto") ) {
 						is_scanning = true;
 					}
@@ -628,36 +717,30 @@ public class DrawPreview {
 				if( is_scanning ) {
 					// we only change the color if ae scanning is at least a certain time, otherwise we get a lot of flickering of the color
 					if( ae_started_scanning_ms == -1 ) {
-						ae_started_scanning_ms = System.currentTimeMillis();
+						ae_started_scanning_ms = time_ms;
 					}
-					else if( System.currentTimeMillis() - ae_started_scanning_ms > 500 ) {
+					else if( time_ms - ae_started_scanning_ms > 500 ) {
 						text_color = Color.rgb(244, 67, 54); // Red 500
 					}
 				}
 				else {
 					ae_started_scanning_ms = -1;
 				}
-				applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
-
+				// can't cache the bounds rect, as the width may change significantly as the ISO or exposure values change
+				int height = applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
+				height += gap_y;
 				// only move location_y if we actually print something (because on old camera API, even if the ISO option has
 				// been enabled, we'll never be able to display the on-screen ISO)
 				if( ui_rotation == 90 ) {
-					location_y -= diff_y;
+					location_y -= height;
 				}
 				else {
-					location_y += diff_y;
+					location_y += height;
 				}
 			}
 		}
 
 		if( camera_controller != null ) {
-			final int symbols_diff_y = (int) (2 * scale + 0.5f); // convert dps to pixels;
-			if( ui_rotation == 90 ) {
-				location_y -= symbols_diff_y;
-			}
-			else {
-				location_y += symbols_diff_y;
-			}
 			// padding to align with earlier text
 			final int flash_padding = (int) (1 * scale + 0.5f); // convert dps to pixels
 			int location_x2 = location_x - flash_padding;
@@ -668,7 +751,8 @@ public class DrawPreview {
 
 			// RAW not enabled in HDR or ExpoBracketing modes (see note in CameraController.takePictureBurstExpoBracketing())
 			// RAW not enabled in NR mode (see note in CameraController.takePictureBurst())
-			if( applicationInterface.isRawPref(sharedPreferences) &&
+			if(
+					is_raw_pref &&
 					preview.supportsRaw() && // RAW can be enabled, even if it isn't available for this camera (e.g., user enables RAW for back camera, but then switches to front camera which doesn't support it)
 					!applicationInterface.isVideoPref() && // RAW not supported for video mode
 					photoMode != MyApplicationInterface.PhotoMode.HDR &&
@@ -690,7 +774,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getAutoStabilisePref(sharedPreferences) ) { // auto-level is supported for photos taken in video mode
+			if( auto_stabilise_pref ) { // auto-level is supported for photos taken in video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -725,7 +809,7 @@ public class DrawPreview {
 				}
 			}
 
-			if( applicationInterface.getStampPref(sharedPreferences).equals("preference_stamp_yes") ) { // photo-stamp is supported for photos taken in video mode
+			if( has_stamp_pref ) { // photo-stamp is supported for photos taken in video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
@@ -747,11 +831,10 @@ public class DrawPreview {
 			if( flash_value != null &&
 					( flash_value.equals("flash_on") || flash_value.equals("flash_red_eye") || ( flash_value.equals("flash_auto") && camera_controller.needsFlash() ) ) &&
 					!applicationInterface.isVideoPref() ) { // flash-indicator not supported for photos taken in video mode
-				long time_now = System.currentTimeMillis();
 				if( needs_flash_time != -1 ) {
 					final long fade_ms = 500;
-					float alpha = (time_now - needs_flash_time)/(float)fade_ms;
-					if( time_now - needs_flash_time >= fade_ms )
+					float alpha = (time_ms - needs_flash_time)/(float)fade_ms;
+					if( time_ms - needs_flash_time >= fade_ms )
 						alpha = 1.0f;
 					icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 
@@ -765,7 +848,7 @@ public class DrawPreview {
 					canvas.drawBitmap(flash_bitmap, null, icon_dest, p);
 				}
 				else {
-					needs_flash_time = time_now;
+					needs_flash_time = time_ms;
 				}
 			}
 			else {
@@ -791,7 +874,7 @@ public class DrawPreview {
 	/** This includes drawing of the UI that requires the canvas to be rotated according to the preview's
 	 *  current UI rotation.
 	 */
-	private void drawUI(Canvas canvas) {
+	private void drawUI(Canvas canvas, long time_ms) {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
@@ -805,94 +888,128 @@ public class DrawPreview {
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
 
-		int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
-		// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
-		int text_base_y = 0;
-		if( ui_rotation == ( ui_placement_right ? 0 : 180 ) ) {
-			text_base_y = canvas.getHeight() - (int)(0.5*text_y);
-		}
-		else if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
-			text_base_y = canvas.getHeight() - (int)(2.5*text_y); // leave room for GUI icons
-		}
-		else if( ui_rotation == 90 || ui_rotation == 270 ) {
-			//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
-			ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
-			// align with "top" of the take_photo button, but remember to take the rotation into account!
-			view.getLocationOnScreen(gui_location);
-			int view_left = gui_location[0];
-			preview.getView().getLocationOnScreen(gui_location);
-			int this_left = gui_location[0];
-			int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
-    		/*if( MyDebug.LOG ) {
-    			Log.d(TAG, "view left: " + view_left);
-    			Log.d(TAG, "this left: " + this_left);
-    			Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
-    		}*/
-			int max_x = canvas.getWidth();
-			if( ui_rotation == 90 ) {
-				// so we don't interfere with the top bar info (datetime, free memory, ISO)
-				max_x -= (int)(2.5*text_y);
-			}
-			if( canvas.getWidth()/2 + diff_x > max_x ) {
-				// in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
-				diff_x = max_x - canvas.getWidth()/2;
-			}
-			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
-		}
-		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
-		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
-
 		if( camera_controller != null && !preview.isPreviewPaused() ) {
 			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
 					canvas.getHeight() / 2, p);*/
-			boolean draw_angle = has_level_angle && sharedPreferences.getBoolean(PreferenceKeys.getShowAnglePreferenceKey(), true);
-			boolean draw_geo_direction = has_geo_direction && sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionPreferenceKey(), false);
+			int text_y = (int) (20 * scale + 0.5f); // convert dps to pixels
+			// fine tuning to adjust placement of text with respect to the GUI, depending on orientation
+			int text_base_y = 0;
+			if( ui_rotation == ( ui_placement_right ? 0 : 180 ) ) {
+				text_base_y = canvas.getHeight() - (int)(0.5*text_y);
+			}
+			else if( ui_rotation == ( ui_placement_right ? 180 : 0 ) ) {
+				text_base_y = canvas.getHeight() - (int)(2.5*text_y); // leave room for GUI icons
+			}
+			else if( ui_rotation == 90 || ui_rotation == 270 ) {
+				//text_base_y = canvas.getHeight() + (int)(0.5*text_y);
+				/*ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+				// align with "top" of the take_photo button, but remember to take the rotation into account!
+				view.getLocationOnScreen(gui_location);
+				int view_left = gui_location[0];
+				preview.getView().getLocationOnScreen(gui_location);
+				int this_left = gui_location[0];
+				// diff_x is the difference from the centre of the canvas to the position we want
+				int diff_x = view_left - ( this_left + canvas.getWidth()/2 );
+				*/
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "view left: " + view_left);
+					Log.d(TAG, "this left: " + this_left);
+					Log.d(TAG, "canvas is " + canvas.getWidth() + " x " + canvas.getHeight());
+				}*/
+				// diff_x is the difference from the centre of the canvas to the position we want
+				// assumes canvas is centered
+				// avoids calling getLocationOnScreen for performance
+				int diff_x = preview.getView().getRootView().getRight()/2 - (int) (100 * scale + 0.5f); // convert dps to pixels
+				int max_x = canvas.getWidth();
+				if( ui_rotation == 90 ) {
+					// so we don't interfere with the top bar info (datetime, free memory, ISO)
+					max_x -= (int)(2.5*text_y);
+				}
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "root view right: " + preview.getView().getRootView().getRight());
+					Log.d(TAG, "diff_x: " + diff_x);
+					Log.d(TAG, "canvas.getWidth()/2 + diff_x: " + (canvas.getWidth()/2+diff_x));
+					Log.d(TAG, "max_x: " + max_x);
+				}*/
+				if( canvas.getWidth()/2 + diff_x > max_x ) {
+					// in case goes off the size of the canvas, for "black bar" cases (when preview aspect ratio != screen aspect ratio)
+					diff_x = max_x - canvas.getWidth()/2;
+				}
+				text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
+			}
+
+			boolean draw_angle = has_level_angle && show_angle_pref;
+			boolean draw_geo_direction = has_geo_direction && show_geo_direction_pref;
 			if( draw_angle ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				int pixels_offset_x = 0;
+				int pixels_offset_x;
 				if( draw_geo_direction ) {
-					pixels_offset_x = - (int) (82 * scale + 0.5f); // convert dps to pixels
+					pixels_offset_x = - (int) (35 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				else {
-					p.setTextAlign(Paint.Align.CENTER);
+					//p.setTextAlign(Paint.Align.CENTER);
+					// slightly better for performance to use Align.LEFT, due to avoid measureText() call in drawTextWithBackground()
+					pixels_offset_x = - (int) ((level_angle<0 ? 16 : 14) * scale + 0.5f); // convert dps to pixels
+					p.setTextAlign(Paint.Align.LEFT);
 				}
 				if( Math.abs(level_angle) <= close_level_angle ) {
-					color = getAngleHighlightColor();
+					color = angle_highlight_color_pref;
 					p.setUnderlineText(true);
 				}
-				if( angle_string == null || System.currentTimeMillis() > this.last_angle_string_time + 500 ) {
+				if( angle_string == null || time_ms > this.last_angle_string_time + 500 ) {
 					// update cached string
 					/*if( MyDebug.LOG )
 						Log.d(TAG, "update angle_string: " + angle_string);*/
-					last_angle_string_time = System.currentTimeMillis();
+					last_angle_string_time = time_ms;
 					String number_string = formatLevelAngle(level_angle);
 					//String number_string = "" + level_angle;
-					angle_string = getContext().getResources().getString(R.string.angle) + ": " + number_string + (char)0x00B0;
+					angle_string = number_string + (char)0x00B0;
+					cached_angle = level_angle;
 					//String angle_string = "" + level_angle;
 				}
-				applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+				//applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+				if( text_bounds_angle_single == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "compute text_bounds_angle_single");
+					text_bounds_angle_single = new Rect();
+					String bounds_angle_string = "-9.0" + (char)0x00B0;
+					p.getTextBounds(bounds_angle_string, 0, bounds_angle_string.length(), text_bounds_angle_single);
+				}
+				if( text_bounds_angle_double == null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "compute text_bounds_angle_double");
+					text_bounds_angle_double = new Rect();
+					String bounds_angle_string = "-45.0" + (char)0x00B0;
+					p.getTextBounds(bounds_angle_string, 0, bounds_angle_string.length(), text_bounds_angle_double);
+				}
+				applicationInterface.drawTextWithBackground(canvas, p, angle_string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, null, true, Math.abs(cached_angle) < 10.0 ? text_bounds_angle_single : text_bounds_angle_double);
 				p.setUnderlineText(false);
 			}
 			if( draw_geo_direction ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+				int pixels_offset_x = 0;
 				if( draw_angle ) {
+					pixels_offset_x = (int) (10 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
 				}
 				else {
-					p.setTextAlign(Paint.Align.CENTER);
+					//p.setTextAlign(Paint.Align.CENTER);
+					// slightly better for performance to use Align.LEFT, due to avoid measureText() call in drawTextWithBackground()
+					pixels_offset_x = - (int) (14 * scale + 0.5f); // convert dps to pixels
+					p.setTextAlign(Paint.Align.LEFT);
 				}
 				float geo_angle = (float)Math.toDegrees(geo_direction);
 				if( geo_angle < 0.0f ) {
 					geo_angle += 360.0f;
 				}
-				String string = " " + getContext().getResources().getString(R.string.direction) + ": " + Math.round(geo_angle) + (char)0x00B0;
-				applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+				String string = "" + Math.round(geo_angle) + (char)0x00B0;
+				applicationInterface.drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
 			}
 			if( preview.isOnTimer() ) {
-				long remaining_time = (preview.getTimerEndTime() - System.currentTimeMillis() + 999)/1000;
+				long remaining_time = (preview.getTimerEndTime() - time_ms + 999)/1000;
 				if( MyDebug.LOG )
 					Log.d(TAG, "remaining_time: " + remaining_time);
 				if( remaining_time > 0 ) {
@@ -925,7 +1042,7 @@ public class DrawPreview {
             		applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.screen_lock_message_1), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
             		pixels_offset_y += text_y;
             	}
-				if( !preview.isVideoRecordingPaused() || ((int)(System.currentTimeMillis() / 500)) % 2 == 0 ) { // if video is paused, then flash the video time
+				if( !preview.isVideoRecordingPaused() || ((int)(time_ms / 500)) % 2 == 0 ) { // if video is paused, then flash the video time
 					applicationInterface.drawTextWithBackground(canvas, p, time_s, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 				}
 			}
@@ -934,7 +1051,7 @@ public class DrawPreview {
 					// only show "capturing" text with time for manual exposure time >= 0.5s
 					long exposure_time = camera_controller.getExposureTime();
 					if( exposure_time >= 500000000L ) {
-						if( ((int)(System.currentTimeMillis() / 500)) % 2 == 0 ) {
+						if( ((int)(time_ms / 500)) % 2 == 0 ) {
 							p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
 							p.setTextAlign(Paint.Align.CENTER);
 							int pixels_offset_y = 3*text_y; // avoid overwriting the zoom, and also allow a bit extra space
@@ -944,6 +1061,18 @@ public class DrawPreview {
 					}
 				}
 			}
+
+			if( preview.supportsZoom() && show_zoom_pref ) {
+				float zoom_ratio = preview.getZoomRatio();
+				// only show when actually zoomed in
+				if( zoom_ratio > 1.0f + 1.0e-5f ) {
+					// Convert the dps to pixels, based on density scale
+					p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+					p.setTextAlign(Paint.Align.CENTER);
+					applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - text_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
+				}
+			}
+
 		}
 		else if( camera_controller == null ) {
 			/*if( MyDebug.LOG ) {
@@ -969,16 +1098,8 @@ public class DrawPreview {
 			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
 
-		if( preview.supportsZoom() && camera_controller != null && sharedPreferences.getBoolean(PreferenceKeys.getShowZoomPreferenceKey(), true) ) {
-			float zoom_ratio = preview.getZoomRatio();
-			// only show when actually zoomed in
-			if( zoom_ratio > 1.0f + 1.0e-5f ) {
-				// Convert the dps to pixels, based on density scale
-				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				p.setTextAlign(Paint.Align.CENTER);
-				applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - text_y, MyApplicationInterface.Alignment.ALIGNMENT_BOTTOM, ybounds_text, true);
-			}
-		}
+		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
+		final int location_size = (int) (20 * scale + 0.5f); // convert dps to pixels
 
 		int battery_x = (int) (5 * scale + 0.5f); // convert dps to pixels
 		int battery_y = top_y;
@@ -995,8 +1116,8 @@ public class DrawPreview {
 		if( ui_rotation == 180 ) {
 			battery_x = canvas.getWidth() - battery_x - battery_width;
 		}
-		if( sharedPreferences.getBoolean(PreferenceKeys.getShowBatteryPreferenceKey(), true) ) {
-			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
+		if( show_battery_pref ) {
+			if( !this.has_battery_frac || time_ms > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
 				// note that it's fine to call registerReceiver repeatedly - we pass a null receiver, so this is fine as a "one shot" use
 				Intent batteryStatus = main_activity.registerReceiver(null, battery_ifilter);
@@ -1004,7 +1125,7 @@ public class DrawPreview {
 				int battery_scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 				has_battery_frac = true;
 				battery_frac = battery_level/(float)battery_scale;
-				last_battery_time = System.currentTimeMillis();
+				last_battery_time = time_ms;
 				if( MyDebug.LOG )
 					Log.d(TAG, "Battery status is " + battery_level + " / " + battery_scale + " : " + battery_frac);
 			}
@@ -1012,20 +1133,16 @@ public class DrawPreview {
 			boolean draw_battery = true;
 			if( battery_frac <= 0.05f ) {
 				// flash icon at this low level
-				draw_battery = ((( System.currentTimeMillis() / 1000 )) % 2) == 0;
+				draw_battery = ((( time_ms / 1000 )) % 2) == 0;
 			}
 			if( draw_battery ) {
-				p.setColor(Color.WHITE);
-				p.setStyle(Paint.Style.STROKE);
-				canvas.drawRect(battery_x, battery_y, battery_x+battery_width, battery_y+battery_height, p);
 				p.setColor(battery_frac > 0.15f ? Color.rgb(37, 155, 36) : Color.rgb(244, 67, 54)); // Green 500 or Red 500
 				p.setStyle(Paint.Style.FILL);
-				canvas.drawRect(battery_x+1, battery_y+1+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width-1, battery_y+battery_height-1, p);
+				canvas.drawRect(battery_x, battery_y+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width, battery_y+battery_height, p);
 			}
 		}
 
-		boolean store_location = sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
-		if( store_location ) {
+		if( store_location_pref ) {
 			int location_x = (int) (20 * scale + 0.5f); // convert dps to pixels
 			int location_y = top_y;
 			if( ui_rotation == 90 || ui_rotation == 270 ) {
@@ -1058,7 +1175,7 @@ public class DrawPreview {
 			}
 		}
 
-		onDrawInfoLines(canvas, top_y, location_size);
+		onDrawInfoLines(canvas, top_y, location_size, time_ms);
 
 		canvas.restore();
 	}
@@ -1067,10 +1184,7 @@ public class DrawPreview {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		boolean has_level_angle = preview.hasLevelAngle();
-		boolean show_angle_line = sharedPreferences.getBoolean(PreferenceKeys.getShowAngleLinePreferenceKey(), false);
-		boolean show_pitch_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowPitchLinesPreferenceKey(), false);
-		boolean show_geo_direction_lines = sharedPreferences.getBoolean(PreferenceKeys.getShowGeoDirectionLinesPreferenceKey(), false);
-		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line || show_pitch_lines || show_geo_direction_lines ) ) {
+		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line_pref || show_pitch_lines_pref || show_geo_direction_lines_pref ) ) {
 			final float scale = getContext().getResources().getDisplayMetrics().density;
 			int ui_rotation = preview.getUIRotation();
 			double level_angle = preview.getLevelAngle();
@@ -1116,7 +1230,7 @@ public class DrawPreview {
 			final int line_alpha = 96;
 			float hthickness = (0.5f * scale + 0.5f); // convert dps to pixels
 			p.setStyle(Paint.Style.FILL);
-			if( show_angle_line ) {
+			if( show_angle_line_pref ) {
 				// draw outline
 				p.setColor(Color.BLACK);
 				p.setAlpha(64);
@@ -1127,9 +1241,10 @@ public class DrawPreview {
 				draw_rect.set(cx - 2 * hthickness, cy - radius / 2 - hthickness, cx + 2 * hthickness, cy + radius / 2 + hthickness);
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 				// draw inner portion
-				if (is_level) {
-					p.setColor(getAngleHighlightColor());
-				} else {
+				if( is_level ) {
+					p.setColor(angle_highlight_color_pref);
+				}
+				else {
 					p.setColor(Color.WHITE);
 				}
 				p.setAlpha(line_alpha);
@@ -1140,7 +1255,7 @@ public class DrawPreview {
 				draw_rect.set(cx - hthickness, cy - radius / 2, cx + hthickness, cy + radius / 2);
 				canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
 
-				if (is_level) {
+				if( is_level ) {
 					// draw a second line
 
 					p.setColor(Color.BLACK);
@@ -1148,7 +1263,7 @@ public class DrawPreview {
 					draw_rect.set(cx - radius - hthickness, cy - 7 * hthickness, cx + radius + hthickness, cy - 3 * hthickness);
 					canvas.drawRoundRect(draw_rect, 2 * hthickness, 2 * hthickness, p);
 
-					p.setColor(getAngleHighlightColor());
+					p.setColor(angle_highlight_color_pref);
 					p.setAlpha(line_alpha);
 					draw_rect.set(cx - radius, cy - 6 * hthickness, cx + radius, cy - 4 * hthickness);
 					canvas.drawRoundRect(draw_rect, hthickness, hthickness, p);
@@ -1172,7 +1287,7 @@ public class DrawPreview {
 			}*/
 			float angle_scale = (float)Math.sqrt( angle_scale_x*angle_scale_x + angle_scale_y*angle_scale_y );
 			angle_scale *= preview.getZoomRatio();
-			if( has_pitch_angle && show_pitch_lines ) {
+			if( has_pitch_angle && show_pitch_lines_pref ) {
 				int pitch_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 100 : 80;
 				int pitch_radius = (int) (pitch_radius_dps * scale + 0.5f); // convert dps to pixels
 				int angle_step = 10;
@@ -1208,7 +1323,7 @@ public class DrawPreview {
 					}
 				}
 			}
-			if( has_geo_direction && has_pitch_angle && show_geo_direction_lines ) {
+			if( has_geo_direction && has_pitch_angle && show_geo_direction_lines_pref ) {
 				int geo_radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 80 : 100;
 				int geo_radius = (int) (geo_radius_dps * scale + 0.5f); // convert dps to pixels
 				float geo_angle = (float)Math.toDegrees(geo_direction);
@@ -1263,13 +1378,14 @@ public class DrawPreview {
 	public void onDrawPreview(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
-		// make sure sharedPreferences etc up to date
-		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		photoMode = applicationInterface.getPhotoMode(sharedPreferences);
-
+		if( !has_settings ) {
+			updateSettings();
+		}
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
+
+		final long time_ms = System.currentTimeMillis();
 
 		// see documentation for CameraController.shouldCoverPreview()
 		if( preview.usingCamera2API() && ( camera_controller == null || camera_controller.shouldCoverPreview() ) ) {
@@ -1282,8 +1398,7 @@ public class DrawPreview {
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
 		if( main_activity.getMainUI().inImmersiveMode() ) {
-			String immersive_mode = sharedPreferences.getString(PreferenceKeys.getImmersiveModePreferenceKey(), "immersive_mode_low_profile");
-			if( immersive_mode.equals("immersive_mode_everything") ) {
+			if( immersive_mode_everything_pref ) {
 				// exit, to ensure we don't display anything!
 				// though note we still should do the front screen flash (since the user can take photos via volume keys when
 				// in immersive_mode_everything mode)
@@ -1292,7 +1407,7 @@ public class DrawPreview {
 		}
 
 		final float scale = getContext().getResources().getDisplayMetrics().density;
-		if( camera_controller != null && taking_picture && !front_screen_flash && getTakePhotoBorderPref() ) {
+		if( camera_controller != null && taking_picture && !front_screen_flash && take_photo_border_pref ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
 			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels
@@ -1339,7 +1454,7 @@ public class DrawPreview {
 		
 		// note, no need to check preferences here, as we do that when setting thumbnail_anim
 		if( camera_controller != null && this.thumbnail_anim && last_thumbnail != null ) {
-			long time = System.currentTimeMillis() - this.thumbnail_anim_start_ms;
+			long time = time_ms - this.thumbnail_anim_start_ms;
 			final long duration = 500;
 			if( time > duration ) {
 				if( MyDebug.LOG )
@@ -1387,14 +1502,14 @@ public class DrawPreview {
 			}
 		}
 
-		drawUI(canvas);
+		drawUI(canvas, time_ms);
 
 		drawAngleLines(canvas);
 
 		if( camera_controller != null && continuous_focus_moving && !taking_picture ) {
 			// we don't display the continuous focusing animation when taking a photo - and can also ive the impression of having
 			// frozen if we pause because the image saver queue is full
-			long dt = System.currentTimeMillis() - continuous_focus_moving_ms;
+			long dt = time_ms - continuous_focus_moving_ms;
 			final long length = 1000;
 			/*if( MyDebug.LOG )
 				Log.d(TAG, "continuous focus moving, dt: " + dt);*/

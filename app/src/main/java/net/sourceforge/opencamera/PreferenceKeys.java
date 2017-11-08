@@ -9,37 +9,25 @@ public class PreferenceKeys {
 
 	/** If this preference is set, no longer show the intro dialog.
 	 */
-    public static String getFirstTimePreferenceKey() {
-        return "done_first_time";
-    }
-    
+	public static final String FirstTimePreferenceKey = "done_first_time";
+
 	/** This preference stores the version number seen by the user - used to show "What's New" dialog.
 	 */
-    public static String getLatestVersionPreferenceKey() {
-        return "latest_version";
-    }
+	public static final String LatestVersionPreferenceKey = "latest_version";
 
 	/** If this preference is set, no longer show the auto-stabilise info dialog.
 	 */
-    public static String getAutoStabiliseInfoPreferenceKey() {
-        return "done_auto_stabilise_info";
-    }
-    
+	public static final String AutoStabiliseInfoPreferenceKey = "done_auto_stabilise_info";
+
 	/** If this preference is set, no longer show the HDR info dialog.
 	 */
-    public static String getHDRInfoPreferenceKey() {
-        return "done_hdr_info";
-    }
-    
+	public static final String HDRInfoPreferenceKey = "done_hdr_info";
+
     /** If this preference is set, no longer show the raw info dialog.
 	 */
-    public static String getRawInfoPreferenceKey() {
-        return "done_raw_info";
-    }
+	public static final String RawInfoPreferenceKey = "done_raw_info";
 
-    public static String getUseCamera2PreferenceKey() {
-    	return "preference_use_camera2";
-    }
+	public static final String UseCamera2PreferenceKey = "preference_use_camera2";
 
     public static String getFlashPreferenceKey(int cameraId) {
     	return "flash_value_" + cameraId;
@@ -57,169 +45,87 @@ public class PreferenceKeys {
     	return "video_quality_" + cameraId;
     }
     
-    public static String getIsVideoPreferenceKey() {
-    	return "is_video";
-    }
-    
-    public static String getExposurePreferenceKey() {
-    	return "preference_exposure";
-    }
+	public static final String IsVideoPreferenceKey = "is_video";
 
-    public static String getColorEffectPreferenceKey() {
-    	return "preference_color_effect";
-    }
+	public static final String ExposurePreferenceKey = "preference_exposure";
 
-    public static String getSceneModePreferenceKey() {
-    	return "preference_scene_mode";
-    }
+	public static final String ColorEffectPreferenceKey = "preference_color_effect";
 
-    public static String getWhiteBalancePreferenceKey() {
-    	return "preference_white_balance";
-    }
+	public static final String SceneModePreferenceKey = "preference_scene_mode";
 
-    public static String getWhiteBalanceTemperaturePreferenceKey() {
-        return "preference_white_balance_temperature";
-    }
+	public static final String WhiteBalancePreferenceKey = "preference_white_balance";
 
-    public static String getISOPreferenceKey() {
-    	return "preference_iso";
-    }
-    
-    public static String getExposureTimePreferenceKey() {
-    	return "preference_exposure_time";
-    }
-    
-    public static String getRawPreferenceKey() {
-    	return "preference_raw";
-    }
-    
-    public static String getExpoBracketingNImagesPreferenceKey() {
-    	return "preference_expo_bracketing_n_images";
-    }
+	public static final String WhiteBalanceTemperaturePreferenceKey = "preference_white_balance_temperature";
 
-    public static String getExpoBracketingStopsPreferenceKey() {
-    	return "preference_expo_bracketing_stops";
-    }
-    
-    public static String getVolumeKeysPreferenceKey() {
-    	return "preference_volume_keys";
-    }
-    
-    public static String getAudioControlPreferenceKey() {
-    	return "preference_audio_control";
-    }
-    
-    public static String getAudioNoiseControlSensitivityPreferenceKey() {
-    	return "preference_audio_noise_control_sensitivity";
-    }
-    
-    public static String getQualityPreferenceKey() {
-    	return "preference_quality";
-    }
-    
-    public static String getAutoStabilisePreferenceKey() {
-    	return "preference_auto_stabilise";
-    }
-    
-    public static String getPhotoModePreferenceKey() {
-    	return "preference_photo_mode";
-    }
+	public static final String ISOPreferenceKey = "preference_iso";
 
-    public static String getHDRSaveExpoPreferenceKey() {
-    	return "preference_hdr_save_expo";
-    }
+	public static final String ExposureTimePreferenceKey = "preference_exposure_time";
 
-    public static String getNRSaveExpoPreferenceKey() {
-    	return "preference_nr_save";
-    }
+	public static final String RawPreferenceKey = "preference_raw";
 
-    public static String getLocationPreferenceKey() {
-    	return "preference_location";
-    }
-    
-    public static String getGPSDirectionPreferenceKey() {
-    	return "preference_gps_direction";
-    }
-    
-    public static String getRequireLocationPreferenceKey() {
-    	return "preference_require_location";
-    }
-    
-    public static String getStampPreferenceKey() {
-    	return "preference_stamp";
-    }
+	public static final String ExpoBracketingNImagesPreferenceKey = "preference_expo_bracketing_n_images";
 
-    public static String getStampDateFormatPreferenceKey() {
-    	return "preference_stamp_dateformat";
-    }
+	public static final String ExpoBracketingStopsPreferenceKey = "preference_expo_bracketing_stops";
 
-    public static String getStampTimeFormatPreferenceKey() {
-    	return "preference_stamp_timeformat";
-    }
+	public static final String VolumeKeysPreferenceKey = "preference_volume_keys";
 
-    public static String getStampGPSFormatPreferenceKey() {
-    	return "preference_stamp_gpsformat";
-    }
+	public static final String AudioControlPreferenceKey = "preference_audio_control";
 
-    public static String getTextStampPreferenceKey() {
-    	return "preference_textstamp";
-    }
+	public static final String AudioNoiseControlSensitivityPreferenceKey = "preference_audio_noise_control_sensitivity";
 
-    public static String getStampFontSizePreferenceKey() {
-    	return "preference_stamp_fontsize";
-    }
+	public static final String QualityPreferenceKey = "preference_quality";
 
-    public static String getStampFontColorPreferenceKey() {
-    	return "preference_stamp_font_color";
-    }
+	public static final String AutoStabilisePreferenceKey = "preference_auto_stabilise";
 
-    public static String getStampStyleKey() {
-    	return "preference_stamp_style";
-    }
+	public static final String PhotoModePreferenceKey = "preference_photo_mode";
 
-    public static String getVideoSubtitlePref() {
-        return "preference_video_subtitle";
-    }
+	public static final String HDRSaveExpoPreferenceKey = "preference_hdr_save_expo";
 
-    public static String getFrontCameraMirrorKey() {
-        return "preference_front_camera_mirror";
-    }
+	public static final String NRSaveExpoPreferenceKey = "preference_nr_save";
 
-    public static String getBackgroundPhotoSavingPreferenceKey() {
-    	return "preference_background_photo_saving";
-    }
-    
-    public static String getCamera2FakeFlashPreferenceKey() {
-    	return "preference_camera2_fake_flash";
-    }
+	public static final String LocationPreferenceKey = "preference_location";
 
-    public static String getCamera2FastBurstPreferenceKey() {
-        return "preference_camera2_fast_burst";
-    }
+	public static final String GPSDirectionPreferenceKey = "preference_gps_direction";
 
-    public static String getUIPlacementPreferenceKey() {
-    	return "preference_ui_placement";
-    }
-    
-    public static String getTouchCapturePreferenceKey() {
-    	return "preference_touch_capture";
-    }
+	public static final String RequireLocationPreferenceKey = "preference_require_location";
 
-    public static String getPausePreviewPreferenceKey() {
-    	return "preference_pause_preview";
-    }
+	public static final String StampPreferenceKey = "preference_stamp";
 
-    public static String getShowToastsPreferenceKey() {
-    	return "preference_show_toasts";
-    }
+	public static final String StampDateFormatPreferenceKey = "preference_stamp_dateformat";
 
-    public static String getThumbnailAnimationPreferenceKey() {
-    	return "preference_thumbnail_animation";
-    }
+	public static final String StampTimeFormatPreferenceKey = "preference_stamp_timeformat";
 
-    public static String getTakePhotoBorderPreferenceKey() {
-    	return "preference_take_photo_border";
-    }
+	public static final String StampGPSFormatPreferenceKey = "preference_stamp_gpsformat";
+
+	public static final String TextStampPreferenceKey = "preference_textstamp";
+
+	public static final String StampFontSizePreferenceKey = "preference_stamp_fontsize";
+
+	public static final String StampFontColorPreferenceKey = "preference_stamp_font_color";
+
+	public static final String StampStyleKey = "preference_stamp_style";
+
+	public static final String VideoSubtitlePref = "preference_video_subtitle";
+
+	public static final String FrontCameraMirrorKey = "preference_front_camera_mirror";
+
+	public static final String BackgroundPhotoSavingPreferenceKey = "preference_background_photo_saving";
+
+	public static final String Camera2FakeFlashPreferenceKey = "preference_camera2_fake_flash";
+
+	public static final String Camera2FastBurstPreferenceKey = "preference_camera2_fast_burst";
+
+	public static final String UIPlacementPreferenceKey = "preference_ui_placement";
+
+	public static final String TouchCapturePreferenceKey = "preference_touch_capture";
+
+	public static final String PausePreviewPreferenceKey = "preference_pause_preview";
+
+	public static final String ShowToastsPreferenceKey = "preference_show_toasts";
+
+	public static final String ThumbnailAnimationPreferenceKey = "preference_thumbnail_animation";
+
+	public static final String TakePhotoBorderPreferenceKey = "preference_take_photo_border";
 
     public static String getShowWhenLockedPreferenceKey() {
     	return "preference_show_when_locked";
@@ -261,77 +167,41 @@ public class PreferenceKeys {
     	return "preference_save_zulu_time";
     }
 
-    public static String getShowZoomControlsPreferenceKey() {
-    	return "preference_show_zoom_controls";
-    }
+	public static final String ShowZoomControlsPreferenceKey = "preference_show_zoom_controls";
 
-    public static String getShowZoomSliderControlsPreferenceKey() {
-    	return "preference_show_zoom_slider_controls";
-    }
+	public static final String ShowZoomSliderControlsPreferenceKey = "preference_show_zoom_slider_controls";
 
-    public static String getShowTakePhotoPreferenceKey() {
-        return "preference_show_take_photo";
-    }
+	public static final String ShowTakePhotoPreferenceKey = "preference_show_take_photo";
 
-    public static String getShowZoomPreferenceKey() {
-    	return "preference_show_zoom";
-    }
+	public static final String ShowZoomPreferenceKey = "preference_show_zoom";
 
-    public static String getShowISOPreferenceKey() {
-    	return "preference_show_iso";
-    }
+	public static final String ShowISOPreferenceKey = "preference_show_iso";
 
-    public static String getShowAnglePreferenceKey() {
-    	return "preference_show_angle";
-    }
-    
-    public static String getShowAngleLinePreferenceKey() {
-    	return "preference_show_angle_line";
-    }
+	public static final String ShowAnglePreferenceKey = "preference_show_angle";
 
-    public static String getShowPitchLinesPreferenceKey() {
-        return "preference_show_pitch_lines";
-    }
+	public static final String ShowAngleLinePreferenceKey = "preference_show_angle_line";
 
-    public static String getShowGeoDirectionLinesPreferenceKey() {
-        return "preference_show_geo_direction_lines";
-    }
+	public static final String ShowPitchLinesPreferenceKey = "preference_show_pitch_lines";
 
-    public static String getShowAngleHighlightColorPreferenceKey() {
-    	return "preference_angle_highlight_color";
-    }
+	public static final String ShowGeoDirectionLinesPreferenceKey = "preference_show_geo_direction_lines";
 
-    public static String getCalibratedLevelAnglePreferenceKey() {
-        return "preference_calibrate_level_angle";
-    }
+	public static final String ShowAngleHighlightColorPreferenceKey = "preference_angle_highlight_color";
 
-    public static String getShowGeoDirectionPreferenceKey() {
-    	return "preference_show_geo_direction";
-    }
-    
-    public static String getShowFreeMemoryPreferenceKey() {
-    	return "preference_free_memory";
-    }
-    
-    public static String getShowTimePreferenceKey() {
-    	return "preference_show_time";
-    }
-    
-    public static String getShowBatteryPreferenceKey() {
-    	return "preference_show_battery";
-    }
-    
-    public static String getShowGridPreferenceKey() {
-    	return "preference_grid";
-    }
-    
-    public static String getShowCropGuidePreferenceKey() {
-    	return "preference_crop_guide";
-    }
-    
-    public static String getFaceDetectionPreferenceKey() {
-    	return "preference_face_detection";
-    }
+	public static final String CalibratedLevelAnglePreferenceKey = "preference_calibrate_level_angle";
+
+	public static final String ShowGeoDirectionPreferenceKey = "preference_show_geo_direction";
+
+	public static final String ShowFreeMemoryPreferenceKey = "preference_free_memory";
+
+	public static final String ShowTimePreferenceKey = "preference_show_time";
+
+	public static final String ShowBatteryPreferenceKey = "preference_show_battery";
+
+	public static final String ShowGridPreferenceKey = "preference_grid";
+
+	public static final String ShowCropGuidePreferenceKey = "preference_crop_guide";
+
+	public static final String FaceDetectionPreferenceKey = "preference_face_detection";
 
     public static String getVideoStabilizationPreferenceKey() {
     	return "preference_video_stabilization";
@@ -389,9 +259,7 @@ public class PreferenceKeys {
     	return "preference_record_audio_src";
     }
 
-    public static String getPreviewSizePreferenceKey() {
-    	return "preference_preview_size";
-    }
+	public static final String PreviewSizePreferenceKey = "preference_preview_size";
 
     public static String getRotatePreviewPreferenceKey() {
     	return "preference_rotate_preview";
@@ -425,7 +293,5 @@ public class PreferenceKeys {
     	return "preference_shutter_sound";
     }
     
-    public static String getImmersiveModePreferenceKey() {
-    	return "preference_immersive_mode";
-    }
+	public static final String ImmersiveModePreferenceKey = "preference_immersive_mode";
 }

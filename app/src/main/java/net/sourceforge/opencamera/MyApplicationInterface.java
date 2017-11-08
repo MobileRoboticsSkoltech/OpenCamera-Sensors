@@ -79,7 +79,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	private final Rect text_bounds = new Rect();
     private boolean used_front_screen_flash ;
-	
+
+	// store to avoid calling PreferenceManager.getDefaultSharedPreferences() repeatedly
+	private final SharedPreferences sharedPreferences;
+
 	private boolean last_images_saf; // whether the last images array are using SAF or not
 	/** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
 	 */
@@ -114,6 +117,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			debug_time = System.currentTimeMillis();
 		}
 		this.main_activity = main_activity;
+		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		this.locationSupplier = new LocationSupplier(main_activity);
 		if( MyDebug.LOG )
 			Log.d(TAG, "MyApplicationInterface: time after creating location supplier: " + (System.currentTimeMillis() - debug_time));
@@ -190,6 +194,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return imageSaver;
 	}
 
+	public DrawPreview getDrawPreview() {
+		return drawPreview;
+	}
+
     @Override
 	public Context getContext() {
     	return main_activity;
@@ -197,9 +205,8 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public boolean useCamera2() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         if( main_activity.supportsCamera2() ) {
-    		return sharedPreferences.getBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), false);
+    		return sharedPreferences.getBoolean(PreferenceKeys.UseCamera2PreferenceKey, false);
         }
         return false;
     }
@@ -272,56 +279,47 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
     @Override
 	public String getFlashPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getString(PreferenceKeys.getFlashPreferenceKey(cameraId), "");
     }
 
     @Override
 	public String getFocusPref(boolean is_video) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), "");
     }
 
     @Override
 	public boolean isVideoPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getBoolean(PreferenceKeys.getIsVideoPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.IsVideoPreferenceKey, false);
     }
 
     @Override
 	public String getSceneModePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(PreferenceKeys.getSceneModePreferenceKey(), "auto");
+		return sharedPreferences.getString(PreferenceKeys.SceneModePreferenceKey, "auto");
     }
     
     @Override
     public String getColorEffectPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(PreferenceKeys.getColorEffectPreferenceKey(), "none");
+		return sharedPreferences.getString(PreferenceKeys.ColorEffectPreferenceKey, "none");
     }
 
     @Override
     public String getWhiteBalancePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(PreferenceKeys.getWhiteBalancePreferenceKey(), "auto");
+		return sharedPreferences.getString(PreferenceKeys.WhiteBalancePreferenceKey, "auto");
     }
 
 	@Override
 	public int getWhiteBalanceTemperaturePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), 5000);
+		return sharedPreferences.getInt(PreferenceKeys.WhiteBalanceTemperaturePreferenceKey, 5000);
 	}
 
 	@Override
 	public String getISOPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(PreferenceKeys.getISOPreferenceKey(), "auto");
+    	return sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, "auto");
     }
     
     @Override
 	public int getExposureCompensationPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String value = sharedPreferences.getString(PreferenceKeys.getExposurePreferenceKey(), "0");
+		String value = sharedPreferences.getString(PreferenceKeys.ExposurePreferenceKey, "0");
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved exposure value: " + value);
 		int exposure = 0;
@@ -339,7 +337,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public Pair<Integer, Integer> getCameraResolutionPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String resolution_value = sharedPreferences.getString(PreferenceKeys.getResolutionPreferenceKey(cameraId), "");
 		if( MyDebug.LOG )
 			Log.d(TAG, "resolution_value: " + resolution_value);
@@ -383,8 +380,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private int getSaveImageQualityPref() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSaveImageQualityPref");
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		String image_quality_s = sharedPreferences.getString(PreferenceKeys.getQualityPreferenceKey(), "90");
+		String image_quality_s = sharedPreferences.getString(PreferenceKeys.QualityPreferenceKey, "90");
 		int image_quality;
 		try {
 			image_quality = Integer.parseInt(image_quality_s);
@@ -414,25 +410,21 @@ public class MyApplicationInterface implements ApplicationInterface {
     
 	@Override
 	public boolean getFaceDetectionPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getBoolean(PreferenceKeys.getFaceDetectionPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.FaceDetectionPreferenceKey, false);
     }
     
 	@Override
 	public String getVideoQualityPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId), "");
 	}
 	
     @Override
 	public boolean getVideoStabilizationPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		return sharedPreferences.getBoolean(PreferenceKeys.getVideoStabilizationPreferenceKey(), false);
     }
     
     @Override
 	public boolean getForce4KPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		if( cameraId == 0 && sharedPreferences.getBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K() ) {
 			return true;
 		}
@@ -441,19 +433,16 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
     public String getVideoBitratePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getVideoBitratePreferenceKey(), "default");
     }
 
     @Override
     public String getVideoFPSPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getVideoFPSPreferenceKey(), "default");
     }
     
     @Override
     public long getVideoMaxDurationPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String video_max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
 		long video_max_duration;
 		try {
@@ -470,7 +459,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public int getVideoRestartTimesPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String restart_value = sharedPreferences.getString(PreferenceKeys.getVideoRestartPreferenceKey(), "0");
 		int remaining_restart_video;
 		try {
@@ -488,7 +476,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 	long getVideoMaxFileSizeUserPref() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getVideoMaxFileSizeUserPref");
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String video_max_filesize_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxFileSizePreferenceKey(), "0");
 		long video_max_filesize;
 		try {
@@ -506,7 +493,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	private boolean getVideoRestartMaxFileSizeUserPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getVideoRestartMaxFileSizePreferenceKey(), true);
 	}
 
@@ -580,45 +566,38 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public boolean getVideoFlashPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), false);
     }
     
     @Override
     public boolean getVideoLowPowerCheckPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getVideoLowPowerCheckPreferenceKey(), true);
     }
     
     @Override
 	public String getPreviewSizePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(PreferenceKeys.getPreviewSizePreferenceKey(), "preference_preview_size_wysiwyg");
+		return sharedPreferences.getString(PreferenceKeys.PreviewSizePreferenceKey, "preference_preview_size_wysiwyg");
     }
     
     @Override
     public String getPreviewRotationPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getRotatePreviewPreferenceKey(), "0");
     }
     
     @Override
     public String getLockOrientationPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getLockOrientationPreferenceKey(), "none");
     }
 
     @Override
     public boolean getTouchCapturePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	String value = sharedPreferences.getString(PreferenceKeys.getTouchCapturePreferenceKey(), "none");
+    	String value = sharedPreferences.getString(PreferenceKeys.TouchCapturePreferenceKey, "none");
     	return value.equals("single");
     }
     
     @Override
 	public boolean getDoubleTapCapturePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	String value = sharedPreferences.getString(PreferenceKeys.getTouchCapturePreferenceKey(), "none");
+    	String value = sharedPreferences.getString(PreferenceKeys.TouchCapturePreferenceKey, "none");
     	return value.equals("double");
     }
 
@@ -628,36 +607,30 @@ public class MyApplicationInterface implements ApplicationInterface {
 			// don't pause preview when taking photos while recording video!
 			return false;
 		}
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(PreferenceKeys.getPausePreviewPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.PausePreviewPreferenceKey, false);
     }
 
     @Override
 	public boolean getShowToastsPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(PreferenceKeys.getShowToastsPreferenceKey(), true);
+    	return sharedPreferences.getBoolean(PreferenceKeys.ShowToastsPreferenceKey, true);
     }
 
     public boolean getThumbnailAnimationPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(PreferenceKeys.getThumbnailAnimationPreferenceKey(), true);
+    	return sharedPreferences.getBoolean(PreferenceKeys.ThumbnailAnimationPreferenceKey, true);
     }
     
     @Override
     public boolean getShutterSoundPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getShutterSoundPreferenceKey(), true);
     }
 
     @Override
 	public boolean getStartupFocusPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getStartupFocusPreferenceKey(), true);
     }
 
     @Override
     public long getTimerPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String timer_value = sharedPreferences.getString(PreferenceKeys.getTimerPreferenceKey(), "0");
 		long timer_delay;
 		try {
@@ -674,13 +647,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
     public String getRepeatPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getBurstModePreferenceKey(), "1");
     }
     
     @Override
     public long getRepeatIntervalPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		String timer_value = sharedPreferences.getString(PreferenceKeys.getBurstIntervalPreferenceKey(), "0");
 		long timer_delay;
 		try {
@@ -697,84 +668,63 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
     public boolean getGeotaggingPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(PreferenceKeys.getLocationPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.LocationPreferenceKey, false);
     }
     
     @Override
     public boolean getRequireLocationPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(PreferenceKeys.getRequireLocationPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.RequireLocationPreferenceKey, false);
     }
     
     private boolean getGeodirectionPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getBoolean(PreferenceKeys.getGPSDirectionPreferenceKey(), false);
+    	return sharedPreferences.getBoolean(PreferenceKeys.GPSDirectionPreferenceKey, false);
     }
     
     @Override
 	public boolean getRecordAudioPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getBoolean(PreferenceKeys.getRecordAudioPreferenceKey(), true);
     }
     
     @Override
     public String getRecordAudioChannelsPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getRecordAudioChannelsPreferenceKey(), "audio_default");
     }
     
     @Override
     public String getRecordAudioSourcePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	return sharedPreferences.getString(PreferenceKeys.getRecordAudioSourcePreferenceKey(), "audio_src_camcorder");
     }
 
-    private boolean getAutoStabilisePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return getAutoStabilisePref(sharedPreferences);
-    }
-    
-    public boolean getAutoStabilisePref(SharedPreferences sharedPreferences) {
-		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.getAutoStabilisePreferenceKey(), false);
+    public boolean getAutoStabilisePref() {
+		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false);
 		if( auto_stabilise && main_activity.supportsAutoStabilise() )
 			return true;
 		return false;
     }
 
-    private String getStampPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return getStampPref(sharedPreferences);
-    }
-    
-    public String getStampPref(SharedPreferences sharedPreferences) {
-    	return sharedPreferences.getString(PreferenceKeys.getStampPreferenceKey(), "preference_stamp_no");
+    public String getStampPref() {
+    	return sharedPreferences.getString(PreferenceKeys.StampPreferenceKey, "preference_stamp_no");
     }
 
     private String getStampDateFormatPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(PreferenceKeys.getStampDateFormatPreferenceKey(), "preference_stamp_dateformat_default");
+    	return sharedPreferences.getString(PreferenceKeys.StampDateFormatPreferenceKey, "preference_stamp_dateformat_default");
     }
     
     private String getStampTimeFormatPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(PreferenceKeys.getStampTimeFormatPreferenceKey(), "preference_stamp_timeformat_default");
+    	return sharedPreferences.getString(PreferenceKeys.StampTimeFormatPreferenceKey, "preference_stamp_timeformat_default");
     }
     
     private String getStampGPSFormatPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(PreferenceKeys.getStampGPSFormatPreferenceKey(), "preference_stamp_gpsformat_default");
+    	return sharedPreferences.getString(PreferenceKeys.StampGPSFormatPreferenceKey, "preference_stamp_gpsformat_default");
     }
     
     private String getTextStampPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getString(PreferenceKeys.getTextStampPreferenceKey(), "");
+    	return sharedPreferences.getString(PreferenceKeys.TextStampPreferenceKey, "");
     }
     
     private int getTextStampFontSizePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     	int font_size = 12;
-		String value = sharedPreferences.getString(PreferenceKeys.getStampFontSizePreferenceKey(), "12");
+		String value = sharedPreferences.getString(PreferenceKeys.StampFontSizePreferenceKey, "12");
 		if( MyDebug.LOG )
 			Log.d(TAG, "saved font size: " + value);
 		try {
@@ -790,8 +740,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
 	private String getVideoSubtitlePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getString(PreferenceKeys.getVideoSubtitlePref(), "preference_video_subtitle_no");
+		return sharedPreferences.getString(PreferenceKeys.VideoSubtitlePref, "preference_video_subtitle_no");
 	}
 
 	@Override
@@ -803,14 +752,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public double getCalibratedLevelAngle() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getFloat(PreferenceKeys.getCalibratedLevelAnglePreferenceKey(), 0.0f);
+		return sharedPreferences.getFloat(PreferenceKeys.CalibratedLevelAnglePreferenceKey, 0.0f);
 	}
 
 	@Override
     public long getExposureTimePref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    	return sharedPreferences.getLong(PreferenceKeys.getExposureTimePreferenceKey(), CameraController.EXPOSURE_TIME_DEFAULT);
+    	return sharedPreferences.getLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
     }
     
     @Override
@@ -845,8 +792,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     		n_images = 3;
     	}
     	else {
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-			String n_images_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingNImagesPreferenceKey(), "3");
+			String n_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
 			try {
 				n_images = Integer.parseInt(n_images_s);
 			}
@@ -872,8 +818,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     		n_stops = 2.0;
     	}
     	else {
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-			String n_stops_s = sharedPreferences.getString(PreferenceKeys.getExpoBracketingStopsPreferenceKey(), "2");
+			String n_stops_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingStopsPreferenceKey, "2");
 			try {
 				n_stops = Double.parseDouble(n_stops_s);
 			}
@@ -892,12 +837,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		// Note, this always should return the true photo mode - if we're in video mode and taking a photo snapshot while
 		// video recording, the caller should override. We don't override here, as this preference may be used to affect how
 		// the CameraController is set up, and we don't always re-setup the camera when switching between photo and video modes.
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return getPhotoMode(sharedPreferences);
-    }
-
-    public PhotoMode getPhotoMode(SharedPreferences sharedPreferences) {
-		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.getPhotoModePreferenceKey(), "preference_photo_mode_std");
+		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
 		boolean dro = photo_mode_pref.equals("preference_photo_mode_dro");
 		if( dro && main_activity.supportsDRO() )
 			return PhotoMode.DRO;
@@ -921,26 +861,19 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public boolean isRawPref() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return isRawPref(sharedPreferences);
-    }
-
-	public boolean isRawPref(SharedPreferences sharedPreferences) {
     	if( isImageCaptureIntent() )
     		return false;
-    	return sharedPreferences.getString(PreferenceKeys.getRawPreferenceKey(), "preference_raw_no").equals("preference_raw_yes");
+    	return sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no").equals("preference_raw_yes");
     }
 
     @Override
 	public boolean useCamera2FakeFlash() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getBoolean(PreferenceKeys.getCamera2FakeFlashPreferenceKey(), false);
+		return sharedPreferences.getBoolean(PreferenceKeys.Camera2FakeFlashPreferenceKey, false);
 	}
 
 	@Override
 	public boolean useCamera2FastBurst() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		return sharedPreferences.getBoolean(PreferenceKeys.getCamera2FastBurstPreferenceKey(), true);
+		return sharedPreferences.getBoolean(PreferenceKeys.Camera2FastBurstPreferenceKey, true);
 	}
 
 	@Override
@@ -1024,7 +957,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	@Override
 	public void startingVideo() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		if( sharedPreferences.getBoolean(PreferenceKeys.getLockVideoPreferenceKey(), false) ) {
 			main_activity.lockScreen();
 		}
@@ -1218,9 +1150,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "filename " + filename);
 		}
 		View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
-		pauseVideoButton.setVisibility(View.INVISIBLE);
+		pauseVideoButton.setVisibility(View.GONE);
 		View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
-		takePhotoVideoButton.setVisibility(View.INVISIBLE);
+		takePhotoVideoButton.setVisibility(View.GONE);
 		main_activity.getMainUI().setPauseVideoContentDescription(); // just to be safe
 		main_activity.getMainUI().destroyPopup(); // as the available popup options change while recording video
 		if( subtitleVideoTimerTask != null ) {
@@ -1351,7 +1283,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 			// in versions 1.24 and 1.24, there was a bug where we had "info_" for onVideoError and "error_" for onVideoInfo!
 			// fixed in 1.25; also was correct for 1.23 and earlier
 			String debug_value = "info_" + what + "_" + extra;
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 			SharedPreferences.Editor editor = sharedPreferences.edit();
 			editor.putString("last_video_error", debug_value);
 			editor.apply();
@@ -1388,7 +1319,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		// in versions 1.24 and 1.24, there was a bug where we had "info_" for onVideoError and "error_" for onVideoInfo!
 		// fixed in 1.25; also was correct for 1.23 and earlier
 		String debug_value = "error_" + what + "_" + extra;
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString("last_video_error", debug_value);
 		editor.apply();
@@ -1534,7 +1464,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "timerBeep()");
 			Log.d(TAG, "remaining_time: " + remaining_time);
 		}
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		if( sharedPreferences.getBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), true) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "play beep!");
@@ -1567,7 +1496,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public void setFlashPref(String flash_value) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString(PreferenceKeys.getFlashPreferenceKey(cameraId), flash_value);
 		editor.apply();
@@ -1575,7 +1503,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public void setFocusPref(String focus_value, boolean is_video) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), focus_value);
 		editor.apply();
@@ -1587,97 +1514,85 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public void setVideoPref(boolean is_video) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putBoolean(PreferenceKeys.getIsVideoPreferenceKey(), is_video);
+		editor.putBoolean(PreferenceKeys.IsVideoPreferenceKey, is_video);
 		editor.apply();
     }
 
     @Override
     public void setSceneModePref(String scene_mode) {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getSceneModePreferenceKey(), scene_mode);
+		editor.putString(PreferenceKeys.SceneModePreferenceKey, scene_mode);
 		editor.apply();
     }
     
     @Override
 	public void clearSceneModePref() {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getSceneModePreferenceKey());
+		editor.remove(PreferenceKeys.SceneModePreferenceKey);
 		editor.apply();
     }
 	
     @Override
 	public void setColorEffectPref(String color_effect) {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getColorEffectPreferenceKey(), color_effect);
+		editor.putString(PreferenceKeys.ColorEffectPreferenceKey, color_effect);
 		editor.apply();
     }
 	
     @Override
 	public void clearColorEffectPref() {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getColorEffectPreferenceKey());
+		editor.remove(PreferenceKeys.ColorEffectPreferenceKey);
 		editor.apply();
     }
 	
     @Override
 	public void setWhiteBalancePref(String white_balance) {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getWhiteBalancePreferenceKey(), white_balance);
+		editor.putString(PreferenceKeys.WhiteBalancePreferenceKey, white_balance);
 		editor.apply();
     }
 
     @Override
 	public void clearWhiteBalancePref() {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getWhiteBalancePreferenceKey());
+		editor.remove(PreferenceKeys.WhiteBalancePreferenceKey);
 		editor.apply();
     }
 
 	@Override
 	public void setWhiteBalanceTemperaturePref(int white_balance_temperature) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putInt(PreferenceKeys.getWhiteBalanceTemperaturePreferenceKey(), white_balance_temperature);
+		editor.putInt(PreferenceKeys.WhiteBalanceTemperaturePreferenceKey, white_balance_temperature);
 		editor.apply();
 	}
 
 	@Override
 	public void setISOPref(String iso) {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getISOPreferenceKey(), iso);
+		editor.putString(PreferenceKeys.ISOPreferenceKey, iso);
 		editor.apply();
     }
 
     @Override
 	public void clearISOPref() {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getISOPreferenceKey());
+		editor.remove(PreferenceKeys.ISOPreferenceKey);
 		editor.apply();
     }
 	
     @Override
 	public void setExposureCompensationPref(int exposure) {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getExposurePreferenceKey(), "" + exposure);
+		editor.putString(PreferenceKeys.ExposurePreferenceKey, "" + exposure);
 		editor.apply();
     }
 
     @Override
 	public void clearExposureCompensationPref() {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getExposurePreferenceKey());
+		editor.remove(PreferenceKeys.ExposurePreferenceKey);
 		editor.apply();
     }
 	
@@ -1687,7 +1602,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "save new resolution_value: " + resolution_value);
 		}
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString(PreferenceKeys.getResolutionPreferenceKey(cameraId), resolution_value);
 		editor.apply();
@@ -1695,7 +1609,6 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
     public void setVideoQualityPref(String video_quality) {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId), video_quality);
 		editor.apply();
@@ -1731,17 +1644,15 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public void setExposureTimePref(long exposure_time) {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putLong(PreferenceKeys.getExposureTimePreferenceKey(), exposure_time);
+		editor.putLong(PreferenceKeys.ExposureTimePreferenceKey, exposure_time);
 		editor.apply();
 	}
 
     @Override
 	public void clearExposureTimePref() {
-    	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.remove(PreferenceKeys.getExposureTimePreferenceKey());
+		editor.remove(PreferenceKeys.ExposureTimePreferenceKey);
 		editor.apply();
     }
 
@@ -1751,8 +1662,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
     private int getStampFontColor() {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String color = sharedPreferences.getString(PreferenceKeys.getStampFontColorPreferenceKey(), "#ffffff");
+		String color = sharedPreferences.getString(PreferenceKeys.StampFontColorPreferenceKey, "#ffffff");
 		return Color.parseColor(color);
     }
 
@@ -1767,27 +1677,36 @@ public class MyApplicationInterface implements ApplicationInterface {
 		ALIGNMENT_BOTTOM
 	}
 
-    public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
-		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, Alignment.ALIGNMENT_BOTTOM);
+    public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y) {
+		return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, Alignment.ALIGNMENT_BOTTOM);
 	}
 
-	public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y) {
-		drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, true);
+	public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y) {
+		return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, true);
 	}
 
-	public void drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow) {
+	public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow) {
+		return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, true, null);
+	}
+
+	public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow, Rect bounds) {
 		final float scale = getContext().getResources().getDisplayMetrics().density;
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(background);
 		paint.setAlpha(64);
-		int alt_height = 0;
-		if( ybounds_text != null ) {
-			paint.getTextBounds(ybounds_text, 0, ybounds_text.length(), text_bounds);
-			alt_height = text_bounds.bottom - text_bounds.top;
+		if( bounds != null ) {
+			text_bounds.set(bounds);
 		}
-		paint.getTextBounds(text, 0, text.length(), text_bounds);
-		if( ybounds_text != null ) {
-			text_bounds.bottom = text_bounds.top + alt_height;
+		else {
+			int alt_height = 0;
+			if( ybounds_text != null ) {
+				paint.getTextBounds(ybounds_text, 0, ybounds_text.length(), text_bounds);
+				alt_height = text_bounds.bottom - text_bounds.top;
+			}
+			paint.getTextBounds(text, 0, text.length(), text_bounds);
+			if( ybounds_text != null ) {
+				text_bounds.bottom = text_bounds.top + alt_height;
+			}
 		}
 		final int padding = (int) (2 * scale + 0.5f); // convert dps to pixels
 		if( paint.getTextAlign() == Paint.Align.RIGHT || paint.getTextAlign() == Paint.Align.CENTER ) {
@@ -1813,7 +1732,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		else if( alignment_y == Alignment.ALIGNMENT_CENTRE ) {
 			int height = text_bounds.bottom - text_bounds.top + 2*padding;
-			int y_diff = - text_bounds.top + padding - 1;
+			//int y_diff = - text_bounds.top + padding - 1;
 			text_bounds.top = (int)(0.5 * ( (location_y - 1) + (text_bounds.top + location_y - padding) )); // average of ALIGNMENT_TOP and ALIGNMENT_BOTTOM
 			text_bounds.bottom = text_bounds.top + height;
 			location_y += (int)(0.5*top_y_diff); // average of ALIGNMENT_TOP and ALIGNMENT_BOTTOM
@@ -1827,12 +1746,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		paint.setColor(foreground);
 		canvas.drawText(text, location_x, location_y, paint);
+		return text_bounds.bottom - text_bounds.top;
 	}
 	
 	private boolean saveInBackground(boolean image_capture_intent) {
 		boolean do_in_background = true;
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		if( !sharedPreferences.getBoolean(PreferenceKeys.getBackgroundPhotoSavingPreferenceKey(), true) )
+		if( !sharedPreferences.getBoolean(PreferenceKeys.BackgroundPhotoSavingPreferenceKey, true) )
 			do_in_background = false;
 		else if( image_capture_intent )
 			do_in_background = false;
@@ -1883,13 +1802,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 	    	level_angle = 45.0;
 		// I have received crashes where camera_controller was null - could perhaps happen if this thread was running just as the camera is closing?
 		boolean is_front_facing = main_activity.getPreview().getCameraController() != null && main_activity.getPreview().getCameraController().isFrontFacing();
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-		boolean mirror = is_front_facing && sharedPreferences.getString(PreferenceKeys.getFrontCameraMirrorKey(), "preference_front_camera_mirror_no").equals("preference_front_camera_mirror_photo");
+		boolean mirror = is_front_facing && sharedPreferences.getString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_no").equals("preference_front_camera_mirror_photo");
 		String preference_stamp = this.getStampPref();
 		String preference_textstamp = this.getTextStampPref();
 		int font_size = getTextStampFontSizePref();
         int color = getStampFontColor();
-		String pref_style = sharedPreferences.getString(PreferenceKeys.getStampStyleKey(), "preference_stamp_style_shadowed");
+		String pref_style = sharedPreferences.getString(PreferenceKeys.StampStyleKey, "preference_stamp_style_shadowed");
 		String preference_stamp_dateformat = this.getStampDateFormatPref();
 		String preference_stamp_timeformat = this.getStampTimeFormatPref();
 		String preference_stamp_gpsformat = this.getStampGPSFormatPref();
@@ -1925,7 +1843,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( photo_mode == PhotoMode.NoiseReduction ) {
 			if( n_capture_images == 1 ) {
 				ImageSaver.Request.SaveBase save_base = ImageSaver.Request.SaveBase.SAVEBASE_NONE;
-				String save_base_preference = sharedPreferences.getString(PreferenceKeys.getNRSaveExpoPreferenceKey(), "preference_nr_save_no");
+				String save_base_preference = sharedPreferences.getString(PreferenceKeys.NRSaveExpoPreferenceKey, "preference_nr_save_no");
 				switch( save_base_preference ) {
 					case "preference_nr_save_single":
 						save_base = ImageSaver.Request.SaveBase.SAVEBASE_FIRST;
@@ -2018,8 +1936,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( photo_mode == PhotoMode.HDR ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "HDR mode");
-			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-			boolean save_expo = sharedPreferences.getBoolean(PreferenceKeys.getHDRSaveExpoPreferenceKey(), false);
+			boolean save_expo = sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false);
 			if( MyDebug.LOG )
 				Log.d(TAG, "save_expo: " + save_expo);
 

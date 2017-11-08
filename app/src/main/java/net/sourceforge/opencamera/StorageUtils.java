@@ -45,6 +45,8 @@ public class StorageUtils {
 	private final Context context;
     private Uri last_media_scanned;
 
+	private final static File base_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+
 	// for testing:
 	public volatile boolean failed_to_scan;
 	
@@ -298,7 +300,7 @@ public class StorageUtils {
     }
 
 	public static File getBaseFolder() {
-		return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+		return base_folder;
 	}
 
 	// only valid if !isUsingSAF()

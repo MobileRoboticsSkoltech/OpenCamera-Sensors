@@ -48,6 +48,7 @@
         android:onClick="clickedPauseVideo"
         android:layout_above="@+id/take_photo"
         android:background="@null"
+        android:visibility="gone"
         />
 
     <ImageButton
@@ -75,6 +76,7 @@
         android:onClick="clickedTakePhotoVideoSnapshot"
         android:layout_below="@+id/take_photo"
         android:background="@null"
+        android:visibility="gone"
         />
 
     <ZoomControls
@@ -105,7 +107,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="0dp"
         android:layout_marginBottom="0dp"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:background="@color/seekbar_background"
         />
     
@@ -115,6 +117,7 @@
         android:layout_height="0dp"
         android:padding="1dp"
         android:scaleType="fitCenter"
+        android:visibility="invisible"
         />
 
     <ImageButton
@@ -203,6 +206,7 @@
         android:contentDescription="@string/audio_control_start"
         android:src="@drawable/ic_mic_white_48dp"
         android:onClick="clickedAudioControl"
+        android:visibility="gone"
         />
 
     <!-- should be at left-most -->
@@ -238,6 +242,7 @@
         android:layout_centerVertical="true"
         android:orientation="vertical"
         android:background="@color/seekbar_background"
+        android:visibility="gone"
         >
 
         <RelativeLayout
@@ -245,6 +250,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:visibility="gone"
             >
 
             <TextView
@@ -274,6 +280,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:visibility="gone"
             >
 
             <TextView
@@ -326,6 +333,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:visibility="gone"
             >
 
             <TextView
@@ -370,6 +378,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:visibility="gone"
             >
 
             <TextView
@@ -394,13 +403,6 @@
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/prefs_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerInParent="true"
-        />
-    
-    <FrameLayout
         android:id="@+id/locker"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -418,6 +420,8 @@
         android:id="@+id/hide_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:visibility="gone"
         />
     
 </RelativeLayout>
