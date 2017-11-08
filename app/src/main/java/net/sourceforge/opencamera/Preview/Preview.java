@@ -1820,14 +1820,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					int last_n_faces = -1;
 					FaceLocation last_face_location = FaceLocation.FACELOCATION_UNSET;
 
+					/** Note, at least for Camera2 API, onFaceDetection() isn't called on UI thread.
+					 */
 				    @Override
 				    public void onFaceDetection(CameraController.Face[] faces) {
 						/*if( MyDebug.LOG )
 							Log.d(TAG, "onFaceDetection: " + faces);*/
-				    	faces_detected = new CameraController.Face[faces.length];
-				    	System.arraycopy(faces, 0, faces_detected, 0, faces.length);
+						if( camera_controller == null ) {
+							// can get a crash in some cases when switching camera when face detection is on
+							faces_detected = null;
+							return;
+						}
+						// take a local copy first before assigning to faces_detected, as the latter has to be done on the UI thread
+						final CameraController.Face [] local_faces = new CameraController.Face[faces.length];
+				    	System.arraycopy(faces, 0, local_faces, 0, faces.length);
 				    	// convert rects to preview screen space
-						for(CameraController.Face face : faces_detected) {
+						for(CameraController.Face face : local_faces) {
 							face_rect.set(face.rect);
 							getCameraToPreviewMatrix().mapRect(face_rect);
 							face_rect.round(face.rect);
@@ -1836,14 +1844,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
 							// accessibility: report number of faces for talkback etc
 
-							int n_faces = faces_detected.length;
+							int n_faces = local_faces.length;
 							FaceLocation face_location = FaceLocation.FACELOCATION_UNKNOWN;
 							if( n_faces > 0 ) {
 								// set face_location
 								float avg_x = 0, avg_y = 0;
 								final float bdry_frac_c = 0.3f;
 								boolean all_centre = true;
-								for(CameraController.Face face : faces_detected) {
+								for(CameraController.Face face : local_faces) {
 									float face_x = face.rect.centerX();
 									float face_y = face.rect.centerY();
 									face_x /= (float)cameraSurface.getView().getWidth();
@@ -1948,6 +1956,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 								last_face_location = face_location;
 							}
 						}
+
+						// We don't sychronize on faces_detected, as the array may be passed to other
+						// classes via getFacesDetected(). Although that function could copy instead,
+						// that would mean an allocation in every frame in DrawPreview.
+						// Easier to just do the assignment on the UI thread.
+						Activity activity = (Activity)Preview.this.getContext();
+						activity.runOnUiThread(new Runnable() {
+							public void run() {
+								faces_detected = local_faces;
+							}
+						});
 				    }
 				}
 				camera_controller.setFaceDetectionListener(new MyFaceDetectionListener());
