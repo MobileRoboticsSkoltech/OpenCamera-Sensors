@@ -459,7 +459,7 @@
     <string name="donate">Donate</string>
 
     <!-- for accessibility, these strings for face detection will typically be spoken, e.g., through Google Talkback -->
-    <string name="faces_detected">faces detected</string>
+    <string name="faces_detected">faces</string>
     <string name="left_of_screen">at left of screen</string>
     <string name="right_of_screen">at right of screen</string>
     <string name="top_of_screen">at top of screen</string>
