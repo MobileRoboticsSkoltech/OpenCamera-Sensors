@@ -141,8 +141,11 @@ public class CameraController1 extends CameraController {
 	}
 	
 	public void release() {
-		camera.release();
-		camera = null;
+		if( camera != null ) {
+			// have had crashes when this is called from Preview/CloseCameraTask.
+			camera.release();
+			camera = null;
+		}
 	}
 
 	private Camera.Parameters getParameters() {
