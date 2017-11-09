@@ -1824,8 +1824,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					 */
 				    @Override
 				    public void onFaceDetection(CameraController.Face[] faces) {
-						/*if( MyDebug.LOG )
-							Log.d(TAG, "onFaceDetection: " + faces);*/
+						if( MyDebug.LOG )
+							Log.d(TAG, "onFaceDetection: " + faces);
 						if( camera_controller == null ) {
 							// can get a crash in some cases when switching camera when face detection is on
 							faces_detected = null;
