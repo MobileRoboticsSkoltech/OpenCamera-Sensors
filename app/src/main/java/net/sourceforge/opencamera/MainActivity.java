@@ -3181,7 +3181,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	    View speechRecognizerButton = findViewById(R.id.audio_control);
     	    speechRecognizerButton.setVisibility(View.GONE);
 			speechRecognizer.cancel();
-			speechRecognizer.destroy();
+			try {
+				speechRecognizer.destroy();
+			}
+			catch(IllegalArgumentException e) {
+				// reported from Google Play - unclear why this happens, but might as well catch
+				Log.e(TAG, "exception destroying speechRecognizer");
+				e.printStackTrace();
+			}
 			speechRecognizer = null;
 		}
 	}
