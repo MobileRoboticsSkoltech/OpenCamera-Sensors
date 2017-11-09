@@ -927,6 +927,15 @@ public class CameraController2 extends CameraController {
 			e.printStackTrace();
 			throw new CameraControllerException();
 		}
+		catch(IllegalArgumentException e) {
+			// have seen this from Google Play
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to open camera: IllegalArgumentException");
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
 
 		// set up a timeout - sometimes if the camera has got in a state where it can't be opened until after a reboot, we'll never even get a myStateCallback callback called
 		handler.postDelayed(new Runnable() {
