@@ -2389,9 +2389,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		}
 		if( is_preview_started ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "setPreviewSize() shouldn't be called when preview is running");
-			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+			Log.e(TAG, "setPreviewSize() shouldn't be called when preview is running");
+			//throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+			// Bizarrely I have seen the above crash reported from Google Play devices, but inspection of the code leaves it unclear
+			// why this can happen. So have disabled the exception since this evidently can happen.
+			return;
 		}
 		if( !using_android_l ) {
 			// don't do for Android L, else this means we get flash on startup autofocus if flash is on
