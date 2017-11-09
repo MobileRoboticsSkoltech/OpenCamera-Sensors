@@ -1914,7 +1914,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 									// only say 0 faces detected if previously the number was non-zero
 								}
 								else {
-									String string = n_faces + " " + getContext().getResources().getString(R.string.faces_detected);
+									String string = n_faces + " " + getContext().getResources().getString(n_faces==1 ? R.string.face_detected : R.string.faces_detected);
 									if( n_faces > 0 && face_location != FaceLocation.FACELOCATION_UNKNOWN ) {
 										switch( face_location ) {
 											case FACELOCATION_CENTRE:
