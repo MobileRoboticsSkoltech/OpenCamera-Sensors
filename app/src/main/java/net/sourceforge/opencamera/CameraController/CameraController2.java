@@ -70,6 +70,7 @@ public class CameraController2 extends CameraController {
 	private AutoFocusCallback autofocus_cb;
 	private boolean capture_follows_autofocus_hint;
 	private FaceDetectionListener face_detection_listener;
+	private int last_faces_detected = -1;
 	private final Object image_reader_lock = new Object(); // lock to make sure we only handle one image being available at a time
 	private final Object open_camera_lock = new Object(); // lock to wait for camera to be opened from CameraDevice.StateCallback
 	private final Object create_capture_session_lock = new Object(); // lock to wait for capture session to be created from CameraCaptureSession.StateCallback
@@ -3459,6 +3460,7 @@ public class CameraController2 extends CameraController {
 	@Override
 	public void setFaceDetectionListener(final FaceDetectionListener listener) {
 		this.face_detection_listener = listener;
+		this.last_faces_detected = -1;
 	}
 
 	/* If do_af_trigger_for_continuous is false, doing an autoFocus() in continuous focus mode just
@@ -5258,11 +5260,17 @@ public class CameraController2 extends CameraController {
 				Rect sensor_rect = getViewableRect();
 				android.hardware.camera2.params.Face [] camera_faces = result.get(CaptureResult.STATISTICS_FACES);
 				if( camera_faces != null ) {
-					CameraController.Face [] faces = new CameraController.Face[camera_faces.length];
-					for(int i=0;i<camera_faces.length;i++) {
-						faces[i] = convertFromCameraFace(sensor_rect, camera_faces[i]);
+					if( camera_faces.length == 0 && last_faces_detected == 0 ) {
+						// no point continually calling the callback if 0 faces detected (same behaviour as CameraController1)
 					}
-					face_detection_listener.onFaceDetection(faces);
+					else {
+						last_faces_detected = camera_faces.length;
+						CameraController.Face [] faces = new CameraController.Face[camera_faces.length];
+						for(int i=0;i<camera_faces.length;i++) {
+							faces[i] = convertFromCameraFace(sensor_rect, camera_faces[i]);
+						}
+						face_detection_listener.onFaceDetection(faces);
+					}
 				}
 			}
 
