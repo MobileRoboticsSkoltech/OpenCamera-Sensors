@@ -29,8 +29,15 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.TwoStatePreference;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Locale;
@@ -536,8 +543,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked about");
             	        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
-                        alertDialog.setTitle(getActivity().getResources().getString(R.string.preference_about));
+                        alertDialog.setTitle(R.string.preference_about);
                         final StringBuilder about_string = new StringBuilder();
+                		final String gpl_link = "GPL v3 or later";
+                		final String online_help_link = "online help";
                         String version = "UNKNOWN_VERSION";
                         int version_code = -1;
 						try {
@@ -555,7 +564,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append("\nCode: ");
                         about_string.append(version_code);
                         about_string.append("\n(c) 2013-2017 Mark Harman");
-                        about_string.append("\nReleased under the GPL v3 or later");
+                        about_string.append("\nReleased under the ");
+                        about_string.append(gpl_link);
+                        about_string.append(" (Open Camera also uses additional third party files, see " + online_help_link + " for full licences and attributions.)");
                         about_string.append("\nPackage: ");
                         about_string.append(MyPreferenceFragment.this.getActivity().getPackageName());
                         about_string.append("\nAndroid API version: ");
@@ -809,8 +820,42 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 		else {
                             about_string.append("None");
                 		}
-                        
-                        alertDialog.setMessage(about_string);
+
+                		SpannableString span = new SpannableString(about_string);
+					    span.setSpan(new ClickableSpan() {
+					        @Override
+        					public void onClick(View v) {
+                        		if( MyDebug.LOG )
+	            					Log.d(TAG, "gpl link clicked");
+								Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.gnu.org/copyleft/gpl.html"));
+								startActivity(browserIntent);
+					        }
+						}, about_string.indexOf(gpl_link), about_string.indexOf(gpl_link) + gpl_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+					    span.setSpan(new ClickableSpan() {
+					        @Override
+        					public void onClick(View v) {
+                        		if( MyDebug.LOG )
+	            					Log.d(TAG, "online help link clicked");
+								MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+								main_activity.launchOnlineHelp();
+					        }
+						}, about_string.indexOf(online_help_link), about_string.indexOf(online_help_link) + online_help_link.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+					    // clickable text is only supported if we call setMovementMethod on the TextView - which means we need to create
+						// our own for the AlertDialog!
+						final float scale = getActivity().getResources().getDisplayMetrics().density;
+						TextView textView = new TextView(getActivity());
+						textView.setText(span);
+						textView.setMovementMethod(LinkMovementMethod.getInstance());
+						textView.setTextAppearance(getActivity(), android.R.style.TextAppearance_Medium);
+						ScrollView scrollView = new ScrollView(getActivity());
+						scrollView.addView(textView);
+						// padding values from /sdk/platforms/android-18/data/res/layout/alert_dialog.xml
+						textView.setPadding((int)(5*scale+0.5f), (int)(5*scale+0.5f), (int)(5*scale+0.5f), (int)(5*scale+0.5f));
+						scrollView.setPadding((int)(14*scale+0.5f), (int)(2*scale+0.5f), (int)(10*scale+0.5f), (int)(12*scale+0.5f));
+						alertDialog.setView(scrollView);
+                        //alertDialog.setMessage(about_string);
+
                         alertDialog.setPositiveButton(android.R.string.ok, null);
                         alertDialog.setNegativeButton(R.string.about_copy_to_clipboard, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
