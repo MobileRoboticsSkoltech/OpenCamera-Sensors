@@ -56,7 +56,12 @@ public class CameraController2 extends CameraController {
 	private final Context context;
 	private CameraDevice camera;
 	private String cameraIdS;
+
 	private CameraCharacteristics characteristics;
+	// cached characteristics (use this for values that need to be frequently accessed, e.g., per frame, to improve performance);
+	private int characteristics_sensor_orientation;
+	private boolean characteristics_is_front_facing;
+
 	private List<Integer> zoom_ratios;
 	private int current_zoom_value;
 	private boolean supports_face_detect_mode_simple;
@@ -797,6 +802,13 @@ public class CameraController2 extends CameraController {
 						characteristics = manager.getCameraCharacteristics(cameraIdS);
 						if( MyDebug.LOG )
 							Log.d(TAG, "successfully obtained camera characteristics");
+						// now read cached values
+						characteristics_sensor_orientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+						characteristics_is_front_facing = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "characteristics_sensor_orientation: " + characteristics_sensor_orientation);
+							Log.d(TAG, "characteristics_is_front_facing: " + characteristics_is_front_facing);
+						}
 
 						CameraController2.this.camera = cam;
 
@@ -4535,12 +4547,14 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public int getCameraOrientation() {
-		return characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+		// cached for performance, as this method is frequently called from Preview.onOrientationChanged
+		return characteristics_sensor_orientation;
 	}
 
 	@Override
 	public boolean isFrontFacing() {
-		return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
+		// cached for performance, as this method is frequently called from Preview.onOrientationChanged
+		return characteristics_is_front_facing;
 	}
 
 	@Override

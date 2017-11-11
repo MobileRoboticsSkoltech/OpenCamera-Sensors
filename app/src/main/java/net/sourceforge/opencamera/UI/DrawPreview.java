@@ -63,12 +63,14 @@ public class DrawPreview {
 	private boolean has_stamp_pref;
 	private boolean is_raw_pref;
 	private boolean auto_stabilise_pref;
+	private String preference_grid_pref;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
 	private final RectF draw_rect = new RectF();
 	//private final int [] gui_location = new int[2];
 	private final static DecimalFormat decimalFormat = new DecimalFormat("#0.0");
+	private final float scale;
 	private final float stroke_width;
 	private Calendar calendar;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
@@ -89,7 +91,10 @@ public class DrawPreview {
 	private long last_free_memory_time;
 
 	private String current_time_string;
-	private long current_time_time;
+	private long last_current_time_time;
+
+	private String iso_exposure_string;
+	private long last_iso_exposure_time;
 
 	private final IntentFilter battery_ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 	private boolean has_battery_frac;
@@ -140,12 +145,12 @@ public class DrawPreview {
 		this.main_activity = main_activity;
 		this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 		this.applicationInterface = applicationInterface;
-		// n.b., don't call updateSettings() here, as it may rely on things that aren't yet initialise (e.g., the prevew)
+		// n.b., don't call updateSettings() here, as it may rely on things that aren't yet initialise (e.g., the preview)
 		// see testHDRRestart
 
 		p.setAntiAlias(true);
         p.setStrokeCap(Paint.Cap.ROUND);
-		final float scale = getContext().getResources().getDisplayMetrics().density;
+		scale = getContext().getResources().getDisplayMetrics().density;
 		this.stroke_width = (1.0f * scale + 0.5f); // convert dps to pixels
 		p.setStrokeWidth(stroke_width);
 
@@ -327,6 +332,8 @@ public class DrawPreview {
 
 		auto_stabilise_pref = applicationInterface.getAutoStabilisePref();
 
+		preference_grid_pref = sharedPreferences.getString(PreferenceKeys.ShowGridPreferenceKey, "preference_grid_none");
+
 		has_settings = true;
 	}
 
@@ -345,10 +352,8 @@ public class DrawPreview {
 		if( camera_controller == null ) {
 			return;
 		}
-		String preference_grid = sharedPreferences.getString(PreferenceKeys.ShowGridPreferenceKey, "preference_grid_none");
-		final float scale = getContext().getResources().getDisplayMetrics().density;
 
-		switch( preference_grid ) {
+		switch( preference_grid_pref ) {
 			case "preference_grid_3x3":
 				p.setColor(Color.WHITE);
 				canvas.drawLine(canvas.getWidth() / 3.0f, 0.0f, canvas.getWidth() / 3.0f, canvas.getHeight() - 1.0f, p);
@@ -385,7 +390,7 @@ public class DrawPreview {
 			case "preference_grid_golden_spiral_upside_down_right":
 			case "preference_grid_golden_spiral_upside_down_left":
 				canvas.save();
-				switch (preference_grid) {
+				switch( preference_grid_pref ) {
 					case "preference_grid_golden_spiral_left":
 						canvas.scale(-1.0f, 1.0f, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.5f);
 						break;
@@ -492,7 +497,7 @@ public class DrawPreview {
 				double dist = canvas.getHeight() * Math.cos(theta);
 				float dist_x = (float) (dist * Math.sin(theta));
 				float dist_y = (float) (dist * Math.cos(theta));
-				if( preference_grid.equals("preference_grid_golden_triangle_1") ) {
+				if( preference_grid_pref.equals("preference_grid_golden_triangle_1") ) {
 					canvas.drawLine(0.0f, canvas.getHeight() - 1.0f, canvas.getWidth() - 1.0f, 0.0f, p);
 					canvas.drawLine(0.0f, 0.0f, dist_x, canvas.getHeight() - dist_y, p);
 					canvas.drawLine(canvas.getWidth() - 1.0f - dist_x, dist_y - 1.0f, canvas.getWidth() - 1.0f, canvas.getHeight() - 1.0f, p);
@@ -588,7 +593,6 @@ public class DrawPreview {
 		Preview preview  = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
-		final float scale = getContext().getResources().getDisplayMetrics().density;
 
 		// set up text etc for the multiple lines of "info" (time, free mem, etc)
 		p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
@@ -610,7 +614,7 @@ public class DrawPreview {
 		}
 
 		if( show_time_pref ) {
-			if( current_time_string == null || time_ms/1000 > current_time_time/1000 ) {
+			if( current_time_string == null || time_ms/1000 > last_current_time_time/1000 ) {
 				// avoid creating a new calendar object every time
 				if( calendar == null )
 					calendar = Calendar.getInstance();
@@ -619,7 +623,7 @@ public class DrawPreview {
 
 				current_time_string = dateFormatTimeInstance.format(calendar.getTime());
 				//current_time_string = DateUtils.formatDateTime(getContext(), c.getTimeInMillis(), DateUtils.FORMAT_SHOW_TIME);
-				current_time_time = time_ms;
+				last_current_time_time = time_ms;
 			}
 	        // n.b., DateFormat.getTimeInstance() ignores user preferences such as 12/24 hour or date format, but this is an Android bug.
 	        // Whilst DateUtils.formatDateTime doesn't have that problem, it doesn't print out seconds! See:
@@ -682,26 +686,31 @@ public class DrawPreview {
 		}
 
 		if( camera_controller != null && show_iso_pref ) {
-			String string = "";
-			if( camera_controller.captureResultHasIso() ) {
-				int iso = camera_controller.captureResultIso();
-				if( string.length() > 0 )
-					string += " ";
-				string += preview.getISOString(iso);
+			if( iso_exposure_string == null || time_ms > last_iso_exposure_time + 500 ) {
+				iso_exposure_string = "";
+				if( camera_controller.captureResultHasIso() ) {
+					int iso = camera_controller.captureResultIso();
+					if( iso_exposure_string.length() > 0 )
+						iso_exposure_string += " ";
+					iso_exposure_string += preview.getISOString(iso);
+				}
+				if( camera_controller.captureResultHasExposureTime() ) {
+					long exposure_time = camera_controller.captureResultExposureTime();
+					if( iso_exposure_string.length() > 0 )
+						iso_exposure_string += " ";
+					iso_exposure_string += preview.getExposureTimeString(exposure_time);
+				}
+				/*if( camera_controller.captureResultHasFrameDuration() ) {
+					long frame_duration = camera_controller.captureResultFrameDuration();
+					if( iso_exposure_string.length() > 0 )
+						iso_exposure_string += " ";
+					iso_exposure_string += preview.getFrameDurationString(frame_duration);
+				}*/
+
+				last_iso_exposure_time = time_ms;
 			}
-			if( camera_controller.captureResultHasExposureTime() ) {
-				long exposure_time = camera_controller.captureResultExposureTime();
-				if( string.length() > 0 )
-					string += " ";
-				string += preview.getExposureTimeString(exposure_time);
-			}
-			/*if( camera_controller.captureResultHasFrameDuration() ) {
-				long frame_duration = camera_controller.captureResultFrameDuration();
-				if( string.length() > 0 )
-					string += " ";
-				string += preview.getFrameDurationString(frame_duration);
-			}*/
-			if( string.length() > 0 ) {
+
+			if( iso_exposure_string.length() > 0 ) {
 				boolean is_scanning = false;
 				if( camera_controller.captureResultIsAEScanning() ) {
 					// only show as scanning if in auto ISO mode (problem on Nexus 6 at least that if we're in manual ISO mode, after pausing and
@@ -726,7 +735,7 @@ public class DrawPreview {
 					ae_started_scanning_ms = -1;
 				}
 				// can't cache the bounds rect, as the width may change significantly as the ISO or exposure values change
-				int height = applicationInterface.drawTextWithBackground(canvas, p, string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
+				int height = applicationInterface.drawTextWithBackground(canvas, p, iso_exposure_string, text_color, Color.BLACK, location_x, location_y, MyApplicationInterface.Alignment.ALIGNMENT_TOP, ybounds_text, true);
 				height += gap_y;
 				// only move location_y if we actually print something (because on old camera API, even if the ISO option has
 				// been enabled, we'll never be able to display the on-screen ISO)
@@ -882,7 +891,6 @@ public class DrawPreview {
 		double level_angle = preview.getLevelAngle();
 		boolean has_geo_direction = preview.hasGeoDirection();
 		double geo_direction = preview.getGeoDirection();
-		final float scale = getContext().getResources().getDisplayMetrics().density;
 
 		canvas.save();
 		canvas.rotate(ui_rotation, canvas.getWidth()/2.0f, canvas.getHeight()/2.0f);
@@ -1184,7 +1192,6 @@ public class DrawPreview {
 		CameraController camera_controller = preview.getCameraController();
 		boolean has_level_angle = preview.hasLevelAngle();
 		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line_pref || show_pitch_lines_pref || show_geo_direction_lines_pref ) ) {
-			final float scale = getContext().getResources().getDisplayMetrics().density;
 			int ui_rotation = preview.getUIRotation();
 			double level_angle = preview.getLevelAngle();
 			boolean has_pitch_angle = preview.hasPitchAngle();
@@ -1405,7 +1412,6 @@ public class DrawPreview {
 			}
 		}
 
-		final float scale = getContext().getResources().getDisplayMetrics().density;
 		if( camera_controller != null && taking_picture && !front_screen_flash && take_photo_border_pref ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
@@ -1634,7 +1640,6 @@ public class DrawPreview {
     }
 
     private void drawGyroSpot(Canvas canvas, float distance_x, float distance_y) {
-		final float scale = getContext().getResources().getDisplayMetrics().density;
 		p.setAlpha(64);
 		float radius = (45 * scale + 0.5f); // convert dps to pixels
 		canvas.drawCircle(canvas.getWidth()/2.0f + distance_x, canvas.getHeight()/2.0f + distance_y, radius, p);

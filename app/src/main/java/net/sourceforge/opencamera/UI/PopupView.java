@@ -520,6 +520,7 @@ public class PopupView extends LinearLayout {
 					SharedPreferences.Editor editor = sharedPreferences.edit();
 					editor.putString(PreferenceKeys.ShowGridPreferenceKey, new_grid_value);
 					editor.apply();
+					main_activity.getApplicationInterface().getDrawPreview().updateSettings(); // because we cache the grid
     			}
 				@Override
 				public int onClickPrev() {
