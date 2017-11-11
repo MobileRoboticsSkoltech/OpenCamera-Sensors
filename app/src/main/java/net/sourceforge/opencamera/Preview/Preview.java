@@ -3577,21 +3577,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				String focus_value = current_focus_index != -1 ? supported_focus_values.get(current_focus_index) : null;
 				if( MyDebug.LOG )
 					Log.d(TAG, "focus_value is " + focus_value);
-				if( !is_video && focus_value != null && focus_value.equals("focus_mode_continuous_picture") ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "restart camera due to returning to continuous picture mode from video mode");
-					// workaround for bug on Nexus 6 at least where switching to video and back to photo mode causes continuous picture mode to stop
-					this.reopenCamera();
-				}
-				else {
-					if( this.is_preview_started ) {
-						camera_controller.stopPreview();
-						this.is_preview_started = false;
-					}
-					setPreviewSize();
-					// always start the camera preview, even if it was previously paused (also needed to update preview fps)
-			        this.startCameraPreview();
-				}
+				// Although in theory we only need to stop and start preview, which should be faster, reopening the camera allows that to
+				// run on the background thread, thus not freezing the UI
+				// Also workaround for bug on Nexus 6 at least where switching to video and back to photo mode causes continuous picture mode to stop -
+				// at the least, we need to reopen camera when: ( !is_video && focus_value != null && focus_value.equals("focus_mode_continuous_picture") ).
+				this.reopenCamera();
 			}
 
 			/*if( is_video ) {
