@@ -804,9 +804,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
     			Log.d(TAG, "stop video recording");
     		//this.phase = PHASE_NORMAL;
+			video_recorder.setOnErrorListener(null);
+			video_recorder.setOnInfoListener(null);
+
 			try {
-				video_recorder.setOnErrorListener(null);
-				video_recorder.setOnInfoListener(null);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "about to call video_recorder.stop()");
 				video_recorder.stop();
@@ -846,23 +847,27 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     				applicationInterface.onVideoRecordStopError(profile);
     			}
 			}
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "reset video_recorder");
-    		video_recorder.reset();
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "release video_recorder");
-    		video_recorder.release(); 
-    		video_recorder = null;
-			video_recorder_is_paused = false;
-			applicationInterface.cameraInOperation(false, true);
-			reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
-			applicationInterface.stoppedVideo(video_method, video_uri, video_filename);
-    		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
-    		video_uri = null;
-			video_filename = null;
+			videoRecordingStopped();
 		}
 	}
 	
+	private void videoRecordingStopped() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "reset video_recorder");
+		video_recorder.reset();
+		if( MyDebug.LOG )
+			Log.d(TAG, "release video_recorder");
+		video_recorder.release();
+		video_recorder = null;
+		video_recorder_is_paused = false;
+		applicationInterface.cameraInOperation(false, true);
+		reconnectCamera(false); // n.b., if something went wrong with video, then we reopen the camera - which may fail (or simply not reopen, e.g., if app is now paused)
+		applicationInterface.stoppedVideo(video_method, video_uri, video_filename);
+		video_method = ApplicationInterface.VIDEOMETHOD_FILE;
+		video_uri = null;
+		video_filename = null;
+	}
+
 	private Context getContext() {
 		return applicationInterface.getContext();
 	}
