@@ -4506,20 +4506,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to start video recorder");
 				video_recorder.start();
-				video_recorder_is_paused = false;
-				if( MyDebug.LOG )
-					Log.d(TAG, "video recorder started");
-				if( test_video_failure ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "test_video_failure is true");
-					throw new RuntimeException();
-				}
-				video_start_time = System.currentTimeMillis();
-				video_start_time_set = true;
-				applicationInterface.startedVideo();
-				// Don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file.
-				// Don't do any further calls after applicationInterface.startedVideo() that might throw an error - instead video error
-				// should be handled by including a call to stopVideo() (since the video_recorder has started).
+				videoRecordingStarted(max_filesize_restart);
 			}
 			catch(IOException e) {
 				if( MyDebug.LOG )
@@ -4570,90 +4557,105 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				this.reconnectCamera(true);
 				this.showToast(null, R.string.video_no_free_space);
 			}
+		}
+	}
 
-			{
-            	// handle restarts
-				if( remaining_restart_video == 0 && !max_filesize_restart ) {
-					remaining_restart_video = applicationInterface.getVideoRestartTimesPref();
-		    		if( MyDebug.LOG )
-		    			Log.d(TAG, "initialised remaining_restart_video to: " + remaining_restart_video);
-				}
+	private void videoRecordingStarted(boolean max_filesize_restart) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "video recorder started");
+		video_recorder_is_paused = false;
+		if( test_video_failure ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "test_video_failure is true");
+			throw new RuntimeException();
+		}
+		video_start_time = System.currentTimeMillis();
+		video_start_time_set = true;
+		applicationInterface.startedVideo();
+		// Don't send intent for ACTION_MEDIA_SCANNER_SCAN_FILE yet - wait until finished, so we get completed file.
+		// Don't do any further calls after applicationInterface.startedVideo() that might throw an error - instead video error
+		// should be handled by including a call to stopVideo() (since the video_recorder has started).
 
-				if( applicationInterface.getVideoFlashPref() && supportsFlash() ) {
-					class FlashVideoTimerTask extends TimerTask {
-    					public void run() {
-    			    		if( MyDebug.LOG )
-    			    			Log.e(TAG, "FlashVideoTimerTask");
-    						Activity activity = (Activity)Preview.this.getContext();
-    						activity.runOnUiThread(new Runnable() {
-    							public void run() {
-    								// we run on main thread to avoid problem of camera closing at the same time
-    								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
-    								if( camera_controller != null && flashVideoTimerTask != null )
-    									flashVideo();
-    								else {
-    									if( MyDebug.LOG )
-    										Log.d(TAG, "flashVideoTimerTask: don't flash video, as already cancelled");
-    								}
-    							}
-    						});
-    					}
-					}
-    		    	flashVideoTimer.schedule(flashVideoTimerTask = new FlashVideoTimerTask(), 0, 1000);
-				}
-				
-				if( applicationInterface.getVideoLowPowerCheckPref() ) {
-					/* When a device shuts down due to power off, the application will receive shutdown signals, and normally the video
-					 * should stop and be valid. However it can happen that the video ends up corrupted (I've had people telling me this
-					 * can happen; Googling finds plenty of stories of this happening on Android devices). I think the issue is that for
-					 * very large videos, a lot of time is spent processing during the MediaRecorder.stop() call - if that doesn't complete
-					 * by the time the device switches off, the video may be corrupt.
-					 * So we add an extra safety net - devices typically turn off abou 1%, but we stop video at 3% to be safe. The user
-					 * can try recording more videos after that if the want, but this reduces the risk that really long videos are entirely
-					 * lost.
-					 */
-					class BatteryCheckVideoTimerTask extends TimerTask {
-    					public void run() {
-    			    		if( MyDebug.LOG )
-    			    			Log.d(TAG, "BatteryCheckVideoTimerTask");
-    			    		
-    						// only check periodically - unclear if checking is costly in any way
-    						// note that it's fine to call registerReceiver repeatedly - we pass a null receiver, so this is fine as a "one shot" use
-    						Intent batteryStatus = getContext().registerReceiver(null, battery_ifilter);
-    						int battery_level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-    						int battery_scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-    						double battery_frac = battery_level/(double)battery_scale;
-							if( MyDebug.LOG )
-								Log.d(TAG, "batteryCheckVideoTimerTask: battery level at: " + battery_frac);
-							
-							if( battery_frac <= 0.03 ) {
+		// handle restarts
+		if( remaining_restart_video == 0 && !max_filesize_restart ) {
+			remaining_restart_video = applicationInterface.getVideoRestartTimesPref();
+			if( MyDebug.LOG )
+				Log.d(TAG, "initialised remaining_restart_video to: " + remaining_restart_video);
+		}
+
+		if( applicationInterface.getVideoFlashPref() && supportsFlash() ) {
+			class FlashVideoTimerTask extends TimerTask {
+				public void run() {
+					if( MyDebug.LOG )
+						Log.e(TAG, "FlashVideoTimerTask");
+					Activity activity = (Activity)Preview.this.getContext();
+					activity.runOnUiThread(new Runnable() {
+						public void run() {
+							// we run on main thread to avoid problem of camera closing at the same time
+							// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
+							if( camera_controller != null && flashVideoTimerTask != null )
+								flashVideo();
+							else {
 								if( MyDebug.LOG )
-									Log.d(TAG, "batteryCheckVideoTimerTask: battery at critical level, switching off video");
-	    						Activity activity = (Activity)Preview.this.getContext();
-	    						activity.runOnUiThread(new Runnable() {
-	    							public void run() {
-	    								// we run on main thread to avoid problem of camera closing at the same time
-	    								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
-	    								if( camera_controller != null && batteryCheckVideoTimerTask != null ) {
-	    									stopVideo(false);
-	    									String toast = getContext().getResources().getString(R.string.video_power_critical);
-    										showToast(null, toast); // show the toast afterwards, as we're hogging the UI thread here, and media recorder takes time to stop
-	    								}
-	    								else {
-	    									if( MyDebug.LOG )
-	    										Log.d(TAG, "batteryCheckVideoTimerTask: don't stop video, as already cancelled");
-	    								}
-	    							}
-	    						});
+									Log.d(TAG, "flashVideoTimerTask: don't flash video, as already cancelled");
 							}
-    					}
-					}
-					final long battery_check_interval_ms = 60 * 1000;
-					// Since we only first check after battery_check_interval_ms, this means users will get some video recorded even if the battery is already too low.
-					// But this is fine, as typically short videos won't be corrupted if the device shuts off, and good to allow users to try to record a bit more if they want.
-					batteryCheckVideoTimer.schedule(batteryCheckVideoTimerTask = new BatteryCheckVideoTimerTask(), battery_check_interval_ms, battery_check_interval_ms);
+						}
+					});
 				}
 			}
+			flashVideoTimer.schedule(flashVideoTimerTask = new FlashVideoTimerTask(), 0, 1000);
+		}
+
+		if( applicationInterface.getVideoLowPowerCheckPref() ) {
+			/* When a device shuts down due to power off, the application will receive shutdown signals, and normally the video
+			 * should stop and be valid. However it can happen that the video ends up corrupted (I've had people telling me this
+			 * can happen; Googling finds plenty of stories of this happening on Android devices). I think the issue is that for
+			 * very large videos, a lot of time is spent processing during the MediaRecorder.stop() call - if that doesn't complete
+			 * by the time the device switches off, the video may be corrupt.
+			 * So we add an extra safety net - devices typically turn off abou 1%, but we stop video at 3% to be safe. The user
+			 * can try recording more videos after that if the want, but this reduces the risk that really long videos are entirely
+			 * lost.
+			 */
+			class BatteryCheckVideoTimerTask extends TimerTask {
+				public void run() {
+					if( MyDebug.LOG )
+						Log.d(TAG, "BatteryCheckVideoTimerTask");
+
+					// only check periodically - unclear if checking is costly in any way
+					// note that it's fine to call registerReceiver repeatedly - we pass a null receiver, so this is fine as a "one shot" use
+					Intent batteryStatus = getContext().registerReceiver(null, battery_ifilter);
+					int battery_level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+					int battery_scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+					double battery_frac = battery_level/(double)battery_scale;
+					if( MyDebug.LOG )
+						Log.d(TAG, "batteryCheckVideoTimerTask: battery level at: " + battery_frac);
+
+					if( battery_frac <= 0.03 ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "batteryCheckVideoTimerTask: battery at critical level, switching off video");
+						Activity activity = (Activity)Preview.this.getContext();
+						activity.runOnUiThread(new Runnable() {
+							public void run() {
+								// we run on main thread to avoid problem of camera closing at the same time
+								// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
+								if( camera_controller != null && batteryCheckVideoTimerTask != null ) {
+									stopVideo(false);
+									String toast = getContext().getResources().getString(R.string.video_power_critical);
+									showToast(null, toast); // show the toast afterwards, as we're hogging the UI thread here, and media recorder takes time to stop
+								}
+								else {
+									if( MyDebug.LOG )
+										Log.d(TAG, "batteryCheckVideoTimerTask: don't stop video, as already cancelled");
+								}
+							}
+						});
+					}
+				}
+			}
+			final long battery_check_interval_ms = 60 * 1000;
+			// Since we only first check after battery_check_interval_ms, this means users will get some video recorded even if the battery is already too low.
+			// But this is fine, as typically short videos won't be corrupted if the device shuts off, and good to allow users to try to record a bit more if they want.
+			batteryCheckVideoTimer.schedule(batteryCheckVideoTimerTask = new BatteryCheckVideoTimerTask(), battery_check_interval_ms, battery_check_interval_ms);
 		}
 	}
 	
