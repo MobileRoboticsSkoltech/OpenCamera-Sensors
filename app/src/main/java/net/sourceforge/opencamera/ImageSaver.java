@@ -773,7 +773,9 @@ public class ImageSaver extends Thread {
         	long time_s = System.currentTimeMillis();
 			if( request.jpeg_images.size() > 1 ) {
 				// if there's only 1 image, we're in DRO mode, and shouldn't save the base image
-				saveBaseImages(request, "_EXP");
+				// note that in earlier Open Camera versions, we used _EXP as the suffix. We now use just "_" from 1.42 onwards, so Google
+				// Photos will group them together. (Unfortunately using "_EXP_" doesn't work, the images aren't grouped!)
+				saveBaseImages(request, "_");
 				if( MyDebug.LOG ) {
 					Log.d(TAG, "HDR performance: time after saving base exposures: " + (System.currentTimeMillis() - time_s));
 				}
