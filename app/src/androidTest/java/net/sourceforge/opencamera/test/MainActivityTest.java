@@ -72,7 +72,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
 		SharedPreferences.Editor editor = settings.edit();
 		editor.clear();
-		//editor.putBoolean(PreferenceKeys.getUseCamera2PreferenceKey(), true); // uncomment to test Camera2 API
+		//editor.putBoolean(PreferenceKeys.UseCamera2PreferenceKey, true); // uncomment to test Camera2 API
 		editor.apply();
 		Log.d(TAG, "setUp: 2");
 
@@ -2052,11 +2052,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
 		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_container);
 		SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
-	    ZoomControls seekBarZoom = (ZoomControls) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar_zoom);
 	    assertTrue(exposureButton.getVisibility() == (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
 	    assertTrue(exposureContainer.getVisibility() == View.GONE);
-	    assertTrue(seekBarZoom.getVisibility() == View.GONE);
-	    
+
 	    if( !mPreview.supportsExposures() ) {
 	    	return;
 	    }
@@ -2064,7 +2062,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
-	    assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
 
 		subTestISOButtonAvailability();
 
@@ -2087,11 +2084,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureContainer.getVisibility() == View.GONE);
-	    assertTrue(seekBarZoom.getVisibility() == View.GONE);
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
-	    assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
 	    assertTrue( mPreview.getCurrentExposure() == mPreview.getMinimumExposure() );
 	    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
 
@@ -2103,11 +2098,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    TouchUtils.drag(MainActivityTest.this, gui_location[0]+step_dist_c, gui_location[0], gui_location[1]+step_dist_c, gui_location[1], step_count_c);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureContainer.getVisibility() == View.GONE);
-	    assertTrue(seekBarZoom.getVisibility() == View.GONE);
 	    clickView(exposureButton);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
-	    assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
 	    assertTrue( mPreview.getCurrentExposure() == mPreview.getMinimumExposure() );
 	    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
 
@@ -2121,7 +2114,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    TouchUtils.drag(MainActivityTest.this, gui_location[0]+step_dist_c, gui_location[0], gui_location[1]+step_dist_c, gui_location[1], step_count_c);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureContainer.getVisibility() == View.GONE);
-	    assertTrue(seekBarZoom.getVisibility() == View.GONE);
 
 	    subTestTakePhoto(false, false, true, true, false, false, false, false);
 
@@ -2133,14 +2125,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 		    assertTrue(exposureContainer.getVisibility() == View.GONE);
-		    assertTrue(seekBarZoom.getVisibility() == View.GONE);
 		    assertTrue( mPreview.getCurrentExposure() == -1 );
 		    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
 
 		    clickView(exposureButton);
 		    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 		    assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
-		    assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
 		    assertTrue( mPreview.getCurrentExposure() == -1 );
 		    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
 		}
@@ -2397,13 +2387,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
 		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_container);
 		SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
-		ZoomControls seekBarZoom = (ZoomControls) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar_zoom);
         View manualWBContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.manual_white_balance_container);
 		SeekBar seekBarWB = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_seekbar);
 
 		assertTrue(exposureButton.getVisibility() == (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
 		assertTrue(exposureContainer.getVisibility() == View.GONE);
-		assertTrue(seekBarZoom.getVisibility() == View.GONE);
 		assertTrue(manualWBContainer.getVisibility() == View.GONE);
 
 		if( !mPreview.supportsExposures() ) {
@@ -2416,7 +2404,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 		assertTrue(exposureContainer.getVisibility() == View.VISIBLE);
 		assertTrue(seekBar.getVisibility() == View.VISIBLE);
-		assertTrue(seekBarZoom.getVisibility() == View.VISIBLE);
         assertTrue(manualWBContainer.getVisibility() == View.VISIBLE);
 		assertTrue(seekBarWB.getVisibility() == View.VISIBLE);
 	}
