@@ -4328,7 +4328,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			applicationInterface.cameraInOperation(false, true);
 		}
 		if( created_video_file ) {
-        	CamcorderProfile profile = getCamcorderProfile();
+        	final CamcorderProfile profile = getCamcorderProfile();
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "current_video_quality: " + this.video_quality_handler.getCurrentVideoQualityIndex());
     			if( this.video_quality_handler.getCurrentVideoQualityIndex() != -1 )
@@ -4525,6 +4525,24 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					failedToStartVideoRecorder(profile);
 				}
 
+				/*Activity activity = (Activity)Preview.this.getContext();
+				activity.runOnUiThread(new Runnable() {
+					public void run() {
+						try {
+							video_recorder.start();
+							videoRecordingStarted(max_filesize_restart);
+						}
+						catch(RuntimeException e) {
+							// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
+							if( MyDebug.LOG )
+								Log.e(TAG, "runtime exception starting video recorder");
+							e.printStackTrace();
+							// told_app_starting must be true if we're here
+							applicationInterface.stoppingVideo();
+							failedToStartVideoRecorder(profile);
+						}
+					}
+				});*/
 				/*new AsyncTask<Void, Void, Void>() {
 					private static final String TAG = "video_recorder.start";
 
