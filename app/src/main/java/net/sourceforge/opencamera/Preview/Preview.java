@@ -4283,7 +4283,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	/** Start video recording.
 	 */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	private void startVideoRecording(boolean max_filesize_restart) {
+	private void startVideoRecording(final boolean max_filesize_restart) {
 		focus_success = FOCUS_DONE; // clear focus rectangle (don't do for taking photos yet)
 		// initialise just in case:
 		boolean created_video_file = false;
@@ -4505,8 +4505,38 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				camera_controller.initVideoRecorderPostPrepare(video_recorder);
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to start video recorder");
-				video_recorder.start();
-				videoRecordingStarted(max_filesize_restart);
+
+				try {
+					video_recorder.start();
+					videoRecordingStarted(max_filesize_restart);
+				}
+				catch(RuntimeException e) {
+					// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
+					if( MyDebug.LOG )
+						Log.e(TAG, "runtime exception starting video recorder");
+					e.printStackTrace();
+					// told_app_starting must be true if we're here
+					applicationInterface.stoppingVideo();
+					failedToStartVideoRecorder(profile);
+				}
+
+				/*new AsyncTask<Void, Void, Void>() {
+					private static final String TAG = "video_recorder.start";
+
+					@Override
+					protected Void doInBackground(Void... voids) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "doInBackground, async task: " + this);
+						video_recorder.start();
+						return null;
+					}
+
+					protected void onPostExecute(Void param) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "onPostExecute, async task: " + this);
+						videoRecordingStarted(max_filesize_restart);
+					}
+				}.execute();*/
 			}
 			catch(IOException e) {
 				if( MyDebug.LOG )
@@ -4522,16 +4552,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				video_recorder_is_paused = false;
 				applicationInterface.cameraInOperation(false, true);
 				this.reconnectCamera(true);
-			}
-			catch(RuntimeException e) {
-				// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
-				if( MyDebug.LOG )
-					Log.e(TAG, "runtime exception starting video recorder");
-				e.printStackTrace();
-				if( told_app_starting ) {
-					applicationInterface.stoppingVideo();
-				}
-				failedToStartVideoRecorder(profile);
 			}
 			catch(CameraControllerException e) {
 				if( MyDebug.LOG )
