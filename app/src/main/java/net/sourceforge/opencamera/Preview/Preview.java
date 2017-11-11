@@ -5861,7 +5861,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	
 		class RotatedTextView extends View {
 			private String [] lines;
-			private final Paint paint = new Paint();
+			private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			private final Rect bounds = new Rect();
 			private final Rect sub_bounds = new Rect();
 			private final RectF rect = new RectF();
