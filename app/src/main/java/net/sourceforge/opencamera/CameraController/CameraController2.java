@@ -18,6 +18,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
@@ -104,6 +105,7 @@ public class CameraController2 extends CameraController {
 	private Image pending_image;
 	private ErrorCallback take_picture_error_cb;
 	private boolean want_video_high_speed;
+	private boolean is_video_high_speed; // whether we're actually recording in high speed
 	//private ImageReader previewImageReader;
 	private SurfaceTexture texture;
 	private Surface surface_texture;
@@ -1308,7 +1310,7 @@ public class CameraController2 extends CameraController {
 		if( capabilities_high_speed_video ) {
 			android.util.Size[] camera_video_sizes_high_speed = configs.getHighSpeedVideoSizes();
 			camera_features.video_sizes_high_speed = new ArrayList<>();
-			for (android.util.Size camera_size : camera_video_sizes_high_speed) {
+			for(android.util.Size camera_size : camera_video_sizes_high_speed) {
 				if (MyDebug.LOG)
 					Log.d(TAG, "high speed video size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
 				if (camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160)
@@ -2097,6 +2099,7 @@ public class CameraController2 extends CameraController {
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		this.want_video_high_speed = want_video_high_speed;
+		this.is_video_high_speed = false; // reset just to be safe
 	}
 
 	@Override
@@ -3112,7 +3115,14 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "no camera or capture session");
 			return;
 		}
-		captureSession.setRepeatingRequest(request, previewCaptureCallback, handler);
+		if( is_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+			CameraConstrainedHighSpeedCaptureSession captureSessionHighSpeed = (CameraConstrainedHighSpeedCaptureSession)captureSession;
+			List<CaptureRequest> mPreviewBuilderBurst = captureSessionHighSpeed.createHighSpeedRequestList(request);
+			captureSessionHighSpeed.setRepeatingBurst(mPreviewBuilderBurst, previewCaptureCallback, handler);
+		}
+		else {
+			captureSession.setRepeatingRequest(request, previewCaptureCallback, handler);
+		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "setRepeatingRequest done");
 	}
@@ -3349,21 +3359,30 @@ public class CameraController2 extends CameraController {
 					}
 					else {
 						Log.d(TAG, "imageReader: " + imageReader);
-						Log.d(TAG, "imageReader: " + imageReader.getWidth());
-						Log.d(TAG, "imageReader: " + imageReader.getHeight());
-						Log.d(TAG, "imageReader: " + imageReader.getImageFormat());
+						Log.d(TAG, "imageReader width: " + imageReader.getWidth());
+						Log.d(TAG, "imageReader height: " + imageReader.getHeight());
+						Log.d(TAG, "imageReader format: " + imageReader.getImageFormat());
 					}
 				}
 			}
-        	if( want_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+        	if( video_recorder != null && want_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+				//StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+				//configs.getHighSpeedVideoFpsRangesFor()
+				// okay to set this for previewBuilder - we create a new one in initVideoRecorderPostPrepare() when starting
+				// video recording, and another one when stopping video recording in reconnect().
+				Range<Integer> fps_range = new Range<>(120, 120);
+				previewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps_range);
+
 				camera.createConstrainedHighSpeedCaptureSession(surfaces,
 					myStateCallback,
 					handler);
+				is_video_high_speed = true;
 			}
 			else {
 				camera.createCaptureSession(surfaces,
 					myStateCallback,
 					handler);
+				is_video_high_speed = false;
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "wait until session created...");

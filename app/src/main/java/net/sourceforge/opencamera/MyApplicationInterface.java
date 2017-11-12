@@ -1325,7 +1325,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 	
 	@Override
-	public void onVideoRecordStartError(CamcorderProfile profile) {
+	public void onVideoRecordStartError(Preview.VideoProfile profile) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onVideoRecordStartError");
 		String error_message;
@@ -1344,7 +1344,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
-	public void onVideoRecordStopError(CamcorderProfile profile) {
+	public void onVideoRecordStopError(Preview.VideoProfile profile) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onVideoRecordStopError");
 		//main_activity.getPreview().showToast(null, R.string.failed_to_record_video);

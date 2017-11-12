@@ -211,9 +211,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<CameraController.Size> sizes;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
-	private boolean video_slow_motion;
-	private boolean supports_video_slow_motion;
-	private CameraController.Size video_slow_motion_size;
+	private boolean has_capture_rate_factor; // whether we have a capture rate for faster or slow motion
+	private float capture_rate_factor = 1.0f; // should be 1.0f if has_capture_rate_factor is false
+	private boolean video_high_speed;
+	private boolean supports_video_high_speed;
+	private CameraController.Size video_high_speed_size;
 	private final VideoQualityHandler video_quality_handler = new VideoQualityHandler();
 
 	private Toast last_toast;
@@ -290,6 +292,51 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public volatile boolean test_fail_open_camera;
 	public volatile boolean test_video_failure;
 	public volatile boolean test_ticker_called; // set from MySurfaceView or CanvasView
+
+	/** This is essentially similar to CamcorderProfile in that it encapsulates a set of video settings
+	 *  to be passed to MediaRecorder, but allows us to create values without having to create a
+	 *  CamcorderProfile (needed for slow motion / high speed video recording).
+	 */
+	public class VideoProfile {
+		final CamcorderProfile camcorderProfile;
+		public final int audioCodec;
+		public final int fileFormat;
+		public final int videoBitRate;
+		public final int videoCodec;
+		public final int videoFrameHeight;
+		public final int videoFrameRate;
+		public final int videoFrameWidth;
+
+		VideoProfile(CamcorderProfile camcorderProfile) {
+			this.camcorderProfile = camcorderProfile;
+
+			this.audioCodec = camcorderProfile.audioCodec;
+			this.fileFormat = camcorderProfile.fileFormat;
+			this.videoBitRate = camcorderProfile.videoBitRate;
+			this.videoCodec = camcorderProfile.videoCodec;
+			this.videoFrameHeight = camcorderProfile.videoFrameHeight;
+			this.videoFrameRate = camcorderProfile.videoFrameRate;
+			this.videoFrameWidth = camcorderProfile.videoFrameWidth;
+		}
+		VideoProfile(int audioCodec, int fileFormat, int videoBitRate, int videoCodec, int videoFrameHeight, int videoFrameRate, int videoFrameWidth) {
+			this.camcorderProfile = null;
+
+			this.audioCodec = audioCodec;
+			this.fileFormat = fileFormat;
+			this.videoBitRate = videoBitRate;
+			this.videoCodec = videoCodec;
+			this.videoFrameHeight = videoFrameHeight;
+			this.videoFrameRate = videoFrameRate;
+			this.videoFrameWidth = videoFrameWidth;
+		}
+
+		/** Returns the CamcorderProfile this VideoProfile was created with, or null if it was not
+		 *  created with a CamcorderProfile.
+		 */
+		CamcorderProfile getCamcorderProfile() {
+			return this.camcorderProfile;
+		}
+	}
 
 	public Preview(ApplicationInterface applicationInterface, ViewGroup parent) {
 		if( MyDebug.LOG ) {
@@ -846,7 +893,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			video_filename = null;
 	    		// if video recording is stopped quickly after starting, it's normal that we might not have saved a valid file, so no need to display a message
     			if( !video_start_time_set || System.currentTimeMillis() - video_start_time > 2000 ) {
-    	        	CamcorderProfile profile = getCamcorderProfile();
+    	        	VideoProfile profile = getVideoProfile();
     				applicationInterface.onVideoRecordStopError(profile);
     			}
 			}
@@ -960,7 +1007,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			// update: can no longer reproduce failures on Nexus 7?!
     			this.is_preview_started = false;
     			if( !quiet ) {
-    	        	CamcorderProfile profile = getCamcorderProfile();
+    	        	VideoProfile profile = getVideoProfile();
     				applicationInterface.onVideoRecordStopError(profile);
     			}
     			camera_controller.release();
@@ -1252,9 +1299,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		view_angle_y = 43.0f; // set a sensible default
 		sizes = null;
 		current_size_index = -1;
-		video_slow_motion = false;
-		supports_video_slow_motion = false;
-		video_slow_motion_size = null;
+		has_capture_rate_factor = false;
+		capture_rate_factor = 1.0f;
+		video_high_speed = false;
+		supports_video_high_speed = false;
+		video_high_speed_size = null;
 		video_quality_handler.resetCurrentQuality();
 		supported_flash_values = null;
 		current_flash_index = -1;
@@ -1626,15 +1675,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 
-		// Setup for slow motion - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize()
-		if( this.is_video && this.supports_video_slow_motion && false /*&& applicationInterface.isVideoSlowMotionPref()*/ ) {
-			video_slow_motion = true;
+		// Setup for high speed - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize()
+		/*if( this.is_video && this.supports_video_high_speed
+				&& false
+				// && applicationInterface.isVideoSlowMotionPref()
+			) {
+	    	has_capture_rate_factor = true;
+	    	capture_rate_factor = 0.25f;
+			video_high_speed = true;
 			camera_controller.setVideoHighSpeed(true);
 		}
 		else {
-			video_slow_motion = false;
+			video_high_speed = false;
 			camera_controller.setVideoHighSpeed(false);
 		}
+		has_capture_rate_factor = true;
+		capture_rate_factor = 0.25f;
+		*/
 
 		if( do_startup_focus && using_android_l && camera_controller.supportsAutoFocus() ) {
 			// need to switch flash off for autofocus - and for Android L, need to do this before starting preview (otherwise it won't work in time); for old camera API, need to do this after starting preview!
@@ -1813,17 +1870,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.supports_raw = camera_features.supports_raw;
 			this.view_angle_x = camera_features.view_angle_x;
 			this.view_angle_y = camera_features.view_angle_y;
-			this.supports_video_slow_motion = camera_features.video_sizes_high_speed != null && camera_features.video_sizes_high_speed.size() > 0;
-			if( supports_video_slow_motion ) {
+			this.supports_video_high_speed = camera_features.video_sizes_high_speed != null && camera_features.video_sizes_high_speed.size() > 0;
+			if( supports_video_high_speed ) {
 				// only use highest high speed resolution for now
 				for(int i=0;i<camera_features.video_sizes_high_speed.size();i++) {
 					CameraController.Size size = camera_features.video_sizes_high_speed.get(i);
-		        	if( video_slow_motion_size == null || size.width*size.height > video_slow_motion_size.width*video_slow_motion_size.height ) {
-		        		video_slow_motion_size = size;
+		        	if( video_high_speed_size == null || size.width*size.height > video_high_speed_size.width*video_high_speed_size.height ) {
+		        		video_high_speed_size = size;
 		        	}
 		        }
 				if( MyDebug.LOG )
-					Log.d(TAG, "supports_video_slow_motion, size: " + video_slow_motion_size.width + " x " + video_slow_motion_size.height);
+					Log.d(TAG, "supports_video_high_speed, size: " + video_high_speed_size.width + " x " + video_high_speed_size.height);
 			}
 			this.video_quality_handler.setVideoSizes(camera_features.video_sizes);
 	        this.supported_preview_sizes = camera_features.preview_sizes;
@@ -2436,14 +2493,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		CameraController.Size new_size = null;
     	if( this.is_video ) {
 			// see comments for getOptimalVideoPictureSize()
-        	CamcorderProfile profile = getCamcorderProfile();
-        	if( MyDebug.LOG )
-        		Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
-        	if( video_slow_motion ) {
-        		// picture size must match video resolution for slow motion, see doc for CameraDevice.createConstrainedHighSpeedCaptureSession()
-				new_size = new CameraController.Size(profile.videoFrameWidth, profile.videoFrameHeight);
+        	if( video_high_speed ) {
+        		// picture size must match video resolution for high speed, see doc for CameraDevice.createConstrainedHighSpeedCaptureSession()
+				new_size = new CameraController.Size(video_high_speed_size.width, video_high_speed_size.height);
 			}
 			else {
+				VideoProfile profile = getVideoProfile();
+				if( MyDebug.LOG )
+					Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
 				double targetRatio = ((double) profile.videoFrameWidth) / (double) profile.videoFrameHeight;
 				new_size = getOptimalVideoPictureSize(sizes, targetRatio);
 			}
@@ -2458,14 +2515,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	}
 		// set optimal preview size
         if( supported_preview_sizes != null && supported_preview_sizes.size() > 0 ) {
-	        /*CameraController.Size best_size = supported_preview_sizes.get(0);
-	        for(CameraController.Size size : supported_preview_sizes) {
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "    supported preview size: " + size.width + ", " + size.height);
-	        	if( size.width*size.height > best_size.width*best_size.height ) {
-	        		best_size = size;
-	        	}
-	        }*/
         	CameraController.Size best_size = getOptimalPreviewSize(supported_preview_sizes);
         	camera_controller.setPreviewSize(best_size.width, best_size.height);
         	this.set_preview_size = true;
@@ -2538,6 +2587,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         this.video_quality_handler.initialiseVideoQualityFromProfiles(profiles, dimensions);
 	}
 
+	/** Gets a CamcorderProfile associated with the supplied quality, for non-slow motion modes. Note
+	 *  that the supplied quality doesn't have to match whatever the current video mode is (or indeed,
+	 *  this might be called even in slow motion mode), since we use this for things like setting up
+	 *  available preferences.
+	 */
 	private CamcorderProfile getCamcorderProfile(String quality) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCamcorderProfile(): " + quality);
@@ -2545,10 +2599,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH);
-		}
-		if( video_slow_motion ) {
-			Log.e(TAG, "shouldn't call getCamcorderProfile in slow motion mode");
-			throw new RuntimeException();
 		}
 		int cameraId = camera_controller.getCameraId();
 		CamcorderProfile camcorder_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH); // default
@@ -2599,18 +2649,28 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 		return camcorder_profile;
 	}
-	
-	public CamcorderProfile getCamcorderProfile() {
+
+	/** Returns a profile describing the currently selected video quality. The returned VideoProfile
+	 *  will usually encapsulate a CamcorderProfile (VideoProfile.getCamcorderProfile() will return
+	 *  non-null), but not always (e.g., for slow motion mode).
+	 */
+	public VideoProfile getVideoProfile() {
 		// 4K UHD video is not yet supported by Android API (at least testing on Samsung S5 and Note 3, they do not return it via getSupportedVideoSizes(), nor via a CamcorderProfile (either QUALITY_HIGH, or anything else)
 		// but it does work if we explicitly set the resolution (at least tested on an S5)
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
-			return CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH);
+			return new VideoProfile( CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH) );
 		}
-		if( video_slow_motion ) {
-			Log.e(TAG, "shouldn't call getCamcorderProfile in slow motion mode");
-			throw new RuntimeException();
+		if( video_high_speed ) {
+			// return a video profile for a high speed frame rate - note that if we have a capture rate factor of say 0.25x,
+			// the actual fps and bitrate of the resultant video would also be scaled by a factor of 0.25x
+			/*return new VideoProfile(MediaRecorder.AudioEncoder.AAC, MediaRecorder.OutputFormat.WEBM, 20000000,
+					MediaRecorder.VideoEncoder.VP8, this.video_high_speed_size.height, 120,
+					this.video_high_speed_size.width);*/
+			return new VideoProfile(MediaRecorder.AudioEncoder.AAC, MediaRecorder.OutputFormat.MPEG_4, 4*14000000,
+					MediaRecorder.VideoEncoder.H264, this.video_high_speed_size.height, 120,
+					this.video_high_speed_size.width);
 		}
 		CamcorderProfile profile;
 		int cameraId = camera_controller.getCameraId();
@@ -2627,6 +2687,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		else {
 			profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
+		}
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "fileFormat: " + profile.fileFormat);
+			Log.d(TAG, "audioCodec: " + profile.audioCodec);
+			Log.d(TAG, "videoCodec: " + profile.videoCodec);
 		}
 
 		String bitrate_value = applicationInterface.getVideoBitratePref();
@@ -2686,7 +2751,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			profile.audioCodec = MediaRecorder.AudioEncoder.VORBIS;
 		}*/
 
-		return profile;
+		return new VideoProfile(profile);
 	}
 	
 	private static String formatFloatToString(final float f) {
@@ -2782,7 +2847,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        if( this.is_video ) {
 	        	if( MyDebug.LOG )
 	        		Log.d(TAG, "set preview aspect ratio from video size (wysiwyg)");
-	        	CamcorderProfile profile = getCamcorderProfile();
+	        	VideoProfile profile = getVideoProfile();
 	        	if( MyDebug.LOG )
 	        		Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
 	        	targetRatio = ((double)profile.videoFrameWidth) / (double)profile.videoFrameHeight;
@@ -2837,6 +2902,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		final double ASPECT_TOLERANCE = 0.05;
         if( sizes == null )
         	return null;
+		if( video_high_speed ) {
+			// preview size must match video resolution for high speed, see doc for CameraDevice.createConstrainedHighSpeedCaptureSession()
+			return new CameraController.Size(video_high_speed_size.width, video_high_speed_size.height);
+		}
         CameraController.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
         Point display_size = new Point();
@@ -3531,7 +3600,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private void setPreviewFps() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewFps()");
-		CamcorderProfile profile = getCamcorderProfile();
+		VideoProfile profile = getVideoProfile();
 		List<int []> fps_ranges = camera_controller.getSupportedPreviewFpsRange();
 		if( fps_ranges == null || fps_ranges.size() == 0 ) {
 			if( MyDebug.LOG )
@@ -3733,7 +3802,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return flash_mode != null && ( flash_mode.equals("flash_off") || flash_mode.equals("flash_torch") );
 	}
 	
-	public String getErrorFeatures(CamcorderProfile profile) {
+	public String getErrorFeatures(VideoProfile profile) {
 		boolean was_4k = false, was_bitrate = false, was_fps = false;
 		if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 && applicationInterface.getForce4KPref() ) {
 			was_4k = true;
@@ -4370,7 +4439,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			applicationInterface.cameraInOperation(false, true);
 		}
 		if( created_video_file ) {
-        	final CamcorderProfile profile = getCamcorderProfile();
+        	final VideoProfile profile = getVideoProfile();
     		if( MyDebug.LOG ) {
 				Log.d(TAG, "current_video_quality: " + this.video_quality_handler.getCurrentVideoQualityIndex());
 				if (this.video_quality_handler.getCurrentVideoQualityIndex() != -1)
@@ -4418,6 +4487,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			});
         	camera_controller.initVideoRecorderPrePrepare(video_recorder);
 			boolean record_audio = applicationInterface.getRecordAudioPref();
+			if( has_capture_rate_factor ) {
+				// audio not recorded with slow motion video
+				record_audio = false;
+			}
 			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
 				// needed for Android 6, in case users deny storage permission, otherwise we'll crash
 				// see https://developer.android.com/training/permissions/requesting.html
@@ -4463,8 +4536,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     		if( MyDebug.LOG )
     			Log.d(TAG, "set video profile");
-			if( record_audio ) {
-				video_recorder.setProfile(profile);
+			if( has_capture_rate_factor ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set video profile for slow motion");
+				// n.b., order may be important - output format should be first, at least
+				video_recorder.setOutputFormat(profile.fileFormat);
+				video_recorder.setVideoFrameRate((int)(profile.videoFrameRate * capture_rate_factor + 0.5f));
+				video_recorder.setCaptureRate(profile.videoFrameRate);
+				video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+				video_recorder.setVideoEncodingBitRate((int)(profile.videoBitRate * capture_rate_factor + 0.5f));
+				video_recorder.setVideoEncoder(profile.videoCodec);
+			}
+			else if( record_audio ) {
+				if( profile.getCamcorderProfile() != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "set video profile from camcorderprofile");
+					video_recorder.setProfile(profile.getCamcorderProfile());
+				}
+				else {
+					video_recorder.setOutputFormat(profile.fileFormat);
+					video_recorder.setVideoFrameRate(profile.videoFrameRate);
+					video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+					video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
+					video_recorder.setVideoEncoder(profile.videoCodec);
+					video_recorder.setAudioEncoder(profile.audioCodec);
+				}
         		String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
@@ -4477,6 +4573,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			else {
 				// from http://stackoverflow.com/questions/5524672/is-it-possible-to-use-camcorderprofile-without-audio-source
+				if( MyDebug.LOG )
+					Log.d(TAG, "set video profile from parameters (without audio)");
+				// n.b., order may be important - output format should be first, at least
 				video_recorder.setOutputFormat(profile.fileFormat);
 				video_recorder.setVideoFrameRate(profile.videoFrameRate);
 				video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
@@ -4744,7 +4843,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 	
-	private void failedToStartVideoRecorder(CamcorderProfile profile) {
+	private void failedToStartVideoRecorder(VideoProfile profile) {
 		applicationInterface.onVideoRecordStartError(profile);
 		video_recorder.reset();
 		video_recorder.release(); 
@@ -5598,7 +5697,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public boolean supportsPhotoVideoRecording() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsPhotoVideoRecording");
-    	return supports_photo_video_recording && !video_slow_motion;
+    	return supports_photo_video_recording && !video_high_speed;
 	}
     
     public boolean canDisableShutterSound() {

@@ -790,7 +790,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    clickView(switchVideoButton);
 		waitUntilCameraOpened();
 	    assertTrue(mPreview.isVideo());
-    	CamcorderProfile profile = mPreview.getCamcorderProfile();
+    	Preview.VideoProfile profile = mPreview.getVideoProfile();
         CameraController.Size video_preview_size = mPreview.getCameraController().getPreviewSize();
         //targetRatio = mPreview.getTargetRatioForPreview(display_size);
         targetRatio = mPreview.getTargetRatio();
@@ -835,7 +835,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    clickView(switchVideoButton);
 			waitUntilCameraOpened();
 		    assertTrue(mPreview.isVideo());
-	    	profile = mPreview.getCamcorderProfile();
+	    	profile = mPreview.getVideoProfile();
 	        video_preview_size = mPreview.getCameraController().getPreviewSize();
 		    //targetRatio = mPreview.getTargetRatioForPreview(display_size);
 		    targetRatio = mPreview.getTargetRatio();
