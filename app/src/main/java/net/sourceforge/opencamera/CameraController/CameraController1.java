@@ -757,6 +757,11 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public void setVideoHighSpeed(boolean setVideoHighSpeed) {
+		// not supported for CameraController1
+	}
+
+	@Override
 	public void setVideoStabilization(boolean enabled) {
 	    Camera.Parameters parameters = this.getParameters();
         parameters.setVideoStabilization(enabled);

@@ -211,6 +211,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<CameraController.Size> sizes;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
+	private boolean video_slow_motion;
+	private boolean supports_video_slow_motion;
+	private CameraController.Size video_slow_motion_size;
 	private final VideoQualityHandler video_quality_handler = new VideoQualityHandler();
 
 	private Toast last_toast;
@@ -1249,6 +1252,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		view_angle_y = 43.0f; // set a sensible default
 		sizes = null;
 		current_size_index = -1;
+		video_slow_motion = false;
+		supports_video_slow_motion = false;
+		video_slow_motion_size = null;
 		video_quality_handler.resetCurrentQuality();
 		supported_flash_values = null;
 		current_flash_index = -1;
@@ -1620,6 +1626,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 
+		// Setup for slow motion - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize()
+		if( this.is_video && this.supports_video_slow_motion && false /*&& applicationInterface.isVideoSlowMotionPref()*/ ) {
+			video_slow_motion = true;
+			camera_controller.setVideoHighSpeed(true);
+		}
+		else {
+			video_slow_motion = false;
+			camera_controller.setVideoHighSpeed(false);
+		}
+
 		if( do_startup_focus && using_android_l && camera_controller.supportsAutoFocus() ) {
 			// need to switch flash off for autofocus - and for Android L, need to do this before starting preview (otherwise it won't work in time); for old camera API, need to do this after starting preview!
 			set_flash_value_after_autofocus = "";
@@ -1797,6 +1813,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.supports_raw = camera_features.supports_raw;
 			this.view_angle_x = camera_features.view_angle_x;
 			this.view_angle_y = camera_features.view_angle_y;
+			this.supports_video_slow_motion = camera_features.video_sizes_high_speed != null && camera_features.video_sizes_high_speed.size() > 0;
+			if( supports_video_slow_motion ) {
+				// only use highest high speed resolution for now
+				for(int i=0;i<camera_features.video_sizes_high_speed.size();i++) {
+					CameraController.Size size = camera_features.video_sizes_high_speed.get(i);
+		        	if( video_slow_motion_size == null || size.width*size.height > video_slow_motion_size.width*video_slow_motion_size.height ) {
+		        		video_slow_motion_size = size;
+		        	}
+		        }
+				if( MyDebug.LOG )
+					Log.d(TAG, "supports_video_slow_motion, size: " + video_slow_motion_size.width + " x " + video_slow_motion_size.height);
+			}
 			this.video_quality_handler.setVideoSizes(camera_features.video_sizes);
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
@@ -2411,8 +2439,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         	CamcorderProfile profile = getCamcorderProfile();
         	if( MyDebug.LOG )
         		Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
-        	double targetRatio = ((double)profile.videoFrameWidth) / (double)profile.videoFrameHeight;
-        	new_size = getOptimalVideoPictureSize(sizes, targetRatio);
+        	if( video_slow_motion ) {
+        		// picture size must match video resolution for slow motion, see doc for CameraDevice.createConstrainedHighSpeedCaptureSession()
+				new_size = new CameraController.Size(profile.videoFrameWidth, profile.videoFrameHeight);
+			}
+			else {
+				double targetRatio = ((double) profile.videoFrameWidth) / (double) profile.videoFrameHeight;
+				new_size = getOptimalVideoPictureSize(sizes, targetRatio);
+			}
     	}
     	else {
     		if( current_size_index != -1 ) {
@@ -2512,6 +2546,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH);
 		}
+		if( video_slow_motion ) {
+			Log.e(TAG, "shouldn't call getCamcorderProfile in slow motion mode");
+			throw new RuntimeException();
+		}
 		int cameraId = camera_controller.getCameraId();
 		CamcorderProfile camcorder_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH); // default
 		try {
@@ -2569,6 +2607,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
 			return CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH);
+		}
+		if( video_slow_motion ) {
+			Log.e(TAG, "shouldn't call getCamcorderProfile in slow motion mode");
+			throw new RuntimeException();
 		}
 		CamcorderProfile profile;
 		int cameraId = camera_controller.getCameraId();
@@ -4330,11 +4372,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( created_video_file ) {
         	final CamcorderProfile profile = getCamcorderProfile();
     		if( MyDebug.LOG ) {
-    			Log.d(TAG, "current_video_quality: " + this.video_quality_handler.getCurrentVideoQualityIndex());
-    			if( this.video_quality_handler.getCurrentVideoQualityIndex() != -1 )
-    				Log.d(TAG, "current_video_quality value: " + this.video_quality_handler.getCurrentVideoQuality());
-    			Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
-    			Log.d(TAG, "bit rate " + profile.videoBitRate);
+				Log.d(TAG, "current_video_quality: " + this.video_quality_handler.getCurrentVideoQualityIndex());
+				if (this.video_quality_handler.getCurrentVideoQualityIndex() != -1)
+					Log.d(TAG, "current_video_quality value: " + this.video_quality_handler.getCurrentVideoQuality());
+				Log.d(TAG, "resolution " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
+				Log.d(TAG, "bit rate " + profile.videoBitRate);
     		}
 
 			boolean enable_sound = applicationInterface.getShutterSoundPref();
@@ -5556,7 +5598,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     public boolean supportsPhotoVideoRecording() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsPhotoVideoRecording");
-    	return supports_photo_video_recording;
+    	return supports_photo_video_recording && !video_slow_motion;
 	}
     
     public boolean canDisableShutterSound() {

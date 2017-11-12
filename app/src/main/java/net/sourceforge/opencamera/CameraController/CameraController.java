@@ -249,6 +249,7 @@ public abstract class CameraController {
 	 */
 	public abstract void setOptimiseAEForDRO(boolean optimise_ae_for_dro);
 	public abstract void setRaw(boolean want_raw);
+	public abstract void setVideoHighSpeed(boolean setVideoHighSpeed);
 	/**
 	 * setUseCamera2FakeFlash() should be called after creating the CameraController, and before calling getCameraFeatures() or
 	 * starting the preview (as it changes the available flash modes).

@@ -103,6 +103,7 @@ public class CameraController2 extends CameraController {
 	private DngCreator pending_dngCreator;
 	private Image pending_image;
 	private ErrorCallback take_picture_error_cb;
+	private boolean want_video_high_speed;
 	//private ImageReader previewImageReader;
 	private SurfaceTexture texture;
 	private Surface surface_texture;
@@ -1242,7 +1243,8 @@ public class CameraController2 extends CameraController {
 			if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW ) {
 				capabilities_raw = true;
 			}
-			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO ) {
+			else if( capability == CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+				// we test for at least Android M just to be safe (this is needed for createConstrainedHighSpeedCaptureSession())
 				capabilities_high_speed_video = true;
 			}
 		}
@@ -2074,6 +2076,27 @@ public class CameraController2 extends CameraController {
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		this.want_raw = want_raw;
+	}
+
+	@Override
+	public void setVideoHighSpeed(boolean want_video_high_speed) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setVideoHighSpeed: " + want_video_high_speed);
+		if( camera == null ) {
+			if( MyDebug.LOG )
+				Log.e(TAG, "no camera");
+			return;
+		}
+		if( this.want_video_high_speed == want_video_high_speed ) {
+			return;
+		}
+		if( captureSession != null ) {
+			// can only call this when captureSession not created - as it affects how we create the session
+			if( MyDebug.LOG )
+				Log.e(TAG, "can't set high speed when captureSession running!");
+			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
+		}
+		this.want_video_high_speed = want_video_high_speed;
 	}
 
 	@Override
@@ -3167,7 +3190,7 @@ public class CameraController2 extends CameraController {
 
 		try {
 			if( video_recorder != null ) {
-				if( supports_photo_video_recording ) {
+				if( supports_photo_video_recording && !want_video_high_speed ) {
 					createPictureImageReader();
 				}
 				else {
@@ -3300,7 +3323,7 @@ public class CameraController2 extends CameraController {
         	Surface preview_surface = getPreviewSurface();
         	List<Surface> surfaces;
         	if( video_recorder != null ) {
-				if( supports_photo_video_recording ) {
+				if( supports_photo_video_recording && !want_video_high_speed ) {
 					surfaces = Arrays.asList(preview_surface, video_recorder.getSurface(), imageReader.getSurface());
 				}
 				else {
@@ -3332,9 +3355,16 @@ public class CameraController2 extends CameraController {
 					}
 				}
 			}
-			camera.createCaptureSession(surfaces,
-				myStateCallback,
-		 		handler);
+        	if( want_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+				camera.createConstrainedHighSpeedCaptureSession(surfaces,
+					myStateCallback,
+					handler);
+			}
+			else {
+				camera.createCaptureSession(surfaces,
+					myStateCallback,
+					handler);
+			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "wait until session created...");
 			synchronized( create_capture_session_lock ) {
