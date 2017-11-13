@@ -2674,6 +2674,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		CamcorderProfile profile;
 		int cameraId = camera_controller.getCameraId();
+
 		if( applicationInterface.getForce4KPref() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "force 4K UHD video");
