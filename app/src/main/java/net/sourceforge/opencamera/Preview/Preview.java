@@ -2002,7 +2002,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 							}
 						}
 
-						// We don't sychronize on faces_detected, as the array may be passed to other
+						// We don't synchronize on faces_detected, as the array may be passed to other
 						// classes via getFacesDetected(). Although that function could copy instead,
 						// that would mean an allocation in every frame in DrawPreview.
 						// Easier to just do the assignment on the UI thread.
