@@ -1915,7 +1915,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 							if( n_faces > 0 ) {
 								// set face_location
 								float avg_x = 0, avg_y = 0;
-								final float bdry_frac_c = 0.3f;
+								final float bdry_frac_c = 0.35f;
 								boolean all_centre = true;
 								for(CameraController.Face face : local_faces) {
 									float face_x = face.rect.centerX();
