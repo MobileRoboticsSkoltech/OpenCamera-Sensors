@@ -4418,11 +4418,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "enable_sound? " + enable_sound);
 			camera_controller.enableShutterSound(enable_sound); // Camera2 API can disable video sound too
-    		video_recorder = new MediaRecorder();
+    		MediaRecorder local_video_recorder = new MediaRecorder();
     		this.camera_controller.unlock();
     		if( MyDebug.LOG )
     			Log.d(TAG, "set video listeners");
-        	video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+        	local_video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
 				@Override
 				public void onInfo(MediaRecorder mr, int what, int extra) {
 					if( MyDebug.LOG )
@@ -4438,7 +4438,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					});
 				}
 			});
-        	video_recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+        	local_video_recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
 				public void onError(MediaRecorder mr, int what, int extra) {
 					final int final_what = what;
 					final int final_extra = extra;
@@ -4451,7 +4451,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					});
 				}
 			});
-        	camera_controller.initVideoRecorderPrePrepare(video_recorder);
+        	camera_controller.initVideoRecorderPrePrepare(local_video_recorder);
 			boolean record_audio = applicationInterface.getRecordAudioPref();
 			if( has_capture_rate_factor ) {
 				// audio not recorded with slow motion video
@@ -4485,11 +4485,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "audio_source: " + audio_source);
-				video_recorder.setAudioSource(audio_source);
+				local_video_recorder.setAudioSource(audio_source);
 			}
     		if( MyDebug.LOG )
     			Log.d(TAG, "set video source");
-			video_recorder.setVideoSource(using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA);
+			local_video_recorder.setVideoSource(using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA);
 
     		boolean store_location = applicationInterface.getGeotaggingPref();
 			if( store_location && applicationInterface.getLocation() != null ) {
@@ -4497,7 +4497,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    		if( MyDebug.LOG ) {
 	    			Log.d(TAG, "set video location: lat " + location.getLatitude() + " long " + location.getLongitude() + " accuracy " + location.getAccuracy());
 	    		}
-				video_recorder.setLocation((float)location.getLatitude(), (float)location.getLongitude());
+				local_video_recorder.setLocation((float)location.getLatitude(), (float)location.getLongitude());
 			}
 
     		if( MyDebug.LOG )
@@ -4506,35 +4506,35 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "set video profile for slow motion");
 				// n.b., order may be important - output format should be first, at least
-				video_recorder.setOutputFormat(profile.fileFormat);
-				video_recorder.setVideoFrameRate((int)(profile.videoFrameRate * capture_rate_factor + 0.5f));
-				video_recorder.setCaptureRate(profile.videoFrameRate);
-				video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-				video_recorder.setVideoEncodingBitRate((int)(profile.videoBitRate * capture_rate_factor + 0.5f));
-				video_recorder.setVideoEncoder(profile.videoCodec);
+				local_video_recorder.setOutputFormat(profile.fileFormat);
+				local_video_recorder.setVideoFrameRate((int)(profile.videoFrameRate * capture_rate_factor + 0.5f));
+				local_video_recorder.setCaptureRate(profile.videoFrameRate);
+				local_video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+				local_video_recorder.setVideoEncodingBitRate((int)(profile.videoBitRate * capture_rate_factor + 0.5f));
+				local_video_recorder.setVideoEncoder(profile.videoCodec);
 			}
 			else if( record_audio ) {
 				if( profile.getCamcorderProfile() != null ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "set video profile from camcorderprofile");
-					video_recorder.setProfile(profile.getCamcorderProfile());
+					local_video_recorder.setProfile(profile.getCamcorderProfile());
 				}
 				else {
-					video_recorder.setOutputFormat(profile.fileFormat);
-					video_recorder.setVideoFrameRate(profile.videoFrameRate);
-					video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-					video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
-					video_recorder.setVideoEncoder(profile.videoCodec);
-					video_recorder.setAudioEncoder(profile.audioCodec);
+					local_video_recorder.setOutputFormat(profile.fileFormat);
+					local_video_recorder.setVideoFrameRate(profile.videoFrameRate);
+					local_video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+					local_video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
+					local_video_recorder.setVideoEncoder(profile.videoCodec);
+					local_video_recorder.setAudioEncoder(profile.audioCodec);
 				}
         		String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
         		if( pref_audio_channels.equals("audio_mono") ) {
-        			video_recorder.setAudioChannels(1);
+        			local_video_recorder.setAudioChannels(1);
         		}
         		else if( pref_audio_channels.equals("audio_stereo") ) {
-        			video_recorder.setAudioChannels(2);
+        			local_video_recorder.setAudioChannels(2);
         		}
 			}
 			else {
@@ -4542,11 +4542,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "set video profile from parameters (without audio)");
 				// n.b., order may be important - output format should be first, at least
-				video_recorder.setOutputFormat(profile.fileFormat);
-				video_recorder.setVideoFrameRate(profile.videoFrameRate);
-				video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-				video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
-				video_recorder.setVideoEncoder(profile.videoCodec);
+				local_video_recorder.setOutputFormat(profile.fileFormat);
+				local_video_recorder.setVideoFrameRate(profile.videoFrameRate);
+				local_video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+				local_video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
+				local_video_recorder.setVideoEncoder(profile.videoCodec);
 			}
     		if( MyDebug.LOG ) {
     			Log.d(TAG, "video fileformat: " + profile.fileFormat);
@@ -4564,7 +4564,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					if( MyDebug.LOG )
 						Log.d(TAG, "set max file size of: " + max_filesize);
 					try {
-						video_recorder.setMaxFileSize(max_filesize);
+						local_video_recorder.setMaxFileSize(max_filesize);
 					}
 					catch(RuntimeException e) {
 						// Google Camera warns this can happen - for example, if 64-bit filesizes not supported
@@ -4595,13 +4595,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
 				if( MyDebug.LOG )
 					Log.d(TAG, "actual video_max_duration: " + video_max_duration);
-				video_recorder.setMaxDuration((int)video_max_duration);
+				local_video_recorder.setMaxDuration((int)video_max_duration);
 
 				if( video_method == ApplicationInterface.VIDEOMETHOD_FILE ) {
-					video_recorder.setOutputFile(video_filename);
+					local_video_recorder.setOutputFile(video_filename);
 				}
 				else {
-					video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
+					local_video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
 				}
 
 				applicationInterface.cameraInOperation(true, true);
@@ -4609,62 +4609,66 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				applicationInterface.startingVideo();
         		/*if( true ) // test
         			throw new IOException();*/
-				cameraSurface.setVideoRecorder(video_recorder);
-				video_recorder.setOrientationHint(getImageVideoRotation());
+				cameraSurface.setVideoRecorder(local_video_recorder);
+				local_video_recorder.setOrientationHint(getImageVideoRotation());
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to prepare video recorder");
-				video_recorder.prepare();
-				camera_controller.initVideoRecorderPostPrepare(video_recorder);
+				local_video_recorder.prepare();
+				camera_controller.initVideoRecorderPostPrepare(local_video_recorder);
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to start video recorder");
 
 				try {
-					video_recorder.start();
+					local_video_recorder.start();
+					this.video_recorder = local_video_recorder;
 					videoRecordingStarted(max_filesize_restart);
 				}
 				catch(RuntimeException e) {
 					// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
-					if( MyDebug.LOG )
-						Log.e(TAG, "runtime exception starting video recorder");
+					Log.e(TAG, "runtime exception starting video recorder");
 					e.printStackTrace();
+					this.video_recorder = local_video_recorder; // still assign, so failedToStartVideoRecorder() will release the video_recorder
 					// told_app_starting must be true if we're here
 					applicationInterface.stoppingVideo();
 					failedToStartVideoRecorder(profile);
 				}
 
-				/*Activity activity = (Activity)Preview.this.getContext();
-				activity.runOnUiThread(new Runnable() {
-					public void run() {
+				/*final MediaRecorder local_video_recorder_f = local_video_recorder;
+				new AsyncTask<Void, Void, Boolean>() {
+					private static final String TAG = "video_recorder.start";
+
+					@Override
+					protected Boolean doInBackground(Void... voids) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "doInBackground, async task: " + this);
 						try {
-							video_recorder.start();
-							videoRecordingStarted(max_filesize_restart);
+							local_video_recorder_f.start();
 						}
 						catch(RuntimeException e) {
 							// needed for emulator at least - although MediaRecorder not meant to work with emulator, it's good to fail gracefully
-							if( MyDebug.LOG )
-								Log.e(TAG, "runtime exception starting video recorder");
+							Log.e(TAG, "runtime exception starting video recorder");
 							e.printStackTrace();
+							return false;
+						}
+						return true;
+					}
+
+					@Override
+					protected void onPostExecute(Boolean success) {
+						if( MyDebug.LOG ) {
+							Log.d(TAG, "onPostExecute, async task: " + this);
+							Log.d(TAG, "success: " + success);
+						}
+						 // still assign even if success==false, so failedToStartVideoRecorder() will release the video_recorder
+						Preview.this.video_recorder = local_video_recorder_f;
+						if( success ) {
+							videoRecordingStarted(max_filesize_restart);
+						}
+						else {
 							// told_app_starting must be true if we're here
 							applicationInterface.stoppingVideo();
 							failedToStartVideoRecorder(profile);
 						}
-					}
-				});*/
-				/*new AsyncTask<Void, Void, Void>() {
-					private static final String TAG = "video_recorder.start";
-
-					@Override
-					protected Void doInBackground(Void... voids) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "doInBackground, async task: " + this);
-						video_recorder.start();
-						return null;
-					}
-
-					protected void onPostExecute(Void param) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "onPostExecute, async task: " + this);
-						videoRecordingStarted(max_filesize_restart);
 					}
 				}.execute();*/
 			}
