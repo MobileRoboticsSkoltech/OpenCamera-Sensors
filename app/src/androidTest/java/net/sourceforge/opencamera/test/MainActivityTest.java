@@ -15,6 +15,7 @@ import net.sourceforge.opencamera.HDRProcessor;
 import net.sourceforge.opencamera.HDRProcessorException;
 import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.Preview.VideoProfile;
 import net.sourceforge.opencamera.SaveLocationHistory;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.Preview;
@@ -790,7 +791,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    clickView(switchVideoButton);
 		waitUntilCameraOpened();
 	    assertTrue(mPreview.isVideo());
-    	Preview.VideoProfile profile = mPreview.getVideoProfile();
+    	VideoProfile profile = mPreview.getVideoProfile();
         CameraController.Size video_preview_size = mPreview.getCameraController().getPreviewSize();
         //targetRatio = mPreview.getTargetRatioForPreview(display_size);
         targetRatio = mPreview.getTargetRatio();

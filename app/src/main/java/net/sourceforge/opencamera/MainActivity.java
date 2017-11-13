@@ -3,6 +3,7 @@ package net.sourceforge.opencamera;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraControllerManager2;
 import net.sourceforge.opencamera.Preview.Preview;
+import net.sourceforge.opencamera.Preview.VideoProfile;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import net.sourceforge.opencamera.UI.MainUI;
 
@@ -1336,7 +1337,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( preview.getVideoQualityHander().getCurrentVideoQuality() != null ) {
 			bundle.putString("current_video_quality", preview.getVideoQualityHander().getCurrentVideoQuality());
 		}
-		Preview.VideoProfile camcorder_profile = preview.getVideoProfile();
+		VideoProfile camcorder_profile = preview.getVideoProfile();
 		bundle.putInt("video_frame_width", camcorder_profile.videoFrameWidth);
 		bundle.putInt("video_frame_height", camcorder_profile.videoFrameHeight);
 		bundle.putInt("video_bit_rate", camcorder_profile.videoBitRate);
@@ -2858,7 +2859,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean simple = true;
 		if( preview.isVideo() ) {
-			Preview.VideoProfile profile = preview.getVideoProfile();
+			VideoProfile profile = preview.getVideoProfile();
 			String bitrate_string;
 			if( profile.videoBitRate >= 10000000 )
 				bitrate_string = profile.videoBitRate/1000000 + "Mbps";

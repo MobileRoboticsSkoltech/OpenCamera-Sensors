@@ -15,6 +15,7 @@ import java.util.TimerTask;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
 import net.sourceforge.opencamera.Preview.Preview;
+import net.sourceforge.opencamera.Preview.VideoProfile;
 import net.sourceforge.opencamera.UI.DrawPreview;
 
 import android.annotation.TargetApi;
@@ -29,7 +30,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.hardware.camera2.DngCreator;
 import android.location.Location;
-import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
@@ -1325,7 +1325,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 	
 	@Override
-	public void onVideoRecordStartError(Preview.VideoProfile profile) {
+	public void onVideoRecordStartError(VideoProfile profile) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onVideoRecordStartError");
 		String error_message;
@@ -1344,7 +1344,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
-	public void onVideoRecordStopError(Preview.VideoProfile profile) {
+	public void onVideoRecordStopError(VideoProfile profile) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onVideoRecordStopError");
 		//main_activity.getPreview().showToast(null, R.string.failed_to_record_video);

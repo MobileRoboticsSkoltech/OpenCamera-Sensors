@@ -113,8 +113,8 @@ public interface ApplicationInterface {
 	void onPhotoError(); // callback for failing to take a photo
 	void onVideoInfo(int what, int extra); // callback for info when recording video (see MediaRecorder.OnInfoListener)
 	void onVideoError(int what, int extra); // callback for errors when recording video (see MediaRecorder.OnErrorListener)
-	void onVideoRecordStartError(Preview.VideoProfile profile); // callback for video recording failing to start
-	void onVideoRecordStopError(Preview.VideoProfile profile); // callback for video recording being corrupted
+	void onVideoRecordStartError(VideoProfile profile); // callback for video recording failing to start
+	void onVideoRecordStopError(VideoProfile profile); // callback for video recording being corrupted
 	void onFailedReconnectError(); // failed to reconnect camera after stopping video recording
 	void onFailedCreateVideoFileError(); // callback if unable to create file for recording video
 	void hasPausedPreview(boolean paused); // called when the preview is paused or unpaused (due to getPausePreviewPref())
