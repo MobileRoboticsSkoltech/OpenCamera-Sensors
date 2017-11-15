@@ -8084,7 +8084,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	long time_s = System.currentTimeMillis();
 			try {
 				mActivity.getApplicationInterface().getHDRProcessor().processHDR(inputs, true, null, true, null, 0.5f, 4, tonemapping_algorithm);
-			} catch (HDRProcessorException e) {
+			}
+			catch(HDRProcessorException e) {
 				e.printStackTrace();
 				throw new RuntimeException();
 			}
