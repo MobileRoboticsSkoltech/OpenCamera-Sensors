@@ -87,8 +87,7 @@ public class HDRProcessor {
 		}
 
 		static ResponseFunction createIdentity() {
-			ResponseFunction function = new ResponseFunction(1.0f, 0.0f);
-			return function;
+			return new ResponseFunction(1.0f, 0.0f);
 		}
 
 		/** Computes the response function.

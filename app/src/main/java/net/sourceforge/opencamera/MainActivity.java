@@ -29,7 +29,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
-import android.media.CamcorderProfile;
 import android.media.SoundPool;
 import android.net.Uri;
 import android.os.AsyncTask;

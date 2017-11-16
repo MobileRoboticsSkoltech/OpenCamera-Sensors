@@ -7,7 +7,7 @@ import android.media.CamcorderProfile;
 	 *  CamcorderProfile (needed for slow motion / high speed video recording).
 	 */
 public class VideoProfile {
-    final CamcorderProfile camcorderProfile;
+    final private CamcorderProfile camcorderProfile;
     public final int audioCodec;
     public final int fileFormat;
     public final int videoBitRate;

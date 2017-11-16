@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -415,7 +416,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
-	public Matrix getCameraToPreviewMatrix() {
+	private Matrix getCameraToPreviewMatrix() {
 		calculateCameraToPreviewMatrix();
 		return camera_to_preview_matrix;
 	}
@@ -1410,7 +1411,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// We pass a camera controller back to the UI thread rather than assigning to camera_controller here, because:
 		// * If we set camera_controller directly, we'd need to synchronize, otherwise risk of memory barrier issues
 		// * Risk of race conditions if UI thread accesses camera_controller before we have called cameraOpened().
-		CameraController camera_controller_local = null;
+		CameraController camera_controller_local;
 		try {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "try to open camera: " + cameraId);
@@ -1870,7 +1871,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				    @Override
 				    public void onFaceDetection(CameraController.Face[] faces) {
 						if( MyDebug.LOG )
-							Log.d(TAG, "onFaceDetection: " + faces);
+							Log.d(TAG, "onFaceDetection: " + Arrays.toString(faces));
 						if( camera_controller == null ) {
 							// can get a crash in some cases when switching camera when face detection is on (at least for Camera2)
 							Activity activity = (Activity)Preview.this.getContext();

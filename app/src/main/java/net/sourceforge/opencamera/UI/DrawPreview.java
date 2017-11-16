@@ -31,7 +31,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 import android.view.View;
-import android.widget.ImageButton;
 
 public class DrawPreview {
 	private static final String TAG = "DrawPreview";
@@ -659,7 +658,7 @@ public class DrawPreview {
 						Log.d(TAG, "free_memory_gb: " + free_memory_gb);
 						Log.d(TAG, "new_free_memory_gb: " + new_free_memory_gb);
 					}
-					if( Math.abs(new_free_memory_gb - free_memory_gb) > 0.01f ) {
+					if( Math.abs(new_free_memory_gb - free_memory_gb) > 0.001f ) {
 						free_memory_gb = new_free_memory_gb;
 						free_memory_gb_string = decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation);
 					}
@@ -997,7 +996,7 @@ public class DrawPreview {
 			if( draw_geo_direction ) {
 				int color = Color.WHITE;
 				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				int pixels_offset_x = 0;
+				int pixels_offset_x;
 				if( draw_angle ) {
 					pixels_offset_x = (int) (10 * scale + 0.5f); // convert dps to pixels
 					p.setTextAlign(Paint.Align.LEFT);
