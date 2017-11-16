@@ -659,7 +659,7 @@ public class DrawPreview {
 						Log.d(TAG, "free_memory_gb: " + free_memory_gb);
 						Log.d(TAG, "new_free_memory_gb: " + new_free_memory_gb);
 					}
-					if( new_free_memory_gb != free_memory_gb ) {
+					if( Math.abs(new_free_memory_gb - free_memory_gb) > 0.01f ) {
 						free_memory_gb = new_free_memory_gb;
 						free_memory_gb_string = decimalFormat.format(free_memory_gb) + getContext().getResources().getString(R.string.gb_abbreviation);
 					}
