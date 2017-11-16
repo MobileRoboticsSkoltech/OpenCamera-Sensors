@@ -654,7 +654,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	void launchOnlineHelp() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "launchOnlineHelp");
-		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://opencamera.sourceforge.net/"));
+		Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://opencamera.sourceforge.io/"));
 		startActivity(browserIntent);
 	}
 
