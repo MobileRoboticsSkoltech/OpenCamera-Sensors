@@ -81,6 +81,16 @@ public class HDRProcessor {
 		float parameter_A;
 		float parameter_B;
 
+		private ResponseFunction(float parameter_A, float parameter_B) {
+			this.parameter_A = parameter_A;
+			this.parameter_B = parameter_B;
+		}
+
+		static ResponseFunction createIdentity() {
+			ResponseFunction function = new ResponseFunction(1.0f, 0.0f);
+			return function;
+		}
+
 		/** Computes the response function.
 		 * We pass the context, so this inner class can be made static.
 		 * @param x_samples List of Xi samples. Must be at least 3 samples.
@@ -302,7 +312,7 @@ public class HDRProcessor {
 			bitmaps = new ArrayList<>(bitmaps);
 		}
 		int n_bitmaps = bitmaps.size();
-		if( n_bitmaps != 1 && n_bitmaps != 3 ) {
+		if( n_bitmaps != 1 && n_bitmaps != 3 /*&& n_bitmaps != 5*/ ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "n_bitmaps not supported: " + n_bitmaps);
 			throw new HDRProcessorException(HDRProcessorException.INVALID_N_IMAGES);
@@ -474,9 +484,9 @@ public class HDRProcessor {
 	private void processHDRCore(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, boolean assume_sorted, SortCallback sort_cb, float hdr_alpha, int n_tiles, TonemappingAlgorithm tonemapping_algorithm) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "processHDRCore");
-		
-    	long time_s = System.currentTimeMillis();
-		
+
+		long time_s = System.currentTimeMillis();
+
 		int n_bitmaps = bitmaps.size();
 		int width = bitmaps.get(0).getWidth();
 		int height = bitmaps.get(0).getHeight();
@@ -500,10 +510,11 @@ public class HDRProcessor {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+		final int base_bitmap = (n_bitmaps - 1) / 2; // index of the bitmap with the base exposure and offsets
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
-		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, 1, assume_sorted, sort_cb, true, false, time_s);
+		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, base_bitmap, assume_sorted, sort_cb, true, false, time_s);
 		int median_brightness = brightnessDetails.median_brightness;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
@@ -511,11 +522,14 @@ public class HDRProcessor {
 		}
 
 		// compute response_functions
-		final int base_bitmap = (n_bitmaps-1)/2; // index of the bitmap with the base exposure and offsets
 		for(int i=0;i<n_bitmaps;i++) {
 			ResponseFunction function = null;
 			if( i != base_bitmap ) {
 				function = createFunctionFromBitmaps(i, bitmaps.get(i), bitmaps.get(base_bitmap), offsets_x[i], offsets_y[i]);
+			}
+			else if( n_bitmaps > 3 ) {
+				// for more than 3 bitmaps, need to still create the identity response function
+				function = ResponseFunction.createIdentity();
 			}
 			response_functions[i] = function;
 		}
@@ -571,11 +585,28 @@ public class HDRProcessor {
 		processHDRScript.set_offset_y2(offsets_y[2]);
 
 		// set response functions
-		processHDRScript.set_parameter_A0( response_functions[0].parameter_A );
-		processHDRScript.set_parameter_B0( response_functions[0].parameter_B );
+		processHDRScript.set_parameter_A0(response_functions[0].parameter_A);
+		processHDRScript.set_parameter_B0(response_functions[0].parameter_B);
 		// no response function for middle image
-		processHDRScript.set_parameter_A2( response_functions[2].parameter_A );
-		processHDRScript.set_parameter_B2( response_functions[2].parameter_B );
+		processHDRScript.set_parameter_A2(response_functions[2].parameter_A);
+		processHDRScript.set_parameter_B2(response_functions[2].parameter_B);
+
+		if( n_bitmaps > 3 ) {
+			processHDRScript.set_offset_x1(offsets_x[1]);
+			processHDRScript.set_offset_y1(offsets_y[1]);
+			processHDRScript.set_parameter_A1(response_functions[1].parameter_A);
+			processHDRScript.set_parameter_B1(response_functions[1].parameter_B);
+
+			processHDRScript.set_offset_x3(offsets_x[3]);
+			processHDRScript.set_offset_y3(offsets_y[3]);
+			processHDRScript.set_parameter_A3(response_functions[3].parameter_A);
+			processHDRScript.set_parameter_B3(response_functions[3].parameter_B);
+
+			processHDRScript.set_offset_x4(offsets_x[4]);
+			processHDRScript.set_offset_y4(offsets_y[4]);
+			processHDRScript.set_parameter_A4(response_functions[4].parameter_A);
+			processHDRScript.set_parameter_B4(response_functions[4].parameter_B);
+		}
 
 		// set globals
 
@@ -608,7 +639,8 @@ public class HDRProcessor {
 				break;
 		}
 
-		float max_possible_value = response_functions[0].parameter_A * 255 + response_functions[0].parameter_B;
+		//float max_possible_value = response_functions[0].parameter_A * 255 + response_functions[0].parameter_B;
+		float max_possible_value = response_functions[base_bitmap - 1].parameter_A * 255 + response_functions[base_bitmap - 1].parameter_B;
 		if( MyDebug.LOG )
 			Log.d(TAG, "max_possible_value: " + max_possible_value);
 		if( max_possible_value < 255.0f ) {
@@ -633,7 +665,7 @@ public class HDRProcessor {
 			Log.d(TAG, "compare: " + 255.0f / max_possible_value);
 			Log.d(TAG, "to: " + (((float)median_target)/(float)median_brightness + median_target / 255.0f - 1.0f));
 		}
-		if( 255.0f / max_possible_value < ((float)median_target)/(float)median_brightness + median_target / 255.0f - 1.0f) {
+		if( 255.0f / max_possible_value < ((float)median_target)/(float)median_brightness + median_target / 255.0f - 1.0f ) {
 			// For Reinhard tonemapping:
 			// As noted below, we have f(V) = V.S / (V+C), where V is the HDR value, C is tonemap_scale_c
 			// and S = (Vmax + C)/Vmax (see below)
@@ -740,7 +772,14 @@ public class HDRProcessor {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time before processHDRScript: " + (System.currentTimeMillis() - time_s));
-		processHDRScript.forEach_hdr(allocations[1], output_allocation);
+		if( n_bitmaps == 3 )
+			processHDRScript.forEach_hdr(allocations[base_bitmap], output_allocation);
+		else {
+			processHDRScript.set_n_bitmaps_g(n_bitmaps);
+			processHDRScript.forEach_hdr_n(allocations[base_bitmap], output_allocation);
+		}
+		/*processHDRScript.set_n_bitmaps_g(n_bitmaps);
+		processHDRScript.forEach_hdr_n(allocations[base_bitmap], output_allocation);*/
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after processHDRScript: " + (System.currentTimeMillis() - time_s));
 
@@ -765,7 +804,7 @@ public class HDRProcessor {
 		if( release_bitmaps ) {
 			// must be the base_bitmap we copy to - see note above about using allocations[base_bitmap] as the output
 			allocations[base_bitmap].copyTo(bitmaps.get(base_bitmap));
-			if (MyDebug.LOG)
+			if( MyDebug.LOG )
 				Log.d(TAG, "### time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 
 			// make it so that we store the output bitmap as first in the list
@@ -776,7 +815,7 @@ public class HDRProcessor {
 		}
 		else {
 			output_allocation.copyTo(output_bitmap);
-			if (MyDebug.LOG)
+			if( MyDebug.LOG )
 				Log.d(TAG, "### time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 		}
 
@@ -786,7 +825,7 @@ public class HDRProcessor {
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 	private void processSingleImage(List<Bitmap> bitmaps, boolean release_bitmaps, Bitmap output_bitmap, float hdr_alpha, int n_tiles) {
-		if (MyDebug.LOG)
+		if( MyDebug.LOG )
 			Log.d(TAG, "processSingleImage");
 
 		long time_s = System.currentTimeMillis();
@@ -795,7 +834,7 @@ public class HDRProcessor {
 		int height = bitmaps.get(0).getHeight();
 
 		initRenderscript();
-		if (MyDebug.LOG)
+		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
 
 		// create allocation
@@ -849,12 +888,12 @@ public class HDRProcessor {
 
 		if( release_bitmaps ) {
 			allocation.copyTo(bitmaps.get(0));
-			if (MyDebug.LOG)
+			if( MyDebug.LOG )
 				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 		}
 		else {
 			output_allocation.copyTo(output_bitmap);
-			if (MyDebug.LOG)
+			if( MyDebug.LOG )
 				Log.d(TAG, "time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
 		}
 
