@@ -3320,7 +3320,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 		setToDefault();
 	    SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
-	    assertTrue(seekBar.getVisibility() == View.INVISIBLE);
+	    assertTrue(seekBar.getVisibility() == View.GONE);
 		switchToFocusValue("focus_mode_manual2");
 	    assertTrue(seekBar.getVisibility() == View.VISIBLE);
 		seekBar.setProgress( (int)(0.25*(seekBar.getMax()-1)) );
