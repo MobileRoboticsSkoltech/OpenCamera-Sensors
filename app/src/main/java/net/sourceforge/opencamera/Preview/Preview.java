@@ -4677,6 +4677,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.e(TAG, "failed to save video");
 				e.printStackTrace();
+				this.video_recorder = local_video_recorder;
 				if( told_app_starting ) {
 					applicationInterface.stoppingVideo();
 				}
@@ -4692,6 +4693,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.e(TAG, "camera exception starting video recorder");
 				e.printStackTrace();
+				this.video_recorder = local_video_recorder; // still assign, so failedToStartVideoRecorder() will release the video_recorder
 				if( told_app_starting ) {
 					applicationInterface.stoppingVideo();
 				}
@@ -4701,6 +4703,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.e(TAG, "nofreestorageexception starting video recorder");
 				e.printStackTrace();
+				this.video_recorder = local_video_recorder;
 				if( told_app_starting ) {
 					applicationInterface.stoppingVideo();
 				}
