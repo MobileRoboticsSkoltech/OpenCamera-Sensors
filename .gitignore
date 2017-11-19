@@ -6,6 +6,7 @@ _other/
 .gradle/
 .idea/
 build/
+app/release/
 gfx/
 testdata/
 
