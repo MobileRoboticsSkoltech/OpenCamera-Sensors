@@ -77,6 +77,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.MeasureSpec;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 /** This class was originally named due to encapsulating the camera preview,
@@ -232,6 +233,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean using_face_detection;
 	private CameraController.Face [] faces_detected;
 	private final RectF face_rect = new RectF();
+	private final AccessibilityManager accessibility_manager;
 	private boolean supports_video_stabilization;
 	private boolean supports_photo_video_recording;
 	private boolean can_disable_shutter_sound;
@@ -335,6 +337,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	    gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener());
 	    gestureDetector.setOnDoubleTapListener(new DoubleTapListener());
 	    scaleGestureDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
+		accessibility_manager = (AccessibilityManager)activity.getSystemService(Activity.ACCESSIBILITY_SERVICE);
 
 		parent.addView(cameraSurface.getView());
 		if( canvasView != null ) {
@@ -1869,9 +1872,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					/** Note, at least for Camera2 API, onFaceDetection() isn't called on UI thread.
 					 */
 				    @Override
-				    public void onFaceDetection(CameraController.Face[] faces) {
+				    public void onFaceDetection(final CameraController.Face[] faces) {
 						if( MyDebug.LOG )
-							Log.d(TAG, "onFaceDetection: " + Arrays.toString(faces));
+							Log.d(TAG, "onFaceDetection: " + faces.length + " : " + Arrays.toString(faces));
 						if( camera_controller == null ) {
 							// can get a crash in some cases when switching camera when face detection is on (at least for Camera2)
 							Activity activity = (Activity)Preview.this.getContext();
@@ -1882,17 +1885,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 							});
 							return;
 						}
-						// take a local copy first before assigning to faces_detected, as the latter has to be done on the UI thread
-						final CameraController.Face [] local_faces = new CameraController.Face[faces.length];
-				    	System.arraycopy(faces, 0, local_faces, 0, faces.length);
+						// don't assign to faces_detected yet, as that has to be done on the UI thread
 				    	// convert rects to preview screen space
-						for(CameraController.Face face : local_faces) {
+						final Matrix matrix = getCameraToPreviewMatrix();
+						for(CameraController.Face face : faces) {
 							face_rect.set(face.rect);
-							getCameraToPreviewMatrix().mapRect(face_rect);
+							matrix.mapRect(face_rect);
 							face_rect.round(face.rect);
 						}
 
-						reportFaces(local_faces);
+						reportFaces(faces);
 
 						// We don't synchronize on faces_detected, as the array may be passed to other
 						// classes via getFacesDetected(). Although that function could copy instead,
@@ -1901,7 +1903,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Activity activity = (Activity)Preview.this.getContext();
 						activity.runOnUiThread(new Runnable() {
 							public void run() {
-								faces_detected = local_faces;
+								if( faces_detected == null || faces_detected.length != faces.length ) {
+									// avoid unnecessary reallocations
+									if( MyDebug.LOG )
+										Log.d(TAG, "allocate new faces_detected");
+									faces_detected = new CameraController.Face[faces.length];
+								}
+								System.arraycopy(faces, 0, faces_detected, 0, faces.length);
 							}
 						});
 				    }
@@ -1910,7 +1918,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					 *  Note, at least for Camera2 API, reportFaces() isn't called on UI thread.
 					 */
 				    private void reportFaces(CameraController.Face[] local_faces) {
-						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
+						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && accessibility_manager.isEnabled() && accessibility_manager.isTouchExplorationEnabled() ) {
 							int n_faces = local_faces.length;
 							FaceLocation face_location = FaceLocation.FACELOCATION_UNKNOWN;
 							if( n_faces > 0 ) {
