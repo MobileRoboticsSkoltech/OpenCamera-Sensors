@@ -837,14 +837,6 @@ cards and I am looking into this. Note that (a) this requires rewriting portions
 fix, and (b) this new API is unfortunately not compatible with some of Google/Android's own APIs (e.g., for Exif
 reading/writing), so full support for SD cards doesn't seem possible until Google themselves fix this situation.</p>-->
 
-<p><b>Why is taking photos slow compared to other cameras?</b> - If this seems to be the case,
-one possibility is due to focusing before taking photos; some
-cameras use continuous focus mode which gives faster picture taking. Open Camera supports continuous focus mode, just select
-the popup menu and choose the "C" icon
-<img src="focus_mode_continuous_picture.png" alt="Continuous Picture focus icon" width="32" height="32">.
-Other reasons may be if some options are set (such as <a href="#auto_stabilise">auto-level</a>, or "Stamp photos"), these will result in slower photo
-times.</p>
-
 <p><b>My pictures are being rotated/cropped!</b> - This likely means the <a href="#auto_stabilise">auto-level</a>
 option is on. (If they're being rotated even when the phone is held level, it may mean the accelerometer sensor on your
 device isn't calibrated.) It's off by default, but you may have accidentally switched it on. To turn off, go to the "popup" menu
