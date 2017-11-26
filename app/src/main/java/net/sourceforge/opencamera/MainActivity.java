@@ -1631,14 +1631,23 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         // set screen to max brightness - see http://stackoverflow.com/questions/11978042/android-screen-brightness-max-value
 		// done here rather than onCreate, so that changing it in preferences takes effect without restarting app
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        final WindowManager.LayoutParams layout = getWindow().getAttributes();
 		if( force_max || sharedPreferences.getBoolean(PreferenceKeys.getMaxBrightnessPreferenceKey(), true) ) {
 	        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL;
         }
 		else {
 	        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
 		}
-        getWindow().setAttributes(layout); 
+
+		// this must be called from the ui thread
+		// sometimes this method may be called not on UI thread, e.g., Preview.takePhotoWhenFocused->CameraController2.takePicture
+		// ->CameraController2.runFakePrecapture->Preview/onFrontScreenTurnOn->MyApplicationInterface.turnFrontScreenFlashOn
+		// -> this.setBrightnessForCamera
+		this.runOnUiThread(new Runnable() {
+			public void run() {
+				getWindow().setAttributes(layout);
+			}
+		});
     }
 
     /** Sets the window flags for normal operation (when camera preview is visible).
