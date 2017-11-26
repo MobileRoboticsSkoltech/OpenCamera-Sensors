@@ -773,7 +773,7 @@ public class ImageSaver extends Thread {
         	long time_s = System.currentTimeMillis();
 			if( request.jpeg_images.size() > 1 ) {
 				// if there's only 1 image, we're in DRO mode, and shouldn't save the base image
-				// note that in earlier Open Camera versions, we used _EXP as the suffix. We now use just "_" from 1.42 onwards, so Google
+				// note that in earlier Open Camera versions, we used "_EXP" as the suffix. We now use just "_" from 1.42 onwards, so Google
 				// Photos will group them together. (Unfortunately using "_EXP_" doesn't work, the images aren't grouped!)
 				saveBaseImages(request, "_");
 				if( MyDebug.LOG ) {
@@ -866,7 +866,9 @@ public class ImageSaver extends Thread {
 				for(int i=0;i<request.jpeg_images.size();i++) {
 					// note, even if one image fails, we still try saving the other images - might as well give the user as many images as we can...
 					byte [] image = request.jpeg_images.get(i);
-					String filename_suffix = "_EXP" + i;
+					// see note above how we used to use "_EXP" for the suffix
+					//String filename_suffix = "_EXP" + i;
+					String filename_suffix = "_" + i;
 					boolean share_image = i == mid_image;
 					if( !saveSingleImageNow(request, image, null, filename_suffix, true, share_image) ) {
 						if( MyDebug.LOG )
