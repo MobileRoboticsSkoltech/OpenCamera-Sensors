@@ -265,6 +265,8 @@ public class CameraController2 extends CameraController {
 			if( is_samsung_s7 ) {
 				// see https://sourceforge.net/p/opencamera/discussion/general/thread/48bd836b/ ,
 				// https://stackoverflow.com/questions/36028273/android-camera-api-glossy-effect-on-galaxy-s7
+				if( MyDebug.LOG )
+					Log.d(TAG, "set EDGE_MODE_OFF");
 				builder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
 			}
 
