@@ -58,6 +58,8 @@ public class CameraController2 extends CameraController {
 	private CameraDevice camera;
 	private String cameraIdS;
 
+	private boolean is_samsung_s7; // Galaxy S7 or Galaxy S7 Edge
+
 	private CameraCharacteristics characteristics;
 	// cached characteristics (use this for values that need to be frequently accessed, e.g., per frame, to improve performance);
 	private int characteristics_sensor_orientation;
@@ -258,6 +260,12 @@ public class CameraController2 extends CameraController {
 				}
 				builder.set(CaptureRequest.JPEG_ORIENTATION, rotation);
 				builder.set(CaptureRequest.JPEG_QUALITY, jpeg_quality);
+			}
+
+			if( is_samsung_s7 ) {
+				// see https://sourceforge.net/p/opencamera/discussion/general/thread/48bd836b/ ,
+				// https://stackoverflow.com/questions/36028273/android-camera-api-glossy-effect-on-galaxy-s7
+				builder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
 			}
 
 			/*builder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
@@ -779,6 +787,10 @@ public class CameraController2 extends CameraController {
 		this.context = context;
 		this.preview_error_cb = preview_error_cb;
 		this.camera_error_cb = camera_error_cb;
+
+		this.is_samsung_s7 = Build.MODEL.toLowerCase(Locale.US).contains("sm-g93");
+		if( MyDebug.LOG )
+			Log.d(TAG, "is_samsung_s7: " + is_samsung_s7);
 
 		thread = new HandlerThread("CameraBackground"); 
 		thread.start(); 
