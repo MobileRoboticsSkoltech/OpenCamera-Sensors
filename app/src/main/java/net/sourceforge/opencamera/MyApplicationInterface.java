@@ -1686,7 +1686,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow) {
-		return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, true, null);
+		return drawTextWithBackground(canvas, paint, text, foreground, background, location_x, location_y, alignment_y, null, shadow, null);
 	}
 
 	public int drawTextWithBackground(Canvas canvas, Paint paint, String text, int foreground, int background, int location_x, int location_y, Alignment alignment_y, String ybounds_text, boolean shadow, Rect bounds) {

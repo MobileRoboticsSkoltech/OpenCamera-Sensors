@@ -1152,6 +1152,8 @@ public class ImageSaver extends Thread {
 				int font_size = request.font_size;
 				int color = request.color;
 				String pref_style = request.pref_style;
+				if( MyDebug.LOG )
+					Log.d(TAG, "pref_style: " + pref_style);
 				String preference_stamp_dateformat = request.preference_stamp_dateformat;
 				String preference_stamp_timeformat = request.preference_stamp_timeformat;
 				String preference_stamp_gpsformat = request.preference_stamp_gpsformat;
@@ -1186,6 +1188,8 @@ public class ImageSaver extends Thread {
 				else if( pref_style.equals("preference_stamp_style_plain") ) {
 					draw_shadowed = false;
 				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "draw_shadowed: " + draw_shadowed);
 				if( dategeo_stamp ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "stamp date");
