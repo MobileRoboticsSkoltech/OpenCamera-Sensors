@@ -115,7 +115,7 @@
     <string name="preference_volume_keys">Volume keys</string>
     <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
     <string name="preference_audio_control">Audio control options</string>
-    <string name="preference_audio_control_summary">Take photo or record video when a noise is detected, or on a voice command (\"cheese\"). When enabled, use the on-screen microphone button to start and stop listening.</string>
+    <string name="preference_audio_control_summary">Take photo or record video when a noise is detected, or on a voice command (\"cheese\"). When enabled, use the on-screen microphone button to start and stop listening.</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
     <string name="preference_audio_noise_control_sensitivity">Audio control sensitivity</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Noise level sensitivity for audio (loud noise) option</string>
     <string name="preference_save_location">Save location</string>
@@ -297,7 +297,7 @@
 
     <string name="audio_control_start">Start audio listening</string>
     <string name="audio_control_stop">Stop audio listening</string>
-    <string name="speech_recognizer_started">Say \"cheese\"</string>
+    <string name="speech_recognizer_started">Say \"cheese\"</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
     <string name="audio_listener_started">Make a loud noise</string>
 
     <string name="auto_stabilise_info">Auto-level will automatically rotate photos so that they appear level.\n\nNote that this means images will come out a slightly lower resolution (due to the rotation and cropping that\'s required).</string>
