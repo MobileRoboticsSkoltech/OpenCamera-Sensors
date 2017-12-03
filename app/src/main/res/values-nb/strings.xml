@@ -115,7 +115,7 @@
     <string name="preference_volume_keys">Volumknapper</string>
     <string name="preference_volume_keys_summary">Velg oppførsel når volumknappene blir trykket på.</string>
     <string name="preference_audio_control">Lydkontrollalternativer</string>
-    <string name="preference_audio_control_summary">Ta et bilde eller ta opp video når lyder blir oppdager, eller ved en stemmekommande (\"Smil!\"). Når det er aktivert, bruk mikrofonknappen på skjermen til å begynne og slutte å lytte.</string>
+    <string name="preference_audio_control_summary">Ta et bilde eller ta opp video når lyder blir oppdager, eller ved en stemmekommande (\"Cheese!\"). Når det er aktivert, bruk mikrofonknappen på skjermen til å begynne og slutte å lytte.</string>
     <string name="preference_audio_noise_control_sensitivity">Lydkontrollsensitivitet</string>
     <string name="preference_audio_noise_control_sensitivity_summary">Innstillingen for støynivåsensitiviteten for lyd (Høy støy)</string>
     <string name="preference_save_location">Lagringsplasseringen</string>
@@ -133,7 +133,7 @@
     <string name="preference_startup_focus">Utfør auto-fokusering ved oppstart</string>
     <string name="preference_startup_focus_summary">Hvorvidt det skal auto-fokuseres når Open Camera startes opp. Hvis du har problemer med at blitsen skrur seg på ved oppstart, skru av denne innstillingen.</string>
     <string name="preference_lock_video">Lås skjermen under videoopptak</string>
-    <string name="preference_lock_video_summary">Under opptak av video, vil brukergrensesnitt bli låst for unngå at opptaket blir stoppet ved et uhell. Sveip skjermen for å låse opp. Bemerk at opptak alltid vil bli stoppet sersom appen går inn i bakgrunnen eller at skjermen blir blank.</string>
+    <string name="preference_lock_video_summary">Under opptak av video, vil brukergrensesnitt bli låst for å unngå at opptaket blir stoppet ved et uhell. Sveip skjermen for å låse opp. Bemerk at opptak alltid vil bli stoppet dersom appen går inn i bakgrunnen eller at skjermen blir blank.</string>
     <string name="preference_rotate_preview">Rotér forhåndsvisningen</string>
     <string name="preference_rotate_preview_summary">Innstilling for å rotere forhåndsvisningen (Påvirker ikke de resulterende bildene/videoene).</string>
     <string name="preference_screen_gui">Grensesnittet på skjermen…</string>
@@ -186,7 +186,7 @@
     <string name="preference_screen_video_settings">Videoinnstillinger…</string>
     <string name="preference_screen_location_settings">Posisjonsinnstillinger…</string>
     <string name="preference_resolution">Kameraoppløsning</string>
-    <string name="preference_resolution_summary">Velg oppløsningen til bildene som blir tatt av kameraet the resolution of photos taken by the camera</string>
+    <string name="preference_resolution_summary">Velg oppløsningen til bildene som blir tatt av kameraet</string>
     <string name="preference_quality">Bildekvalitet</string>
     <string name="preference_quality_summary">Velg JPEG-kvaliteten til de lagrede bildene (Standardverdien er 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
@@ -216,7 +216,7 @@
     <string name="preference_background_photo_saving">Bruk bakgrunnstråd</string>
     <string name="preference_background_photo_saving_summary">Hvorvidt det skal lagres bilder på en bakgrunnstråd (for å kunne kjøre raskere)</string>
     <string name="video_quality">Videooppløsning</string>
-    <string name="video_quality_summary">Bestem oppløsningen til videoene the resolution of videos</string>
+    <string name="video_quality_summary">Bestem oppløsningen til videoene</string>
     <string name="preference_force_video_4k">Tving frem 4K/UHD-oppløsning (Virker kun på noen enheter)</string>
     <string name="preference_force_video_4k_summary">Aktiver 3840x2160-oppløsning for videoopptak på bakkameraet — Denne innstillingen er en hack som kanskje kan tillate 4K-kameraer på 4K-enheter som ikke vanligvis lar tredjepartsapper bruke dette. Det er ikke garantert å virke, så vennligst test det ut før du bruker det.</string>
     <string name="preference_video_stabilization">Aktiver videovater</string>
@@ -297,7 +297,7 @@
 
     <string name="audio_control_start">Begynn lydlytting</string>
     <string name="audio_control_stop">Avslutt lydlytting</string>
-    <string name="speech_recognizer_started">Si \"Smil!\"</string>
+    <string name="speech_recognizer_started">Si \"Cheese!\"</string>
     <string name="audio_listener_started">Lag en høy lyd</string>
 
     <string name="auto_stabilise_info">Auto-vater vil automatisk rotere bildene dine slik at de ser ut til å være i vater. \n\nBemerk at dette betyr at bilder automatisk vil litt lavere oppløsning (på grunn av roteringen og klippingen som er påkrevd).</string>
@@ -314,7 +314,7 @@
     <string name="photo_mode_noise_reduction">Støyreduksjon</string>
     <string name="preference_category_stamp">Fotostempel</string>
     <string name="preference_hdr_save_expo">Lagre alle bilder i HDR-modus</string>
-    <string name="preference_hdr_save_expo_summary">Hvis dette er aktivert, vil det i HDR-fotomodus være tre eskponeringsgrunnbilder som vil bli lagret, i tillegg til det endelige HDR-bildet. Bemerk at dette vil gjøre lagring tregere, spesielt hvis innstillinger som \"Stemple bilder\" eller Auto-vater også er brukt.</string>
+    <string name="preference_hdr_save_expo_summary">Hvis dette er aktivert, vil det i HDR-fotomodus være tre eksponeringsgrunnbilder som vil bli lagret, i tillegg til det endelige HDR-bildet. Bemerk at dette vil gjøre lagring tregere, spesielt hvis innstillinger som \"Stemple bilder\" eller Auto-vater også er brukt.</string>
 
     <string name="no_permission">TILLATELSER ER IKKE TILGJENGELIGE</string>
     <string name="permission_rationale_title">Tillatelse er påkrevd</string>
@@ -378,7 +378,7 @@
     <string name="preference_show_geo_direction_lines">Vis kompassretnings-linjer</string>
     <string name="preference_show_geo_direction_lines_summary">Vis kompassretnings-linjer.</string>
     <string name="preference_video_subtitle">Videoundertekster</string>
-    <string name="preference_video_subtitle_summary">Lag en undertekstfil (.SRT) som lagrer dato og klokkeslett; og også GPS-info dersom plassering-/retnings-dataer er aktivert.</string>
+    <string name="preference_video_subtitle_summary">Lag en undertekstfil (.SRT) som lagrer dato og klokkeslett; og også GPS-info dersom plasserings-/retnings-dataer er aktivert.</string>
 
     <string name="duration_unlimited">Ubegrenset</string>
     <string name="duration_3s">3 sekunder</string>

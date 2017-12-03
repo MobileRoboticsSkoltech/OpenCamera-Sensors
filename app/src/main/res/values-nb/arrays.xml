@@ -71,7 +71,7 @@
         <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
-        <item>Off</item>
+        <item>Av</item>
         <item>1s</item>
         <item>2s</item>
         <item>3s</item>
@@ -117,7 +117,7 @@
         <item>unlimited</item>
     </string-array>
     <string-array name="preference_burst_interval_entries">
-        <item>No delay</item>
+        <item>Ingen forsinkelse</item>
         <item>1s</item>
         <item>2s</item>
         <item>3s</item>
@@ -132,8 +132,8 @@
         <item>10m</item>
         <item>20m</item>
         <item>30m</item>
-        <item>1h</item>
-        <item>2h</item>
+        <item>1t</item>
+        <item>2t</item>
     </string-array>
     <string-array name="preference_burst_interval_values">
         <item>0</item>
@@ -263,7 +263,7 @@
         <item>preference_grid_diagonals</item>
     </string-array>
     <string-array name="preference_crop_guide_entries">
-        <item>None</item>
+        <item>Ingen</item>
         <item>1 (1:1)</item>
         <item>1,25 (5:4)</item>
         <item>1,33 (4:3)</item>
@@ -452,7 +452,7 @@
     </string-array>
     <string-array name="preference_video_restart_entries">
         <item>Ikke gjenta</item>
-        <item>Gjenta 1 time</item>
+        <item>Gjenta 1 gang</item>
         <item>Gjenta 2 ganger</item>
         <item>Gjenta 3 ganger</item>
         <item>Gjenta 4 ganger</item>
