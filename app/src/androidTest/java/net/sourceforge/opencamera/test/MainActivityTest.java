@@ -2824,7 +2824,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			suffix = "_HDR";
 		}
 		else if( is_expo ) {
-			suffix = "_EXP" + (n_expo_images-1);
+			//suffix = "_EXP" + (n_expo_images-1);
+			suffix = "_" + (n_expo_images-1);
 		}
 		String expected_filename = "IMG_" + timeStamp + suffix + ".jpg";
 		// allow for possibility that the time has passed on by 1s since taking the photo
