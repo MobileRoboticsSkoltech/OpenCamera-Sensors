@@ -7,10 +7,14 @@ public class VideoTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(MainTests.class.getName());
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideo"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoAudioControl"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoAudioControl"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSAF"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitles"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitlesGPS"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitles"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSubtitlesGPS"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmersiveMode"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testImmersiveModeEverything"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoStabilization"));
@@ -18,9 +22,11 @@ public class VideoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFocusArea"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoQuick"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoQuickSAF"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxDuration"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxDurationRestart"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxDurationRestartInterrupt"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxDuration"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxDurationRestart"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxDurationRestartInterrupt"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSettings"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMacro"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoPause"));
@@ -29,15 +35,21 @@ public class VideoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotTimer"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotPausePreview"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSnapshotMax"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFlashVideo"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFlashVideo"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoTimerInterrupt"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoPopup"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoTimerPopup"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoAvailableMemory"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoAvailableMemory2"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoAvailableMemory2"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize1"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize2"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize3"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize2"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize3"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoForceFailure"));
 		// put tests which change bitrate, fps or test 4K at end
 		// update: now deprecating these tests, as setting these settings can be dodgy on some devices

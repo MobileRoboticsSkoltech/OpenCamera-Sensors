@@ -12,7 +12,9 @@ public class PhotoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationOn"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationDirectionOn"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLocationOff"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testDirectionOn"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testDirectionOn"));
+		}
 		// then do memory intensive tests:
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoLevel"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoLevelLowMemory"));
@@ -22,11 +24,15 @@ public class PhotoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhoto"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoContinuous"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoContinuousNoTouch"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoStabilise"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAutoStabilise"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFlashAuto"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFlashOn"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFlashTorch"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAudioButton"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAudioButton"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoNoAutofocus"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoNoThumbnail"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoFlashBug"));
@@ -50,16 +56,20 @@ public class PhotoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoSingleTap"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDoubleTap"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoAlt"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTimerBackground"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTimerSettings"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTimerPopup"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTimerBackground"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTimerSettings"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTimerPopup"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoBurst"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPicture1"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPicture2"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testContinuousPictureFocusBurst"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testPhotoStamp"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDRO"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDROPhotoStamp"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoDROPhotoStamp"));
+		}
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDR"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDRSaveExpo"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDRFrontCamera"));
@@ -67,11 +77,13 @@ public class PhotoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoHDRPhotoStamp"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoExpo"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder1"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder2"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder3"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder4"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolderUnicode"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolderEmpty"));
+		if( !MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder2"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder3"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolder4"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolderUnicode"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolderEmpty"));
+		}
         return suite;
     }
 }

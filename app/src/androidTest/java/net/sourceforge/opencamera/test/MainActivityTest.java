@@ -55,6 +55,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	private static final String TAG = "MainActivityTest";
 	private MainActivity mActivity = null;
 	private Preview mPreview = null;
+	public static boolean test_camera2 = false;
+	//public static boolean test_camera2 = true;
 
 	@SuppressWarnings("deprecation")
 	public MainActivityTest() {
@@ -73,7 +75,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
 		SharedPreferences.Editor editor = settings.edit();
 		editor.clear();
-		//editor.putBoolean(PreferenceKeys.UseCamera2PreferenceKey, true); // uncomment to test Camera2 API
+		if( test_camera2 ) {
+			editor.putBoolean(PreferenceKeys.UseCamera2PreferenceKey, true);
+		}
 		editor.apply();
 		Log.d(TAG, "setUp: 2");
 
@@ -156,7 +160,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		waitUntilCameraOpened();
 		Log.d(TAG, "restart done");
 	}
-	
+
 	private void pauseAndResume() {
 		Log.d(TAG, "pauseAndResume");
 		pauseAndResume(true);
@@ -272,7 +276,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue(compare_focus_value.equals(actual_focus_value));
 	    }
 	}
-	
+
 	private void switchToISO(int required_iso) {
 		Log.d(TAG, "switchToISO: "+ required_iso);
 		int iso = mPreview.getCameraController().getISO();
@@ -303,7 +307,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 		assertTrue(iso == required_iso);
 	}
-	
+
 	/* Sets the camera up to a predictable state:
 	 * - Back camera
 	 * - Photo mode
@@ -447,8 +451,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	/* Ensures that we save the video mode.
 	 * Also tests the icons and content descriptions of the take photo and switch photo/video buttons are as expected.
 	 */
-	public void testSaveVideoMode() {
-		Log.d(TAG, "testSaveVideoMode");
+	private void subTestSaveVideoMode() {
+		Log.d(TAG, "subTestSaveVideoMode");
 		setToDefault();
 
 		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -478,8 +482,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	/* Ensures that we save the focus mode for photos when restarting.
 	 * Note that saving the focus mode for video mode is tested in testFocusSwitchVideoResetContinuous.
 	 */
-	public void testSaveFocusMode() {
-		Log.d(TAG, "testSaveVideoMode");
+	private void subTestSaveFocusMode() {
+		Log.d(TAG, "subTestSaveFocusMode");
 		if( !mPreview.supportsFocus() ) {
 			return;
 		}
@@ -498,15 +502,15 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	/* Ensures that we save the flash mode torch when quitting and restarting.
 	 */
-	public void testSaveFlashTorchQuit() throws InterruptedException {
-		Log.d(TAG, "testSaveFlashTorchQuit");
+	private void subTestSaveFlashTorchQuit() throws InterruptedException {
+		Log.d(TAG, "subTestSaveFlashTorchQuit");
 
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
 
 		setToDefault();
-		
+
 		switchToFlashValue("flash_torch");
 
 		restart();
@@ -519,10 +523,45 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(flash_value.equals("flash_torch"));
 	}
 
+	private void subTestExposureLockNotSaved() {
+		Log.d(TAG, "subTestExposureLockNotSaved");
+
+	    if( !mPreview.supportsExposureLock() ) {
+	    	return;
+	    }
+
+		setToDefault();
+
+	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
+	    clickView(exposureLockButton);
+	    assertTrue(mPreview.getCameraController().getAutoExposureLock());
+
+	    this.pauseAndResume();
+	    assertTrue(!mPreview.getCameraController().getAutoExposureLock());
+
+	    // now with restart
+
+	    clickView(exposureLockButton);
+	    assertTrue(mPreview.getCameraController().getAutoExposureLock());
+
+	    restart();
+	    assertTrue(!mPreview.getCameraController().getAutoExposureLock());
+	}
+
+	/** Tests for things which should (or shouldn't) be saved.
+	 */
+	public void testSaveModes() throws InterruptedException {
+		Log.d(TAG, "testSaveModes");
+		subTestSaveVideoMode();
+		subTestSaveFocusMode();
+		subTestSaveFlashTorchQuit();
+		subTestExposureLockNotSaved();
+	}
+
 	/* Ensures that the flash mode changes as expected when switching between photo and video modes.
 	 */
 	public void testFlashVideoMode() throws InterruptedException {
-		Log.d(TAG, "testSaveVideoMode");
+		Log.d(TAG, "testFlashVideoMode");
 		setToDefault();
 
 		if( !mPreview.supportsFlash() ) {
@@ -594,7 +633,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		setToDefault();
-		
+
 		switchToFlashValue("flash_torch");
 
 		int cameraId = mPreview.getCameraId();
@@ -617,7 +656,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "flash_value: " + flash_value);
 	    assertTrue(flash_value.equals("flash_torch"));
 	}*/
-	
+
 	public void testFlashStartup() throws InterruptedException {
 		Log.d(TAG, "testFlashStartup");
 		setToDefault();
@@ -654,7 +693,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "# camera flash value: " + camera_flash_value);
 	    assertTrue(camera_flash_value.equals(flash_value));
 	}
-	
+
 	/** Tests that flash remains on, with the startup focus flash hack.
 	 */
 	public void testFlashStartup2() throws InterruptedException {
@@ -681,7 +720,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "2 flash value is now: " + flash_value);
 		assertTrue(flash_value.equals("flash_on"));
 	}
-	
+
 	private void checkOptimalPreviewSize() {
 		Log.d(TAG, "preview size: " + mPreview.getCameraController().getPreviewSize().width + ", " + mPreview.getCameraController().getPreviewSize().height);
         List<CameraController.Size> sizes = mPreview.getSupportedPreviewSizes();
@@ -713,7 +752,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		double etol = (double)mPreview.getView().getWidth() / (double)(mPreview.getView().getHeight() * (mPreview.getView().getHeight()-1) ) + 1.0e-5;
 		assertTrue( Math.abs(frame_aspect_ratio - preview_aspect_ratio) <= etol );
 	}
-	
+
 	/* Ensures that preview resolution is set as expected in non-WYSIWYG mode
 	 */
 	public void testPreviewSize() {
@@ -831,7 +870,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	        assertTrue( Math.abs(previewRatio - expTargetRatio) <= 1.0e-5 );
 	        checkOptimalPreviewSize();
 			checkSquareAspectRatio();
-			
+
 			Log.d(TAG, "switch to video again");
 		    clickView(switchVideoButton);
 			waitUntilCameraOpened();
@@ -957,7 +996,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(mPreview.getCameraController().getFocusAreas().size() == 1);
 	    assertTrue(mPreview.getCameraController().getMeteringAreas() != null);
 	    assertTrue(mPreview.getCameraController().getMeteringAreas().size() == 1);
-	    
+
 		switchToFocusValue("focus_mode_locked"); // change to a mode that isn't auto (so that the first iteration of the next loop will set of an autofocus, due to changing the focus mode)
 		List<String> supported_focus_values = mPreview.getSupportedFocusValues();
 		assertTrue( supported_focus_values != null );
@@ -1065,7 +1104,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    Log.d(TAG, "4 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus + " compare to saved_count: " + saved_count);
 			assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
 		}
-		
+
 		if( mPreview.getSupportedFocusValues().contains("focus_mode_locked") ) {
 			switchToFocusValue("focus_mode_locked");
 		    restart();
@@ -1076,7 +1115,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    Log.d(TAG, "5 count_cameraAutoFocus: " + mPreview.count_cameraAutoFocus + " compare to saved_count: " + saved_count);
 			assertTrue(mPreview.count_cameraAutoFocus == saved_count+1);
 		}
-		
+
 		if( mPreview.getSupportedFocusValues().contains("focus_mode_continuous_picture") ) {
 			switchToFocusValue("focus_mode_continuous_picture");
 		    restart();
@@ -1088,7 +1127,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			assertTrue(mPreview.count_cameraAutoFocus == saved_count);
 		}
 	}
-	
+
 	/* Test doing touch to auto-focus region by swiping to all four corners works okay.
 	 */
 	public void testAutoFocusCorners() {
@@ -1123,7 +1162,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(!mPreview.hasFocusArea());
 	    assertTrue(mPreview.getCameraController().getFocusAreas() == null);
 	    assertTrue(mPreview.getCameraController().getMeteringAreas() == null);
-	    
+
 		// do larger step at top-right, due to conflicting with Settings button
 		// but we now ignore swipes - so we now test for that instead
 		Log.d(TAG, "top-right");
@@ -1254,7 +1293,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	private void subTestPopupButtonAvailability(String test_key, String option, List<String> options) {
 		subTestPopupButtonAvailability(test_key, option, options != null && options.contains(option));
 	}
-	
+
 	private void subTestPopupButtonAvailability(String option, boolean expected) {
 	    View button = mActivity.getUIButton(option);
 	    if( expected ) {
@@ -1264,7 +1303,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	assertTrue(button == null);
 	    }
 	}
-	
+
 	private void subTestPopupButtonAvailability() {
 		List<String> supported_flash_values = mPreview.getSupportedFlashValues();
 		Log.d(TAG, "supported_flash_values: "+ supported_flash_values);
@@ -1279,14 +1318,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_infinity", supported_focus_values);
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_macro", supported_focus_values);
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_fixed", supported_focus_values);
-		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_edof", supported_focus_values);		
+		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_edof", supported_focus_values);
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_continuous_picture", supported_focus_values);
 		subTestPopupButtonAvailability("TEST_FOCUS", "focus_mode_continuous_video", supported_focus_values);
 		subTestPopupButtonAvailability("TEST_WHITE_BALANCE", mPreview.getSupportedWhiteBalances() != null);
 		subTestPopupButtonAvailability("TEST_SCENE_MODE", mPreview.getSupportedSceneModes() != null);
 		subTestPopupButtonAvailability("TEST_COLOR_EFFECT", mPreview.getSupportedColorEffects() != null);
 	}
-	
+
 	private void subTestFocusFlashAvailability() {
 	    //View focusModeButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_mode);
 	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
@@ -1316,7 +1355,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(has_exposure == exposure_visible);
 		assertTrue(has_exposure_lock == exposure_lock_visible);
 		assertTrue(popup_visible);
-		
+
 	    clickView(popupButton);
 	    while( !mActivity.popupIsOpen() ) {
 	    }
@@ -1490,7 +1529,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    focus_value = mPreview.getCameraController().getFocusValue();
 		Log.d(TAG, "video focus_value: "+ focus_value);
     	assertTrue(focus_value.equals("focus_mode_continuous_picture"));
-	    
+
 		// check continuous focus is working
 		saved_count_cameraContinuousFocusMoving = mPreview.count_cameraContinuousFocusMoving;
 		Thread.sleep(3000);
@@ -1516,7 +1555,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.putString(PreferenceKeys.getFocusPreferenceKey(mPreview.getCameraId(), false), "focus_mode_continuous_video");
 		editor.apply();
 		restart();
-		
+
 		Thread.sleep(1000);
 
 	    View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
@@ -1739,7 +1778,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Thread.sleep(1000);
 		assertTrue(mPreview.getCurrentFocusValue().equals(focus_value_ui));
 		assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
-		
+
 		for(int i=0;i<8;i++) {
 			Log.d(TAG, "about to click preview for autofocus: " + i);
 			int saved_count = mPreview.count_cameraAutoFocus;
@@ -1788,7 +1827,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Thread.sleep(1000);
 		assertTrue(mPreview.getCurrentFocusValue().equals(focus_value_ui));
 		assertTrue(mPreview.getCameraController().getFocusValue().equals(focus_value));
-		
+
 		Log.d(TAG, "about to click preview for autofocus");
 		int saved_count = mPreview.count_cameraAutoFocus;
 		TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
@@ -2009,7 +2048,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    this.pauseAndResume();
 	    assertTrue(mPreview.isVideo());
-	    
+
 	    focus_value = mPreview.getCameraController().getFocusValue();
 	    assertTrue(focus_value.equals("focus_mode_auto"));
 
@@ -2049,7 +2088,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakePhotoExposureCompensation() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExposureCompensation");
 		setToDefault();
-		
+
 	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
 		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_container);
 		SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
@@ -2135,31 +2174,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue( mPreview.getCurrentExposure() == -1 );
 		    assertTrue( mPreview.getCurrentExposure() - mPreview.getMinimumExposure() == seekBar.getProgress() );
 		}
-	}
-
-	public void testExposureLockNotSaved() {
-		Log.d(TAG, "testExposureLockNotSaved");
-
-	    if( !mPreview.supportsExposureLock() ) {
-	    	return;
-	    }
-
-		setToDefault();
-
-	    View exposureLockButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_lock);
-	    clickView(exposureLockButton);
-	    assertTrue(mPreview.getCameraController().getAutoExposureLock());
-
-	    this.pauseAndResume();
-	    assertTrue(!mPreview.getCameraController().getAutoExposureLock());
-
-	    // now with restart
-
-	    clickView(exposureLockButton);
-	    assertTrue(mPreview.getCameraController().getAutoExposureLock());
-
-	    restart();
-	    assertTrue(!mPreview.getCameraController().getAutoExposureLock());
 	}
 
 	public void testTakePhotoManualISOExposure() throws InterruptedException {
@@ -2742,16 +2756,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
-		
+
 		int saved_count_cameraTakePicture = mPreview.count_cameraTakePicture;
-		
+
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
 		Log.d(TAG, "folder: " + folder);
 		File [] files = folder.listFiles();
 		int n_files = files.length;
 		Log.d(TAG, "n_files at start: " + n_files);
-		
+
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
@@ -2886,10 +2900,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
 		editor.apply();
 		updateForSettings();
-		
+
 		subTestTakePhoto(false, false, true, true, false, false, true, false);
 	}
-	
+
 	/** Test taking photo with JPEG + DNG (RAW), with test_wait_capture_result.
 	 */
 	public void testTakePhotoRawWaitCaptureResult() throws InterruptedException {
@@ -2903,11 +2917,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
 		editor.apply();
 		updateForSettings();
-		
+
 		mPreview.getCameraController().test_wait_capture_result = true;
 		subTestTakePhoto(false, false, true, true, false, false, true, true);
 	}
-	
+
 	/** Test taking multiple RAW photos.
 	 */
 	public void testTakePhotoRawMulti() {
@@ -2961,7 +2975,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
-	
+
 	/** Test taking photo with continuous photo mode.
 	 *  Touching to focus will mean the photo is taken whilst the camera controller is actually
 	 *  in autofocus mode.
@@ -2974,7 +2988,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		assertTrue( mPreview.getCameraController().test_af_state_null_focus == 0 );
 	}
-	
+
 	/** Test taking photo with continuous photo mode. Don't touch to focus first, so we take the
 	 *  photo in continuous focus mode.
 	 */
@@ -3248,7 +3262,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( contentDescription.equals( mActivity.getResources().getString(new_is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera) ) );
 		assertTrue( new_contentDescription.equals( mActivity.getResources().getString(is_front_facing ? net.sourceforge.opencamera.R.string.switch_to_front_camera : net.sourceforge.opencamera.R.string.switch_to_back_camera) ) );
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
-		
+
 		// check still front camera after pause/resume
 		pauseAndResume();
 
@@ -3276,7 +3290,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 		setToDefault();
-		
+
 		int cameraId = mPreview.getCameraId();
 
 		View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
@@ -3442,7 +3456,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(takePhotoVideoButton.getVisibility() == View.GONE);
 
 	    subTestTakePhoto(false, true, true, true, false, false, false, false);
-	    
+
 	    // test now exited immersive mode
 	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
@@ -3650,7 +3664,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(pauseVideoButton.getVisibility() == View.GONE);
 		assertTrue(takePhotoVideoButton.getVisibility() == View.GONE);
 	}
-	
+
 	private void subTestTakePhotoPreviewPaused(boolean immersive_mode, boolean is_raw) throws InterruptedException {
 		mPreview.count_cameraTakePicture = 0;
 
@@ -3669,7 +3683,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		Log.d(TAG, "check if preview is started");
 		assertTrue(mPreview.isPreviewStarted());
-		
+
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
@@ -3699,7 +3713,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 		assertTrue(mPreview.count_cameraTakePicture==1);
-		
+
 		// don't need to wait until image queue empty, as Open Camera shouldn't use background thread for preview pause option
 
 		Bitmap thumbnail = mActivity.gallery_bitmap;
@@ -3763,7 +3777,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 		subTestTakePhotoPreviewPaused(false, false);
 	}
-	
+
 	public void testTakePhotoPreviewPausedAudioButton() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoPreviewPausedAudioButton");
 		setToDefault();
@@ -3775,7 +3789,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		subTestTakePhotoPreviewPaused(false, false);
 	}
-	
+
 	// If this test fails, make sure we've manually selected that folder (as permission can't be given through the test framework).
 	public void testTakePhotoPreviewPausedSAF() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoPreviewPausedSAF");
@@ -3795,7 +3809,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		subTestTakePhotoPreviewPaused(false, false);
 	}
-	
+
 	private void subTestTakePhotoPreviewPausedTrash(boolean is_raw) throws InterruptedException {
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
@@ -3811,7 +3825,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
 	    assertTrue(mPreview.isPreviewStarted());
-		
+
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
@@ -3845,12 +3859,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "after idle sync");
 		Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 		assertTrue(mPreview.count_cameraTakePicture==1);
-		
+
 		// don't need to wait until image queue empty, as Open Camera shouldn't use background thread for preview pause option
 
 		Bitmap thumbnail = mActivity.gallery_bitmap;
 		assertTrue(thumbnail != null);
-		
+
 		int n_new_files = folder.listFiles().length - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		int exp_n_new_files = is_raw ? 2 : 1;
@@ -3990,9 +4004,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakePhotoQuickFocus() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoQuickFocus");
 		setToDefault();
-		
+
 		assertTrue(mPreview.isPreviewStarted());
-		
+
 		// touch to auto-focus with focus area
 		// autofocus shouldn't be immediately, but after a delay
 		Thread.sleep(1000);
@@ -4043,7 +4057,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		assertTrue(mPreview.isPreviewStarted());
-		
+
 		// touch to auto-focus with focus area
 		// autofocus shouldn't be immediately, but after a delay
 		Thread.sleep(1000);
@@ -4113,12 +4127,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
 	    assertTrue(mPreview.isPreviewStarted());
-		
+
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
 		int n_files = folder.listFiles().length;
 		Log.d(TAG, "n_files at start: " + n_files);
-		
+
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
 	    //View flashButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.flash);
@@ -4157,7 +4171,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(mPreview.count_cameraTakePicture==1);
 
 		mActivity.waitUntilImageQueueEmpty();
-		
+
 		int n_new_files = folder.listFiles().length - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 1);
@@ -4360,7 +4374,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	private interface VideoTestCallback {
 		int doTest(); // return expected number of new files (or -1 to indicate not to check this)
 	}
-	
+
 	private void subTestTakeVideo(boolean test_exposure_lock, boolean test_focus_area, boolean allow_failure, boolean immersive_mode, VideoTestCallback test_cb, long time_ms, boolean max_filesize, boolean subtitles) throws InterruptedException {
 		assertTrue(mPreview.isPreviewStarted());
 
@@ -4408,7 +4422,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "folder: " + folder);
 		int n_files = folder.listFiles().length;
 		Log.d(TAG, "n_files at start: " + n_files);
-		
+
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
@@ -4479,7 +4493,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				    Thread.sleep(500);
 					switchToFlashValue("flash_off");
 			    }
-			    
+
 		    	Thread.sleep(time_ms);
 			    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_recording );
                 assertTrue( (Integer)switchVideoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_photo );
@@ -4508,7 +4522,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					Log.d(TAG, "touch again to focus");
 					TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
 			    }
-			    
+
 			    if( test_exposure_lock ) {
 					Log.d(TAG, "test exposure lock");
 				    assertTrue( !mPreview.getCameraController().getAutoExposureLock() );
@@ -4518,7 +4532,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				    assertTrue( mPreview.getCameraController().getAutoExposureLock() );
 				    Thread.sleep(2000);
 			    }
-		
+
 			    assertTrue( (Integer)takePhotoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_video_recording );
                 assertTrue( (Integer)switchVideoButton.getTag() == net.sourceforge.opencamera.R.drawable.take_photo );
 				assertTrue( takePhotoButton.getContentDescription().equals( mActivity.getResources().getString(net.sourceforge.opencamera.R.string.stop_video) ) );
@@ -5034,7 +5048,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakeVideoAvailableMemory");
 
 		setToDefault();
-		
+
 		mActivity.getApplicationInterface().test_set_available_memory = true;
 		mActivity.getApplicationInterface().test_available_memory = 50000000;
 
@@ -5074,7 +5088,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testTakeVideoAvailableMemory2");
 
 		setToDefault();
-		
+
 		mActivity.getApplicationInterface().test_set_available_memory = true;
 		mActivity.getApplicationInterface().test_available_memory = 5000000;
 
@@ -5352,7 +5366,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakeVideo4K() throws InterruptedException {
 		Log.d(TAG, "testTakeVideo4K");
-		
+
 		if( !mActivity.supportsForceVideo4K() ) {
 			return;
 		}
@@ -5371,7 +5385,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakeVideoFPS() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoFPS");
-		
+
 		setToDefault();
 		final String [] fps_values = new String[]{"15", "24", "25", "30", "60"};
 		for(String fps_value : fps_values) {
@@ -5391,7 +5405,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakeVideoBitrate() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoBitrate");
-		
+
 		setToDefault();
 		final String [] bitrate_values = new String[]{"1000000", "10000000", "20000000", "50000000"};
 		//final String [] bitrate_values = new String[]{"1000000", "10000000", "20000000", "30000000"};
@@ -5428,12 +5442,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
-		
+
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
 		int n_files = folder.listFiles().length;
 		Log.d(TAG, "n_files at start: " + n_files);
-		
+
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean has_audio_control_button = !sharedPreferences.getString(PreferenceKeys.AudioControlPreferenceKey, "none").equals("none");
 
@@ -5513,7 +5527,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 		Log.d(TAG, "check stopped taking video");
 		assertTrue( !mPreview.isVideoRecording() );
-		
+
 		assertTrue( folder.exists() );
 		n_new_files = folder.listFiles().length - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
@@ -5536,33 +5550,33 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakeVideoMaxDuration() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxDuration");
-		
+
 		setToDefault();
-		
+
 		subTestTakeVideoMaxDuration(false, false);
 	}
 
 	public void testTakeVideoMaxDurationRestart() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxDurationRestart");
-		
+
 		setToDefault();
-		
+
 		subTestTakeVideoMaxDuration(true, false);
 	}
 
 	public void testTakeVideoMaxDurationRestartInterrupt() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxDurationRestartInterrupt");
-		
+
 		setToDefault();
-		
+
 		subTestTakeVideoMaxDuration(true, true);
 	}
 
 	public void testTakeVideoSettings() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoSettings");
-		
+
 		setToDefault();
-		
+
 		assertTrue(mPreview.isPreviewStarted());
 
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -5572,12 +5586,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
-		
+
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
 		int n_files = folder.listFiles().length;
 		Log.d(TAG, "n_files at start: " + n_files);
-		
+
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 
 	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -5622,7 +5636,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		this.getInstrumentation().waitForIdleSync();
 	    Thread.sleep(500);
 		assertTrue( !mPreview.isVideoRecording() );
-		
+
 		Log.d(TAG, "about to click take video");
 	    clickView(takePhotoButton);
 		Log.d(TAG, "done clicking take video");
@@ -5645,9 +5659,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
-		
+
 		setToDefault();
-		
+
 		assertTrue(mPreview.isPreviewStarted());
 
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -5687,7 +5701,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		File folder = mActivity.getImageFolder();
 		int n_files = folder.listFiles().length;
 		Log.d(TAG, "n_files at start: " + n_files);
-		
+
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
 
 	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -5715,14 +5729,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
-		
+
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), true);
 		editor.apply();
 		updateForSettings();
-		
+
 		assertTrue(mPreview.isPreviewStarted());
 
 		View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -5732,7 +5746,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	    assertTrue(mPreview.isVideo());
 		assertTrue(mPreview.isPreviewStarted());
-		
+
 	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take video");
 	    clickView(takePhotoButton);
@@ -5754,7 +5768,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    }
 		    assertTrue( System.currentTimeMillis() - time_s <= 200 );
 		}
-		
+
 		// wait until flash on
 		time_s = System.currentTimeMillis();
 		for(;;) {
@@ -5787,7 +5801,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "done clicking stop video");
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
-		
+
 		// test flash now off
 	    assertTrue( !mPreview.getCameraController().getFlashValue().equals("flash_torch") );
 	}
@@ -5813,7 +5827,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "done clicking take photo");
 		assertTrue(mPreview.isOnTimer());
 		assertTrue(mPreview.count_cameraTakePicture==0);
-		
+
 		try {
 			// wait 2s, and check we are still on timer, and not yet taken a photo
 			Thread.sleep(2000);
@@ -5865,7 +5879,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			n_new_files = folder.listFiles().length - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 0);
-			
+
 			// wait 15s, and ensure we took a photo
 			Thread.sleep(15000);
 			Log.d(TAG, "waited, count now " + mPreview.count_cameraTakePicture);
@@ -5874,7 +5888,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			n_new_files = folder.listFiles().length - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 1);
-			
+
 			// now set timer to 5s, and turn on pause_preview
 			editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
 			editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, true);
@@ -5899,7 +5913,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			n_new_files = folder.listFiles().length - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 2);
-			
+
 			// now test cancelling
 			Log.d(TAG, "about to click take photo");
 			assertTrue(mPreview.getCameraController() != null);
@@ -5939,34 +5953,34 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			assertTrue(false);
 		}
 	}
-	
+
 	/* Test with 10s timer, start a photo, go to background, then back, then take another photo. We should only take 1 photo - the original countdown should not be active (nor should we crash)!
 	 */
 	public void testTimerBackground() {
 		Log.d(TAG, "testTimerBackground");
 		setToDefault();
-		
+
 		subTestTimer(0);
 	}
-	
+
 	/* Test and going to settings.
 	 */
 	public void testTimerSettings() {
 		Log.d(TAG, "testTimerSettings");
 		setToDefault();
-		
+
 		subTestTimer(1);
 	}
-	
+
 	/* Test and going to popup.
 	 */
 	public void testTimerPopup() {
 		Log.d(TAG, "testTimerPopup");
 		setToDefault();
-		
+
 		subTestTimer(2);
 	}
-	
+
 	/* Takes video on a timer, but interrupts with restart.
 	 */
 	public void testVideoTimerInterrupt() {
@@ -5997,7 +6011,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "done clicking take photo");
 		assertTrue(mPreview.isOnTimer());
 		assertTrue(mPreview.count_cameraTakePicture==0);
-		
+
 		try {
 			// wait a moment after 5s, then restart
 			Thread.sleep(5100);
@@ -6064,7 +6078,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    while( !mActivity.popupIsOpen() ) {
 		    }
 	    }
-	    
+
 	    View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
 		Log.d(TAG, "about to click take photo");
 	    clickView(takePhotoButton);
@@ -6072,11 +6086,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( on_timer ) {
 			assertTrue(mPreview.isOnTimer());
 		}
-		
+
 		try {
 			if( on_timer ) {
 				Thread.sleep(2000);
-	
+
 				// now open popup
 			    clickView(popupButton);
 			    while( !mActivity.popupIsOpen() ) {
@@ -6163,7 +6177,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 	    subTestPopupButtonAvailability();
 	}
-	
+
 	/* Tests that popup menu closes when we record video; then tests behaviour of popup.
 	 */
 	public void testVideoPopup() {
@@ -6192,7 +6206,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
 		editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
 		editor.apply();
-		
+
 		subTestVideoPopup(true);
 
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() > 1 ) {
@@ -6203,7 +6217,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			subTestVideoPopup(true);
 	    }
 	}
-	
+
 	/* Tests taking photos repeatedly with auto-repeat "burst" method.
 	 */
 	public void testTakePhotoBurst() {
@@ -6344,7 +6358,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			editor.putString(PreferenceKeys.getResolutionPreferenceKey(mPreview.getCameraId()), size.width + " " + size.height);
 			editor.apply();
 	    }
-		
+
 		// need to resume activity for it to take effect (for camera to be reopened)
 	    pauseAndResume();
 	    CameraController.Size new_size = mPreview.getCameraController().getPictureSize();
@@ -6370,7 +6384,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			editor.putString(PreferenceKeys.getResolutionPreferenceKey(mPreview.getCameraId()), front_size.width + " " + front_size.height);
 			editor.apply();
 	    }
-		
+
 		// need to resume activity for it to take effect (for camera to be reopened)
 	    pauseAndResume();
 	    // check still on front camera
@@ -6389,7 +6403,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			editor.putString(PreferenceKeys.getResolutionPreferenceKey(mPreview.getCameraId()), front_size.width + " " + front_size.height);
 			editor.apply();
 	    }
-		
+
 		// need to resume activity for it to take effect (for camera to be reopened)
 	    pauseAndResume();
 	    front_new_size = mPreview.getCameraController().getPictureSize();
@@ -6401,7 +6415,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		waitUntilCameraOpened();
 		new_cameraId = mPreview.getCameraId();
 		assertTrue(cameraId == new_cameraId);
-		
+
 		// now back camera size should still be what it was
 	    {
 		    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -6852,7 +6866,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to max_zoom " + max_zoom);
 	    assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
 		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
-		
+
 	    mPreview.scaleZoom(1.0f/10000.0f);
 		this.getInstrumentation().waitForIdleSync();
 	    Log.d(TAG, "compare actual zoom " + mPreview.getCameraController().getZoom() + " to zero");
@@ -7095,7 +7109,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    View galleryButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.gallery);
 	    clickView(galleryButton);
-	    
+
 	}
 
 	/* Tests going to settings.
@@ -7106,7 +7120,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    View settingsButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.settings);
 	    clickView(settingsButton);
-	    
+
 	}
 
 	private void subTestCreateSaveFolder(boolean use_saf, String save_folder, boolean delete_folder) {
@@ -7129,7 +7143,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				mActivity.updateFolderHistorySAF(save_folder);
 			}
 		}
-		
+
 		SaveLocationHistory save_location_history = use_saf ? mActivity.getSaveLocationHistorySAF() : mActivity.getSaveLocationHistory();
 		assertTrue(save_location_history.size() > 0);
 		assertTrue(save_location_history.contains(save_folder));
@@ -7169,7 +7183,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(mPreview.count_cameraTakePicture==1);
 
 		mActivity.waitUntilImageQueueEmpty();
-		
+
 		assertTrue( folder.exists() );
 		int n_new_files = folder.listFiles().length;
 		Log.d(TAG, "n_new_files: " + n_new_files);
@@ -7330,7 +7344,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "save_location_history entry: " + save_location_history.get(0));
 			assertTrue(save_location_history.get(0).equals(current_folder));
 		}
-		
+
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
@@ -7350,7 +7364,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(save_location_history.size() == 2);
 		assertTrue(save_location_history.get(0).equals(current_folder));
 		assertTrue(save_location_history.get(1).equals("new_folder_history_entry"));
-		
+
 		restart();
 
 		save_location_history = use_saf ? mActivity.getSaveLocationHistorySAF() : mActivity.getSaveLocationHistory();
@@ -7408,13 +7422,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testSaveFolderHistory() {
 		setToDefault();
-		
+
 		subTestSaveFolderHistory(false);
 	}
 
 	public void testSaveFolderHistorySAF() {
 		setToDefault();
-		
+
 		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
 			Log.d(TAG, "SAF requires Android Lollipop or better");
 			return;
@@ -7439,10 +7453,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "testPreviewRotation");
 
 		setToDefault();
-		
+
 		int display_orientation = mPreview.getDisplayRotation();
 		Log.d(TAG, "display_orientation = " + display_orientation);
-		
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.getRotatePreviewPreferenceKey(), "180");
@@ -7454,11 +7468,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( new_display_orientation == ((display_orientation + 2) % 4) );
 	}
 
-	public void testSceneMode() {
-		Log.d(TAG, "testSceneMode");
+	private void subTestSceneMode() {
+		Log.d(TAG, "subTestSceneMode");
 
 		setToDefault();
-		
+
 	    List<String> scene_modes = mPreview.getSupportedSceneModes();
 	    if( scene_modes == null ) {
 	    	return;
@@ -7478,7 +7492,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 		Log.d(TAG, "change to scene_mode: " + scene_mode);
-	    
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.SceneModePreferenceKey, scene_mode);
@@ -7490,11 +7504,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue( new_scene_mode.equals(scene_mode) );
 	}
 
-	public void testColorEffect() {
-		Log.d(TAG, "testColorEffect");
+	private void subTestColorEffect() {
+		Log.d(TAG, "subTestColorEffect");
 
 		setToDefault();
-		
+
 	    List<String> color_effects = mPreview.getSupportedColorEffects();
 	    if( color_effects == null ) {
 	    	return;
@@ -7514,7 +7528,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 		Log.d(TAG, "change to color_effect: " + color_effect);
-	    
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.ColorEffectPreferenceKey, color_effect);
@@ -7526,11 +7540,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue( new_color_effect.equals(color_effect) );
 	}
 
-	public void testWhiteBalance() {
-		Log.d(TAG, "testWhiteBalance");
+	private void subTestWhiteBalance() {
+		Log.d(TAG, "subTestWhiteBalance");
 
 		setToDefault();
-		
+
 	    List<String> white_balances = mPreview.getSupportedWhiteBalances();
 	    if( white_balances == null ) {
 	    	return;
@@ -7550,7 +7564,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 		Log.d(TAG, "change to white_balance: " + white_balance);
-	    
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.WhiteBalancePreferenceKey, white_balance);
@@ -7562,11 +7576,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue( new_white_balance.equals(white_balance) );
 	}
 
-	public void testImageQuality() {
-		Log.d(TAG, "testImageQuality");
+	private void subTestImageQuality() {
+		Log.d(TAG, "subTestImageQuality");
 
 		setToDefault();
-		
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.QualityPreferenceKey, "100");
@@ -7576,6 +7590,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int quality = mPreview.getCameraController().getJpegQuality();
 		Log.d(TAG, "quality is: " + quality);
 	    assertTrue( quality == 100 );
+	}
+
+	public void testCameraModes() {
+		Log.d(TAG, "testCameraModes");
+		subTestSceneMode();
+		subTestColorEffect();
+		subTestWhiteBalance();
+		subTestImageQuality();
 	}
 
 	/** Tests that changing resolutions doesn't close the popup.
