@@ -71,6 +71,8 @@ public class MyTextureView extends TextureView implements CameraSurface {
 
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onMeasure: " + widthSpec + " x " + heightSpec);
     	preview.getMeasureSpec(measure_spec, widthSpec, heightSpec);
     	super.onMeasure(measure_spec[0], measure_spec[1]);
     }
