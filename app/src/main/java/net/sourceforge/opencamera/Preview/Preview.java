@@ -334,6 +334,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		this.cameraSurface = new MySurfaceView(getContext(), this);
     		camera_controller_manager = new CameraControllerManager1();
         }
+		/*{
+			FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+			layoutParams.gravity = Gravity.CENTER;
+			cameraSurface.getView().setLayoutParams(layoutParams);
+		}*/
 
 	    gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener());
 	    gestureDetector.setOnDoubleTapListener(new DoubleTapListener());
@@ -622,7 +627,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     public void getMeasureSpec(int [] spec, int widthSpec, int heightSpec) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getMeasureSpec");
     	if( !this.hasAspectRatio() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "doesn't have aspect ratio");
     		spec[0] = widthSpec;
     		spec[1] = heightSpec;
     		return;
@@ -664,6 +673,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
         spec[0] = MeasureSpec.makeMeasureSpec(previewWidth, MeasureSpec.EXACTLY);
         spec[1] = MeasureSpec.makeMeasureSpec(previewHeight, MeasureSpec.EXACTLY);
+		if( MyDebug.LOG )
+			Log.d(TAG, "return: " + spec[0] + " x " + spec[1]);
     }
     
     private void mySurfaceCreated() {
