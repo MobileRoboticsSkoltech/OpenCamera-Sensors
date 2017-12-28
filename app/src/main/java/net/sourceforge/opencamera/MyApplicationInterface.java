@@ -1443,6 +1443,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public void cameraClosed() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "cameraClosed");
 		main_activity.getMainUI().clearSeekBar();
 		main_activity.getMainUI().destroyPopup(); // need to close popup - and when camera reopened, it may have different settings
 		drawPreview.clearContinuousFocusMove();
