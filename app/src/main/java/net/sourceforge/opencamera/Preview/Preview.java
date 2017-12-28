@@ -6219,6 +6219,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		return video_accumulated_time;
 	}
 
+	/** Returns the frame rate that the preview's surface or canvas view should be updated.
+	 */
 	public long getFrameRate() {
 		// avoid overloading ui thread when taking photo
     	return this.isTakingPhoto() ? 500 : 100;
