@@ -280,8 +280,10 @@ public class DrawPreview {
 	public void clearContinuousFocusMove() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearContinuousFocusMove");
-		continuous_focus_moving = false;
-		continuous_focus_moving_ms = 0;
+		if( continuous_focus_moving ) {
+			continuous_focus_moving = false;
+			continuous_focus_moving_ms = 0;
+		}
 	}
 
 	public void setGyroDirectionMarker(float x, float y, float z) {
@@ -346,7 +348,7 @@ public class DrawPreview {
     }
 
 	private void drawGrids(Canvas canvas) {
-		Preview preview  = main_activity.getPreview();
+		Preview preview = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		if( camera_controller == null ) {
 			return;
@@ -521,7 +523,7 @@ public class DrawPreview {
 	}
 
 	private void drawCropGuides(Canvas canvas) {
-		Preview preview  = main_activity.getPreview();
+		Preview preview = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		if( preview.isVideo() || preview_size_wysiwyg_pref ) {
 			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.ShowCropGuidePreferenceKey, "crop_guide_none");
@@ -589,7 +591,7 @@ public class DrawPreview {
 	}
 
 	private void onDrawInfoLines(Canvas canvas, final int top_y, final int location_size, long time_ms) {
-		Preview preview  = main_activity.getPreview();
+		Preview preview = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
 
@@ -882,7 +884,7 @@ public class DrawPreview {
 	 *  current UI rotation.
 	 */
 	private void drawUI(Canvas canvas, long time_ms) {
-		Preview preview  = main_activity.getPreview();
+		Preview preview = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
 		boolean ui_placement_right = main_activity.getMainUI().getUIPlacementRight();
@@ -1187,7 +1189,7 @@ public class DrawPreview {
 	}
 
 	private void drawAngleLines(Canvas canvas) {
-		Preview preview  = main_activity.getPreview();
+		Preview preview = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		boolean has_level_angle = preview.hasLevelAngle();
 		if( camera_controller != null && !preview.isPreviewPaused() && has_level_angle && ( show_angle_line_pref || show_pitch_lines_pref || show_geo_direction_lines_pref ) ) {
@@ -1380,13 +1382,161 @@ public class DrawPreview {
 		}
 	}
 
+	private void doThumbnailAnimation(Canvas canvas, long time_ms) {
+		Preview preview  = main_activity.getPreview();
+		CameraController camera_controller = preview.getCameraController();
+		// note, no need to check preferences here, as we do that when setting thumbnail_anim
+		if( camera_controller != null && this.thumbnail_anim && last_thumbnail != null ) {
+			int ui_rotation = preview.getUIRotation();
+			long time = time_ms - this.thumbnail_anim_start_ms;
+			final long duration = 500;
+			if( time > duration ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "thumbnail_anim finished");
+				this.thumbnail_anim = false;
+			}
+			else {
+				thumbnail_anim_src_rect.left = 0;
+				thumbnail_anim_src_rect.top = 0;
+				thumbnail_anim_src_rect.right = last_thumbnail.getWidth();
+				thumbnail_anim_src_rect.bottom = last_thumbnail.getHeight();
+			    View galleryButton = main_activity.findViewById(R.id.gallery);
+				float alpha = ((float)time)/(float)duration;
+
+				int st_x = canvas.getWidth()/2;
+				int st_y = canvas.getHeight()/2;
+				int nd_x = galleryButton.getLeft() + galleryButton.getWidth()/2;
+				int nd_y = galleryButton.getTop() + galleryButton.getHeight()/2;
+				int thumbnail_x = (int)( (1.0f-alpha)*st_x + alpha*nd_x );
+				int thumbnail_y = (int)( (1.0f-alpha)*st_y + alpha*nd_y );
+
+				float st_w = canvas.getWidth();
+				float st_h = canvas.getHeight();
+				float nd_w = galleryButton.getWidth();
+				float nd_h = galleryButton.getHeight();
+				//int thumbnail_w = (int)( (1.0f-alpha)*st_w + alpha*nd_w );
+				//int thumbnail_h = (int)( (1.0f-alpha)*st_h + alpha*nd_h );
+				float correction_w = st_w/nd_w - 1.0f;
+				float correction_h = st_h/nd_h - 1.0f;
+				int thumbnail_w = (int)(st_w/(1.0f+alpha*correction_w));
+				int thumbnail_h = (int)(st_h/(1.0f+alpha*correction_h));
+				thumbnail_anim_dst_rect.left = thumbnail_x - thumbnail_w/2;
+				thumbnail_anim_dst_rect.top = thumbnail_y - thumbnail_h/2;
+				thumbnail_anim_dst_rect.right = thumbnail_x + thumbnail_w/2;
+				thumbnail_anim_dst_rect.bottom = thumbnail_y + thumbnail_h/2;
+				//canvas.drawBitmap(this.thumbnail, thumbnail_anim_src_rect, thumbnail_anim_dst_rect, p);
+				thumbnail_anim_matrix.setRectToRect(thumbnail_anim_src_rect, thumbnail_anim_dst_rect, Matrix.ScaleToFit.FILL);
+				//thumbnail_anim_matrix.reset();
+				if( ui_rotation == 90 || ui_rotation == 270 ) {
+					float ratio = ((float)last_thumbnail.getWidth())/(float)last_thumbnail.getHeight();
+					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+				}
+				thumbnail_anim_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+				canvas.drawBitmap(last_thumbnail, thumbnail_anim_matrix, p);
+			}
+		}
+	}
+
+	private void doFocusAnimation(Canvas canvas, long time_ms) {
+		Preview preview = main_activity.getPreview();
+		CameraController camera_controller = preview.getCameraController();
+		if( camera_controller != null && continuous_focus_moving && !taking_picture ) {
+			// we don't display the continuous focusing animation when taking a photo - and can also give the impression of having
+			// frozen if we pause because the image saver queue is full
+			long dt = time_ms - continuous_focus_moving_ms;
+			final long length = 1000;
+			/*if( MyDebug.LOG )
+				Log.d(TAG, "continuous focus moving, dt: " + dt);*/
+			if( dt <= length ) {
+				float frac = ((float)dt) / (float)length;
+				float pos_x = canvas.getWidth()/2.0f;
+				float pos_y = canvas.getHeight()/2.0f;
+				float min_radius = (40 * scale + 0.5f); // convert dps to pixels
+				float max_radius = (60 * scale + 0.5f); // convert dps to pixels
+				float radius;
+				if( frac < 0.5f ) {
+					float alpha = frac*2.0f;
+					radius = (1.0f-alpha) * min_radius + alpha * max_radius;
+				}
+				else {
+					float alpha = (frac-0.5f)*2.0f;
+					radius = (1.0f-alpha) * max_radius + alpha * min_radius;
+				}
+				/*if( MyDebug.LOG ) {
+					Log.d(TAG, "dt: " + dt);
+					Log.d(TAG, "radius: " + radius);
+				}*/
+				p.setColor(Color.WHITE);
+				p.setStyle(Paint.Style.STROKE);
+				canvas.drawCircle(pos_x, pos_y, radius, p);
+				p.setStyle(Paint.Style.FILL); // reset
+			}
+			else {
+				clearContinuousFocusMove();
+			}
+		}
+
+		if( preview.isFocusWaiting() || preview.isFocusRecentSuccess() || preview.isFocusRecentFailure() ) {
+			long time_since_focus_started = preview.timeSinceStartedAutoFocus();
+			float min_radius = (40 * scale + 0.5f); // convert dps to pixels
+			float max_radius = (45 * scale + 0.5f); // convert dps to pixels
+			float radius = min_radius;
+			if( time_since_focus_started > 0 ) {
+				final long length = 500;
+				float frac = ((float)time_since_focus_started) / (float)length;
+				if( frac > 1.0f )
+					frac = 1.0f;
+				if( frac < 0.5f ) {
+					float alpha = frac*2.0f;
+					radius = (1.0f-alpha) * min_radius + alpha * max_radius;
+				}
+				else {
+					float alpha = (frac-0.5f)*2.0f;
+					radius = (1.0f-alpha) * max_radius + alpha * min_radius;
+				}
+			}
+			int size = (int)radius;
+
+			if( preview.isFocusRecentSuccess() )
+				p.setColor(Color.rgb(20, 231, 21)); // Green A400
+			else if( preview.isFocusRecentFailure() )
+				p.setColor(Color.rgb(244, 67, 54)); // Red 500
+			else
+				p.setColor(Color.WHITE);
+			p.setStyle(Paint.Style.STROKE);
+			int pos_x;
+			int pos_y;
+			if( preview.hasFocusArea() ) {
+				Pair<Integer, Integer> focus_pos = preview.getFocusPos();
+				pos_x = focus_pos.first;
+				pos_y = focus_pos.second;
+			}
+			else {
+				pos_x = canvas.getWidth() / 2;
+				pos_y = canvas.getHeight() / 2;
+			}
+			float frac = 0.5f;
+			// horizontal strokes
+			canvas.drawLine(pos_x - size, pos_y - size, pos_x - frac*size, pos_y - size, p);
+			canvas.drawLine(pos_x + frac*size, pos_y - size, pos_x + size, pos_y - size, p);
+			canvas.drawLine(pos_x - size, pos_y + size, pos_x - frac*size, pos_y + size, p);
+			canvas.drawLine(pos_x + frac*size, pos_y + size, pos_x + size, pos_y + size, p);
+			// vertical strokes
+			canvas.drawLine(pos_x - size, pos_y - size, pos_x - size, pos_y - frac*size, p);
+			canvas.drawLine(pos_x - size, pos_y + frac*size, pos_x - size, pos_y + size, p);
+			canvas.drawLine(pos_x + size, pos_y - size, pos_x + size, pos_y - frac*size, p);
+			canvas.drawLine(pos_x + size, pos_y + frac*size, pos_x + size, pos_y + size, p);
+			p.setStyle(Paint.Style.FILL); // reset
+		}
+	}
+
 	public void onDrawPreview(Canvas canvas) {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
 		if( !has_settings ) {
 			updateSettings();
 		}
-		Preview preview  = main_activity.getPreview();
+		Preview preview = main_activity.getPreview();
 		CameraController camera_controller = preview.getCameraController();
 		int ui_rotation = preview.getUIRotation();
 
@@ -1456,148 +1606,13 @@ public class DrawPreview {
 			canvas.drawBitmap(last_thumbnail, last_image_matrix, p);
 		}
 		
-		// note, no need to check preferences here, as we do that when setting thumbnail_anim
-		if( camera_controller != null && this.thumbnail_anim && last_thumbnail != null ) {
-			long time = time_ms - this.thumbnail_anim_start_ms;
-			final long duration = 500;
-			if( time > duration ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "thumbnail_anim finished");
-				this.thumbnail_anim = false;
-			}
-			else {
-				thumbnail_anim_src_rect.left = 0;
-				thumbnail_anim_src_rect.top = 0;
-				thumbnail_anim_src_rect.right = last_thumbnail.getWidth();
-				thumbnail_anim_src_rect.bottom = last_thumbnail.getHeight();
-			    View galleryButton = main_activity.findViewById(R.id.gallery);
-				float alpha = ((float)time)/(float)duration;
-
-				int st_x = canvas.getWidth()/2;
-				int st_y = canvas.getHeight()/2;
-				int nd_x = galleryButton.getLeft() + galleryButton.getWidth()/2;
-				int nd_y = galleryButton.getTop() + galleryButton.getHeight()/2;
-				int thumbnail_x = (int)( (1.0f-alpha)*st_x + alpha*nd_x );
-				int thumbnail_y = (int)( (1.0f-alpha)*st_y + alpha*nd_y );
-
-				float st_w = canvas.getWidth();
-				float st_h = canvas.getHeight();
-				float nd_w = galleryButton.getWidth();
-				float nd_h = galleryButton.getHeight();
-				//int thumbnail_w = (int)( (1.0f-alpha)*st_w + alpha*nd_w );
-				//int thumbnail_h = (int)( (1.0f-alpha)*st_h + alpha*nd_h );
-				float correction_w = st_w/nd_w - 1.0f;
-				float correction_h = st_h/nd_h - 1.0f;
-				int thumbnail_w = (int)(st_w/(1.0f+alpha*correction_w));
-				int thumbnail_h = (int)(st_h/(1.0f+alpha*correction_h));
-				thumbnail_anim_dst_rect.left = thumbnail_x - thumbnail_w/2;
-				thumbnail_anim_dst_rect.top = thumbnail_y - thumbnail_h/2;
-				thumbnail_anim_dst_rect.right = thumbnail_x + thumbnail_w/2;
-				thumbnail_anim_dst_rect.bottom = thumbnail_y + thumbnail_h/2;
-				//canvas.drawBitmap(this.thumbnail, thumbnail_anim_src_rect, thumbnail_anim_dst_rect, p);
-				thumbnail_anim_matrix.setRectToRect(thumbnail_anim_src_rect, thumbnail_anim_dst_rect, Matrix.ScaleToFit.FILL);
-				//thumbnail_anim_matrix.reset();
-				if( ui_rotation == 90 || ui_rotation == 270 ) {
-					float ratio = ((float)last_thumbnail.getWidth())/(float)last_thumbnail.getHeight();
-					thumbnail_anim_matrix.preScale(ratio, 1.0f/ratio, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
-				}
-				thumbnail_anim_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
-				canvas.drawBitmap(last_thumbnail, thumbnail_anim_matrix, p);
-			}
-		}
+		doThumbnailAnimation(canvas, time_ms);
 
 		drawUI(canvas, time_ms);
 
 		drawAngleLines(canvas);
 
-		if( camera_controller != null && continuous_focus_moving && !taking_picture ) {
-			// we don't display the continuous focusing animation when taking a photo - and can also ive the impression of having
-			// frozen if we pause because the image saver queue is full
-			long dt = time_ms - continuous_focus_moving_ms;
-			final long length = 1000;
-			/*if( MyDebug.LOG )
-				Log.d(TAG, "continuous focus moving, dt: " + dt);*/
-			if( dt <= length ) {
-				float frac = ((float)dt) / (float)length;
-				float pos_x = canvas.getWidth()/2.0f;
-				float pos_y = canvas.getHeight()/2.0f;
-				float min_radius = (40 * scale + 0.5f); // convert dps to pixels
-				float max_radius = (60 * scale + 0.5f); // convert dps to pixels
-				float radius;
-				if( frac < 0.5f ) {
-					float alpha = frac*2.0f;
-					radius = (1.0f-alpha) * min_radius + alpha * max_radius;
-				}
-				else {
-					float alpha = (frac-0.5f)*2.0f;
-					radius = (1.0f-alpha) * max_radius + alpha * min_radius;
-				}
-				/*if( MyDebug.LOG ) {
-					Log.d(TAG, "dt: " + dt);
-					Log.d(TAG, "radius: " + radius);
-				}*/
-				p.setColor(Color.WHITE);
-				p.setStyle(Paint.Style.STROKE);
-				canvas.drawCircle(pos_x, pos_y, radius, p);
-				p.setStyle(Paint.Style.FILL); // reset
-			}
-			else {
-				continuous_focus_moving = false;
-			}
-		}
-
-		if( preview.isFocusWaiting() || preview.isFocusRecentSuccess() || preview.isFocusRecentFailure() ) {
-			long time_since_focus_started = preview.timeSinceStartedAutoFocus();
-			float min_radius = (40 * scale + 0.5f); // convert dps to pixels
-			float max_radius = (45 * scale + 0.5f); // convert dps to pixels
-			float radius = min_radius;
-			if( time_since_focus_started > 0 ) {
-				final long length = 500;
-				float frac = ((float)time_since_focus_started) / (float)length;
-				if( frac > 1.0f )
-					frac = 1.0f;
-				if( frac < 0.5f ) {
-					float alpha = frac*2.0f;
-					radius = (1.0f-alpha) * min_radius + alpha * max_radius;
-				}
-				else {
-					float alpha = (frac-0.5f)*2.0f;
-					radius = (1.0f-alpha) * max_radius + alpha * min_radius;
-				}
-			}
-			int size = (int)radius;
-
-			if( preview.isFocusRecentSuccess() )
-				p.setColor(Color.rgb(20, 231, 21)); // Green A400
-			else if( preview.isFocusRecentFailure() )
-				p.setColor(Color.rgb(244, 67, 54)); // Red 500
-			else
-				p.setColor(Color.WHITE);
-			p.setStyle(Paint.Style.STROKE);
-			int pos_x;
-			int pos_y;
-			if( preview.hasFocusArea() ) {
-				Pair<Integer, Integer> focus_pos = preview.getFocusPos();
-				pos_x = focus_pos.first;
-				pos_y = focus_pos.second;
-			}
-			else {
-				pos_x = canvas.getWidth() / 2;
-				pos_y = canvas.getHeight() / 2;
-			}
-			float frac = 0.5f;
-			// horizontal strokes
-			canvas.drawLine(pos_x - size, pos_y - size, pos_x - frac*size, pos_y - size, p);
-			canvas.drawLine(pos_x + frac*size, pos_y - size, pos_x + size, pos_y - size, p);
-			canvas.drawLine(pos_x - size, pos_y + size, pos_x - frac*size, pos_y + size, p);
-			canvas.drawLine(pos_x + frac*size, pos_y + size, pos_x + size, pos_y + size, p);
-			// vertical strokes
-			canvas.drawLine(pos_x - size, pos_y - size, pos_x - size, pos_y - frac*size, p);
-			canvas.drawLine(pos_x - size, pos_y + frac*size, pos_x - size, pos_y + size, p);
-			canvas.drawLine(pos_x + size, pos_y - size, pos_x + size, pos_y - frac*size, p);
-			canvas.drawLine(pos_x + size, pos_y + frac*size, pos_x + size, pos_y + size, p);
-			p.setStyle(Paint.Style.FILL); // reset
-		}
+		doFocusAnimation(canvas, time_ms);
 
 		CameraController.Face [] faces_detected = preview.getFacesDetected();
 		if( faces_detected != null ) {
