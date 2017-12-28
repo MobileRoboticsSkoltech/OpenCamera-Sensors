@@ -6218,7 +6218,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	public long getVideoAccumulatedTime() {
 		return video_accumulated_time;
 	}
-	
+
+	public long getFrameRate() {
+		// avoid overloading ui thread when taking photo
+    	return this.isTakingPhoto() ? 500 : 100;
+	}
+
     public boolean isTakingPhoto() {
     	return this.phase == PHASE_TAKING_PHOTO;
     }

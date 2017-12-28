@@ -48,8 +48,7 @@ public class MySurfaceView extends SurfaceView implements CameraSurface {
 					Log.d(TAG, "invalidate()");*/
 				preview.test_ticker_called = true;
 				invalidate();
-				// avoid overloading ui thread when taking photo
-				handler.postDelayed(this, preview.isTakingPhoto() ? 500 : 100);
+				handler.postDelayed(this, preview.getFrameRate());
 			}
 		};
 	}
