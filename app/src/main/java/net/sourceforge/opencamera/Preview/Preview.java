@@ -6222,7 +6222,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	/** Returns the frame rate that the preview's surface or canvas view should be updated.
 	 */
 	public long getFrameRate() {
-		// avoid overloading ui thread when taking photo
+    	/* See https://stackoverflow.com/questions/44594711/slow-rendering-when-updating-textview ,
+    	   https://stackoverflow.com/questions/44233870/how-to-fix-slow-rendering-android-vitals -
+    	   there is evidence that using an infrequent update actually results in poorer performance,
+    	   due to devices running in a lower power state, but Google Play analytics do not take this
+    	   into consideration. Thus we are forced to request updates at 60fps whether we need them
+    	   or not. I can reproducing this giving improved performance on OnePlus 3T for old and
+    	   Camera2 API. Testing suggests this does not seem to adversely affect battery life.
+    	   This is limited to Android 7+, to avoid causing problems on older devices (which don't
+    	   contribute to Google Analytics anyway).
+    	 */
+		//
+    	if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N )
+    		return 16;
+		// old behaviour: avoid overloading ui thread when taking photo
     	return this.isTakingPhoto() ? 500 : 100;
 	}
 
