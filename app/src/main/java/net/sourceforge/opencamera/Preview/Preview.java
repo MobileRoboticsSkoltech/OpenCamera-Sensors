@@ -6165,7 +6165,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					toast.setView(text);
 				}
 				toast.setDuration(Toast.LENGTH_SHORT);
-				toast.show();
+				if( !((Activity)getContext()).isFinishing() ) {
+					// Workaround for crash due to bug in Android 7.1 when activity is closing whilst toast shows.
+					// This was fixed in Android 8, but still good to fix the crash on Android 7.1! See
+					// https://stackoverflow.com/questions/47548317/what-belong-is-badtokenexception-at-classes-of-project and
+					// https://github.com/drakeet/ToastCompat#why .
+					toast.show();
+				}
 				last_toast = toast;
 			}
 		});
