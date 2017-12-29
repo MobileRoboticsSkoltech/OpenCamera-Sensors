@@ -2118,7 +2118,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		showPreview(false);
 		setWindowFlagsForSettings();
 		FolderChooserDialog fragment = new MyFolderChooserDialog();
-		fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
+		// use commitAllowingStateLoss() instead of fragment.show(), does to "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState" crash seen on Google Play
+		// see https://stackoverflow.com/questions/14262312/java-lang-illegalstateexception-can-not-perform-this-action-after-onsaveinstanc
+		//fragment.show(getFragmentManager(), "FOLDER_FRAGMENT");
+		getFragmentManager().beginTransaction().add(fragment, "FOLDER_FRAGMENT").commitAllowingStateLoss();
     }
 
     /** User can long-click on gallery to select a recent save location from the history, of if not available,
