@@ -1905,15 +1905,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 							return;
 						}
 						// don't assign to faces_detected yet, as that has to be done on the UI thread
-				    	// convert rects to preview screen space
-						final Matrix matrix = getCameraToPreviewMatrix();
-						for(CameraController.Face face : faces) {
-							face_rect.set(face.rect);
-							matrix.mapRect(face_rect);
-							face_rect.round(face.rect);
-						}
-
-						reportFaces(faces);
 
 						// We don't synchronize on faces_detected, as the array may be passed to other
 						// classes via getFacesDetected(). Although that function could copy instead,
@@ -1922,6 +1913,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Activity activity = (Activity)Preview.this.getContext();
 						activity.runOnUiThread(new Runnable() {
 							public void run() {
+								// convert rects to preview screen space - also needs to be done on UI thread
+								// (otherwise can have crashes if camera_controller becomes null in the meantime)
+								final Matrix matrix = getCameraToPreviewMatrix();
+								for(CameraController.Face face : faces) {
+									face_rect.set(face.rect);
+									matrix.mapRect(face_rect);
+									face_rect.round(face.rect);
+								}
+
+								reportFaces(faces);
+
 								if( faces_detected == null || faces_detected.length != faces.length ) {
 									// avoid unnecessary reallocations
 									if( MyDebug.LOG )
@@ -1934,7 +1936,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				    }
 
 					/** Accessibility: report number of faces for talkback etc.
-					 *  Note, at least for Camera2 API, reportFaces() isn't called on UI thread.
 					 */
 				    private void reportFaces(CameraController.Face[] local_faces) {
 						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && accessibility_manager.isEnabled() && accessibility_manager.isTouchExplorationEnabled() ) {
