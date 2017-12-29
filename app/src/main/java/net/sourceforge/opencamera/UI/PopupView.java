@@ -1197,6 +1197,6 @@ public class PopupView extends LinearLayout {
         		main_activity.showPreview(true);
 			}
         });
-		alert.show();
+		main_activity.showAlert(alert);
     }
 }

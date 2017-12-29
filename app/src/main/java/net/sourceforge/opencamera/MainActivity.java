@@ -1717,6 +1717,24 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		setImmersiveMode(false);
 		camera_in_background = true;
     }
+
+	/** Use this is place of simply alert.show(), if the orientation has just been set to allow
+	 *  rotation via setWindowFlagsForSettings(). On some devices (e.g., OnePlus 3T with Android 8),
+	 *  the dialog doesn't show properly if the phone is held in portrait. A workaround seems to be
+	 *  to use postDelayed. Note that postOnAnimation() doesn't work.
+	 */
+	public void showAlert(final AlertDialog alert) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "showAlert");
+		Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			public void run() {
+				alert.show();
+			}
+		}, 20);
+		// note that 1ms usually fixes the problem, but not always; 10ms seems fine, have set 20ms
+		// just in case
+	}
     
     public void showPreview(boolean show) {
 		if( MyDebug.LOG )
@@ -2238,9 +2256,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				showPreview(true);
 			}
 		});
-        alertDialog.show();
 		//getWindow().setLayout(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		setWindowFlagsForSettings();
+		showAlert(alertDialog.create());
     }
 
     /** Clears the non-SAF folder history.
