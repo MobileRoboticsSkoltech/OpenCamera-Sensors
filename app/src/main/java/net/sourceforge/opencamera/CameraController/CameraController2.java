@@ -3142,16 +3142,24 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "no camera or capture session");
 			return;
 		}
-		if( is_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
-			CameraConstrainedHighSpeedCaptureSession captureSessionHighSpeed = (CameraConstrainedHighSpeedCaptureSession)captureSession;
-			List<CaptureRequest> mPreviewBuilderBurst = captureSessionHighSpeed.createHighSpeedRequestList(request);
-			captureSessionHighSpeed.setRepeatingBurst(mPreviewBuilderBurst, previewCaptureCallback, handler);
+		try {
+			if( is_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+				CameraConstrainedHighSpeedCaptureSession captureSessionHighSpeed = (CameraConstrainedHighSpeedCaptureSession) captureSession;
+				List<CaptureRequest> mPreviewBuilderBurst = captureSessionHighSpeed.createHighSpeedRequestList(request);
+				captureSessionHighSpeed.setRepeatingBurst(mPreviewBuilderBurst, previewCaptureCallback, handler);
+			}
+			else {
+				captureSession.setRepeatingRequest(request, previewCaptureCallback, handler);
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "setRepeatingRequest done");
 		}
-		else {
-			captureSession.setRepeatingRequest(request, previewCaptureCallback, handler);
+		catch(IllegalStateException e) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "captureSession already closed!");
+			e.printStackTrace();
+			// got this as a Google Play exception (from onCaptureCompleted->processCompleted) - this means the capture session is already closed
 		}
-		if( MyDebug.LOG )
-			Log.d(TAG, "setRepeatingRequest done");
 	}
 
 	private void capture() throws CameraAccessException {
