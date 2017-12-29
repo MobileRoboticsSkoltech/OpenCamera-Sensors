@@ -1150,10 +1150,12 @@ public class CameraController2 extends CameraController {
 	}
 	
 	@Override
-	public CameraFeatures getCameraFeatures() {
+	public CameraFeatures getCameraFeatures() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getCameraFeatures()");
 		CameraFeatures camera_features = new CameraFeatures();
+		/*if( true )
+			throw new CameraControllerException();*/
 		if( MyDebug.LOG ) {
 			int hardware_level = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
 			if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY )
@@ -1272,7 +1274,15 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "capabilities_high_speed_video?: " + capabilities_high_speed_video);
 		}
 
-		StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+		StreamConfigurationMap configs;
+		try {
+			configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+		}
+		catch(IllegalArgumentException e) {
+			// have had crashes from Google Play - unclear what the cause is, but at least fail gracefully
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
 
 	    android.util.Size [] camera_picture_sizes = configs.getOutputSizes(ImageFormat.JPEG);
 		camera_features.picture_sizes = new ArrayList<>();

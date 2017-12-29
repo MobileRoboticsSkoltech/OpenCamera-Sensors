@@ -1631,7 +1631,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// we'll switch to the user-requested focus by calling setFocusPref() from setupCameraParameters() below
 		this.updateFocusForVideo();
 
-		setupCameraParameters();
+		try {
+			setupCameraParameters();
+		}
+		catch(CameraControllerException e) {
+			e.printStackTrace();
+			applicationInterface.onCameraError();
+			closeCamera(false, null);
+			return;
+		}
 
 		// now switch to video if saved
 		boolean saved_is_video = applicationInterface.isVideoPref();
@@ -1775,7 +1783,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
-	private void setupCameraParameters() {
+	private void setupCameraParameters() throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setupCameraParameters()");
 		long debug_time = 0;

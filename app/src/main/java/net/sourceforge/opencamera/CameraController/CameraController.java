@@ -179,7 +179,7 @@ public abstract class CameraController {
 		this.cameraId = cameraId;
 	}
 	public abstract String getAPI();
-	public abstract CameraFeatures getCameraFeatures();
+	public abstract CameraFeatures getCameraFeatures() throws CameraControllerException;
 	public int getCameraId() {
 		return cameraId;
 	}
