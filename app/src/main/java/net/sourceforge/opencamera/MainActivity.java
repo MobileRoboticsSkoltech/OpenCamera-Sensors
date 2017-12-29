@@ -1938,7 +1938,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				// from http://stackoverflow.com/questions/11073832/no-activity-found-to-handle-intent - needed to fix crash if no gallery app installed
 				//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("blah")); // test
 				if( intent.resolveActivity(getPackageManager()) != null ) {
-					this.startActivity(intent);
+					try {
+						this.startActivity(intent);
+					}
+					catch(SecurityException e2) {
+						// have received this crash from Google Play - don't display a toast, simply do nothing
+						Log.e(TAG, "SecurityException from ACTION_VIEW startActivity");
+						e2.printStackTrace();
+					}
 				}
 				else{
 					preview.showToast(null, R.string.no_gallery_app);
