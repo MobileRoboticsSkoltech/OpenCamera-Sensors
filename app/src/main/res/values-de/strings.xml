@@ -367,7 +367,7 @@
     <string name="preference_show_pitch_lines">Zeige Neigungslinien</string>
     <string name="preference_show_pitch_lines_summary">Zeige horizontale Neigungsebene</string>
     <string name="preference_show_geo_direction_lines">Zeige Kompass Richtung</string>
-    <string name="preference_show_geo_direction_lines_summary">Zeige Komapss Richtungslinien</string>
+    <string name="preference_show_geo_direction_lines_summary">Zeige Kompass Richtungslinien</string>
     <string name="preference_video_subtitle">Video Untertitel</string>
     <string name="preference_video_subtitle_summary">Erzeuge ein Untertitel .SRT File um das Datum und Zeit zu speichern, sowie die GPS Daten sofern Orts- und Richtungsdaten aktiviert sind</string>
 
