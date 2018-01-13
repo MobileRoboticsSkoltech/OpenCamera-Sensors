@@ -8157,8 +8157,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int [] offsets_y = mActivity.getApplicationInterface().getHDRProcessor().offsets_y;
 		for(int i=0;i<offsets_x.length;i++) {
 			Log.d(TAG, "offsets " + i + " ( " + offsets_x[i] + " , " + offsets_y[i] + " ), expected ( " + exp_offsets_x[i] + " , " + exp_offsets_y[i] + " )");
-			assertTrue( offsets_x[i] == exp_offsets_x[i] );
-			assertTrue( offsets_y[i] == exp_offsets_y[i] );
+			// we allow some tolerance as different devices can produce different results (e.g., Nexus 6 vs OnePlus 3T; see testHDR5 on Nexus 6)
+			assertTrue(Math.abs(offsets_x[i] - exp_offsets_x[i]) <= 1);
+			assertTrue(Math.abs(offsets_y[i] - exp_offsets_y[i]) <= 1);
 		}
 	}
 
@@ -8166,9 +8167,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "compare min value " + hdrHistogramDetails.min_value + " to expected " + exp_min_value);
 		Log.d(TAG, "compare median value " + hdrHistogramDetails.median_value + " to expected " + exp_median_value);
 		Log.d(TAG, "compare max value " + hdrHistogramDetails.max_value + " to expected " + exp_max_value);
-		assertTrue(exp_min_value == hdrHistogramDetails.min_value);
-		assertTrue(exp_median_value == hdrHistogramDetails.median_value);
-		assertTrue(exp_max_value == hdrHistogramDetails.max_value);
+			// we allow some tolerance as different devices can produce different results (e.g., Nexus 6 vs OnePlus 3T; see testHDR18 on Nexus 6 which needs a tolerance of 2)
+		assertTrue(Math.abs(exp_min_value - hdrHistogramDetails.min_value) <= 2);
+		assertTrue(Math.abs(exp_median_value - hdrHistogramDetails.median_value) <= 2);
+		assertTrue(Math.abs(exp_max_value - hdrHistogramDetails.max_value) <= 2);
 	}
 
 	final private String hdr_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/hdrsamples/";
@@ -8730,6 +8732,30 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		int [] exp_offsets_x = {0, 0, 0};
 		int [] exp_offsets_y = {0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR23", but with 5 images.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR23_exp5() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR23_exp5");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0062.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0066.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0068.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0070.png") );
+
+		subTestHDR(inputs, "testHDR23_exp5_output.jpg", false);
+
+        int [] exp_offsets_x = {0, 0, 0, 0, 0};
+        int [] exp_offsets_y = {0, 0, 0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
