@@ -481,7 +481,8 @@ uchar4 __attribute__((kernel)) hdr_n(uchar4 in, uint32_t x, uint32_t y) {
     		float3 base_rgb = rgb;
 			int adj_indx = mid_indx;
 
-            //for(int k=0;k<mid_indx;k++) {
+            for(int k=0;k<mid_indx;k++) {
+
 			// now look at a neighbour image
 			weight = 1.0f - weight;
 			if( avg <= 127.5f ) {
@@ -491,7 +492,9 @@ uchar4 __attribute__((kernel)) hdr_n(uchar4 in, uint32_t x, uint32_t y) {
     			adj_indx--;
 			}
             rgb = convert_float3(pixels[adj_indx].rgb);
-            if( n_bitmaps_g > 3 ) {
+            //if( n_bitmaps_g > 3 ) {
+            if( k+1 < mid_indx ) {
+                // there will be at least one more adjacent image to look at
                 avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
                 diff = fabs( avg - 127.5f );
                 if( diff > safe_range_c ) {
@@ -530,7 +533,11 @@ uchar4 __attribute__((kernel)) hdr_n(uchar4 in, uint32_t x, uint32_t y) {
 			hdr += weight * rgb;
 			sum_weight += weight;
 
-			if( n_bitmaps_g > 3 && diff > safe_range_c ) {
+			if( diff <= safe_range_c ) {
+			    break;
+            }
+
+			/*if( n_bitmaps_g > 3 && diff > safe_range_c ) {
                 // now look at a neighbour image
                 weight = 1.0f - weight;
 
@@ -584,12 +591,14 @@ uchar4 __attribute__((kernel)) hdr_n(uchar4 in, uint32_t x, uint32_t y) {
                 //hdr.r = 255;
                 //hdr.g = 0;
                 //hdr.b = 255;
-			}
+			}*/
 
 			// testing: make all non-safe images purple:
 			//hdr.r = 255;
 			//hdr.g = 0;
 			//hdr.b = 255;
+		}
+
 		}
 	}
 
