@@ -102,13 +102,13 @@ static uchar4 tonemap(float3 hdr) {
             float scale = 255.0f / ( tonemap_scale + value );
             scale *= linear_scale;
             // shouldn't need to clamp - linear_scale should be such that values don't map to more than 255
-            /*out.r = (uchar)(scale * hdr.r + 0.5f);
+            out.r = (uchar)(scale * hdr.r + 0.5f);
             out.g = (uchar)(scale * hdr.g + 0.5f);
-            out.b = (uchar)(scale * hdr.b + 0.5f);*/
-        	float3 out_f = scale * hdr;
+            out.b = (uchar)(scale * hdr.b + 0.5f);
+        	/*float3 out_f = scale * hdr;
             out.r = (uchar)clamp(out_f.r+0.5f, 0.0f, 255.0f);
             out.g = (uchar)clamp(out_f.g+0.5f, 0.0f, 255.0f);
-            out.b = (uchar)clamp(out_f.b+0.5f, 0.0f, 255.0f);
+            out.b = (uchar)clamp(out_f.b+0.5f, 0.0f, 255.0f);*/
             out.a = 255;
             /*int test_r = (int)(scale * hdr.r + 0.5f);
             int test_g = (int)(scale * hdr.g + 0.5f);
@@ -490,14 +490,14 @@ uchar4 __attribute__((kernel)) hdr_n(uchar4 in, uint32_t x, uint32_t y) {
     			adj_indx--;
 			}
             rgb = convert_float3(pixels[adj_indx].rgb);
-            /*if( n_bitmaps_g > 3 ) {
+            if( n_bitmaps_g > 3 ) {
                 avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
                 diff = fabs( avg - 127.5f );
                 if( diff > safe_range_c ) {
                     // scaling chosen so that 0 and 255 map to a non-zero weight of 0.01
                     weight *= 1.0f - 0.99f * (diff - safe_range_c) / (127.5f - safe_range_c);
                 }
-            }*/
+            }
             rgb = parameter_A[adj_indx] * rgb + parameter_B[adj_indx];
 
             float value = fmax(rgb.r, rgb.g);
@@ -529,7 +529,7 @@ uchar4 __attribute__((kernel)) hdr_n(uchar4 in, uint32_t x, uint32_t y) {
 			hdr += weight * rgb;
 			sum_weight += weight;
 
-			/*if( n_bitmaps_g > 3 && diff > safe_range_c ) {
+			if( n_bitmaps_g > 3 && diff > safe_range_c ) {
                 // now look at a neighbour image
                 weight = 1.0f - weight;
 
@@ -540,7 +540,7 @@ uchar4 __attribute__((kernel)) hdr_n(uchar4 in, uint32_t x, uint32_t y) {
                     adj_indx--;
                 }
                 rgb = convert_float3(pixels[adj_indx].rgb);
-                if( n_bitmaps_g > 5 ) {
+                if( false && n_bitmaps_g > 5 ) {
                     avg = (rgb.r+rgb.g+rgb.b) / 3.0f;
                     diff = fabs( avg - 127.5f );
                     if( diff > safe_range_c ) {
@@ -556,10 +556,10 @@ uchar4 __attribute__((kernel)) hdr_n(uchar4 in, uint32_t x, uint32_t y) {
                 sum_weight += weight;
 
                 // testing: make all non-safe images purple:
-                hdr.r = 255;
-                hdr.g = 0;
-                hdr.b = 255;
-			}*/
+                //hdr.r = 255;
+                //hdr.g = 0;
+                //hdr.b = 255;
+			}
 
 			// testing: make all non-safe images purple:
 			//hdr.r = 255;

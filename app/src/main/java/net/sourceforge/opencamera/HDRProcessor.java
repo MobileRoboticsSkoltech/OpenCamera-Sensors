@@ -311,7 +311,7 @@ public class HDRProcessor {
 			bitmaps = new ArrayList<>(bitmaps);
 		}
 		int n_bitmaps = bitmaps.size();
-		if( n_bitmaps != 1 && n_bitmaps != 3 /*&& n_bitmaps != 5*/ ) {
+		if( n_bitmaps != 1 && n_bitmaps != 3 && n_bitmaps != 5 ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "n_bitmaps not supported: " + n_bitmaps);
 			throw new HDRProcessorException(HDRProcessorException.INVALID_N_IMAGES);
@@ -520,14 +520,17 @@ public class HDRProcessor {
 			Log.d(TAG, "median_brightness: " + median_brightness);
 		}
 
+		//final boolean use_hdr_n = true; // test always using hdr_n
+		final boolean use_hdr_n = n_bitmaps > 3;
+
 		// compute response_functions
 		for(int i=0;i<n_bitmaps;i++) {
 			ResponseFunction function = null;
 			if( i != base_bitmap ) {
 				function = createFunctionFromBitmaps(i, bitmaps.get(i), bitmaps.get(base_bitmap), offsets_x[i], offsets_y[i]);
 			}
-			else if( n_bitmaps > 3 ) {
-				// for more than 3 bitmaps, need to still create the identity response function
+			else if( use_hdr_n ) {
+				// for hdr_n, need to still create the identity response function
 				function = ResponseFunction.createIdentity();
 			}
 			response_functions[i] = function;
@@ -590,17 +593,23 @@ public class HDRProcessor {
 		processHDRScript.set_parameter_A2(response_functions[2].parameter_A);
 		processHDRScript.set_parameter_B2(response_functions[2].parameter_B);
 
-		if( n_bitmaps > 3 ) {
+		if( use_hdr_n ) {
+			// now need to set values for image 1
+			processHDRScript.set_bitmap1(allocations[1]);
 			processHDRScript.set_offset_x1(offsets_x[1]);
 			processHDRScript.set_offset_y1(offsets_y[1]);
 			processHDRScript.set_parameter_A1(response_functions[1].parameter_A);
 			processHDRScript.set_parameter_B1(response_functions[1].parameter_B);
+		}
 
+		if( n_bitmaps > 3 ) {
+			processHDRScript.set_bitmap3(allocations[3]);
 			processHDRScript.set_offset_x3(offsets_x[3]);
 			processHDRScript.set_offset_y3(offsets_y[3]);
 			processHDRScript.set_parameter_A3(response_functions[3].parameter_A);
 			processHDRScript.set_parameter_B3(response_functions[3].parameter_B);
 
+			processHDRScript.set_bitmap4(allocations[4]);
 			processHDRScript.set_offset_x4(offsets_x[4]);
 			processHDRScript.set_offset_y4(offsets_y[4]);
 			processHDRScript.set_parameter_A4(response_functions[4].parameter_A);
@@ -638,8 +647,8 @@ public class HDRProcessor {
 				break;
 		}
 
-		//float max_possible_value = response_functions[0].parameter_A * 255 + response_functions[0].parameter_B;
-		float max_possible_value = response_functions[base_bitmap - 1].parameter_A * 255 + response_functions[base_bitmap - 1].parameter_B;
+		float max_possible_value = response_functions[0].parameter_A * 255 + response_functions[0].parameter_B;
+		//float max_possible_value = response_functions[base_bitmap - 1].parameter_A * 255 + response_functions[base_bitmap - 1].parameter_B;
 		if( MyDebug.LOG )
 			Log.d(TAG, "max_possible_value: " + max_possible_value);
 		if( max_possible_value < 255.0f ) {
@@ -771,11 +780,12 @@ public class HDRProcessor {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time before processHDRScript: " + (System.currentTimeMillis() - time_s));
-		if( n_bitmaps == 3 )
-			processHDRScript.forEach_hdr(allocations[base_bitmap], output_allocation);
-		else {
+		if( use_hdr_n ) {
 			processHDRScript.set_n_bitmaps_g(n_bitmaps);
 			processHDRScript.forEach_hdr_n(allocations[base_bitmap], output_allocation);
+		}
+		else {
+			processHDRScript.forEach_hdr(allocations[base_bitmap], output_allocation);
 		}
 		/*processHDRScript.set_n_bitmaps_g(n_bitmaps);
 		processHDRScript.forEach_hdr_n(allocations[base_bitmap], output_allocation);*/
