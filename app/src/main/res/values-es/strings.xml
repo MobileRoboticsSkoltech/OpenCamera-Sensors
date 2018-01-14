@@ -408,4 +408,13 @@
 
     <string name="audio_listener_failed">Failed to initalise audio listening</string>
     <string name="failed_to_process_hdr">Failed to create HDR image</string>
+
+    <!-- for accessibility, these strings for face detection will typically be spoken, e.g., through Google Talkback -->
+    <string name="face_detected">cara detectada</string>
+    <string name="faces_detected">caras detectadas</string>
+    <string name="left_of_screen">en la izquierda de la pantalla</string>
+    <string name="right_of_screen">en la derecha de la pantalla</string>
+    <string name="top_of_screen">arriba de la pantalla</string>
+    <string name="bottom_of_screen">abajo de la pantalla</string>
+    <string name="centre_of_screen">en el centro de la pantalla</string>
 </resources>
