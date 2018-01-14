@@ -8226,7 +8226,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int [] exp_offsets_y = {0, 0, 0, 0, 0};
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-        //checkHistogramDetails(hdrHistogramDetails, 2, 32, 251);
+        checkHistogramDetails(hdrHistogramDetails, 3, 43, 251);
     }
 
     /** Tests HDR algorithm on test samples "stlouis".
@@ -9315,7 +9315,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6313.jpg") );
 		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6315.jpg") );
 
-		subTestHDR(inputs, "testHDR45_exp5_output.jpg", false);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR45_exp5_output.jpg", false);
+
+        checkHistogramDetails(hdrHistogramDetails, 6, 129, 237);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR46".
@@ -9357,7 +9359,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 02.jpg") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 01.jpg") );
 
-		subTestHDR(inputs, "testHDR46_exp5_output.jpg", false);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR46_exp5_output.jpg", false);
+
+        checkHistogramDetails(hdrHistogramDetails, 3, 146, 243);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR47".
@@ -9404,7 +9408,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 02.jpg") );
 		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 01.jpg") );
 
-		subTestHDR(inputs, "testHDR47_exp5_output.jpg", false);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR47_exp5_output.jpg", false);
+
+        checkHistogramDetails(hdrHistogramDetails, 1, 73, 255);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDRtemp".
