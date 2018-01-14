@@ -61,6 +61,9 @@ public class HDRTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR42"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR43"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testHDR44"));
+		// don't include testHDR45, we only test the _exp5 version
+		// don't include testHDR46, we only test the _exp5 version
+		// don't include testHDR47, we only test the _exp5 version
         return suite;
     }
 }

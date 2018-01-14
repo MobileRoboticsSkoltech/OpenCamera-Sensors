@@ -8226,7 +8226,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int [] exp_offsets_y = {0, 0, 0, 0, 0};
         checkHDROffsets(exp_offsets_x, exp_offsets_y);
 
-        checkHistogramDetails(hdrHistogramDetails, 2, 32, 251);
+        //checkHistogramDetails(hdrHistogramDetails, 2, 32, 251);
     }
 
     /** Tests HDR algorithm on test samples "stlouis".
@@ -9272,6 +9272,139 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR44/input2.jpg") );
 
 		subTestHDR(inputs, "testHDR44_output.jpg", false);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR45".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR45() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR45");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6314.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6312.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6310.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6309.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6311.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6313.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6315.jpg") );
+
+		subTestHDR(inputs, "testHDR45_output.jpg", false);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR45".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR45_exp5() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR45_exp5");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6314.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6312.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6310.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6309.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6311.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6313.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR45/IMG_6315.jpg") );
+
+		subTestHDR(inputs, "testHDR45_exp5_output.jpg", false);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR46".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR46() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR46");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 06.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 05.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 04.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 03.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 02.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 01.jpg") );
+
+		subTestHDR(inputs, "testHDR46_output.jpg", false);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR46".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR46_exp5() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR46_exp5");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 06.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 05.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 04.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 03.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 02.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR46/Izmir Harbor - ppw - 01.jpg") );
+
+		subTestHDR(inputs, "testHDR46_exp5_output.jpg", false);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR47".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR47() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR47");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 08.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 07.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 06.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 05.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 04.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 03.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 02.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 01.jpg") );
+
+		subTestHDR(inputs, "testHDR47_output.jpg", false);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR47".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR47_exp5() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR47_exp5");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 08.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 07.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 06.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 05.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 04.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 03.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 02.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 01.jpg") );
+
+		subTestHDR(inputs, "testHDR47_exp5_output.jpg", false);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDRtemp".
