@@ -8724,10 +8724,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		
 		// list assets
 		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
-		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0066.png") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0068.png") );
-		
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0066.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
+
 		subTestHDR(inputs, "testHDR23_output.jpg", false);
 
 		int [] exp_offsets_x = {0, 0, 0};
@@ -8746,12 +8746,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<Bitmap> inputs = new ArrayList<>();
-		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0062.png") );
-		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
-		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0066.png") );
-		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0068.png") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0070.png") );
-
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0068.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0066.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0062.png") );
 		subTestHDR(inputs, "testHDR23_exp5_output.jpg", false);
 
         int [] exp_offsets_x = {0, 0, 0, 0, 0};
