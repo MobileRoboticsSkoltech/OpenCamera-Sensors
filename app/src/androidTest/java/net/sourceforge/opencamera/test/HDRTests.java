@@ -64,6 +64,7 @@ public class HDRTests {
 		// don't include testHDR45, we only test the _exp5 version
 		// don't include testHDR46, we only test the _exp5 version
 		// don't include testHDR47, we only test the _exp5 version
+		// don't include testHDR48, we only test the _exp5 version
         return suite;
     }
 }

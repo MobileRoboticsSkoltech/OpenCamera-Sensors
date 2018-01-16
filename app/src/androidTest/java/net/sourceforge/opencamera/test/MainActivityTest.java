@@ -9413,6 +9413,50 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         checkHistogramDetails(hdrHistogramDetails, 1, 73, 255);
 	}
 
+	/** Tests HDR algorithm on test samples "testHDR48".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR48() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR48");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input2.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input3.jpg") );
+		//inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input4.jpg") );
+
+		subTestHDR(inputs, "testHDR48_output.jpg", false);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR48".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR48_exp5() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR48_exp5");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input2.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input3.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR48/input4.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR48_exp5_output.jpg", false);
+
+        checkHistogramDetails(hdrHistogramDetails, 0, 59, 241);
+	}
+
 	/** Tests HDR algorithm on test samples "testHDRtemp".
 	 *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
 	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
