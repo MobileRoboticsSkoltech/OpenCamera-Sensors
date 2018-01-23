@@ -2,6 +2,7 @@ _archive/
 _devdocs/
 _docs/*.jpg
 _other/
+_saved/
 
 .gradle/
 .idea/
