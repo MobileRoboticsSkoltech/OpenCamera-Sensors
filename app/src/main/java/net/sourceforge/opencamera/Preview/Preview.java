@@ -2664,16 +2664,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "camera not opened!");
 			return new VideoProfile( CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH) );
 		}
-		if( video_high_speed ) {
+		/*if( video_high_speed ) {
 			// return a video profile for a high speed frame rate - note that if we have a capture rate factor of say 0.25x,
 			// the actual fps and bitrate of the resultant video would also be scaled by a factor of 0.25x
-			/*return new VideoProfile(MediaRecorder.AudioEncoder.AAC, MediaRecorder.OutputFormat.WEBM, 20000000,
-					MediaRecorder.VideoEncoder.VP8, this.video_high_speed_size.height, 120,
-					this.video_high_speed_size.width);*/
+			//return new VideoProfile(MediaRecorder.AudioEncoder.AAC, MediaRecorder.OutputFormat.WEBM, 20000000,
+			//		MediaRecorder.VideoEncoder.VP8, this.video_high_speed_size.height, 120,
+			//		this.video_high_speed_size.width);
 			return new VideoProfile(MediaRecorder.AudioEncoder.AAC, MediaRecorder.OutputFormat.MPEG_4, 4*14000000,
 					MediaRecorder.VideoEncoder.H264, this.video_high_speed_size.height, 120,
 					this.video_high_speed_size.width);
-		}
+		}*/
 		CamcorderProfile profile;
 		int cameraId = camera_controller.getCameraId();
 
@@ -4551,19 +4551,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				local_video_recorder.setVideoEncoder(profile.videoCodec);
 			}
 			else if( record_audio ) {
-				if( profile.getCamcorderProfile() != null ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "set video profile from camcorderprofile");
-					local_video_recorder.setProfile(profile.getCamcorderProfile());
-				}
-				else {
-					local_video_recorder.setOutputFormat(profile.fileFormat);
-					local_video_recorder.setVideoFrameRate(profile.videoFrameRate);
-					local_video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-					local_video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
-					local_video_recorder.setVideoEncoder(profile.videoCodec);
-					local_video_recorder.setAudioEncoder(profile.audioCodec);
-				}
+				// n.b., order may be important - output format should be first, at least
+				// also match order of MediaRecorder.setProfile() just to be safe, see https://stackoverflow.com/questions/5524672/is-it-possible-to-use-camcorderprofile-without-audio-source
+				local_video_recorder.setOutputFormat(profile.fileFormat);
+				local_video_recorder.setVideoFrameRate(profile.videoFrameRate);
+				local_video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
+				local_video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
+				local_video_recorder.setVideoEncoder(profile.videoCodec);
+                local_video_recorder.setAudioEncodingBitRate(profile.audioBitRate);
+            	local_video_recorder.setAudioChannels(profile.audioChannels);
+                local_video_recorder.setAudioSamplingRate(profile.audioSampleRate);
+            	local_video_recorder.setAudioEncoder(profile.audioCodec);
         		String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
