@@ -7,6 +7,8 @@ import android.media.MediaRecorder;
 	 *  to be passed to MediaRecorder, but allows us to store additional fields.
 	 */
 public class VideoProfile {
+    public boolean record_audio;
+    public boolean no_audio_permission; // set to true if record_audio==false, but where the user had requested audio and we don't have microphone permission
     public int audioSource;
     public int audioCodec;
     public int audioChannels;
@@ -22,6 +24,8 @@ public class VideoProfile {
     public int videoFrameWidth;
 
     VideoProfile(CamcorderProfile camcorderProfile) {
+        this.record_audio = true;
+        this.no_audio_permission = false;
         this.audioSource = MediaRecorder.AudioSource.CAMCORDER;
         this.audioCodec = camcorderProfile.audioCodec;
         this.audioChannels = camcorderProfile.audioChannels;
@@ -57,7 +61,7 @@ public class VideoProfile {
     /**
      * Copies the fields of this profile to a MediaRecorder instance.
      */
-    public void copyToMediaRecorder(MediaRecorder media_recorder, boolean record_audio) {
+    public void copyToMediaRecorder(MediaRecorder media_recorder) {
         if( record_audio ) {
             media_recorder.setAudioSource(this.audioSource);
         }

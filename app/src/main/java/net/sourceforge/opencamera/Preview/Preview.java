@@ -2657,12 +2657,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	 *  non-null), but not always (e.g., for slow motion mode).
 	 */
 	public VideoProfile getVideoProfile() {
+		VideoProfile video_profile;
+
 		// 4K UHD video is not yet supported by Android API (at least testing on Samsung S5 and Note 3, they do not return it via getSupportedVideoSizes(), nor via a CamcorderProfile (either QUALITY_HIGH, or anything else)
 		// but it does work if we explicitly set the resolution (at least tested on an S5)
 		if( camera_controller == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "camera not opened!");
-			return new VideoProfile( CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH) );
+			video_profile = new VideoProfile( CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH) );
+			Log.e(TAG, "camera not opened! returning default video profile for QUALITY_HIGH");
+			return video_profile;
 		}
 		/*if( video_high_speed ) {
 			// return a video profile for a high speed frame rate - note that if we have a capture rate factor of say 0.25x,
@@ -2674,50 +2676,41 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					MediaRecorder.VideoEncoder.H264, this.video_high_speed_size.height, 120,
 					this.video_high_speed_size.width);
 		}*/
-		CamcorderProfile profile;
-		int cameraId = camera_controller.getCameraId();
 
-		if( applicationInterface.getForce4KPref() ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "force 4K UHD video");
-			profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
-			profile.videoFrameWidth = 3840;
-			profile.videoFrameHeight = 2160;
-			profile.videoBitRate = (int)(profile.videoBitRate*2.8); // need a higher bitrate for the better quality - this is roughly based on the bitrate used by an S5's native camera app at 4K (47.6 Mbps, compared to 16.9 Mbps which is what's returned by the QUALITY_HIGH profile)
-		}
-		else if( this.video_quality_handler.getCurrentVideoQualityIndex() != -1 ) {
-			profile = getCamcorderProfile(this.video_quality_handler.getCurrentVideoQuality());
-		}
-		else {
-			profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
-		}
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "fileFormat: " + profile.fileFormat);
-			Log.d(TAG, "audioCodec: " + profile.audioCodec);
-			Log.d(TAG, "videoCodec: " + profile.videoCodec);
-		}
-
-		String bitrate_value = applicationInterface.getVideoBitratePref();
-		if( !bitrate_value.equals("default") ) {
-			try {
-				int bitrate = Integer.parseInt(bitrate_value);
-				if( MyDebug.LOG )
-					Log.d(TAG, "bitrate: " + bitrate);
-				profile.videoBitRate = bitrate;
-			}
-			catch(NumberFormatException exception) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "bitrate invalid format, can't parse to int: " + bitrate_value);
-			}
-		}
-
+		// Get user settings
+		boolean record_audio = applicationInterface.getRecordAudioPref();
 		String fps_value = applicationInterface.getVideoFPSPref();
+		String bitrate_value = applicationInterface.getVideoBitratePref();
+		boolean force4k = applicationInterface.getForce4KPref();
+		// Use CamcorderProfile just to get the current sizes and defaults.
+		{
+			CamcorderProfile cam_profile;
+			int cameraId = camera_controller.getCameraId();
+
+			if( force4k ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "force 4K UHD video");
+				cam_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
+				cam_profile.videoFrameWidth = 3840;
+				cam_profile.videoFrameHeight = 2160;
+				cam_profile.videoBitRate = (int)(cam_profile.videoBitRate*2.8); // need a higher bitrate for the better quality - this is roughly based on the bitrate used by an S5's native camera app at 4K (47.6 Mbps, compared to 16.9 Mbps which is what's returned by the QUALITY_HIGH profile)
+			}
+			else if( this.video_quality_handler.getCurrentVideoQualityIndex() != -1 ) {
+				cam_profile = getCamcorderProfile(this.video_quality_handler.getCurrentVideoQuality());
+			}
+			else {
+				cam_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
+			}
+			video_profile = new VideoProfile(cam_profile);
+		}
+
 		if( !fps_value.equals("default") ) {
 			try {
 				int fps = Integer.parseInt(fps_value);
 				if( MyDebug.LOG )
 					Log.d(TAG, "fps: " + fps);
-				profile.videoFrameRate = fps;
+				video_profile.videoFrameRate = fps;
+				video_profile.videoCaptureRate = fps;
 			}
 			catch(NumberFormatException exception) {
 				if( MyDebug.LOG )
@@ -2725,7 +2718,85 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 
-		/*String pref_video_output_format = applicationInterface.getRecordVideoOutputFormatPref();
+		if( !bitrate_value.equals("default") ) {
+			try {
+				int bitrate = Integer.parseInt(bitrate_value);
+				if( MyDebug.LOG )
+					Log.d(TAG, "bitrate: " + bitrate);
+				video_profile.videoBitRate = bitrate;
+			}
+			catch(NumberFormatException exception) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "bitrate invalid format, can't parse to int: " + bitrate_value);
+			}
+		}
+
+		if( has_capture_rate_factor ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set video profile frame rate for slow motion or timelapse");
+			// capture rate remains the same, and we adjust the frame rate of video
+			video_profile.videoFrameRate = (int)(video_profile.videoFrameRate * capture_rate_factor + 0.5f);
+			video_profile.videoBitRate = (int)(video_profile.videoBitRate * capture_rate_factor + 0.5f);
+			// audio not recorded with slow motion video
+			record_audio = false;
+		}
+
+		video_profile.videoSource = using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA;
+
+		// Done with video
+
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+				&& record_audio
+				&& ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
+			// needed for Android 6, in case users deny storage permission, otherwise we'll crash
+			// see https://developer.android.com/training/permissions/requesting.html
+			// we request permission when switching to video mode - if it wasn't granted, here we just switch it off
+			// we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+			if( MyDebug.LOG )
+				Log.e(TAG, "don't have RECORD_AUDIO permission");
+			// don't show a toast here, otherwise we'll keep showing toasts whenever getVideoProfile() is called; we only
+			// should show a toast when user starts recording video; so we indicate this via the no_audio_permission flag
+			record_audio = false;
+			video_profile.no_audio_permission = true;
+		}
+
+		video_profile.record_audio = record_audio;
+		if( record_audio ) {
+			String pref_audio_src = applicationInterface.getRecordAudioSourcePref();
+			if( MyDebug.LOG )
+				Log.d(TAG, "pref_audio_src: " + pref_audio_src);
+			switch(pref_audio_src) {
+				case "audio_src_mic":
+					video_profile.audioSource = MediaRecorder.AudioSource.MIC;
+					break;
+				case "audio_src_default":
+					video_profile.audioSource = MediaRecorder.AudioSource.DEFAULT;
+					break;
+				case "audio_src_voice_communication":
+					video_profile.audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+					break;
+				case "audio_src_camcorder":
+				default:
+					video_profile.audioSource = MediaRecorder.AudioSource.CAMCORDER;
+					break;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "audio_source: " + video_profile.audioSource);
+
+			String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
+			if( MyDebug.LOG )
+				Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
+			if( pref_audio_channels.equals("audio_mono") ) {
+				video_profile.audioChannels = 1;
+			}
+			else if( pref_audio_channels.equals("audio_stereo") ) {
+				video_profile.audioChannels = 2;
+			}
+			// else keep with the value already stored in VideoProfile (set from the CamcorderProfile)
+		}
+
+		/*
+		String pref_video_output_format = applicationInterface.getRecordVideoOutputFormatPref();
 		if( MyDebug.LOG )
 			Log.d(TAG, "pref_video_output_format: " + pref_video_output_format);
 		if( pref_video_output_format.equals("output_format_default") ) {
@@ -2754,7 +2825,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			profile.audioCodec = MediaRecorder.AudioEncoder.VORBIS;
 		}*/
 
-		return new VideoProfile(profile);
+		return video_profile;
 	}
 	
 	private static String formatFloatToString(final float f) {
@@ -3708,9 +3779,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				setFocusPref(false);
 			}*/
 			if( is_video ) {
-				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
+				if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && applicationInterface.getRecordAudioPref() ) {
 					// check for audio permission now, rather than when user starts video recording
 					// we restrict the checks to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
+					// only request permission if record audio preference is enabled
 					if( MyDebug.LOG )
 						Log.d(TAG, "check for record audio permission");
 					if( ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
@@ -4443,13 +4515,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		if( created_video_file ) {
         	final VideoProfile profile = getVideoProfile();
-			if( has_capture_rate_factor ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "set video profile frame rate for slow motion or timelapse");
-				// capture rate remains the same, and we adjust the frame rate of video
-				profile.videoFrameRate = (int)(profile.videoFrameRate * capture_rate_factor + 0.5f);
-				profile.videoBitRate = (int)(profile.videoBitRate * capture_rate_factor + 0.5f);
-			}
     		if( MyDebug.LOG ) {
 				Log.d(TAG, "current_video_quality: " + this.video_quality_handler.getCurrentVideoQualityIndex());
 				if (this.video_quality_handler.getCurrentVideoQualityIndex() != -1)
@@ -4497,56 +4562,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					});
 				}
 			});
-        	camera_controller.initVideoRecorderPrePrepare(local_video_recorder);
-			boolean record_audio = applicationInterface.getRecordAudioPref();
-			if( has_capture_rate_factor ) {
-				// audio not recorded with slow motion video
-				record_audio = false;
-			}
-			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ) {
-				// needed for Android 6, in case users deny storage permission, otherwise we'll crash
-				// see https://developer.android.com/training/permissions/requesting.html
-				// we request permission when switching to video mode - if it wasn't granted, here we just switch it off
-				// we restrict check to Android 6 or later just in case, see note in LocationSupplier.setupLocationListener()
-				if( MyDebug.LOG )
-					Log.e(TAG, "don't have RECORD_AUDIO permission");
-				showToast(null, R.string.permission_record_audio_not_available);
-				record_audio = false;
-			}
-			if( record_audio ) {
-        		String pref_audio_src = applicationInterface.getRecordAudioSourcePref();
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "pref_audio_src: " + pref_audio_src);
-				switch(pref_audio_src) {
-					case "audio_src_mic":
-						profile.audioSource = MediaRecorder.AudioSource.MIC;
-						break;
-					case "audio_src_default":
-						profile.audioSource = MediaRecorder.AudioSource.DEFAULT;
-						break;
-					case "audio_src_voice_communication":
-						profile.audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
-						break;
-					case "audio_src_camcorder":
-					default:
-						profile.audioSource = MediaRecorder.AudioSource.CAMCORDER;
-						break;
-				}
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "audio_source: " + profile.audioSource);
 
-				String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
-				if( MyDebug.LOG )
-					Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
-				if( pref_audio_channels.equals("audio_mono") ) {
-					profile.audioChannels = 1;
-				}
-				else if( pref_audio_channels.equals("audio_stereo") ) {
-					profile.audioChannels = 2;
-				}
-				// else keep with the value already stored in VideoProfile (set from the CamcorderProfile)
+        	camera_controller.initVideoRecorderPrePrepare(local_video_recorder);
+        	if( profile.no_audio_permission ) {
+				showToast(null, R.string.permission_record_audio_not_available);
 			}
-			profile.videoSource = using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA;
 
     		boolean store_location = applicationInterface.getGeotaggingPref();
 			if( store_location && applicationInterface.getLocation() != null ) {
@@ -4560,7 +4580,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     		if( MyDebug.LOG )
 	   			Log.d(TAG, "copy video profile to media recorder");
 
-			profile.copyToMediaRecorder(local_video_recorder, record_audio);
+			profile.copyToMediaRecorder(local_video_recorder);
 
 			boolean told_app_starting = false; // true if we called applicationInterface.startingVideo()
         	try {
