@@ -4443,6 +4443,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		if( created_video_file ) {
         	final VideoProfile profile = getVideoProfile();
+			if( has_capture_rate_factor ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "set video profile frame rate for slow motion or timelapse");
+				// capture rate remains the same, and we adjust the frame rate of video
+				profile.videoFrameRate = (int)(profile.videoFrameRate * capture_rate_factor + 0.5f);
+				profile.videoBitRate = (int)(profile.videoBitRate * capture_rate_factor + 0.5f);
+			}
     		if( MyDebug.LOG ) {
 				Log.d(TAG, "current_video_quality: " + this.video_quality_handler.getCurrentVideoQualityIndex());
 				if (this.video_quality_handler.getCurrentVideoQualityIndex() != -1)
@@ -4455,10 +4462,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "enable_sound? " + enable_sound);
 			camera_controller.enableShutterSound(enable_sound); // Camera2 API can disable video sound too
+
     		MediaRecorder local_video_recorder = new MediaRecorder();
     		this.camera_controller.unlock();
     		if( MyDebug.LOG )
     			Log.d(TAG, "set video listeners");
+
         	local_video_recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
 				@Override
 				public void onInfo(MediaRecorder mr, int what, int extra) {
@@ -4508,25 +4517,36 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         		String pref_audio_src = applicationInterface.getRecordAudioSourcePref();
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "pref_audio_src: " + pref_audio_src);
-        		int audio_source = MediaRecorder.AudioSource.CAMCORDER;
 				switch(pref_audio_src) {
 					case "audio_src_mic":
-						audio_source = MediaRecorder.AudioSource.MIC;
+						profile.audioSource = MediaRecorder.AudioSource.MIC;
 						break;
 					case "audio_src_default":
-						audio_source = MediaRecorder.AudioSource.DEFAULT;
+						profile.audioSource = MediaRecorder.AudioSource.DEFAULT;
 						break;
 					case "audio_src_voice_communication":
-						audio_source = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+						profile.audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+						break;
+					case "audio_src_camcorder":
+					default:
+						profile.audioSource = MediaRecorder.AudioSource.CAMCORDER;
 						break;
 				}
 	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "audio_source: " + audio_source);
-				local_video_recorder.setAudioSource(audio_source);
+	    			Log.d(TAG, "audio_source: " + profile.audioSource);
+
+				String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
+				if( MyDebug.LOG )
+					Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
+				if( pref_audio_channels.equals("audio_mono") ) {
+					profile.audioChannels = 1;
+				}
+				else if( pref_audio_channels.equals("audio_stereo") ) {
+					profile.audioChannels = 2;
+				}
+				// else keep with the value already stored in VideoProfile (set from the CamcorderProfile)
 			}
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "set video source");
-			local_video_recorder.setVideoSource(using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA);
+			profile.videoSource = using_android_l ? MediaRecorder.VideoSource.SURFACE : MediaRecorder.VideoSource.CAMERA;
 
     		boolean store_location = applicationInterface.getGeotaggingPref();
 			if( store_location && applicationInterface.getLocation() != null ) {
@@ -4538,58 +4558,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 
     		if( MyDebug.LOG )
-    			Log.d(TAG, "set video profile");
-			if( has_capture_rate_factor ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "set video profile for slow motion");
-				// n.b., order may be important - output format should be first, at least
-				local_video_recorder.setOutputFormat(profile.fileFormat);
-				local_video_recorder.setVideoFrameRate((int)(profile.videoFrameRate * capture_rate_factor + 0.5f));
-				local_video_recorder.setCaptureRate(profile.videoFrameRate);
-				local_video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-				local_video_recorder.setVideoEncodingBitRate((int)(profile.videoBitRate * capture_rate_factor + 0.5f));
-				local_video_recorder.setVideoEncoder(profile.videoCodec);
-			}
-			else if( record_audio ) {
-				// n.b., order may be important - output format should be first, at least
-				// also match order of MediaRecorder.setProfile() just to be safe, see https://stackoverflow.com/questions/5524672/is-it-possible-to-use-camcorderprofile-without-audio-source
-				local_video_recorder.setOutputFormat(profile.fileFormat);
-				local_video_recorder.setVideoFrameRate(profile.videoFrameRate);
-				local_video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-				local_video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
-				local_video_recorder.setVideoEncoder(profile.videoCodec);
-                local_video_recorder.setAudioEncodingBitRate(profile.audioBitRate);
-            	local_video_recorder.setAudioChannels(profile.audioChannels);
-                local_video_recorder.setAudioSamplingRate(profile.audioSampleRate);
-            	local_video_recorder.setAudioEncoder(profile.audioCodec);
-        		String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
-	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
-        		if( pref_audio_channels.equals("audio_mono") ) {
-        			local_video_recorder.setAudioChannels(1);
-        		}
-        		else if( pref_audio_channels.equals("audio_stereo") ) {
-        			local_video_recorder.setAudioChannels(2);
-        		}
-			}
-			else {
-				// from http://stackoverflow.com/questions/5524672/is-it-possible-to-use-camcorderprofile-without-audio-source
-				if( MyDebug.LOG )
-					Log.d(TAG, "set video profile from parameters (without audio)");
-				// n.b., order may be important - output format should be first, at least
-				local_video_recorder.setOutputFormat(profile.fileFormat);
-				local_video_recorder.setVideoFrameRate(profile.videoFrameRate);
-				local_video_recorder.setVideoSize(profile.videoFrameWidth, profile.videoFrameHeight);
-				local_video_recorder.setVideoEncodingBitRate(profile.videoBitRate);
-				local_video_recorder.setVideoEncoder(profile.videoCodec);
-			}
-    		if( MyDebug.LOG ) {
-    			Log.d(TAG, "video fileformat: " + profile.fileFormat);
-    			Log.d(TAG, "video framerate: " + profile.videoFrameRate);
-    			Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
-    			Log.d(TAG, "video bitrate: " + profile.videoBitRate);
-    			Log.d(TAG, "video codec: " + profile.videoCodec);
-    		}
+	   			Log.d(TAG, "copy video profile to media recorder");
+
+			profile.copyToMediaRecorder(local_video_recorder, record_audio);
+
 			boolean told_app_starting = false; // true if we called applicationInterface.startingVideo()
         	try {
 				ApplicationInterface.VideoMaxFileSize video_max_filesize = applicationInterface.getVideoMaxFileSizePref();
@@ -4638,13 +4610,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				else {
 					local_video_recorder.setOutputFile(pfd_saf.getFileDescriptor());
 				}
-
 				applicationInterface.cameraInOperation(true, true);
 				told_app_starting = true;
 				applicationInterface.startingVideo();
         		/*if( true ) // test
         			throw new IOException();*/
 				cameraSurface.setVideoRecorder(local_video_recorder);
+
 				local_video_recorder.setOrientationHint(getImageVideoRotation());
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to prepare video recorder");
