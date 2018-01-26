@@ -109,14 +109,14 @@ public class VideoQualityHandler {
                 video_quality.add(str);
                 done_video_size[i] = true;
                 if( MyDebug.LOG )
-                    Log.d(TAG, "added: " + str);
+                    Log.d(TAG, "added: " + i + ":"+ str + " " + size.width + "x" + size.height);
             }
             else if( base_profile == CamcorderProfile.QUALITY_LOW || size.width * size.height >= min_resolution_w*min_resolution_h ) {
                 String str = "" + base_profile + "_r" + size.width + "x" + size.height;
                 video_quality.add(str);
                 done_video_size[i] = true;
                 if( MyDebug.LOG )
-                    Log.d(TAG, "added: " + str);
+                    Log.d(TAG, "added: " + i + ":" + str);
             }
         }
     }
