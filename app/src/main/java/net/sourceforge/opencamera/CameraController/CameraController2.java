@@ -201,6 +201,7 @@ public class CameraController2 extends CameraController {
 		private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
 		private boolean video_stabilization;
 		private Range<Integer> ae_target_fps_range;
+		private long sensor_frame_duration;
 
 		private int getExifOrientation() {
 			int exif_orientation = ExifInterface.ORIENTATION_NORMAL;
@@ -381,7 +382,9 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "actually using exposure_time of: " + actual_exposure_time);
 				}
 				builder.set(CaptureRequest.SENSOR_EXPOSURE_TIME, actual_exposure_time);
-				//builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L/30);
+				if (sensor_frame_duration > 0) {
+					builder.set(CaptureRequest.SENSOR_FRAME_DURATION, sensor_frame_duration);
+				}
 				//builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 1000000000L);
 				//builder.set(CaptureRequest.SENSOR_FRAME_DURATION, 0L);
 				// for now, flash is disabled when using manual iso - it seems to cause ISO level to jump to 100 on Nexus 6 when flash is turned on!
@@ -2670,6 +2673,9 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewFpsRange: " + min +"-" + max);
 		camera_settings.ae_target_fps_range = new Range<Integer>(min / 1000, max / 1000);
+//		Frame duration is in nanoseconds.  Using min to be safe.
+		camera_settings.sensor_frame_duration =
+				(long)(1.0 / (min / 1000.0) * 1000000000L);
 
 		try {
 			if( camera_settings.setAEMode(previewBuilder, false) ) {
