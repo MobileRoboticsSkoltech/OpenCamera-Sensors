@@ -2908,6 +2908,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				bitrate_string = profile.videoBitRate + "bps";
 
 			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
+
+			String fps_value = applicationInterface.getVideoFPSPref();
+			if( !fps_value.equals("default") ) {
+				simple = false;
+			}
+
 			boolean record_audio = sharedPreferences.getBoolean(PreferenceKeys.getRecordAudioPreferenceKey(), true);
 			if( !record_audio ) {
 				toast_string += "\n" + getResources().getString(R.string.audio_disabled);
