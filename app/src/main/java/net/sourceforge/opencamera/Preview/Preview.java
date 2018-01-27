@@ -216,7 +216,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 	private boolean has_capture_rate_factor; // whether we have a capture rate for faster or slow motion
 	private float capture_rate_factor = 1.0f; // should be 1.0f if has_capture_rate_factor is false
-	private boolean video_high_speed;
+	private boolean video_high_speed; // whether the current video mode requires high speed frame rate (note this may still be true even if is_video==false, so potentially we could switch photo/video modes without setting up the flag)
 	private boolean supports_video_high_speed;
 	private final VideoQualityHandler video_quality_handler = new VideoQualityHandler();
 
@@ -5729,6 +5729,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "supportsPhotoVideoRecording");
     	return supports_photo_video_recording && !video_high_speed;
+	}
+
+	/** Returns true iff we're in video mode, and a high speed fps video mode is selected.
+	 */
+	public boolean isVideoHighSpeed() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "isVideoHighSpeed");
+		return is_video && video_high_speed;
 	}
     
     public boolean canDisableShutterSound() {

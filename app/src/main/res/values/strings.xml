@@ -467,6 +467,8 @@
     <string name="bottom_of_screen">at bottom of screen</string>
     <string name="centre_of_screen">at centre</string>
 
+    <string name="high_speed">High Speed</string> <!-- in the sense of high speed video frame rates -->
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>
