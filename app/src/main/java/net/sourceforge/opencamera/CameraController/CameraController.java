@@ -341,7 +341,7 @@ public abstract class CameraController {
 	public abstract int getExposureCompensation();
 	public abstract boolean setExposureCompensation(int new_exposure);
 	public abstract void setPreviewFpsRange(int min, int max);
-	public abstract List<int []> getSupportedPreviewFpsRange();
+	public abstract List<int []> getSupportedPreviewFpsRange(); // result depends on setting of setVideoHighSpeed()
 
 	public String getDefaultSceneMode() {
 		return "auto"; // chosen to match Camera.Parameters.SCENE_MODE_AUTO, but we also use compatible values for Camera2 API

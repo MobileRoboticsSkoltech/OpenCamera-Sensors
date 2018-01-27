@@ -109,6 +109,8 @@ public class CameraController2 extends CameraController {
 	private ErrorCallback take_picture_error_cb;
 	private boolean want_video_high_speed;
 	private boolean is_video_high_speed; // whether we're actually recording in high speed
+	private List<int[]> ae_fps_ranges;
+	private List<int[]> hs_fps_ranges;
 	//private ImageReader previewImageReader;
 	private SurfaceTexture texture;
 	private Surface surface_texture;
@@ -198,7 +200,8 @@ public class CameraController2 extends CameraController {
 		private boolean has_face_detect_mode;
 		private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
 		private boolean video_stabilization;
-		
+		private Range<Integer> ae_target_fps_range;
+
 		private int getExifOrientation() {
 			int exif_orientation = ExifInterface.ORIENTATION_NORMAL;
 			switch( (rotation + 360) % 360 ) {
@@ -405,6 +408,8 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "auto mode");
 					Log.d(TAG, "flash_value: " + flash_value);
 				}
+				builder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, ae_target_fps_range);
+
 				// prefer to set flash via the ae mode (otherwise get even worse results), except for torch which we can't
 				switch(flash_value) {
 					case "flash_off":
@@ -1324,8 +1329,10 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "RAW capability not supported");
 			want_raw = false; // just in case it got set to true somehow
     	}
-		
-    	ArrayList<int[]> ae_fps_ranges = new ArrayList<int[]>();
+
+
+
+    	ae_fps_ranges = new ArrayList<int[]>();
 		for (Range<Integer> r : characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)) {
 			ae_fps_ranges.add(new int[] {r.getLower(), r.getUpper()});
 		}
@@ -1337,10 +1344,10 @@ public class CameraController2 extends CameraController {
 			}
 		}
 
-	    android.util.Size [] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
-		camera_features.video_sizes = new ArrayList<>();
+		android.util.Size[] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
+		camera_features.video_sizes = new ArrayList<CameraController.Size>();
 		int min_fps = 9999;
-		for(int[] r : ae_fps_ranges) {
+		for(int[] r : this.ae_fps_ranges) {
 			min_fps = Math.min(min_fps, r[0]);
 		}
 		for(android.util.Size camera_size : camera_video_sizes) {
@@ -1359,8 +1366,22 @@ public class CameraController2 extends CameraController {
 		Collections.sort(camera_features.video_sizes, new CameraController.SizeSorter());
 
 		if( capabilities_high_speed_video ) {
-			android.util.Size[] camera_video_sizes_high_speed = configs.getHighSpeedVideoSizes();
+			hs_fps_ranges = new ArrayList<int[]>();
 			camera_features.video_sizes_high_speed = new ArrayList<>();
+
+			for (Range<Integer> r : configs.getHighSpeedVideoFpsRanges()) {
+				hs_fps_ranges.add(new int[] {r.getLower(), r.getUpper()});
+			}
+			Collections.sort(hs_fps_ranges, new CameraController.RangeSorter());
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "Supported high speed video fps ranges: ");
+				for (int[] f : hs_fps_ranges) {
+					Log.d(TAG, "   hs range: [" + f[0] + "-" + f[1] + "]");
+				}
+			}
+
+
+			android.util.Size[] camera_video_sizes_high_speed = configs.getHighSpeedVideoSizes();
 			for(android.util.Size camera_size : camera_video_sizes_high_speed) {
 				ArrayList<int[]> fr = new ArrayList<int[]>();
 				for (Range<Integer> r : configs.getHighSpeedVideoFpsRangesFor(camera_size)) {
@@ -2646,14 +2667,38 @@ public class CameraController2 extends CameraController {
 	
 	@Override
 	public void setPreviewFpsRange(int min, int max) {
-		// TODO Auto-generated method stub
+		if( MyDebug.LOG )
+			Log.d(TAG, "setPreviewFpsRange: " + min +"-" + max);
+		camera_settings.ae_target_fps_range = new Range<Integer>(min / 1000, max / 1000);
 
+		try {
+			if( camera_settings.setAEMode(previewBuilder, false) ) {
+				setRepeatingRequest();
+			}
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set preview fps range to " + min +"-" + max);
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public List<int[]> getSupportedPreviewFpsRange() {
-		// TODO Auto-generated method stub
-		return null;
+		List<int[]> l = new ArrayList<int[]>();
+
+		List<int[]> rr = want_video_high_speed ? hs_fps_ranges : ae_fps_ranges;
+		for (int[] r : rr) {
+			int[] ir = { r[0] * 1000, r[1] * 1000 };
+			l.add( ir );
+		}
+		if( MyDebug.LOG )
+			Log.e(TAG, "   using " + (want_video_high_speed ? "high speed" : "ae")  + " preview fps ranges");
+
+		return l;
 	}
 
 	@Override
@@ -3432,13 +3477,6 @@ public class CameraController2 extends CameraController {
 				}
 			}
         	if( video_recorder != null && want_video_high_speed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
-				//StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-				//configs.getHighSpeedVideoFpsRangesFor()
-				// okay to set this for previewBuilder - we create a new one in initVideoRecorderPostPrepare() when starting
-				// video recording, and another one when stopping video recording in reconnect().
-				Range<Integer> fps_range = new Range<>(120, 120);
-				previewBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fps_range);
-
 				camera.createConstrainedHighSpeedCaptureSession(surfaces,
 					myStateCallback,
 					handler);

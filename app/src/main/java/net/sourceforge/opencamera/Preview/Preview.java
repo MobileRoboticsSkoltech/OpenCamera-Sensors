@@ -1661,24 +1661,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		// in theory it shouldn't matter if we call setVideoHighSpeed(true) if is_video==false, as it should only have an effect
 		// in video mode; but don't set high speed mode in photo mode just to be safe
-		// Setup for high speed - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize()
+		// Setup for high speed - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize() and startCameraPreview()
 		camera_controller.setVideoHighSpeed(is_video && video_high_speed);
-		/*if( this.is_video && this.supports_video_high_speed
-				&& false
+	    // test slow motion
+		/*if( this.is_video && video_high_speed
+				//&& false
 				// && applicationInterface.isVideoSlowMotionPref()
 			) {
 	    	has_capture_rate_factor = true;
 	    	capture_rate_factor = 0.25f;
-			video_high_speed = true;
-			camera_controller.setVideoHighSpeed(true);
-		}
-		else {
-			video_high_speed = false;
-			camera_controller.setVideoHighSpeed(false);
-		}
-		has_capture_rate_factor = true;
-		capture_rate_factor = 0.25f;
-		*/
+		}*/
 
 		if( do_startup_focus && using_android_l && camera_controller.supportsAutoFocus() ) {
 			// need to switch flash off for autofocus - and for Android L, need to do this before starting preview (otherwise it won't work in time); for old camera API, need to do this after starting preview!
@@ -3722,7 +3714,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// use chooseBestPreviewFps() more widely.
 			// Update for v1.31: we no longer seem to need this - I no longer get a dark preview in photo or video mode if we don't set the fps range;
 			// but leaving the code as it is, to be safe.
-			boolean preview_too_dark = Build.MODEL.equals("Nexus 5") || Build.MODEL.equals("Nexus 6");
+			// Update for v1.43: implementing setPreviewFpsRange() for CameraController2 caused the dark preview problem on
+			// OnePlus 3T. So enable the preview_too_dark for all devices on Camera2.
+			boolean preview_too_dark = using_android_l || Build.MODEL.equals("Nexus 5") || Build.MODEL.equals("Nexus 6");
 			String fps_value = applicationInterface.getVideoFPSPref();
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "preview_too_dark? " + preview_too_dark);
