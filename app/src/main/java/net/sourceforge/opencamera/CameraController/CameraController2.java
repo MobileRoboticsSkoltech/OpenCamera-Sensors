@@ -5,6 +5,7 @@ import net.sourceforge.opencamera.MyDebug;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -1324,26 +1325,56 @@ public class CameraController2 extends CameraController {
 			want_raw = false; // just in case it got set to true somehow
     	}
 		
+    	ArrayList<int[]> ae_fps_ranges = new ArrayList<int[]>();
+		for (Range<Integer> r : characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)) {
+			ae_fps_ranges.add(new int[] {r.getLower(), r.getUpper()});
+		}
+		Collections.sort(ae_fps_ranges, new CameraController.RangeSorter());
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "Supported AE video fps ranges: ");
+			for (int[] f : ae_fps_ranges) {
+				Log.d(TAG, "   ae range: [" + f[0] + "-" + f[1] + "]");
+			}
+		}
+
 	    android.util.Size [] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
 		camera_features.video_sizes = new ArrayList<>();
+		int min_fps = 9999;
+		for(int[] r : ae_fps_ranges) {
+			min_fps = Math.min(min_fps, r[0]);
+		}
 		for(android.util.Size camera_size : camera_video_sizes) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "video size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
 			if( camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160 )
 				continue; // Nexus 6 returns these, even though not supported?!
-			camera_features.video_sizes.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+			long mfd = configs.getOutputMinFrameDuration(MediaRecorder.class, camera_size);
+			int  max_fps = (int)((1.0 / mfd) * 1000000000L);
+			ArrayList<int[]> fr = new ArrayList<int[]>();
+			fr.add(new int[] {min_fps, max_fps});
+			CameraController.Size normal_video_size = new CameraController.Size(camera_size.getWidth(), camera_size.getHeight(), fr, false);
+			camera_features.video_sizes.add(normal_video_size);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "normal video size: " + normal_video_size);
+			}
 		}
+		Collections.sort(camera_features.video_sizes, new CameraController.SizeSorter());
 
 		if( capabilities_high_speed_video ) {
 			android.util.Size[] camera_video_sizes_high_speed = configs.getHighSpeedVideoSizes();
 			camera_features.video_sizes_high_speed = new ArrayList<>();
 			for(android.util.Size camera_size : camera_video_sizes_high_speed) {
-				if (MyDebug.LOG)
-					Log.d(TAG, "high speed video size: " + camera_size.getWidth() + " x " + camera_size.getHeight());
+				ArrayList<int[]> fr = new ArrayList<int[]>();
+				for (Range<Integer> r : configs.getHighSpeedVideoFpsRangesFor(camera_size)) {
+					fr.add(new int[] { r.getLower(), r.getUpper()});
+				}
 				if (camera_size.getWidth() > 4096 || camera_size.getHeight() > 2160)
 					continue; // just in case? see above
-				camera_features.video_sizes_high_speed.add(new CameraController.Size(camera_size.getWidth(), camera_size.getHeight()));
+				CameraController.Size hs_video_size = new CameraController.Size(camera_size.getWidth(), camera_size.getHeight(), fr, true);
+				if (MyDebug.LOG) {
+					Log.d(TAG, "high speed video size: " + hs_video_size);
+				}
+				camera_features.video_sizes_high_speed.add(hs_video_size);
 			}
+			Collections.sort(camera_features.video_sizes_high_speed, new CameraController.SizeSorter());
 		}
 
 		android.util.Size [] camera_preview_sizes = configs.getOutputSizes(SurfaceTexture.class);

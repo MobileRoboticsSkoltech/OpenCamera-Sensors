@@ -2,6 +2,9 @@ package net.sourceforge.opencamera.CameraController;
 
 import net.sourceforge.opencamera.MyDebug;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.graphics.Rect;
@@ -46,7 +49,7 @@ public abstract class CameraController {
 		public boolean supports_face_detection;
 		public List<CameraController.Size> picture_sizes;
 		public List<CameraController.Size> video_sizes;
-		public List<CameraController.Size> video_sizes_high_speed;
+		public List<CameraController.Size> video_sizes_high_speed; // may be null if high speed not supported
 		public List<CameraController.Size> preview_sizes;
 		public List<String> supported_flash_values;
 		public List<String> supported_focus_values;
@@ -73,15 +76,67 @@ public abstract class CameraController {
 		public boolean supports_raw;
 		public float view_angle_x; // horizontal angle of view in degrees (when unzoomed)
 		public float view_angle_y; // vertical angle of view in degrees (when unzoomed)
+
+		public static Size findSize(List<Size> sizes, Size size, int fps, boolean return_closest) {
+			Size last_s = null;
+			for(Size s : sizes) {
+				if (size.equals(s)) {
+					last_s = s;
+					if (fps > 0) {
+						if (s.supportsFrameRate(fps)) {
+							return s;
+						}
+					} else {
+						return s;
+					}
+				}
+			}
+			return return_closest ? last_s : null;
+		}
+	}
+
+	public static class RangeSorter implements Comparator<int[]> {
+		private static final long serialVersionUID = 5802214721073728212L;
+		@Override
+		public int compare(int[] o1, int[] o2) {
+			if (o1[0] == o2[0]) return o1[1] - o2[1];
+			return o1[0] - o2[0];
+		}
+	}
+
+	public static class SizeSorter implements Comparator<Size> {
+		private static final long serialVersionUID = 5802214721073718212L;
+
+		@Override
+		public int compare(final CameraController.Size a, final CameraController.Size b) {
+			return b.width * b.height - a.width * a.height;
+		}
 	}
 
 	public static class Size {
 		public final int width;
 		public final int height;
-		
-		public Size(int width, int height) {
+		public List<int[]> fps_ranges;
+		public final boolean high_speed;
+
+		public Size(int width, int height, List<int[]> fps_ranges, boolean high_speed) {
 			this.width = width;
 			this.height = height;
+			this.fps_ranges = fps_ranges;
+			this.high_speed = high_speed;
+			Collections.sort(this.fps_ranges, new RangeSorter());
+		}
+
+		public Size(int width, int height) {
+			this(width, height, new ArrayList<int[]>(), false);
+		}
+
+		public boolean supportsFrameRate(int fps) {
+			for (int[] f : this.fps_ranges) {
+				if (f[0] <= fps && fps <= f[1])
+					return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -100,6 +155,14 @@ public abstract class CameraController {
 			// as this requires API level 19
 			// so use this from http://stackoverflow.com/questions/11742593/what-is-the-hashcode-for-a-custom-class-having-just-two-int-properties
 			return width*31 + height;
+		}
+
+		public String toString() {
+			String s = "";
+			for (int[] f : this.fps_ranges) {
+				s += " [" + f[0] + "-" + f[1] + "]";
+			}
+			return this.width + "x" + this.height + " " + s + (this.high_speed ? "-hs" : "");
 		}
 	}
 	

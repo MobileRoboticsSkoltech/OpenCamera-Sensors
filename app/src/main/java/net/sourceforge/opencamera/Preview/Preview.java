@@ -218,7 +218,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private float capture_rate_factor = 1.0f; // should be 1.0f if has_capture_rate_factor is false
 	private boolean video_high_speed;
 	private boolean supports_video_high_speed;
-	private CameraController.Size video_high_speed_size;
 	private final VideoQualityHandler video_quality_handler = new VideoQualityHandler();
 
 	private Toast last_toast;
@@ -1281,7 +1280,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		capture_rate_factor = 1.0f;
 		video_high_speed = false;
 		supports_video_high_speed = false;
-		video_high_speed_size = null;
 		video_quality_handler.resetCurrentQuality();
 		supported_flash_values = null;
 		current_flash_index = -1;
@@ -1661,7 +1659,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 
+		// in theory it shouldn't matter if we call setVideoHighSpeed(true) if is_video==false, as it should only have an effect
+		// in video mode; but don't set high speed mode in photo mode just to be safe
 		// Setup for high speed - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize()
+		camera_controller.setVideoHighSpeed(is_video && video_high_speed);
 		/*if( this.is_video && this.supports_video_high_speed
 				&& false
 				// && applicationInterface.isVideoSlowMotionPref()
@@ -1857,18 +1858,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.view_angle_x = camera_features.view_angle_x;
 			this.view_angle_y = camera_features.view_angle_y;
 			this.supports_video_high_speed = camera_features.video_sizes_high_speed != null && camera_features.video_sizes_high_speed.size() > 0;
-			if( supports_video_high_speed ) {
-				// only use highest high speed resolution for now
-				for(int i=0;i<camera_features.video_sizes_high_speed.size();i++) {
-					CameraController.Size size = camera_features.video_sizes_high_speed.get(i);
-		        	if( video_high_speed_size == null || size.width*size.height > video_high_speed_size.width*video_high_speed_size.height ) {
-		        		video_high_speed_size = size;
-		        	}
-		        }
-				if( MyDebug.LOG )
-					Log.d(TAG, "supports_video_high_speed, size: " + video_high_speed_size.width + " x " + video_high_speed_size.height);
-			}
 			this.video_quality_handler.setVideoSizes(camera_features.video_sizes);
+			this.video_quality_handler.setVideoSizesHighSpeed(camera_features.video_sizes_high_speed);
 	        this.supported_preview_sizes = camera_features.preview_sizes;
 		}
 		if( MyDebug.LOG ) {
@@ -2375,6 +2366,35 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
 		{
+			// set up high speed frame rates
+			// should be done after checking the requested video size is available
+			video_high_speed = false;
+			if( this.supports_video_high_speed ) {
+				VideoProfile profile = getVideoProfile();
+				if( MyDebug.LOG )
+					Log.d(TAG, "check if we need high speed video for " + profile.videoFrameWidth + " x " + profile.videoFrameHeight + " at fps " + profile.videoCaptureRate);
+				CameraController.Size requested_size = new CameraController.Size(profile.videoFrameWidth, profile.videoFrameHeight);
+				CameraController.Size best_video_size = CameraController.CameraFeatures.findSize(video_quality_handler.getSupportedVideoSizes(), requested_size, profile.videoCaptureRate, false);
+				if( best_video_size == null && video_quality_handler.getSupportedVideoSizesHighSpeed() != null ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "need to check high speed sizes");
+					// check high speed
+					best_video_size = CameraController.CameraFeatures.findSize(video_quality_handler.getSupportedVideoSizesHighSpeed(), requested_size, profile.videoCaptureRate, false);
+				}
+
+				if( best_video_size == null ) {
+					Log.e(TAG, "fps not supported for this video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight + " at fps " + profile.videoCaptureRate);
+					// TODO handle this
+				}
+				else if( best_video_size.high_speed ) {
+					video_high_speed = true;
+				}
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "video_high_speed?: " + video_high_speed);
+		}
+
+		{
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "set up flash");
 				Log.d(TAG, "flash values: " + supported_flash_values);
@@ -2495,14 +2515,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		CameraController.Size new_size = null;
     	if( this.is_video ) {
 			// see comments for getOptimalVideoPictureSize()
+			VideoProfile profile = getVideoProfile();
+			if( MyDebug.LOG )
+				Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
         	if( video_high_speed ) {
-        		// picture size must match video resolution for high speed, see doc for CameraDevice.createConstrainedHighSpeedCaptureSession()
-				new_size = new CameraController.Size(video_high_speed_size.width, video_high_speed_size.height);
+				// It's unclear it matters what size we set here given that high speed is only for Camera2 API, and that
+				// take photo whilst recording video isn't supported for high speed video - so for Camera2 API, setting
+				// picture size should have no effect. But set to a sensible value just in case.
+				new_size = new CameraController.Size(profile.videoFrameWidth, profile.videoFrameHeight);
 			}
 			else {
-				VideoProfile profile = getVideoProfile();
-				if( MyDebug.LOG )
-					Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
 				double targetRatio = ((double) profile.videoFrameWidth) / (double) profile.videoFrameHeight;
 				new_size = getOptimalVideoPictureSize(sizes, targetRatio);
 			}
@@ -2679,6 +2701,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		// Get user settings
 		boolean record_audio = applicationInterface.getRecordAudioPref();
+		String channels_value = applicationInterface.getRecordAudioChannelsPref();
 		String fps_value = applicationInterface.getVideoFPSPref();
 		String bitrate_value = applicationInterface.getVideoBitratePref();
 		boolean force4k = applicationInterface.getForce4KPref();
@@ -2729,6 +2752,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "bitrate invalid format, can't parse to int: " + bitrate_value);
 			}
+		}
+		final int min_high_speed_bitrate_c = 4*14000000;
+		if( video_high_speed && video_profile.videoBitRate < min_high_speed_bitrate_c ) {
+			video_profile.videoBitRate = min_high_speed_bitrate_c;
+			if( MyDebug.LOG )
+				Log.d(TAG, "set minimum bitrate for high speed: " + video_profile.videoBitRate);
 		}
 
 		if( has_capture_rate_factor ) {
@@ -2783,13 +2812,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "audio_source: " + video_profile.audioSource);
 
-			String pref_audio_channels = applicationInterface.getRecordAudioChannelsPref();
 			if( MyDebug.LOG )
-				Log.d(TAG, "pref_audio_channels: " + pref_audio_channels);
-			if( pref_audio_channels.equals("audio_mono") ) {
+				Log.d(TAG, "pref_audio_channels: " + channels_value);
+			if( channels_value.equals("audio_mono") ) {
 				video_profile.audioChannels = 1;
 			}
-			else if( pref_audio_channels.equals("audio_stereo") ) {
+			else if( channels_value.equals("audio_stereo") ) {
 				video_profile.audioChannels = 2;
 			}
 			// else keep with the value already stored in VideoProfile (set from the CamcorderProfile)
@@ -2976,9 +3004,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		final double ASPECT_TOLERANCE = 0.05;
         if( sizes == null )
         	return null;
-		if( video_high_speed ) {
+		if( is_video && video_high_speed ) {
+			VideoProfile profile = getVideoProfile();
+			if( MyDebug.LOG )
+				Log.d(TAG, "video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight);
 			// preview size must match video resolution for high speed, see doc for CameraDevice.createConstrainedHighSpeedCaptureSession()
-			return new CameraController.Size(video_high_speed_size.width, video_high_speed_size.height);
+			return new CameraController.Size(profile.videoFrameWidth, profile.videoFrameHeight);
 		}
         CameraController.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;

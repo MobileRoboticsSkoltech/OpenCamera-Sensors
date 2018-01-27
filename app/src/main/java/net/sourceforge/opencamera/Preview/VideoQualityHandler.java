@@ -35,6 +35,7 @@ public class VideoQualityHandler {
     private List<String> video_quality;
     private int current_video_quality = -1; // this is an index into the video_quality array, or -1 if not found (though this shouldn't happen?)
     private List<CameraController.Size> video_sizes;
+    private List<CameraController.Size> video_sizes_high_speed; // may be null if high speed not supported
 
     void resetCurrentQuality() {
         video_quality = null;
@@ -151,6 +152,12 @@ public class VideoQualityHandler {
         return this.video_sizes;
     }
 
+    public List<CameraController.Size> getSupportedVideoSizesHighSpeed() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "getSupportedVideoSizesHighSpeed");
+        return this.video_sizes_high_speed;
+    }
+
     /** Returns the maximum supported video size.
      */
     CameraController.Size getMaxSupportedVideoSize() {
@@ -167,6 +174,10 @@ public class VideoQualityHandler {
     public void setVideoSizes(List<CameraController.Size> video_sizes) {
         this.video_sizes = video_sizes;
         this.sortVideoSizes();
+    }
+
+    public void setVideoSizesHighSpeed(List<CameraController.Size> video_sizes_high_speed) {
+        this.video_sizes_high_speed = video_sizes_high_speed;
     }
 
 }
