@@ -71,7 +71,7 @@ public class VideoProfile {
         media_recorder.setOutputFormat(this.fileFormat);
         media_recorder.setVideoFrameRate(this.videoFrameRate);
         // it's probably safe to always call setCaptureRate, but to be safe (and keep compatibility with old Open Camera versions), we only do so when needed
-        if( this.videoCaptureRate != this.videoCaptureRate )
+        if( this.videoCaptureRate != this.videoFrameRate )
             media_recorder.setCaptureRate(this.videoCaptureRate);
         media_recorder.setVideoSize(this.videoFrameWidth, this.videoFrameHeight);
         media_recorder.setVideoEncodingBitRate(this.videoBitRate);
