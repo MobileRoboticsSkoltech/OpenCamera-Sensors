@@ -1668,6 +1668,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				//&& false
 				// && applicationInterface.isVideoSlowMotionPref()
 			) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set capture rate for slow motion");
 	    	has_capture_rate_factor = true;
 	    	capture_rate_factor = 0.25f;
 		}*/
@@ -2719,6 +2721,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			video_profile = new VideoProfile(cam_profile);
 		}
 
+		//video_profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
+		//video_profile.videoCodec = MediaRecorder.VideoEncoder.H264;
+
 		if( !fps_value.equals("default") ) {
 			try {
 				int fps = Integer.parseInt(fps_value);
@@ -2845,6 +2850,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			profile.audioCodec = MediaRecorder.AudioEncoder.VORBIS;
 		}*/
 
+		if( MyDebug.LOG )
+			Log.d(TAG, "returning video_profile: " + video_profile);
 		return video_profile;
 	}
 	
