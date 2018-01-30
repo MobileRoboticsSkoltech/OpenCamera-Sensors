@@ -59,7 +59,7 @@ public class CameraController2 extends CameraController {
 	private CameraDevice camera;
 	private String cameraIdS;
 
-	private boolean is_samsung_s7; // Galaxy S7 or Galaxy S7 Edge
+	private final boolean is_samsung_s7; // Galaxy S7 or Galaxy S7 Edge
 
 	private CameraCharacteristics characteristics;
 	// cached characteristics (use this for values that need to be frequently accessed, e.g., per frame, to improve performance);
@@ -1335,7 +1335,7 @@ public class CameraController2 extends CameraController {
 
 
 
-    	ae_fps_ranges = new ArrayList<int[]>();
+    	ae_fps_ranges = new ArrayList<>();
 		for (Range<Integer> r : characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)) {
 			ae_fps_ranges.add(new int[] {r.getLower(), r.getUpper()});
 		}
@@ -1348,7 +1348,7 @@ public class CameraController2 extends CameraController {
 		}
 
 		android.util.Size[] camera_video_sizes = configs.getOutputSizes(MediaRecorder.class);
-		camera_features.video_sizes = new ArrayList<CameraController.Size>();
+		camera_features.video_sizes = new ArrayList<>();
 		int min_fps = 9999;
 		for(int[] r : this.ae_fps_ranges) {
 			min_fps = Math.min(min_fps, r[0]);
@@ -1358,7 +1358,7 @@ public class CameraController2 extends CameraController {
 				continue; // Nexus 6 returns these, even though not supported?!
 			long mfd = configs.getOutputMinFrameDuration(MediaRecorder.class, camera_size);
 			int  max_fps = (int)((1.0 / mfd) * 1000000000L);
-			ArrayList<int[]> fr = new ArrayList<int[]>();
+			ArrayList<int[]> fr = new ArrayList<>();
 			fr.add(new int[] {min_fps, max_fps});
 			CameraController.Size normal_video_size = new CameraController.Size(camera_size.getWidth(), camera_size.getHeight(), fr, false);
 			camera_features.video_sizes.add(normal_video_size);
@@ -1369,7 +1369,7 @@ public class CameraController2 extends CameraController {
 		Collections.sort(camera_features.video_sizes, new CameraController.SizeSorter());
 
 		if( capabilities_high_speed_video ) {
-			hs_fps_ranges = new ArrayList<int[]>();
+			hs_fps_ranges = new ArrayList<>();
 			camera_features.video_sizes_high_speed = new ArrayList<>();
 
 			for (Range<Integer> r : configs.getHighSpeedVideoFpsRanges()) {
@@ -1386,7 +1386,7 @@ public class CameraController2 extends CameraController {
 
 			android.util.Size[] camera_video_sizes_high_speed = configs.getHighSpeedVideoSizes();
 			for(android.util.Size camera_size : camera_video_sizes_high_speed) {
-				ArrayList<int[]> fr = new ArrayList<int[]>();
+				ArrayList<int[]> fr = new ArrayList<>();
 				for (Range<Integer> r : configs.getHighSpeedVideoFpsRangesFor(camera_size)) {
 					fr.add(new int[] { r.getLower(), r.getUpper()});
 				}
@@ -2672,7 +2672,7 @@ public class CameraController2 extends CameraController {
 	public void setPreviewFpsRange(int min, int max) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setPreviewFpsRange: " + min +"-" + max);
-		camera_settings.ae_target_fps_range = new Range<Integer>(min / 1000, max / 1000);
+		camera_settings.ae_target_fps_range = new Range<>(min / 1000, max / 1000);
 //		Frame duration is in nanoseconds.  Using min to be safe.
 		camera_settings.sensor_frame_duration =
 				(long)(1.0 / (min / 1000.0) * 1000000000L);
@@ -2694,7 +2694,7 @@ public class CameraController2 extends CameraController {
 
 	@Override
 	public List<int[]> getSupportedPreviewFpsRange() {
-		List<int[]> l = new ArrayList<int[]>();
+		List<int[]> l = new ArrayList<>();
 
 		List<int[]> rr = want_video_high_speed ? hs_fps_ranges : ae_fps_ranges;
 		for (int[] r : rr) {

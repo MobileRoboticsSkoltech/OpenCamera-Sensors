@@ -116,7 +116,7 @@ public abstract class CameraController {
 	public static class Size {
 		public final int width;
 		public final int height;
-		public List<int[]> fps_ranges;
+		public final List<int[]> fps_ranges;
 		public final boolean high_speed;
 
 		public Size(int width, int height, List<int[]> fps_ranges, boolean high_speed) {
@@ -158,9 +158,9 @@ public abstract class CameraController {
 		}
 
 		public String toString() {
-			String s = "";
+			StringBuilder s = new StringBuilder();
 			for (int[] f : this.fps_ranges) {
-				s += " [" + f[0] + "-" + f[1] + "]";
+				s.append(" [").append(f[0]).append("-").append(f[1]).append("]");
 			}
 			return this.width + "x" + this.height + " " + s + (this.high_speed ? "-hs" : "");
 		}
