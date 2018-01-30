@@ -509,12 +509,12 @@
         <item>voice</item>
     </string-array>
     <string-array name="preference_audio_noise_control_sensitivity_entries">
-        <item>+3 (alta sensibilità)</item>
+        <item>+3 (alta sensibilitÃ )</item>
         <item>+2</item>
         <item>+1</item>
         <item>0 (default)</item>
         <item>-1</item>
-        <item>-2 (bassa sensibilità)</item>
+        <item>-2 (bassa sensibilitÃ )</item>
     </string-array>
     <string-array name="preference_audio_noise_control_sensitivity_values">
         <item>3</item>
