@@ -420,28 +420,6 @@
         <item>90000000</item>
         <item>100000000</item>
     </string-array>
-    <string-array name="preference_video_fps_entries">
-        <item>デフォルト</item>
-        <item>15fps</item>
-        <item>24fps</item>
-        <item>25fps</item>
-        <item>30fps</item>
-        <item>60fps</item>
-        <item>96fps</item>
-        <item>100fps</item>
-        <item>120fps</item>
-    </string-array>
-    <string-array name="preference_video_fps_values">
-        <item>default</item>
-        <item>15</item>
-        <item>24</item>
-        <item>25</item>
-        <item>30</item>
-        <item>60</item>
-        <item>96</item>
-        <item>100</item>
-        <item>120</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>なし</item>
         <item>1回</item>

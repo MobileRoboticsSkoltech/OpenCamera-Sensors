@@ -289,4 +289,5 @@
     <string name="duration_30m">30 dakika</string>
     <string name="duration_45m">45 dakika</string>
     <string name="duration_1h">1 saat</string>
+    <string name="preference_video_fps_default">Öntanımlı ayar</string>
 </resources>

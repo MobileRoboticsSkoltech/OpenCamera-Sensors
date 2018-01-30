@@ -290,4 +290,5 @@
     <string name="duration_30m">30 minut</string>
     <string name="duration_45m">45 minut</string>
     <string name="duration_1h">1 hodina</string>
+    <string name="preference_video_fps_default">Implicitní</string>
 </resources>

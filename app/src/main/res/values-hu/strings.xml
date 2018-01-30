@@ -407,4 +407,6 @@
     <string name="capturing">Rögzítés…</string>
 
     <string name="audio_listener_failed">Nem sikerült elindítani a hangfigyelést</string>
+
+    <string name="preference_video_fps_default">Alapértelmezett</string>
 </resources>

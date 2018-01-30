@@ -407,4 +407,6 @@
     <string name="capturing">Захват…</string>
 
     <string name="audio_listener_failed">Не удалось инициализировать прослушивание аудио</string>
+
+    <string name="preference_video_fps_default">По умолчанию</string>
 </resources>

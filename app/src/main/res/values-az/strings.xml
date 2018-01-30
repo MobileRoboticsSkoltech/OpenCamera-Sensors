@@ -245,4 +245,5 @@
     <string name="duration_30m">30 dəqiqə</string>
     <string name="duration_45m">45 dəqiqə</string>
     <string name="duration_1h">1 saat</string>
+    <string name="preference_video_fps_default">Susmaya görə</string>
 </resources>

@@ -440,4 +440,6 @@
     <string name="color_effect_sepia">Seppia</string>
     <string name="color_effect_solarize">Solarizza</string>
     <string name="color_effect_whiteboard">Lavagna bianca</string>
+
+    <string name="preference_video_fps_default">Predefinito</string>
 </resources>

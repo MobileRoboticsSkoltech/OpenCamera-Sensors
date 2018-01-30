@@ -308,4 +308,5 @@
     <string name="duration_30m">30 分</string>
     <string name="duration_45m">45 分</string>
     <string name="duration_1h">1 小时</string>
+    <string name="preference_video_fps_default">默认</string>
 </resources>

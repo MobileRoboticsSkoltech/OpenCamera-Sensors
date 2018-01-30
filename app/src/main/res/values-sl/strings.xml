@@ -464,4 +464,5 @@
     <string name="top_of_screen">na zgornji strani zaslona</string>
     <string name="bottom_of_screen">na spodnji strani zaslona</string>
 
+    <string name="preference_video_fps_default">Privzeta</string>
 </resources>

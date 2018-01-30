@@ -469,6 +469,16 @@
 
     <string name="high_speed">High Speed</string> <!-- in the sense of high speed video frame rates -->
 
+    <string name="preference_video_fps_default">Default</string>
+    <string name="preference_video_fps_15">15</string>
+    <string name="preference_video_fps_24">24</string>
+    <string name="preference_video_fps_25">25</string>
+    <string name="preference_video_fps_30">30</string>
+    <string name="preference_video_fps_60">60</string>
+    <string name="preference_video_fps_96">96</string>
+    <string name="preference_video_fps_100">100</string>
+    <string name="preference_video_fps_120">120</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

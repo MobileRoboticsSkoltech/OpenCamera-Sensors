@@ -407,4 +407,6 @@
     <string name="capturing">Захоплення…</string>
 
     <string name="audio_listener_failed">Не вдалося ініціалізувати прослуховування аудіо</string>
+
+    <string name="preference_video_fps_default">Типово</string>
 </resources>

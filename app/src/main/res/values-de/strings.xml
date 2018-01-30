@@ -407,4 +407,6 @@
     <string name="capturing">Aufnahme läuft…</string>
 
     <string name="audio_listener_failed">Initialisierung der Audioaufnahme fehlgeschlagen</string>
+
+    <string name="preference_video_fps_default">Standard</string>
 </resources>

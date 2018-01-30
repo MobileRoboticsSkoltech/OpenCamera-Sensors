@@ -383,4 +383,5 @@
     <string name="capturing">Przechwytywanie…</string>
     <string name="audio_listener_failed">Nie udało się uruchomić nasłuchu</string>
     <string name="failed_to_process_hdr">Tworzenie obrazu HDR nie powiodło się</string>
+    <string name="preference_video_fps_default">Domyślnie</string>
 </resources>

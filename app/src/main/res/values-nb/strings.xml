@@ -457,4 +457,6 @@
 
     <string name="whats_new">Hva er nytt:</string>
     <string name="donate">Doner</string>
+
+    <string name="preference_video_fps_default">Standard</string>
 </resources>

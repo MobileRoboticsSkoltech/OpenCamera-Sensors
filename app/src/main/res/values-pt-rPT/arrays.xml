@@ -428,28 +428,6 @@
         <item>90000000</item>
         <item>100000000</item>
     </string-array>
-    <string-array name="preference_video_fps_entries">
-        <item>Predefinição</item>
-        <item>15</item>
-        <item>24</item>
-        <item>25</item>
-        <item>30</item>
-        <item>60</item>
-        <item>96</item>
-        <item>100</item>
-        <item>120</item>
-    </string-array>
-    <string-array name="preference_video_fps_values">
-        <item>default</item>
-        <item>15</item>
-        <item>24</item>
-        <item>25</item>
-        <item>30</item>
-        <item>60</item>
-        <item>96</item>
-        <item>100</item>
-        <item>120</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>Não reiniciar</item>
         <item>Repetir 1 vez</item>
