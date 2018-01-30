@@ -648,6 +648,7 @@
         <item>@string/preference_video_fps_96</item>
         <item>@string/preference_video_fps_100</item>
         <item>@string/preference_video_fps_120</item>
+        <item>@string/preference_video_fps_240</item>
     </string-array>
     <string-array name="preference_video_fps_values">
         <item>default</item>
@@ -659,5 +660,6 @@
         <item>96</item>
         <item>100</item>
         <item>120</item>
+        <item>240</item>
     </string-array>
 </resources>

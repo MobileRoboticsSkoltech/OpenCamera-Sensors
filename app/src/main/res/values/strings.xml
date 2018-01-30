@@ -478,6 +478,7 @@
     <string name="preference_video_fps_96">96</string>
     <string name="preference_video_fps_100">100</string>
     <string name="preference_video_fps_120">120</string>
+    <string name="preference_video_fps_240">240</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
