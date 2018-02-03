@@ -50,7 +50,7 @@ import android.widget.ImageView.ScaleType;
 public class PopupView extends LinearLayout {
 	private static final String TAG = "PopupView";
 	public static final float ALPHA_BUTTON_SELECTED = 1.0f;
-	public static final float ALPHA_BUTTON = 0.6f;
+	public static final float ALPHA_BUTTON = 0.4f;
 
 	private int total_width_dp;
 
