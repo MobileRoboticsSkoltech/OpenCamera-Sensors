@@ -151,6 +151,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			debug_time = System.currentTimeMillis();
 		}
 		super.onCreate(savedInstanceState);
+
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+			// don't show orientation animations
+	        WindowManager.LayoutParams layout = getWindow().getAttributes();
+			layout.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
+			getWindow().setAttributes(layout);
+		}
+
 		setContentView(R.layout.activity_main);
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false); // initialise any unset preferences to their default values
 		if( MyDebug.LOG )
@@ -1364,6 +1372,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		preferencesListener.startListening();
 
+		showPreview(false);
 		setWindowFlagsForSettings();
 		MyPreferenceFragment fragment = new MyPreferenceFragment();
 		fragment.setArguments(bundle);
@@ -1522,6 +1531,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "close settings");
 			setWindowFlagsForCamera();
+			showPreview(true);
 
 			preferencesListener.stopListening();
 
@@ -1711,7 +1721,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		{
 	        WindowManager.LayoutParams layout = getWindow().getAttributes();
 	        layout.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
-	        getWindow().setAttributes(layout); 
+			getWindow().setAttributes(layout);
 		}
 
 		setImmersiveMode(false);
