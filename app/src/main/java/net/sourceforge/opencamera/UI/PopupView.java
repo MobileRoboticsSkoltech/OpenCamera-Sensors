@@ -266,6 +266,16 @@ public class PopupView extends LinearLayout {
         		CheckBox checkBox = new CheckBox(main_activity);
         		checkBox.setText(getResources().getString(R.string.preference_auto_stabilise));
         		checkBox.setTextColor(Color.WHITE);
+				{
+					// align the checkbox a bit better
+					LayoutParams params = new LayoutParams(
+							LayoutParams.MATCH_PARENT,
+							LayoutParams.MATCH_PARENT
+					);
+					final int left_padding = (int) (10 * scale + 0.5f); // convert dps to pixels
+					params.setMargins(left_padding, 0, 0, 0);
+					checkBox.setLayoutParams(params);
+				}
 
         		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false);
 				if( auto_stabilise )
@@ -781,7 +791,8 @@ public class PopupView extends LinearLayout {
         			if( MyDebug.LOG )
         				Log.d(TAG, "addButtonOptionsToPopup time 2.13: " + (System.nanoTime() - debug_time));
         			image_button.setScaleType(ScaleType.FIT_CENTER);
-        			final int padding = (int) (10 * scale + 0.5f); // convert dps to pixels
+        			image_button.setBackgroundColor(Color.TRANSPARENT);
+        			final int padding = (int) (7 * scale + 0.5f); // convert dps to pixels
         			view.setPadding(padding, padding, padding, padding);
         		}
         		else {
