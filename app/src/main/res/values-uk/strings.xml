@@ -96,15 +96,12 @@
 
     <string name="preference_category_camera_controls">Керування</string>
     <string name="preference_timer">Таймер</string>
-    <string name="preference_timer_summary">Встановлення таймеру для камери</string>
     <string name="preference_timer_beep">Звук таймеру</string>
     <string name="preference_timer_beep_summary">Подавати звуковий сигнал, коли таймер закінчить відлік</string>
     <string name="preference_timer_speak">Озвучення таймеру</string>
     <string name="preference_timer_speak_summary">Озвучувати зворотній відлік для таймера чи пакетного режиму (від 60 секунд)</string>
     <string name="preference_burst_mode">повторення</string>
-    <string name="preference_burst_mode_summary">Зйомка декілька фото</string>
     <string name="preference_burst_interval">Інтервал в пакетному режимі</string>
-    <string name="preference_burst_interval_summary">Затримка між зняттям фото</string>
     <string name="preference_screen_camera_controls_more">Додаткові налаштування</string>
     <string name="preference_touch_capture">Дотик для зйомки</string>
     <string name="preference_touch_capture_summary">Робити знімок по одному чи подвійному дотику по області перегляду</string>
@@ -113,7 +110,6 @@
     <string name="preference_shutter_sound">Звук затвору</string>
     <string name="preference_shutter_sound_summary">Відтворення звуку під час знімку фотографії (потрібно версія Android 4.2+ аби вимкнути)</string>
     <string name="preference_volume_keys">Кнопки гучності</string>
-    <string name="preference_volume_keys_summary">Задати дію при натисканні кнопок зміну гучності</string>
     <string name="preference_audio_control">Налаштування керування звуком</string>
 
     <string name="preference_audio_noise_control_sensitivity">Чутливість керування</string>
@@ -127,7 +123,6 @@
     <string name="preference_save_video_prefix">Префікс для відео</string>
     <string name="preference_save_video_prefix_summary">Префікс імен файлів для відео</string>
     <string name="preference_save_zulu_time">Формат часу для імені файлу</string>
-    <string name="preference_save_zulu_time_summary">Використовувати місцевий час або UTC (всесвітній скоординований час) для назв фото та відео</string>
     <string name="preference_show_when_locked">Камера на екрані блокування</string>
     <string name="preference_show_when_locked_summary">Якщо увімкнуто, то Open Camera все одно буде показуватись над будь-яким екраном блокування (ви можете отримати доступ до налаштувань, галереї и т.п.)</string>
     <string name="preference_startup_focus">Автофокус під час запуску</string>
@@ -138,11 +133,8 @@
     <string name="preference_rotate_preview_summary">Можливість повороту попереднього перегляду (не впливає на фото/відео)</string>
     <string name="preference_screen_gui">Налаштування інтерфейсу</string>
     <string name="preference_preview_size">Розмір попереднього перегляду</string>
-    <string name="preference_preview_size_summary">Вибір розміру попереднього перегляду</string>
     <string name="preference_ui_placement">Розміщення інтерфейсу</string>
-    <string name="preference_ui_placement_summary">Інтерфейс користувача для правші/лівші</string>
     <string name="preference_immersive_mode">Режим занурення</string>
-    <string name="preference_immersive_mode_summary">Опції для \"режиму занурення\"</string>
     <string name="preference_show_zoom">Показувати масштаб</string>
     <string name="preference_show_zoom_summary">Показ поточного рівня масштабування камери на екрані (при збільшені масштабу)</string>
     <string name="preference_show_zoom_controls">Показувати кнопки масштабу (+/-)</string>
@@ -166,7 +158,6 @@
     <string name="preference_show_battery">Показувати батарею</string>
     <string name="preference_show_battery_summary">Показувати поточний рівень заряду батареї</string>
     <string name="preference_grid">Показати сітку</string>
-    <string name="preference_grid_summary">Показ одного з варіантів сітки</string>
     <string name="grid">Сітка</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Порадник по обрізанню фото</string>
     <string name="preference_crop_guide_summary">Показ прямокутника, який показуватиме відношення сторін - корисно, якщо ви плануєте обрізати фото/відео. Потребує WYSIWYG режим фотознімку чи режим відео.</string>
@@ -186,11 +177,9 @@
     <string name="preference_screen_video_settings">Налаштування відео…</string>
     <string name="preference_screen_location_settings">Налаштування місце-розташування…</string>
     <string name="preference_resolution">Розширення камери</string>
-    <string name="preference_resolution_summary">Вибір розширення фотографій, знятих на камеру</string>
     <string name="preference_quality">Якість зображення</string>
     <string name="preference_quality_summary">Вибір якості фотографій (рекомендується 90%%)</string>
     <string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Зберігати в форматі RAW (DNG)</string>
     <string name="preference_location">Зберігати дані про місце-розташування (Geotagging)</string>
     <string name="preference_location_summary">Зберігати дані про місце-розташування в фотографіях в момент зйомки</string>
     <string name="preference_gps_direction">Зберігати напрямок компасу</string>
@@ -200,11 +189,8 @@
     <string name="preference_stamp">Відмітки</string>
     <string name="preference_stamp_summary">Зберігати разом із фотографіями такі дані, як: дата/час/місце-розташування</string>
     <string name="preference_stamp_dateformat">Формат дати</string>
-    <string name="preference_stamp_dateformat_summary">Визначення формату дати (якщо увімкнуто)</string>
     <string name="preference_stamp_timeformat">Формат часу</string>
-    <string name="preference_stamp_timeformat_summary">Визначення формату часу (якщо увімкнуто)</string>
     <string name="preference_stamp_gpsformat">Формат GPS</string>
-    <string name="preference_stamp_gpsformat_summary">Визначення формату відмітки GPS (якщо увімкнуто)</string>
     <string name="preference_textstamp">Підпис фото</string>
     <string name="preference_textstamp_summary">Додавання тексту на фотографію</string>
     <string name="preference_stamp_fontsize">Розмір шрифту</string>
@@ -216,7 +202,6 @@
     <string name="preference_background_photo_saving">Використовувати фоновий потік</string>
     <string name="preference_background_photo_saving_summary">Зберігати фото у фоновому процесі (для прискорення роботи)</string>
     <string name="video_quality">Розширення відео</string>
-    <string name="video_quality_summary">Вибір розширення відео</string>
     <string name="preference_force_video_4k">Якість відео 4K UHD (експериментально)</string>
     <string name="preference_force_video_4k_summary">При виборі розширення (3840х2160) для запису через задню камеру, це буде працювати лише тоді, якщо ваш пристрій підтримує вказаний формат!</string>
     <string name="preference_video_stabilization">Увімкнути стабілізацію відео</string>

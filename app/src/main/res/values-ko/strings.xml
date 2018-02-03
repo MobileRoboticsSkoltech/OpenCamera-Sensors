@@ -95,20 +95,16 @@
 
     <string name="preference_category_camera_controls">카메라 조작 설정</string>
     <string name="preference_timer">타이머</string>
-    <string name="preference_timer_summary">타이머를 설정합니다</string>
     <string name="preference_timer_beep">타이머 알림음</string>
     <string name="preference_timer_beep_summary">타이머가 작동중이거나 연사 모드 지연시 알림음을 재생합니다</string>
     <string name="preference_burst_mode">연사 모드</string>
-    <string name="preference_burst_mode_summary">연속적으로 다수의 사진을 촬영합니다</string>
     <string name="preference_burst_interval">연사 모드 간격</string>
-    <string name="preference_burst_interval_summary">연사 모드에서 사진을 찍는 간격을 설정합니다</string>
     <string name="preference_screen_camera_controls_more">추가적인 카메라 조작 설정</string>
     <string name="preference_pause_preview">사진 촬영 후 일시정지</string>
     <string name="preference_pause_preview_summary">사진 촬영 후 화면을 일시정지하고 사진을 공유하거나 삭제하는 옵션을 보여줍니다</string>
     <string name="preference_shutter_sound">셔터 소리</string>
     <string name="preference_shutter_sound_summary">사진을 촬영할때 소리를 재생합니다 (해제하려면 안드로이드 4.2 혹은 이후 버전이 필요합니다)</string>
     <string name="preference_volume_keys">볼륨 버튼</string>
-    <string name="preference_volume_keys_summary">볼륨 버튼을 눌렀을때 수행할 동작을 설정합니다</string>
     <string name="preference_save_location">저장 위치</string>
     <string name="preference_save_location_summary">사진/동영상 파일을 저장할 폴더를 선택합니다</string>
     <string name="preference_save_photo_prefix">사진 저장 접두사</string>
@@ -123,11 +119,8 @@
     <string name="preference_rotate_preview_summary">미리보기 회전 설정 (사진/동영상 촬영 결과에는 영향을 미치지 않습니다)</string>
     <string name="preference_screen_gui">화면상의 인터페이스</string>
     <string name="preference_preview_size">미리보기 크기</string>
-    <string name="preference_preview_size_summary">미리보기 크기를 선택합니다</string>
     <string name="preference_ui_placement">인터페이스 배치</string>
-    <string name="preference_ui_placement_summary">왼손잡이 혹은 오른손잡이에 맞게 인터페이스를 배치합니다</string>
     <string name="preference_immersive_mode">전체화면 모드</string>
-    <string name="preference_immersive_mode_summary">전체화면(몰입) 모드에서의 동작을 설정합니다</string>
     <string name="preference_show_zoom">줌 배율 표시</string>
     <string name="preference_show_zoom_summary">현재 카메라 줌 배율을 화면에 표시합니다 (확대시)</string>
     <string name="preference_show_zoom_controls">줌 -/+ 조작계 표시</string>
@@ -149,7 +142,6 @@
     <string name="preference_show_battery">배터리 표시</string>
     <string name="preference_show_battery_summary">현재 배터리 잔량을 화면에 표시합니다</string>
     <string name="preference_grid">격자 표시</string>
-    <string name="preference_grid_summary">격자를 표시합니다</string>
     <string name="grid">격자</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">크롭 안내선 표시</string>
     <string name="preference_crop_guide_summary">크롭 안내선은 특정한 종횡비가 어떤 식으로 보이는지를 사각형으로 보여줍니다 - 사진이나 동영상을 나중에 다른 종횡비로 잘라낼 예정이라면 활용할 수 있습니다. 동영상 촬영 모드 혹은 WYSIWYG 사진 모드가 필요합니다</string>
@@ -165,7 +157,6 @@
     <string name="preference_screen_video_settings">동영상 설정</string>
     <string name="preference_screen_location_settings">위치 설정</string>
     <string name="preference_resolution">카메라 해상도</string>
-    <string name="preference_resolution_summary">사진 촬영 해상도를 설정합니다</string>
     <string name="preference_quality">이미지 화질</string>
     <string name="preference_quality_summary">저장하는 사진의 이미지 화질을 설정합니다 (추천하는 값은 90%%입니다)</string>
     <string name="preference_location">위치 데이터 저장 (지오태깅)</string>
@@ -181,7 +172,6 @@
     <string name="preference_stamp_fontsize">글자 크기</string>
     <string name="preference_stamp_fontsize_summary">사진에 글자를 새길때 사용할 글자 크기를 선택합니다</string>
     <string name="video_quality">동영상 해상도</string>
-    <string name="video_quality_summary">동영상 촬영 해상도를 설정합니다</string>
     <string name="preference_force_video_4k">강제 4K UHD 비디오 (실험적)</string>
     <string name="preference_force_video_4k_summary">후면 카메라로 동영상 촬영시 3840x2160 해상도를 사용합니다 - 기기가 지원하는 경우에만 작동하며 아닐 경우 충돌이 발생할 수 있습니다</string>
     <string name="preference_video_stabilization">비디오 안정화 사용</string>

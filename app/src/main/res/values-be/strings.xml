@@ -95,15 +95,12 @@
 
     <string name="preference_category_camera_controls">Кіраванне камерай</string>
     <string name="preference_timer">Таймер</string>
-    <string name="preference_timer_summary">Усталяваць таймер для камеры</string>
     <string name="preference_timer_beep">Таймер-гукавы сігнал</string>
     <string name="preference_timer_beep_summary">Гукавы сігнал, калі ідзе адлік таймера або за затрымку ў пакетным рэжыме  здымкі</string>
     <string name="preference_timer_speak">Галасавы таймер зваротнага адліку</string>
     <string name="preference_timer_speak_summary">Агучваць зваротны адлік таймера  або пакетнага  рэжыму фатаграфавання (ад 60 секунд)</string>
     <string name="preference_burst_mode">пакетнай здымкі</string>
-    <string name="preference_burst_mode_summary">Зрабіць некалькі фотаздымкаў запар</string>
     <string name="preference_burst_interval">Інтэрвал пры пакетнай здымцы</string>
-    <string name="preference_burst_interval_summary">Затрымка (калі такія маюцца) паміж фотаздымкамі ў пакетным рэжыме здымкі</string>
     <string name="preference_screen_camera_controls_more">Больш налад камеры…</string>
     <string name="preference_touch_capture">Націсніце, каб захапіць</string>
     <string name="preference_touch_capture_summary">Фатаграфаваць дакранаючыся або двойчы націснуўшы прагляд</string>
@@ -112,7 +109,6 @@
     <string name="preference_shutter_sound">Гук засаўкі</string>
     <string name="preference_shutter_sound_summary">Прайграванне гуку пры фатаграфаванні (патрабуецца Android 4.2 або вышэй, каб адключыць)</string>
     <string name="preference_volume_keys">Клавішы рэгулявання гучнасці</string>
-    <string name="preference_volume_keys_summary">Абраць паводзіны пры націсканні на клавішы рэгулявання гучнасці</string>
     <string name="preference_save_location">Захаваць месца</string>
     <string name="preference_save_location_summary">Тэчка для захавання фота / відэа файлаў</string>
     <string name="preference_using_saf">Выкарыстоўваць сховішча Access Framework</string>
@@ -129,11 +125,8 @@
     <string name="preference_rotate_preview_summary">Опцыя паварочвання пры папярэднім праглядзе (не ўплывае на вынік фота / відэа)</string>
     <string name="preference_screen_gui">Графічны інтэрфейс…</string>
     <string name="preference_preview_size">Памер папярэдняга прагляду</string>
-    <string name="preference_preview_size_summary">Як абраць памер папярэдняга прагляду</string>
     <string name="preference_ui_placement">Інтэрфейс</string>
-    <string name="preference_ui_placement_summary">Інтэрфейс карыстальніка справа альбо злева.</string>
     <string name="preference_immersive_mode">Рэжым захаплення</string>
-    <string name="preference_immersive_mode_summary">Варыянты  паводзін</string>
     <string name="preference_show_zoom">Паказваць маштаб</string>
     <string name="preference_show_zoom_summary">Адлюстроўваць маштаб камеры на экране </string>
     <string name="preference_show_zoom_controls">Паказваць  - / + кнопкі кіравання павелічэннем</string>
@@ -157,7 +150,6 @@
     <string name="preference_show_battery">Паказваць батарэю</string>
     <string name="preference_show_battery_summary">Адлюстроўваць узровень зараду батарэі на экране</string>
     <string name="preference_grid">Паказваць сетку</string>
-    <string name="preference_grid_summary">Адлюстроўваць адну з розных сетак</string>
     <string name="preference_crop_guide">Паказваць дапаможнік памеру</string>
     <string name="preference_crop_guide_summary">Дапаможнік паказвае прапорцыі , калі вы плануеце пасля абрэзаць фота/відэа .Патрабуецца WYSIWYG рэжым. </string>
     <string name="preference_show_toasts">Паказваць паведамленні пераключэння</string>
@@ -174,7 +166,6 @@
     <string name="preference_screen_video_settings">Налады відэа…</string>
     <string name="preference_screen_location_settings">Налады месцазнаходжання…</string>
     <string name="preference_resolution">Раздзяляльная здольнасць камеры</string>
-    <string name="preference_resolution_summary">Прызначыць раздзяляльную здольнасць фотаздымкаў, зробленых з дапамогай камеры</string>
     <string name="preference_quality">Якасць малюнка</string>
     <string name="preference_quality_summary">Абраць якасць фота (рэкамендавана 90 %%)</string>
     <string name="preference_location">Захоўваць звесткі аб месцазнаходжанні (адзнака на карце)</string>
@@ -186,11 +177,8 @@
     <string name="preference_stamp">Друкаваць на фотаздымках</string>
     <string name="preference_stamp_summary">Друкаваць на фотаздымках дату і час, а таксама звесткі GPS , калі звесткі / кірунак уключаны</string>
     <string name="preference_stamp_dateformat">Фармат даты</string>
-    <string name="preference_stamp_dateformat_summary">Наладзіць фармат друку даты (калі ўключана)</string>
     <string name="preference_stamp_timeformat">Фармат часу</string>
-    <string name="preference_stamp_timeformat_summary">Наладзіць фармат друеу часу (калі уключана)</string>
     <string name="preference_stamp_gpsformat">Фармат друку звестак GPS </string>
-    <string name="preference_stamp_gpsformat_summary">Наладзіць фармат друку звестак GPS (калі уключана)</string>
     <string name="preference_textstamp">Прызначыць тэкст</string>
     <string name="preference_textstamp_summary">Друкаваць на фотаздымках дадзены тэкст</string>
     <string name="preference_stamp_fontsize">Памер шрыфту</string>
@@ -200,7 +188,6 @@
     <string name="preference_stamp_style">Стыль тэксту</string>
     <string name="preference_stamp_style_summary">Стыль для друку на фотаздымках</string>
     <string name="video_quality">Раздзяляльная здольнасць відэа</string>
-    <string name="video_quality_summary">Прызначыць раздзяляльную здольнасць відэа</string>
     <string name="preference_force_video_4k"> 4K UHD відэа (эксперыментальны)</string>
     <string name="preference_force_video_4k_summary">Уключыць раздзяляльную здольнасць 3840x2160  для запісу відэа на задняй камеры. Гэта будзе рабіць, калі  падтрымліваецца прыладай. Калі не - можа адбыцца збой!</string>
     <string name="preference_video_stabilization">Уключыць стабілізацыю відэа</string>

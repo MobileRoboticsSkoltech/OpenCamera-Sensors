@@ -96,15 +96,12 @@
 
     <string name="preference_category_camera_controls">Camera Controls</string>
     <string name="preference_timer">Timer</string>
-    <string name="preference_timer_summary">Set a timer for the camera</string>
     <string name="preference_timer_beep">Timer beep</string>
     <string name="preference_timer_beep_summary">Beep when timer is counting down or for burst mode delay</string>
     <string name="preference_timer_speak">Voice timer countdown</string>
     <string name="preference_timer_speak_summary">Speak the countdown for timer or burst mode delay (from 60 seconds)</string>
     <string name="preference_burst_mode">Burst</string> <!-- also used in popup menu, so shouldn't be too long a string -->
-    <string name="preference_burst_mode_summary">Take multiple photos in succession</string>
     <string name="preference_burst_interval">Burst mode interval</string>
-    <string name="preference_burst_interval_summary">Delay (if any) between taking photos in burst mode</string>
     <string name="preference_screen_camera_controls_more">More camera controls…</string>
     <string name="preference_touch_capture">Touch to capture</string>
     <string name="preference_touch_capture_summary">Take a photo just by touching or double-tapping the preview</string>
@@ -113,7 +110,6 @@
     <string name="preference_shutter_sound">Shutter sound</string>
     <string name="preference_shutter_sound_summary">Play a sound when taking a photo</string>
     <string name="preference_volume_keys">Volume keys</string>
-    <string name="preference_volume_keys_summary">Set behaviour for when volume keys are pressed</string>
     <string name="preference_audio_control">Audio control options</string>
     <string name="preference_audio_control_summary">Take photo or record video when a noise is detected, or on a voice command (\"cheese\"). When enabled, use the on-screen microphone button to start and stop listening.</string> <!-- note that cheese shouldn't be translated, as we listen for this no matter what language is being used -->
     <string name="preference_audio_noise_control_sensitivity">Audio control sensitivity</string>
@@ -127,7 +123,6 @@
     <string name="preference_save_video_prefix">Save video prefix</string>
     <string name="preference_save_video_prefix_summary">The prefix to use for the save filenames for videos</string>
     <string name="preference_save_zulu_time">Time format for filename</string>
-    <string name="preference_save_zulu_time_summary">Whether to use local or UTC (Coordinated Universal Time) time for naming photos and videos</string>
     <string name="preference_show_when_locked">Show camera when locked</string>
     <string name="preference_show_when_locked_summary">If enabled, Open Camera will still show above any lockscreen (you\'ll still have to unlock to access Settings, Gallery etc)</string>
     <string name="preference_startup_focus">Perform auto-focus on startup</string>
@@ -138,11 +133,8 @@
     <string name="preference_rotate_preview_summary">Option to rotate the preview (won\'t affect resultant photos/videos)</string>
     <string name="preference_screen_gui">On screen GUI…</string>
     <string name="preference_preview_size">Preview size</string>
-    <string name="preference_preview_size_summary">How to choose the preview size</string>
     <string name="preference_ui_placement">UI placement</string>
-    <string name="preference_ui_placement_summary">Whether to have a left-handed or right-handed user interface</string>
     <string name="preference_immersive_mode">Immersive mode</string>
-    <string name="preference_immersive_mode_summary">Options for \"immersive mode\" behaviour</string>
     <string name="preference_show_zoom">Show zoom</string>
     <string name="preference_show_zoom_summary">Display the current camera zoom level on screen (when zoomed in)</string>
     <string name="preference_show_zoom_controls">Show zoom -/+ controls</string>
@@ -166,7 +158,6 @@
     <string name="preference_show_battery">Show battery</string>
     <string name="preference_show_battery_summary">Display the current battery level on screen</string>
     <string name="preference_grid">Show a grid</string>
-    <string name="preference_grid_summary">Display one of various grids</string>
     <string name="grid">Grid</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Show a crop guide</string>
     <string name="preference_crop_guide_summary">A crop guide displays a rectangle showing what the specified aspect ratio looks like - useful if you plan to crop the photo/video afterwards to a different aspect ratio. Requires WYSIWYG photo mode, or being in video mode.</string>
@@ -186,11 +177,9 @@
     <string name="preference_screen_video_settings">Video settings…</string>
     <string name="preference_screen_location_settings">Location settings…</string>
     <string name="preference_resolution">Camera resolution</string>
-    <string name="preference_resolution_summary">Set the resolution of photos taken by the camera</string>
     <string name="preference_quality">Image quality</string>
     <string name="preference_quality_summary">Set the image JPEG quality of saved photo images (default value is 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Whether to save in RAW (DNG) format</string>
     <string name="preference_location">Store location data (Geotagging)</string>
     <string name="preference_location_summary">Store GPS location data in the photos/videos</string>
     <string name="preference_gps_direction">Store compass direction</string>
@@ -200,11 +189,8 @@
     <string name="preference_stamp">Stamp photos</string>
     <string name="preference_stamp_summary">Stamp photos with date and time; and also GPS info if location/direction data is enabled</string>
     <string name="preference_stamp_dateformat">Datestamp format</string>
-    <string name="preference_stamp_dateformat_summary">Specify the format of the datestamp (if enabled)</string>
     <string name="preference_stamp_timeformat">Timestamp format</string>
-    <string name="preference_stamp_timeformat_summary">Specify the format of the timestamp (if enabled)</string>
     <string name="preference_stamp_gpsformat">GPS stamp format</string>
-    <string name="preference_stamp_gpsformat_summary">Specify the format of the GPS stamp (if enabled)</string>
     <string name="preference_textstamp">Custom text</string>
     <string name="preference_textstamp_summary">Stamp photos with a custom text</string>
     <string name="preference_stamp_fontsize">Font size</string>
@@ -216,7 +202,6 @@
     <string name="preference_background_photo_saving">Use background thread</string>
     <string name="preference_background_photo_saving_summary">Whether to save photos on a background thread (for faster operation)</string>
     <string name="video_quality">Video resolution</string>
-    <string name="video_quality_summary">Set the resolution of videos</string>
     <string name="preference_force_video_4k">Force 4K UHD video (only works on some devices)</string>
     <string name="preference_force_video_4k_summary">Enable 3840x2160 resolution for video recording on back camera - this option is a hack that may allow 4K devices on 4K cameras that don\'t expose the option to 3rd party camera apps. This isn\'t guaranteed to work, please test before working.</string>
     <string name="preference_video_stabilization">Enable video stabilization</string>

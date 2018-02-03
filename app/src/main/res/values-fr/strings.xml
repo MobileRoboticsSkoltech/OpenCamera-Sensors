@@ -95,15 +95,12 @@
 
     <string name="preference_category_camera_controls">Commandes de la caméra</string>
     <string name="preference_timer">Retardateur</string>
-    <string name="preference_timer_summary">Régle le retardateur pour la caméra</string>
     <string name="preference_timer_beep">Retardateur sonore</string>
     <string name="preference_timer_beep_summary">Émet des bips pour le retardateur ou le délai du mode rafale</string>
     <string name="preference_timer_speak">Retardateur à voix</string>
     <string name="preference_timer_speak_summary">Énonce le compte à rebours pour le retardateur ou le délai du mode rafale (à partir de 60s)</string>
     <string name="preference_burst_mode">Mode rafale</string>
-    <string name="preference_burst_mode_summary">Prendre plusieurs photos les unes à la suite des autres</string>
     <string name="preference_burst_interval">Intervale du mode rafale</string>
-    <string name="preference_burst_interval_summary">Délai (le cas échéant) entre la prise de photos en mode rafale</string>
     <string name="preference_screen_camera_controls_more">Plus de paramètres…</string>
     <string name="preference_touch_capture">Toucher pour capturer</string>
     <string name="preference_touch_capture_summary">Prendre une photo en touchant 1 ou 2 fois l\'aperçu</string>
@@ -112,7 +109,6 @@
     <string name="preference_shutter_sound">Son de l\'obturateur</string>
     <string name="preference_shutter_sound_summary">Jouer un son lorsque vous prenez une photo (nécessite Android 4.2 ou supérieur pour désactiver)</string>
     <string name="preference_volume_keys">Touches de volumes</string>
-    <string name="preference_volume_keys_summary">Définit un comportement lors de l\'utilisation des touches de volume</string>
     <string name="preference_audio_control">Option contrôle audio</string>
     <string name="preference_audio_control_summary">Prend une photo ou une vidéo quand un bruit est détecté, ou sur commande vocale («\u00A0cheese\u00A0»). Si activé alors utilisez le bouton micro pour démarrer/stopper la détection.</string>
     <string name="preference_audio_noise_control_sensitivity">Sensibilité contrôle audio</string>
@@ -135,11 +131,8 @@
     <string name="preference_rotate_preview_summary">Option pour faire pivoter l\'aperçu (n\'affecte pas les photos/videos originales)</string>
     <string name="preference_screen_gui">Interface à l\'écran…</string>
     <string name="preference_preview_size">Taille de l\'aperçu</string>
-    <string name="preference_preview_size_summary">Choisissez la taille de l\'aperçu</string>
     <string name="preference_ui_placement">Emplacement de l\'interface utilisateur</string>
-    <string name="preference_ui_placement_summary">Choisissez l\'interface pour gaucher ou droitier</string>
     <string name="preference_immersive_mode">Mode immersif</string>
-    <string name="preference_immersive_mode_summary">Options de comportement pour le «\u00A0mode immersif\u00A0»</string>
     <string name="preference_show_zoom">Afficher le zoom</string>
     <string name="preference_show_zoom_summary">Affiche le niveau actuel de zoom à l\'écran (quand le zoom est actif)</string>
     <string name="preference_show_zoom_controls">Afficher les contrôles de zoom -/+</string>
@@ -163,7 +156,6 @@
     <string name="preference_show_battery">Afficher la batterie</string>
     <string name="preference_show_battery_summary">Affiche le niveau actuel de la batterie à l\'écran</string>
     <string name="preference_grid">Afficher une grille</string>
-    <string name="preference_grid_summary">Affiche l\'une des différentes grilles</string>
     <string name="grid">Grille</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Afficher un guide de recadrage</string>
     <string name="preference_crop_guide_summary">Un guide de recadrage affiche un rectangle montrant à quoi le rapport d\'aspect spécifié ressemble - utile si vous prévoyez de recadrer la photo/vidéo après un ratio d\'aspect différent. Nécessite le mode photo WYSIWYG, ou d\'être en mode vidéo.</string>
@@ -183,7 +175,6 @@
     <string name="preference_screen_video_settings">Paramètres vidéo…</string>
     <string name="preference_screen_location_settings">Paramètres de géocodage…</string>
     <string name="preference_resolution">Résolution de l\'appareil photo</string>
-    <string name="preference_resolution_summary">Réglez la résolution des photos prises par l\'appareil photo</string>
     <string name="preference_quality">Qualité de l\'image</string>
     <string name="preference_quality_summary">Réglez la qualité des photos enregistrées (la valeur recommandée est 90 %%)</string>
     <string name="preference_location">Stocker les données de position (Géocodage)</string>
@@ -195,11 +186,8 @@
     <string name="preference_stamp">Incrustation photo</string>
     <string name="preference_stamp_summary">Incruste sur les photos la date, l\'heure et la position GPS si les informations de position/direction sont activées</string>
     <string name="preference_stamp_dateformat">Format de la date</string>
-    <string name="preference_stamp_dateformat_summary">Spécifie le format de la date (si activé)</string>
     <string name="preference_stamp_timeformat">Format de l\'heure</string>
-    <string name="preference_stamp_timeformat_summary">Spécifie le format de l\'heure (si activé)</string>
     <string name="preference_stamp_gpsformat">Format GPS</string>
-    <string name="preference_stamp_gpsformat_summary">Specifie le format du GPS (si activé)</string>
     <string name="preference_textstamp">Texte personnalisé</string>
     <string name="preference_textstamp_summary">Incruste un texte personnalisé sur la photo</string>
     <string name="preference_stamp_fontsize">Taille de la police</string>
@@ -209,7 +197,6 @@
     <string name="preference_stamp_style">Format du texte</string>
     <string name="preference_stamp_style_summary">Format du texte utilisé pour l\'incrustation de texte sur les photos</string>
     <string name="video_quality">Résolution vidéo</string>
-    <string name="video_quality_summary">Règle la résolution des vidéos</string>
     <string name="preference_force_video_4k">Forcer le format vidéo 4K UHD (experimental)</string>
     <string name="preference_force_video_4k_summary">Active la résolution 3840x2160 pour l\'enregistrement vidéo sur l\'appareil photo arrière - cela ne fonctionnera que si votre appareil le prend en charge (et peut se bloquer le cas échéant\u00A0!)</string>
     <string name="preference_video_stabilization">Activer la stabilisation vidéo</string>
@@ -319,11 +306,7 @@
         utilisées.
     </string>
     <string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Choisissez d\'enregistrer au format RAW (DNG)</string>
     <string name="preference_save_zulu_time">Format de l\'heure pour le nom de fichier</string>
-    <string name="preference_save_zulu_time_summary">Utiliser l\'heure locale ou l\'heure UTC pour nommer les photos ou
-        les vidéos
-    </string>
     <string name="raw_info">Les fichiers DNG contiennent toutes les informations non compressées ni traitées de votre
         caméra.\n\nLa plupart des applications d\'affichage d\'image ne reconnaissent pas le DNG. Vous devrez utiliser une app
         spécialisée comme Snapseed ou Lightroom\n\nNotez que certaines options comme «\u00A0Incrustation photo\u00A0» ou

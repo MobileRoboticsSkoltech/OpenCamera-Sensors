@@ -96,15 +96,12 @@
 
     <string name="preference_category_camera_controls">Nadzor fotoaparata</string>
     <string name="preference_timer">Samosprožilec</string>
-    <string name="preference_timer_summary">Nastavite samosprožilec fotoaparata</string>
     <string name="preference_timer_beep">Pisk samosprožilca</string>
     <string name="preference_timer_beep_summary">Zapiskaj ob odštevanju samosprožilca ali zakasnitvi zaporednega načina</string>
     <string name="preference_timer_speak">Glasovno odštevanje samosprožilca</string>
     <string name="preference_timer_speak_summary">Glasovno odštevanje samosprožilca ali zakasnitve zaporednega načina (od 60-ih s naprej)</string>
     <string name="preference_burst_mode">Zaporedje</string>
-    <string name="preference_burst_mode_summary">Posnemi več fotografij v zaporedju</string>
     <string name="preference_burst_interval">Razmik zaporednega načina</string>
-    <string name="preference_burst_interval_summary">Zakasnitev (če obstaja) med fotografjami v zaporednem načinu</string>
     <string name="preference_screen_camera_controls_more">Več nadzora fotoaparata …</string>
     <string name="preference_touch_capture">Dotik za zajem</string>
     <string name="preference_touch_capture_summary">Posnemi fotografijo z dotikom ali dvojnim dotikom predogleda</string>
@@ -113,7 +110,6 @@
     <string name="preference_shutter_sound">Zvok zaslonke</string>
     <string name="preference_shutter_sound_summary">Predvajaj zvok ob slikanju fotografije</string>
     <string name="preference_volume_keys">Gumba za glasnost</string>
-    <string name="preference_volume_keys_summary">Nastavite vedenje ob pritisku na gumba za glasnost</string>
     <string name="preference_audio_control">Možnosti nadzora zvoka</string>
     <string name="preference_audio_control_summary">Posnemi fotografijo ali videoposnetek ob zaznavanju zvoka ali glasovnemu ukazu (\"cheese\"). Ko je omogočeno, uporabite gumb mikrofona na zaslonu za začetek in ustavitev poslušanja.</string>
     <string name="preference_audio_noise_control_sensitivity">Nadzor občutljivosti zvoka</string>
@@ -127,7 +123,6 @@
     <string name="preference_save_video_prefix">Predpona shranjenih videoposnetkov</string>
     <string name="preference_save_video_prefix_summary">Predpona imena datotek videoposnetkov</string>
 	<string name="preference_save_zulu_time">Oblika časa za ime datoteke</string>
-    <string name="preference_save_zulu_time_summary">Ali naj se uporabi krajevni čas ali čas UTC (Coordinated Universal Time) za poimenovanje fotografij in videoposnetkov</string>
     <string name="preference_show_when_locked">Prikaži fotoaparat, ko je zaklenjeno</string>
     <string name="preference_show_when_locked_summary">Če je omogočeno, se bo Open Camera še vedno prikazoval nad zaklenjenim zaslonom (še vedno boste morali odkleniti za dostop do nastavitev, galerije itd.)</string>
     <string name="preference_startup_focus">Izvedi samodejno ostrenje ob zagonu</string>
@@ -138,11 +133,8 @@
     <string name="preference_rotate_preview_summary">Možnost vrtenja predogleda (ne bo vplivalo na nastale fotografije/videoposnetke)</string>
     <string name="preference_screen_gui">Gr. up. vmesnik na zaslonu …</string>
     <string name="preference_preview_size">Velikost predogleda</string>
-    <string name="preference_preview_size_summary">Kako izbrati velikost preogleda</string>
     <string name="preference_ui_placement">Posavitev up. vmesnika</string>
-    <string name="preference_ui_placement_summary">Izbira up. vmesnika za levičarje ali desničarje</string>
     <string name="preference_immersive_mode">Vdelan način</string>
-    <string name="preference_immersive_mode_summary">Možnosti vedenja za \"Vdelan način\"</string>
     <string name="preference_show_zoom">Prikaži povečavo</string>
     <string name="preference_show_zoom_summary">Prikaži trenutno raven povečave na zaslonu (ob povečavi)</string>
     <string name="preference_show_zoom_controls">Prikaži nadzorna gumba za povečavo -/+</string>
@@ -166,8 +158,7 @@
     <string name="preference_show_battery">Prikaži baterijo</string>
     <string name="preference_show_battery_summary">Na zaslonu prikaži trenutno raven baterije</string>
     <string name="preference_grid">Prikaži mrežo</string>
-    <string name="preference_grid_summary">Prikaži eno od raznih mrež</string>
-	<string name="grid">Mreža</string>
+    <string name="grid">Mreža</string>
     <string name="preference_crop_guide">Prikaži vodnik za obrezovanje</string>
     <string name="preference_crop_guide_summary">Vodnik za obrezovanje prikazuje pravokotnik določenega razmerja slike - uporabno, če boste kasneje obrezali fotografijo/videoposnetek na drugo razmerje. Zahteva način za fotografije WYSIWYG ali način za videoposnetke.</string>
     <string name="preference_show_toasts">Prikaži \"pojavna\" sporočila</string>
@@ -186,11 +177,9 @@
     <string name="preference_screen_video_settings">Nastavitve za videoposnetke …</string>
     <string name="preference_screen_location_settings">Nastavitve lokacije …</string>
     <string name="preference_resolution">Ločljivost fotoaparata</string>
-    <string name="preference_resolution_summary">Nastavite ločljivost fotografij</string>
     <string name="preference_quality">Kakovost slik</string>
     <string name="preference_quality_summary">Nastavite kakovost shranjenih slik JPEG (privzeta vrednost je 90 %%)</string>
 	<string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Ali naj se slike shranjuje v obliki RAW (DNG)</string>
     <string name="preference_location">Shrani podatke o lokaciji (označevanje z zemljepisnim položajem)</string>
     <string name="preference_location_summary">Shrani podatke o lokaicji GPS v fotografijah/videoposnetkih</string>
     <string name="preference_gps_direction">Shrani smer kompasa</string>
@@ -200,11 +189,8 @@
     <string name="preference_stamp">Časovni žig fotografij</string>
     <string name="preference_stamp_summary">Na fotografije dodaj časovni žig in tudi podatke GPS, če so podatki o lokaciji/smeri omogočeni</string>
     <string name="preference_stamp_dateformat">Oblika datumskega žiga</string>
-    <string name="preference_stamp_dateformat_summary">Določite obliko datumskega žiga (če je omogočeno)</string>
     <string name="preference_stamp_timeformat">Oblika časovnega žiga</string>
-    <string name="preference_stamp_timeformat_summary">Določite obliko časovnega žiga (če je omogočeno)</string>
     <string name="preference_stamp_gpsformat">Oblika žiga GPS</string>
-    <string name="preference_stamp_gpsformat_summary">Določite obliko žiga GPS (če je omogočeno)</string>
     <string name="preference_textstamp">Besedilo po meri</string>
     <string name="preference_textstamp_summary">Na fotografije dodaj žig z besedilom po meri</string>
     <string name="preference_stamp_fontsize">Velikost pisave</string>
@@ -216,7 +202,6 @@
     <string name="preference_background_photo_saving">Uporabi nit v ozadju</string>
     <string name="preference_background_photo_saving_summary">Ali naj se fotografije shranjujejo z uporabo niti v ozadju (za hitrejše delovanje)</string>
     <string name="video_quality">Ločljivost videoposnetkov</string>
-    <string name="video_quality_summary">Nastavite ločljivost videoposnetkov</string>
     <string name="preference_force_video_4k">Vsili vidosposnetke 4K UHD (deluje samo na nekaterih napravah)</string>
     <string name="preference_force_video_4k_summary">Omogoči ločljivost 3840x2160 za snemanje videoposnetkov z zadnjo kamero - ta možnost je zaobidenje, ki bo morda omogočila naprave 4K s kamerami 4K, ki te možnosti ne razkrijejo programom za kamero tretjih oseb. Za delovanje tega ni nobenega zagotovila, preizkusite pred uporabo.</string>
     <string name="preference_video_stabilization">Omogoči ustalitev videoposnetkov</string>

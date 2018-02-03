@@ -96,15 +96,12 @@
 
     <string name="preference_category_camera_controls">Kamera-Einstellungen</string>
     <string name="preference_timer">Timer</string>
-    <string name="preference_timer_summary">Auslöseverzögerung einstellen</string>
     <string name="preference_timer_beep">Timer-Signalton</string>
     <string name="preference_timer_beep_summary">Beim Herunterzählen der Auslöseverzögerung einen Signalton ausgeben</string>
     <string name="preference_timer_speak">Timer-Sprachausgabe</string>
     <string name="preference_timer_speak_summary">Sprachausgabe beim Herunterzählen der Auslöseverzögerung (ab 60 s)</string>
     <string name="preference_burst_mode">Serienbild</string>
-    <string name="preference_burst_mode_summary">Mehrere Fotos in Folge nacheinander aufnehmen</string>
     <string name="preference_burst_interval">Serienbild-Intervall</string>
-    <string name="preference_burst_interval_summary">Verzögerung zwischen den Fotoaufnahmen</string>
     <string name="preference_screen_camera_controls_more">Mehr Kamera-Einstellungen…</string>
     <string name="preference_touch_capture">Aufnahme bei Berührung</string>
     <string name="preference_touch_capture_summary">Fotoaufnahme durch Berührung oder Doppelklick der Vorschau starten</string>
@@ -113,7 +110,6 @@
     <string name="preference_shutter_sound">Auslöseton</string>
     <string name="preference_shutter_sound_summary">Abspielen eines Tones bei der Aufnahme (benötigt Android 4.2 oder höher zum Deaktivieren)</string>
     <string name="preference_volume_keys">Lautstärketasten</string>
-    <string name="preference_volume_keys_summary">Das Verhalten beim Betätigen der Lautstärketasten einstellen</string>
     <string name="preference_audio_control">Audio Steuerungsoptionen</string>
     <string name="preference_audio_control_summary">Nimm ein Foto nach einem lauten Geräusch oder Sprachkommando (\"cheese\") auf. When akktiviert, benutze den OnScreen Mikrofone Knopf um die Funktion zu (de)aktivieren.</string>
     <string name="preference_audio_noise_control_sensitivity">Audio Steuerung Empfindlichkeit</string>
@@ -127,7 +123,6 @@
     <string name="preference_save_video_prefix">Video-Präfix</string>
     <string name="preference_save_video_prefix_summary">Den Präfix für die Dateinamen der Videos einstellen</string>
     <string name="preference_save_zulu_time">Zeitformat im Filenamens</string>
-    <string name="preference_save_zulu_time_summary">Legt fest, ob lokale oder UTC (Coordinated Universal Time) Zeit zur Benamung von Fotos oder Videos verwendet wird.</string>
     <string name="preference_show_when_locked">Kamera trotz Sperre anzeigen</string>
     <string name="preference_show_when_locked_summary">Wenn aktiviert, wird Open Camera über dem Sperrbildschirm stehen (das Entsperren ist jedoch für den Zugriff auf Einstellungen, Galerie usw. nötig)</string>
     <string name="preference_startup_focus">Auto-focus beim Hochfahren ausführen</string>
@@ -138,11 +133,8 @@
     <string name="preference_rotate_preview_summary">Vorschaubild drehen (hat keinen Einfluss auf die Aufnahme)</string>
     <string name="preference_screen_gui">Benutzeroberfläche…</string>
     <string name="preference_preview_size">Vorschaugröße</string>
-    <string name="preference_preview_size_summary">Größe der Vorschauanzeige festlegen</string>
     <string name="preference_ui_placement">Ausrichtung der Oberfläche</string>
-    <string name="preference_ui_placement_summary">Einstellung der Oberfläche für Links- und Rechtshänder</string>
     <string name="preference_immersive_mode">Automatisches Ausblenden</string>
-    <string name="preference_immersive_mode_summary">Automatisches Ausblenden von Tasten und Anzeigen in der Vorschau</string>
     <string name="preference_show_zoom">Zoomfaktor anzeigen</string>
     <string name="preference_show_zoom_summary">Zeigt beim Zoomen den aktuellen Zoomfaktor auf dem Bildschirm an</string>
     <string name="preference_show_zoom_controls">Zoom-Tasten anzeigen</string>
@@ -166,7 +158,6 @@
     <string name="preference_show_battery">Batterieanzeige</string>
     <string name="preference_show_battery_summary">Zeigt den aktuellen Ladezustand des Akkus auf dem Bildschirm an</string>
     <string name="preference_grid">Gitter-Hilfslinien</string>
-    <string name="preference_grid_summary">Gitter/Spirale im Vorschaubild anzeigen</string>
     <string name="grid">Gitter</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Beschnitt-Hilfslinien</string>
     <string name="preference_crop_guide_summary">Anzeige einer rechteckigen Hilfslinie entsprechend dem gewählten Seitenverhältnis (nützlich, wenn ein Beschnitt geplant ist). Nur in der WYSIWYG-Vorschau oder bei Videoaufnahme möglich.</string>
@@ -186,11 +177,9 @@
     <string name="preference_screen_video_settings">Video-Einstellungen…</string>
     <string name="preference_screen_location_settings">Standort-Einstellungen…</string>
     <string name="preference_resolution">Kamera-Auflösung</string>
-    <string name="preference_resolution_summary">Einstellung der Auflösung der Fotoaufnahmen</string>
     <string name="preference_quality">Bildqualität</string>
     <string name="preference_quality_summary">Die Qualität beim Speichern der Fotos einstellen (Empfehlung: 90%%)</string>
     <string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Legt fest, ob im RAW (DNG) Format gespeichert wird</string>
     <string name="preference_location">Geotagging</string>
     <string name="preference_location_summary">Wenn aktiviert, werden die GPS-Standortdaten in den Aufnahmen gespeichert.</string>
     <string name="preference_gps_direction">Himmelsrichtung</string>
@@ -200,11 +189,8 @@
     <string name="preference_stamp">Fotos stempeln</string>
     <string name="preference_stamp_summary">Wenn aktiviert, werden die Fotos mit Datum, Zeit, eigenem Text und/oder GPS-Daten (sofern aktiviert) gestempelt.</string>
     <string name="preference_stamp_dateformat">Datumsstempel</string>
-    <string name="preference_stamp_dateformat_summary">Aktivierung und Formateinstellung des Datumsstempels</string>
     <string name="preference_stamp_timeformat">Zeitstempel</string>
-    <string name="preference_stamp_timeformat_summary">Aktivierung und Formateinstellung des Zeitstempels</string>
     <string name="preference_stamp_gpsformat">GPS-Stempel</string>
-    <string name="preference_stamp_gpsformat_summary">Aktivierung und Formateinstellung des GPS-Stempels</string>
     <string name="preference_textstamp">Textstempel</string>
     <string name="preference_textstamp_summary">Definition eines eigenen Textstempels</string>
     <string name="preference_stamp_fontsize">Stempel-Schriftgröße</string>
@@ -216,7 +202,6 @@
     <string name="preference_background_photo_saving">Benutze Hintergrund Thread</string>
     <string name="preference_background_photo_saving_summary">Legt fest, ob ein Hintergrund Thread zum Speichern eines Bildes zur schnelleren Ausführung benutzt wird</string>
     <string name="video_quality">Video-Auflösung</string>
-    <string name="video_quality_summary">Einstellung der Auflösung der Videoaufnahmen</string>
     <string name="preference_force_video_4k">Erzwinge UHD/4K (experimentell)</string>
     <string name="preference_force_video_4k_summary">Aktiviert die Auflösung von 3840x2160 für die Videoaufnahme der Hauptkamera. Funktioniert jedoch nur, wenn es vom Gerät unterstützt wird</string>
     <string name="preference_video_stabilization">Video-Stabilisierung</string>

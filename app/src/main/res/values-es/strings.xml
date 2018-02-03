@@ -96,15 +96,12 @@
 
     <string name="preference_category_camera_controls">Controles de cámara</string>
     <string name="preference_timer">Temporizador</string>
-    <string name="preference_timer_summary">Establece un temporizador para la cámara</string>
     <string name="preference_timer_beep">Sonido del temporizador</string>
     <string name="preference_timer_beep_summary">Sonar cuando el temporizador está contando regresivamente o para el retardo en el modo de ráfaga</string>
     <string name="preference_timer_speak">Cuenta regresiva del temporizador por voz</string>
     <string name="preference_timer_speak_summary">Activa la cuenta regresiva por voz para el temporizador o el modo ráfaga (desde 60 segundos)</string>
     <string name="preference_burst_mode">Ráfaga</string> <!-- also used in popup menu, so shouldn't be too long a string -->
-    <string name="preference_burst_mode_summary">Tome múltiples fotos sucesivamente</string>
     <string name="preference_burst_interval">Intervalo de modo de ráfaga</string>
-    <string name="preference_burst_interval_summary">Retardo (si existe) entre captura de fotos en modo ráfaga</string>
     <string name="preference_screen_camera_controls_more">Más controles de cámara…</string>
     <string name="preference_touch_capture">Tocar para capturar</string>
     <string name="preference_touch_capture_summary">Toma una foto simplemente tocando o tocando dos veces la pantalla</string>
@@ -113,7 +110,6 @@
     <string name="preference_shutter_sound">Sonido del obturador</string>
     <string name="preference_shutter_sound_summary">Reproducir un sonido al tomar una foto</string>
     <string name="preference_volume_keys">Teclas de volumen</string>
-    <string name="preference_volume_keys_summary">Establece el comportamiento cuando se pulsan las teclas de volumen</string>
     <string name="preference_audio_control">Opciones de control de audio</string>
     <string name="preference_audio_control_summary">Tome fotos o grabe videos cuando se detecte un ruido o un comando de voz (\"cheese\"). Cuando esté activado, utilice el botón del micrófono en pantalla para iniciar y detener la escucha.</string>
     <string name="preference_audio_noise_control_sensitivity">Sensibilidad de control de audio</string>
@@ -127,7 +123,6 @@
     <string name="preference_save_video_prefix">Prefijo de video</string>
     <string name="preference_save_video_prefix_summary">Prefijo utilizado para el nombre de los videos</string>
     <string name="preference_save_zulu_time">Formato de hora para el nombre de archivo</string>
-    <string name="preference_save_zulu_time_summary">Utilice la hora local o UTC (Tiempo Universal Coordinado) para nombrar fotos y videos</string>
     <string name="preference_show_when_locked">Mostrar cámara aunque el dispositivo esté bloqueado</string>
     <string name="preference_show_when_locked_summary">Si está activado, Open Camera se mostrará por encima de la pantalla de bloqueo (sin embargo tendrá que desbloquear para acceder a la Galería, Ajustes, etc)</string>
     <string name="preference_startup_focus">Realizar autoenfoque al iniciar</string>
@@ -138,11 +133,8 @@
     <string name="preference_rotate_preview_summary">Opción para rotar la vista previa (no afectará a las fotos/videos resultantes)</string>
     <string name="preference_screen_gui">Interfaz de pantalla…</string>
     <string name="preference_preview_size">Tamaño de la vista previa</string>
-    <string name="preference_preview_size_summary">Elige el tamaño de la vista previa</string>
     <string name="preference_ui_placement">Ubicación de la Interfaz de Usuario</string>
-    <string name="preference_ui_placement_summary">Define una interfaz de usuario zurda o diestra</string>
     <string name="preference_immersive_mode">Modo inmersivo</string>
-    <string name="preference_immersive_mode_summary">Opciones para el comportamiento en \"modo inmersivo\"</string>
     <string name="preference_show_zoom">Mostrar zoom</string>
     <string name="preference_show_zoom_summary">Muestra el nivel de zoom actual de la cámara en la pantalla (cuando se amplía)</string>
     <string name="preference_show_zoom_controls">Mostrar controles zoom -/+</string>
@@ -166,7 +158,6 @@
     <string name="preference_show_battery">Mostrar batería</string>
     <string name="preference_show_battery_summary">Muestra el nivel actual de la batería en la pantalla</string>
     <string name="preference_grid">Mostrar cuadrícula</string>
-    <string name="preference_grid_summary">Muestra una de múltiples cuadrículas</string>
     <string name="grid">Grid</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Mostrar guía de recorte</string>
     <string name="preference_crop_guide_summary">Una guía de recorte muestra un rectángulo que indica la relación de aspecto especificada, útil si planea recortar la foto/video posteriormente con una relación de aspecto diferente. Requiere modo de foto WYSIWYG, o estar en modo de video.</string>
@@ -186,11 +177,9 @@
     <string name="preference_screen_video_settings">Configuración de videos…</string>
     <string name="preference_screen_location_settings">Configuración de ubicación…</string>
     <string name="preference_resolution">Resolución de la cámara</string>
-    <string name="preference_resolution_summary">Establece la resolución de las fotos tomadas con cámara</string>
     <string name="preference_quality">Calidad de la imagen</string>
     <string name="preference_quality_summary">Establece la calidad JPEG de las imágenes fotográficas guardadas (el valor predeterminado es 90 %%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Whether to save in RAW (DNG) format</string>
     <string name="preference_location">Almacenar datos de ubicación (Geotagging)</string>
     <string name="preference_location_summary">Almacene los datos de ubicación del GPS en las fotos/videos</string>
     <string name="preference_gps_direction">Almacenar la dirección de la brújula</string>
@@ -200,11 +189,8 @@
     <string name="preference_stamp">Estampar fotos</string>
     <string name="preference_stamp_summary">Estampe fotos con fecha y hora; también información del GPS si los datos de la ubicación/dirección están activados</string>
     <string name="preference_stamp_dateformat">Formato de estampa de fecha</string>
-    <string name="preference_stamp_dateformat_summary">Especifique el formato de estampa de fecha (si está activado)</string>
     <string name="preference_stamp_timeformat">Formato de estampa de hora</string>
-    <string name="preference_stamp_timeformat_summary">Especifique el formato de estampa de hora (si está activado)</string>
     <string name="preference_stamp_gpsformat">Formato de estampa de GPS</string>
-    <string name="preference_stamp_gpsformat_summary">Especifique el formato de estampa de GPS (si está activado)</string>
     <string name="preference_textstamp">Texto personalizado</string>
     <string name="preference_textstamp_summary">Estampe fotos con un texto personalizado</string>
     <string name="preference_stamp_fontsize">Tamaño de fuente</string>
@@ -216,7 +202,6 @@
     <string name="preference_background_photo_saving">Utilizar subproceso en segundo plano</string>
     <string name="preference_background_photo_saving_summary">Guarde fotos con un subproceso en segundo plano (para una operación más rápida)</string>
     <string name="video_quality">Resolución de video</string>
-    <string name="video_quality_summary">Establece la resolución de los videos</string>
     <string name="preference_force_video_4k">Forzar 4K UHD vídeo (experimental)</string>
     <string name="preference_force_video_4k_summary">Activa la resolución 3840x2160 para la grabación de vídeos en la cámara trasera - esto solo funcionara si tu dispositivo lo soporta</string>
     <string name="preference_video_stabilization">Activar Estabilización de Vídeo</string>

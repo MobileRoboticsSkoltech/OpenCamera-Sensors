@@ -94,15 +94,12 @@
 
     <string name="preference_category_camera_controls">相機控制</string>
     <string name="preference_timer">定時器</string>
-    <string name="preference_timer_summary">為相機設定一個定時器</string>
     <string name="preference_timer_beep">定時器提示音</string>
     <string name="preference_timer_beep_summary">當定時器倒數或連拍模式延遲時提示</string>
     <string name="preference_timer_speak">語音倒數計時</string>
     <string name="preference_timer_speak_summary">定時或連拍模式時使用語音倒數計時 (從 60 秒開始)</string>
 	<string name="preference_burst_mode">連拍模式</string>
-    <string name="preference_burst_mode_summary">連續拍攝多張照片</string>
     <string name="preference_burst_interval">連拍模式間隔</string>
-    <string name="preference_burst_interval_summary">連拍模式中拍照之間的延遲(如果有的話)</string>
     <string name="preference_screen_camera_controls_more">更多相機控制…</string>
 	<string name="preference_touch_capture">快門設定</string>
     <string name="preference_touch_capture_summary">在預覽畫面按一次或兩次來拍照</string>
@@ -111,7 +108,6 @@
     <string name="preference_shutter_sound">快門聲音</string>
     <string name="preference_shutter_sound_summary">拍照時播放聲音(需要 Android 4.2 或更高才能停用)</string>
     <string name="preference_volume_keys">音量鍵</string>
-    <string name="preference_volume_keys_summary">設定音量鍵按下時的行為</string>
     <string name="preference_save_location">儲存位置</string>
     <string name="preference_save_location_summary">用來儲存照片/影片檔的資料夾</string>
 	<string name="preference_using_saf">使用 Storage Access Framework</string>
@@ -128,11 +124,8 @@
     <string name="preference_rotate_preview_summary">旋轉預覽選項 (不會影響最終的照片/影片)</string>
     <string name="preference_screen_gui">螢幕GUI…</string>
     <string name="preference_preview_size">預覽大小</string>
-    <string name="preference_preview_size_summary">如何選擇預覽大小</string>
     <string name="preference_ui_placement">UI 佈局</string>
-    <string name="preference_ui_placement_summary">是否使用左撇子或右撇子的使用者介面</string>
     <string name="preference_immersive_mode">全螢幕模式</string>
-    <string name="preference_immersive_mode_summary">\"全螢幕模式\" 行為選項</string>
     <string name="preference_show_zoom">顯示縮放</string>
     <string name="preference_show_zoom_summary">在螢幕上顯示目前的相機縮放等級 (當放大時)</string>
     <string name="preference_show_zoom_controls">顯示縮放 -/+ 控制</string>
@@ -156,7 +149,6 @@
     <string name="preference_show_battery">顯示電池</string>
     <string name="preference_show_battery_summary">在螢幕上顯示目前電池電量</string>
     <string name="preference_grid">顯示格線</string>
-    <string name="preference_grid_summary">顯示各種格線中的一種</string>
     <string name="grid">格</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">顯示裁切輔助</string>
     <string name="preference_crop_guide_summary">裁切輔助顯示一個矩形來表示指定的長寬比看起來如何 - 如果您計畫以後裁切照片/影片為不同的解析度很有用。需要所見即所得拍照模式，或處於錄影模式中。</string>
@@ -174,7 +166,6 @@
     <string name="preference_screen_video_settings">影片設定…</string>
     <string name="preference_screen_location_settings">位置設定…</string>
     <string name="preference_resolution">相機解析度</string>
-    <string name="preference_resolution_summary">設定相機拍攝的照片的解析度</string>
     <string name="preference_quality">圖像品質</string>
     <string name="preference_quality_summary">設定儲存的照片圖像的圖像品質（建議值是90%%）</string>
     <string name="preference_location">儲存位置資料 (地理標記)</string>
@@ -186,11 +177,8 @@
     <string name="preference_stamp">標記照片</string>
     <string name="preference_stamp_summary">用日期和時間標記照片；如果啟用了位置/方向資料也標記 GPS 資訊</string>
     <string name="preference_stamp_dateformat">日期標記格式</string>
-    <string name="preference_stamp_dateformat_summary">指定日期標記的格式 (如果有啟用)</string>
     <string name="preference_stamp_timeformat">時間標記格式</string>
-    <string name="preference_stamp_timeformat_summary">指定時間標記的格式 (如果有啟用)</string>
     <string name="preference_stamp_gpsformat">GPS 標記格式</string>
-    <string name="preference_stamp_gpsformat_summary">指定 GPS 標記的格式 (如果有啟用)</string>
     <string name="preference_textstamp">自訂文字</string>
     <string name="preference_textstamp_summary">用自訂文字標記照片</string>
     <string name="preference_stamp_fontsize">字型大小</string>
@@ -200,7 +188,6 @@
     <string name="preference_stamp_style">文字風格</string>
     <string name="preference_stamp_style_summary">當在照片上標記文字時使用的字型風格</string>
     <string name="video_quality">影片解析度</string>
-    <string name="video_quality_summary">設定影片解析度</string>
     <string name="preference_force_video_4k">強制 4K UHD 影片 (實驗中)</string>
     <string name="preference_force_video_4k_summary">為後置相機錄影啟用 3840x2160 解析度 - 僅當您的裝置支援時才能作用，且如果不支援可能當機！</string>
     <string name="preference_video_stabilization">啟用影片穩定</string>

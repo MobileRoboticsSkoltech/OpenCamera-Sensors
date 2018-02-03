@@ -93,16 +93,13 @@
     <string name="preference_face_detection_summary">Używa wykrywania twarzy zamiast obszarów ostrości</string>
     <string name="preference_category_camera_controls">Sterowanie aparatem</string>
     <string name="preference_timer">Samowyzwalacz</string>
-    <string name="preference_timer_summary">Ustaw samowyzwalacz aparatu</string>
     <string name="preference_timer_beep">Dźwięk samowyzwalacza</string>
     <string name="preference_timer_beep_summary">Dźwięk pikania podczas odliczania samowyzwalacza lub między zdjęciami serii</string>
     <string name="preference_timer_speak">Głosowe odliczanie</string>
     <string name="preference_timer_speak_summary">Głosowe odliczanie dla wyzwalacza lub zdjęć seryjnych (od 60 sekund)</string>
     <string name="preference_burst_mode">Seria</string>
     <!-- also used in popup menu, so shouldn't be too long a string -->
-    <string name="preference_burst_mode_summary">Wykonuje kolejno zdjęcia w serii</string>
     <string name="preference_burst_interval">Interwał trybu seryjnego</string>
-    <string name="preference_burst_interval_summary">Opóźnienie między kolejnymi zdjęciami trybu seryjnego</string>
     <string name="preference_screen_camera_controls_more">Więcej ustawień aparatu…</string>
     <string name="preference_touch_capture">Dotknij, aby zrobić zdjęcie</string>
     <string name="preference_touch_capture_summary">Zrób zdjęcie poprzez pojedyncze lub podwójne dotknięcie</string>
@@ -111,7 +108,6 @@
     <string name="preference_shutter_sound">Dźwięk migawki</string>
     <string name="preference_shutter_sound_summary">Odtwarza dźwięk podczas wykonywania zdjęcia</string>
     <string name="preference_volume_keys">Klawisze głośności</string>
-    <string name="preference_volume_keys_summary">Ustawia zachowanie po wciśnięciu klawiszy głośności</string>
     <string name="preference_audio_control">Aktywacja za pomocą dźwięków</string>
     <string name="preference_audio_control_summary">Wykonuje zdjęcie lub nagrywa film po wykryciu dźwięku lub komendy głosowej (\"cheese\"). Jeśli włączone, użyj ikony mikrofonu w celu rozpoczęcia nasłuchu</string>
     <string name="preference_audio_noise_control_sensitivity">Wrażliwość sterowania dźwiękiem</string>
@@ -125,7 +121,6 @@
     <string name="preference_save_video_prefix">Przedrostek nazw filmów</string>
     <string name="preference_save_video_prefix_summary">Przedrostek używany w nazwach plików filmów</string>
     <string name="preference_save_zulu_time">Format czasu w nazwie pliku</string>
-    <string name="preference_save_zulu_time_summary">Wybór czasu UTC (Coordinated Universal Time) lub lokalnego w nazwach plików zdjęć i filmów</string>
     <string name="preference_show_when_locked">Pokaż aparat gdy zablokowany</string>
     <string name="preference_show_when_locked_summary">Jeśli włączone, Open Camera będzie widoczny ponad ekranem blokady (dostęp do opcji, galerii itp. wymaga odblokowania)</string>
     <string name="preference_startup_focus">Automatyczne ustawianie ostrości podczas uruchamiania</string>
@@ -136,11 +131,8 @@
     <string name="preference_rotate_preview_summary">Umożliwia obtót podglądu (nie wpływa na zapisywane pliki)</string>
     <string name="preference_screen_gui">Interfejs fotografowania…</string>
     <string name="preference_preview_size">Rozmiar podglądu</string>
-    <string name="preference_preview_size_summary">Wybór rozmiaru podglądu. Maksymalizacja kadruje podgląd jeśli wybrany rozmiar zdjęcia ma inne proporcje niż ekran (np 4:3 na ekranie 16:9).</string>
     <string name="preference_ui_placement">Położenie interfejsu</string>
-    <string name="preference_ui_placement_summary">Wybór między prawo i leworęcznym trybem interfejsu</string>
     <string name="preference_immersive_mode">Tryb pełnoekranowy</string>
-    <string name="preference_immersive_mode_summary">Opcje pełnego ekranu</string>
     <string name="preference_show_zoom">Pokaż przybliżenie</string>
     <string name="preference_show_zoom_summary">Wyświetla poziom przybliżenia na ekranie (jeśli</string>
     <string name="preference_show_zoom_controls">Pokaż przyciski -/+ przybliżenia</string>
@@ -164,7 +156,6 @@
     <string name="preference_show_battery">Pokaż baterię</string>
     <string name="preference_show_battery_summary">Wyświetla na ekranie aktualny poziom baterii</string>
     <string name="preference_grid">Pokaż kratkę</string>
-    <string name="preference_grid_summary">Wyświetla jedną z różnych kratek do kadrowania</string>
     <string name="grid">Kratka</string>
     <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Pokaż prowadnice kadrowania</string>
@@ -184,12 +175,10 @@
     <string name="preference_screen_video_settings">Ustawienia filmów…</string>
     <string name="preference_screen_location_settings">Ustawienia lokalizacji…</string>
     <string name="preference_resolution">Rozdzielczość</string>
-    <string name="preference_resolution_summary">Ustaw rozdzielczość wykonywanych zdjęć i ich proporcje</string>
     <string name="preference_quality">Jakość obrazu</string>
     <string name="preference_quality_summary">Ustaw jakość zapisywanych plików JPEG (domyślna wartość to 90%%)</string>
     <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Zapis w formacie surowym RAW (plik DNG)</string>
     <string name="preference_location">Zapisuj dane geolokalizacji</string>
     <string name="preference_location_summary">Zapisuje współrzędne geograficzne w zdjęciach i filmach</string>
     <string name="preference_gps_direction">Zapisuj kierunek kompasu</string>
@@ -199,11 +188,8 @@
     <string name="preference_stamp">Stempluj zdjęcia</string>
     <string name="preference_stamp_summary">Stempluje zdjęcia datą i czasem, jeśli są dostępne także danymi z GPS</string>
     <string name="preference_stamp_dateformat">Format daty stempla</string>
-    <string name="preference_stamp_dateformat_summary">Określa format daty stempla (jeśli jest włączony)</string>
     <string name="preference_stamp_timeformat">Format czasu stempla</string>
-    <string name="preference_stamp_timeformat_summary">Określa format czasu stempla (jeśli jest włączony)</string>
     <string name="preference_stamp_gpsformat">Format stempla GPS</string>
-    <string name="preference_stamp_gpsformat_summary">Określa format stempla GPS (jeśli jest włączony)</string>
     <string name="preference_textstamp">Własny tekst</string>
     <string name="preference_textstamp_summary">Określa własny tekst na stemplu</string>
     <string name="preference_stamp_fontsize">Rozmiar fontu</string>
@@ -215,7 +201,6 @@
     <string name="preference_background_photo_saving">Użyj wątku w tle</string>
     <string name="preference_background_photo_saving_summary">Używanie wątku aplikacji działającego w tle do zapisu zdjęć (szybsze operacje)</string>
     <string name="video_quality">Rozdzielczość filmów</string>
-    <string name="video_quality_summary">Ustaw rozdzielczość filmów</string>
     <string name="preference_force_video_4k">Wymuś nagrywanie filmów 4K UHD (działa tylko z niektórymi urządzeniami)</string>
     <string name="preference_force_video_4k_summary">Włącza rozdzielczość 3840x2160 przy nagrywaniu filmów z tylnego aparatu. Ta opcja to hack, który pozwala urządzeniom z obsługą 4K na nagrywanie filmów w 4K mimo zablokowania takiej możliwości dla niefirmowych aplikacji nagrywających. Nie ma gwarancji, że to zadziała, proszę przetestować.</string>
     <string name="preference_video_stabilization">Włącz stabilizację obrazu</string>

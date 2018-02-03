@@ -86,20 +86,16 @@
     <string name="preference_face_detection_summary">Obyektivdə sifətin aydınlaşdırılması</string>
     <string name="preference_category_camera_controls">Kamera idarəsi</string>
     <string name="preference_timer">Vaxtölçən</string>
-    <string name="preference_timer_summary">Kamera üçün vaxtölçənin quraşdırılması</string>
     <string name="preference_timer_beep">Vaxtölçənin səsi</string>
     <string name="preference_timer_beep_summary">Vaxtölçən sayıb qurtaran zaman siqnal səslənir</string>
     <string name="preference_burst_mode">Serial çəkiliş</string>
-    <string name="preference_burst_mode_summary">Bir neçə şəkilin ardıcıl çəkilməsi</string>
     <string name="preference_burst_interval">Serial çəkiliş fasiləsi</string>
-    <string name="preference_burst_interval_summary">Serial şəkil çəkilişləri arasında fasilə</string>
     <string name="preference_screen_camera_controls_more">Əlavə parametrlər…</string>
     <string name="preference_pause_preview">Çəkilişdən sonra fasilə</string>
     <string name="preference_pause_preview_summary">Şəkil çəkildikdən sonra paylaşma və ya silinmə imkanları yaradan fasilə</string>
     <string name="preference_shutter_sound">Çəkiliş səsi</string>
     <string name="preference_shutter_sound_summary">Şəkil çəkilən zaman eşidilən səs (bağlanması üçün Android 4.2+ tələb olunur)</string>
     <string name="preference_volume_keys">Səs səviyyəsi düyməsi</string>
-    <string name="preference_volume_keys_summary">Səs səviyəsi düyməsi basılan zaman icra olunacaq tapşırığı təyin et</string>
     <string name="preference_save_location">Saxlanma yeri</string>
     <string name="preference_save_location_summary">Şəkil və videonun saxlanması üçün qovluq adı</string>
     <string name="preference_save_photo_prefix">Saxlanılan şəkil prefiksi</string>
@@ -114,11 +110,8 @@
     <string name="preference_rotate_preview_summary">Ön izləmədə fırlanma imkanı (şəkil və video nəticələrinə təsir etmir)</string>
     <string name="preference_screen_gui">Təsvir parametrləri…</string>
     <string name="preference_preview_size">Önbaxış ölçüsü</string>
-    <string name="preference_preview_size_summary">Önbaxış üçün ölçü seçin</string>
     <string name="preference_ui_placement">İnterfeys</string>
-    <string name="preference_ui_placement_summary">Sol və ya Sağ əllə işləyənlər üçün istifadəçi interfeysi</string>
     <string name="preference_immersive_mode">Yüklənmə rejimi</string>
-    <string name="preference_immersive_mode_summary">\"Yüklənmə rejimi\" üçün parametrlər</string>
     <string name="preference_show_zoom">Miqyası göstər</string>
     <string name="preference_show_zoom_summary">Kameranın cari miqyas səviyyəsi (miqyas böyüdülən zaman) ekranda görünür</string>
     <string name="preference_show_zoom_controls">Miqyasın -/+ idarəsi</string>
@@ -140,7 +133,6 @@
     <string name="preference_show_battery">Batareyanı göstər</string>
     <string name="preference_show_battery_summary">Cari batareya səviyyəsi ekranda görünür</string>
     <string name="preference_grid">Tor göstər</string>
-    <string name="preference_grid_summary">Müxtəlif torlardan biri ekranda görünür</string>
     <string name="grid">Tor</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Kəsmək üçün təlimat</string>
     <string name="preference_crop_guide_summary">Kənarların nisbətini göstərən dördbucaqlı təsvir - şəkil/video kəsən zaman faydalıdır. WYSIWYG şəkilçəkmə və ya video rejimi tələb olunur</string>
@@ -155,7 +147,6 @@
     <string name="preference_screen_video_settings">Video parametrləri…</string>
     <string name="preference_screen_location_settings">Məkan parametrləri…</string>
     <string name="preference_resolution">Kamera icazələri</string>
-    <string name="preference_resolution_summary">Kamerada çəkilən şəkillər üçün ölçülər seçin</string>
     <string name="preference_quality">Təsvir keyfiyyəti</string>
     <string name="preference_quality_summary">Şəkil üçün keyfiyyət dərəcəsi seçin (90%% tövsiyyə edilir)</string>
     <string name="preference_location">Məkan məlumatları (Geotagging)</string>
@@ -171,7 +162,6 @@
     <string name="preference_stamp_fontsize">Şrift ölçüsü</string>
     <string name="preference_stamp_fontsize_summary">Şəkil üzərində mətn yazısı üçün şriftin ölçüsü</string>
     <string name="video_quality">Video keyfiyyəti</string>
-    <string name="video_quality_summary">Video keyfiyyət dərəcəsi seçin</string>
     <string name="preference_force_video_4k">Video keyfiyyəti 4K UHD (eksperimental)</string>
     <string name="preference_force_video_4k_summary">Arxa kamera üçün 3840х2160 ölçüsü seçiləcək və yalnız cihaz verilən formatı dəstəklədiyi zaman işləyəcək!</string>
     <string name="preference_video_stabilization">Video stabilləşməsini işə sal</string>

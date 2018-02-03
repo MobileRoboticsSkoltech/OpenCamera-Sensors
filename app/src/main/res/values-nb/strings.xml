@@ -96,15 +96,12 @@
 
     <string name="preference_category_camera_controls">Kamerakontrollere</string>
     <string name="preference_timer">Nedtelling</string>
-    <string name="preference_timer_summary">Bestem en nedtelling for kameraet</string>
     <string name="preference_timer_beep">Nedtellingsbipp</string>
     <string name="preference_timer_beep_summary">Bipp når nedtellingen teller ned, eller under seriefotograferingsforsinkelse</string>
     <string name="preference_timer_speak">Stemmenedtelling</string>
     <string name="preference_timer_speak_summary">Si nedtellingen eller seriefotograferingsmodusforsinkelsen (fra 60 sekunder)</string>
     <string name="preference_burst_mode">Seriefoto</string> <!-- also used in popup menu, so shouldn't be too long a string -->
-    <string name="preference_burst_mode_summary">Ta flere bilder etter hverandre.</string>
     <string name="preference_burst_interval">Seriefotograferingsintervall</string>
-    <string name="preference_burst_interval_summary">Forsinkelse (eller ikke) mellom fototakninger i seriefotograferingsmodus.</string>
     <string name="preference_screen_camera_controls_more">Flere kamerakontrollere…</string>
     <string name="preference_touch_capture">Trykk for å ta bilde</string>
     <string name="preference_touch_capture_summary">Ta et foto kun ved å trykke på dobbelt-tappe på forhåndsvisningen.</string>
@@ -113,7 +110,6 @@
     <string name="preference_shutter_sound">Lukkerlyd</string>
     <string name="preference_shutter_sound_summary">Spill av en lyd når du tar et bilde.</string>
     <string name="preference_volume_keys">Volumknapper</string>
-    <string name="preference_volume_keys_summary">Velg oppførsel når volumknappene blir trykket på.</string>
     <string name="preference_audio_control">Lydkontrollalternativer</string>
     <string name="preference_audio_control_summary">Ta et bilde eller ta opp video når lyder blir oppdager, eller ved en stemmekommande (\"Cheese!\"). Når det er aktivert, bruk mikrofonknappen på skjermen til å begynne og slutte å lytte.</string>
     <string name="preference_audio_noise_control_sensitivity">Lydkontrollsensitivitet</string>
@@ -127,7 +123,6 @@
     <string name="preference_save_video_prefix">Forstavelsen til videolagring</string>
     <string name="preference_save_video_prefix_summary">Forstavelsen som skal brukes til lagringsfilnavnene til bildene.</string>
     <string name="preference_save_zulu_time">Tidsformatet til filnavnene</string>
-    <string name="preference_save_zulu_time_summary">Hvorvidt lokal tid eller UTC (Coordinated Universal Time) skal brukes under navngiving av bilder og videoer.</string>
     <string name="preference_show_when_locked">Vis kameraet når mobilen er låstShow camera when locked</string>
     <string name="preference_show_when_locked_summary">Hvis dette er aktivert, vil Open Camera fortsett vises over enhver låseskjerm (Du vil fortsatt måtte låse opp for å få tilgang til Innstillinger, Galleri, osv.).</string>
     <string name="preference_startup_focus">Utfør auto-fokusering ved oppstart</string>
@@ -138,11 +133,8 @@
     <string name="preference_rotate_preview_summary">Innstilling for å rotere forhåndsvisningen (Påvirker ikke de resulterende bildene/videoene).</string>
     <string name="preference_screen_gui">Grensesnittet på skjermen…</string>
     <string name="preference_preview_size">Forhåndsvisningsstørrelse</string>
-    <string name="preference_preview_size_summary">Hvordan velge forhåndsvisningsstørrelsen.</string>
     <string name="preference_ui_placement">Grensesnittsplassering</string>
-    <string name="preference_ui_placement_summary">Hvorvidt grensesnittet skal være ment for venstrehendte eller høyrehendte.</string>
     <string name="preference_immersive_mode">Oppslukkende modus</string>
-    <string name="preference_immersive_mode_summary">Innstillinger for \"Oppslukende modus\" sin oppførsel.</string>
     <string name="preference_show_zoom">Vis forstørring</string>
     <string name="preference_show_zoom_summary">Vis det nåværende kameraforstørringsnivået på skjermen (under forstørring)</string>
     <string name="preference_show_zoom_controls">Vis -/+—forstørringskontrollere</string>
@@ -166,7 +158,6 @@
     <string name="preference_show_battery">Vis batterinivå</string>
     <string name="preference_show_battery_summary">Vis det nåværende batterinivået på skjermen.</string>
     <string name="preference_grid">Vis netting</string>
-    <string name="preference_grid_summary">Vis en av nettingene.</string>
     <string name="grid">Netting</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Vis en klippingsveiviser</string>
     <string name="preference_crop_guide_summary">En klippeveiviser viser et rektangel som vis hva det bestemte skjermforholdet ser ut som — Nyttig dersom du planlegger å klippe bildet/videoen etterpå til et annet skjermforhold. Krever WYSIWYG-fotomodus, eller å være i videomodus.</string>
@@ -186,11 +177,9 @@
     <string name="preference_screen_video_settings">Videoinnstillinger…</string>
     <string name="preference_screen_location_settings">Posisjonsinnstillinger…</string>
     <string name="preference_resolution">Kameraoppløsning</string>
-    <string name="preference_resolution_summary">Velg oppløsningen til bildene som blir tatt av kameraet</string>
     <string name="preference_quality">Bildekvalitet</string>
     <string name="preference_quality_summary">Velg JPEG-kvaliteten til de lagrede bildene (Standardverdien er 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Hvorvidt det skal lagres i RAW (DNG)-formatet.</string>
     <string name="preference_location">Lagre posisjonsdata (Geotagging)</string>
     <string name="preference_location_summary">Lagre GPS-posisjonsdata i bildene/videoene.</string>
     <string name="preference_gps_direction">Lagre kompassretning</string>
@@ -200,11 +189,8 @@
     <string name="preference_stamp">Stemple bilder</string>
     <string name="preference_stamp_summary">Stemple bilder med dato og klokkeslett; og også GPS-info dersom posisjons-/retnings-dataer er aktivert.</string>
     <string name="preference_stamp_dateformat">Datostemplingsformat</string>
-    <string name="preference_stamp_dateformat_summary">Bestem formatet til datostemplet (hvis det er aktivert).</string>
     <string name="preference_stamp_timeformat">Klokkeslettsstemplingsformat</string>
-    <string name="preference_stamp_timeformat_summary">Bestem formatet til klokkeslettsstemplet (hvis det er aktivert).</string>
     <string name="preference_stamp_gpsformat">GPS-stemplingsformat</string>
-    <string name="preference_stamp_gpsformat_summary">Bestem formatet til GPS-stemplet (hvis det er aktivert).</string>
     <string name="preference_textstamp">Tilpasset tekst</string>
     <string name="preference_textstamp_summary">Stemple bilder med tilpasset tekst.</string>
     <string name="preference_stamp_fontsize">Skrifttypestørrelse</string>
@@ -216,7 +202,6 @@
     <string name="preference_background_photo_saving">Bruk bakgrunnstråd</string>
     <string name="preference_background_photo_saving_summary">Hvorvidt det skal lagres bilder på en bakgrunnstråd (for å kunne kjøre raskere)</string>
     <string name="video_quality">Videooppløsning</string>
-    <string name="video_quality_summary">Bestem oppløsningen til videoene</string>
     <string name="preference_force_video_4k">Tving frem 4K/UHD-oppløsning (Virker kun på noen enheter)</string>
     <string name="preference_force_video_4k_summary">Aktiver 3840x2160-oppløsning for videoopptak på bakkameraet — Denne innstillingen er en hack som kanskje kan tillate 4K-kameraer på 4K-enheter som ikke vanligvis lar tredjepartsapper bruke dette. Det er ikke garantert å virke, så vennligst test det ut før du bruker det.</string>
     <string name="preference_video_stabilization">Aktiver videovater</string>

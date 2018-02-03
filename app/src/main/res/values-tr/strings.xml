@@ -95,15 +95,12 @@
 
     <string name="preference_category_camera_controls">Kamera Kontrolleri</string>
     <string name="preference_timer">Zamanlayıcı</string>
-    <string name="preference_timer_summary">Kamera için bir zamanlayıcı ayarla</string>
     <string name="preference_timer_beep">Zamanlayıcı ayarla</string>
     <string name="preference_timer_beep_summary">Zamanlayıcı ya da patlama modu gecikmesi çalışırken bip sesi çıkar</string>
     <string name="preference_timer_speak">Ses zamanlayıcısı geri sayım</string>
     <string name="preference_timer_speak_summary">Zamanlayıcı ya da patlama modu gecikmesi için gerisayımı sesli söyle(60 saniyeden itibaren)</string>
     <string name="preference_burst_mode">Patlama modu</string>
-    <string name="preference_burst_mode_summary">Ardarda çoklu fotoğraf çek</string>
     <string name="preference_burst_interval">Patlama modu süresi</string>
-    <string name="preference_burst_interval_summary">Patlama modunda fotoğraf çekme aralarında(varsa) geciktir</string>
     <string name="preference_screen_camera_controls_more">Daha fazla kamera kontrol ayarı…</string>
     <string name="preference_touch_capture">Yakalamak için dokunun</string>
     <string name="preference_touch_capture_summary">Sadece dokunarak fotoğraf çekin ya da önizlemek için ardarda dokunun</string>
@@ -112,7 +109,6 @@
     <string name="preference_shutter_sound">Fotoğraf çekme sesi</string>
     <string name="preference_shutter_sound_summary">Fotoğraf çekerken ses çal(kapatmak için Android 4.2 ya da daha üstü gereklidir)</string>
     <string name="preference_volume_keys">Ses seviyesi tuşları</string>
-    <string name="preference_volume_keys_summary">Ses tuşlarına basıldığında yapılacak eylemi seç</string>
 
     <string name="preference_save_location">Kaydetme yeri</string>
     <string name="preference_save_location_summary">Fotoğraf/vidyo dosyaları için kayıt klasörü</string>
@@ -131,11 +127,8 @@
     <string name="preference_rotate_preview_summary">Önizlemeyi döndürme seçeneği(etkile\'yecek fotoğraf/vidyo sonucunu etkilemeyecektir)</string>
     <string name="preference_screen_gui">GUI Ekran Ayarları(grafik arayuzu)…</string>
     <string name="preference_preview_size">Önizleme boyutu</string>
-    <string name="preference_preview_size_summary">Önizleme boyutu ayarını seçin</string>
     <string name="preference_ui_placement">Kullanıcı arayüzü</string>
-    <string name="preference_ui_placement_summary">Arayüzü solak ya da sağ el kullanım ayarı</string>
     <string name="preference_immersive_mode">Immersive(Tutulma) mod</string>
-    <string name="preference_immersive_mode_summary">Seçenekleri \"Immersive(Tutulma) mod\" davranışı</string>
     <string name="preference_show_zoom">Zoomu göster</string>
     <string name="preference_show_zoom_summary">Ekranda şu anki zoom seviyesini göster(büyütüldüğünde)</string>
     <string name="preference_show_zoom_controls">Zoom -/+ kontrollerini göster</string>
@@ -159,7 +152,6 @@
     <string name="preference_show_battery">Pili göster</string>
     <string name="preference_show_battery_summary">Ekranda şu anki pil seviyesini göster</string>
     <string name="preference_grid">Çerçeve göster</string>
-    <string name="preference_grid_summary">Çeşitli çerçeve seçeneklerini göster</string>
     <string name="preference_crop_guide">Kırpma yardımcısını göster</string>
     <string name="preference_crop_guide_summary">Kırpma yardımcısı -eğer daha sonra fotoğraf/vidyoları farklı görüntü oranlarında kırpmayı planlıyorsanız kullanışlıdır- özel görüntü oranlarının nasıl göründüğünü dikdörtgen şeklinde gösterir. WYSIWYG fotoğraf modu ya da vidyo modunda olmak gerekir.</string>
     <string name="preference_show_toasts">\"ileti\" mesajları göster</string>
@@ -176,7 +168,6 @@
     <string name="preference_screen_video_settings">Vidyo ayarları…</string>
     <string name="preference_screen_location_settings">Konum ayarları…</string>
     <string name="preference_resolution">Kamera çözünürlüğü</string>
-    <string name="preference_resolution_summary">Kamera için fotoğraf çözünürlüğünü ayarla</string>
     <string name="preference_quality">Resim kalitesi</string>
     <string name="preference_quality_summary">Kaydedilmiş fotoğrafların resim kalitesini ayarla(tavsiye edilen değer 90%%)</string>
     <string name="preference_location">Konum verisini kaydet(Geotagging)</string>
@@ -188,11 +179,8 @@
     <string name="preference_stamp">Fotoğraflara tarih-saat ekleme</string>
     <string name="preference_stamp_summary">Fotoğraflara tarih-saaat ekle; konum/yön bilgisi açık ise GPS bilgisini de ekle</string>
     <string name="preference_stamp_dateformat">Tarih formatı</string>
-    <string name="preference_stamp_dateformat_summary">Tarih formatını özelleştir(etkin ise)</string>
     <string name="preference_stamp_timeformat">Saat modu formatı</string>
-    <string name="preference_stamp_timeformat_summary">Saat formatını özelleştir(etkin ise)</string>
     <string name="preference_stamp_gpsformat">GPS formatı</string>
-    <string name="preference_stamp_gpsformat_summary">GPS formatını özelleştir(etkin ise)</string>
     <string name="preference_textstamp">Özel yazı ekleme</string>
     <string name="preference_textstamp_summary">Özel bir yazı ekleyerek fotoğrafları işaretle</string>
     <string name="preference_stamp_fontsize">Font(yazı) boyutu</string>
@@ -202,7 +190,6 @@
     <string name="preference_stamp_style">Yazı stili</string>
     <string name="preference_stamp_style_summary">Fotoğrafların üzerine eklendiğinde kullanılacak yazı stili</string>
     <string name="video_quality">Vidyo çözünürlüğü</string>
-    <string name="video_quality_summary">vidyo çözünürlüğünü ayarla</string>
     <string name="preference_force_video_4k">4K UHD vidyo için zorla(deneysel)</string>
     <string name="preference_force_video_4k_summary">3840x2160 çözünürlüğünü arka kameradan vidyo kaydederken etkinleştir- bu ayar sadece cihazınız destekliyorsa çalışacaktır, desteklemiyorsa cihazınız çökebilir!</string>
     <string name="preference_video_stabilization">Vidyo stabilizasyonunu etkinleştir</string>

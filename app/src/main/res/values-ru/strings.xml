@@ -96,15 +96,12 @@
 
     <string name="preference_category_camera_controls">Управление</string>
     <string name="preference_timer">Таймер</string>
-    <string name="preference_timer_summary">Установка таймера для камеры</string>
     <string name="preference_timer_beep">Звук таймера</string>
     <string name="preference_timer_beep_summary">Подавать звуковой сигнал, когда таймер закончит отсчет</string>
     <string name="preference_timer_speak">Озвучка таймера</string>
     <string name="preference_timer_speak_summary">Озвучивать обратный отсчет для таймера или пакетного режима (от 60 секунд)</string>
     <string name="preference_burst_mode">Пакетный</string>
-    <string name="preference_burst_mode_summary">Съёмка нескольких фото подряд</string>
     <string name="preference_burst_interval">Интервал в пакетном режиме</string>
-    <string name="preference_burst_interval_summary">Задержка между снятием фото</string>
     <string name="preference_screen_camera_controls_more">Дополнительные настройки</string>
     <string name="preference_touch_capture">Касание для съемки</string>
     <string name="preference_touch_capture_summary">Делать снимок по одинарному или двойному касанию области просмотра</string>
@@ -113,7 +110,6 @@
     <string name="preference_shutter_sound">Звук затвора</string>
     <string name="preference_shutter_sound_summary">Воспроизведение звука при съемке фотографии (требуется Android 4.2+ для отключения)</string>
     <string name="preference_volume_keys">Клавиши громкости</string>
-    <string name="preference_volume_keys_summary">Задать поведение при нажатии клавиш громкости</string>
     <string name="preference_audio_control">Настройки управления звуком</string>
     <string name="preference_audio_control_summary">Снимать фото или видео при помощи громкого шума или голосовой команды (\"cheese\"). Если включено, используйте кнопку микрофона на экране для включения и выключения управления звуком.</string>
     <string name="preference_audio_noise_control_sensitivity">Чувствительность управления звуком</string>
@@ -127,7 +123,6 @@
     <string name="preference_save_video_prefix">Префикс для видео</string>
     <string name="preference_save_video_prefix_summary">Префикс имен файлов для сохраняемых видео</string>
     <string name="preference_save_zulu_time">Формат времени для имени файла</string>
-    <string name="preference_save_zulu_time_summary">Использовать местное время или UTC (всемирное координированное время) для названий фото и видео</string>
     <string name="preference_show_when_locked">Камера на экране блокировки</string>
     <string name="preference_show_when_locked_summary">Если включено, то Open Camera будет отображаться поверх экрана блокировки (вы можете получить доступ к настройкам, галерее и т.д.)</string>
     <string name="preference_startup_focus">Автофокус при запуске</string>
@@ -138,11 +133,8 @@
     <string name="preference_rotate_preview_summary">Возможность поворота превью (не повлияет на фото/видео)</string>
     <string name="preference_screen_gui">Настройки интерфейса</string>
     <string name="preference_preview_size">Размер предпросмотра</string>
-    <string name="preference_preview_size_summary">Выбор размера предпросмотра</string>
     <string name="preference_ui_placement">Расположение интерфейса</string>
-    <string name="preference_ui_placement_summary">Пользовательский интерфейс для правши/левши</string>
     <string name="preference_immersive_mode">Режим погружения</string>
-    <string name="preference_immersive_mode_summary">Опции для \"режима погружения\"</string>
     <string name="preference_show_zoom">Показать масштаб</string>
     <string name="preference_show_zoom_summary">Отображение текущего уровня масштабирования камеры на экране (при увеличении масштаба)</string>
     <string name="preference_show_zoom_controls">Показать кнопки масштаба (+/-)</string>
@@ -166,7 +158,6 @@
     <string name="preference_show_battery">Показать батарею</string>
     <string name="preference_show_battery_summary">Отображение текущего уровня заряда батареи</string>
     <string name="preference_grid">Показать сетку</string>
-    <string name="preference_grid_summary">Отображение одной из различных сеток</string>
     <string name="grid">Сетка</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Руководство по обрезке</string>
     <string name="preference_crop_guide_summary">Отображение прямоугольника, показывающего соотношение сторон - полезно, если вы планируете обрезать фото/видео. Требуется режим фотосъемки WYSIWYG или режим видео.</string>
@@ -186,11 +177,9 @@
     <string name="preference_screen_video_settings">Настройки видео…</string>
     <string name="preference_screen_location_settings">Настройки местоположения…</string>
     <string name="preference_resolution">Разрешение камеры</string>
-    <string name="preference_resolution_summary">Выбор  разрешения фотографий, снятых на камеру</string>
     <string name="preference_quality">Качество изображения</string>
     <string name="preference_quality_summary">Выбор качества фотографий (рекомендуется 90%%)</string>
     <string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Сохранять в формате RAW (DNG)</string>
     <string name="preference_location">Хранить данные о местоположении (геотеггинг)</string>
     <string name="preference_location_summary">Хранить данные о местоположении в фотографиях</string>
     <string name="preference_gps_direction">Хранить направление компаса</string>
@@ -200,11 +189,8 @@
     <string name="preference_stamp">Штампы</string>
     <string name="preference_stamp_summary">Сохранение вместе с фотографией таких данных как: дата/время/местоположение</string>
     <string name="preference_stamp_dateformat">Формат даты</string>
-    <string name="preference_stamp_dateformat_summary">Изменение формата даты (если включено)</string>
     <string name="preference_stamp_timeformat">Формат времени</string>
-    <string name="preference_stamp_timeformat_summary">Изменение формата времени (если включено)</string>
     <string name="preference_stamp_gpsformat">Формат GPS</string>
-    <string name="preference_stamp_gpsformat_summary">Изменение формата отметки GPS (если включено)</string>
     <string name="preference_textstamp">Подписывание фото</string>
     <string name="preference_textstamp_summary">Добавление текста на фотографию</string>
     <string name="preference_stamp_fontsize">Размер шрифта</string>
@@ -216,7 +202,6 @@
     <string name="preference_background_photo_saving">Использовать фоновый поток</string>
     <string name="preference_background_photo_saving_summary">Сохранять фото в фоновом потоке (для ускорения работы)</string>
     <string name="video_quality">Разрешение видео</string>
-    <string name="video_quality_summary">Выбор разрешения видео</string>
     <string name="preference_force_video_4k">Качество видео 4K UHD (экспериментально)</string>
     <string name="preference_force_video_4k_summary">При выборе разрешения (3840х2160) для записи через заднюю камеру она будет работать только, если ваше устройство поддерживает данный формат!</string>
     <string name="preference_video_stabilization">Включить стабилизацию видео</string>

@@ -95,15 +95,12 @@
 
     <string name="preference_category_camera_controls">カメラ制御</string>
     <string name="preference_timer">タイマー</string>
-    <string name="preference_timer_summary">カメラにタイマーを設定します</string>
     <string name="preference_timer_beep">タイマー音</string>
     <string name="preference_timer_beep_summary">タイマーの計測もしくは高速撮影時の間隔の計測で音を鳴らします</string>
     <string name="preference_timer_speak">音声タイマー</string>
     <string name="preference_timer_speak_summary">タイマーの計測もしくは高速撮影時の間隔の計測で(残り1分から)音声を流します</string>
     <string name="preference_burst_mode">高速撮影</string>
-    <string name="preference_burst_mode_summary">1度に多くの写真を撮影します</string>
     <string name="preference_burst_interval">撮影間隔</string>
-    <string name="preference_burst_interval_summary">高速撮影時の撮影間隔を決めます</string>
     <string name="preference_screen_camera_controls_more">カメラ制御の詳細設定…</string>
     <string name="preference_touch_capture">タッチして保存する</string>
     <string name="preference_touch_capture_summary">タッチもしくはプレビューを2回タップして写真を保存します</string>
@@ -112,7 +109,6 @@
     <string name="preference_shutter_sound">シャッター音</string>
     <string name="preference_shutter_sound_summary">撮影時に音を再生する (無効にする場合はAndroid 4.2以上が必要です)</string>
     <string name="preference_volume_keys">音量キー</string>
-    <string name="preference_volume_keys_summary">音量キーを押した時の動作を設定します</string>
 
     <string name="preference_save_location">保存場所</string>
     <string name="preference_save_location_summary">写真/ビデオを保存するフォルダを決めます</string>
@@ -131,11 +127,8 @@
     <string name="preference_rotate_preview_summary">プレビューを回転して表示します(写真/ビデオの保存には影響しません)</string>
     <string name="preference_screen_gui">画面上での表示設定…</string>
     <string name="preference_preview_size">プレビューサイズ</string>
-    <string name="preference_preview_size_summary">プレビューサイズの選択を設定します</string>
     <string name="preference_ui_placement">操作位置</string>
-    <string name="preference_ui_placement_summary">左利きもしくは右利き用に設定します</string>
     <string name="preference_immersive_mode">全画面表示モード</string>
-    <string name="preference_immersive_mode_summary">このオプションは画面全体による表示を提供します</string>
     <string name="preference_show_zoom">ズームを表示する</string>
     <string name="preference_show_zoom_summary">画面上にズームレベルを表示します(ズームインする場合)</string>
     <string name="preference_show_zoom_controls">ズーム制御を表示する</string>
@@ -159,7 +152,6 @@
     <string name="preference_show_battery">電池残量を表示する</string>
     <string name="preference_show_battery_summary">画面上に電池残量を表示します</string>
     <string name="preference_grid">グリッドを表示する</string>
-    <string name="preference_grid_summary">画面上にグリッドを表示します</string>
     <string name="grid">グリッド</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">クロップを表示する</string>
     <string name="preference_crop_guide_summary">画面上に切り取り用の線を表示します - 異なる比率に加工する場合に便利です。使用にはWYSIWYGでの写真モード、もしくはビデオモードを必要とします。</string>
@@ -177,7 +169,6 @@
     <string name="preference_screen_video_settings">ビデオの設定…</string>
     <string name="preference_screen_location_settings">位置情報の設定…</string>
     <string name="preference_resolution">写真の解像度</string>
-    <string name="preference_resolution_summary">カメラで撮影する写真の解像度を決めます</string>
     <string name="preference_quality">写真の品質</string>
     <string name="preference_quality_summary">保存する写真の品質を決めます (90%%の圧縮率を提案します)</string>
     <string name="preference_location">位置情報を使用する</string>
@@ -189,11 +180,8 @@
     <string name="preference_stamp">情報を貼り付ける</string>
     <string name="preference_stamp_summary">写真に日付と時刻を貼り付けます。GPSが有効であれば位置情報も埋め込みます。</string>
     <string name="preference_stamp_dateformat">日付の形式</string>
-    <string name="preference_stamp_dateformat_summary">日付の形式を指定します (有効時のみ)</string>
     <string name="preference_stamp_timeformat">時刻の形式</string>
-    <string name="preference_stamp_timeformat_summary">時刻の形式を指定します (有効時のみ)</string>
     <string name="preference_stamp_gpsformat">GPSの形式</string>
-    <string name="preference_stamp_gpsformat_summary">GPSの形式を指定します (有効時のみ)</string>
     <string name="preference_textstamp">文字の内容</string>
     <string name="preference_textstamp_summary">写真に貼り付ける文字の内容を決めます</string>
     <string name="preference_stamp_fontsize">文字のサイズ</string>
@@ -203,7 +191,6 @@
     <string name="preference_stamp_style">文字の形状</string>
     <string name="preference_stamp_style_summary">写真に貼り付ける文字の形状を決めます</string>
     <string name="video_quality">ビデオの解像度</string>
-    <string name="video_quality_summary">ビデオの解像度を設定します</string>
     <string name="preference_force_video_4k">4K UHDビデオ (実験中)</string>
     <string name="preference_force_video_4k_summary">3840x2160での撮影を有効にします - サポートしていない機械ではクラッシュする事もあります!</string>
     <string name="preference_video_stabilization">自動回転を有効にする</string>

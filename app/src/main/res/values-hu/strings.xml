@@ -96,15 +96,12 @@
 
     <string name="preference_category_camera_controls">Kamera kezelés</string>
     <string name="preference_timer">Időzítő</string>
-    <string name="preference_timer_summary">Késleltetett képkészítés beállítása</string>
     <string name="preference_timer_beep">Időzítő hangjelzés</string>
     <string name="preference_timer_beep_summary">Csipogjon az időzítő visszaszámlálása és sorozatfelvétel készítés alatt</string>
     <string name="preference_timer_speak">Hangos visszaszámlálás</string>
     <string name="preference_timer_speak_summary">Az időzítő és sorozatfelvétel visszaszámlálás késleltetésének bemondása (60 másodperctől)</string>
     <string name="preference_burst_mode">Sorozatfelvétel</string>
-    <string name="preference_burst_mode_summary">Több kép készítése egymás után</string>
     <string name="preference_burst_interval">Sorozatfelvétel intervallum</string>
-    <string name="preference_burst_interval_summary">Késleltetés a sorozatfelvétel fotói között</string>
     <string name="preference_screen_camera_controls_more">További kamera beállítások…</string>
     <string name="preference_touch_capture">Exponálás érintéssel</string>
     <string name="preference_touch_capture_summary">Fénykép készítése az előnézet érintésével, vagy dupla koppintással</string>
@@ -113,7 +110,6 @@
     <string name="preference_shutter_sound">Zárhang</string>
     <string name="preference_shutter_sound_summary">Hang lejátszása fotózáskor</string>
     <string name="preference_volume_keys">Hangerő gombok</string>
-    <string name="preference_volume_keys_summary">Mi történjen a hangerőgombok megnyomásakor?</string>
     <string name="preference_audio_control">Hangvezérlési lehetőségek</string>
     <string name="preference_audio_control_summary">Fotó, vagy videó készítése zajra, vagy hangjelzésre (pl. \"csíz\"). Ha engedélyezve van, használd a képernyőn megjelenő mikrofon gombot a figyelés indításához és leállításához.</string>
     <string name="preference_audio_noise_control_sensitivity">Hangvezérlés érzékenysége</string>
@@ -127,7 +123,6 @@
     <string name="preference_save_video_prefix">Videó fájlnév előtag</string>
     <string name="preference_save_video_prefix_summary">A videók mentésekor használt fájlnév előtag</string>
     <string name="preference_save_zulu_time">Fájlnév időformátum</string>
-    <string name="preference_save_zulu_time_summary">A fotók és videók fájlnevében a helyi idő, vagy az UTC (egyezményes koordinált világidő) jelenjen meg</string>
     <string name="preference_show_when_locked">Kamera megjelenítése zárolt állapotban</string>
     <string name="preference_show_when_locked_summary">Ha engedélyezve van, az Open Camera látható marad a zárképernyő alatt is (de fel kell oldanod a beállítások, geléria, stb. eléréséhez)</string>
     <string name="preference_startup_focus">Autofókusz indításkor</string>
@@ -138,11 +133,8 @@
     <string name="preference_rotate_preview_summary">Az előnézet forgatásának lehetősége (nem befolyásolja az elkészített fotót, videót)</string>
     <string name="preference_screen_gui">Kezelőfelület…</string>
     <string name="preference_preview_size">Előnézet mérete</string>
-    <string name="preference_preview_size_summary">Hogyan kerüljön kiválasztásra az előnézet mérete</string>
     <string name="preference_ui_placement">Kezelőfelület elhelyezés</string>
-    <string name="preference_ui_placement_summary">Bal- vagy jobbkezes használathoz megfelelő felület</string>
     <string name="preference_immersive_mode">Kiterjesztett üzemmód</string>
-    <string name="preference_immersive_mode_summary">\"Kiterjesztett módú\" üzemmód beállításai</string>
     <string name="preference_show_zoom">Zoom megjelenítése</string>
     <string name="preference_show_zoom_summary">Az aktuális zoomszint megjelenítése a képernyőn (zoomolt állapotban)</string>
     <string name="preference_show_zoom_controls">Zoom -/+ gombok</string>
@@ -166,7 +158,6 @@
     <string name="preference_show_battery">Akkumulátor megjelenítése</string>
     <string name="preference_show_battery_summary">Az aktuális akkumulátortöltöttség megjelenítése a képernyőn</string>
     <string name="preference_grid">Rács megjelenítése</string>
-    <string name="preference_grid_summary">Egy rács megjelenítése a különféle választhatóak közül</string>
     <string name="grid">Rács</string> <!-- short form of Show a grid -->
     <string name="preference_crop_guide">Vágási segédvonal megjelenítése</string>
     <string name="preference_crop_guide_summary">A vágási segéd egy négyzetet jelenít meg, mutatva, hogy nézne ki a megadott oldalarány – hasznos, ha a fotót/videót később más oldalarányúra tervezed vágni. WYSIWYG fényképmód, vagy videózás mód szükséges hozzá.</string>
@@ -186,11 +177,9 @@
     <string name="preference_screen_video_settings">Videó beállítások…</string>
     <string name="preference_screen_location_settings">Helymeghatározás beállítások…</string>
     <string name="preference_resolution">Kamera felbontása</string>
-    <string name="preference_resolution_summary">Beállítja a kamera által készített képek felbontását</string>
     <string name="preference_quality">Képminőség</string>
     <string name="preference_quality_summary">Beállítja, hogy a képek milyen JPEG minőséggel legyenek elmentve (ajánlott érték 90%%)</string> <!-- '%' is encoded as '%%' - a single % can crash devices, and this isn't picked up by Android Lint! -->
     <string name="preference_raw">RAW</string>
-    <string name="preference_raw_summary">Mentsen-e RAW (DNG) formátumban</string>
     <string name="preference_location">Helyadatok eltárolása (geotaggelés)</string>
     <string name="preference_location_summary">Eltárolja a GPS helyadatot a fotóban/videóban</string>
     <string name="preference_gps_direction">Irány eltárolása</string>
@@ -200,11 +189,8 @@
     <string name="preference_stamp">Fotók feliratozása</string>
     <string name="preference_stamp_summary">A fotók feliratozása dátum- és időbélyeggel, valamint GPS információval, ha a hely/irány adat elérhető</string>
     <string name="preference_stamp_dateformat">Dátumbélyeg formátum</string>
-    <string name="preference_stamp_dateformat_summary">Add meg a dátumbélyeg formátumát (ha engedélyezve van)</string>
     <string name="preference_stamp_timeformat">Időbélyeg formátum</string>
-    <string name="preference_stamp_timeformat_summary">Add meg az időbélyeg formátumát (ha engedélyezve van)</string>
     <string name="preference_stamp_gpsformat">GPS bélyeg formátum</string>
-    <string name="preference_stamp_gpsformat_summary">Add meg a GPS-bélyegző formátumát (ha engedélyezve van)</string>
     <string name="preference_textstamp">Egyéni szöveg</string>
     <string name="preference_textstamp_summary">Képek feliratozása egyéni szöveggel</string>
     <string name="preference_stamp_fontsize">Betűméret</string>
@@ -216,7 +202,6 @@
     <string name="preference_background_photo_saving">Háttérszál használata</string>
     <string name="preference_background_photo_saving_summary">A fotók mentése háttérben futó programszálon (gyorsabb műveletek)</string>
     <string name="video_quality">Videó felbontása</string>
-    <string name="video_quality_summary">Videók felbontásának beállítása</string>
     <string name="preference_force_video_4k">4K UHD videó kényszerítése (csak egyes eszközökön működik)</string>
     <string name="preference_force_video_4k_summary">3840x2160 felbontású videofelvétel engedélyezése hátlapi kamerával - ez a lehetőség egy trükk, ami lehetővé teheti a 4K videózást olyan 4K-s eszközökön amelyek nem kínálják fel ezt a lehetőséget a nem gyári kamera alkalmazásoknak. Nem biztos, hogy működik, használat előtt próbáld ki.</string>
     <string name="preference_video_stabilization">Videó stabilizáció engedélyezése</string>
