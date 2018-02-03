@@ -25,6 +25,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -71,7 +72,7 @@ public class DrawPreview {
 	//private final int [] gui_location = new int[2];
 	private final static DecimalFormat decimalFormat = new DecimalFormat("#0.0");
 	private final float scale;
-	private final float stroke_width;
+	private final float stroke_width; // stroke_width used for various UI elements
 	private Calendar calendar;
 	private final DateFormat dateFormatTimeInstance = DateFormat.getTimeInstance();
 	private final String ybounds_text;
@@ -150,10 +151,11 @@ public class DrawPreview {
 		// see testHDRRestart
 
 		p.setAntiAlias(true);
+        p.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         p.setStrokeCap(Paint.Cap.ROUND);
 		scale = getContext().getResources().getDisplayMetrics().density;
 		this.stroke_width = (1.0f * scale + 0.5f); // convert dps to pixels
-		p.setStrokeWidth(stroke_width);
+		// don't set stroke_width now - set it when we use STROKE style (as it'll be overridden by drawTextWithBackground())
 
         location_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_gps_fixed_white_48dp);
     	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_gps_off_white_48dp);
@@ -415,6 +417,7 @@ public class DrawPreview {
 				}
 				p.setColor(Color.WHITE);
 				p.setStyle(Paint.Style.STROKE);
+				p.setStrokeWidth(stroke_width);
 				int fibb = 34;
 				int fibb_n = 21;
 				int left = 0, top = 0;
@@ -537,6 +540,7 @@ public class DrawPreview {
 			String preference_crop_guide = sharedPreferences.getString(PreferenceKeys.ShowCropGuidePreferenceKey, "crop_guide_none");
 			if( camera_controller != null && preview.getTargetRatio() > 0.0 && !preference_crop_guide.equals("crop_guide_none") ) {
 				p.setStyle(Paint.Style.STROKE);
+				p.setStrokeWidth(stroke_width);
 				p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 				double crop_ratio = -1.0;
 				switch(preference_crop_guide) {
@@ -604,11 +608,11 @@ public class DrawPreview {
 		int ui_rotation = preview.getUIRotation();
 
 		// set up text etc for the multiple lines of "info" (time, free mem, etc)
-		p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+		p.setTextSize(16 * scale + 0.5f); // convert dps to pixels
 		p.setTextAlign(Paint.Align.LEFT);
 		int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
 		int location_y = top_y;
-		final int gap_y = (int) (2 * scale + 0.5f); // convert dps to pixels
+		final int gap_y = (int) (0 * scale + 0.5f); // convert dps to pixels
 		if( ui_rotation == 90 || ui_rotation == 270 ) {
 			int diff = canvas.getWidth() - canvas.getHeight();
 			location_x += diff/2;
@@ -1493,6 +1497,7 @@ public class DrawPreview {
 				}*/
 				p.setColor(Color.WHITE);
 				p.setStyle(Paint.Style.STROKE);
+				p.setStrokeWidth(stroke_width);
 				canvas.drawCircle(pos_x, pos_y, radius, p);
 				p.setStyle(Paint.Style.FILL); // reset
 			}
@@ -1529,6 +1534,7 @@ public class DrawPreview {
 			else
 				p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
+			p.setStrokeWidth(stroke_width);
 			int pos_x;
 			int pos_y;
 			if( preview.hasFocusArea() ) {
@@ -1589,6 +1595,7 @@ public class DrawPreview {
 		if( camera_controller != null && taking_picture && !front_screen_flash && take_photo_border_pref ) {
 			p.setColor(Color.WHITE);
 			p.setStyle(Paint.Style.STROKE);
+			p.setStrokeWidth(stroke_width);
 			float this_stroke_width = (5.0f * scale + 0.5f); // convert dps to pixels
 			p.setStrokeWidth(this_stroke_width);
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
@@ -1643,6 +1650,7 @@ public class DrawPreview {
 		if( faces_detected != null ) {
 			p.setColor(Color.rgb(255, 235, 59)); // Yellow 500
 			p.setStyle(Paint.Style.STROKE);
+			p.setStrokeWidth(stroke_width);
 			for(CameraController.Face face : faces_detected) {
 				// Android doc recommends filtering out faces with score less than 50 (same for both Camera and Camera2 APIs)
 				if( face.score >= 50 ) {

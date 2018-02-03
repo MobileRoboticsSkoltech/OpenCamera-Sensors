@@ -1743,11 +1743,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 			text_bounds.top += location_y - padding;
 			text_bounds.bottom += location_y + padding;
 		}
-		if( shadow ) {
-			canvas.drawRect(text_bounds, paint);
-		}
 		paint.setColor(foreground);
 		canvas.drawText(text, location_x, location_y, paint);
+		if( shadow ) {
+			paint.setColor(background);
+			paint.setStyle(Paint.Style.STROKE);
+			paint.setStrokeWidth(1);
+			canvas.drawText(text, location_x, location_y, paint);
+		}
 		return text_bounds.bottom - text_bounds.top;
 	}
 	
