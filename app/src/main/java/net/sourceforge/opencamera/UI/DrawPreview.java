@@ -1176,6 +1176,11 @@ public class DrawPreview {
 				p.setColor(battery_frac > 0.15f ? Color.rgb(37, 155, 36) : Color.rgb(244, 67, 54)); // Green 500 or Red 500
 				p.setStyle(Paint.Style.FILL);
 				canvas.drawRect(battery_x, battery_y+(1.0f-battery_frac)*(battery_height-2), battery_x+battery_width, battery_y+battery_height, p);
+				if( battery_frac < 1.0f ) {
+					p.setColor(Color.BLACK);
+					p.setAlpha(64);
+					canvas.drawRect(battery_x, battery_y, battery_x + battery_width, battery_y + (1.0f - battery_frac) * (battery_height - 2), p);
+				}
 			}
 		}
 
