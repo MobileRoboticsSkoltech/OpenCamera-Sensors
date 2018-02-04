@@ -1239,7 +1239,7 @@ public class MainUI {
 						}
 						return true;
 					case "volume_auto_stabilise":
-						if(main_activity.supportsAutoStabilise()) {
+						if( main_activity.supportsAutoStabilise() ) {
 							boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false);
 							auto_stabilise = !auto_stabilise;
 							SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -1247,6 +1247,8 @@ public class MainUI {
 							editor.apply();
 							String message = main_activity.getResources().getString(R.string.preference_auto_stabilise) + ": " + main_activity.getResources().getString(auto_stabilise ? R.string.on : R.string.off);
 							main_activity.getPreview().showToast(main_activity.getChangedAutoStabiliseToastBoxer(), message);
+							main_activity.getApplicationInterface().getDrawPreview().updateSettings(); // because we cache the auto-stabilise setting
+		    				this.destroyPopup(); // need to recreate popup in order to update the auto-level checkbox
 						}
 						else {
 							main_activity.getPreview().showToast(main_activity.getChangedAutoStabiliseToastBoxer(), R.string.auto_stabilise_not_supported);
