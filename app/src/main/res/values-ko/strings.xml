@@ -7,9 +7,6 @@
     <string name="intro_text">터치해서 초점을 맞추고 파란색 카메라 버튼을 눌러서 사진을 찍습니다. 더 많은 도움이 필요하시면, 설정에서 온라인 도움말을 선택하세요. 오픈 카메라는 완전 무료입니다. 앱이 마음에 드시면 기부용 앱을 구매해보세요 (온라인 도움말 혹은 설정에서 링크를 선택).\n\n개인정보 정책: 위치 퍼미션은 지오태깅을 위해 필요합니다. 하지만 비활성화가 기본값입니다. 만약 활성화되면, 당신의 위치는 저장된 파일에 기록됩니다 (이것은 오직 지오태깅 용도로만 사용됩니다).</string>
     <string name="intro_ok">확인 (이 메세지는 더이상 표시되지 않습니다)</string>
 
-    <string name="answer_yes">예</string>
-    <string name="answer_no">아니오</string>
-
     <string name="on">켜짐</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
     <string name="off">꺼짐</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->
 

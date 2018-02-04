@@ -5,8 +5,6 @@
     <string name="action_popup">Ustawienia</string>
     <string name="intro_text">Dotknij aby ustawić ostrość a następnie wciśnij niebieski przycisk by zrobić zdjęcie. Jeśli potrzebujesz pomocy kliknij Pomoc online w ustawieniach. Open Camera jest zupełnie za darmo. Jeśli spodobała Ci się ta aplikacja rozważ zakup aplikacji-darowizny :) (sprawdź link w ustawieniach).\n\nPolityka prywatności: Dostęp do lokalizacji jest wymagany do geotagowania ale jest domyślnie wyłączony. Jeśli jest włączony Twoja lokalizacja będzie dodawana do zapisywanych plików i będzie używana wyłącznie w tym celu.</string>
     <string name="intro_ok">OK (Ta wiadomość nie pokaże się ponownie)</string>
-    <string name="answer_yes">Tak</string>
-    <string name="answer_no">Nie</string>
     <string name="on">Włączone</string>
     <!-- whether a setting is turned on, e.g., "Auto-level: On" -->
     <string name="off">Wyłączone</string>

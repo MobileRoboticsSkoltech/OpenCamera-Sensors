@@ -6,9 +6,6 @@
     <string name="action_popup">Definições rápidas</string>
     <string name="intro_text">Tocar para focar, pressione o botão de câmara azul para tirar fotografias. Para mais ajuda, clique em Ajuda online nas Definições. O Open Camera é completamente grátis. Se gosta desta aplicação, por favor concidere comprar a minha aplicação de donativo :) (veja o link nas Definições, ou Ajuda online).\n\nPolítica de Privacidade: A permissão de localização é necessária para o geotagging, mas isto encontra-se desativado por predefinição. Se ativado, a sua localização será codificada e guardada nos ficheiros (e apenas será usada para este propósito).</string>
     <string name="intro_ok">OK (Esta mensagem não será mostrada novamente)</string>
-    
-    <string name="answer_yes">Sim</string>
-    <string name="answer_no">Não</string>
 
     <string name="on">Ativar</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
     <string name="off">Desativar</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->

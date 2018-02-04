@@ -6,9 +6,6 @@
     <string name="action_popup">Vyskakovací nastavení</string>
     <string name="intro_text">Dotkněte se pro zaostření a zmáčkněte modré tlačítko pro pořízení fotografie. Pro nápovědu klikněte na Online nápověda v Nastavení. Open Camera je zcela zdarma. Pokud se vám aplikace líbí, zvažte koupi mé darovací aplikace :) (odkaz je v Nastavení nebo v Online nápovědě).\n\nZásady ochrany osobních údajů: Povolení k určení polohy je nutné pro geotagging, ale je implicitně vypnuto. Pokud jej povolíte, vaše poloha bude zakódována do uložených souborů (a použita pouze pro tyto účely).</string>
     <string name="intro_ok">OK (Tato zpráva se již znovu nezobrazí.)</string>
-    
-    <string name="answer_yes">Ano</string>
-    <string name="answer_no">Ne</string>
 
     <string name="on">Zap</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
     <string name="off">Vyp</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->

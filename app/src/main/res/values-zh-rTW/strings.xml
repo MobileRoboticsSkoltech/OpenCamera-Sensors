@@ -6,9 +6,6 @@
     <string name="action_popup">彈出設定</string>
     <string name="intro_text">輕觸對焦，按下藍色相機按鈕來拍照。按下設定中的線上說明可以取得更多協助。Open Camera 是完全免費的。如果您喜歡這個 app，請考慮購買我的捐贈 app :)(查看設定中的連結，或線上說明)。\n\n隱私政策：必須允許位置許可才能進行地理標記，但預設這是關閉的。如果開啟，您的位置會編碼在儲存的檔案中(且僅被用於此目的).\n\n(此訊息將不會再顯示。)</string>
     <string name="intro_ok">好 (此訊息將不再顯示)</string>
-    
-    <string name="answer_yes">是</string>
-    <string name="answer_no">否</string>
 
     <string name="on">開啟</string> <!-- whether a setting is turned on, e.g., "Auto-stabilise: On" -->
     <string name="off">關閉</string> <!-- whether a setting is turned off, e.g., "Auto-stabilise: Off" -->

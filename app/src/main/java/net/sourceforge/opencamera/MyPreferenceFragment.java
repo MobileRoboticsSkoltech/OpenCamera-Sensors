@@ -717,7 +717,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                         about_string.append("\nVideo stabilization?: ");
                         about_string.append(getString(supports_video_stabilization ? R.string.about_available : R.string.about_not_available));
 						about_string.append("\nCan disable shutter sound?: ");
-						about_string.append(getString(can_disable_shutter_sound ? R.string.answer_yes : R.string.answer_no));
+						about_string.append(getString(can_disable_shutter_sound ? R.string.about_available : R.string.about_not_available));
                         about_string.append("\nFlash modes: ");
                 		String [] flash_values = bundle.getStringArray("flash_values");
                 		if( flash_values != null && flash_values.length > 0 ) {
@@ -886,7 +886,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			        	.setIcon(android.R.drawable.ic_dialog_alert)
 			        	.setTitle(R.string.preference_reset)
 			        	.setMessage(R.string.preference_reset_question)
-			        	.setPositiveButton(R.string.answer_yes, new DialogInterface.OnClickListener() {
+			        	.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 			        		@Override
 					        public void onClick(DialogInterface dialog, int which) {
 		                		if( MyDebug.LOG )
@@ -915,7 +915,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			                	startActivity(i);
 					        }
 			        	})
-			        	.setNegativeButton(R.string.answer_no, null)
+			        	.setNegativeButton(android.R.string.no, null)
 			        	.show();
                 	}
                 	return false;

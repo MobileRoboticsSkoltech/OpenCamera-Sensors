@@ -6,9 +6,6 @@
     <string name="action_popup">Настройки всплывающих окон</string>
     <string name="intro_text">Нажмите на экран для фокуса и нажмите синюю кнопку, чтобы сделать фото. В настройках вас ждет очень много плюшек. :)</string>
     <string name="intro_ok">Ок (Это сообщение больше не появится.)</string>
-    
-    <string name="answer_yes">Да</string>
-    <string name="answer_no">Нет</string>
 
     <string name="on">Вкл</string>
     <string name="off">Выкл</string>

@@ -2189,7 +2189,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			        	.setIcon(android.R.drawable.ic_dialog_alert)
 			        	.setTitle(R.string.clear_folder_history)
 			        	.setMessage(R.string.clear_folder_history_question)
-			        	.setPositiveButton(R.string.answer_yes, new DialogInterface.OnClickListener() {
+			        	.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 			        		@Override
 					        public void onClick(DialogInterface dialog, int which) {
 								if( MyDebug.LOG )
@@ -2202,7 +2202,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 								showPreview(true);
 					        }
 			        	})
-			        	.setNegativeButton(R.string.answer_no, new DialogInterface.OnClickListener() {
+			        	.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
 			        		@Override
 					        public void onClick(DialogInterface dialog, int which) {
 								if( MyDebug.LOG )
