@@ -1750,6 +1750,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			paint.setStyle(Paint.Style.STROKE);
 			paint.setStrokeWidth(1);
 			canvas.drawText(text, location_x, location_y, paint);
+			paint.setStyle(Paint.Style.FILL); // set back to default
 		}
 		return text_bounds.bottom - text_bounds.top;
 	}
