@@ -66,9 +66,9 @@
         <item>锁定为纵向</item>
     </string-array>
     <string-array name="preference_lock_orientation_values">
-        <item>无</item>
-        <item>横向</item>
-        <item>纵向</item>
+        <item>none</item>
+        <item>landscape</item>
+        <item>portrait</item>
     </string-array>
     <string-array name="preference_timer_entries">
         <item>无定时器</item>
@@ -114,7 +114,7 @@
         <item>4</item>
         <item>5</item>
         <item>10</item>
-        <item>无限</item>
+        <item>unlimited</item>
     </string-array>
     <string-array name="preference_burst_interval_entries">
         <item>无延迟</item>
@@ -395,7 +395,7 @@
         <item>100Mbps</item>
     </string-array>
     <string-array name="preference_video_bitrate_values">
-        <item>默认</item>
+        <item>default</item>
         <item>100000</item>
         <item>200000</item>
         <item>500000</item>
