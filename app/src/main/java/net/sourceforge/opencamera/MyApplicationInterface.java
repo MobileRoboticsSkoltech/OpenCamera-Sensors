@@ -1821,6 +1821,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		Location location = store_location ? getLocation() : null;
 		boolean store_geo_direction = main_activity.getPreview().hasGeoDirection() && getGeodirectionPref();
 		double geo_direction = store_geo_direction ? main_activity.getPreview().getGeoDirection() : 0.0;
+		String custom_tag_artist = sharedPreferences.getString(PreferenceKeys.ExifArtistPreferenceKey, "");
+		String custom_tag_copyright = sharedPreferences.getString(PreferenceKeys.ExifCopyrightPreferenceKey, "");
+
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
 		boolean do_in_background = saveInBackground(image_capture_intent);
@@ -1869,6 +1872,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					current_date,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 					store_location, location, store_geo_direction, geo_direction,
+					custom_tag_artist, custom_tag_copyright,
 					sample_factor);
 			}
 			imageSaver.addImageAverage(images.get(0));
@@ -1884,6 +1888,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 					current_date,
 					preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 					store_location, location, store_geo_direction, geo_direction,
+					custom_tag_artist, custom_tag_copyright,
 					sample_factor);
 		}
 

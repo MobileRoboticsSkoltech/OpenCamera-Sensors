@@ -539,6 +539,34 @@
 				android:defaultValue="preference_front_camera_mirror_no"
 				/>
 
+            <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+			<PreferenceCategory
+		        android:key="preference_category_exif_tags"
+		        android:title="@string/preference_category_exif_tags"
+		        >
+
+				<EditTextPreference
+					android:key="preference_exif_artist"
+					android:title="@string/preference_exif_artist"
+					android:summary="@string/preference_exif_artist_summary"
+					android:dialogTitle="@string/preference_exif_artist"
+					android:dialogMessage="@string/preference_exif_artist_summary"
+					android:inputType="text"
+					android:defaultValue=""
+					/>
+
+				<EditTextPreference
+					android:key="preference_exif_copyright"
+					android:title="@string/preference_exif_copyright"
+					android:summary="@string/preference_exif_copyright_summary"
+					android:dialogTitle="@string/preference_exif_copyright"
+					android:dialogMessage="@string/preference_exif_copyright_summary"
+					android:inputType="text"
+					android:defaultValue=""
+					/>
+
+			</PreferenceCategory>
+
 			<PreferenceCategory
 		        android:key="preference_category_stamp"
 		        android:title="@string/preference_category_stamp"

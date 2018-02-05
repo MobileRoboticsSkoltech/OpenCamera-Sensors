@@ -89,6 +89,10 @@ public class PreferenceKeys {
 
 	public static final String RequireLocationPreferenceKey = "preference_require_location";
 
+	public static final String ExifArtistPreferenceKey = "preference_exif_artist";
+
+	public static final String ExifCopyrightPreferenceKey = "preference_exif_copyright";
+
 	public static final String StampPreferenceKey = "preference_stamp";
 
 	public static final String StampDateFormatPreferenceKey = "preference_stamp_dateformat";

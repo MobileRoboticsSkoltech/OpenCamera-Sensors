@@ -21,6 +21,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
@@ -328,6 +329,18 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
         }
         
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
+        	// the required ExifInterface tags requires Android N or greater
+        	Preference pref = findPreference("preference_category_exif_tags");
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+        	pg.removePreference(pref);
+        }
+        else {
+			setSummary("preference_exif_artist");
+			setSummary("preference_exif_copyright");
+		}
+
+
 		final boolean using_android_l = bundle.getBoolean("using_android_l");
         if( !using_android_l ) {
         	Preference pref = findPreference("preference_show_iso");
@@ -998,6 +1011,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 	/* So that manual changes to the checkbox/switch preferences, while the preferences are showing, show up;
 	 * in particular, needed for preference_using_saf, when the user cancels the SAF dialog (see
 	 * MainActivity.onActivityResult).
+	 * Also programmatically sets summary (see setSummary).
 	 */
 	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 		if( MyDebug.LOG )
@@ -1007,5 +1021,30 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 	    	TwoStatePreference twoStatePref = (TwoStatePreference)pref;
 	    	twoStatePref.setChecked(prefs.getBoolean(key, true));
 	    }
+	    setSummary(key);
+	}
+
+	/** Programmatically sets summaries as required.
+	 *  Remember to call setSummary() from the constructor for any keys we set, to initialise the
+	 *  summary.
+	 */
+	private void setSummary(String key) {
+		Preference pref = findPreference(key);
+	    if( pref instanceof EditTextPreference ) {
+	    	// %s only supported for ListPreference
+			// we also display the usual summary if no preference value is set
+	    	if( pref.getKey().equals("preference_exif_artist") || pref.getKey().equals("preference_exif_copyright") ) {
+				EditTextPreference editTextPref = (EditTextPreference)pref;
+				if( editTextPref.getText().length() > 0 ) {
+					pref.setSummary(editTextPref.getText());
+				}
+				else if( pref.getKey().equals("preference_exif_artist") ) {
+					pref.setSummary(getActivity().getResources().getString(R.string.preference_exif_artist_summary));
+				}
+				else if( pref.getKey().equals("preference_exif_copyright") ) {
+					pref.setSummary(getActivity().getResources().getString(R.string.preference_exif_copyright_summary));
+				}
+			}
+		}
 	}
 }

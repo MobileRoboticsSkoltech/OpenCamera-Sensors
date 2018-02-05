@@ -113,6 +113,8 @@ public class ImageSaver extends Thread {
 		final Location location;
 		final boolean store_geo_direction;
 		final double geo_direction;
+		String custom_tag_artist;
+		String custom_tag_copyright;
 		int sample_factor = 1; // sampling factor for thumbnail, higher means lower quality
 		
 		Request(Type type,
@@ -128,6 +130,8 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+			String custom_tag_artist,
+			String custom_tag_copyright,
 			int sample_factor) {
 			this.type = type;
 			this.process_type = process_type;
@@ -156,6 +160,8 @@ public class ImageSaver extends Thread {
 			this.location = location;
 			this.store_geo_direction = store_geo_direction;
 			this.geo_direction = geo_direction;
+			this.custom_tag_artist = custom_tag_artist;
+			this.custom_tag_copyright = custom_tag_copyright;
 			this.sample_factor = sample_factor;
 		}
 	}
@@ -254,6 +260,8 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+			String custom_tag_artist,
+			String custom_tag_copyright,
 			int sample_factor) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saveImageJpeg");
@@ -274,6 +282,8 @@ public class ImageSaver extends Thread {
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
+				custom_tag_artist,
+				custom_tag_copyright,
 				sample_factor);
 	}
 
@@ -304,6 +314,7 @@ public class ImageSaver extends Thread {
 				current_date,
 				null, null, 0, 0, null, null, null, null,
 				false, null, false, 0.0,
+				null, null,
 				1);
 	}
 
@@ -319,6 +330,8 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+			String custom_tag_artist,
+			String custom_tag_copyright,
 			int sample_factor) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "startImageAverage");
@@ -337,6 +350,8 @@ public class ImageSaver extends Thread {
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
+				custom_tag_artist,
+				custom_tag_copyright,
 				sample_factor);
 	}
 
@@ -390,6 +405,8 @@ public class ImageSaver extends Thread {
 			Date current_date,
 			String preference_stamp, String preference_textstamp, int font_size, int color, String pref_style, String preference_stamp_dateformat, String preference_stamp_timeformat, String preference_stamp_gpsformat,
 			boolean store_location, Location location, boolean store_geo_direction, double geo_direction,
+			String custom_tag_artist,
+			String custom_tag_copyright,
 			int sample_factor) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saveImage");
@@ -412,6 +429,8 @@ public class ImageSaver extends Thread {
 				current_date,
 				preference_stamp, preference_textstamp, font_size, color, pref_style, preference_stamp_dateformat, preference_stamp_timeformat, preference_stamp_gpsformat,
 				store_location, location, store_geo_direction, geo_direction,
+				custom_tag_artist,
+				custom_tag_copyright,
 				sample_factor);
 
 		if( do_in_background ) {
@@ -492,6 +511,7 @@ public class ImageSaver extends Thread {
 			null,
 			null, null, 0, 0, null, null, null, null,
 			false, null, false, 0.0,
+			null, null,
 			1);
 		if( MyDebug.LOG )
 			Log.d(TAG, "add dummy request");
@@ -1460,12 +1480,12 @@ public class ImageSaver extends Thread {
 							}
 						}
 	            	}
-	            	else if( store_geo_direction ) {
+	            	else if( store_geo_direction || hasCustomExif(request.custom_tag_artist, request.custom_tag_copyright) ) {
     	            	if( MyDebug.LOG )
-        	    			Log.d(TAG, "add GPS direction exif info");
+        	    			Log.d(TAG, "add additional exif info");
     	            	try {
 	    	            	ExifInterface exif = new ExifInterface(picFile.getAbsolutePath());
-							modifyExif(exif, using_camera2, current_date, store_location, store_geo_direction, request.geo_direction);
+							modifyExif(exif, using_camera2, current_date, store_location, store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright);
 	    	            	exif.saveAttributes();
     	            	}
     		    		catch(NoClassDefFoundError exception) {
@@ -2000,7 +2020,7 @@ public class ImageSaver extends Thread {
 					exif_new.setAttribute(ExifInterface.TAG_USER_COMMENT, exif_user_comment);
 			}
 
-			modifyExif(exif_new, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction);
+			modifyExif(exif_new, request.using_camera2, request.current_date, request.store_location, request.store_geo_direction, request.geo_direction, request.custom_tag_artist, request.custom_tag_copyright);
 			exif_new.saveAttributes();
 	}
 
@@ -2235,9 +2255,10 @@ public class ImageSaver extends Thread {
 
 	/** Makes various modifications to the exif data, if necessary.
 	 */
-    private void modifyExif(ExifInterface exif, boolean using_camera2, Date current_date, boolean store_location, boolean store_geo_direction, double geo_direction) {
+    private void modifyExif(ExifInterface exif, boolean using_camera2, Date current_date, boolean store_location, boolean store_geo_direction, double geo_direction, String custom_tag_artist, String custom_tag_copyright) {
 		setGPSDirectionExif(exif, store_geo_direction, geo_direction);
 		setDateTimeExif(exif);
+		setCustomExif(exif, custom_tag_artist, custom_tag_copyright);
 		if( needGPSTimestampHack(using_camera2, store_location) ) {
 			fixGPSTimestamp(exif, current_date);
 		}
@@ -2258,6 +2279,31 @@ public class ImageSaver extends Thread {
 		   	exif.setAttribute(TAG_GPS_IMG_DIRECTION, GPSImgDirection_string);
 		   	exif.setAttribute(TAG_GPS_IMG_DIRECTION_REF, "M");
     	}
+	}
+
+	/** Whether custom exif tags need to be applied to the image file.
+	 */
+	private boolean hasCustomExif(String custom_tag_artist, String custom_tag_copyright) {
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && custom_tag_artist != null && custom_tag_artist.length() > 0 )
+			return true;
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && custom_tag_copyright != null && custom_tag_copyright.length() > 0 )
+			return true;
+		return false;
+	}
+
+	/** Applies the custom exif tags to the ExifInterface.
+	 */
+	private void setCustomExif(ExifInterface exif, String custom_tag_artist, String custom_tag_copyright) {
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && custom_tag_artist != null && custom_tag_artist.length() > 0 ) {
+        	if( MyDebug.LOG )
+    			Log.d(TAG, "apply TAG_ARTIST: " + custom_tag_artist);
+			exif.setAttribute(ExifInterface.TAG_ARTIST, custom_tag_artist);
+		}
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && custom_tag_copyright != null && custom_tag_copyright.length() > 0 ) {
+			exif.setAttribute(ExifInterface.TAG_COPYRIGHT, custom_tag_copyright);
+        	if( MyDebug.LOG )
+    			Log.d(TAG, "apply TAG_COPYRIGHT: " + custom_tag_copyright);
+		}
 	}
 
 	private void setDateTimeExif(ExifInterface exif) {
