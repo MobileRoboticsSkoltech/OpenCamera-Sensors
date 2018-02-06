@@ -212,7 +212,7 @@
     <string name="preference_video_restart">Restart video after max duration</string>
     <string name="preference_video_restart_summary">If the video has stopped after hitting the maximum duration (if set), this option will make the video restart, up to the specified number of times</string>
     <string name="preference_video_max_filesize">Maximum file size of video</string>
-    <string name="preference_video_max_filesize_summary">The video recording will stop and/or restart (see option below) when the (approximate) maximum file size is reached. Note that almost all Android devices have a maximum file size for videos (typically around 2GB or 4GB), but this option allows setting a specific value</string>
+    <string name="preference_video_max_filesize_summary">The video recording will stop and/or restart (see option below) when the (approximate) maximum file size is reached. Note that almost all Android devices have a maximum file size for videos (typically around 2GB or 4GB), but this option allows setting a specific value.</string>
     <string name="preference_video_restart_max_filesize">Restart on maximum file size</string>
     <string name="preference_video_restart_max_filesize_summary">Whether to automatically restart when the maximum file size is reached (whether the device default max file size, or user specified)</string>
     <string name="preference_record_audio">Record audio</string>
@@ -343,10 +343,10 @@
     <string name="selfie">Selfie</string>
 
     <string name="preference_front_camera_mirror">Front camera mirror</string>
-    <string name="preference_front_camera_mirror_summary">Whether to mirror images when using the front camera.</string>
+    <string name="preference_front_camera_mirror_summary">Whether to mirror images when using the front camera</string>
 
     <string name="preference_calibrate_level">Calibrate level angle</string>
-    <string name="preference_calibrate_level_summary">This option calibrates your device\'s accelerometer, so the auto-level and on-screen level/angle options work correctly.</string>
+    <string name="preference_calibrate_level_summary">This option calibrates your device\'s accelerometer, so the auto-level and on-screen level/angle options work correctly</string>
     <string name="preference_calibrate_level_dialog">Please place your device on a flat horizontal surface so that it is level (either in portrait or landscape orientation), and then select Calibrate.\n\nPress Reset to remove the calibration from your device.\n\nPress back button to cancel.</string>
     <string name="preference_calibrate_level_calibrate">Calibrate</string>
     <string name="preference_calibrate_level_reset">Reset</string>
