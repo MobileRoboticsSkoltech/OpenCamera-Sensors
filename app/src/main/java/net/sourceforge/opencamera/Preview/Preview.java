@@ -2132,7 +2132,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.isos = null; // if supports_iso_range==true, caller shouldn't be using getSupportedISOs()
 
 			// now set the desired ISO mode/value
-			if( value.equals("auto") ) {
+			if( value.equals(CameraController.ISO_DEFAULT) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setting auto iso");
 				camera_controller.setManualISO(false, 0);
@@ -2148,7 +2148,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				else {
 					// failed to parse
 					camera_controller.setManualISO(false, 0);
-					value = "auto"; // so we switch the preferences back to auto mode, rather than the invalid value
+					value = CameraController.ISO_DEFAULT; // so we switch the preferences back to auto mode, rather than the invalid value
 				}
 
 				// now save, so it's available for PreferenceActivity
@@ -2160,7 +2160,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			CameraController.SupportedValues supported_values = camera_controller.setISO(value);
 			if( supported_values != null ) {
 				isos = supported_values.values;
-				if( !supported_values.selected_value.equals("auto") ) {
+				if( !supported_values.selected_value.equals(CameraController.ISO_DEFAULT) ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "has manual iso");
 					is_manual_iso = true;

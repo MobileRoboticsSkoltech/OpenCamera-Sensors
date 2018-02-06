@@ -2447,7 +2447,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			return false;
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String iso_value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
-		boolean manual_iso = !iso_value.equals("auto");
+		boolean manual_iso = !iso_value.equals(CameraController.ISO_DEFAULT);
 		return preview.supportsExposures() || (manual_iso && preview.supportsISORange() );
 	}
 

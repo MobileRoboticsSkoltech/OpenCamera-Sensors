@@ -294,17 +294,17 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
 	public String getSceneModePref() {
-		return sharedPreferences.getString(PreferenceKeys.SceneModePreferenceKey, "auto");
+		return sharedPreferences.getString(PreferenceKeys.SceneModePreferenceKey, CameraController.SCENE_MODE_DEFAULT);
     }
     
     @Override
     public String getColorEffectPref() {
-		return sharedPreferences.getString(PreferenceKeys.ColorEffectPreferenceKey, "none");
+		return sharedPreferences.getString(PreferenceKeys.ColorEffectPreferenceKey, CameraController.COLOR_EFFECT_DEFAULT);
     }
 
     @Override
     public String getWhiteBalancePref() {
-		return sharedPreferences.getString(PreferenceKeys.WhiteBalancePreferenceKey, "auto");
+		return sharedPreferences.getString(PreferenceKeys.WhiteBalancePreferenceKey, CameraController.WHITE_BALANCE_DEFAULT);
     }
 
 	@Override
@@ -314,7 +314,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public String getISOPref() {
-    	return sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, "auto");
+    	return sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
     }
     
     @Override

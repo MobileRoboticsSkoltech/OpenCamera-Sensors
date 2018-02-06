@@ -423,7 +423,7 @@ public class CameraController1 extends CameraController {
 		/*{
 			// test
 			values = new ArrayList<>();
-			values.add("auto");
+			values.add(ISO_DEFAULT);
 		}*/
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
@@ -564,7 +564,7 @@ public class CameraController1 extends CameraController {
 			}
 		}
 		/*values = new ArrayList<>();
-		//values.add("auto");
+		//values.add(ISO_DEFAULT);
 		//values.add("ISO_HJR");
 		values.add("ISO50");
 		values.add("ISO64");
@@ -585,7 +585,7 @@ public class CameraController1 extends CameraController {
 		values.add("ISO2000");
 		values.add("ISO2500");
 		values.add("ISO3200");
-		values.add("auto");
+		values.add(ISO_DEFAULT);
 		//values.add("400");
 		//values.add("800");
 		//values.add("1600");
@@ -594,7 +594,7 @@ public class CameraController1 extends CameraController {
 			if( values == null ) {
 				// set a default for some devices which have an iso_key, but don't give a list of supported ISOs
 				values = new ArrayList<>();
-				values.add("auto");
+				values.add(ISO_DEFAULT);
 				values.add("50");
 				values.add("100");
 				values.add("200");

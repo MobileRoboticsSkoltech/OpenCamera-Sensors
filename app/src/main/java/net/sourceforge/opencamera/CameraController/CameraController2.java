@@ -1537,7 +1537,7 @@ public class CameraController2 extends CameraController {
 			value = "candlelight";
 			break;
 		case CameraMetadata.CONTROL_SCENE_MODE_DISABLED:
-			value = "auto";
+			value = SCENE_MODE_DEFAULT;
 			break;
 		case CameraMetadata.CONTROL_SCENE_MODE_FIREWORKS:
 			value = "fireworks";
@@ -1604,7 +1604,7 @@ public class CameraController2 extends CameraController {
 			}
 		}
 		if( !has_disabled ) {
-			values.add(0, "auto");
+			values.add(0, SCENE_MODE_DEFAULT);
 		}
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
@@ -1622,7 +1622,7 @@ public class CameraController2 extends CameraController {
 				case "candlelight":
 					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_CANDLELIGHT;
 					break;
-				case "auto":
+				case SCENE_MODE_DEFAULT:
 					selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
 					break;
 				case "fireworks":
@@ -1713,7 +1713,7 @@ public class CameraController2 extends CameraController {
 			value = "negative";
 			break;
 		case CameraMetadata.CONTROL_EFFECT_MODE_OFF:
-			value = "none";
+			value = COLOR_EFFECT_DEFAULT;
 			break;
 		case CameraMetadata.CONTROL_EFFECT_MODE_POSTERIZE:
 			value = "posterize";
@@ -1766,7 +1766,7 @@ public class CameraController2 extends CameraController {
 				case "negative":
 					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_NEGATIVE;
 					break;
-				case "none":
+				case COLOR_EFFECT_DEFAULT:
 					selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
 					break;
 				case "posterize":
@@ -1817,7 +1817,7 @@ public class CameraController2 extends CameraController {
 		String value;
 		switch( value2 ) {
 		case CameraMetadata.CONTROL_AWB_MODE_AUTO:
-			value = "auto";
+			value = WHITE_BALANCE_DEFAULT;
 			break;
 		case CameraMetadata.CONTROL_AWB_MODE_CLOUDY_DAYLIGHT:
 			value = "cloudy-daylight";
@@ -1881,18 +1881,18 @@ public class CameraController2 extends CameraController {
 		}
 		{
 			// re-order so that auto is first, manual is second
-			boolean has_auto = values.remove("auto");
+			boolean has_auto = values.remove(WHITE_BALANCE_DEFAULT);
 			boolean has_manual = values.remove("manual");
 			if( has_manual )
 				values.add(0, "manual");
 			if( has_auto )
-				values.add(0, "auto");
+				values.add(0, WHITE_BALANCE_DEFAULT);
 		}
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
 		if( supported_values != null ) {
 			int selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
 			switch(supported_values.selected_value) {
-				case "auto":
+				case WHITE_BALANCE_DEFAULT:
 					selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
 					break;
 				case "cloudy-daylight":

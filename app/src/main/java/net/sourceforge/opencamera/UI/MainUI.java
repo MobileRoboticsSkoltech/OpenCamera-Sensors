@@ -769,7 +769,7 @@ public class MainUI {
 			int min_iso = preview.getMinimumISO();
 			int max_iso = preview.getMaximumISO();
 			List<String> values = new ArrayList<>();
-			values.add("auto");
+			values.add(CameraController.ISO_DEFAULT);
 			values.add(manual_iso_value);
 			iso_button_manual_index = 1; // must match where we place the manual button!
 			int [] iso_values = {50, 100, 200, 400, 800, 1600, 3200, 6400};
@@ -786,9 +786,9 @@ public class MainUI {
 			supported_isos = preview.getSupportedISOs();
 			iso_button_manual_index = -1;
 		}
-		String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, "auto");
+		String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
 		// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
-		if( !current_iso.equals("auto") && supported_isos != null && supported_isos.contains(manual_iso_value) && !supported_isos.contains(current_iso) )
+		if( !current_iso.equals(CameraController.ISO_DEFAULT) && supported_isos != null && supported_isos.contains(manual_iso_value) && !supported_isos.contains(current_iso) )
 			current_iso = manual_iso_value;
 		// n.b., we hardcode the string "ISO" as this isn't a user displayed string, rather it's used to filter out "ISO" included in old Camera API parameters
 		iso_buttons = PopupView.createButtonOptions(iso_buttons_container, main_activity, 280, test_ui_buttons, supported_isos, -1, -1, "ISO", false, current_iso, "TEST_ISO", new PopupView.ButtonOptionsPopupListener() {
@@ -797,14 +797,14 @@ public class MainUI {
 				if( MyDebug.LOG )
 					Log.d(TAG, "clicked iso: " + option);
 				SharedPreferences.Editor editor = sharedPreferences.edit();
-				String old_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, "auto");
+				String old_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
 				if( MyDebug.LOG )
 					Log.d(TAG, "old_iso: " + old_iso);
 				editor.putString(PreferenceKeys.ISOPreferenceKey, option);
 				String toast_option = option;
 
 				if( preview.supportsISORange() ) {
-					if( option.equals("auto") ) {
+					if( option.equals(CameraController.ISO_DEFAULT) ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "switched from manual to auto iso");
 						// also reset exposure time when changing from manual to auto from the popup menu:
@@ -812,7 +812,7 @@ public class MainUI {
 						editor.apply();
 						main_activity.updateForSettings("ISO: " + toast_option);
 					}
-					else if( old_iso.equals("auto") ) {
+					else if( old_iso.equals(CameraController.ISO_DEFAULT) ) {
 						if( MyDebug.LOG )
 							Log.d(TAG, "switched from auto to manual iso");
 						if( option.equals("m") ) {
@@ -884,7 +884,7 @@ public class MainUI {
 		View exposure_seek_bar = main_activity.findViewById(R.id.exposure_container);
 		View manual_exposure_seek_bar = main_activity.findViewById(R.id.manual_exposure_container);
 		String iso_value = main_activity.getApplicationInterface().getISOPref();
-		if( main_activity.getPreview().usingCamera2API() && !iso_value.equals("auto") ) {
+		if( main_activity.getPreview().usingCamera2API() && !iso_value.equals(CameraController.ISO_DEFAULT) ) {
 			exposure_seek_bar.setVisibility(View.GONE);
 
 			// with Camera2 API, when using manual ISO we instead show sliders for ISO range and exposure time
@@ -940,7 +940,7 @@ public class MainUI {
 		Preview preview = main_activity.getPreview();
 		if( preview.supportsISORange() && isExposureUIOpen() ) {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-			String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, "auto");
+			String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
 			// if the manual ISO value isn't one of the "preset" values, then instead highlight the manual ISO icon
 			if( MyDebug.LOG )
 				Log.d(TAG, "current_iso: " + current_iso);
@@ -958,7 +958,7 @@ public class MainUI {
 					PopupView.setButtonSelected(button, false);
 				}
 			}
-			if( !found && !current_iso.equals("auto") ) {
+			if( !found && !current_iso.equals(CameraController.ISO_DEFAULT) ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "must be manual");
 				if( iso_button_manual_index >= 0 && iso_button_manual_index < iso_buttons.size() ) {
@@ -1219,7 +1219,7 @@ public class MainUI {
 					case "volume_exposure":
 						if(main_activity.getPreview().getCameraController() != null) {
 							String value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
-							boolean manual_iso = !value.equals("auto");
+							boolean manual_iso = !value.equals(CameraController.ISO_DEFAULT);
 							if(keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 								if(manual_iso) {
 									if(main_activity.getPreview().supportsISORange())
@@ -1318,7 +1318,7 @@ public class MainUI {
 	public String getEntryForWhiteBalance(String value) {
 		int id = -1;
 		switch( value ) {
-			case "auto":
+			case CameraController.WHITE_BALANCE_DEFAULT:
 				id = R.string.white_balance_auto;
 				break;
 			case "cloudy-daylight":
@@ -1377,7 +1377,7 @@ public class MainUI {
 			case "candlelight":
 				id = R.string.scene_mode_candlelight;
 				break;
-			case "auto":
+			case CameraController.SCENE_MODE_DEFAULT:
 				id = R.string.scene_mode_auto;
 				break;
 			case "fireworks":
@@ -1445,7 +1445,7 @@ public class MainUI {
 			case "negative":
 				id = R.string.color_effect_negative;
 				break;
-			case "none":
+			case CameraController.COLOR_EFFECT_DEFAULT:
 				id = R.string.color_effect_none;
 				break;
 			case "posterize":
