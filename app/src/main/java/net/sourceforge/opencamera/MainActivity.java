@@ -2926,7 +2926,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				simple = false;
 			}
 
-			boolean record_audio = sharedPreferences.getBoolean(PreferenceKeys.getRecordAudioPreferenceKey(), true);
+			boolean record_audio = applicationInterface.getRecordAudioPref();
 			if( !record_audio ) {
 				toast_string += "\n" + getResources().getString(R.string.audio_disabled);
 				simple = false;
@@ -2948,7 +2948,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				toast_string += "\n" + getResources().getString(R.string.max_filesize) +": " + max_filesize_mb + getResources().getString(R.string.mb_abbreviation);
 				simple = false;
 			}
-			if( sharedPreferences.getBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), false) && preview.supportsFlash() ) {
+			if( applicationInterface.getVideoFlashPref() && preview.supportsFlash() ) {
 				toast_string += "\n" + getResources().getString(R.string.preference_video_flash);
 				simple = false;
 			}
@@ -2966,7 +2966,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					}
 				}
 			}
-			if( sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false) ) {
+			if( applicationInterface.getAutoStabilisePref() ) {
 				// important as users are sometimes confused at the behaviour if they don't realise the option is on
 				toast_string += "\n" + getResources().getString(R.string.preference_auto_stabilise);
 				simple = false;
@@ -2992,11 +2992,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			toast_string += "\n" + getResources().getString(R.string.preference_face_detection);
 			simple = false;
 		}
-		String iso_value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, camera_controller.getDefaultISO());
+		String iso_value = applicationInterface.getISOPref();
 		if( !iso_value.equals(camera_controller.getDefaultISO()) ) {
 			toast_string += "\nISO: " + iso_value;
 			if( preview.supportsExposureTime() ) {
-				long exposure_time_value = sharedPreferences.getLong(PreferenceKeys.ExposureTimePreferenceKey, camera_controller.getDefaultExposureTime());
+				long exposure_time_value = applicationInterface.getExposureTimePref();
 				toast_string += " " + preview.getExposureTimeString(exposure_time_value);
 			}
 			simple = false;
@@ -3024,7 +3024,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     		toast_string += "\n" + getResources().getString(R.string.color_effect) + ": " + mainUI.getEntryForColorEffect(color_effect);
 			simple = false;
     	}
-		String lock_orientation = sharedPreferences.getString(PreferenceKeys.getLockOrientationPreferenceKey(), "none");
+		String lock_orientation = applicationInterface.getLockOrientationPref();
 		if( !lock_orientation.equals("none") ) {
 			String [] entries_array = getResources().getStringArray(R.array.preference_lock_orientation_entries);
 			String [] values_array = getResources().getStringArray(R.array.preference_lock_orientation_values);
