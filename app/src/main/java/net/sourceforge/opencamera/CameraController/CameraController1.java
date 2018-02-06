@@ -409,11 +409,6 @@ public class CameraController1 extends CameraController {
 		return camera_features;
 	}
 	
-	public long getDefaultExposureTime() {
-		// not supported for CameraController1
-		return 0L;
-	}
-
 	/** Important, from docs:
 	 *  "Changing scene mode may override other parameters (such as flash mode, focus mode, white balance).
 	 *  For example, suppose originally flash mode is on and supported flash modes are on/off. In night
@@ -422,7 +417,7 @@ public class CameraController1 extends CameraController {
 	 */
 	@Override
 	public SupportedValues setSceneMode(String value) {
-		String default_value = getDefaultSceneMode();
+		String default_value = SCENE_MODE_DEFAULT;
     	Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedSceneModes();
 		/*{
@@ -459,7 +454,7 @@ public class CameraController1 extends CameraController {
 	}
 
 	public SupportedValues setColorEffect(String value) {
-		String default_value = getDefaultColorEffect();
+		String default_value = COLOR_EFFECT_DEFAULT;
     	Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedColorEffects();
 		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
@@ -480,7 +475,7 @@ public class CameraController1 extends CameraController {
 	}
 
 	public SupportedValues setWhiteBalance(String value) {
-		String default_value = getDefaultWhiteBalance();
+		String default_value = WHITE_BALANCE_DEFAULT;
     	Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedWhiteBalance();
 		if( values != null ) {
@@ -607,7 +602,7 @@ public class CameraController1 extends CameraController {
 				values.add("800");
 				values.add("1600");
 			}
-			SupportedValues supported_values = checkModeIsSupported(values, value, getDefaultISO());
+			SupportedValues supported_values = checkModeIsSupported(values, value, ISO_DEFAULT);
 			if( supported_values != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "set: " + iso_key + " to: " + supported_values.selected_value);

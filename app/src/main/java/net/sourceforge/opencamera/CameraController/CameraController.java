@@ -30,7 +30,11 @@ public abstract class CameraController {
 	private static final String TAG = "CameraController";
 	private final int cameraId;
 
-	public static final long EXPOSURE_TIME_DEFAULT = 1000000000L/30;
+	public static final String SCENE_MODE_DEFAULT = "auto"; // chosen to match Camera.Parameters.SCENE_MODE_AUTO, but we also use compatible values for Camera2 API
+	public static final String COLOR_EFFECT_DEFAULT = "none"; // chosen to match Camera.Parameters.EFFECT_NONE, but we also use compatible values for Camera2 API
+	public static final String WHITE_BALANCE_DEFAULT = "auto"; // chosen to match Camera.Parameters.WHITE_BALANCE_AUTO, but we also use compatible values for Camera2 API
+	public static final String ISO_DEFAULT = "auto";
+	public static final long EXPOSURE_TIME_DEFAULT = 1000000000L/30; // note, responsibility of callers to check that this is within the valid min/max range
 
 	// for testing:
 	int count_camera_parameters_exception;
@@ -342,20 +346,6 @@ public abstract class CameraController {
 	public abstract boolean setExposureCompensation(int new_exposure);
 	public abstract void setPreviewFpsRange(int min, int max);
 	public abstract List<int []> getSupportedPreviewFpsRange(); // result depends on setting of setVideoHighSpeed()
-
-	public String getDefaultSceneMode() {
-		return "auto"; // chosen to match Camera.Parameters.SCENE_MODE_AUTO, but we also use compatible values for Camera2 API
-	}
-	public String getDefaultColorEffect() {
-		return "none"; // chosen to match Camera.Parameters.EFFECT_NONE, but we also use compatible values for Camera2 API
-	}
-	public String getDefaultWhiteBalance() {
-		return "auto"; // chosen to match Camera.Parameters.WHITE_BALANCE_AUTO, but we also use compatible values for Camera2 API
-	}
-	public String getDefaultISO() {
-		return "auto";
-	}
-	public abstract long getDefaultExposureTime();
 
 	public abstract void setFocusValue(String focus_value);
 	public abstract String getFocusValue();

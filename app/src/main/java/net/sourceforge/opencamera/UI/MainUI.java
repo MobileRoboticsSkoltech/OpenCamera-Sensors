@@ -1218,7 +1218,7 @@ public class MainUI {
 						return true;
 					case "volume_exposure":
 						if(main_activity.getPreview().getCameraController() != null) {
-							String value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, main_activity.getPreview().getCameraController().getDefaultISO());
+							String value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
 							boolean manual_iso = !value.equals("auto");
 							if(keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 								if(manual_iso) {

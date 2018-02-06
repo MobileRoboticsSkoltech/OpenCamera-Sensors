@@ -1591,7 +1591,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setSceneMode: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
-		String default_value = getDefaultSceneMode();
+		String default_value = SCENE_MODE_DEFAULT;
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES);
 		boolean has_disabled = false;
 		List<String> values = new ArrayList<>();
@@ -1741,7 +1741,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setColorEffect: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
-		String default_value = getDefaultColorEffect();
+		String default_value = COLOR_EFFECT_DEFAULT;
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_EFFECTS);
 		List<String> values = new ArrayList<>();
 		for(int value2 : values2) {
@@ -1865,7 +1865,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setWhiteBalance: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
-		String default_value = getDefaultWhiteBalance();
+		String default_value = WHITE_BALANCE_DEFAULT;
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
 		List<String> values = new ArrayList<>();
 		for(int value2 : values2) {
@@ -2705,12 +2705,6 @@ public class CameraController2 extends CameraController {
 			Log.e(TAG, "   using " + (want_video_high_speed ? "high speed" : "ae")  + " preview fps ranges");
 
 		return l;
-	}
-
-	@Override
-	// note, responsibility of callers to check that this is within the valid min/max range
-	public long getDefaultExposureTime() {
-		return 1000000000L/30;
 	}
 
 	@Override
