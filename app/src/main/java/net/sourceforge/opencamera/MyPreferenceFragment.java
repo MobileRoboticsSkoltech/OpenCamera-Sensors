@@ -1039,10 +1039,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 					pref.setSummary(editTextPref.getText());
 				}
 				else if( pref.getKey().equals("preference_exif_artist") ) {
-					pref.setSummary(getActivity().getResources().getString(R.string.preference_exif_artist_summary));
+					pref.setSummary(R.string.preference_exif_artist_summary);
 				}
 				else if( pref.getKey().equals("preference_exif_copyright") ) {
-					pref.setSummary(getActivity().getResources().getString(R.string.preference_exif_copyright_summary));
+					pref.setSummary(R.string.preference_exif_copyright_summary);
 				}
 			}
 		}
