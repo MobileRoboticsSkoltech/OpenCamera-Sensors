@@ -591,6 +591,8 @@ uncompressed and unprocessed information from your camera. Please note the follo
 	<li>Note that various processing options such as "Stamp photos" and <a href="#auto_stabilise">"Auto-level"</a> will only apply
 	to the JPEG images, and not the DNG images. This is not a bug - the DNGs represent the RAW output
 	of the camera device.</li>
+	<li>Options to store extra Exif tags ("Store compass direction", "Artist", "Copyright") are only supported for
+	JPEG format.</li>
 	<li>RAW images will only be saved in the Standard or DRO photo modes.</li>
 </ul>
 
@@ -616,10 +618,10 @@ photos will still be as the camera (or other people) view the scene. This option
 resultant photo, so the resultant photo matches the mirrored image you see on the screen.</p>
 
 <p><b>Artist</b> - If text is entered in this setting, then the text will be stored in the image's Exif metadata as the
-	"Artist" tag.</p>
+	"Artist" tag. Not supported for RAW photos (DNG format).</p>
 
 <p><b>Copyright</b> - If text is entered in this setting, then the text will be stored in the image's Exif metadata as the
-	"Copyright" tag.</p>
+	"Copyright" tag. Not supported for RAW photos (DNG format).</p>
 
 <p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
 location data" is enabled (see "Location settings" below), then the current location latitude
@@ -756,7 +758,7 @@ location. Location data will also be stored in videos (though only for devices t
 3GPP formats).</p>
 
 <p><b>Store compass direction</b> - If selected, then photos will be tagged with the compass direction.
-Not supported for videos.</p>
+Not supported for RAW photos (DNG format) or videos.</p>
 
 <p><b>Require location data</b> - If "Store location data" is enabled, then also enabling this option means that
 photos and videos can only be taken if location data is present (this can be useful if you need pictures/videos to

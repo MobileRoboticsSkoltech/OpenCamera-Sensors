@@ -180,7 +180,7 @@
     <string name="preference_location">Store location data (Geotagging)</string>
     <string name="preference_location_summary">Store GPS location data in the photos/videos</string>
     <string name="preference_gps_direction">Store compass direction</string>
-    <string name="preference_gps_direction_summary">Store GPS compass direction in the photos</string>
+    <string name="preference_gps_direction_summary">Store GPS compass direction in the photos (JPEG format only)</string>
     <string name="preference_require_location">Require location data</string>
     <string name="preference_require_location_summary">If location data is enabled, only take photo/video if location data is available</string>
     <string name="preference_stamp">Stamp photos</string>
@@ -464,9 +464,9 @@
 
     <string name="preference_category_exif_tags">Custom EXIF tags</string>
     <string name="preference_exif_artist">Artist</string>
-    <string name="preference_exif_artist_summary">Text to store in the image metadata for the "artist" tag. (Leave blank for none.)</string>
+    <string name="preference_exif_artist_summary">Text to store in the image metadata for the "artist" tag  (JPEG format only). (Leave blank for none.)</string>
     <string name="preference_exif_copyright">Copyright</string>
-    <string name="preference_exif_copyright_summary">Text to store in the image metadata for the "copyright" tag. (Leave blank for none.)</string>
+    <string name="preference_exif_copyright_summary">Text to store in the image metadata for the "copyright" tag  (JPEG format only). (Leave blank for none.)</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
