@@ -24,7 +24,7 @@ public class RawImage {
         this.image = image;
     }
 
-    /** Writes  the dng file to the supplied output.
+    /** Writes the dng file to the supplied output.
      */
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void writeImage(OutputStream dngOutput) throws IOException {
