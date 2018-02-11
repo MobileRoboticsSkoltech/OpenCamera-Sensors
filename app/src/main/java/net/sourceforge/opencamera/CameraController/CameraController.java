@@ -9,9 +9,7 @@ import java.util.List;
 
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.hardware.camera2.DngCreator;
 import android.location.Location;
-import android.media.Image;
 import android.media.MediaRecorder;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -192,9 +190,9 @@ public abstract class CameraController {
 		void onCompleted(); // called after all relevant on*PictureTaken() callbacks have been called and returned
 		void onPictureTaken(byte[] data);
 		/** Only called if RAW is requested.
-		 *  Caller should call image.close() and dngCreator.close() when done with the image.
+		 *  Caller should call raw_image.close() when done with the image.
 		 */
-		void onRawPictureTaken(DngCreator dngCreator, Image image);
+		void onRawPictureTaken(RawImage raw_image);
 		/** Only called if burst is requested.
 		 */
 		void onBurstPictureTaken(List<byte[]> images);

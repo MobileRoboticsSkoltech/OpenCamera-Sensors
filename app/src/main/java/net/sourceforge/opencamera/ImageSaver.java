@@ -1,6 +1,7 @@
 package net.sourceforge.opencamera;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.CameraController.RawImage;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -31,10 +32,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
-import android.hardware.camera2.DngCreator;
 import android.location.Location;
 import android.media.ExifInterface;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.renderscript.Allocation;
@@ -90,8 +89,7 @@ public class ImageSaver extends Thread {
 		 * If process_type==NORMAL, then multiple images are saved sequentially.
 		 */
 		final List<byte []> jpeg_images;
-		final DngCreator dngCreator; // for raw
-		final Image image; // for raw
+		final RawImage raw_image; // for raw
 		final boolean image_capture_intent;
 		final Uri image_capture_intent_uri;
 		final boolean using_camera2;
@@ -121,7 +119,7 @@ public class ImageSaver extends Thread {
 			ProcessType process_type,
 			SaveBase save_base,
 			List<byte []> jpeg_images,
-			DngCreator dngCreator, Image image,
+			RawImage raw_image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
@@ -137,8 +135,7 @@ public class ImageSaver extends Thread {
 			this.process_type = process_type;
 			this.save_base = save_base;
 			this.jpeg_images = jpeg_images;
-			this.dngCreator = dngCreator;
-			this.image = image;
+			this.raw_image = raw_image;
 			this.image_capture_intent = image_capture_intent;
 			this.image_capture_intent_uri = image_capture_intent_uri;
 			this.using_camera2 = using_camera2;
@@ -273,7 +270,7 @@ public class ImageSaver extends Thread {
 				is_hdr,
 				save_expo,
 				images,
-				null, null,
+				null,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
@@ -294,7 +291,7 @@ public class ImageSaver extends Thread {
 	 *  successfully.
 	 */
 	boolean saveImageRaw(boolean do_in_background,
-			DngCreator dngCreator, Image image,
+			RawImage raw_image,
 			Date current_date) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saveImageRaw");
@@ -305,7 +302,7 @@ public class ImageSaver extends Thread {
 				false,
 				false,
 				null,
-				dngCreator, image,
+				raw_image,
 				false, null,
 				false, 0,
 				false, 0.0,
@@ -341,7 +338,7 @@ public class ImageSaver extends Thread {
 				Request.ProcessType.AVERAGE,
 				save_base,
 				new ArrayList<byte[]>(),
-				null, null,
+				null,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
@@ -396,7 +393,7 @@ public class ImageSaver extends Thread {
 			boolean is_hdr,
 			boolean save_expo,
 			List<byte []> jpeg_images,
-			DngCreator dngCreator, Image image,
+			RawImage raw_image,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
 			boolean do_auto_stabilise, double level_angle,
@@ -420,7 +417,7 @@ public class ImageSaver extends Thread {
 				is_hdr ? Request.ProcessType.HDR : Request.ProcessType.NORMAL,
 				save_expo ? Request.SaveBase.SAVEBASE_ALL : Request.SaveBase.SAVEBASE_NONE,
 				jpeg_images,
-				dngCreator, image,
+				raw_image,
 				image_capture_intent, image_capture_intent_uri,
 				using_camera2, image_quality,
 				do_auto_stabilise, level_angle,
@@ -502,7 +499,7 @@ public class ImageSaver extends Thread {
 			Request.ProcessType.NORMAL,
             Request.SaveBase.SAVEBASE_NONE,
 			null,
-			null, null,
+			null,
 			false, null,
 			false, 0,
 			false, 0.0,
@@ -2004,27 +2001,23 @@ public class ImageSaver extends Thread {
 		StorageUtils storageUtils = main_activity.getStorageUtils();
 		boolean success = false;
 
-		// unpack
-		DngCreator dngCreator = request.dngCreator;
-		Image image = request.image;
-		Date current_date = request.current_date;
-
 		main_activity.savingImage(true);
 
         OutputStream output = null;
+        RawImage raw_image = request.raw_image;
         try {
     		File picFile = null;
     		Uri saveUri = null;
 
 			if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", current_date);
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", request.current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "saveUri: " + saveUri);
 	    		// When using SAF, we don't save to a temp file first (unlike for JPEGs). Firstly we don't need to modify Exif, so don't
 	    		// need a real file; secondly copying to a temp file is much slower for RAW.
 			}
 			else {
-        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", current_date);
+        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", request.current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}
@@ -2035,11 +2028,9 @@ public class ImageSaver extends Thread {
     		else {
     		    output = main_activity.getContentResolver().openOutputStream(saveUri);
     		}
-            dngCreator.writeImage(output, image);
-    		image.close();
-    		image = null;
-    		dngCreator.close();
-    		dngCreator = null;
+            raw_image.writeImage(output);
+			raw_image.close();
+			raw_image = null;
     		output.close();
     		output = null;
 
@@ -2107,14 +2098,10 @@ public class ImageSaver extends Thread {
 					e.printStackTrace();
 				}
         	}
-        	if( image != null ) {
-        		image.close();
-        	}
-        	if( dngCreator != null ) {
-        		dngCreator.close();
+        	if( raw_image != null ) {
+        		raw_image.close();
         	}
         }
-
 
     	System.gc();
 

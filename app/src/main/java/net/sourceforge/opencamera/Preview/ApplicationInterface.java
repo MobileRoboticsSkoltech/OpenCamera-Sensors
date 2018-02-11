@@ -7,12 +7,12 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.hardware.camera2.DngCreator;
 import android.location.Location;
-import android.media.Image;
 import android.net.Uri;
 import android.util.Pair;
 import android.view.MotionEvent;
+
+import net.sourceforge.opencamera.CameraController.RawImage;
 
 /** Provides communication between the Preview and the rest of the application
  *  - so in theory one can drop the Preview/ (and CameraController/) classes
@@ -157,7 +157,7 @@ public interface ApplicationInterface {
 	void onDrawPreview(Canvas canvas);
 	boolean onPictureTaken(byte [] data, Date current_date);
 	boolean onBurstPictureTaken(List<byte []> images, Date current_date);
-	boolean onRawPictureTaken(DngCreator dngCreator, Image image, Date current_date);
+	boolean onRawPictureTaken(RawImage raw_image, Date current_date);
 	void onCaptureStarted(); // called immediately before we start capturing the picture
 	void onPictureCompleted(); // called after all picture callbacks have been called and returned
 	void onContinuousFocusMove(boolean start); // called when focusing starts/stop in continuous picture mode (in photo mode only)

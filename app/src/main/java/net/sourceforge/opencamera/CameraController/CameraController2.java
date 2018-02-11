@@ -104,8 +104,7 @@ public class CameraController2 extends CameraController {
 	private final List<byte []> pending_burst_images = new ArrayList<>(); // burst images that have been captured so far, but not yet sent to the application
 	private List<CaptureRequest> slow_burst_capture_requests; // the set of burst capture requests - used when not using captureBurst() (i.e., when use_expo_fast_burst==false)
 	private long slow_burst_start_ms = 0; // time when burst started (used for measuring performance of captures when not using fast burst)
-	private DngCreator pending_dngCreator;
-	private Image pending_image;
+	private RawImage pending_raw_image;
 	private ErrorCallback take_picture_error_cb;
 	private boolean want_video_high_speed;
 	private boolean is_video_high_speed; // whether we're actually recording in high speed
@@ -709,10 +708,9 @@ public class CameraController2 extends CameraController {
 			if( camera_settings.location != null ) {
                 dngCreator.setLocation(camera_settings.location);
 			}
-			
-			pending_dngCreator = dngCreator;
-			pending_image = image;
-			
+
+			pending_raw_image = new RawImage(dngCreator, image);
+
             PictureCallback cb = raw_cb;
             if( jpeg_cb == null ) {
 				if( MyDebug.LOG )
@@ -2460,7 +2458,7 @@ public class CameraController2 extends CameraController {
 									Log.d(TAG, "all image callbacks now completed");
 								cb.onCompleted();
 							}
-							else if( pending_dngCreator != null ) {
+							else if( pending_raw_image != null ) {
 								if( MyDebug.LOG )
 									Log.d(TAG, "can now call pending raw callback");
 								takePendingRaw();
@@ -2489,8 +2487,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearPending");
 		pending_burst_images.clear();
-		pending_dngCreator = null;
-		pending_image = null;
+		pending_raw_image = null;
 		if( onRawImageAvailableListener != null ) {
 			onRawImageAvailableListener.clear();
 		}
@@ -2503,13 +2500,12 @@ public class CameraController2 extends CameraController {
 	private void takePendingRaw() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePendingRaw");
-		if( pending_dngCreator != null ) {
+		if( pending_raw_image != null ) {
             PictureCallback cb = raw_cb;
             raw_cb = null;
-            cb.onRawPictureTaken(pending_dngCreator, pending_image);
-            // image and dngCreator should be closed by the application (we don't do it here, so that applications can keep hold of the data, e.g., in a queue for background processing)
-            pending_dngCreator = null;
-            pending_image = null;
+            cb.onRawPictureTaken(pending_raw_image);
+            // pending_raw_image should be closed by the application (we don't do it here, so that applications can keep hold of the data, e.g., in a queue for background processing)
+			pending_raw_image = null;
 			if( onRawImageAvailableListener != null ) {
 				onRawImageAvailableListener.clear();
 			}

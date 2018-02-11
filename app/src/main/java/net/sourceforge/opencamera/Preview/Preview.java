@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera.Preview;
 
+import net.sourceforge.opencamera.CameraController.RawImage;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.TakePhoto;
@@ -50,10 +51,8 @@ import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
-import android.hardware.camera2.DngCreator;
 import android.location.Location;
 import android.media.CamcorderProfile;
-import android.media.Image;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -5202,11 +5201,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				}
     	    }
 
-			public void onRawPictureTaken(DngCreator dngCreator, Image image) {
+			public void onRawPictureTaken(RawImage raw_image) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "onRawPictureTaken");
 				initDate();
-				if( !applicationInterface.onRawPictureTaken(dngCreator, image, current_date) ) {
+				if( !applicationInterface.onRawPictureTaken(raw_image, current_date) ) {
 					if( MyDebug.LOG )
 						Log.e(TAG, "applicationInterface.onRawPictureTaken failed");
 				}

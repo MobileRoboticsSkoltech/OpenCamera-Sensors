@@ -13,6 +13,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
+import net.sourceforge.opencamera.CameraController.RawImage;
 import net.sourceforge.opencamera.Preview.ApplicationInterface;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.Preview.VideoProfile;
@@ -28,9 +29,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.hardware.camera2.DngCreator;
 import android.location.Location;
-import android.media.Image;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -1966,14 +1965,14 @@ public class MyApplicationInterface implements ApplicationInterface {
     }
 
     @Override
-	public boolean onRawPictureTaken(DngCreator dngCreator, Image image, Date current_date) {
+	public boolean onRawPictureTaken(RawImage raw_image, Date current_date) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRawPictureTaken");
         System.gc();
 
 		boolean do_in_background = saveInBackground(false);
 
-		boolean success = imageSaver.saveImageRaw(do_in_background, dngCreator, image, current_date);
+		boolean success = imageSaver.saveImageRaw(do_in_background, raw_image, current_date);
 		
 		if( MyDebug.LOG )
 			Log.d(TAG, "onRawPictureTaken complete");
