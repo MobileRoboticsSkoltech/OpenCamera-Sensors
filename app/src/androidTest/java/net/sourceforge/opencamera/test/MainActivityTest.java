@@ -7478,12 +7478,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 		Log.d(TAG, "scene mode: " + mPreview.getCameraController().getSceneMode());
-	    assertTrue( mPreview.getCameraController().getSceneMode() == null || mPreview.getCameraController().getSceneMode().equals(mPreview.getCameraController().getDefaultSceneMode()) );
+	    assertTrue( mPreview.getCameraController().getSceneMode() == null || mPreview.getCameraController().getSceneMode().equals(CameraController.SCENE_MODE_DEFAULT) );
 
 	    String scene_mode = null;
 	    // find a scene mode that isn't default
 	    for(String this_scene_mode : scene_modes) {
-	    	if( !this_scene_mode.equals(mPreview.getCameraController().getDefaultSceneMode()) ) {
+	    	if( !this_scene_mode.equals(CameraController.SCENE_MODE_DEFAULT) ) {
 	    		scene_mode = this_scene_mode;
 	    		break;
 	    	}
@@ -7514,12 +7514,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 		Log.d(TAG, "color effect: " + mPreview.getCameraController().getColorEffect());
-	    assertTrue( mPreview.getCameraController().getColorEffect() == null || mPreview.getCameraController().getColorEffect().equals(mPreview.getCameraController().getDefaultColorEffect()) );
+	    assertTrue( mPreview.getCameraController().getColorEffect() == null || mPreview.getCameraController().getColorEffect().equals(CameraController.COLOR_EFFECT_DEFAULT) );
 
 	    String color_effect = null;
 	    // find a color effect that isn't default
 	    for(String this_color_effect : color_effects) {
-	    	if( !this_color_effect.equals(mPreview.getCameraController().getDefaultColorEffect()) ) {
+	    	if( !this_color_effect.equals(CameraController.COLOR_EFFECT_DEFAULT) ) {
 	    		color_effect = this_color_effect;
 	    		break;
 	    	}
@@ -7550,12 +7550,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 		Log.d(TAG, "white balance: " + mPreview.getCameraController().getWhiteBalance());
-	    assertTrue( mPreview.getCameraController().getWhiteBalance() == null || mPreview.getCameraController().getWhiteBalance().equals(mPreview.getCameraController().getDefaultWhiteBalance()) );
+	    assertTrue( mPreview.getCameraController().getWhiteBalance() == null || mPreview.getCameraController().getWhiteBalance().equals(CameraController.WHITE_BALANCE_DEFAULT) );
 
 	    String white_balance = null;
 	    // find a white balance that isn't default
 	    for(String this_white_balances : white_balances) {
-	    	if( !this_white_balances.equals(mPreview.getCameraController().getDefaultWhiteBalance()) ) {
+	    	if( !this_white_balances.equals(CameraController.WHITE_BALANCE_DEFAULT) ) {
 	    		white_balance = this_white_balances;
 	    		break;
 	    	}
