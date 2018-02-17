@@ -93,6 +93,7 @@ public class CameraController2 extends CameraController {
 	private boolean want_burst;
 	private boolean want_raw;
 	//private boolean want_raw = true;
+	private int max_raw_images;
 	private android.util.Size raw_size;
 	private ImageReader imageReaderRaw;
 	private OnRawImageAvailableListener onRawImageAvailableListener;
@@ -2135,15 +2136,17 @@ public class CameraController2 extends CameraController {
 	}
 
 	@Override
-	public void setRaw(boolean want_raw) {
-		if( MyDebug.LOG )
+	public void setRaw(boolean want_raw, int max_raw_images) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "setRaw: " + want_raw);
+			Log.d(TAG, "max_raw_images: " + max_raw_images);
+		}
 		if( camera == null ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "no camera");
 			return;
 		}
-		if( this.want_raw == want_raw ) {
+		if( this.want_raw == want_raw && this.max_raw_images == max_raw_images ) {
 			return;
 		}
 		if( want_raw && this.raw_size == null ) {
@@ -2158,6 +2161,7 @@ public class CameraController2 extends CameraController {
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
 		this.want_raw = want_raw;
+		this.max_raw_images = max_raw_images;
 	}
 
 	@Override
@@ -2318,7 +2322,8 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "application needs to call setPictureSize()");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
-		imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2); 
+		// maxImages only needs to be 2, as we always read the JPEG data and close the image straight away in the imageReader
+		imageReader = ImageReader.newInstance(picture_width, picture_height, ImageFormat.JPEG, 2);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "created new imageReader: " + imageReader.toString());
 			Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
@@ -2474,7 +2479,9 @@ public class CameraController2 extends CameraController {
 			}
 		}, null);
 		if( want_raw && raw_size != null&& !previewIsVideoMode  ) {
-			imageReaderRaw = ImageReader.newInstance(raw_size.getWidth(), raw_size.getHeight(), ImageFormat.RAW_SENSOR, 2);
+			// unlike the JPEG imageReader, we can't read the data and close the image straight away, so we need to allow a larger
+			// value for maxImages
+			imageReaderRaw = ImageReader.newInstance(raw_size.getWidth(), raw_size.getHeight(), ImageFormat.RAW_SENSOR, max_raw_images);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "created new imageReaderRaw: " + imageReaderRaw.toString());
 				Log.d(TAG, "imageReaderRaw surface: " + imageReaderRaw.getSurface().toString());

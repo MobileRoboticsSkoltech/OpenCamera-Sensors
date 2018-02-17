@@ -1688,10 +1688,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		
 		if( this.supports_raw && applicationInterface.isRawPref() ) {
-			camera_controller.setRaw(true);
+			camera_controller.setRaw(true, applicationInterface.getMaxRawImages());
 		}
 		else {
-			camera_controller.setRaw(false);
+			camera_controller.setRaw(false, 0);
 		}
 
 		if( this.supports_expo_bracketing && applicationInterface.isExpoBracketingPref() ) {

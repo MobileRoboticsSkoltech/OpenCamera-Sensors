@@ -94,6 +94,7 @@ public interface ApplicationInterface {
 	boolean getOptimiseAEForDROPref(); // see CameraController doc for setOptimiseAEForDRO().
 	boolean isCameraBurstPref(); // whether to shoot the camera in burst mode (n.b., not the same as the "auto-repeat" burst)
 	boolean isRawPref(); // whether to enable RAW photos
+	int getMaxRawImages(); // see documentation of CameraController.setRaw(), corresponds to max_raw_images
 	boolean useCamera2FakeFlash(); // whether to enable CameraController.setUseCamera2FakeFlash() for Camera2 API
 	boolean useCamera2FastBurst(); // whether to enable Camera2's captureBurst() for faster taking of expo-bracketing photos (generally should be true, but some devices have problems with captureBurst())
 

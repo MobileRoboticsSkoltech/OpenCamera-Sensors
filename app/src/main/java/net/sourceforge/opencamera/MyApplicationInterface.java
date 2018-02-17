@@ -865,6 +865,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     	return sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no").equals("preference_raw_yes");
     }
 
+	@Override
+	public int getMaxRawImages() {
+    	return imageSaver.getMaxDNG();
+	}
+
     @Override
 	public boolean useCamera2FakeFlash() {
 		return sharedPreferences.getBoolean(PreferenceKeys.Camera2FakeFlashPreferenceKey, false);

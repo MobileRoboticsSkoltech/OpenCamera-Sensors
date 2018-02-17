@@ -23,6 +23,7 @@ import java.util.concurrent.BlockingQueue;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -62,8 +63,12 @@ public class ImageSaver extends Thread {
 	 * Therefore we should always have n_images_to_save >= queue.size().
 	 */
 	private int n_images_to_save = 0;
-	private final BlockingQueue<Request> queue = new ArrayBlockingQueue<>(1); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
-	
+	private final int queue_capacity;
+	private final BlockingQueue<Request> queue;
+	private final static int queue_cost_jpeg_c = 1;
+	//private final static int queue_cost_dng_c = 6;
+	private final static int queue_cost_dng_c = 1;
+
 	static class Request {
 		enum Type {
 			JPEG,
@@ -167,11 +172,78 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "ImageSaver");
 		this.main_activity = main_activity;
+
+		ActivityManager activityManager = (ActivityManager) main_activity.getSystemService(Activity.ACTIVITY_SERVICE);
+		this.queue_capacity = getQueueSize(activityManager.getLargeMemoryClass());
+		this.queue = new ArrayBlockingQueue<>(queue_capacity); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
+
 		this.hdrProcessor = new HDRProcessor(main_activity);
 
 		p.setAntiAlias(true);
 	}
-	
+
+	/** Compute a sensible size for the queue, based on the device's memory (large heap).
+	 */
+	private int getQueueSize(int large_heap_memory) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "large max memory = " + large_heap_memory + "MB");
+		int max_queue_size;
+		/*if( large_heap_memory >= 512 ) {
+			// This should be at least 5*(queue_cost_jpeg_c+queue_cost_dng_c)-1 so we can take a burst of 5 photos
+			// (e.g., in expo mode) with RAW+JPEG without blocking (we subtract 1, as the first image can be immediately
+			// taken off the queue).
+			// This should be at most 85 for large heap 512MB (estimate based on reserving 80MB for post-processing
+			// operations, then estimate a JPEG image at 5MB).
+			max_queue_size = 34;
+		}
+		else if( large_heap_memory >= 256 ) {
+			// This should be at least 19 so we can take a burst of 20 photos with JPEG without blocking (we subtract 1,
+			// as the first image can be immediately taken off the queue).
+			// This should be at most 34 for large heap 256MB.
+			max_queue_size = 19;
+		}
+		else if( large_heap_memory >= 128 ) {
+			// This should be at least 1*(queue_cost_jpeg_c+queue_cost_dng_c)-1 so we can take a photo with RAW+JPEG
+			// without blocking (we subtract 1, as the first image can be immediately taken off the queue).
+			// This should be at most 8 for large heap 256MB.
+			max_queue_size = 8;
+		}
+		else {
+			// This should be at least 1*(queue_cost_jpeg_c+queue_cost_dng_c)-1 so we can take a photo with RAW+JPEG
+			// without blocking (we subtract 1, as the first image can be immediately taken off the queue).
+			max_queue_size = 6;
+		}*/
+		max_queue_size = 1;
+		if( MyDebug.LOG )
+			Log.d(TAG, "max_queue_size = " + max_queue_size);
+		return max_queue_size;
+	}
+
+	/** Computes the cost for a particular request.
+	 * @param is_raw Whether RAW/DNG or JPEG.
+	 * @param n_jpegs If is_raw is false, this is the number of JPEG images that are in the request.
+	 */
+	int computeCost(boolean is_raw, int n_jpegs) {
+		int cost;
+		if( is_raw )
+			cost = queue_cost_dng_c;
+		else {
+			//cost = n_jpegs * queue_cost_jpeg_c;
+			cost = (n_jpegs > 1 ? 2 : 1) * queue_cost_jpeg_c;
+		}
+		return cost;
+	}
+
+	/** Returns the maximum number of DNG images that might be held by the image saver queue at once, before blocking.
+	 */
+	int getMaxDNG() {
+		int max_dng = (queue_capacity+1)/queue_cost_dng_c;
+		max_dng++; // increase by 1, as the user can still take one extra photo if the queue is exactly full
+		if( MyDebug.LOG )
+			Log.d(TAG, "max_dng = " + max_dng);
+		return max_dng;
+	}
+
 	void onDestroy() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onDestroy");
@@ -375,8 +447,7 @@ public class ImageSaver extends Thread {
 		if( do_in_background ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
-			addRequest(pending_image_average_request);
-			addDummyRequest();
+			addRequest(pending_image_average_request, 2);
 		}
 		else {
 			// wait for queue to be empty
@@ -433,14 +504,8 @@ public class ImageSaver extends Thread {
 		if( do_in_background ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
-			addRequest(request);
-			if( ( request.process_type == Request.ProcessType.HDR && request.jpeg_images.size() > 1 ) || ( !is_raw && request.jpeg_images.size() > 1 ) ) {
-				// For (multi-image) HDR, we also add a dummy request, effectively giving it a cost of 2 - to reflect the fact that HDR is more memory intensive
-				// (arguably it should have a cost of 3, to reflect the 3 JPEGs, but one can consider this comparable to RAW+JPEG, which have a cost
-				// of 2, due to RAW and JPEG each needing their own request).
-				// Similarly for saving multiple images (expo-bracketing)
-				addDummyRequest();
-			}
+			int cost = computeCost(is_raw, is_raw ? 0 : request.jpeg_images.size());
+			addRequest(request, cost);
 			success = true; // always return true when done in background
 		}
 		else {
@@ -461,9 +526,9 @@ public class ImageSaver extends Thread {
 	
 	/** Adds a request to the background queue, blocking if the queue is already full
 	 */
-	private void addRequest(Request request) {
+	private void addRequest(Request request, int cost) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "addRequest");
+			Log.d(TAG, "addRequest, cost: " + cost);
 		// this should not be synchronized on "this": BlockingQueue is thread safe, and if it's blocking in queue.put(), we'll hang because
 		// the saver queue will need to synchronize on "this" in order to notifyAll() the main thread
 		boolean done = false;
@@ -492,6 +557,12 @@ public class ImageSaver extends Thread {
 					Log.e(TAG, "interrupted while trying to add to ImageSaver queue");
 			}
 		}
+		if( cost > 0 ) {
+			// add "dummy" requests to simulate the cost
+			for(int i=0;i<cost-1;i++) {
+				addDummyRequest();
+			}
+		}
 	}
 
 	private void addDummyRequest() {
@@ -512,7 +583,7 @@ public class ImageSaver extends Thread {
 			1);
 		if( MyDebug.LOG )
 			Log.d(TAG, "add dummy request");
-		addRequest(dummy_request);
+		addRequest(dummy_request, 1); // cost must be 1, so we don't have infinite recursion!
 	}
 
 	/** Wait until the queue is empty and all pending images have been saved.

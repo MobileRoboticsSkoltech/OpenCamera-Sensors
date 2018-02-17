@@ -313,7 +313,16 @@ public abstract class CameraController {
 	 *  is not on, the CameraController should try to optimise for a DRO (dynamic range optimisation) mode.
 	 */
 	public abstract void setOptimiseAEForDRO(boolean optimise_ae_for_dro);
-	public abstract void setRaw(boolean want_raw);
+
+	/**
+	 * @param want_raw       Whether to enable taking photos in RAW (DNG) format.
+	 * @param max_raw_images The maximum number of unclosed DNG images that may be held in memory at any one
+	 *                       time. Trying to take a photo, when the number of unclosed DNG images is already
+	 *                       equal to this number, will result in an exception (java.lang.IllegalStateException
+	 *                       - note, the exception will come from a CameraController2 callback, so can't be
+	 *                       caught by the callera).
+	 */
+	public abstract void setRaw(boolean want_raw, int max_raw_images);
 	public abstract void setVideoHighSpeed(boolean setVideoHighSpeed);
 	/**
 	 * setUseCamera2FakeFlash() should be called after creating the CameraController, and before calling getCameraFeatures() or
