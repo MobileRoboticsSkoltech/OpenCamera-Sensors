@@ -189,6 +189,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    // updateForSettings has code that must run on UI thread
 		mActivity.runOnUiThread(new Runnable() {
 			public void run() {
+				mActivity.getApplicationInterface().getDrawPreview().updateSettings();
 				mActivity.updateForSettings();
 			}
 		});
