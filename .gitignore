@@ -17,3 +17,4 @@ testdata/
 *.ap_
 
 local.properties
+uninstall.bat
