@@ -151,6 +151,9 @@ public class CameraController2 extends CameraController {
 	private boolean capture_result_is_ae_scanning;
 	private Integer capture_result_ae; // latest ae_state, null if not available
 	private boolean is_flash_required; // whether capture_result_ae suggests FLASH_REQUIRED? Or in neither FLASH_REQUIRED nor CONVERGED, this stores the last known result
+	private boolean modified_from_camera_settings;
+		// if modified_from_camera_settings set to true, then we've temporarily requested captures with settings such as
+		// exposure modified from the normal ones in camera_settings
 	private boolean capture_result_has_white_balance_rggb;
 	private RggbChannelVector capture_result_white_balance_rggb;
 	private boolean capture_result_has_iso;
@@ -3944,6 +3947,7 @@ public class CameraController2 extends CameraController {
 						Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
 						Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
 					}
+					modified_from_camera_settings = true;
 					setManualExposureTime(stillBuilder, exposure_time);
 				}
 			}
@@ -4225,6 +4229,7 @@ public class CameraController2 extends CameraController {
 				jpeg_cb.onStarted();
 			}
 
+			modified_from_camera_settings = true;
 			if( use_expo_fast_burst ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "using fast burst");
@@ -4319,6 +4324,7 @@ public class CameraController2 extends CameraController {
 						long exposure_time = 1000000000L/10;
 						if( MyDebug.LOG )
 							Log.d(TAG, "also set 100ms exposure time");
+						modified_from_camera_settings = true;
 						setManualExposureTime(stillBuilder, exposure_time);
 					}
 				}
@@ -4338,6 +4344,7 @@ public class CameraController2 extends CameraController {
 								Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
 								Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
 							}
+							modified_from_camera_settings = true;
 							setManualExposureTime(stillBuilder, exposure_time);
 						}
 					}
@@ -5355,7 +5362,12 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "has_received_frame now set to true");
 			}
 
-			if( result.get(CaptureResult.SENSOR_SENSITIVITY) != null ) {
+			if( modified_from_camera_settings ) {
+				// don't update capture results!
+				// otherwise have problem taking HDR photos twice in a row, the second one will pick up the exposure time as
+				// being from the long exposure of the previous HDR/expo burst!
+			}
+			else if( result.get(CaptureResult.SENSOR_SENSITIVITY) != null ) {
 				capture_result_has_iso = true;
 				capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
 				/*if( MyDebug.LOG )
@@ -5387,14 +5399,22 @@ public class CameraController2 extends CameraController {
 			else {
 				capture_result_has_iso = false;
 			}
-			if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {
+
+			if( modified_from_camera_settings ) {
+				// see note above
+			}
+			else if( result.get(CaptureResult.SENSOR_EXPOSURE_TIME) != null ) {
 				capture_result_has_exposure_time = true;
 				capture_result_exposure_time = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
 			}
 			else {
 				capture_result_has_exposure_time = false;
 			}
-			if( result.get(CaptureResult.SENSOR_FRAME_DURATION) != null ) {
+
+			if( modified_from_camera_settings ) {
+				// see note above
+			}
+			else if( result.get(CaptureResult.SENSOR_FRAME_DURATION) != null ) {
 				capture_result_has_frame_duration = true;
 				capture_result_frame_duration = result.get(CaptureResult.SENSOR_FRAME_DURATION);
 			}
@@ -5411,7 +5431,10 @@ public class CameraController2 extends CameraController {
 					Log.d(TAG, "capture_result_frame_duration: " + capture_result_frame_duration);
 				}
 			}*/
-			/*if( result.get(CaptureResult.LENS_FOCUS_RANGE) != null ) {
+			/*if( modified_from_camera_settings ) {
+				// see note above
+			}
+			else if( result.get(CaptureResult.LENS_FOCUS_RANGE) != null ) {
 				Pair<Float, Float> focus_range = result.get(CaptureResult.LENS_FOCUS_RANGE);
 				capture_result_has_focus_distance = true;
 				capture_result_focus_distance_min = focus_range.first;
@@ -5422,7 +5445,10 @@ public class CameraController2 extends CameraController {
 			}*/
 			{
 				RggbChannelVector vector = result.get(CaptureResult.COLOR_CORRECTION_GAINS);
-				if( vector != null ) {
+				if( modified_from_camera_settings ) {
+					// see note above
+				}
+				else if( vector != null ) {
 					capture_result_has_white_balance_rggb = true;
 					capture_result_white_balance_rggb = vector;
 				}
@@ -5504,6 +5530,7 @@ public class CameraController2 extends CameraController {
 				if( MyDebug.LOG )
 					Log.d(TAG, "capture request completed");
 				test_capture_results++;
+				modified_from_camera_settings = false;
 				if( onRawImageAvailableListener != null ) {
 					if( test_wait_capture_result ) {
 						// for RAW capture, we require the capture result before creating DngCreator
