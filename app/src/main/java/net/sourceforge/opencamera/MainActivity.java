@@ -1904,6 +1904,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		});
     }
 
+	/** Called when the number of images being saved in ImageSaver changes.
+	 */
+	void imageQueueChanged() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "imageQueueChanged");
+		applicationInterface.getDrawPreview().setImageQueueFull( !applicationInterface.canTakeNewPhoto() );
+	}
+
     public void clickedGallery(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedGallery");
@@ -2786,8 +2794,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     }
 
     public boolean supportsNoiseReduction() {
-		//return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsExpoBracketing() );
-		return false; // currently blocked for release
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsExpoBracketing() );
+		//return false; // currently blocked for release
 	}
     
     private int maxExpoBracketingNImages() {

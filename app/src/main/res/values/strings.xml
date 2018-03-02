@@ -468,6 +468,8 @@
     <string name="preference_exif_copyright">Copyright</string>
     <string name="preference_exif_copyright_summary">Text to store in the image metadata for the "copyright" tag  (JPEG format only). (Leave blank for none.)</string>
 
+    <string name="processing">Processing…</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

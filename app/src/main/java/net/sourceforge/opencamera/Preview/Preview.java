@@ -4258,6 +4258,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			return;
 		}
 
+		if( !is_video || photo_snapshot ) {
+			// check it's okay to take a photo
+			if( !applicationInterface.canTakeNewPhoto() ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "don't take another photo, queue is full");
+				//showToast(take_photo_toast, "Still processing...");
+				return;
+			}
+		}
+
     	// make sure that preview running (also needed to hide trash/share icons)
         this.startCameraPreview();
 
@@ -5151,27 +5161,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     			if( MyDebug.LOG )
     				Log.d(TAG, "do we need to take another photo? remaining_burst_photos: " + remaining_burst_photos);
-    	        if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
-					if( camera_controller == null ) {
-	    				Log.e(TAG, "remaining_burst_photos still set, but camera is closed!: " + remaining_burst_photos);
-						cancelBurst();
-					}
-					else {
-						if( remaining_burst_photos > 0 )
-							remaining_burst_photos--;
-
-						long timer_delay = applicationInterface.getRepeatIntervalPref();
-						if( timer_delay == 0 ) {
-							// we set skip_autofocus to go straight to taking a photo rather than refocusing, for speed
-							// need to manually set the phase
-							phase = PHASE_TAKING_PHOTO;
-							takePhoto(true);
-						}
-						else {
-							takePictureOnTimer(timer_delay, true);
-						}
-					}
-    	        }
+				if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
+					takeRemainingBurstPhotos();
+				}
 			}
 
 			/** Ensures we get the same date for both JPEG and RAW; and that we set the date ASAP so that it corresponds to actual
@@ -5265,6 +5257,49 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePhotoWhenFocused exit");
     }
+
+    private void takeRemainingBurstPhotos() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "takeRemainingBurstPhotos");
+		if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
+			if( camera_controller == null ) {
+				Log.e(TAG, "remaining_burst_photos still set, but camera is closed!: " + remaining_burst_photos);
+				cancelBurst();
+			}
+			else {
+				// check it's okay to take a photo
+				if( !applicationInterface.canTakeNewPhoto() ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "takeRemainingBurstPhotos: still processing...");
+					// wait a bit then check again
+					final Handler handler = new Handler();
+					handler.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							if( MyDebug.LOG )
+								Log.d(TAG, "takeRemainingBurstPhotos: check again from post delayed runnable");
+							takeRemainingBurstPhotos();
+						}
+					}, 500);
+					return;
+				}
+
+				if( remaining_burst_photos > 0 )
+					remaining_burst_photos--;
+
+				long timer_delay = applicationInterface.getRepeatIntervalPref();
+				if( timer_delay == 0 ) {
+					// we set skip_autofocus to go straight to taking a photo rather than refocusing, for speed
+					// need to manually set the phase
+					phase = PHASE_TAKING_PHOTO;
+					takePhoto(true);
+				}
+				else {
+					takePictureOnTimer(timer_delay, true);
+				}
+			}
+		}
+	}
 
 	public void requestAutoFocus() {
 		if( MyDebug.LOG )

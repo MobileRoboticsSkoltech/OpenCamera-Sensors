@@ -61,6 +61,8 @@ public class ImageSaver extends Thread {
 	 * but only decrement the count when we've finished saving the image.
 	 * In general, n_images_to_save represents the number of images still to process, including ones currently being processed.
 	 * Therefore we should always have n_images_to_save >= queue.size().
+	 * Also note, main_activity.imageQueueChanged() should be called on UI thread after n_images_to_save increases or
+	 * decreases.
 	 */
 	private int n_images_to_save = 0;
 	private final int queue_capacity;
@@ -213,7 +215,8 @@ public class ImageSaver extends Thread {
 			// without blocking (we subtract 1, as the first image can be immediately taken off the queue).
 			max_queue_size = 6;
 		}*/
-		max_queue_size = 1;
+		//max_queue_size = 1;
+		max_queue_size = 3;
 		if( MyDebug.LOG )
 			Log.d(TAG, "max_queue_size = " + max_queue_size);
 		return max_queue_size;
@@ -223,7 +226,7 @@ public class ImageSaver extends Thread {
 	 * @param is_raw Whether RAW/DNG or JPEG.
 	 * @param n_jpegs If is_raw is false, this is the number of JPEG images that are in the request.
 	 */
-	int computeCost(boolean is_raw, int n_jpegs) {
+	private int computeCost(boolean is_raw, int n_jpegs) {
 		int cost;
 		if( is_raw )
 			cost = queue_cost_dng_c;
@@ -232,6 +235,40 @@ public class ImageSaver extends Thread {
 			cost = (n_jpegs > 1 ? 2 : 1) * queue_cost_jpeg_c;
 		}
 		return cost;
+	}
+
+	/** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
+	 */
+	boolean queueWouldBlock(int n_raw, int n_jpegs) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "queueWouldBlock");
+			Log.d(TAG, "n_raw: " + n_raw);
+			Log.d(TAG, "n_jpegs: " + n_jpegs);
+		}
+		int extra_cost;
+		if( n_raw > 0 )
+			extra_cost = n_raw*queue_cost_dng_c + n_jpegs*queue_cost_jpeg_c;
+		else
+			extra_cost = (n_jpegs > 1 ? 2 : 1) * queue_cost_jpeg_c;
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "n_images_to_save: " + n_images_to_save);
+			Log.d(TAG, "extra_cost: " + extra_cost);
+			Log.d(TAG, "queue_capacity: " + queue_capacity);
+		}
+		// we add one to queue, to account for the image currently being processed; n_images_to_save includes an image
+		// currently being processed
+		if( n_images_to_save == 0 ) {
+			// In theory, we should never have the extra_cost large enough to block the queue even when no images are being
+			// saved - but we have this just in case. This means taking the photo will likely block the UI, but we don't want
+			// to disallow ever taking photos!
+			return false;
+		}
+		else if( n_images_to_save + extra_cost > queue_capacity + 1 ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "queue would block");
+			return true;
+		}
+		return false;
 	}
 
 	/** Returns the maximum number of DNG images that might be held by the image saver queue at once, before blocking.
@@ -301,6 +338,12 @@ public class ImageSaver extends Thread {
 						throw new RuntimeException();
 					}
 					notifyAll();
+
+					main_activity.runOnUiThread(new Runnable() {
+						public void run() {
+							main_activity.imageQueueChanged();
+						}
+					});
 				}
 			}
 			catch(InterruptedException e) {
@@ -447,7 +490,8 @@ public class ImageSaver extends Thread {
 		if( do_in_background ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
-			addRequest(pending_image_average_request, 2);
+			int cost = computeCost(false, pending_image_average_request.jpeg_images.size());
+			addRequest(pending_image_average_request, cost);
 		}
 		else {
 			// wait for queue to be empty
@@ -541,6 +585,16 @@ public class ImageSaver extends Thread {
 					// but we synchronize modification to avoid risk of problems related to compiler optimisation (local caching or reordering)
 					// also see FindBugs warning due to inconsistent synchronisation
 					n_images_to_save++; // increment before adding to the queue, just to make sure the main thread doesn't think we're all done
+
+					main_activity.runOnUiThread(new Runnable() {
+						public void run() {
+							main_activity.imageQueueChanged();
+						}
+					});
+				}
+				if( queue.size() + 1 >= queue_capacity ) {
+					Log.e(TAG, "ImageSaver thread is going to block, queue already full: " + queue.size());
+					//throw new RuntimeException();
 				}
 				queue.put(request); // if queue is full, put() blocks until it isn't full
 				if( MyDebug.LOG ) {

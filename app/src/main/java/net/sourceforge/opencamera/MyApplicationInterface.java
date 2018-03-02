@@ -424,11 +424,8 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
 	public boolean getForce4KPref() {
-		if( cameraId == 0 && sharedPreferences.getBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K() ) {
-			return true;
-		}
-		return false;
-    }
+		return cameraId == 0 && sharedPreferences.getBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), false) && main_activity.supportsForceVideo4K();
+	}
     
     @Override
     public String getVideoBitratePref() {
@@ -696,10 +693,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     public boolean getAutoStabilisePref() {
 		boolean auto_stabilise = sharedPreferences.getBoolean(PreferenceKeys.AutoStabilisePreferenceKey, false);
-		if( auto_stabilise && main_activity.supportsAutoStabilise() )
-			return true;
-		return false;
-    }
+		return auto_stabilise && main_activity.supportsAutoStabilise();
+	}
 
     public String getStampPref() {
     	return sharedPreferences.getString(PreferenceKeys.StampPreferenceKey, "preference_stamp_no");
@@ -755,6 +750,35 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
+	public boolean canTakeNewPhoto() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "canTakeNewPhoto");
+    	int n_raw, n_jpegs;
+    	if( main_activity.getPreview().isVideo() ) {
+			n_raw = 0;
+			n_jpegs = 1;
+		}
+		else {
+			if( main_activity.getPreview().supportsRaw() && this.isRawPref() ) {
+				n_raw = 1;
+				n_jpegs = 1;
+			}
+			else {
+				n_raw = 0;
+				n_jpegs = 1;
+			}
+
+			if( main_activity.getPreview().supportsExpoBracketing() && this.isExpoBracketingPref() ) {
+				n_raw = 0;
+				n_jpegs = this.getExpoBracketingNImagesPref();
+			}
+		}
+
+		//return true;
+    	return !imageSaver.queueWouldBlock(n_raw, n_jpegs);
+	}
+
+	@Override
     public long getExposureTimePref() {
     	return sharedPreferences.getLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
     }
@@ -767,17 +791,13 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
 	public boolean isExpoBracketingPref() {
     	PhotoMode photo_mode = getPhotoMode();
-    	if( photo_mode == PhotoMode.HDR || photo_mode == PhotoMode.ExpoBracketing )
-			return true;
-		return false;
-    }
+		return photo_mode == PhotoMode.HDR || photo_mode == PhotoMode.ExpoBracketing;
+	}
 
     @Override
     public boolean isCameraBurstPref() {
     	PhotoMode photo_mode = getPhotoMode();
-    	if( photo_mode == PhotoMode.NoiseReduction )
-			return true;
-		return false;
+		return photo_mode == PhotoMode.NoiseReduction;
 	}
 
     @Override

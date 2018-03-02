@@ -132,6 +132,7 @@ public class DrawPreview {
     private boolean taking_picture; // true iff camera is in process of capturing a picture (including any necessary prior steps such as autofocus, flash/precapture)
 	private boolean capture_started; // true iff the camera is capturing
     private boolean front_screen_flash; // true iff the front screen display should maximise to simulate flash
+	private boolean image_queue_full; // whether we can no longer take new photos due to image queue being full (or rather, would become full if a new photo taken)
     
 	private boolean continuous_focus_moving;
 	private long continuous_focus_moving_ms;
@@ -260,6 +261,10 @@ public class DrawPreview {
 			capture_started = false;
     	}
     }
+
+    public void setImageQueueFull(boolean image_queue_full) {
+		this.image_queue_full = image_queue_full;
+	}
 	
 	public void turnFrontScreenFlashOn() {
 		if( MyDebug.LOG )
@@ -1123,6 +1128,14 @@ public class DrawPreview {
 							applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.capturing), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 						}
 					}
+				}
+			}
+			else if( image_queue_full ) {
+				if( ((int)(time_ms / 500)) % 2 == 0 ) {
+					p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
+					p.setTextAlign(Paint.Align.CENTER);
+					int pixels_offset_y = 3 * text_y; // avoid overwriting the zoom, and also allow a bit extra space
+					applicationInterface.drawTextWithBackground(canvas, p, getContext().getResources().getString(R.string.processing), Color.LTGRAY, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
 				}
 			}
 
