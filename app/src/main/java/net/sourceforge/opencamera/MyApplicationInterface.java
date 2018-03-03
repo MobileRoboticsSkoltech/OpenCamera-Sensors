@@ -106,8 +106,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
-	private int zoom_factor = 0;
 	private float focus_distance = 0.0f;
+	// camera properties that aren't saved even in the bundle; these should also be reset in reset()
+	private int zoom_factor = 0; // don't save zoom, as doing so tends to confuse users; other camera applications don't seem to save zoom when pause/resuming
 
 	MyApplicationInterface(MainActivity main_activity, Bundle savedInstanceState) {
 		long debug_time = 0;
@@ -128,7 +129,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		
 		this.imageSaver = new ImageSaver(main_activity);
 		this.imageSaver.start();
-		
+
         if( savedInstanceState != null ) {
 			// load the things we saved in onSaveInstanceState().
             if( MyDebug.LOG )
@@ -136,9 +137,6 @@ public class MyApplicationInterface implements ApplicationInterface {
     		cameraId = savedInstanceState.getInt("cameraId", 0);
 			if( MyDebug.LOG )
 				Log.d(TAG, "found cameraId: " + cameraId);
-    		zoom_factor = savedInstanceState.getInt("zoom_factor", 0);
-			if( MyDebug.LOG )
-				Log.d(TAG, "found zoom_factor: " + zoom_factor);
 			focus_distance = savedInstanceState.getFloat("focus_distance", 0.0f);
 			if( MyDebug.LOG )
 				Log.d(TAG, "found focus_distance: " + focus_distance);
@@ -158,9 +156,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "save cameraId: " + cameraId);
     	state.putInt("cameraId", cameraId);
-		if( MyDebug.LOG )
-			Log.d(TAG, "save zoom_factor: " + zoom_factor);
-    	state.putInt("zoom_factor", zoom_factor);
 		if( MyDebug.LOG )
 			Log.d(TAG, "save focus_distance: " + focus_distance);
     	state.putFloat("focus_distance", focus_distance);
@@ -1691,6 +1686,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 		String color = sharedPreferences.getString(PreferenceKeys.StampFontColorPreferenceKey, "#ffffff");
 		return Color.parseColor(color);
     }
+
+	/** Should be called to reset parameters which aren't expected to be saved (e.g., resetting zoom when application is paused,
+	 *  when switching between photo/video modes, or switching cameras).
+	 */
+	void reset() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "reset");
+		this.zoom_factor = 0;
+	}
 
     @Override
     public void onDrawPreview(Canvas canvas) {
