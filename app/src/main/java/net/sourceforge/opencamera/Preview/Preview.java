@@ -845,6 +845,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		    				DocumentsContract.deleteDocument(getContext().getContentResolver(), video_uri);
 						}
 						catch(FileNotFoundException e2) {
+			    			// note, Android Studio reports a warning that FileNotFoundException isn't thrown, but it can be
+							// thrown by DocumentsContract.deleteDocument - and we get an error if we try to remove the catch!
 							if( MyDebug.LOG )
 								Log.e(TAG, "exception when deleting " + video_uri);
 							e2.printStackTrace();

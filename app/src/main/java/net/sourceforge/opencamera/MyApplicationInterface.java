@@ -2087,6 +2087,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 				}
 			}
 			catch(FileNotFoundException e) {
+				// note, Android Studio reports a warning that FileNotFoundException isn't thrown, but it can be
+				// thrown by DocumentsContract.deleteDocument - and we get an error if we try to remove the catch!
 				if( MyDebug.LOG )
 					Log.e(TAG, "exception when deleting " + image_uri);
 				e.printStackTrace();
