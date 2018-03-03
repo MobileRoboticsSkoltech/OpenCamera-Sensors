@@ -852,6 +852,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		// video recording, the caller should override. We don't override here, as this preference may be used to affect how
 		// the CameraController is set up, and we don't always re-setup the camera when switching between photo and video modes.
 		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
+		/*if( MyDebug.LOG )
+			Log.d(TAG, "photo_mode_pref: " + photo_mode_pref);*/
 		boolean dro = photo_mode_pref.equals("preference_photo_mode_dro");
 		if( dro && main_activity.supportsDRO() )
 			return PhotoMode.DRO;
@@ -907,6 +909,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void cameraSetup() {
 		main_activity.cameraSetup();
 		drawPreview.clearContinuousFocusMove();
+		drawPreview.updateSettings(); // otherwise icons like HDR won't show after force-restart, because we only know that HDR is supported after the camera is opened
 	}
 
 	@Override
