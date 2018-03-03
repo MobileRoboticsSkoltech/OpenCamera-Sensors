@@ -107,7 +107,9 @@ public class DrawPreview {
 
 	private Bitmap raw_bitmap;
 	private Bitmap auto_stabilise_bitmap;
+	private Bitmap dro_bitmap;
 	private Bitmap hdr_bitmap;
+	private Bitmap expo_bitmap;
 	private Bitmap nr_bitmap;
 	private Bitmap photostamp_bitmap;
 	private Bitmap flash_bitmap;
@@ -161,7 +163,9 @@ public class DrawPreview {
     	location_off_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_gps_off_white_48dp);
 		raw_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.raw_icon);
 		auto_stabilise_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.auto_stabilise_icon);
+		dro_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.dro_icon);
 		hdr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_hdr_on_white_48dp);
+		expo_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.expo_icon);
 		nr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.nr_icon);
 		photostamp_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_text_format_white_48dp);
 		flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
@@ -190,9 +194,17 @@ public class DrawPreview {
 			auto_stabilise_bitmap.recycle();
 			auto_stabilise_bitmap = null;
 		}
+		if( dro_bitmap != null ) {
+			dro_bitmap.recycle();
+			dro_bitmap = null;
+		}
 		if( hdr_bitmap != null ) {
 			hdr_bitmap.recycle();
 			hdr_bitmap = null;
+		}
+		if( expo_bitmap != null ) {
+			expo_bitmap.recycle();
+			expo_bitmap = null;
 		}
 		if( nr_bitmap != null ) {
 			nr_bitmap.recycle();
@@ -861,21 +873,33 @@ public class DrawPreview {
 				}
 			}
 
-			if( ( photoMode == MyApplicationInterface.PhotoMode.HDR || photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ) &&
-					!applicationInterface.isVideoPref() ) { // HDR or NR not supported for video mode
+			if( (
+					photoMode == MyApplicationInterface.PhotoMode.DRO ||
+					photoMode == MyApplicationInterface.PhotoMode.HDR ||
+					photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ||
+					photoMode == MyApplicationInterface.PhotoMode.NoiseReduction
+					) &&
+					!applicationInterface.isVideoPref() ) { // these photo modes not supported for video mode
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
 				p.setAlpha(64);
 				canvas.drawRect(icon_dest, p);
 				p.setAlpha(255);
-				canvas.drawBitmap(photoMode == MyApplicationInterface.PhotoMode.HDR ? hdr_bitmap : nr_bitmap, null, icon_dest, p);
+				Bitmap bitmap = photoMode == MyApplicationInterface.PhotoMode.DRO ? dro_bitmap :
+						photoMode == MyApplicationInterface.PhotoMode.HDR ? hdr_bitmap :
+						photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ? expo_bitmap :
+						photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
+								null;
+				if( bitmap != null ) {
+					canvas.drawBitmap(bitmap, null, icon_dest, p);
 
-				if( ui_rotation == 180 ) {
-					location_x2 -= icon_size + flash_padding;
-				}
-				else {
-					location_x2 += icon_size + flash_padding;
+					if( ui_rotation == 180 ) {
+						location_x2 -= icon_size + flash_padding;
+					}
+					else {
+						location_x2 += icon_size + flash_padding;
+					}
 				}
 			}
 
