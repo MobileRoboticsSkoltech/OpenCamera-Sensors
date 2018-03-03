@@ -230,7 +230,7 @@
     <string name="preference_donate">Donate to support development</string>
     <string name="preference_donate_summary">If you like this app, please consider making a donation to support development. You can do this by purchasing my "donation app" - click this option to open up the page for my donation app. Thanks!</string>
     <string name="preference_use_camera2">Use Camera2 API</string>
-    <string name="preference_use_camera2_summary">Enables Android 5\'s Camera2 API - offers extra features, but may not work properly on all devices (will cause a restart)</string>
+    <string name="preference_use_camera2_summary">Enables extra features such as manual modes for exposure, focus, white balance, along with RAW (if supported by the device), but may not work properly on all devices (will cause a restart)</string>
     <string name="preference_about">About</string>
     <string name="preference_about_summary">App and debug information</string>
     <string name="preference_reset">Reset settings</string>
