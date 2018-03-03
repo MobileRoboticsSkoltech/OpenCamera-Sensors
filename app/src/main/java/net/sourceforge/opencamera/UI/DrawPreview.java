@@ -330,6 +330,8 @@ public class DrawPreview {
 			Log.d(TAG, "updateSettings");
 
 		photoMode = applicationInterface.getPhotoMode();
+		if( MyDebug.LOG )
+			Log.d(TAG, "photoMode: " + photoMode);
 
 		show_time_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowTimePreferenceKey, true);
 		show_free_memory_pref = sharedPreferences.getBoolean(PreferenceKeys.ShowFreeMemoryPreferenceKey, true);
@@ -1600,6 +1602,8 @@ public class DrawPreview {
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "onDrawPreview");*/
 		if( !has_settings ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "onDrawPreview: need to update settings");
 			updateSettings();
 		}
 		Preview preview = main_activity.getPreview();
