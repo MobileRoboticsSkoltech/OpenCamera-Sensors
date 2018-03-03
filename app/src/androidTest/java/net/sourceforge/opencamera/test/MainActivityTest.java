@@ -1571,6 +1571,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		waitUntilCameraOpened();
 	}
 
+	/** Return the number of files in the supplied folder. 0 will be returned if the folder doesn't
+	 *  exist.
+	 */
+	private int getNFiles(File folder) {
+		File [] files = folder.listFiles();
+		return files == null ? 0 : files.length;
+	}
+
 	/* Tests continuous picture focus with burst mode.
 	 */
 	public void testContinuousPictureFocusBurst() throws InterruptedException {
@@ -1591,7 +1599,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		assertTrue(mPreview.count_cameraTakePicture==0);
@@ -1633,7 +1641,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		Thread.sleep(1000);
@@ -1698,7 +1706,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		Thread.sleep(1000);
@@ -2762,7 +2770,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		File folder = mActivity.getImageFolder();
 		Log.d(TAG, "folder: " + folder);
 		File [] files = folder.listFiles();
-		int n_files = files.length;
+		int n_files = files == null ? 0 : files.length;
 		Log.d(TAG, "n_files at start: " + n_files);
 
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
@@ -2937,7 +2945,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		int start_count = mPreview.count_cameraTakePicture;
@@ -3668,7 +3676,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -3811,7 +3819,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	private void subTestTakePhotoPreviewPausedTrash(boolean is_raw) throws InterruptedException {
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -4126,7 +4134,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
@@ -4202,7 +4210,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	private void takePhotoLoop(int count) {
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		int start_count = mPreview.count_cameraTakePicture;
@@ -4284,7 +4292,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// count initial files in folder
 		mActivity.test_have_angle = true;
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		int start_count = mPreview.count_cameraTakePicture;
@@ -4414,7 +4422,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
 		Log.d(TAG, "folder: " + folder);
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -5439,7 +5447,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -5583,7 +5591,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
@@ -5693,7 +5701,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
@@ -5812,7 +5820,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		View takePhotoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.take_photo);
@@ -5991,7 +5999,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -6227,7 +6235,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
-		int n_files = folder.listFiles().length;
+		int n_files = getNFiles(folder);
 		Log.d(TAG, "n_files at start: " + n_files);
 
 		assertTrue(mPreview.count_cameraTakePicture==0);
