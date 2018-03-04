@@ -447,4 +447,7 @@
     <string name="bottom_of_screen">na spodnji strani zaslona</string>
 
     <string name="preference_video_fps_default">Privzeta</string>
+
+    <string name="preference_raw_no">Samo JPEG</string>
+    <string name="preference_raw_yes">JPEG in DNG (RAW)</string>
 </resources>

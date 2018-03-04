@@ -424,4 +424,8 @@
     <string name="color_effect_whiteboard">Lavagna bianca</string>
 
     <string name="preference_video_fps_default">Predefinito</string>
+
+    <string name="preference_raw_no">Solo JPEG</string>
+    <string name="preference_raw_yes">JPEG e DNG (RAW)</string>
+
 </resources>

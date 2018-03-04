@@ -288,14 +288,6 @@
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>
     </string-array>
-    <string-array name="preference_raw_entries">
-        <item>Только JPEG</item>
-        <item>JPEG и DNG (RAW)</item>
-    </string-array>
-    <string-array name="preference_raw_values">
-        <item>preference_raw_no</item>
-        <item>preference_raw_yes</item>
-    </string-array>
     <string-array name="preference_stamp_entries">
         <item>Без штампа</item>
         <item>Со штампом</item>

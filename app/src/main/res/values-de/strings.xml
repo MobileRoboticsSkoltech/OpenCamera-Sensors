@@ -391,4 +391,7 @@
     <string name="audio_listener_failed">Initialisierung der Audioaufnahme fehlgeschlagen</string>
 
     <string name="preference_video_fps_default">Standard</string>
+
+    <string name="preference_raw_no">Nur JPEG</string>
+    <string name="preference_raw_yes">JPEG und DNG (RAW)</string>
 </resources>

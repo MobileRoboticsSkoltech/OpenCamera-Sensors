@@ -391,4 +391,7 @@
     <string name="audio_listener_failed">Nem sikerült elindítani a hangfigyelést</string>
 
     <string name="preference_video_fps_default">Alapértelmezett</string>
+
+    <string name="preference_raw_no">Csak JPEG</string>
+    <string name="preference_raw_yes">JPEG és DNG (RAW)</string>
 </resources>

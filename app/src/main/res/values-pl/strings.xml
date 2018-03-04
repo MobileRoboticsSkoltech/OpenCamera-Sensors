@@ -367,4 +367,7 @@
     <string name="audio_listener_failed">Nie udało się uruchomić nasłuchu</string>
     <string name="failed_to_process_hdr">Tworzenie obrazu HDR nie powiodło się</string>
     <string name="preference_video_fps_default">Domyślnie</string>
+
+    <string name="preference_raw_no">tylko JPEG</string>
+    <string name="preference_raw_yes">JPEG i DNG (RAW)</string>
 </resources>

@@ -310,4 +310,7 @@
     <string name="duration_45m">45 minutos</string>
     <string name="duration_1h">1 hora</string>
     <string name="preference_video_fps_default">Predefinição</string>
+
+    <string name="preference_raw_no">Apenas JPEG</string>
+    <string name="preference_raw_yes">JPEG e DNG (RAW)</string>
 </resources>

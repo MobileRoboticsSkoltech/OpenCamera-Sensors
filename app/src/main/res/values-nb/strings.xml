@@ -441,4 +441,8 @@
     <string name="donate">Doner</string>
 
     <string name="preference_video_fps_default">Standard</string>
+
+    <string name="preference_raw_no">Kun JPEG</string>
+    <string name="preference_raw_yes">JPEG og DNG (RAW)</string>
+
 </resources>

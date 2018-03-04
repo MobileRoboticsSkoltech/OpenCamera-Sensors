@@ -288,14 +288,6 @@
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>
     </string-array>
-    <string-array name="preference_raw_entries">
-        <item>JPEG only</item>
-        <item>JPEG and DNG (RAW)</item>
-    </string-array>
-    <string-array name="preference_raw_values">
-        <item>preference_raw_no</item>
-        <item>preference_raw_yes</item>
-    </string-array>
     <string-array name="preference_stamp_entries">
         <item>No stamp</item>
         <item>Stamp photos</item>
@@ -661,5 +653,13 @@
         <item>100</item>
         <item>120</item>
         <item>240</item>
+    </string-array>
+    <string-array name="preference_raw_entries">
+        <item>@string/preference_raw_no</item>
+        <item>@string/preference_raw_yes</item>
+    </string-array>
+    <string-array name="preference_raw_values">
+        <item>preference_raw_no</item>
+        <item>preference_raw_yes</item>
     </string-array>
 </resources>

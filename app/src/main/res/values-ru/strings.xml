@@ -391,4 +391,7 @@
     <string name="audio_listener_failed">Не удалось инициализировать прослушивание аудио</string>
 
     <string name="preference_video_fps_default">По умолчанию</string>
+
+    <string name="preference_raw_no">Только JPEG</string>
+    <string name="preference_raw_yes">JPEG и DNG (RAW)</string>
 </resources>

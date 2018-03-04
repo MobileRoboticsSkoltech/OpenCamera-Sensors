@@ -288,14 +288,6 @@
         <item>crop_guide_2.35</item>
         <item>crop_guide_2.4</item>
     </string-array>
-    <string-array name="preference_raw_entries">
-        <item>tylko JPEG</item>
-        <item>JPEG i DNG (RAW)</item>
-    </string-array>
-    <string-array name="preference_raw_values">
-        <item>preference_raw_no</item>
-        <item>preference_raw_yes</item>
-    </string-array>
     <string-array name="preference_stamp_entries">
         <item>Bez stempla</item>
         <item>Stempluj zdjęcia</item>
