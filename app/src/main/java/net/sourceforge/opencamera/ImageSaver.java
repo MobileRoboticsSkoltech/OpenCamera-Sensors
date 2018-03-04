@@ -238,6 +238,10 @@ public class ImageSaver extends Thread {
 	}
 
 	/** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
+	 *  Ideally this should be refactored to use common code with computeCost(), but note that
+	 *  for RAW+DNG mode, computeCost() is called twice (one for each of the two requests: one RAW,
+	 *  one JPEG), where as for queueWouldBlock(), we need to know if the queue would block with a
+	 *  single call to this method.
 	 */
 	boolean queueWouldBlock(int n_raw, int n_jpegs) {
 		if( MyDebug.LOG ) {
