@@ -387,8 +387,8 @@
     <string name="duration_45m">45 minutes</string>
     <string name="duration_1h">1 hour</string>
 
-    <string name="preference_show_take_photo">Show take photo icon</string>
-    <string name="preference_show_take_photo_summary">Show the icon for taking photos and recording videos. Useful if your device has a hardware shutter button and you\'d rather use that.</string>
+    <string name="preference_show_take_photo">Show \"Take Photo\" icon</string>
+    <string name="preference_show_take_photo_summary">Show the icon for taking photos and recording videos. Uncheck if you\'d rather take photos by other methods (e.g., if your device has a hardware shutter button, or using the volume keys).</string>
 
     <string name="video_pause">Video paused</string>
     <string name="video_resume">Video resumed</string>
