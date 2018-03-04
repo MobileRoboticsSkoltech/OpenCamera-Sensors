@@ -10,6 +10,7 @@ import net.sourceforge.opencamera.MainActivity;
 import net.sourceforge.opencamera.MyApplicationInterface;
 import net.sourceforge.opencamera.MyDebug;
 import net.sourceforge.opencamera.PreferenceKeys;
+import net.sourceforge.opencamera.Preview.ApplicationInterface;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.Preview;
@@ -363,7 +364,7 @@ public class DrawPreview {
 		immersive_mode_everything_pref = immersive_mode.equals("immersive_mode_everything");
 
 		has_stamp_pref = applicationInterface.getStampPref().equals("preference_stamp_yes");
-		is_raw_pref = applicationInterface.isRawPref();
+		is_raw_pref = applicationInterface.getRawPref() != ApplicationInterface.RawPref.RAWPREF_JPEG_ONLY;
 		is_face_detection_pref = applicationInterface.getFaceDetectionPref();
 		is_audio_enabled_pref = applicationInterface.getRecordAudioPref();
 

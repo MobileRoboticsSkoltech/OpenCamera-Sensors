@@ -754,7 +754,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			n_jpegs = 1;
 		}
 		else {
-			if( main_activity.getPreview().supportsRaw() && this.isRawPref() ) {
+			if( main_activity.getPreview().supportsRaw() && this.getRawPref() == RawPref.RAWPREF_JPEG_DNG ) {
 				n_raw = 1;
 				n_jpegs = 1;
 			}
@@ -876,10 +876,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
-	public boolean isRawPref() {
+	public RawPref getRawPref() {
     	if( isImageCaptureIntent() )
-    		return false;
-    	return sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no").equals("preference_raw_yes");
+    		return RawPref.RAWPREF_JPEG_ONLY;
+		switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
+			case "preference_raw_yes":
+				return RawPref.RAWPREF_JPEG_DNG;
+		}
+		return RawPref.RAWPREF_JPEG_ONLY;
     }
 
 	@Override

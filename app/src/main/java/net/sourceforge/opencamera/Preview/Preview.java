@@ -1689,7 +1689,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "set_flash_value_after_autofocus is now: " + set_flash_value_after_autofocus);
 		}
 		
-		if( this.supports_raw && applicationInterface.isRawPref() ) {
+		if( this.supports_raw && applicationInterface.getRawPref() != ApplicationInterface.RawPref.RAWPREF_JPEG_ONLY ) {
 			camera_controller.setRaw(true, applicationInterface.getMaxRawImages());
 		}
 		else {
