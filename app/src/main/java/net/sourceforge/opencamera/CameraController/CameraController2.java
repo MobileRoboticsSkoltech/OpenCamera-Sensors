@@ -659,6 +659,157 @@ public class CameraController2 extends CameraController {
 		return temperature;
 	}
 
+	private class OnImageAvailableListener implements ImageReader.OnImageAvailableListener {
+		@Override
+		public void onImageAvailable(ImageReader reader) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "new still image available");
+			if( jpeg_cb == null ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "no picture callback available");
+				return;
+			}
+			synchronized( image_reader_lock ) {
+				/* Whilst in theory the two setOnImageAvailableListener methods (for JPEG and RAW) seem to be called separately, I don't know if this is always true;
+				 * also, we may process the RAW image when the capture result is available (see
+				 * OnRawImageAvailableListener.setCaptureResult()), which may be in a separate thread.
+				 */
+				Image image = reader.acquireNextImage();
+				if( MyDebug.LOG )
+					Log.d(TAG, "image timestamp: " + image.getTimestamp());
+				ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+				byte [] bytes = new byte[buffer.remaining()];
+				if( MyDebug.LOG )
+					Log.d(TAG, "read " + bytes.length + " bytes");
+				buffer.get(bytes);
+				image.close();
+				if( burst_single_request && n_burst > 1 ) {
+					pending_burst_images.add(bytes);
+					if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
+						if( MyDebug.LOG )
+							Log.d(TAG, "all burst images available");
+						if( pending_burst_images.size() > n_burst ) {
+							Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than n_burst " + n_burst);
+						}
+						// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
+						PictureCallback cb = jpeg_cb;
+						jpeg_cb = null;
+						// no need to check raw_cb, as raw not supported for burst
+						// take a copy, so that we can clear pending_burst_images
+						List<byte []> images = new ArrayList<>(pending_burst_images);
+						cb.onBurstPictureTaken(images);
+						pending_burst_images.clear();
+						cb.onCompleted();
+					}
+					else {
+						if( MyDebug.LOG )
+							Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
+						if( slow_burst_capture_requests != null ) {
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "need to execute the next capture");
+								Log.d(TAG, "time since start: " + (System.currentTimeMillis() - slow_burst_start_ms));
+							}
+							try {
+								captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+							}
+							catch(CameraAccessException e) {
+								if( MyDebug.LOG ) {
+									Log.e(TAG, "failed to take next burst");
+									Log.e(TAG, "reason: " + e.getReason());
+									Log.e(TAG, "message: " + e.getMessage());
+								}
+								e.printStackTrace();
+								jpeg_cb = null;
+								if( take_picture_error_cb != null ) {
+									take_picture_error_cb.onError();
+									take_picture_error_cb = null;
+								}
+							}
+							/*
+							// code for focus bracketing
+							try {
+								float focus_distance = burst_capture_requests.get(pending_burst_images.size()).get(CaptureRequest.LENS_FOCUS_DISTANCE);
+								if( MyDebug.LOG ) {
+									Log.d(TAG, "prepare preview for next focus_distance: " + focus_distance);
+								}
+								previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
+								previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
+
+								setRepeatingRequest(previewBuilder.build());
+								//captureSession.capture(burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+							}
+							catch(CameraAccessException e) {
+								if( MyDebug.LOG ) {
+									Log.e(TAG, "failed to take next burst");
+									Log.e(TAG, "reason: " + e.getReason());
+									Log.e(TAG, "message: " + e.getMessage());
+								}
+								e.printStackTrace();
+								jpeg_cb = null;
+								if( take_picture_error_cb != null ) {
+									take_picture_error_cb.onError();
+									take_picture_error_cb = null;
+								}
+							}
+							handler.postDelayed(new Runnable(){
+								@Override
+								public void run(){
+									if( MyDebug.LOG )
+										Log.d(TAG, "take picture after delay for next expo");
+									if( camera != null ) { // make sure camera wasn't released in the meantime
+										try {
+											captureSession.capture(burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
+										}
+										catch(CameraAccessException e) {
+											if( MyDebug.LOG ) {
+												Log.e(TAG, "failed to take next burst");
+												Log.e(TAG, "reason: " + e.getReason());
+												Log.e(TAG, "message: " + e.getMessage());
+											}
+											e.printStackTrace();
+											jpeg_cb = null;
+											if( take_picture_error_cb != null ) {
+												take_picture_error_cb.onError();
+												take_picture_error_cb = null;
+											}
+										}
+									}
+							   }
+							}, 500);
+							*/
+						}
+					}
+				}
+				else {
+					jpeg_cb.onPictureTaken(bytes);
+					n_burst--;
+					if( MyDebug.LOG )
+						Log.d(TAG, "n_burst is now " + n_burst);
+					if( n_burst == 0 ) {
+						// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoBurst()
+						PictureCallback cb = jpeg_cb;
+						jpeg_cb = null;
+						if( raw_cb == null ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "all image callbacks now completed");
+							cb.onCompleted();
+						}
+						else if( pending_raw_image != null ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "can now call pending raw callback");
+							takePendingRaw();
+							if( MyDebug.LOG )
+								Log.d(TAG, "all image callbacks now completed");
+							cb.onCompleted();
+						}
+					}
+				}
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "done onImageAvailable");
+		}
+	}
+
 	private class OnRawImageAvailableListener implements ImageReader.OnImageAvailableListener {
 		private CaptureResult capture_result;
 		private Image image;
@@ -2331,156 +2482,7 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "created new imageReader: " + imageReader.toString());
 			Log.d(TAG, "imageReader surface: " + imageReader.getSurface().toString());
 		}
-		imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
-			@Override
-			public void onImageAvailable(ImageReader reader) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "new still image available");
-				if( jpeg_cb == null ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "no picture callback available");
-					return;
-				}
-				synchronized( image_reader_lock ) {
-					/* Whilst in theory the two setOnImageAvailableListener methods (for JPEG and RAW) seem to be called separately, I don't know if this is always true;
-					 * also, we may process the RAW image when the capture result is available (see
-					 * OnRawImageAvailableListener.setCaptureResult()), which may be in a separate thread.
-					 */
-					Image image = reader.acquireNextImage();
-					if( MyDebug.LOG )
-						Log.d(TAG, "image timestamp: " + image.getTimestamp());
-		            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-		            byte [] bytes = new byte[buffer.remaining()]; 
-					if( MyDebug.LOG )
-						Log.d(TAG, "read " + bytes.length + " bytes");
-		            buffer.get(bytes);
-		            image.close();
-		            if( burst_single_request && n_burst > 1 ) {
-		            	pending_burst_images.add(bytes);
-		            	if( pending_burst_images.size() >= n_burst ) { // shouldn't ever be greater, but just in case
-							if( MyDebug.LOG )
-								Log.d(TAG, "all burst images available");
-							if( pending_burst_images.size() > n_burst ) {
-								Log.e(TAG, "pending_burst_images size " + pending_burst_images.size() + " is greater than n_burst " + n_burst);
-							}
-				            // need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in burst mode) - see testTakePhotoBurst()
-				            PictureCallback cb = jpeg_cb;
-				            jpeg_cb = null;
-							// no need to check raw_cb, as raw not supported for burst
-				            // take a copy, so that we can clear pending_burst_images
-				            List<byte []> images = new ArrayList<>(pending_burst_images);
-				            cb.onBurstPictureTaken(images);
-				            pending_burst_images.clear();
-							cb.onCompleted();
-		            	}
-		            	else {
-							if( MyDebug.LOG )
-								Log.d(TAG, "number of burst images is now: " + pending_burst_images.size());
-							if( slow_burst_capture_requests != null ) {
-								if( MyDebug.LOG ) {
-									Log.d(TAG, "need to execute the next capture");
-									Log.d(TAG, "time since start: " + (System.currentTimeMillis() - slow_burst_start_ms));
-								}
-								try {
-									captureSession.capture(slow_burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
-								}
-								catch(CameraAccessException e) {
-									if( MyDebug.LOG ) {
-										Log.e(TAG, "failed to take next burst");
-										Log.e(TAG, "reason: " + e.getReason());
-										Log.e(TAG, "message: " + e.getMessage());
-									}
-									e.printStackTrace();
-									jpeg_cb = null;
-									if( take_picture_error_cb != null ) {
-										take_picture_error_cb.onError();
-										take_picture_error_cb = null;
-									}
-								}
-								/*
-								// code for focus bracketing
-								try {
-									float focus_distance = burst_capture_requests.get(pending_burst_images.size()).get(CaptureRequest.LENS_FOCUS_DISTANCE);
-									if( MyDebug.LOG ) {
-										Log.d(TAG, "prepare preview for next focus_distance: " + focus_distance);
-									}
-									previewBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_OFF);
-									previewBuilder.set(CaptureRequest.LENS_FOCUS_DISTANCE, focus_distance);
-
-									setRepeatingRequest(previewBuilder.build());
-									//captureSession.capture(burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
-								}
-								catch(CameraAccessException e) {
-									if( MyDebug.LOG ) {
-										Log.e(TAG, "failed to take next burst");
-										Log.e(TAG, "reason: " + e.getReason());
-										Log.e(TAG, "message: " + e.getMessage());
-									}
-									e.printStackTrace();
-									jpeg_cb = null;
-									if( take_picture_error_cb != null ) {
-										take_picture_error_cb.onError();
-										take_picture_error_cb = null;
-									}
-								}
-								handler.postDelayed(new Runnable(){
-									@Override
-									public void run(){
-										if( MyDebug.LOG )
-											Log.d(TAG, "take picture after delay for next expo");
-										if( camera != null ) { // make sure camera wasn't released in the meantime
-											try {
-												captureSession.capture(burst_capture_requests.get(pending_burst_images.size()), previewCaptureCallback, handler);
-											}
-											catch(CameraAccessException e) {
-												if( MyDebug.LOG ) {
-													Log.e(TAG, "failed to take next burst");
-													Log.e(TAG, "reason: " + e.getReason());
-													Log.e(TAG, "message: " + e.getMessage());
-												}
-												e.printStackTrace();
-												jpeg_cb = null;
-												if( take_picture_error_cb != null ) {
-													take_picture_error_cb.onError();
-													take_picture_error_cb = null;
-												}
-											}
-										}
-								   }
-								}, 500);
-								*/
-							}
-		            	}
-		            }
-		            else {
-			            jpeg_cb.onPictureTaken(bytes);
-						n_burst--;
-						if( MyDebug.LOG )
-							Log.d(TAG, "n_burst is now " + n_burst);
-						if( n_burst == 0 ) {
-							// need to set jpeg_cb etc to null before calling onCompleted, as that may reenter CameraController to take another photo (if in auto-repeat burst mode) - see testTakePhotoBurst()
-							PictureCallback cb = jpeg_cb;
-							jpeg_cb = null;
-							if( raw_cb == null ) {
-								if( MyDebug.LOG )
-									Log.d(TAG, "all image callbacks now completed");
-								cb.onCompleted();
-							}
-							else if( pending_raw_image != null ) {
-								if( MyDebug.LOG )
-									Log.d(TAG, "can now call pending raw callback");
-								takePendingRaw();
-								if( MyDebug.LOG )
-									Log.d(TAG, "all image callbacks now completed");
-								cb.onCompleted();
-							}
-						}
-		            }
-				}
-				if( MyDebug.LOG )
-					Log.d(TAG, "done onImageAvailable");
-			}
-		}, null);
+		imageReader.setOnImageAvailableListener(new OnImageAvailableListener(), null);
 		if( want_raw && raw_size != null&& !previewIsVideoMode  ) {
 			// unlike the JPEG imageReader, we can't read the data and close the image straight away, so we need to allow a larger
 			// value for maxImages
