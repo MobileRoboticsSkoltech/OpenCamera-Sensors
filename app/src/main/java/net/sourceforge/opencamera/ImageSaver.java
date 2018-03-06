@@ -118,8 +118,8 @@ public class ImageSaver extends Thread {
 		final Location location;
 		final boolean store_geo_direction;
 		final double geo_direction;
-		String custom_tag_artist;
-		String custom_tag_copyright;
+		final String custom_tag_artist;
+		final String custom_tag_copyright;
 		int sample_factor = 1; // sampling factor for thumbnail, higher means lower quality
 		
 		Request(Type type,
@@ -898,7 +898,7 @@ public class ImageSaver extends Thread {
 			main_activity.savingImage(false);
 
 			if( MyDebug.LOG )
-				Log.d(TAG, "save HDR image");
+				Log.d(TAG, "save NR image");
 			String suffix = "_NR";
 			success = saveSingleImageNow(request, request.jpeg_images.get(0), nr_bitmap, suffix, true, true);
 			if( MyDebug.LOG && !success )
@@ -1377,39 +1377,22 @@ public class ImageSaver extends Thread {
 		return bitmap;
 	}
 
-	/** May be run in saver thread or picture callback thread (depending on whether running in background).
-	 *  The requests.images field is ignored, instead we save the supplied data or bitmap.
-	 *  If bitmap is null, then the supplied jpeg data is saved. If bitmap is non-null, then the bitmap is
-	 *  saved, but the supplied data is still used to read EXIF data from.
-	 *  @param update_thumbnail - Whether to update the thumbnail (and show the animation).
-	 *  @param share_image - Whether this image should be marked as the one to share (if multiple images can
-	 *  be saved from a single shot (e.g., saving exposure images with HDR).
-	 */
-	@SuppressLint("SimpleDateFormat")
-	@SuppressWarnings("deprecation")
-	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail, boolean share_image) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "saveSingleImageNow");
+	private class PostProcessBitmapResult {
+		final Bitmap bitmap;
+		final File exifTempFile;
 
-		if( request.type != Request.Type.JPEG ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "saveImageNow called with non-jpeg request");
-			// throw runtime exception, as this is a programming error
-			throw new RuntimeException();
+		PostProcessBitmapResult(Bitmap bitmap, File exifTempFile) {
+			this.bitmap = bitmap;
+			this.exifTempFile = exifTempFile;
 		}
-		else if( data == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "saveSingleImageNow called with no data");
-			// throw runtime exception, as this is a programming error
-			throw new RuntimeException();
-		}
+	}
+
+	/** Performs post-processing on the data, or bitmap if non-null, for saveSingleImageNow.
+	 */
+	private PostProcessBitmapResult postProcessBitmap(final Request request, byte [] data, Bitmap bitmap) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "postProcessBitmap");
     	long time_s = System.currentTimeMillis();
-		
-        boolean success = false;
-		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
-		StorageUtils storageUtils = main_activity.getStorageUtils();
-		
-		main_activity.savingImage(true);
 
 		boolean dategeo_stamp = request.preference_stamp.equals("preference_stamp_yes");
 		boolean text_stamp = request.preference_textstamp.length() > 0;
@@ -1462,6 +1445,46 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "Save single image performance: time after photostamp: " + (System.currentTimeMillis() - time_s));
 		}
+		return new PostProcessBitmapResult(bitmap, exifTempFile);
+	}
+
+	/** May be run in saver thread or picture callback thread (depending on whether running in background).
+	 *  The requests.images field is ignored, instead we save the supplied data or bitmap.
+	 *  If bitmap is null, then the supplied jpeg data is saved. If bitmap is non-null, then the bitmap is
+	 *  saved, but the supplied data is still used to read EXIF data from.
+	 *  @param update_thumbnail - Whether to update the thumbnail (and show the animation).
+	 *  @param share_image - Whether this image should be marked as the one to share (if multiple images can
+	 *  be saved from a single shot (e.g., saving exposure images with HDR).
+	 */
+	@SuppressLint("SimpleDateFormat")
+	@SuppressWarnings("deprecation")
+	private boolean saveSingleImageNow(final Request request, byte [] data, Bitmap bitmap, String filename_suffix, boolean update_thumbnail, boolean share_image) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "saveSingleImageNow");
+
+		if( request.type != Request.Type.JPEG ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "saveImageNow called with non-jpeg request");
+			// throw runtime exception, as this is a programming error
+			throw new RuntimeException();
+		}
+		else if( data == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "saveSingleImageNow called with no data");
+			// throw runtime exception, as this is a programming error
+			throw new RuntimeException();
+		}
+    	long time_s = System.currentTimeMillis();
+		
+        boolean success = false;
+		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
+		StorageUtils storageUtils = main_activity.getStorageUtils();
+		
+		main_activity.savingImage(true);
+
+		PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap);
+		bitmap = postProcessBitmapResult.bitmap;
+		File exifTempFile = postProcessBitmapResult.exifTempFile;
 
 		File picFile = null;
 		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
