@@ -573,11 +573,12 @@ yourself afterwards - but this will correct the preview so that you can still se
 more storage space. Note that 100% does not necessarily mean there is no lossy compression, rather that there is minimum compression.</p>
 
 <p><b>RAW</b> - Only available if Camera2 API is used. If set to "JPEG and DNG (RAW)", then photos
-will also be saved in RAW (DNG) files. DNG stands for
+will also be saved in RAW (DNG) format. If set to "DNG (RAW) only" (requires Android 7), then photos
+will only be saved in DNG format. DNG stands for
 <a href="https://en.wikipedia.org/wiki/Digital_Negative">"digital negative"</a>, and contains the full
 uncompressed and unprocessed information from your camera. Please note the following points:</p>
 <ul>
-	<li>Many gallery applications don't recognise DNG files - if this is the case, you won't even see them listed.
+	<li>Some gallery applications don't recognise DNG files - if this is the case, you won't even see them listed.
 	Either install a gallery application that does (e.g.,
 	<a href="https://play.google.com/store/apps/details?id=com.google.android.apps.photos">Google Photos</a>
 	now has support for RAW), or use specialised RAW viewer or editing tools such as
@@ -585,14 +586,16 @@ uncompressed and unprocessed information from your camera. Please note the follo
 	and <a href="https://play.google.com/store/apps/details?id=com.adobe.lrmobile">Adobe Photoshop Lightroom</a>.
 	(Note that Snapseed will only show the JPEGs when you try to open a photo - but it will automatically
 	instead load the corresponding DNG file if it exists; Lightroom shows both the JPEG and DNG files
-	separately.) Or transfer to a PC to use DNG editing applications there.</li>
-	<li>A file explorer application such as
+	separately.) Or transfer to a PC to use DNG editing applications there. Note that newer versions of Android
+	(7 onwards) seem to have better support for DNG images.</li>
+	<li>If your gallery application doesn't show DNG files, a file explorer application such as
 	<a href="https://play.google.com/store/apps/details?id=com.amaze.filemanager">Amaze</a> may also be useful,
 	to delete DNGs if you don't want them (DNGs take up a lot of space - and won't be deleted when you delete
-	the corresponding JPEG from a Gallery app).</li>
-	<li>Note that various processing options such as "Stamp photos" and <a href="#auto_stabilise">"Auto-level"</a> will only apply
+	the corresponding JPEG from a Gallery application).</li>
+	<li>Note that various processing options such as DRO photo mode, "Stamp photos" and <a href="#auto_stabilise">"Auto-level"</a> will only apply
 	to the JPEG images, and not the DNG images. This is not a bug - the DNGs represent the RAW output
-	of the camera device.</li>
+	of the camera device. This also means that these options have no relevance for photos in "DNG (RAW) only" mode, therefore such
+	options will not show on the popup menu.</li>
 	<li>Options to store extra Exif tags ("Store compass direction", "Artist", "Copyright") are only supported for
 	JPEG format.</li>
 	<li>RAW images will only be saved in the Standard or DRO photo modes.</li>
@@ -620,10 +623,10 @@ photos will still be as the camera (or other people) view the scene. This option
 resultant photo, so the resultant photo matches the mirrored image you see on the screen.</p>
 
 <p><b>Artist</b> - If text is entered in this setting, then the text will be stored in the image's Exif metadata as the
-	"Artist" tag. Not supported for RAW photos (DNG format).</p>
+	"Artist" tag. Not supported for RAW photos (DNG format). (Requires Android 7.)</p>
 
 <p><b>Copyright</b> - If text is entered in this setting, then the text will be stored in the image's Exif metadata as the
-	"Copyright" tag. Not supported for RAW photos (DNG format).</p>
+	"Copyright" tag. Not supported for RAW photos (DNG format). (Requires Android 7.)</p>
 
 <p><b>Stamp photos</b> - Option to add a date and timestamp to the resultant photos. If "Store
 location data" is enabled (see "Location settings" below), then the current location latitude

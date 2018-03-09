@@ -156,13 +156,20 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 		else {
-        	Preference pref = findPreference("preference_raw");
+        	ListPreference pref = (ListPreference)findPreference("preference_raw");
+
+	        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
+	        	// RAW only mode requires at least Android 7; earlier versions seem to have poorer support for DNG files
+	        	pref.setEntries(R.array.preference_raw_entries_preandroid7);
+	        	pref.setEntryValues(R.array.preference_raw_values_preandroid7);
+			}
+
         	pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
         		@Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
             		if( MyDebug.LOG )
             			Log.d(TAG, "clicked raw: " + newValue);
-            		if( newValue.equals("preference_raw_yes") ) {
+            		if( newValue.equals("preference_raw_yes") || newValue.equals("preference_raw_only") ) {
             			// we check done_raw_info every time, so that this works if the user selects RAW again without leaving and returning to Settings
             			boolean done_raw_info = sharedPreferences.contains(PreferenceKeys.RawInfoPreferenceKey);
             			if( !done_raw_info ) {

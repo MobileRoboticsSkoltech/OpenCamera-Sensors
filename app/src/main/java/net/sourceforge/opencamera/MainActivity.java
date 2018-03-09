@@ -1927,19 +1927,23 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "openGallery");
 		//Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 		Uri uri = applicationInterface.getStorageUtils().getLastMediaScanned();
+		boolean is_raw = false; // note that getLastMediaScanned() will never return RAW images, as we only record JPEGs
 		if( uri == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "go to latest media");
 			StorageUtils.Media media = applicationInterface.getStorageUtils().getLatestMedia();
 			if( media != null ) {
 				uri = media.uri;
+				is_raw = media.path != null && media.path.toLowerCase(Locale.US).endsWith(".dng");
 			}
 		}
 
 		if( uri != null ) {
 			// check uri exists
-			if( MyDebug.LOG )
+			if( MyDebug.LOG ) {
 				Log.d(TAG, "found most recent uri: " + uri);
+				Log.d(TAG, "is_raw: " + is_raw);
+			}
 			try {
 				ContentResolver cr = getContentResolver();
 				ParcelFileDescriptor pfd = cr.openFileDescriptor(uri, "r");
@@ -1947,6 +1951,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					if( MyDebug.LOG )
 						Log.d(TAG, "uri no longer exists (1): " + uri);
 					uri = null;
+					is_raw = false;
 				}
 				else {
 					pfd.close();
@@ -1956,24 +1961,37 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				if( MyDebug.LOG )
 					Log.d(TAG, "uri no longer exists (2): " + uri);
 				uri = null;
+				is_raw = false;
 			}
 		}
 		if( uri == null ) {
 			uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+			is_raw = false;
 		}
 		if( !is_test ) {
 			// don't do if testing, as unclear how to exit activity to finish test (for testGallery())
 			if( MyDebug.LOG )
 				Log.d(TAG, "launch uri:" + uri);
 			final String REVIEW_ACTION = "com.android.camera.action.REVIEW";
-			try {
+			boolean done = false;
+			if( !is_raw ) {
 				// REVIEW_ACTION means we can view video files without autoplaying
-				Intent intent = new Intent(REVIEW_ACTION, uri);
-				this.startActivity(intent);
-			}
-			catch(ActivityNotFoundException e) {
+				// however, Google Photos at least has problems with going to a RAW photo (in RAW only mode),
+				// unless we first pause and resume Open Camera
 				if( MyDebug.LOG )
-					Log.d(TAG, "REVIEW_ACTION intent didn't work, try ACTION_VIEW");
+					Log.d(TAG, "try REVIEW_ACTION");
+				try {
+					Intent intent = new Intent(REVIEW_ACTION, uri);
+					this.startActivity(intent);
+					done = true;
+				}
+				catch(ActivityNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+			if( !done ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "try ACTION_VIEW");
 				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 				// from http://stackoverflow.com/questions/11073832/no-activity-found-to-handle-intent - needed to fix crash if no gallery app installed
 				//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("blah")); // test
@@ -2779,10 +2797,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
     
     public boolean supportsAutoStabilise() {
+		if( applicationInterface.isRawOnly() )
+			return false; // if not saving JPEGs, no point having auto-stabilise mode, as it won't affect the RAW images
     	return this.supports_auto_stabilise;
     }
 
 	public boolean supportsDRO() {
+		if( applicationInterface.isRawOnly(MyApplicationInterface.PhotoMode.DRO) )
+			return false; // if not saving JPEGs, no point having DRO mode, as it won't affect the RAW images
 		// require at least Android 5, for the Renderscript support in HDRProcessor
 		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP );
 	}

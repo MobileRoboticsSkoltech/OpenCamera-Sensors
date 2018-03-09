@@ -657,8 +657,18 @@
     <string-array name="preference_raw_entries">
         <item>@string/preference_raw_no</item>
         <item>@string/preference_raw_yes</item>
+        <item>@string/preference_raw_only</item>
     </string-array>
     <string-array name="preference_raw_values">
+        <item>preference_raw_no</item>
+        <item>preference_raw_yes</item>
+        <item>preference_raw_only</item>
+    </string-array>
+    <string-array name="preference_raw_entries_preandroid7">
+        <item>@string/preference_raw_no</item>
+        <item>@string/preference_raw_yes</item>
+    </string-array>
+    <string-array name="preference_raw_values_preandroid7">
         <item>preference_raw_no</item>
         <item>preference_raw_yes</item>
     </string-array>

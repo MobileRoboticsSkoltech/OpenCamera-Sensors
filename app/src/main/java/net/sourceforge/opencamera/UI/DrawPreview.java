@@ -62,7 +62,8 @@ public class DrawPreview {
 	private boolean show_geo_direction_lines_pref;
 	private boolean immersive_mode_everything_pref;
 	private boolean has_stamp_pref;
-	private boolean is_raw_pref;
+	private boolean is_raw_pref; // whether in RAW+JPEG or RAW only mode
+	private boolean is_raw_only_pref; // whether in RAW only mode
 	private boolean is_face_detection_pref;
 	private boolean is_audio_enabled_pref;
 	private boolean auto_stabilise_pref;
@@ -365,6 +366,7 @@ public class DrawPreview {
 
 		has_stamp_pref = applicationInterface.getStampPref().equals("preference_stamp_yes");
 		is_raw_pref = applicationInterface.getRawPref() != ApplicationInterface.RawPref.RAWPREF_JPEG_ONLY;
+		is_raw_only_pref = applicationInterface.isRawOnly();
 		is_face_detection_pref = applicationInterface.getFaceDetectionPref();
 		is_audio_enabled_pref = applicationInterface.getRecordAudioPref();
 
@@ -830,7 +832,6 @@ public class DrawPreview {
 			if(
 					is_raw_pref &&
 					preview.supportsRaw() && // RAW can be enabled, even if it isn't available for this camera (e.g., user enables RAW for back camera, but then switches to front camera which doesn't support it)
-					!applicationInterface.isVideoPref() && // RAW not supported for video mode
 					photoMode != MyApplicationInterface.PhotoMode.HDR &&
 					photoMode != MyApplicationInterface.PhotoMode.ExpoBracketing &&
 					photoMode != MyApplicationInterface.PhotoMode.NoiseReduction ) {
@@ -914,7 +915,9 @@ public class DrawPreview {
 				}
 			}
 
-			if( has_stamp_pref ) { // photo-stamp is supported for photos taken in video mode
+			// photo-stamp is supported for photos taken in video mode
+			// but it isn't supported in RAW-only mode
+			if( has_stamp_pref && !( is_raw_only_pref && preview.supportsRaw() ) ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);

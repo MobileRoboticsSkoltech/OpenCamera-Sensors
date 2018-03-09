@@ -384,6 +384,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 				Log.e(TAG, "image_quality_s invalid format: " + image_quality_s);
 			image_quality = 90;
 		}
+		if( isRawOnly() ) {
+			// if raw only mode, we can set a lower quality for the JPEG, as it isn't going to be saved - only used for
+			// the thumbnail and pause preview option
+			if( MyDebug.LOG )
+				Log.d(TAG, "set lower quality for raw_only mode");
+			image_quality = Math.min(image_quality, 70);
+		}
 		return image_quality;
 	}
 
@@ -750,11 +757,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 			Log.d(TAG, "canTakeNewPhoto");
     	int n_raw, n_jpegs;
     	if( main_activity.getPreview().isVideo() ) {
+    		// video snapshot mode
 			n_raw = 0;
 			n_jpegs = 1;
 		}
 		else {
 			if( main_activity.getPreview().supportsRaw() && this.getRawPref() == RawPref.RAWPREF_JPEG_DNG ) {
+				// note, even in RAW only mode, the CameraController will still take JPEG+RAW (we still need to JPEG to
+				// generate a bitmap from for thumbnail and pause preview option), so this still generates a request in
+				// the ImageSaver
 				n_raw = 1;
 				n_jpegs = 1;
 			}
@@ -847,10 +858,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return n_stops;
     }
 
-    public PhotoMode getPhotoMode() {
-		// Note, this always should return the true photo mode - if we're in video mode and taking a photo snapshot while
-		// video recording, the caller should override. We don't override here, as this preference may be used to affect how
-		// the CameraController is set up, and we don't always re-setup the camera when switching between photo and video modes.
+	/** Returns the current photo mode.
+	 *  Note, this always should return the true photo mode - if we're in video mode and taking a photo snapshot while
+	 *  video recording, the caller should override. We don't override here, as this preference may be used to affect how
+	 *  the CameraController is set up, and we don't always re-setup the camera when switching between photo and video modes.
+	 */
+	public PhotoMode getPhotoMode() {
 		String photo_mode_pref = sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std");
 		/*if( MyDebug.LOG )
 			Log.d(TAG, "photo_mode_pref: " + photo_mode_pref);*/
@@ -875,16 +888,48 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return( photo_mode == PhotoMode.DRO );
 	}
 
+	/** Return whether to capture JPEG, or RAW+JPEG.
+	 *  Note even if in RAW only mode, we still capture RAW+JPEG - the JPEG is needed for things like
+	 *  getting the bitmap for the thumbnail and pause preview option; we simply don't do any post-
+	 *  processing or saving on the JPEG.
+	 */
 	@Override
 	public RawPref getRawPref() {
     	if( isImageCaptureIntent() )
     		return RawPref.RAWPREF_JPEG_ONLY;
+		if( main_activity.getPreview().isVideo() )
+    		return RawPref.RAWPREF_JPEG_ONLY; // video snapshot mode
 		switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
 			case "preference_raw_yes":
+			case "preference_raw_only":
 				return RawPref.RAWPREF_JPEG_DNG;
 		}
 		return RawPref.RAWPREF_JPEG_ONLY;
     }
+
+	/** Whether RAW only mode is enabled.
+	 */
+	public boolean isRawOnly() {
+    	PhotoMode photo_mode = getPhotoMode();
+    	return isRawOnly(photo_mode);
+	}
+
+	/** Use this instead of isRawOnly() if the photo mode is already known - useful to call e.g. from MainActivity.supportsDRO()
+	 *  without causing an infinite loop!
+	 */
+	boolean isRawOnly(PhotoMode photo_mode) {
+    	if( isImageCaptureIntent() )
+    		return false;
+		if( main_activity.getPreview().isVideo() )
+    		return false; // video snapshot mode
+    	if( photo_mode == PhotoMode.Standard || photo_mode == PhotoMode.DRO ) {
+			switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
+				case "preference_raw_only":
+					return true;
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public int getMaxRawImages() {
@@ -913,7 +958,10 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public void cameraSetup() {
 		main_activity.cameraSetup();
 		drawPreview.clearContinuousFocusMove();
-		drawPreview.updateSettings(); // otherwise icons like HDR won't show after force-restart, because we only know that HDR is supported after the camera is opened
+		// Need to cause drawPreview.updateSettings(), otherwise icons like HDR won't show after force-restart, because we only
+		// know that HDR is supported after the camera is opened
+		// Also needed for settings which update when switching between photo and video mode.
+		drawPreview.updateSettings();
 	}
 
 	@Override
@@ -1452,7 +1500,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		PhotoMode photo_mode = getPhotoMode();
 		if( main_activity.getPreview().isVideo() ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "snapshop mode");
+				Log.d(TAG, "snapshot mode");
 			// must be in photo snapshot while recording video mode, only support standard photo mode
 			photo_mode = PhotoMode.Standard;
 		}

@@ -565,13 +565,15 @@ public class StorageUtils {
 		final Uri uri;
 		final long date;
 		final int orientation;
+		final String path;
 
-    	Media(long id, boolean video, Uri uri, long date, int orientation) {
+    	Media(long id, boolean video, Uri uri, long date, int orientation, String path) {
     		this.id = id;
     		this.video = video;
     		this.uri = uri;
     		this.date = date;
     		this.orientation = orientation;
+    		this.path = path;
     	}
     }
     
@@ -591,10 +593,11 @@ public class StorageUtils {
 		Uri baseUri = video ? Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 		final int column_id_c = 0;
 		final int column_date_taken_c = 1;
-		final int column_data_c = 2;
-		final int column_orientation_c = 3;
+		final int column_data_c = 2; // full path and filename, including extension
+		final int column_orientation_c = 3; // for images only
 		String [] projection = video ? new String[] {VideoColumns._ID, VideoColumns.DATE_TAKEN, VideoColumns.DATA} : new String[] {ImageColumns._ID, ImageColumns.DATE_TAKEN, ImageColumns.DATA, ImageColumns.ORIENTATION};
-		String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg'";
+		// for images, we need to search for JPEG and RAW, to support RAW only mode (even if we're not currently in that mode, it may be that previously the user did take photos in RAW only mode)
+		String selection = video ? "" : ImageColumns.MIME_TYPE + "='image/jpeg' OR " + ImageColumns.MIME_TYPE + "='image/x-adobe-dng'";
 		String order = video ? VideoColumns.DATE_TAKEN + " DESC," + VideoColumns._ID + " DESC" : ImageColumns.DATE_TAKEN + " DESC," + ImageColumns._ID + " DESC";
 		Cursor cursor = null;
 		try {
@@ -629,7 +632,53 @@ public class StorageUtils {
 							break;
 						}
 					}
-				} while( cursor.moveToNext() );
+				}
+				while( cursor.moveToNext() );
+				if( found ) {
+					// make sure we prefer JPEG if there's a JPEG version of this image
+					// this is because we want to support RAW only and JPEG+RAW modes
+					String path = cursor.getString(column_data_c);
+					if( MyDebug.LOG )
+						Log.d(TAG, "path: " + path);
+					// path may be null on Android 4.4, see above!
+					if( path != null && path.toLowerCase(Locale.US).endsWith(".dng") ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "try to find a JPEG version of the DNG");
+						int dng_pos = cursor.getPosition();
+						boolean found_jpeg = false;
+						String path_without_ext = path.toLowerCase(Locale.US);
+						if( path_without_ext.indexOf(".") > 0 )
+							path_without_ext = path_without_ext.substring(0, path_without_ext.lastIndexOf("."));
+						if( MyDebug.LOG )
+							Log.d(TAG, "path_without_ext: " + path_without_ext);
+						while( cursor.moveToNext() ) {
+							String next_path = cursor.getString(column_data_c);
+							if( MyDebug.LOG )
+								Log.d(TAG, "next_path: " + next_path);
+							if( next_path == null )
+								break;
+							String next_path_without_ext = next_path.toLowerCase(Locale.US);
+							if( next_path_without_ext.indexOf(".") > 0 )
+								next_path_without_ext = next_path_without_ext.substring(0, next_path_without_ext.lastIndexOf("."));
+							if( MyDebug.LOG )
+								Log.d(TAG, "next_path_without_ext: " + next_path_without_ext);
+							if( !path_without_ext.equals(next_path_without_ext) )
+								break;
+							// so we've found another file with matching filename - is it a JPEG?
+							if( next_path.toLowerCase(Locale.US).endsWith(".jpg") ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "found equivalent jpeg");
+								found_jpeg = true;
+								break;
+							}
+						}
+						if( !found_jpeg ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "can't find equivalent jpeg");
+							cursor.moveToPosition(dng_pos);
+						}
+					}
+				}
 				if( !found ) {
 					if( MyDebug.LOG )
 						Log.d(TAG, "can't find suitable in Open Camera folder, so just go with most recent");
@@ -639,9 +688,10 @@ public class StorageUtils {
 				long date = cursor.getLong(column_date_taken_c);
 				int orientation = video ? 0 : cursor.getInt(column_orientation_c);
 				Uri uri = ContentUris.withAppendedId(baseUri, id);
+				String path = cursor.getString(column_data_c);
 				if( MyDebug.LOG )
 					Log.d(TAG, "found most recent uri for " + (video ? "video" : "images") + ": " + uri);
-				media = new Media(id, video, uri, date, orientation);
+				media = new Media(id, video, uri, date, orientation, path);
 			}
 		}
 		catch(Exception e) {

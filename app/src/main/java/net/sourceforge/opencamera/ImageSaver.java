@@ -1478,18 +1478,29 @@ public class ImageSaver extends Thread {
 		
         boolean success = false;
 		final MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
+		boolean raw_only = applicationInterface.isRawOnly();
+		if( MyDebug.LOG )
+			Log.d(TAG, "raw_only: " + raw_only);
 		StorageUtils storageUtils = main_activity.getStorageUtils();
 		
 		main_activity.savingImage(true);
 
-		PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap);
-		bitmap = postProcessBitmapResult.bitmap;
-		File exifTempFile = postProcessBitmapResult.exifTempFile;
+		File exifTempFile = null;
+
+		if( !raw_only ) {
+			PostProcessBitmapResult postProcessBitmapResult = postProcessBitmap(request, data, bitmap);
+			bitmap = postProcessBitmapResult.bitmap;
+			exifTempFile = postProcessBitmapResult.exifTempFile;
+		}
 
 		File picFile = null;
 		Uri saveUri = null; // if non-null, then picFile is a temporary file, which afterwards we should redirect to saveUri
         try {
-			if( request.image_capture_intent ) {
+        	if( raw_only ) {
+        		// don't save the JPEG
+				success = true;
+			}
+			else if( request.image_capture_intent ) {
     			if( MyDebug.LOG )
     				Log.d(TAG, "image_capture_intent");
     			if( request.image_capture_intent_uri != null )
@@ -1702,7 +1713,10 @@ public class ImageSaver extends Thread {
 				Log.e(TAG, "failed to delete temp " + exifTempFile.getAbsolutePath());
 		}
 
-        if( success && saveUri == null ) {
+		if( raw_only ) {
+        	// no saved image to record
+		}
+        else if( success && saveUri == null ) {
         	applicationInterface.addLastImage(picFile, share_image);
         }
         else if( success && storageUtils.isUsingSAF() ){
