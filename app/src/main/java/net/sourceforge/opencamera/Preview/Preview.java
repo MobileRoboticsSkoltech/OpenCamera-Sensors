@@ -1605,6 +1605,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	/* Should only be called after camera first opened, or after preview is paused.
 	 * take_photo is true if we have been called from the TakePhoto widget (which means
 	 * we'll take a photo immediately after startup).
+	 * Important to call this when switching between photo and video mode, as ApplicationInterface
+	 * preferences/parameters may be different (since we can support taking photos in video snapshot
+	 * mode, but this may have different parameters).
 	 */
 	public void setupCamera(boolean take_photo) {
 		if( MyDebug.LOG )
@@ -3804,6 +3807,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// run on the background thread, thus not freezing the UI
 				// Also workaround for bug on Nexus 6 at least where switching to video and back to photo mode causes continuous picture mode to stop -
 				// at the least, we need to reopen camera when: ( !is_video && focus_value != null && focus_value.equals("focus_mode_continuous_picture") ).
+				// Lastly, note that it's important to still call setupCamera() when switching between photo and video modes (see comment for setupCamera()).
+				// So if we ever allow stopping/starting the preview again, we still need to call setupCamera() again.
 				this.reopenCamera();
 			}
 
