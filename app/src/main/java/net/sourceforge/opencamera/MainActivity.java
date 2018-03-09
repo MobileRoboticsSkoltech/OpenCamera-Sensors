@@ -1526,6 +1526,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     
     @Override
     public void onBackPressed() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onBackPressed");
         final MyPreferenceFragment fragment = getPreferenceFragment();
         if( screen_is_locked ) {
 			preview.showToast(screen_locked_toast, R.string.screen_is_locked);
@@ -1555,6 +1557,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					Log.d(TAG, "no need to call updateForSettings() for changes made to preferences");
 			}
         }
+        else if( preview != null && preview.isPreviewPaused() ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "preview was paused, so unpause it");
+			preview.startCameraPreview();
+			return;
+		}
         else {
 			if( popupIsOpen() ) {
     			closePopup();
