@@ -3016,6 +3016,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			else if( photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
 				photo_mode_string = getResources().getString(R.string.photo_mode_expo_bracketing_full);
 			}
+			else if( photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
+				photo_mode_string = getResources().getString(R.string.photo_mode_noise_reduction);
+			}
 			if( photo_mode_string != null ) {
 				toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + photo_mode_string;
 				simple = false;
