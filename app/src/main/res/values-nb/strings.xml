@@ -446,7 +446,7 @@
     <string name="preference_raw_yes">JPEG og DNG (RAW)</string>
 
     <string name="preference_stamp_dateformat_default">Standard</string>
-    <string name="preference_stamp_dateformat_yyyymmdd">åååå/mm/dd</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">åååå-mm-dd</string>
     <string name="preference_stamp_dateformat_ddmmyyyy">dd/mm/åååå</string>
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/åååå</string>
     <string name="preference_stamp_dateformat_none">ingen</string>

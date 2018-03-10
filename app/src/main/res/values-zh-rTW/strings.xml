@@ -269,7 +269,7 @@
     <string name="preference_video_fps_default">預設</string>
 
     <string name="preference_stamp_dateformat_default">預設</string>
-    <string name="preference_stamp_dateformat_yyyymmdd">年/月/日</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">年-月-日</string>
     <string name="preference_stamp_dateformat_ddmmyyyy">日/月/年</string>
     <string name="preference_stamp_dateformat_mmddyyyy">月/日/年</string>
     <string name="preference_stamp_dateformat_none">無</string>

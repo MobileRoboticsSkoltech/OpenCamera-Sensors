@@ -30,7 +30,8 @@ public class TextFormatter {
         if( !preference_stamp_dateformat.equals("preference_stamp_dateformat_none") ) {
             switch(preference_stamp_dateformat) {
                 case "preference_stamp_dateformat_yyyymmdd":
-                    date_stamp = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(date);
+                    // use dashes instead of slashes - this should follow https://en.wikipedia.org/wiki/ISO_8601
+                    date_stamp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date);
                     break;
                 case "preference_stamp_dateformat_ddmmyyyy":
                     date_stamp = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date);

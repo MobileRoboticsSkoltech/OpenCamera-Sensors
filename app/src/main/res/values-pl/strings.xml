@@ -372,7 +372,7 @@
     <string name="preference_raw_yes">JPEG i DNG (RAW)</string>
 
     <string name="preference_stamp_dateformat_default">Domyślnie</string>
-    <string name="preference_stamp_dateformat_yyyymmdd">yyyy/mm/dd</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">yyyy-mm-dd</string>
     <string name="preference_stamp_dateformat_ddmmyyyy">dd/mm/yyyy</string>
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
     <string name="preference_stamp_dateformat_none">Brak</string>

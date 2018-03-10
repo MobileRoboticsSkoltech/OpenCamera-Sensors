@@ -396,7 +396,7 @@
     <string name="preference_raw_yes">JPEG и DNG (RAW)</string>
 
     <string name="preference_stamp_dateformat_default">По умолчанию</string>
-    <string name="preference_stamp_dateformat_yyyymmdd">гггг/мм/дд</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">гггг-мм-дд</string>
     <string name="preference_stamp_dateformat_ddmmyyyy">дд/мм/гггг</string>
     <string name="preference_stamp_dateformat_mmddyyyy">мм/дд/гггг</string>
     <string name="preference_stamp_dateformat_none">Нет</string>

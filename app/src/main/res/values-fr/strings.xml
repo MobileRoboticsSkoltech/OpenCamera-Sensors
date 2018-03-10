@@ -340,7 +340,7 @@
     <string name="preference_video_fps_default">Par défaut</string>
 
     <string name="preference_stamp_dateformat_default">Par défaut</string>
-    <string name="preference_stamp_dateformat_yyyymmdd">aaaa/mm/jj</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">aaaa-mm-jj</string>
     <string name="preference_stamp_dateformat_ddmmyyyy">jj/mm/aaaa</string>
     <string name="preference_stamp_dateformat_mmddyyyy">mm/jj/aaaa</string>
     <string name="preference_stamp_dateformat_none">Aucun</string>
