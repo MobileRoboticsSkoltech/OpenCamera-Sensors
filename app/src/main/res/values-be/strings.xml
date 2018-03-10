@@ -271,4 +271,11 @@
     <string name="duration_45m">45 хвілін</string>
     <string name="duration_1h">1 гадзіна</string>
     <string name="preference_video_fps_default">Прадвызначана</string>
+
+    <string name="preference_stamp_dateformat_default">Прадвызначана</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">г/м/дз</string>
+    <string name="preference_stamp_dateformat_ddmmyyyy">дз/м/г</string>
+    <string name="preference_stamp_dateformat_mmddyyyy">м/дз/г</string>
+    <string name="preference_stamp_dateformat_none">Няма</string>
+
 </resources>

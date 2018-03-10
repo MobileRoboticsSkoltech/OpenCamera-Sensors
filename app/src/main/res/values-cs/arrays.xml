@@ -296,20 +296,6 @@
         <item>preference_stamp_no</item>
         <item>preference_stamp_yes</item>
     </string-array>
-    <string-array name="preference_stamp_dateformat_entries">
-        <item>Implicitní</item>
-        <item>rrrr/mm/dd</item>
-        <item>dd/mm/rrrr</item>
-        <item>mm/dd/rrrr</item>
-        <item>Žádné</item>
-        </string-array>
-    <string-array name="preference_stamp_dateformat_values">
-        <item>preference_stamp_dateformat_default</item>
-        <item>preference_stamp_dateformat_yyyymmdd</item>
-        <item>preference_stamp_dateformat_ddmmyyyy</item>
-        <item>preference_stamp_dateformat_mmddyyyy</item>
-        <item>preference_stamp_dateformat_none</item>
-    </string-array>
     <string-array name="preference_stamp_timeformat_entries">
         <item>Implicitní</item>
         <item>12-ti hodinový</item>

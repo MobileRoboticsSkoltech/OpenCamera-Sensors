@@ -296,20 +296,6 @@
         <item>preference_stamp_no</item>
         <item>preference_stamp_yes</item>
     </string-array>
-    <string-array name="preference_stamp_dateformat_entries">
-        <item>Öntanımlı ayar</item>
-        <item>yyyy/aa/gg</item>
-        <item>gg/aa/yyyy</item>
-        <item>aa/gg/yyyy</item>
-        <item>Tarih bilgisi yok</item>
-        </string-array>
-    <string-array name="preference_stamp_dateformat_values">
-        <item>preference_stamp_dateformat_default</item>
-        <item>preference_stamp_dateformat_yyyymmdd</item>
-        <item>preference_stamp_dateformat_ddmmyyyy</item>
-        <item>preference_stamp_dateformat_mmddyyyy</item>
-        <item>preference_stamp_dateformat_none</item>
-    </string-array>
     <string-array name="preference_stamp_timeformat_entries">
         <item>Öntanımlı ayar</item>
         <item>12 saat</item>

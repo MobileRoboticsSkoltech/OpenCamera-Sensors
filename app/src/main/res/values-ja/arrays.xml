@@ -296,20 +296,6 @@
         <item>preference_stamp_no</item>
         <item>preference_stamp_yes</item>
     </string-array>
-    <string-array name="preference_stamp_dateformat_entries">
-        <item>デフォルト</item>
-        <item>年/月/日</item>
-        <item>日/月/年</item>
-        <item>月/日/年</item>
-        <item>なし</item>
-        </string-array>
-    <string-array name="preference_stamp_dateformat_values">
-        <item>preference_stamp_dateformat_default</item>
-        <item>preference_stamp_dateformat_yyyymmdd</item>
-        <item>preference_stamp_dateformat_ddmmyyyy</item>
-        <item>preference_stamp_dateformat_mmddyyyy</item>
-        <item>preference_stamp_dateformat_none</item>
-    </string-array>
     <string-array name="preference_stamp_timeformat_entries">
         <item>デフォルト</item>
         <item>12時間制</item>

@@ -274,4 +274,11 @@
     <string name="duration_45m">45 dakika</string>
     <string name="duration_1h">1 saat</string>
     <string name="preference_video_fps_default">Öntanımlı ayar</string>
+
+    <string name="preference_stamp_dateformat_default">Öntanımlı ayar</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">yyyy/aa/gg</string>
+    <string name="preference_stamp_dateformat_ddmmyyyy">gg/aa/yyyy</string>
+    <string name="preference_stamp_dateformat_mmddyyyy">aa/gg/yyyy</string>
+    <string name="preference_stamp_dateformat_none">Tarih bilgisi yok</string>
+
 </resources>

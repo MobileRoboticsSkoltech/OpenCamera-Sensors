@@ -275,4 +275,11 @@
     <string name="duration_45m">45分</string>
     <string name="duration_1h">1時間</string>
     <string name="preference_video_fps_default">デフォルト</string>
+
+    <string name="preference_stamp_dateformat_default">デフォルト</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">年/月/日</string>
+    <string name="preference_stamp_dateformat_ddmmyyyy">日/月/年</string>
+    <string name="preference_stamp_dateformat_mmddyyyy">月/日/年</string>
+    <string name="preference_stamp_dateformat_none">なし</string>
+
 </resources>

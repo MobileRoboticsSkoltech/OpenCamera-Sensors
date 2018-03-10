@@ -394,4 +394,11 @@
 
     <string name="preference_raw_no">Csak JPEG</string>
     <string name="preference_raw_yes">JPEG és DNG (RAW)</string>
+
+    <string name="preference_stamp_dateformat_default">Alapértelmezett</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">éééé/hh/nn</string>
+    <string name="preference_stamp_dateformat_ddmmyyyy">nn/hh/éééé</string>
+    <string name="preference_stamp_dateformat_mmddyyyy">hh/nn/éééé</string>
+    <string name="preference_stamp_dateformat_none">Nincs</string>
+
 </resources>

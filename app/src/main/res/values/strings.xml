@@ -474,6 +474,12 @@
     <string name="preference_raw_yes">JPEG and DNG (RAW)</string>
     <string name="preference_raw_only">DNG (RAW) only</string>
 
+    <string name="preference_stamp_dateformat_default">Default</string>
+    <string name="preference_stamp_dateformat_yyyymmdd">yyyy/mm/dd</string>
+    <string name="preference_stamp_dateformat_ddmmyyyy">dd/mm/yyyy</string>
+    <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
+    <string name="preference_stamp_dateformat_none">None</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>
