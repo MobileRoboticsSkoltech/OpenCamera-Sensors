@@ -1523,39 +1523,48 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	private MyPreferenceFragment getPreferenceFragment() {
         return (MyPreferenceFragment)getFragmentManager().findFragmentByTag("PREFERENCE_FRAGMENT");
     }
-    
+
+    private boolean settingsIsOpen() {
+		return getPreferenceFragment() != null;
+	}
+
+	/** Call when the settings is going to be closed.
+	 */
+	private void settingsClosing() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "close settings");
+		setWindowFlagsForCamera();
+		showPreview(true);
+
+		preferencesListener.stopListening();
+
+		// Update the cached settings in DrawPreview
+		// Note that some GUI related settings won't trigger preferencesListener.anyChanges(), so
+		// we always call this. Perhaps we could add more classifications to PreferencesListener
+		// to mark settings that need us to update DrawPreview but not call updateForSettings().
+		// However, DrawPreview.updateSettings() should be a quick function (the main point is
+		// to avoid reading the preferences in every single frame).
+		applicationInterface.getDrawPreview().updateSettings();
+
+		if( preferencesListener.anyChanges() ) {
+			updateForSettings();
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "no need to call updateForSettings() for changes made to preferences");
+		}
+	}
+
     @Override
     public void onBackPressed() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "onBackPressed");
-        final MyPreferenceFragment fragment = getPreferenceFragment();
         if( screen_is_locked ) {
 			preview.showToast(screen_locked_toast, R.string.screen_is_locked);
         	return;
         }
-        if( fragment != null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "close settings");
-			setWindowFlagsForCamera();
-			showPreview(true);
-
-			preferencesListener.stopListening();
-
-			// Update the cached settings in DrawPreview
-			// Note that some GUI related settings won't trigger preferencesListener.anyChanges(), so
-			// we always call this. Perhaps we could add more classifications to PreferencesListener
-			// to mark settings that need us to update DrawPreview but not call updateForSettings().
-			// However, DrawPreview.updateSettings() should be a quick function (the main point is
-			// to avoid reading the preferences in every single frame).
-			applicationInterface.getDrawPreview().updateSettings();
-
-			if( preferencesListener.anyChanges() ) {
-				updateForSettings();
-			}
-			else {
-				if( MyDebug.LOG )
-					Log.d(TAG, "no need to call updateForSettings() for changes made to preferences");
-			}
+        if( settingsIsOpen() ) {
+        	settingsClosing();
         }
         else if( preview != null && preview.isPreviewPaused() ) {
 			if( MyDebug.LOG )
