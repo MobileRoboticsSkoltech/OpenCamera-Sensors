@@ -6987,6 +6987,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    final SeekBar zoomSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
 		assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
+		int init_zoom = mPreview.getCameraController().getZoom();
 	    int max_zoom = mPreview.getMaxZoom();
 	    zoomSeekBar.setProgress(0);
 		this.getInstrumentation().waitForIdleSync();
@@ -6996,7 +6997,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		pauseAndResume();
 	    Log.d(TAG, "after pause and resume: compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + max_zoom);
-	    assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
+	    // as of Open Camera v1.43, zoom is reset when pause/resuming
+	    //assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() == init_zoom);
 		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
 	}
 
@@ -7014,6 +7017,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    final SeekBar zoomSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
 		assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
+		int init_zoom = mPreview.getCameraController().getZoom();
 	    int max_zoom = mPreview.getMaxZoom();
 	    zoomSeekBar.setProgress(0);
 		this.getInstrumentation().waitForIdleSync();
@@ -7030,7 +7034,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    max_zoom = mPreview.getMaxZoom();
 	    Log.d(TAG, "after pause and resume: compare actual zoom " + mPreview.getCameraController().getZoom() + " to zoom " + max_zoom);
-	    assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
+	    // as of Open Camera v1.43, zoom is reset when pause/resuming
+	    //assertTrue(mPreview.getCameraController().getZoom() == max_zoom);
+	    assertTrue(mPreview.getCameraController().getZoom() == init_zoom);
 		assertTrue(max_zoom-zoomSeekBar.getProgress() == mPreview.getCameraController().getZoom());
 	}
 
