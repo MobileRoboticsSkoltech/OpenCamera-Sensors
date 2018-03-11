@@ -285,11 +285,15 @@ public class PreferenceKeys {
     	return "preference_timer_speak";
     }
     
-    public static String getBurstModePreferenceKey() {
+    public static String getRepeatModePreferenceKey() {
+    	// note for historical reasons the preference refers to burst; the feature was renamed to
+		// "repeat" in v1.43, but we still need to use the old string to avoid changing user settings
+		// when people upgrade
     	return "preference_burst_mode";
     }
     
-    public static String getBurstIntervalPreferenceKey() {
+    public static String getRepeatIntervalPreferenceKey() {
+    	// see note about "repeat" vs "burst" under getRepeatModePreferenceKey()
     	return "preference_burst_interval";
     }
     

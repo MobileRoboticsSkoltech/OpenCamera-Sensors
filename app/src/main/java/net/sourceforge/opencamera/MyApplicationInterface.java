@@ -645,19 +645,19 @@ public class MyApplicationInterface implements ApplicationInterface {
     
     @Override
     public String getRepeatPref() {
-    	return sharedPreferences.getString(PreferenceKeys.getBurstModePreferenceKey(), "1");
+    	return sharedPreferences.getString(PreferenceKeys.getRepeatModePreferenceKey(), "1");
     }
     
     @Override
     public long getRepeatIntervalPref() {
-		String timer_value = sharedPreferences.getString(PreferenceKeys.getBurstIntervalPreferenceKey(), "0");
+		String timer_value = sharedPreferences.getString(PreferenceKeys.getRepeatIntervalPreferenceKey(), "0");
 		long timer_delay;
 		try {
 			timer_delay = (long)Integer.parseInt(timer_value) * 1000;
 		}
         catch(NumberFormatException e) {
     		if( MyDebug.LOG )
-    			Log.e(TAG, "failed to parse preference_burst_interval value: " + timer_value);
+    			Log.e(TAG, "failed to parse repeat interval value: " + timer_value);
     		e.printStackTrace();
     		timer_delay = 0;
         }

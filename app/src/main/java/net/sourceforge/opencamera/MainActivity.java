@@ -1259,7 +1259,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		waitUntilImageQueueEmpty(); // in theory not needed as we could continue running in the background, but best to be safe
 		closePopup();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
-		preview.cancelBurst(); // similarly cancel the auto-repeat burst mode!
+		preview.cancelRepeat(); // similarly cancel the auto-repeat mode!
 		preview.stopVideo(false); // important to stop video, as we'll be changing camera parameters when the settings window closes
 		stopAudioListeners();
 		

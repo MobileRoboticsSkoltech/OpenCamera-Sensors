@@ -150,7 +150,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private final Timer batteryCheckVideoTimer = new Timer();
 	private TimerTask batteryCheckVideoTimerTask;
 	private long take_photo_time;
-	private int remaining_burst_photos;
+	private int remaining_repeat_photos;
 	private int remaining_restart_video;
 
 	private boolean is_preview_started;
@@ -1079,7 +1079,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 		applicationInterface.cameraClosed();
 		cancelTimer();
-		cancelBurst();
+		cancelRepeat();
 		if( camera_controller != null ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "close camera_controller");
@@ -1154,10 +1154,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
-	public void cancelBurst() {
+	public void cancelRepeat() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "cancelBurst()");
-		remaining_burst_photos = 0;
+			Log.d(TAG, "cancelRepeat()");
+		remaining_repeat_photos = 0;
 	}
 
 	/**
@@ -4258,8 +4258,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// user requested take photo while already taking photo
 			if( MyDebug.LOG )
 				Log.d(TAG, "already taking a photo");
-			if( remaining_burst_photos != 0 ) {
-				cancelBurst();
+			if( remaining_repeat_photos != 0 ) {
+				cancelRepeat();
 				showToast(take_photo_toast, R.string.cancelled_repeat_mode);
 			}
 			return;
@@ -4279,33 +4279,33 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         this.startCameraPreview();
 
 		if( photo_snapshot ) {
-			// go straight to taking a photo, ignore timer or burst options
+			// go straight to taking a photo, ignore timer or repeat options
 			takePicture(false, photo_snapshot);
 			return;
 		}
 
 		long timer_delay = applicationInterface.getTimerPref();
 
-		String burst_mode_value = applicationInterface.getRepeatPref();
-		if( burst_mode_value.equals("unlimited") ) {
+		String repeat_mode_value = applicationInterface.getRepeatPref();
+		if( repeat_mode_value.equals("unlimited") ) {
     		if( MyDebug.LOG )
-    			Log.d(TAG, "unlimited burst");
-			remaining_burst_photos = -1;
+    			Log.d(TAG, "unlimited repeat");
+			remaining_repeat_photos = -1;
 		}
 		else {
-			int n_burst;
+			int n_repeat;
 			try {
-				n_burst = Integer.parseInt(burst_mode_value);
+				n_repeat = Integer.parseInt(repeat_mode_value);
 	    		if( MyDebug.LOG )
-	    			Log.d(TAG, "n_burst: " + n_burst);
+	    			Log.d(TAG, "n_repeat: " + n_repeat);
 			}
 	        catch(NumberFormatException e) {
 	    		if( MyDebug.LOG )
-	    			Log.e(TAG, "failed to parse preference_burst_mode value: " + burst_mode_value);
+	    			Log.e(TAG, "failed to parse repeat_mode value: " + repeat_mode_value);
 	    		e.printStackTrace();
-	    		n_burst = 1;
+	    		n_repeat = 1;
 	        }
-			remaining_burst_photos = n_burst-1;
+			remaining_repeat_photos = n_repeat-1;
 		}
 		
 		if( timer_delay == 0 ) {
@@ -5101,7 +5101,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		focus_success = FOCUS_DONE; // clear focus rectangle if not already done
 		successfully_focused = false; // so next photo taken will require an autofocus
 		if( MyDebug.LOG )
-			Log.d(TAG, "remaining_burst_photos: " + remaining_burst_photos);
+			Log.d(TAG, "remaining_repeat_photos: " + remaining_repeat_photos);
 
 		CameraController.PictureCallback pictureCallback = new CameraController.PictureCallback() {
 			private boolean success = false; // whether jpeg callback succeeded
@@ -5121,16 +5121,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     	        if( !using_android_l ) {
     	        	is_preview_started = false; // preview automatically stopped due to taking photo on original Camera API
     	        }
-    	        phase = PHASE_NORMAL; // need to set this even if remaining burst photos, so we can restart the preview
-    	        if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
+    	        phase = PHASE_NORMAL; // need to set this even if remaining repeat photos, so we can restart the preview
+    	        if( remaining_repeat_photos == -1 || remaining_repeat_photos > 0 ) {
     	        	if( !is_preview_started ) {
     	    	    	// we need to restart the preview; and we do this in the callback, as we need to restart after saving the image
     	    	    	// (otherwise this can fail, at least on Nexus 7)
 						if( MyDebug.LOG )
-							Log.d(TAG, "burst mode photos remaining: onPictureTaken about to start preview: " + remaining_burst_photos);
+							Log.d(TAG, "repeat mode photos remaining: onPictureTaken about to start preview: " + remaining_repeat_photos);
     		            startCameraPreview();
     	        		if( MyDebug.LOG )
-    	        			Log.d(TAG, "burst mode photos remaining: onPictureTaken started preview: " + remaining_burst_photos);
+    	        			Log.d(TAG, "repeat mode photos remaining: onPictureTaken started preview: " + remaining_repeat_photos);
     	        	}
     	        }
     	        else {
@@ -5167,9 +5167,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			}
 
     			if( MyDebug.LOG )
-    				Log.d(TAG, "do we need to take another photo? remaining_burst_photos: " + remaining_burst_photos);
-				if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
-					takeRemainingBurstPhotos();
+    				Log.d(TAG, "do we need to take another photo? remaining_repeat_photos: " + remaining_repeat_photos);
+				if( remaining_repeat_photos == -1 || remaining_repeat_photos > 0 ) {
+					takeRemainingRepeatPhotos();
 				}
 			}
 
@@ -5265,34 +5265,34 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "takePhotoWhenFocused exit");
     }
 
-    private void takeRemainingBurstPhotos() {
+    private void takeRemainingRepeatPhotos() {
 		if( MyDebug.LOG )
-			Log.d(TAG, "takeRemainingBurstPhotos");
-		if( remaining_burst_photos == -1 || remaining_burst_photos > 0 ) {
+			Log.d(TAG, "takeRemainingRepeatPhotos");
+		if( remaining_repeat_photos == -1 || remaining_repeat_photos > 0 ) {
 			if( camera_controller == null ) {
-				Log.e(TAG, "remaining_burst_photos still set, but camera is closed!: " + remaining_burst_photos);
-				cancelBurst();
+				Log.e(TAG, "remaining_repeat_photos still set, but camera is closed!: " + remaining_repeat_photos);
+				cancelRepeat();
 			}
 			else {
 				// check it's okay to take a photo
 				if( !applicationInterface.canTakeNewPhoto() ) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "takeRemainingBurstPhotos: still processing...");
+						Log.d(TAG, "takeRemainingRepeatPhotos: still processing...");
 					// wait a bit then check again
 					final Handler handler = new Handler();
 					handler.postDelayed(new Runnable() {
 						@Override
 						public void run() {
 							if( MyDebug.LOG )
-								Log.d(TAG, "takeRemainingBurstPhotos: check again from post delayed runnable");
-							takeRemainingBurstPhotos();
+								Log.d(TAG, "takeRemainingRepeatPhotos: check again from post delayed runnable");
+							takeRemainingRepeatPhotos();
 						}
 					}, 500);
 					return;
 				}
 
-				if( remaining_burst_photos > 0 )
-					remaining_burst_photos--;
+				if( remaining_repeat_photos > 0 )
+					remaining_repeat_photos--;
 
 				long timer_delay = applicationInterface.getRepeatIntervalPref();
 				if( timer_delay == 0 ) {

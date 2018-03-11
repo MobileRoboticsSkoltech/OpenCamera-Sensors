@@ -1579,10 +1579,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		return files == null ? 0 : files.length;
 	}
 
-	/* Tests continuous picture focus with burst mode.
+	/* Tests continuous picture focus with repeat mode.
 	 */
-	public void testContinuousPictureFocusBurst() throws InterruptedException {
-		Log.d(TAG, "testContinuousPictureFocusBurst");
+	public void testContinuousPictureFocusRepeat() throws InterruptedException {
+		Log.d(TAG, "testContinuousPictureFocusRepeat");
 
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
@@ -1592,7 +1592,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getBurstModePreferenceKey(), "3");
+			editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), "3");
 			editor.apply();
 		}
 		switchToFocusValue("focus_mode_continuous_picture");
@@ -6220,16 +6220,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 	}
 
-	/* Tests taking photos repeatedly with auto-repeat "burst" method.
+	/* Tests taking photos repeatedly with auto-repeat method.
 	 */
-	public void testTakePhotoBurst() {
-		Log.d(TAG, "testTakePhotoBurst");
+	public void testTakePhotoRepeat() {
+		Log.d(TAG, "testTakePhotoRepeat");
 		setToDefault();
 
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getBurstModePreferenceKey(), "3");
+			editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), "3");
 			editor.apply();
 		}
 
@@ -6295,12 +6295,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				editor.apply();
 			}
 
-			// now test burst interval
+			// now test repeat interval
 			{
 				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 				SharedPreferences.Editor editor = settings.edit();
-				editor.putString(PreferenceKeys.getBurstModePreferenceKey(), "2");
-				editor.putString(PreferenceKeys.getBurstIntervalPreferenceKey(), "3");
+				editor.putString(PreferenceKeys.getRepeatModePreferenceKey(), "2");
+				editor.putString(PreferenceKeys.getRepeatIntervalPreferenceKey(), "3");
 				editor.putBoolean(PreferenceKeys.getTimerBeepPreferenceKey(), false);
 				editor.apply();
 			}
