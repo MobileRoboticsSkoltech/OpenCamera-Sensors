@@ -35,7 +35,7 @@
     <string name="exposure_locked">Osvetlitev zaklenjena</string>
     <string name="exposure_unlocked">Osvetlitev odklenjena</string>
     <string name="cancelled_timer">Samosprožilec preklican</string>
-    <string name="cancelled_burst_mode">Zaporedni način preklican</string>
+    <string name="cancelled_repeat_mode">Zaporedni način preklican</string>
     <string name="started_timer">Odštevanje se je začelo</string>
     <string name="failed_to_save_video">Shranjevanje datoteke videoposnetka je spodletelo</string>
     <string name="failed_to_record_video">Snemanje videoposnetka je spodletelo</string>

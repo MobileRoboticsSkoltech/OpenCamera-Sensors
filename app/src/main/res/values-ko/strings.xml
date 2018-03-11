@@ -35,7 +35,7 @@
     <string name="exposure_locked">노출 고정</string>
     <string name="exposure_unlocked">노출 고정 해제</string>
     <string name="cancelled_timer">타이머 취소</string>
-    <string name="cancelled_burst_mode">연사 모드 취소</string>
+    <string name="cancelled_repeat_mode">연사 모드 취소</string>
     <string name="started_timer">타이머 시작</string>
     <string name="failed_to_save_video">동영상 파일 저장 실패</string>
     <string name="failed_to_record_video">동영상 녹화 실패</string>

@@ -35,7 +35,7 @@
     <string name="exposure_locked">Exposição Travada</string>
     <string name="exposure_unlocked">Exposição Destravada</string>
     <string name="cancelled_timer">Temporizador cancelado</string>
-    <string name="cancelled_burst_mode">Disparo contínuo cancelado</string>
+    <string name="cancelled_repeat_mode">Disparo contínuo cancelado</string>
     <string name="started_timer">Temporizador começou</string>
     <string name="failed_to_save_video">Falha ao salvar arquivo de vídeo</string>
     <string name="failed_to_record_video">Falha ao gravar vídeo</string>

@@ -4260,7 +4260,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "already taking a photo");
 			if( remaining_burst_photos != 0 ) {
 				cancelBurst();
-				showToast(take_photo_toast, R.string.cancelled_burst_mode);
+				showToast(take_photo_toast, R.string.cancelled_repeat_mode);
 			}
 			return;
 		}

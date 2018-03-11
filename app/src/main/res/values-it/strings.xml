@@ -34,7 +34,7 @@
     <string name="exposure_locked">Esposizione bloccata</string>
     <string name="exposure_unlocked">Esposizione sbloccata</string>
     <string name="cancelled_timer">Timer annullato</string>
-    <string name="cancelled_burst_mode">Modalità scatto a raffica annullato</string>
+    <string name="cancelled_repeat_mode">Modalità scatto a raffica annullato</string>
     <string name="started_timer">Il timer è partito</string>
     <string name="failed_to_save_video">Il salvataggio del file video è fallito</string>
     <string name="failed_to_record_video">La registrazione del video è fallita</string>
@@ -95,7 +95,7 @@
     <string name="preference_timer_beep">Suono timer</string>
     <string name="preference_timer_beep_summary">Emette un suono quando c\'è il countdown o per il ritardo nella modalità raffica</string>
     <string name="preference_timer_speak">Conto alla rovescia timer vocale</string>
-    <string name="preference_timer_speak_summary">Speak the countdown for timer or burst mode delay (from 60 seconds)</string>
+    <string name="preference_timer_speak_summary">Speak the countdown for timer or repeat mode delay (from 60 seconds)</string>
     <string name="preference_burst_mode">Modalità raffica</string>
     <string name="preference_burst_interval">Intervallo foto a raffica</string>
     <string name="preference_screen_camera_controls_more">Più controlli fotocamera…</string>

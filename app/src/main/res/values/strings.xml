@@ -35,7 +35,7 @@
     <string name="exposure_locked">Exposure Locked</string>
     <string name="exposure_unlocked">Exposure unlocked</string>
     <string name="cancelled_timer">Cancelled timer</string>
-    <string name="cancelled_burst_mode">Cancelled burst mode</string>
+    <string name="cancelled_repeat_mode">Cancelled repeat mode</string>
     <string name="started_timer">Started timer</string>
     <string name="failed_to_save_video">Failed to save video file</string>
     <string name="failed_to_record_video">Failed to record video</string>
@@ -94,11 +94,11 @@
     <string name="preference_category_camera_controls">Camera Controls</string>
     <string name="preference_timer">Timer</string>
     <string name="preference_timer_beep">Timer beep</string>
-    <string name="preference_timer_beep_summary">Beep when timer is counting down or for burst mode delay</string>
+    <string name="preference_timer_beep_summary">Beep when timer is counting down or for repeat mode delay</string>
     <string name="preference_timer_speak">Voice timer countdown</string>
-    <string name="preference_timer_speak_summary">Speak the countdown for timer or burst mode delay (from 60 seconds)</string>
-    <string name="preference_burst_mode">Burst</string> <!-- also used in popup menu, so shouldn't be too long a string -->
-    <string name="preference_burst_interval">Burst mode interval</string>
+    <string name="preference_timer_speak_summary">Speak the countdown for timer or repeat mode delay (from 60 seconds)</string>
+    <string name="preference_burst_mode">Repeat</string> <!-- also used in popup menu, so shouldn't be too long a string -->
+    <string name="preference_burst_interval">Repeat mode interval</string>
     <string name="preference_screen_camera_controls_more">More camera controls…</string>
     <string name="preference_touch_capture">Touch to capture</string>
     <string name="preference_touch_capture_summary">Take a photo just by touching or double-tapping the preview</string>

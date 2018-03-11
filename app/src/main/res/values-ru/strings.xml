@@ -35,7 +35,7 @@
     <string name="exposure_locked">Экспозиция заблокирована</string>
     <string name="exposure_unlocked">Экспозиция разблокирована</string>
     <string name="cancelled_timer">Таймер отменен</string>
-    <string name="cancelled_burst_mode">Режим серийной съемки отменен</string>
+    <string name="cancelled_repeat_mode">Режим серийной съемки отменен</string>
     <string name="started_timer">Таймер запущен</string>
     <string name="failed_to_save_video">Не удалось сохранить видеофайл</string>
     <string name="failed_to_record_video">Не удалось записать видео</string>

@@ -35,7 +35,7 @@
     <string name="exposure_locked">露出を設定しました</string>
     <string name="exposure_unlocked">露出を解除しました</string>
     <string name="cancelled_timer">タイマーを解除しました</string>
-    <string name="cancelled_burst_mode">高速撮影を解除しました</string>
+    <string name="cancelled_repeat_mode">高速撮影を解除しました</string>
     <string name="started_timer">タイマーを開始しました</string>
     <string name="failed_to_save_video">保存に失敗しました</string>
     <string name="failed_to_record_video">録画に失敗しました</string>

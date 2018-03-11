@@ -35,7 +35,7 @@
     <string name="exposure_locked">Expozice zamčena</string>
     <string name="exposure_unlocked">Expozice odemčena</string>
     <string name="cancelled_timer">Časovač zrušen</string>
-    <string name="cancelled_burst_mode">Sekvenční snímání zrušeno</string>
+    <string name="cancelled_repeat_mode">Sekvenční snímání zrušeno</string>
     <string name="started_timer">Časovač spuštěn</string>
     <string name="failed_to_save_video">Selhalo ukládání videa</string>
     <string name="failed_to_record_video">Selhalo natáčení videa</string>

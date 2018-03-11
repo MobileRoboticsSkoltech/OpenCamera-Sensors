@@ -35,7 +35,7 @@
     <string name="exposure_locked">Pozlanma kilitlendi</string>
     <string name="exposure_unlocked">Pozlama kilidi açıldı</string>
     <string name="cancelled_timer">Sayaç iptal edildi</string>
-    <string name="cancelled_burst_mode">Patlama modu iptal edildi</string>
+    <string name="cancelled_repeat_mode">Patlama modu iptal edildi</string>
     <string name="started_timer">Sayaç başlatıldı</string>
     <string name="failed_to_save_video">Vidyo dosyasını kaydederken hata oluştu</string>
     <string name="failed_to_record_video">Vidyo kaydında hata oluştu.</string>

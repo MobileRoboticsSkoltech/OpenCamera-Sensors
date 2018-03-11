@@ -35,7 +35,7 @@
     <string name="exposure_locked">Exposición bloqueada</string>
     <string name="exposure_unlocked">Exposición desbloqueada</string>
     <string name="cancelled_timer">Temporizador cancelado</string>
-    <string name="cancelled_burst_mode">Modo ráfaga cancelado</string>
+    <string name="cancelled_repeat_mode">Modo ráfaga cancelado</string>
     <string name="started_timer">Temporizador iniciado</string>
     <string name="failed_to_save_video">Error al guardar el video</string>
     <string name="failed_to_record_video">Error al grabar el video</string>

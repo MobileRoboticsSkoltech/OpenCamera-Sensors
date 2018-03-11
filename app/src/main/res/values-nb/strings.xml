@@ -35,7 +35,7 @@
     <string name="exposure_locked">Eksponeringen er låst</string>
     <string name="exposure_unlocked">Eksponeringen er låst opp</string>
     <string name="cancelled_timer">Nedtellingen er avbrutt.</string>
-    <string name="cancelled_burst_mode">Avbrøt seriefotograferingsmodusen</string>
+    <string name="cancelled_repeat_mode">Avbrøt seriefotograferingsmodusen</string>
     <string name="started_timer">Startet nedtelling</string>
     <string name="failed_to_save_video">Klarte ikke å lagre videofilen.</string>
     <string name="failed_to_record_video">Klarte ikke å ta opp video.</string>

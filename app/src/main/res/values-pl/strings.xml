@@ -36,7 +36,7 @@
     <string name="exposure_locked">Ekspozycja zablokowana</string>
     <string name="exposure_unlocked">Ekspozycja odblokowana</string>
     <string name="cancelled_timer">Anulowano samowyzwalacz</string>
-    <string name="cancelled_burst_mode">Anulowano tryb seryjny</string>
+    <string name="cancelled_repeat_mode">Anulowano tryb seryjny</string>
     <string name="started_timer">Włączono timer</string>
     <string name="failed_to_save_video">Nie udało się zapisać pliku wideo</string>
     <string name="failed_to_record_video">Nie udało się nagrać wideo</string>

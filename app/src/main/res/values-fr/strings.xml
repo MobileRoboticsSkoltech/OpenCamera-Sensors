@@ -35,7 +35,7 @@
     <string name="exposure_locked">Exposition bloquée</string>
     <string name="exposure_unlocked">Exposition débloquée</string>
     <string name="cancelled_timer">Retardateur annulé</string>
-    <string name="cancelled_burst_mode">Mode rafale annulé</string>
+    <string name="cancelled_repeat_mode">Mode rafale annulé</string>
     <string name="started_timer">Retardateur démarré</string>
     <string name="failed_to_save_video">Impossible d\'enregistrer le fichier vidéo</string>
     <string name="failed_to_record_video">Impossible d\'enregistrer la vidéo</string>

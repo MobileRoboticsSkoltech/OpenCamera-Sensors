@@ -35,7 +35,7 @@
     <string name="exposure_locked">Expozíció zárolva</string>
     <string name="exposure_unlocked">Expozíció feloldva</string>
     <string name="cancelled_timer">Időzítő megszakítva</string>
-    <string name="cancelled_burst_mode">Sorozatfelvétel megszakítva</string>
+    <string name="cancelled_repeat_mode">Sorozatfelvétel megszakítva</string>
     <string name="started_timer">Időzítő elindult</string>
     <string name="failed_to_save_video">Nem sikerült menteni a videofájlt </string>
     <string name="failed_to_record_video">Nem sikerült videofelvételt készíteni</string>

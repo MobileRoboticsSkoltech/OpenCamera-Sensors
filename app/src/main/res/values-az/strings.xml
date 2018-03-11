@@ -31,7 +31,7 @@
     <string name="exposure_locked">Ekspozisiya kilidlənib</string>
     <string name="exposure_unlocked">Ekspozisiya kilidi açıldı</string>
     <string name="cancelled_timer">Vaxtölçən ləğv edildi</string>
-    <string name="cancelled_burst_mode">Serial çəkiliş rejimi ləğv edildi</string>
+    <string name="cancelled_repeat_mode">Serial çəkiliş rejimi ləğv edildi</string>
     <string name="started_timer">Vaxtölçən başladı</string>
     <string name="failed_to_save_video">Videofaylı saxlamaq mümkün olmadı</string>
     <string name="failed_to_record_video">Videonu qeydə almaq mümkün olmadı</string>

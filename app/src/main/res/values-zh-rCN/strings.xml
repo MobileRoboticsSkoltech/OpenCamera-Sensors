@@ -35,7 +35,7 @@
     <string name="exposure_locked">曝光锁定</string>
     <string name="exposure_unlocked">曝光解锁</string>
     <string name="cancelled_timer">已取消定时器</string>
-    <string name="cancelled_burst_mode">已取消连拍模式</string>
+    <string name="cancelled_repeat_mode">已取消连拍模式</string>
     <string name="started_timer">已开始定时器</string>
     <string name="failed_to_save_video">保存视频文件失败</string>
     <string name="failed_to_record_video">录制视频失败</string>
