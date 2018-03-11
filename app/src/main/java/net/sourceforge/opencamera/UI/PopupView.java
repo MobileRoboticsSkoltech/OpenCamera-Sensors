@@ -322,7 +322,7 @@ public class PopupView extends LinearLayout {
 					String size_string = picture_size.width + " x " + picture_size.height;
 					picture_size_strings.add(size_string);
 				}
-				addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), false, picture_size_index, false, "PHOTO_RESOLUTIONS", new ArrayOptionsPopupListener() {
+				addArrayOptionsToPopup(picture_size_strings, getResources().getString(R.string.preference_resolution), false, false, picture_size_index, false, "PHOTO_RESOLUTIONS", new ArrayOptionsPopupListener() {
 					final Handler handler = new Handler();
 					final Runnable update_runnable = new Runnable() {
 						@Override
@@ -381,7 +381,7 @@ public class PopupView extends LinearLayout {
 					String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
 					video_size_strings.add(quality_string);
 				}
-				addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), false, video_size_index, false, "VIDEO_RESOLUTIONS", new ArrayOptionsPopupListener() {
+				addArrayOptionsToPopup(video_size_strings, getResources().getString(R.string.video_quality), false, false, video_size_index, false, "VIDEO_RESOLUTIONS", new ArrayOptionsPopupListener() {
 					final Handler handler = new Handler();
 					final Runnable update_runnable = new Runnable() {
 						@Override
@@ -439,7 +439,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
 				timer_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), true, timer_index, false, "TIMER", new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), true, false, timer_index, false, "TIMER", new ArrayOptionsPopupListener() {
     			private void update() {
     				if( timer_index == -1 )
     					return;
@@ -480,7 +480,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find burst_mode_value " + burst_mode_value + " in burst_mode_values!");
 				burst_mode_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(R.string.preference_burst_mode), true, burst_mode_index, false, "BURST_MODE", new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(R.string.preference_burst_mode), true, false, burst_mode_index, false, "BURST_MODE", new ArrayOptionsPopupListener() {
     			private void update() {
     				if( burst_mode_index == -1 )
     					return;
@@ -521,7 +521,7 @@ public class PopupView extends LinearLayout {
 					Log.d(TAG, "can't find grid_value " + grid_value + " in grid_values!");
 				grid_index = 0;
     		}
-    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.grid), false, grid_index, true, "GRID", new ArrayOptionsPopupListener() {
+    		addArrayOptionsToPopup(Arrays.asList(grid_entries), getResources().getString(R.string.grid), true, true, grid_index, true, "GRID", new ArrayOptionsPopupListener() {
     			private void update() {
     				if( grid_index == -1 )
     					return;
@@ -1083,8 +1083,27 @@ public class PopupView extends LinearLayout {
 		public abstract int onClickPrev();
 		public abstract int onClickNext();
     }
-    
-    private void addArrayOptionsToPopup(final List<String> supported_options, final String title, final boolean title_in_options, final int current_index, final boolean cyclic, final String test_key, final ArrayOptionsPopupListener listener) {
+
+    private void setArrayOptionsText(List<String> supported_options, String title, TextView textView, boolean title_in_options, boolean title_in_options_first_only, int current_index) {
+		if( title_in_options && !( current_index != 0 && title_in_options_first_only ) )
+			textView.setText(title + ": " + supported_options.get(current_index));
+		else
+			textView.setText(supported_options.get(current_index));
+	}
+
+	/** Adds a set of options to the popup menu, where there user can select one option out of an array of values, using previous or
+	 *  next buttons to switch between them.
+	 * @param supported_options The strings for the array of values to choose from.
+	 * @param title Title to display.
+	 * @param title_in_options Prepend the title to each of the values, rather than above the values.
+	 * @param title_in_options_first_only If title_in_options is true, only prepend to the first option.
+	 * @param current_index Index in the supported_options array of the currently selected option.
+	 * @param cyclic Whether the user can cycle beyond the start/end, to wrap around.
+	 * @param test_key Used to keep track of the UI elements created, for testing.
+	 * @param listener Listener called when previous/next buttons are clicked (and hence the option
+	 *                 changed).
+	 */
+    private void addArrayOptionsToPopup(final List<String> supported_options, final String title, final boolean title_in_options, final boolean title_in_options_first_only, final int current_index, final boolean cyclic, final String test_key, final ArrayOptionsPopupListener listener) {
 		if( supported_options != null && current_index != -1 ) {
 			if( !title_in_options ) {
 				addTitleToPopup(title);
@@ -1101,10 +1120,7 @@ public class PopupView extends LinearLayout {
             ll2.setOrientation(LinearLayout.HORIZONTAL);
             
 			final TextView resolution_text_view = new TextView(this.getContext());
-			if( title_in_options )
-				resolution_text_view.setText(title + ": " + supported_options.get(current_index));
-			else
-				resolution_text_view.setText(supported_options.get(current_index));
+			setArrayOptionsText(supported_options, title, resolution_text_view, title_in_options, title_in_options_first_only, current_index);
 			resolution_text_view.setTextColor(Color.WHITE);
 			resolution_text_view.setGravity(Gravity.CENTER);
 			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -1148,10 +1164,7 @@ public class PopupView extends LinearLayout {
 				public void onClick(View v) {
         			int new_index = listener.onClickPrev();
         			if( new_index != -1 ) {
-        				if( title_in_options )
-        					resolution_text_view.setText(title + ": " + supported_options.get(new_index));
-        				else
-        					resolution_text_view.setText(supported_options.get(new_index));
+						setArrayOptionsText(supported_options, title, resolution_text_view, title_in_options, title_in_options_first_only, new_index);
 	        			prev_button.setVisibility( (cyclic || new_index > 0) ? View.VISIBLE : View.INVISIBLE);
 	        			next_button.setVisibility( (cyclic || new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}
@@ -1162,10 +1175,7 @@ public class PopupView extends LinearLayout {
 				public void onClick(View v) {
         			int new_index = listener.onClickNext();
         			if( new_index != -1 ) {
-        				if( title_in_options )
-        					resolution_text_view.setText(title + ": " + supported_options.get(new_index));
-        				else
-        					resolution_text_view.setText(supported_options.get(new_index));
+						setArrayOptionsText(supported_options, title, resolution_text_view, title_in_options, title_in_options_first_only, new_index);
 	        			prev_button.setVisibility( (cyclic || new_index > 0) ? View.VISIBLE : View.INVISIBLE);
 	        			next_button.setVisibility( (cyclic || new_index < supported_options.size()-1) ? View.VISIBLE : View.INVISIBLE);
         			}
