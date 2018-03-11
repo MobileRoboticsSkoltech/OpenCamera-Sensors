@@ -6,6 +6,8 @@ import net.sourceforge.opencamera.UI.FolderChooserDialog;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
@@ -41,6 +43,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashSet;
 import java.util.Locale;
 
 /** Fragment to handle the Settings UI. Note that originally this was a
@@ -52,6 +55,17 @@ import java.util.Locale;
  */
 public class MyPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "MyPreferenceFragment";
+
+	/* Any AlertDialogs we create should be added to dialogs, and removed when dismissed. Any dialogs still
+	 * opened when onDestroy() is called are closed.
+	 * Normally this shouldn't be needed - the settings is usually only closed by the user pressing Back,
+	 * which can only be done once any opened dialogs are also closed. But this is required if we want to
+	 * programmatically close the settings - this is done in MainActivity.onNewIntent(), so that if Open Camera
+	 * is launched from the homescreen again when the settings was opened, we close the settings.
+	 * UPDATE: At the time of writing, we don't set android:launchMode="singleTask", so onNewIntent() is not called,
+	 * so this code isn't necessary - but there shouldn't be harm to leave it here for future use.
+	 */
+	private final HashSet<AlertDialog> dialogs = new HashSet<>();
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -187,7 +201,18 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 				            		editor.apply();
 								}
 	        	            });
-	        	            alertDialog.show();
+							final AlertDialog alert = alertDialog.create();
+							// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+							alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+								@Override
+								public void onDismiss(DialogInterface arg0) {
+									if( MyDebug.LOG )
+										Log.d(TAG, "raw dialog dismissed");
+									dialogs.remove(alert);
+								}
+							});
+							alert.show();
+	        	            dialogs.add(alert);
             			}
                     }
                 	return true;
@@ -518,7 +543,18 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 								Toast.makeText(main_activity, R.string.preference_calibrate_level_calibration_reset, Toast.LENGTH_SHORT).show();
 							}
 						});
-						alertDialog.show();
+						final AlertDialog alert = alertDialog.create();
+						// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+						alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+							@Override
+							public void onDismiss(DialogInterface arg0) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "calibration dialog dismissed");
+								dialogs.remove(alert);
+							}
+						});
+						alert.show();
+						dialogs.add(alert);
 						return false;
 					}
 					return false;
@@ -886,7 +922,18 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 							 	clipboard.setPrimaryClip(clip);
                             }
                         });
-                        alertDialog.show();
+						final AlertDialog alert = alertDialog.create();
+						// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+						alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+							@Override
+							public void onDismiss(DialogInterface arg0) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "about dialog dismissed");
+								dialogs.remove(alert);
+							}
+						});
+						alert.show();
+						dialogs.add(alert);
                 		return false;
                 	}
                 	return false;
@@ -902,11 +949,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 	if( pref.getKey().equals("preference_reset") ) {
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked reset");
-    				    new AlertDialog.Builder(MyPreferenceFragment.this.getActivity())
-			        	.setIcon(android.R.drawable.ic_dialog_alert)
-			        	.setTitle(R.string.preference_reset)
-			        	.setMessage(R.string.preference_reset_question)
-			        	.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+    				    AlertDialog.Builder alertDialog = new AlertDialog.Builder(MyPreferenceFragment.this.getActivity());
+			        	alertDialog.setIcon(android.R.drawable.ic_dialog_alert);
+			        	alertDialog.setTitle(R.string.preference_reset);
+			        	alertDialog.setMessage(R.string.preference_reset_question);
+			        	alertDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 			        		@Override
 					        public void onClick(DialogInterface dialog, int which) {
 		                		if( MyDebug.LOG )
@@ -934,9 +981,20 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			                	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			                	startActivity(i);
 					        }
-			        	})
-			        	.setNegativeButton(android.R.string.no, null)
-			        	.show();
+			        	});
+			        	alertDialog.setNegativeButton(android.R.string.no, null);
+						final AlertDialog alert = alertDialog.create();
+						// AlertDialog.Builder.setOnDismissListener() requires API level 17, so do it this way instead
+						alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+							@Override
+							public void onDismiss(DialogInterface arg0) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "reset dialog dismissed");
+								dialogs.remove(alert);
+							}
+						});
+						alert.show();
+						dialogs.add(alert);
                 	}
                 	return false;
                 }
@@ -952,8 +1010,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			// n.b., fragments have to be static (as they might be inserted into a new Activity - see http://stackoverflow.com/questions/15571010/fragment-inner-class-should-be-static),
 			// so we access the MainActivity via the fragment's getActivity().
 			MainActivity main_activity = (MainActivity)this.getActivity();
-			String new_save_location = this.getChosenFolder();
-			main_activity.updateSaveFolder(new_save_location);
+			if( main_activity != null ) { // main_activity may be null if this is being closed via MainActivity.onNewIntent()
+				String new_save_location = this.getChosenFolder();
+				main_activity.updateSaveFolder(new_save_location);
+			}
 			super.onDismiss(dialog);
 		}
 	}
@@ -1013,6 +1073,28 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 	public void onPause() {
 		super.onPause();
+	}
+
+    @Override
+    public void onDestroy() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDestroy");
+		super.onDestroy();
+
+		// dismiss open dialogs - see comment for dialogs for why we do this
+		for(AlertDialog dialog : dialogs) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "dismiss dialog: " + dialog);
+			dialog.dismiss();
+		}
+		// similarly dimissed any dialog fragments still opened
+	    Fragment folder_fragment = getFragmentManager().findFragmentByTag("FOLDER_FRAGMENT");
+    	if( folder_fragment != null ) {
+	        DialogFragment dialogFragment = (DialogFragment)folder_fragment;
+			if( MyDebug.LOG )
+				Log.d(TAG, "dismiss dialogFragment: " + dialogFragment);
+	        dialogFragment.dismiss();
+    	}
 	}
 
 	/* So that manual changes to the checkbox/switch preferences, while the preferences are showing, show up;
