@@ -84,13 +84,24 @@ public class CameraController2 extends CameraController {
 	private final Object open_camera_lock = new Object(); // lock to wait for camera to be opened from CameraDevice.StateCallback
 	private final Object create_capture_session_lock = new Object(); // lock to wait for capture session to be created from CameraCaptureSession.StateCallback
 	private ImageReader imageReader;
-	private boolean want_expo_bracketing;
+
+	private boolean enable_burst; // whether to take a burst of images; the behaviour of this burst is controlled by burst_type
+	private enum BurstType {
+		BURSTTYPE_NONE, // for when enable_burst is false
+		BURSTTYPE_EXPO, // enable expo bracketing mode; see expo_bracketing_n_images, expo_bracketing_stops for further control
+		BURSTTYPE_NORMAL // take a regular burst; see burst_for_noise_reduction, burst_requested_n_images for further control
+	};
+	private BurstType burst_type = BurstType.BURSTTYPE_NONE;
+	// for BURSTTYPE_EXPO:
 	private final static int max_expo_bracketing_n_images = 5; // could be more, but limit to 5 for now
 	private int expo_bracketing_n_images = 3;
 	private double expo_bracketing_stops = 2.0;
 	private boolean use_expo_fast_burst = true;
+	// for BURSTTYPE_NORMAL:
+	private boolean burst_for_noise_reduction; // chooses number of burst images and other settings for noise reduction mode
+	private int burst_requested_n_images; // if burst_for_noise_reduction==false, this gives the number of images for the burst
+
 	private boolean optimise_ae_for_dro = false;
-	private boolean want_burst;
 	private boolean want_raw;
 	//private boolean want_raw = true;
 	private int max_raw_images;
@@ -446,7 +457,7 @@ public class CameraController2 extends CameraController {
 						break;
 					case "flash_red_eye":
 						// not supported for expo bracketing or burst
-						if( CameraController2.this.want_expo_bracketing || CameraController2.this.want_burst )
+						if( CameraController2.this.enable_burst )
 							builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 						else
 							builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE);
@@ -2349,7 +2360,7 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "no camera");
 			return;
 		}
-		if( this.want_expo_bracketing == want_expo_bracketing ) {
+		if( (enable_burst && burst_type == BurstType.BURSTTYPE_EXPO) == want_expo_bracketing ) {
 			return;
 		}
 		if( captureSession != null ) {
@@ -2358,7 +2369,14 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "can't set expo when captureSession running!");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
-		this.want_expo_bracketing = want_expo_bracketing;
+		if( want_expo_bracketing ) {
+			this.enable_burst = true;
+			this.burst_type = BurstType.BURSTTYPE_EXPO;
+		}
+		else {
+			this.enable_burst = false;
+			this.burst_type = BurstType.BURSTTYPE_NONE;
+		}
 		updateUseFakePrecaptureMode(camera_settings.flash_value);
 		camera_settings.setAEMode(previewBuilder, false); // need to set the ae mode, as flash is disabled for expo mode
 	}
@@ -2425,7 +2443,7 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "no camera");
 			return;
 		}
-		if( this.want_burst == want_burst ) {
+		if( (enable_burst && burst_type == BurstType.BURSTTYPE_NORMAL) == want_burst ) {
 			return;
 		}
 		if( captureSession != null ) {
@@ -2434,9 +2452,30 @@ public class CameraController2 extends CameraController {
 				Log.e(TAG, "can't set burst when captureSession running!");
 			throw new RuntimeException(); // throw as RuntimeException, as this is a programming error
 		}
-		this.want_burst = want_burst;
+		if( want_burst ) {
+			this.enable_burst = true;
+			this.burst_type = BurstType.BURSTTYPE_NORMAL;
+		}
+		else {
+			this.enable_burst = false;
+			this.burst_type = BurstType.BURSTTYPE_NONE;
+		}
 		updateUseFakePrecaptureMode(camera_settings.flash_value);
 		camera_settings.setAEMode(previewBuilder, false); // need to set the ae mode, as flash is disabled for burst mode
+	}
+
+	@Override
+	public void setBurstNImages(int burst_requested_n_images) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setBurstNImages: " + burst_requested_n_images);
+		this.burst_requested_n_images = burst_requested_n_images;
+	}
+
+	@Override
+	public void setBurstForNoiseReduction(boolean burst_for_noise_reduction) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setBurstForNoiseReduction: " + burst_for_noise_reduction);
+		this.burst_for_noise_reduction = burst_for_noise_reduction;
 	}
 
 	@Override
@@ -2839,7 +2878,7 @@ public class CameraController2 extends CameraController {
     	if( frontscreen_flash ) {
     		use_fake_precapture_mode = true;
     	}
-    	else if( this.want_expo_bracketing || this.want_burst )
+    	else if( enable_burst )
     		use_fake_precapture_mode = true;
     	else {
     		use_fake_precapture_mode = use_fake_precapture;
@@ -3900,11 +3939,11 @@ public class CameraController2 extends CameraController {
 			Log.d(TAG, "takePictureAfterPrecapture");
 		if( !previewIsVideoMode ) {
 			// special burst modes not supported for photo snapshots when recording video
-			if( want_expo_bracketing ) {
+			if( enable_burst && burst_type == BurstType.BURSTTYPE_EXPO ) {
 				takePictureBurstExpoBracketing();
 				return;
 			}
-			else if( want_burst ) {
+			else if( enable_burst && burst_type == BurstType.BURSTTYPE_NORMAL ) {
 				takePictureBurst();
 				return;
 			}
@@ -4000,8 +4039,8 @@ public class CameraController2 extends CameraController {
 	private void takePictureBurstExpoBracketing() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureBurstExpBracketing");
-		if( MyDebug.LOG && !want_expo_bracketing ) {
-			Log.e(TAG, "takePictureBurstExpoBracketing called but want_expo_bracketing is false");
+		if( MyDebug.LOG && !enable_burst ) {
+			Log.e(TAG, "takePictureBurstExpoBracketing called but enable_burst is false");
 		}
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
@@ -4268,8 +4307,8 @@ public class CameraController2 extends CameraController {
 	private void takePictureBurst() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "takePictureBurst");
-		if( MyDebug.LOG && !want_burst ) {
-			Log.e(TAG, "takePictureBurst called but want_burst is false");
+		if( MyDebug.LOG && !enable_burst ) {
+			Log.e(TAG, "takePictureBurst called but enable_burst is false");
 		}
 		if( camera == null || captureSession == null ) {
 			if( MyDebug.LOG )
@@ -4295,9 +4334,13 @@ public class CameraController2 extends CameraController {
 				test_fake_flash_photo++;
 			}
 
-			stillBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
-			stillBuilder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF);
-			stillBuilder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
+			if( burst_for_noise_reduction ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "optimise settings for burst_for_noise_reduction");
+				stillBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
+				stillBuilder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF);
+				stillBuilder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
+			}
 
 			clearPending();
 			// shouldn't add preview surface as a target - see note in takePictureAfterPrecapture()
@@ -4311,47 +4354,56 @@ public class CameraController2 extends CameraController {
 			}
 			// else don't turn torch off, as user may be in torch on mode
 
-			n_burst = 4;
-			burst_single_request = false;
+			if( burst_for_noise_reduction ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "choose n_burst for burst_for_noise_reduction");
+				n_burst = 4;
 
-			if( capture_result_has_iso ) {
-				if( capture_result_iso >= 700 ) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "optimise for dark scene");
-					n_burst = 8;
-					boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
-					// OnePlus 3T at least has bug where manual ISO can't be set to about 800, so dark images end up too dark -
-					// so no point enabling this code, which is meant to brighten the scene, not make it darker!
-					if( !camera_settings.has_iso && !is_oneplus ) {
-						long exposure_time = 1000000000L/10;
+				if( capture_result_has_iso ) {
+					if( capture_result_iso >= 700 ) {
 						if( MyDebug.LOG )
-							Log.d(TAG, "also set 100ms exposure time");
-						modified_from_camera_settings = true;
-						setManualExposureTime(stillBuilder, exposure_time);
-					}
-				}
-				else if( capture_result_has_exposure_time ) {
-					final double full_exposure_time_scale = 0.5;
-					final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
-					final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
-					long exposure_time = capture_result_exposure_time;
-					if( exposure_time <= fixed_exposure_time ) {
-						if( MyDebug.LOG )
-							Log.d(TAG, "optimise for bright scene");
-						n_burst = 2;
-						if( !camera_settings.has_iso ) {
-							double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
-							exposure_time *= exposure_time_scale;
-							if (MyDebug.LOG) {
-								Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
-								Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
-							}
+							Log.d(TAG, "optimise for dark scene");
+						n_burst = 8;
+						boolean is_oneplus = Build.MANUFACTURER.toLowerCase(Locale.US).contains("oneplus");
+						// OnePlus 3T at least has bug where manual ISO can't be set to about 800, so dark images end up too dark -
+						// so no point enabling this code, which is meant to brighten the scene, not make it darker!
+						if( !camera_settings.has_iso && !is_oneplus ) {
+							long exposure_time = 1000000000L/10;
+							if( MyDebug.LOG )
+								Log.d(TAG, "also set 100ms exposure time");
 							modified_from_camera_settings = true;
 							setManualExposureTime(stillBuilder, exposure_time);
 						}
 					}
+					else if( capture_result_has_exposure_time ) {
+						final double full_exposure_time_scale = 0.5;
+						final long fixed_exposure_time = 1000000000L/60; // we only scale the exposure time at all if it's less than this value
+						final long scaled_exposure_time = 1000000000L/120; // we only scale the exposure time by the full_exposure_time_scale if the exposure time is less than this value
+						long exposure_time = capture_result_exposure_time;
+						if( exposure_time <= fixed_exposure_time ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "optimise for bright scene");
+							n_burst = 2;
+							if( !camera_settings.has_iso ) {
+								double exposure_time_scale = getScaleForExposureTime(exposure_time, fixed_exposure_time, scaled_exposure_time, full_exposure_time_scale);
+								exposure_time *= exposure_time_scale;
+								if( MyDebug.LOG ) {
+									Log.d(TAG, "reduce exposure shutter speed further, was: " + exposure_time);
+									Log.d(TAG, "exposure_time_scale: " + exposure_time_scale);
+								}
+								modified_from_camera_settings = true;
+								setManualExposureTime(stillBuilder, exposure_time);
+							}
+						}
+					}
 				}
 			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "user requested n_burst");
+				n_burst = burst_requested_n_images;
+			}
+			burst_single_request = false;
 
 			if( MyDebug.LOG )
 				Log.d(TAG, "n_burst: " + n_burst);
@@ -4448,7 +4500,7 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG ) {
 			if( use_fake_precapture_mode )
 				Log.e(TAG, "shouldn't be doing standard precapture when use_fake_precapture_mode is true!");
-			else if( want_expo_bracketing || want_burst )
+			else if( enable_burst )
 				Log.e(TAG, "shouldn't be doing precapture for want_expo_bracketing/want_burst - should be using fake precapture!");
 		}
 		try {

@@ -303,6 +303,15 @@ public abstract class CameraController {
     public abstract CameraController.Size getPreviewSize();
     public abstract void setPreviewSize(int width, int height);
 	public abstract void setWantBurst(boolean want_burst);
+	/** Only relevant if setWantBurst() is also called with want_burst==true. Sets the number of
+	 *  images to take in the burst.
+	 */
+	public abstract void setBurstNImages(int burst_requested_n_images);
+	/** Only relevant if setWantBurst() is also called with want_burst==true. If this method is
+	 *  called with burst_for_noise_reduction, then the number of burst images, and other settings,
+	 *  will be set for noise reduction mode (and setBurstNImages() is ignored).
+	 */
+	public abstract void setBurstForNoiseReduction(boolean burst_for_noise_reduction);
 	public abstract void setExpoBracketing(boolean want_expo_bracketing);
 	/** n_images must be an odd number greater than 1.
 	 */

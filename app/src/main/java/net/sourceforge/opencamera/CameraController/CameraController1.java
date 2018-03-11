@@ -699,6 +699,16 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public void setBurstNImages(int burst_requested_n_images) {
+		// not supported
+	}
+
+	@Override
+	public void setBurstForNoiseReduction(boolean burst_for_noise_reduction) {
+		// not supported
+	}
+
+	@Override
 	public void setExpoBracketing(boolean want_expo_bracketing) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setExpoBracketing: " + want_expo_bracketing);

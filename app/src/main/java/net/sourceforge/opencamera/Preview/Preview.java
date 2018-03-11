@@ -1709,7 +1709,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			camera_controller.setExpoBracketing(false);
 		}
 
-		camera_controller.setWantBurst( applicationInterface.isCameraBurstPref() );
+		if( applicationInterface.isCameraBurstPref() ) {
+			camera_controller.setWantBurst(true);
+			camera_controller.setBurstForNoiseReduction(true);
+		}
+		else {
+			camera_controller.setWantBurst(false);
+		}
 
 		camera_controller.setOptimiseAEForDRO( applicationInterface.getOptimiseAEForDROPref() );
 		
