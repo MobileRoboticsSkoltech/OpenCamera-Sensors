@@ -2828,8 +2828,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
     public boolean supportsHDR() {
     	// we also require the device have sufficient memory to do the processing, simplest to use the same test as we do for auto-stabilise...
+		// (note we don't call supportsAutoStabilise(), as that does other checks specifically for auto-stabilise, e.g., calling applicationInterface.isRawOnly() - which would get an infinite loop if called from here!)
 		// also require at least Android 5, for the Renderscript support in HDRProcessor
-		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && this.supportsAutoStabilise() && preview.supportsExpoBracketing() );
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && this.supports_auto_stabilise && preview.supportsExpoBracketing() );
     }
     
     public boolean supportsExpoBracketing() {
