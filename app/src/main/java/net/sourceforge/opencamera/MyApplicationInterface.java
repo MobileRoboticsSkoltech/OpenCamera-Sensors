@@ -58,6 +58,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		DRO, // single image "fake" HDR
     	HDR, // HDR created from multiple (expo bracketing) images
     	ExpoBracketing, // take multiple expo bracketed images, without combining to a single image
+		FastBurst,
 		NoiseReduction
     }
     
@@ -237,13 +238,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public File createOutputVideoFile() throws IOException {
-		last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+		last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", false, "mp4", new Date());
 		return last_video_file;
 	}
 
 	@Override
 	public Uri createOutputVideoSAF() throws IOException {
-		last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
+		last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", false, "mp4", new Date());
 		return last_video_file_saf;
 	}
 
@@ -803,6 +804,21 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public boolean isCameraBurstPref() {
     	PhotoMode photo_mode = getPhotoMode();
+		return photo_mode == PhotoMode.FastBurst || photo_mode == PhotoMode.NoiseReduction;
+	}
+
+    @Override
+	public int getBurstNImages() {
+    	PhotoMode photo_mode = getPhotoMode();
+		if( photo_mode == PhotoMode.FastBurst ) {
+			return 20;
+		}
+		return 1;
+	}
+
+    @Override
+	public boolean getBurstForNoiseReduction() {
+    	PhotoMode photo_mode = getPhotoMode();
 		return photo_mode == PhotoMode.NoiseReduction;
 	}
 
@@ -876,6 +892,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		boolean expo_bracketing = photo_mode_pref.equals("preference_photo_mode_expo_bracketing");
 		if( expo_bracketing && main_activity.supportsExpoBracketing() )
 			return PhotoMode.ExpoBracketing;
+		boolean fast_burst = photo_mode_pref.equals("preference_photo_mode_fast_burst");
+		if( fast_burst && main_activity.supportsFastBurst() )
+			return PhotoMode.FastBurst;
 		boolean noise_reduction = photo_mode_pref.equals("preference_photo_mode_noise_reduction");
 		if( noise_reduction && main_activity.supportsNoiseReduction() )
 			return PhotoMode.NoiseReduction;
@@ -1928,7 +1947,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		PhotoMode photo_mode = getPhotoMode();
 		if( main_activity.getPreview().isVideo() ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "snapshop mode");
+				Log.d(TAG, "snapshot mode");
 			// must be in photo snapshot while recording video mode, only support standard photo mode
 			photo_mode = PhotoMode.Standard;
 		}
@@ -1946,6 +1965,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				}
 
 				imageSaver.startImageAverage(true,
+					false,
 					save_base,
 					image_capture_intent, image_capture_intent_uri,
 					using_camera2, image_quality,
@@ -1962,7 +1982,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			success = true;
 		}
 		else {
-			success = imageSaver.saveImageJpeg(do_in_background, is_hdr, save_expo, images,
+			success = imageSaver.saveImageJpeg(do_in_background, is_hdr,
+					photo_mode == PhotoMode.FastBurst,
+					save_expo, images,
 					image_capture_intent, image_capture_intent_uri,
 					using_camera2, image_quality,
 					do_auto_stabilise, level_angle,

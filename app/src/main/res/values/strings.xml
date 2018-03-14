@@ -293,6 +293,7 @@
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">Expo {}</string>
     <string name="photo_mode_expo_bracketing_full">Exposure Bracketing</string>
+    <string name="photo_mode_fast_burst">[]]]</string>
     <string name="photo_mode_noise_reduction">NR</string>
     <string name="preference_category_stamp">Photo Stamp</string>
     <string name="preference_hdr_save_expo">Save all images for HDR mode</string>

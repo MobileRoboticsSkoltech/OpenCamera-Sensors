@@ -205,6 +205,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean supports_expo_bracketing;
 	private int max_expo_bracketing_n_images;
 	private boolean supports_raw;
+	private boolean supports_burst;
 	private float view_angle_x;
 	private float view_angle_y;
 
@@ -1273,6 +1274,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		supports_expo_bracketing = false;
 		max_expo_bracketing_n_images = 0;
 		supports_raw = false;
+		supports_burst = false;
 		view_angle_x = 55.0f; // set a sensible default
 		view_angle_y = 43.0f; // set a sensible default
 		sizes = null;
@@ -1709,9 +1711,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			camera_controller.setExpoBracketing(false);
 		}
 
-		if( applicationInterface.isCameraBurstPref() ) {
-			camera_controller.setWantBurst(true);
-			camera_controller.setBurstForNoiseReduction(true);
+		if( this.supports_burst && applicationInterface.isCameraBurstPref() ) {
+			if( applicationInterface.getBurstForNoiseReduction() ) {
+				if( this.supports_exposure_time ) { // noise reduction mode also needs manual exposure
+					camera_controller.setWantBurst(true);
+					camera_controller.setBurstForNoiseReduction(true);
+				}
+				else {
+					camera_controller.setWantBurst(false);
+				}
+			}
+			else {
+				camera_controller.setWantBurst(true);
+				camera_controller.setBurstForNoiseReduction(false);
+				camera_controller.setBurstNImages(applicationInterface.getBurstNImages());
+			}
 		}
 		else {
 			camera_controller.setWantBurst(false);
@@ -1859,6 +1873,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			this.supports_expo_bracketing = camera_features.supports_expo_bracketing;
 			this.max_expo_bracketing_n_images = camera_features.max_expo_bracketing_n_images;
 			this.supports_raw = camera_features.supports_raw;
+			this.supports_burst = camera_features.supports_burst;
 			this.view_angle_x = camera_features.view_angle_x;
 			this.view_angle_y = camera_features.view_angle_y;
 			this.supports_video_high_speed = camera_features.video_sizes_high_speed != null && camera_features.video_sizes_high_speed.size() > 0;
@@ -5956,6 +5971,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     public boolean supportsRaw() {
     	return this.supports_raw;
+    }
+
+    public boolean supportsBurst() {
+    	return this.supports_burst;
     }
 
 	/** Returns the horizontal angle of view in degrees (when unzoomed).

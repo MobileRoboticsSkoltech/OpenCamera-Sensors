@@ -1497,7 +1497,7 @@ public class CameraController2 extends CameraController {
 			want_raw = false; // just in case it got set to true somehow
     	}
 
-
+		camera_features.supports_burst = true;
 
     	ae_fps_ranges = new ArrayList<>();
 		for (Range<Integer> r : characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES)) {

@@ -76,6 +76,7 @@ public abstract class CameraController {
 		public boolean supports_expo_bracketing;
 		public int max_expo_bracketing_n_images;
 		public boolean supports_raw;
+		public boolean supports_burst; // whether setWantBurst() can be set to true
 		public float view_angle_x; // horizontal angle of view in degrees (when unzoomed)
 		public float view_angle_y; // vertical angle of view in degrees (when unzoomed)
 

@@ -84,6 +84,7 @@ public class ImageSaver extends Thread {
 			AVERAGE
 		}
 		final ProcessType process_type; // for jpeg
+		final boolean suffix_from_0; // if true, images with same datetime will be appended _0, _1 etc (only relevant for the main image; if saving the "base" images, they'll use their own format)
 		enum SaveBase {
 			SAVEBASE_NONE,
 			SAVEBASE_FIRST,
@@ -124,6 +125,7 @@ public class ImageSaver extends Thread {
 		
 		Request(Type type,
 			ProcessType process_type,
+			boolean suffix_from_0,
 			SaveBase save_base,
 			List<byte []> jpeg_images,
 			RawImage raw_image,
@@ -140,6 +142,7 @@ public class ImageSaver extends Thread {
 			int sample_factor) {
 			this.type = type;
 			this.process_type = process_type;
+			this.suffix_from_0 = suffix_from_0;
 			this.save_base = save_base;
 			this.jpeg_images = jpeg_images;
 			this.raw_image = raw_image;
@@ -366,6 +369,7 @@ public class ImageSaver extends Thread {
 	 */
 	boolean saveImageJpeg(boolean do_in_background,
 			boolean is_hdr,
+			boolean suffix_from_0,
 			boolean save_expo,
 			List<byte []> images,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
@@ -387,6 +391,7 @@ public class ImageSaver extends Thread {
 		return saveImage(do_in_background,
 				false,
 				is_hdr,
+				suffix_from_0,
 				save_expo,
 				images,
 				null,
@@ -420,6 +425,7 @@ public class ImageSaver extends Thread {
 				true,
 				false,
 				false,
+				false,
 				null,
 				raw_image,
 				false, null,
@@ -437,6 +443,7 @@ public class ImageSaver extends Thread {
 	private Request pending_image_average_request = null;
 
 	void startImageAverage(boolean do_in_background,
+			boolean suffix_from_0,
 			Request.SaveBase save_base,
 			boolean image_capture_intent, Uri image_capture_intent_uri,
 			boolean using_camera2, int image_quality,
@@ -455,6 +462,7 @@ public class ImageSaver extends Thread {
 		}
 		pending_image_average_request = new Request(Request.Type.JPEG,
 				Request.ProcessType.AVERAGE,
+				suffix_from_0,
 				save_base,
 				new ArrayList<byte[]>(),
 				null,
@@ -510,6 +518,7 @@ public class ImageSaver extends Thread {
 	private boolean saveImage(boolean do_in_background,
 			boolean is_raw,
 			boolean is_hdr,
+			boolean suffix_from_0,
 			boolean save_expo,
 			List<byte []> jpeg_images,
 			RawImage raw_image,
@@ -534,6 +543,7 @@ public class ImageSaver extends Thread {
 		
 		Request request = new Request(is_raw ? Request.Type.RAW : Request.Type.JPEG,
 				is_hdr ? Request.ProcessType.HDR : Request.ProcessType.NORMAL,
+				suffix_from_0,
 				save_expo ? Request.SaveBase.SAVEBASE_ALL : Request.SaveBase.SAVEBASE_NONE,
 				jpeg_images,
 				raw_image,
@@ -626,6 +636,7 @@ public class ImageSaver extends Thread {
 	private void addDummyRequest() {
 		Request dummy_request = new Request(Request.Type.DUMMY,
 			Request.ProcessType.NORMAL,
+            false,
             Request.SaveBase.SAVEBASE_NONE,
 			null,
 			null,
@@ -1024,7 +1035,8 @@ public class ImageSaver extends Thread {
 				}
 			}
 			else {
-				success = saveSingleImageNow(request, request.jpeg_images.get(0), null, "", true, true);
+				String suffix = "";
+				success = saveSingleImageNow(request, request.jpeg_images.get(0), null, suffix, true, true);
 			}
 		}
 
@@ -1570,10 +1582,10 @@ public class ImageSaver extends Thread {
     			}
 			}
 			else if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", request.current_date);
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, request.suffix_from_0, "jpg", request.current_date);
 			}
 			else {
-    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, "jpg", request.current_date);
+    			picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, filename_suffix, request.suffix_from_0, "jpg", request.current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}
@@ -2176,14 +2188,14 @@ public class ImageSaver extends Thread {
     		Uri saveUri = null;
 
 			if( storageUtils.isUsingSAF() ) {
-				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", request.current_date);
+				saveUri = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_IMAGE, "", request.suffix_from_0, "dng", request.current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "saveUri: " + saveUri);
 	    		// When using SAF, we don't save to a temp file first (unlike for JPEGs). Firstly we don't need to modify Exif, so don't
 	    		// need a real file; secondly copying to a temp file is much slower for RAW.
 			}
 			else {
-        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "", "dng", request.current_date);
+        		picFile = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_IMAGE, "", request.suffix_from_0, "dng", request.current_date);
 	    		if( MyDebug.LOG )
 	    			Log.d(TAG, "save to: " + picFile.getAbsolutePath());
 			}

@@ -2837,8 +2837,14 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		return preview.supportsExpoBracketing();
     }
 
+    public boolean supportsFastBurst() {
+		// require 512MB just to be safe, due to the large number of images that may be created
+		return( preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() );
+		//return false; // currently blocked for release
+	}
+
     public boolean supportsNoiseReduction() {
-		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsExpoBracketing() );
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() && preview.supportsExposureTime() );
 		//return false; // currently blocked for release
 	}
     
