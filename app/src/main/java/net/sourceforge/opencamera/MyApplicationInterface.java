@@ -781,8 +781,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 		}
 
-		//return true;
-    	return !imageSaver.queueWouldBlock(n_raw, n_jpegs);
+    	if( imageSaver.queueWouldBlock(n_raw > 0, n_jpegs) )
+    		return false;
+    	return true;
 	}
 
 	@Override

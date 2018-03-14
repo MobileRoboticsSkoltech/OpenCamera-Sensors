@@ -197,20 +197,20 @@ public class ImageSaver extends Thread {
 			// This should be at least 5*(queue_cost_jpeg_c+queue_cost_dng_c)-1 so we can take a burst of 5 photos
 			// (e.g., in expo mode) with RAW+JPEG without blocking (we subtract 1, as the first image can be immediately
 			// taken off the queue).
-			// This should be at most 85 for large heap 512MB (estimate based on reserving 80MB for post-processing
+			// This should also be at least 19 so we can take a burst of 20 photos with JPEG without blocking (we subtract 1,
+			// as the first image can be immediately taken off the queue).
+			// This should be at most 70 for large heap 512MB (estimate based on reserving 160MB for post-processing and HDR
 			// operations, then estimate a JPEG image at 5MB).
 			max_queue_size = 34;
 		}
 		else if( large_heap_memory >= 256 ) {
-			// This should be at least 19 so we can take a burst of 20 photos with JPEG without blocking (we subtract 1,
-			// as the first image can be immediately taken off the queue).
-			// This should be at most 34 for large heap 256MB.
-			max_queue_size = 19;
+			// This should be at most 19 for large heap 256MB.
+			max_queue_size = 12;
 		}
 		else if( large_heap_memory >= 128 ) {
 			// This should be at least 1*(queue_cost_jpeg_c+queue_cost_dng_c)-1 so we can take a photo with RAW+JPEG
 			// without blocking (we subtract 1, as the first image can be immediately taken off the queue).
-			// This should be at most 8 for large heap 256MB.
+			// This should be at most 8 for large heap 128MB (allowing 80MB for post-processing).
 			max_queue_size = 8;
 		}
 		else {
@@ -226,6 +226,8 @@ public class ImageSaver extends Thread {
 	}
 
 	/** Computes the cost for a particular request.
+	 *  Note that for RAW+DNG mode, computeCost() is called twice (one for each of the two
+	 *  requests: one RAW, one JPEG).
 	 * @param is_raw Whether RAW/DNG or JPEG.
 	 * @param n_jpegs If is_raw is false, this is the number of JPEG images that are in the request.
 	 */
@@ -241,22 +243,20 @@ public class ImageSaver extends Thread {
 	}
 
 	/** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
-	 *  Ideally this should be refactored to use common code with computeCost(), but note that
-	 *  for RAW+DNG mode, computeCost() is called twice (one for each of the two requests: one RAW,
-	 *  one JPEG), where as for queueWouldBlock(), we need to know if the queue would block with a
-	 *  single call to this method.
 	 */
-	boolean queueWouldBlock(int n_raw, int n_jpegs) {
+	boolean queueWouldBlock(boolean is_raw, int n_jpegs) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "queueWouldBlock");
-			Log.d(TAG, "n_raw: " + n_raw);
+			Log.d(TAG, "is_raw: " + is_raw);
 			Log.d(TAG, "n_jpegs: " + n_jpegs);
 		}
 		int extra_cost;
-		if( n_raw > 0 )
-			extra_cost = n_raw*queue_cost_dng_c + n_jpegs*queue_cost_jpeg_c;
+		if( is_raw ) {
+			// even in RAW only mode, we still include the cost of a JPEG, as we still take a JPEG photo
+			extra_cost = computeCost(true, 0) + computeCost(false, 1);
+		}
 		else
-			extra_cost = (n_jpegs > 1 ? 2 : 1) * queue_cost_jpeg_c;
+			extra_cost = computeCost(false, n_jpegs);
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "n_images_to_save: " + n_images_to_save);
 			Log.d(TAG, "extra_cost: " + extra_cost);
