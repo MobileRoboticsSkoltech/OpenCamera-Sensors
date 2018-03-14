@@ -226,12 +226,17 @@ public class ImageSaver extends Thread {
 	}
 
 	/** Computes the cost for a particular request.
-	 *  Note that for RAW+DNG mode, computeCost() is called twice (one for each of the two
-	 *  requests: one RAW, one JPEG).
+	 *  Note that for RAW+DNG mode, computeCost() is called twice for a given photo (one for each
+	 *  of the two requests: one RAW, one JPEG).
 	 * @param is_raw Whether RAW/DNG or JPEG.
 	 * @param n_jpegs If is_raw is false, this is the number of JPEG images that are in the request.
 	 */
-	private int computeCost(boolean is_raw, int n_jpegs) {
+	private int computeRequestCost(boolean is_raw, int n_jpegs) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "computeRequestCost");
+			Log.d(TAG, "is_raw: " + is_raw);
+			Log.d(TAG, "n_jpegs: " + n_jpegs);
+		}
 		int cost;
 		if( is_raw )
 			cost = queue_cost_dng_c;
@@ -242,24 +247,37 @@ public class ImageSaver extends Thread {
 		return cost;
 	}
 
-	/** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
+	/** Computes the cost (in terms of number of slots on the image queue) of a new photo.
+	 * @param has_raw Whether this is RAW+JPEG or RAW only.
+	 * @param n_jpegs If has_raw is false, the number of JPEGs that will be taken.
+	 * @return
 	 */
-	boolean queueWouldBlock(boolean is_raw, int n_jpegs) {
+	int computePhotoCost(boolean has_raw, int n_jpegs) {
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "queueWouldBlock");
-			Log.d(TAG, "is_raw: " + is_raw);
+			Log.d(TAG, "computePhotoCost");
+			Log.d(TAG, "has_raw: " + has_raw);
 			Log.d(TAG, "n_jpegs: " + n_jpegs);
 		}
-		int extra_cost;
-		if( is_raw ) {
+		int cost;
+		if( has_raw ) {
 			// even in RAW only mode, we still include the cost of a JPEG, as we still take a JPEG photo
-			extra_cost = computeCost(true, 0) + computeCost(false, 1);
+			cost = computeRequestCost(true, 0) + computeRequestCost(false, 1);
 		}
 		else
-			extra_cost = computeCost(false, n_jpegs);
+			cost = computeRequestCost(false, n_jpegs);
+		if( MyDebug.LOG )
+			Log.d(TAG, "cost: " + cost);
+		return cost;
+	}
+
+	/** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
+	 * @param photo_cost The result returned by computePhotoCost().
+	 */
+	boolean queueWouldBlock(int photo_cost) {
 		if( MyDebug.LOG ) {
+			Log.d(TAG, "queueWouldBlock");
+			Log.d(TAG, "photo_cost: " + photo_cost);
 			Log.d(TAG, "n_images_to_save: " + n_images_to_save);
-			Log.d(TAG, "extra_cost: " + extra_cost);
 			Log.d(TAG, "queue_capacity: " + queue_capacity);
 		}
 		// we add one to queue, to account for the image currently being processed; n_images_to_save includes an image
@@ -270,7 +288,7 @@ public class ImageSaver extends Thread {
 			// to disallow ever taking photos!
 			return false;
 		}
-		else if( n_images_to_save + extra_cost > queue_capacity + 1 ) {
+		else if( n_images_to_save + photo_cost > queue_capacity + 1 ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "queue would block");
 			return true;
@@ -502,7 +520,7 @@ public class ImageSaver extends Thread {
 		if( do_in_background ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
-			int cost = computeCost(false, pending_image_average_request.jpeg_images.size());
+			int cost = computeRequestCost(false, pending_image_average_request.jpeg_images.size());
 			addRequest(pending_image_average_request, cost);
 		}
 		else {
@@ -562,7 +580,7 @@ public class ImageSaver extends Thread {
 		if( do_in_background ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "add background request");
-			int cost = computeCost(is_raw, is_raw ? 0 : request.jpeg_images.size());
+			int cost = computeRequestCost(is_raw, is_raw ? 0 : request.jpeg_images.size());
 			addRequest(request, cost);
 			success = true; // always return true when done in background
 		}

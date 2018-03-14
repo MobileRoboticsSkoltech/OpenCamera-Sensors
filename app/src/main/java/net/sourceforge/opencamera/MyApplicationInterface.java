@@ -781,7 +781,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 		}
 
-    	if( imageSaver.queueWouldBlock(n_raw > 0, n_jpegs) )
+		int photo_cost = imageSaver.computePhotoCost(n_raw > 0, n_jpegs);
+    	if( imageSaver.queueWouldBlock(photo_cost) )
     		return false;
     	return true;
 	}
