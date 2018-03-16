@@ -68,8 +68,8 @@ public class ImageSaver extends Thread {
 	private final int queue_capacity;
 	private final BlockingQueue<Request> queue;
 	private final static int queue_cost_jpeg_c = 1;
-	//private final static int queue_cost_dng_c = 6;
-	private final static int queue_cost_dng_c = 1;
+	private final static int queue_cost_dng_c = 6;
+	//private final static int queue_cost_dng_c = 1;
 
 	static class Request {
 		enum Type {
@@ -193,7 +193,7 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "large max memory = " + large_heap_memory + "MB");
 		int max_queue_size;
-		/*if( large_heap_memory >= 512 ) {
+		if( large_heap_memory >= 512 ) {
 			// This should be at least 5*(queue_cost_jpeg_c+queue_cost_dng_c)-1 so we can take a burst of 5 photos
 			// (e.g., in expo mode) with RAW+JPEG without blocking (we subtract 1, as the first image can be immediately
 			// taken off the queue).
@@ -217,9 +217,9 @@ public class ImageSaver extends Thread {
 			// This should be at least 1*(queue_cost_jpeg_c+queue_cost_dng_c)-1 so we can take a photo with RAW+JPEG
 			// without blocking (we subtract 1, as the first image can be immediately taken off the queue).
 			max_queue_size = 6;
-		}*/
+		}
 		//max_queue_size = 1;
-		max_queue_size = 3;
+		//max_queue_size = 3;
 		if( MyDebug.LOG )
 			Log.d(TAG, "max_queue_size = " + max_queue_size);
 		return max_queue_size;
@@ -241,8 +241,8 @@ public class ImageSaver extends Thread {
 		if( is_raw )
 			cost = queue_cost_dng_c;
 		else {
-			//cost = n_jpegs * queue_cost_jpeg_c;
-			cost = (n_jpegs > 1 ? 2 : 1) * queue_cost_jpeg_c;
+			cost = n_jpegs * queue_cost_jpeg_c;
+			//cost = (n_jpegs > 1 ? 2 : 1) * queue_cost_jpeg_c;
 		}
 		return cost;
 	}
@@ -304,6 +304,10 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "max_dng = " + max_dng);
 		return max_dng;
+	}
+
+	int getNImagesToSave() {
+		return n_images_to_save;
 	}
 
 	void onDestroy() {

@@ -779,11 +779,46 @@ public class MyApplicationInterface implements ApplicationInterface {
 				n_raw = 0;
 				n_jpegs = this.getExpoBracketingNImagesPref();
 			}
+			else if( main_activity.getPreview().supportsBurst() && this.isCameraBurstPref() ) {
+				n_raw = 0;
+				if( this.getBurstForNoiseReduction() ) {
+					n_jpegs = 8;
+				}
+				else {
+					n_jpegs = this.getBurstNImages();
+				}
+			}
 		}
 
 		int photo_cost = imageSaver.computePhotoCost(n_raw > 0, n_jpegs);
     	if( imageSaver.queueWouldBlock(photo_cost) )
     		return false;
+
+    	// even if the queue isn't full, we may apply additional limits
+		PhotoMode photo_mode = getPhotoMode();
+		if( photo_mode == PhotoMode.FastBurst ) {
+			// only allow one fast burst at a time, so require queue to be empty
+			if( imageSaver.getNImagesToSave() > 0 ) {
+				return false;
+			}
+		}
+		if( n_jpegs > 1 ) {
+			// if in any other kind of burst mode (e.g., expo burst, HDR), allow a max of 3 photos in memory
+			if( imageSaver.getNImagesToSave() >= 3*photo_cost ) {
+				return false;
+			}
+		}
+		if( n_raw > 0 ) {
+			// if RAW mode, allow a max of photos
+			if( imageSaver.getNImagesToSave() >= 3*photo_cost ) {
+				return false;
+			}
+		}
+		// otherwise, still have a max limit of 5 photos
+		if( imageSaver.getNImagesToSave() >= 5*photo_cost ) {
+			return false;
+		}
+
     	return true;
 	}
 
@@ -920,6 +955,11 @@ public class MyApplicationInterface implements ApplicationInterface {
     		return RawPref.RAWPREF_JPEG_ONLY;
 		if( main_activity.getPreview().isVideo() )
     		return RawPref.RAWPREF_JPEG_ONLY; // video snapshot mode
+    	PhotoMode photo_mode = getPhotoMode();
+    	if( photo_mode == PhotoMode.FastBurst ) {
+    		// don't allow fast burst with RAW!
+    		return RawPref.RAWPREF_JPEG_ONLY;
+		}
 		switch( sharedPreferences.getString(PreferenceKeys.RawPreferenceKey, "preference_raw_no") ) {
 			case "preference_raw_yes":
 			case "preference_raw_only":
