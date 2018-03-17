@@ -84,6 +84,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private final SharedPreferences sharedPreferences;
 
 	private boolean last_images_saf; // whether the last images array are using SAF or not
+
 	/** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
 	 */
 	private static class LastImage {
@@ -105,6 +106,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 	private final List<LastImage> last_images = new ArrayList<>();
 	
+	private final ToastBoxer photo_delete_toast = new ToastBoxer();
+
 	// camera properties which are saved in bundle, but not stored in preferences (so will be remembered if the app goes into background, but not after restart)
 	private int cameraId = 0;
 	private float focus_distance = 0.0f;
@@ -848,7 +851,18 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public int getBurstNImages() {
     	PhotoMode photo_mode = getPhotoMode();
 		if( photo_mode == PhotoMode.FastBurst ) {
-			return 20;
+			String n_images_value = sharedPreferences.getString(PreferenceKeys.FastBurstNImagesPreferenceKey, "5");
+			int n_images;
+			try {
+				n_images = Integer.parseInt(n_images_value);
+			}
+			catch(NumberFormatException e) {
+				if( MyDebug.LOG )
+					Log.e(TAG, "failed to parse FastBurstNImagesPreferenceKey value: " + n_images_value);
+				e.printStackTrace();
+				n_images = 5;
+			}
+			return n_images;
 		}
 		return 1;
 	}
@@ -2224,7 +2238,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			else {
 				if( MyDebug.LOG )
 					Log.d(TAG, "successfully deleted " + image_name);
-	    	    preview.showToast(null, R.string.photo_deleted);
+	    	    preview.showToast(photo_delete_toast, R.string.photo_deleted);
             	storageUtils.broadcastFile(file, false, false, true);
 			}
 		}

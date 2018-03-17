@@ -55,6 +55,7 @@ public class PopupView extends LinearLayout {
 	private int total_width_dp;
 
 	private int picture_size_index = -1;
+	private int burst_n_images_index = -1;
 	private int video_size_index = -1;
 	private int timer_index = -1;
 	private int repeat_mode_index = -1;
@@ -436,6 +437,52 @@ public class PopupView extends LinearLayout {
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "PopupView time 10: " + (System.nanoTime() - debug_time));
+
+			if( main_activity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.FastBurst ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "add fast burst options");
+				final String [] burst_mode_values = getResources().getStringArray(R.array.preference_fast_burst_n_images_values);
+				String [] burst_mode_entries = getResources().getStringArray(R.array.preference_fast_burst_n_images_entries);
+				String burst_mode_value = sharedPreferences.getString(PreferenceKeys.FastBurstNImagesPreferenceKey, "5");
+				burst_n_images_index = Arrays.asList(burst_mode_values).indexOf(burst_mode_value);
+				if( burst_n_images_index == -1 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "can't find burst_mode_value " + burst_mode_value + " in burst_mode_values!");
+					burst_n_images_index = 0;
+				}
+				addArrayOptionsToPopup(Arrays.asList(burst_mode_entries), getResources().getString(R.string.preference_fast_burst_n_images), true, false, burst_n_images_index, false, "FAST_BURST_N_IMAGES", new ArrayOptionsPopupListener() {
+					private void update() {
+						if( burst_n_images_index == -1 )
+							return;
+						String new_burst_mode_value = burst_mode_values[burst_n_images_index];
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+						SharedPreferences.Editor editor = sharedPreferences.edit();
+						editor.putString(PreferenceKeys.FastBurstNImagesPreferenceKey, new_burst_mode_value);
+						editor.apply();
+						if( preview.getCameraController() != null ) {
+							preview.getCameraController().setBurstNImages(main_activity.getApplicationInterface().getBurstNImages());
+						}
+					}
+					@Override
+					public int onClickPrev() {
+						if( burst_n_images_index != -1 && burst_n_images_index > 0 ) {
+							burst_n_images_index--;
+							update();
+							return burst_n_images_index;
+						}
+						return -1;
+					}
+					@Override
+					public int onClickNext() {
+						if( burst_n_images_index != -1 && burst_n_images_index < burst_mode_values.length-1 ) {
+							burst_n_images_index++;
+							update();
+							return burst_n_images_index;
+						}
+						return -1;
+					}
+				});
+			}
 
     		final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
         	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);

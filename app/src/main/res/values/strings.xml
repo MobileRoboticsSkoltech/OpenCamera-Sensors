@@ -97,7 +97,7 @@
     <string name="preference_timer_beep_summary">Beep when timer is counting down or for repeat mode delay</string>
     <string name="preference_timer_speak">Voice timer countdown</string>
     <string name="preference_timer_speak_summary">Speak the countdown for timer or repeat mode delay (from 60 seconds)</string>
-    <string name="preference_burst_mode">Repeat</string> <!-- also used in popup menu, so shouldn't be too long a string -->
+    <string name="preference_burst_mode">Repeat</string> <!-- preference is called "burst" for historical reasons, but is more of a repeat mode; also used in popup menu, so shouldn't be too long a string -->
     <string name="preference_burst_interval">Repeat mode interval</string>
     <string name="preference_screen_camera_controls_more">More camera controls…</string>
     <string name="preference_touch_capture">Touch to capture</string>
@@ -480,6 +480,18 @@
     <string name="preference_stamp_dateformat_ddmmyyyy">dd/mm/yyyy</string>
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
     <string name="preference_stamp_dateformat_none">None</string>
+
+    <string name="preference_fast_burst_n_images">Number of photos</string>
+    <string name="preference_fast_burst_n_images_entries_2">2</string>
+    <string name="preference_fast_burst_n_images_entries_3">3</string>
+    <string name="preference_fast_burst_n_images_entries_4">4</string>
+    <string name="preference_fast_burst_n_images_entries_5">5</string>
+    <string name="preference_fast_burst_n_images_entries_6">6</string>
+    <string name="preference_fast_burst_n_images_entries_8">8</string>
+    <string name="preference_fast_burst_n_images_entries_10">10</string>
+    <string name="preference_fast_burst_n_images_entries_12">12</string>
+    <string name="preference_fast_burst_n_images_entries_15">15</string>
+    <string name="preference_fast_burst_n_images_entries_20">20</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n

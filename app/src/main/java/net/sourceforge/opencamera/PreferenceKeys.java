@@ -83,6 +83,8 @@ public class PreferenceKeys {
 
 	public static final String NRSaveExpoPreferenceKey = "preference_nr_save";
 
+	public static final String FastBurstNImagesPreferenceKey = "preference_fast_burst_n_images";
+
 	public static final String LocationPreferenceKey = "preference_location";
 
 	public static final String GPSDirectionPreferenceKey = "preference_gps_direction";
