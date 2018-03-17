@@ -115,7 +115,7 @@ public class PreferenceKeys {
 
 	public static final String FrontCameraMirrorKey = "preference_front_camera_mirror";
 
-	public static final String BackgroundPhotoSavingPreferenceKey = "preference_background_photo_saving";
+	//public static final String BackgroundPhotoSavingPreferenceKey = "preference_background_photo_saving";
 
 	public static final String Camera2FakeFlashPreferenceKey = "preference_camera2_fake_flash";
 

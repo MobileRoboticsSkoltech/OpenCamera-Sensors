@@ -1915,9 +1915,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 	
 	private boolean saveInBackground(boolean image_capture_intent) {
 		boolean do_in_background = true;
-		if( !sharedPreferences.getBoolean(PreferenceKeys.BackgroundPhotoSavingPreferenceKey, true) )
+		/*if( !sharedPreferences.getBoolean(PreferenceKeys.BackgroundPhotoSavingPreferenceKey, true) )
 			do_in_background = false;
-		else if( image_capture_intent )
+		else*/ if( image_capture_intent )
 			do_in_background = false;
 		else if( getPausePreviewPref() )
 			do_in_background = false;

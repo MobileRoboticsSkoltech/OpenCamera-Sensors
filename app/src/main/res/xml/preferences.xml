@@ -669,12 +669,14 @@
 					android:defaultValue="true"
 					/>
 
+				<!--
 				<SwitchPreference
 		            android:key="preference_background_photo_saving"
 		            android:title="@string/preference_background_photo_saving"
 		            android:summary="@string/preference_background_photo_saving_summary"
 		            android:defaultValue="true"
 		            />
+		        -->
 
 	        </PreferenceCategory>
 
