@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import android.Manifest;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -860,6 +861,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         mSensorManager.registerListener(accelerometerListener, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
+
+        // to support https://play.google.com/store/apps/details?id=com.miband2.mibandselfie
+		// allows using the Mi Band 2 as a Bluetooth remote for Open Camera to take photos or start/stop videos
+        IntentFilter filter1 = new IntentFilter("com.miband2.action.CAMERA");
+        registerReceiver(cameraReceiver, filter1);
 
         initSpeechRecognizer();
         initLocation();
