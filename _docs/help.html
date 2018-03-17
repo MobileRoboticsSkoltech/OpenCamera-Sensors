@@ -206,7 +206,6 @@ interval between each repeated photo can be set under Settings/"Repeat mode inte
 <li><b>Grid</b> - Whether to display one of a choice of grids on the camera preview. Also available
 under Settings/On screen GUI/"Show a grid".</li>
 </ul>
-<p>See <a href="#settings">Settings</a> for more info on the other settings.</p>
 
 <p><img src="settings.png" alt="Settings icon" width="32" height="32"><b>Settings</b> - Click to open the <a href="#settings">Settings</a>. (If your phone/tablet
 has a hardware menu button, pressing that should also open the settings.)</p>
@@ -274,7 +273,7 @@ regions will have their brightness boosted to bring out the detail. This mode is
 of brightness (e.g., on a bright sunny day) as well as being useful to automatically optimise photos in low light scenes. Also
 see <a href="#dro_vs_hdr">DRO vs HDR</a>.</p>
 
-<p>Note that if Camera2 API is used, DRO will give improved performance in bright scenes.</p>
+<p>Note that if Camera2 API is used, DRO will give improved quality in bright scenes.</p>
 
 <p><a name="hdr"></a><b>HDR</b></p>
 
@@ -296,7 +295,8 @@ the grass. Meanwhile the tree branches in the foreground is a bit too dark.</p>
 <p>Some things to note about Open Camera's HDR feature:</p>
 <ul>
 <li>Taking photos with HDR is significantly slower than regular photos (although note that HDR will give much faster performance if Camera2 API is enabled, see Settings - not all devices support this).</li>
-<li>HDR isn't suitable for scenes with movement, due to combining an image from multiple shots.</li>
+<li>HDR isn't so good for scenes with movement, due to combining an image from multiple shots. Open Camera does apply "deghosting"
+to reduce the problem, but this isn't perfect.</li>
 <li>Although Open Camera applies auto-alignment to the images, it's still best to try to hold your device steady while the photo is
 being taken.</li>
 <li>HDR can sometimes result in less accurate colour reproduction (due to trying to estimate the colours from multiple exposures).</li>
@@ -314,7 +314,6 @@ apps that advertise "HDR" don't even make use of multiple images - this is more 
 <li>Photos will still take longer to process compared with Standard photo mode, but it will still be faster than HDR.</li>
 <li>HDR will in general be better at scenes with a high range of brightness values. It can take advantage of the information from
 three separate images, rather than reprocessing a single image.</li>
-<li>DRO is available on both old and Camera2 APIs (though it still requires Android 5.0).</li>
 </ul>
 
 <p><a name="settings"></a><b>Settings</b></p>
@@ -779,10 +778,11 @@ in Android 5. Turning this option on or off will cause Open Camera to restart. T
 (including manual ISO/exposure, manual focus, HDR, exposure bracketing).
 Note that not all Android 5 devices have full support for the Camera2 API (Open Camera will only show this
 option if all cameras report either "LIMITED" or "FULL" support for the API; "LEGACY" devices are not supported).
-Supported devices include the Nexuses 5/6 onwards. Also note that even if devices support Camera2 API, many
+Also note that even if devices support Camera2 API, many
 devices have extremely poor support, leading to bugs such as poor flash behaviour, or video recording not working.
 These are not necessarily bugs in Open Camera, but problems with manufacturer support for Camera2 API. If you have
-problems with flash behaviour, try the "Use alternative flash method" setting under "Photo Settings".</p>
+problems with flash behaviour, try the "Use alternative flash method" setting under "Photo Settings".
+Please see <a href="devices.html">here</a> for more details on device compatibility.</p>
 
 <p><b>About</b> - Provides various debug information about the app and your device's camera. You can also copy
 this information to the clipboard.</p>
@@ -965,8 +965,13 @@ webpage you're reading now, but not in the app). There are however some clones o
 Please ensure that you've downloaded from one of the places listed above
 on this page.</p>
 
-<p><b>My device has Android 5, why can't I select the Camera2 API?</b> - Only some Android 5 devices support the new
-Camera2 API, such as the Nexus 5 and Nexus 6.</p>
+<p><b>Does Open Camera support features like manual controls for exposure/ISO/focus, and RAW?</b> - Enable
+Settings/"Use Camera2 API" for such features (if the option isn't there, it's not supported on your device).
+This is turned off by default as some <a href="devices.html">devices</a> have poor behaviour.</p>
+
+<p><b>My device has Android 5 or later, why can't I select the Camera2 API?</b> - Some Android 5+ devices only have
+"legacy" Camera2 support, which means it isn't any better than the original Camera API. Open Camera doesn't support
+enabling Camera2 on such devices.</p>
 
 <p><b>Why doesn't Open Camera's HDR images look like other HDR camera apps?</b> - There are a great many different ways
 of applying a HDR algorithm, some may do better or worse in different circumstances; some may look more or less pleasing
