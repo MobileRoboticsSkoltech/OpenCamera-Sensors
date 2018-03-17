@@ -1641,7 +1641,14 @@ public class CameraController1 extends CameraController {
 			Log.d(TAG, "    setDisplayOrientation to " + result);
 		}
 
-		camera.setDisplayOrientation(result);
+		try {
+			camera.setDisplayOrientation(result);
+		}
+		catch(RuntimeException e) {
+	    	// unclear why this happens, but have had crashes from Google Play...
+			Log.e(TAG, "failed to set display orientation");
+			e.printStackTrace();
+		}
 	    this.display_orientation = result;
 	}
 	
