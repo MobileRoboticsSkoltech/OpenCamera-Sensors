@@ -23,6 +23,11 @@ public class VideoProfile {
     public int videoFrameHeight;
     public int videoFrameWidth;
 
+    /** Returns a dummy video profile, used if video isn't supported.
+     */
+    VideoProfile() {
+    }
+
     VideoProfile(CamcorderProfile camcorderProfile) {
         this.record_audio = true;
         this.no_audio_permission = false;

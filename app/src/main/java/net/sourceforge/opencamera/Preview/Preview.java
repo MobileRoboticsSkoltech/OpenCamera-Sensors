@@ -214,6 +214,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<CameraController.Size> sizes;
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
+	private boolean supports_video;
 	private boolean has_capture_rate_factor; // whether we have a capture rate for faster or slow motion
 	private float capture_rate_factor = 1.0f; // should be 1.0f if has_capture_rate_factor is false
 	private boolean video_high_speed; // whether the current video mode requires high speed frame rate (note this may still be true even if is_video==false, so potentially we could switch photo/video modes without setting up the flag)
@@ -1282,6 +1283,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		has_capture_rate_factor = false;
 		capture_rate_factor = 1.0f;
 		video_high_speed = false;
+		supports_video = true;
 		supports_video_high_speed = false;
 		video_quality_handler.resetCurrentQuality();
 		supported_flash_values = null;
@@ -1649,6 +1651,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		boolean saved_is_video = applicationInterface.isVideoPref();
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saved_is_video: " + saved_is_video);
+		}
+		if( saved_is_video && !supports_video ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "but video not supported");
+			saved_is_video = false;
 		}
 		// must switch video before starting preview
 		if( saved_is_video != this.is_video ) {
@@ -2376,15 +2383,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			if( MyDebug.LOG )
 				Log.d(TAG, "set video_quality value to " + video_quality_handler.getCurrentVideoQuality());
 		}
+
 		if( video_quality_handler.getCurrentVideoQualityIndex() != -1 ) {
     		// now save, so it's available for PreferenceActivity
 			applicationInterface.setVideoQualityPref(video_quality_handler.getCurrentVideoQuality());
 		}
+		else {
+			// This means video_quality_handler.getSupportedVideoQuality().size() is 0 - this could happen if the camera driver
+			// supports no camcorderprofiles? In this case, we shouldn't support video.
+			Log.e(TAG, "no video qualities found");
+			supports_video = false;
+		}
+
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "setupCameraParameters: time after handling video quality: " + (System.currentTimeMillis() - debug_time));
 		}
 
-		{
+		if( supports_video ) {
 			// set up high speed frame rates
 			// should be done after checking the requested video size is available
 			video_high_speed = false;
@@ -2703,7 +2718,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// 4K UHD video is not yet supported by Android API (at least testing on Samsung S5 and Note 3, they do not return it via getSupportedVideoSizes(), nor via a CamcorderProfile (either QUALITY_HIGH, or anything else)
 		// but it does work if we explicitly set the resolution (at least tested on an S5)
 		if( camera_controller == null ) {
-			video_profile = new VideoProfile( CamcorderProfile.get(0, CamcorderProfile.QUALITY_HIGH) );
+			video_profile = new VideoProfile();
 			Log.e(TAG, "camera not opened! returning default video profile for QUALITY_HIGH");
 			return video_profile;
 		}
@@ -2741,9 +2756,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				cam_profile = getCamcorderProfile(this.video_quality_handler.getCurrentVideoQuality());
 			}
 			else {
-				cam_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
+				cam_profile = null;
 			}
-			video_profile = new VideoProfile(cam_profile);
+			video_profile = cam_profile != null ? new VideoProfile(cam_profile) : new VideoProfile();
 		}
 
 		//video_profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
@@ -3780,6 +3795,11 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( camera_controller == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "camera not opened!");
+			return;
+		}
+		if( !is_video && !supports_video ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "video not supported");
 			return;
 		}
 		boolean old_is_video = is_video;
