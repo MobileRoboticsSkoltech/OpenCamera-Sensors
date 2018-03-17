@@ -189,7 +189,7 @@ public class ImageSaver extends Thread {
 
 	/** Compute a sensible size for the queue, based on the device's memory (large heap).
 	 */
-	private int getQueueSize(int large_heap_memory) {
+	public static int getQueueSize(int large_heap_memory) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "large max memory = " + large_heap_memory + "MB");
 		int max_queue_size;
@@ -226,12 +226,12 @@ public class ImageSaver extends Thread {
 	}
 
 	/** Computes the cost for a particular request.
-	 *  Note that for RAW+DNG mode, computeCost() is called twice for a given photo (one for each
+	 *  Note that for RAW+DNG mode, computeRequestCost() is called twice for a given photo (one for each
 	 *  of the two requests: one RAW, one JPEG).
 	 * @param is_raw Whether RAW/DNG or JPEG.
 	 * @param n_jpegs If is_raw is false, this is the number of JPEG images that are in the request.
 	 */
-	private int computeRequestCost(boolean is_raw, int n_jpegs) {
+	public static int computeRequestCost(boolean is_raw, int n_jpegs) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "computeRequestCost");
 			Log.d(TAG, "is_raw: " + is_raw);

@@ -4,6 +4,7 @@ import android.media.CamcorderProfile;
 
 import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.CameraController.CameraController2;
+import net.sourceforge.opencamera.ImageSaver;
 import net.sourceforge.opencamera.LocationSupplier;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.Preview.VideoQualityHandler;
@@ -460,5 +461,32 @@ public class UnitTest {
 		assertEquals( "0.0", DrawPreview.formatLevelAngle(-0.0001));
 		assertEquals( "-0.1", DrawPreview.formatLevelAngle(-0.1));
 		assertEquals( "-10.7", DrawPreview.formatLevelAngle(-10.6753));
+	}
+
+	@Test
+	public void testImageSaverQueueSize() {
+		Log.d(TAG, "testImageSaverQueueSize");
+
+		// if any of these values change, review the comments in ImageSaver.getQueueSize().
+
+		assertTrue(ImageSaver.getQueueSize(64) >= 6);
+
+		assertTrue(ImageSaver.getQueueSize(128) >= ImageSaver.getQueueSize(64));
+
+		assertTrue(ImageSaver.getQueueSize(256) >= ImageSaver.getQueueSize(128));
+		assertTrue(ImageSaver.getQueueSize(256) <= 19);
+
+		assertTrue(ImageSaver.getQueueSize(512) >= ImageSaver.getQueueSize(256));
+		assertTrue(ImageSaver.getQueueSize(512) >= 34);
+		assertTrue(ImageSaver.getQueueSize(512) <= 70);
+	}
+
+	@Test
+	public void testImageSaverRequestCost() {
+		Log.d(TAG, "testImageSaverRequestCost");
+
+		assertTrue( ImageSaver.computeRequestCost(true, 0) > ImageSaver.computeRequestCost(false, 1));
+		assertEquals( ImageSaver.computeRequestCost(false, 3), 3*ImageSaver.computeRequestCost(false, 1));
+
 	}
 }
