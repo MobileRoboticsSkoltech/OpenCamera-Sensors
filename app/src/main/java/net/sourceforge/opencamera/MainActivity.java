@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
@@ -845,6 +846,19 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		}
 	};
 
+	/* To support https://play.google.com/store/apps/details?id=com.miband2.mibandselfie .
+	 * Allows using the Mi Band 2 as a Bluetooth remote for Open Camera to take photos or start/stop
+	 * videos.
+	 */
+    private final BroadcastReceiver cameraReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "cameraReceiver.onReceive");
+	    	MainActivity.this.takePicture(false);
+        }
+    };
+
 	@Override
     protected void onResume() {
 		long debug_time = 0;
@@ -862,10 +876,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         mSensorManager.registerListener(magneticListener, mSensorMagnetic, SensorManager.SENSOR_DELAY_NORMAL);
         orientationEventListener.enable();
 
-        // to support https://play.google.com/store/apps/details?id=com.miband2.mibandselfie
-		// allows using the Mi Band 2 as a Bluetooth remote for Open Camera to take photos or start/stop videos
-        IntentFilter filter1 = new IntentFilter("com.miband2.action.CAMERA");
-        registerReceiver(cameraReceiver, filter1);
+        registerReceiver(cameraReceiver, new IntentFilter("com.miband2.action.CAMERA"));
 
         initSpeechRecognizer();
         initLocation();
@@ -912,6 +923,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         mSensorManager.unregisterListener(accelerometerListener);
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
+        unregisterReceiver(cameraReceiver);
         freeAudioListener(false);
         freeSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
