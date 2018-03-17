@@ -2974,10 +2974,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakePhotoAutoStabilise() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoAutoStabilise");
 		setToDefault();
+		assertFalse(mActivity.getApplicationInterface().getDrawPreview().getStoredAutoStabilisePref());
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 		editor.apply();
+		updateForSettings();
+		assertTrue(mActivity.getApplicationInterface().getDrawPreview().getStoredAutoStabilisePref());
 
 		subTestTakePhoto(false, false, true, true, false, false, false, false);
 	}
@@ -4243,8 +4246,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 		editor.apply();
+		updateForSettings();
 
 		assertTrue(mPreview.isPreviewStarted());
+		assertTrue(mActivity.getApplicationInterface().getDrawPreview().getStoredAutoStabilisePref());
 		final int n_photos_c = 5;
 
 		takePhotoLoop(n_photos_c);
@@ -4328,8 +4333,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 		editor.apply();
+		updateForSettings();
 
 		assertTrue(mPreview.isPreviewStarted());
+		assertTrue(mActivity.getApplicationInterface().getDrawPreview().getStoredAutoStabilisePref());
 		final int [] angles = new int[]{0, -129, 30, -44, 61, -89, 179};
 
 		takePhotoLoopAngles(angles);
@@ -6509,6 +6516,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 			editor.apply();
+			updateForSettings();
 		}
 		mActivity.test_last_saved_image = null;
 	    clickView(takePhotoButton);
@@ -6583,6 +6591,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 			editor.apply();
+			updateForSettings();
 		}
 		mActivity.test_last_saved_image = null;
 	    clickView(takePhotoButton);
@@ -6665,11 +6674,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		setToDefault();
 
 		{
+			assertFalse(mActivity.getApplicationInterface().getDrawPreview().getStoredHasStampPref());
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putString(PreferenceKeys.StampPreferenceKey, "preference_stamp_yes");
 			editor.apply();
 			updateForSettings();
+			assertTrue(mActivity.getApplicationInterface().getDrawPreview().getStoredHasStampPref());
 		}
 
 	    assertTrue(mPreview.count_cameraTakePicture==0);
@@ -6737,10 +6748,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// now test with auto-stabilise
 		{
+			assertFalse(mActivity.getApplicationInterface().getDrawPreview().getStoredAutoStabilisePref());
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 			editor.apply();
+			updateForSettings();
+			assertTrue(mActivity.getApplicationInterface().getDrawPreview().getStoredAutoStabilisePref());
 		}
 
 	    clickView(takePhotoButton);
@@ -6785,6 +6799,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putBoolean(PreferenceKeys.AutoStabilisePreferenceKey, true);
 			editor.apply();
+			updateForSettings();
 		}
 
 	    clickView(takePhotoButton);

@@ -1760,4 +1760,14 @@ public class DrawPreview {
 		canvas.drawCircle(canvas.getWidth()/2.0f + distance_x, canvas.getHeight()/2.0f + distance_y, radius, p);
 		p.setAlpha(255);
 	}
+
+	// for testing:
+
+	public boolean getStoredHasStampPref() {
+		return this.has_stamp_pref;
+	}
+
+	public boolean getStoredAutoStabilisePref() {
+		return this.auto_stabilise_pref;
+	}
 }
