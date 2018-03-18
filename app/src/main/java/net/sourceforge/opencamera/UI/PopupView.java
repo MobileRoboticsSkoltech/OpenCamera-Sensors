@@ -218,8 +218,14 @@ public class PopupView extends LinearLayout {
         				else {
     						MyApplicationInterface.PhotoMode new_photo_mode = photo_mode_values.get(option_id);
     						String toast_message = option;
-    						if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing )
+    						if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard )
+    							toast_message = getResources().getString(R.string.photo_mode_standard_full);
+    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing )
     							toast_message = getResources().getString(R.string.photo_mode_expo_bracketing_full);
+    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.FastBurst )
+    							toast_message = getResources().getString(R.string.photo_mode_fast_burst_full);
+    						else if( new_photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction )
+    							toast_message = getResources().getString(R.string.photo_mode_noise_reduction_full);
     	    				final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
     						SharedPreferences.Editor editor = sharedPreferences.edit();
     						if( new_photo_mode == MyApplicationInterface.PhotoMode.Standard ) {

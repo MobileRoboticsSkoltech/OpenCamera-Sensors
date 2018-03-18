@@ -3058,8 +3058,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			else if( photo_mode == MyApplicationInterface.PhotoMode.ExpoBracketing ) {
 				photo_mode_string = getResources().getString(R.string.photo_mode_expo_bracketing_full);
 			}
+			else if( photo_mode == MyApplicationInterface.PhotoMode.FastBurst ) {
+				photo_mode_string = getResources().getString(R.string.photo_mode_fast_burst_full);
+				int n_images = applicationInterface.getBurstNImages();
+				photo_mode_string += " (" + n_images + ")";
+			}
 			else if( photo_mode == MyApplicationInterface.PhotoMode.NoiseReduction ) {
-				photo_mode_string = getResources().getString(R.string.photo_mode_noise_reduction);
+				photo_mode_string = getResources().getString(R.string.photo_mode_noise_reduction_full);
 			}
 			if( photo_mode_string != null ) {
 				toast_string += "\n" + getResources().getString(R.string.photo_mode) + ": " + photo_mode_string;
