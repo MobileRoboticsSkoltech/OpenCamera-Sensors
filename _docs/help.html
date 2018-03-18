@@ -191,6 +191,9 @@ will be available which instead work by making the screen flash (note, front scr
 	be processed in other applications to create HDR images. For Android, you can try my own
 	<a href="https://play.google.com/store/apps/details?id=uk.org.opencamera.vibrancehdr">Vibrance HDR</a>. For
 	PC platforms, try <a href="http://qtpfsgui.sourceforge.net/">Luminance HDR</a>.</li>
+	<li><b>[]]]</b> - Enables Fast Burst mode. Takes multiple images in quick succession. (Only available on some
+	devices, and if Camera2 API is used.) In this mode, you can change the number of photos to take from the
+	popup menu.</li>
 </ul></li>
 <li><b>Auto-level</b> - Enable the auto-level feature for photos (see
 <a href="#auto_stabilise">below</a>). (Only available if the device has enough memory.)</li>
@@ -366,7 +369,9 @@ cancel the timer.</p>
 button again to cancel.</p>-->
 
 <p><b>Repeat mode interval</b> - Specify the delay (if any) between photos in repeat mode. Note that if a delay
-is selected, note that this does not include the time taken to auto-focus and take each photo.</p>
+is selected, note that this does not include the time taken to auto-focus and take each photo. Similarly, "No
+delay" still means there will be some time between each photo. If you want to take a burst of photos, use the
+Fast Burst photo mode if it's available on your device (requires Camera2 API to be enabled).</p>
 
 <p><b>More camera controls...</b> - Select to access the following controls:</p>
 
