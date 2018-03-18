@@ -179,7 +179,7 @@ public class ImageSaver extends Thread {
 		this.main_activity = main_activity;
 
 		ActivityManager activityManager = (ActivityManager) main_activity.getSystemService(Activity.ACTIVITY_SERVICE);
-		this.queue_capacity = getQueueSize(activityManager.getLargeMemoryClass());
+		this.queue_capacity = computeQueueSize(activityManager.getLargeMemoryClass());
 		this.queue = new ArrayBlockingQueue<>(queue_capacity); // since we remove from the queue and then process in the saver thread, in practice the number of background photos - including the one being processed - is one more than the length of this queue
 
 		this.hdrProcessor = new HDRProcessor(main_activity);
@@ -187,9 +187,16 @@ public class ImageSaver extends Thread {
 		p.setAntiAlias(true);
 	}
 
+	/** Returns the length of the image saver queue. In practice, the number of images that can be taken at once before the UI
+	 *  blocks is 1 more than this, as 1 image will be taken off the queue to process straight away.
+	 */
+	public int getQueueSize() {
+		return this.queue_capacity;
+	}
+
 	/** Compute a sensible size for the queue, based on the device's memory (large heap).
 	 */
-	public static int getQueueSize(int large_heap_memory) {
+	public static int computeQueueSize(int large_heap_memory) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "large max memory = " + large_heap_memory + "MB");
 		int max_queue_size;

@@ -441,8 +441,48 @@ public class PopupView extends LinearLayout {
 			if( main_activity.getApplicationInterface().getPhotoMode() == MyApplicationInterface.PhotoMode.FastBurst ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "add fast burst options");
-				final String [] burst_mode_values = getResources().getStringArray(R.array.preference_fast_burst_n_images_values);
-				String [] burst_mode_entries = getResources().getStringArray(R.array.preference_fast_burst_n_images_entries);
+
+				final String [] all_burst_mode_values = getResources().getStringArray(R.array.preference_fast_burst_n_images_values);
+				String [] all_burst_mode_entries = getResources().getStringArray(R.array.preference_fast_burst_n_images_entries);
+
+				//String [] burst_mode_values = new String[all_burst_mode_values.length];
+				//String [] burst_mode_entries = new String[all_burst_mode_entries.length];
+				if( all_burst_mode_values.length != all_burst_mode_entries.length ) {
+					Log.e(TAG, "preference_fast_burst_n_images_values and preference_fast_burst_n_images_entries are different lengths");
+					throw new RuntimeException();
+				}
+
+				int max_burst_images = main_activity.getApplicationInterface().getImageSaver().getQueueSize()+1;
+				max_burst_images = Math.max(2, max_burst_images); // make sure we at least allow the minimum of 2 burst images!
+				if( MyDebug.LOG )
+					Log.d(TAG, "max_burst_images: " + max_burst_images);
+
+				// filter number of burst images - don't allow more than max_burst_images
+				List<String> burst_mode_values_l = new ArrayList<>();
+				List<String> burst_mode_entries_l = new ArrayList<>();
+				for(int i=0;i<all_burst_mode_values.length;i++) {
+					int n_images;
+					try {
+						n_images = Integer.parseInt(all_burst_mode_values[i]);
+					}
+					catch(NumberFormatException e) {
+						Log.e(TAG, "failed to parse " + i + "th preference_fast_burst_n_images_values value: " + all_burst_mode_values[i]);
+						e.printStackTrace();
+						continue;
+					}
+					if( n_images > max_burst_images ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "n_images " + n_images + " is more than max_burst_images: " + max_burst_images);
+						continue;
+					}
+					if( MyDebug.LOG )
+						Log.d(TAG, "n_images " + n_images);
+					burst_mode_values_l.add( all_burst_mode_values[i] );
+					burst_mode_entries_l.add( all_burst_mode_entries[i] );
+				}
+				final String [] burst_mode_values = burst_mode_values_l.toArray(new String[burst_mode_values_l.size()]);
+				final String [] burst_mode_entries = burst_mode_entries_l.toArray(new String[burst_mode_entries_l.size()]);
+
 				String burst_mode_value = sharedPreferences.getString(PreferenceKeys.FastBurstNImagesPreferenceKey, "5");
 				burst_n_images_index = Arrays.asList(burst_mode_values).indexOf(burst_mode_value);
 				if( burst_n_images_index == -1 ) {

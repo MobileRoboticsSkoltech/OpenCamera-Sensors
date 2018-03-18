@@ -188,7 +188,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		return storageUtils;
 	}
 	
-	ImageSaver getImageSaver() {
+	public ImageSaver getImageSaver() {
 		return imageSaver;
 	}
 

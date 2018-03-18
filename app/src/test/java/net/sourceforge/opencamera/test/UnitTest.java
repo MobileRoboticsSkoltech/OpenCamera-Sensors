@@ -469,16 +469,16 @@ public class UnitTest {
 
 		// if any of these values change, review the comments in ImageSaver.getQueueSize().
 
-		assertTrue(ImageSaver.getQueueSize(64) >= 6);
+		assertTrue(ImageSaver.computeQueueSize(64) >= 6);
 
-		assertTrue(ImageSaver.getQueueSize(128) >= ImageSaver.getQueueSize(64));
+		assertTrue(ImageSaver.computeQueueSize(128) >= ImageSaver.computeQueueSize(64));
 
-		assertTrue(ImageSaver.getQueueSize(256) >= ImageSaver.getQueueSize(128));
-		assertTrue(ImageSaver.getQueueSize(256) <= 19);
+		assertTrue(ImageSaver.computeQueueSize(256) >= ImageSaver.computeQueueSize(128));
+		assertTrue(ImageSaver.computeQueueSize(256) <= 19);
 
-		assertTrue(ImageSaver.getQueueSize(512) >= ImageSaver.getQueueSize(256));
-		assertTrue(ImageSaver.getQueueSize(512) >= 34);
-		assertTrue(ImageSaver.getQueueSize(512) <= 70);
+		assertTrue(ImageSaver.computeQueueSize(512) >= ImageSaver.computeQueueSize(256));
+		assertTrue(ImageSaver.computeQueueSize(512) >= 34);
+		assertTrue(ImageSaver.computeQueueSize(512) <= 70);
 	}
 
 	@Test
