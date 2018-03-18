@@ -3994,6 +3994,15 @@ public class CameraController2 extends CameraController {
 			}
 			//stillBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 			//stillBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+			if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O ) {
+				// unclear why we wouldn't want to request ZSL
+				// this is also required to enable HDR+ on Google Pixel devices when using Camera2: https://opensource.google.com/projects/pixelvisualcorecamera
+				stillBuilder.set(CaptureRequest.CONTROL_ENABLE_ZSL, true);
+				if( MyDebug.LOG ) {
+					Boolean zsl = stillBuilder.get(CaptureRequest.CONTROL_ENABLE_ZSL);
+					Log.d(TAG, "CONTROL_ENABLE_ZSL: " + (zsl==null ? "null" : zsl));
+				}
+			}
 			clearPending();
 			// shouldn't add preview surface as a target - no known benefit to doing so
     		stillBuilder.addTarget(imageReader.getSurface());
