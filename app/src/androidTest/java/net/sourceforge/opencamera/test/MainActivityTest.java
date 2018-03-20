@@ -2621,8 +2621,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int n_fast_burst_images = Integer.parseInt(n_fast_burst_images_s);
 
 		int exp_n_new_files;
-		if( is_raw )
-			exp_n_new_files = 2;
+		if( is_raw ) {
+			if( mActivity.getApplicationInterface().isRawOnly() )
+				exp_n_new_files = 1;
+			else
+				exp_n_new_files = 2;
+		}
 		else if( is_hdr && hdr_save_expo )
 			exp_n_new_files = 4;
 		else if( is_expo )
@@ -2688,9 +2692,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				}
 			}
 		}
-		assertTrue( filename_jpeg != null );
+		assertTrue( (filename_jpeg == null) == (is_raw && mActivity.getApplicationInterface().isRawOnly()) );
 		assertTrue( (filename_dng != null) == is_raw );
-		if( is_raw ) {
+		if( is_raw && !mActivity.getApplicationInterface().isRawOnly() ) {
 			// check we have same filenames (ignoring extensions)
 			String filename_base_jpeg = filename_jpeg.substring(0, filename_jpeg.length()-4);
 			Log.d(TAG, "filename_base_jpeg: " + filename_base_jpeg);
@@ -2719,23 +2723,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			assertFalse(mActivity.getStorageUtils().failed_to_scan);
 		}
 
-		assertTrue(mActivity.test_last_saved_image != null);
-		File saved_image_file = new File(mActivity.test_last_saved_image);
-		Log.d(TAG, "saved name: " + saved_image_file.getName());
-		/*Log.d(TAG, "expected name: " + expected_filename);
-		Log.d(TAG, "expected name1: " + expected_filename1);
-		assertTrue(expected_filename.equals(saved_image_file.getName()) || expected_filename1.equals(saved_image_file.getName()));*/
-		// allow for possibility that the time has passed since taking the photo
-		boolean matched = false;
-		for(int i=0;i<=max_time_s && !matched;i++) {
-			Date test_date = new Date(date.getTime() - 1000*i);
-			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(test_date);
-			String expected_filename = "IMG_" + timeStamp + suffix + ".jpg";
-			Log.d(TAG, "expected name: " + expected_filename);
-			if( expected_filename.equals(saved_image_file.getName() ) )
-				matched = true;
+		if( !mActivity.getApplicationInterface().isRawOnly() ) {
+			assertTrue(mActivity.test_last_saved_image != null);
+			File saved_image_file = new File(mActivity.test_last_saved_image);
+			Log.d(TAG, "saved name: " + saved_image_file.getName());
+			/*Log.d(TAG, "expected name: " + expected_filename);
+			Log.d(TAG, "expected name1: " + expected_filename1);
+			assertTrue(expected_filename.equals(saved_image_file.getName()) || expected_filename1.equals(saved_image_file.getName()));*/
+			// allow for possibility that the time has passed since taking the photo
+			boolean matched = false;
+			for(int i=0;i<=max_time_s && !matched;i++) {
+				Date test_date = new Date(date.getTime() - 1000*i);
+				String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(test_date);
+				String expected_filename = "IMG_" + timeStamp + suffix + ".jpg";
+				Log.d(TAG, "expected name: " + expected_filename);
+				if( expected_filename.equals(saved_image_file.getName() ) )
+					matched = true;
+			}
+			assertTrue(matched);
 		}
-		assertTrue(matched);
 	}
 
 	private void postTakePhotoChecks(final boolean immersive_mode, final int exposureVisibility, final int exposureLockVisibility) {
@@ -2988,6 +2994,23 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int n_new_files = folder.listFiles().length - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 2*n_photos); // if we fail here, be careful we haven't lost images (i.e., waitUntilImageQueueEmpty() returns before all images are saved)
+	}
+
+	/** Test taking photo with DNG (RAW) only.
+	 */
+	public void testTakePhotoRawOnly() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoRawOnly");
+		if( !mPreview.usingCamera2API() ) {
+			return;
+		}
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_only");
+		editor.apply();
+		updateForSettings();
+
+		subTestTakePhoto(false, false, true, true, false, false, true, false);
 	}
 
 	public void testTakePhotoAutoStabilise() throws InterruptedException {

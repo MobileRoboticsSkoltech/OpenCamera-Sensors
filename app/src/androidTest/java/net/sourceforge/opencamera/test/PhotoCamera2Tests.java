@@ -13,6 +13,7 @@ public class PhotoCamera2Tests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoRaw"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoRawMulti"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoRawWaitCaptureResult"));
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoRawOnly"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPreviewPausedTrashRaw"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPreviewPausedTrashRaw2"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoExpo5"));
