@@ -2614,8 +2614,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false);
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
 		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_fast_burst = mActivity.supportsFastBurst() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_fast_burst");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
+		String n_fast_burst_images_s = sharedPreferences.getString(PreferenceKeys.FastBurstNImagesPreferenceKey, "5");
+		int n_fast_burst_images = Integer.parseInt(n_fast_burst_images_s);
 
 		int exp_n_new_files;
 		if( is_raw )
@@ -2624,6 +2627,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			exp_n_new_files = 4;
 		else if( is_expo )
 			exp_n_new_files = n_expo_images;
+		else if( is_fast_burst )
+			exp_n_new_files = n_fast_burst_images;
 		else
 			exp_n_new_files = 1;
 		Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
@@ -2634,6 +2639,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		boolean hdr_save_expo =  sharedPreferences.getBoolean(PreferenceKeys.HDRSaveExpoPreferenceKey, false);
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
+		boolean is_fast_burst = mActivity.supportsFastBurst() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_fast_burst");
 		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
 
 		// check files have names as expected
@@ -2653,7 +2659,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				String filename = file.getName();
 				assertTrue(filename.startsWith("IMG_"));
 				if( filename.endsWith(".jpg") ) {
-					assertTrue(hdr_save_expo || is_expo || filename_jpeg == null);
+					assertTrue(hdr_save_expo || is_expo || is_fast_burst || filename_jpeg == null);
 					if( is_hdr && hdr_save_expo ) {
 						// only look for the "_HDR" image
 						if( filename.contains("_HDR") )
@@ -2694,7 +2700,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 	}
 
-	private void checkFilesAfterTakePhoto(final boolean is_raw, final boolean test_wait_capture_result, final File [] files, final String expected_filename, final String expected_filename1) throws InterruptedException {
+	private void checkFilesAfterTakePhoto(final boolean is_raw, final boolean test_wait_capture_result, final File [] files, final String suffix, final int max_time_s, final Date date) throws InterruptedException {
 		File folder = mActivity.getImageFolder();
 		int n_files = files.length;
 		assertTrue( folder.exists() );
@@ -2716,9 +2722,20 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(mActivity.test_last_saved_image != null);
 		File saved_image_file = new File(mActivity.test_last_saved_image);
 		Log.d(TAG, "saved name: " + saved_image_file.getName());
-		Log.d(TAG, "expected name: " + expected_filename);
+		/*Log.d(TAG, "expected name: " + expected_filename);
 		Log.d(TAG, "expected name1: " + expected_filename1);
-		assertTrue(expected_filename.equals(saved_image_file.getName()) || expected_filename1.equals(saved_image_file.getName()));
+		assertTrue(expected_filename.equals(saved_image_file.getName()) || expected_filename1.equals(saved_image_file.getName()));*/
+		// allow for possibility that the time has passed since taking the photo
+		boolean matched = false;
+		for(int i=0;i<=max_time_s && !matched;i++) {
+			Date test_date = new Date(date.getTime() - 1000*i);
+			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(test_date);
+			String expected_filename = "IMG_" + timeStamp + suffix + ".jpg";
+			Log.d(TAG, "expected name: " + expected_filename);
+			if( expected_filename.equals(saved_image_file.getName() ) )
+				matched = true;
+		}
+		assertTrue(matched);
 	}
 
 	private void postTakePhotoChecks(final boolean immersive_mode, final int exposureVisibility, final int exposureLockVisibility) {
@@ -2761,8 +2778,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		boolean is_dro = mActivity.supportsDRO() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_dro");
 		boolean is_hdr = mActivity.supportsHDR() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_hdr");
 		boolean is_expo = mActivity.supportsExpoBracketing() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_expo_bracketing");
+		boolean is_fast_burst = mActivity.supportsFastBurst() && sharedPreferences.getString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_std").equals("preference_photo_mode_fast_burst");
 		String n_expo_images_s = sharedPreferences.getString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "3");
 		int n_expo_images = Integer.parseInt(n_expo_images_s);
+		String n_fast_burst_images_s = sharedPreferences.getString(PreferenceKeys.FastBurstNImagesPreferenceKey, "5");
+		int n_fast_burst_images = Integer.parseInt(n_fast_burst_images_s);
 
 		int saved_count_cameraTakePicture = mPreview.count_cameraTakePicture;
 
@@ -2836,8 +2856,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		waitForTakePhoto();
 
 		Date date = new Date();
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(date);
         String suffix = "";
+        int max_time_s = 1;
 		if( is_dro ) {
 			suffix = "_DRO";
 		}
@@ -2848,11 +2868,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			//suffix = "_EXP" + (n_expo_images-1);
 			suffix = "_" + (n_expo_images-1);
 		}
-		String expected_filename = "IMG_" + timeStamp + suffix + ".jpg";
-		// allow for possibility that the time has passed on by 1s since taking the photo
-		Date date1 = new Date(date.getTime() - 1000);
-        String timeStamp1 = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(date1);
-		String expected_filename1= "IMG_" + timeStamp1 + suffix + ".jpg";
+		else if( is_fast_burst ) {
+			suffix = "_" + (n_fast_burst_images-1);
+			max_time_s = 3; // takes longer to save 20 images!
+		}
 		this.getInstrumentation().waitForIdleSync();
 		Log.d(TAG, "after idle sync");
 		Log.d(TAG, "take picture count: " + mPreview.count_cameraTakePicture);
@@ -2881,7 +2900,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		checkFocusAfterTakePhoto(focus_value, focus_value_ui);
 
-		checkFilesAfterTakePhoto(is_raw, test_wait_capture_result, files, expected_filename, expected_filename1);
+		checkFilesAfterTakePhoto(is_raw, test_wait_capture_result, files, suffix, max_time_s, date);
 
 		checkFocusAfterTakePhoto2(touch_to_focus, test_wait_capture_result, locked_focus, can_auto_focus, can_focus_area, saved_count);
 
@@ -7954,6 +7973,29 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
 		editor.putString(PreferenceKeys.ExpoBracketingNImagesPreferenceKey, "5");
 		editor.putString(PreferenceKeys.ExpoBracketingStopsPreferenceKey, "1");
+		editor.apply();
+		updateForSettings();
+
+		subTestTakePhoto(false, false, true, true, false, false, false, false);
+		if( mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test_capture_results: " + mPreview.getCameraController().test_capture_results);
+			assertTrue(mPreview.getCameraController().test_capture_results == 1);
+		}
+	}
+
+	/** Tests fast burst with 20 images.
+     */
+	public void testTakePhotoFastBurst() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoFastBurst");
+		if( !mActivity.supportsFastBurst() ) {
+			return;
+		}
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_fast_burst");
+		editor.putString(PreferenceKeys.FastBurstNImagesPreferenceKey, "20");
 		editor.apply();
 		updateForSettings();
 
