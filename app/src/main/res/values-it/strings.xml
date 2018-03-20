@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">Open Camera</string>
@@ -151,7 +151,7 @@
     <string name="preference_show_battery_summary">Visualizza sul display il livello corrente di carica della batteria</string>
     <string name="preference_grid">Mostra griglia</string>
     <string name="grid">Griglia</string> <!-- short form of Show a grid -->
-    <string name="preference_crop_guide">Mostra guida rigaglio</string>
+    <string name="preference_crop_guide">Mostra guida ritaglio</string>
     <string name="preference_crop_guide_summary">La guida al ritaglio mostra sullo schermo un rettangolo di certe proporzioni - utile se in un secondo momento si ha intenzione di ritagliare la foto o il video ad un certo rapporto di proporzioni. Richiede la modalità foto WYSIWYG, o di essere in modalità video.</string>
     <string name="preference_show_toasts">Visualizza il messaggio \"toast\"</string>
     <string name="preference_show_toasts_summary">Decide quando visualizzare il popup per messaggio \"toast\"</string>
@@ -221,7 +221,7 @@
     
     <string name="preference_category_online">Varie</string>
     <string name="preference_online_help">Aiuto Online</string>
-    <string name="preference_online_help_summary">Apre il sito web di Open Camera nel vostro browser</string>
+    <string name="preference_online_help_summary">Apre il sito web di Open Camera nel browser</string>
     <string name="preference_donate">Dona per supportare lo sviluppo</string>
     <string name="preference_donate_summary">Se questa applicazione ti piace, puoi sempre pensare di fare una donazione. Puoi farlo premendo sul relativo bottone - cliccando su quel tasto aprirai la pagina per la donazione. Grazie mille!</string>
     <string name="preference_use_camera2">Usa le API Camera2</string>
@@ -289,7 +289,7 @@
     <string name="photo_mode_expo_bracketing_full">Exposure Bracketing</string>
     <string name="preference_category_stamp">Timbro Foto</string>
     <string name="preference_hdr_save_expo">Salva tutte le immagini per la modalità HDR</string>
-    <string name="preference_hdr_save_expo_summary">Se abilitato in modalità HDR, le tre foto con esposizione base verranno salvate, così come l\'immagine risultato finale dell\'elaborazione HDR. Si noti che questo processo renderà l\'attività di salvataggio più lenta, specialmente se sono attivate opzioni come \"Timbro fotos\" o Auto-level.</string>
+    <string name="preference_hdr_save_expo_summary">Se abilitata la modalità HDR, le tre foto con esposizione base verranno salvate, così come l\'immagine risultato finale dell\'elaborazione HDR. Si noti che questo processo renderà l\'attività di salvataggio più lenta, specialmente se sono attivate opzioni come \"Timbro fotos\" o Auto-level.</string>
 
     <string name="no_permission">PERMESSO NON DISPONIBILE</string>
     <string name="permission_rationale_title">Richiesto permesso</string>
