@@ -113,6 +113,7 @@ public class DrawPreview {
 	private Bitmap dro_bitmap;
 	private Bitmap hdr_bitmap;
 	private Bitmap expo_bitmap;
+	private Bitmap burst_bitmap;
 	private Bitmap nr_bitmap;
 	private Bitmap photostamp_bitmap;
 	private Bitmap flash_bitmap;
@@ -170,6 +171,7 @@ public class DrawPreview {
 		dro_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.dro_icon);
 		hdr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_hdr_on_white_48dp);
 		expo_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.expo_icon);
+		burst_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_burst_mode_white_48dp);
 		nr_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.nr_icon);
 		photostamp_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_text_format_white_48dp);
 		flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
@@ -210,6 +212,10 @@ public class DrawPreview {
 		if( expo_bitmap != null ) {
 			expo_bitmap.recycle();
 			expo_bitmap = null;
+		}
+		if( burst_bitmap != null ) {
+			burst_bitmap.recycle();
+			burst_bitmap = null;
 		}
 		if( nr_bitmap != null ) {
 			nr_bitmap.recycle();
@@ -889,6 +895,7 @@ public class DrawPreview {
 					photoMode == MyApplicationInterface.PhotoMode.DRO ||
 					photoMode == MyApplicationInterface.PhotoMode.HDR ||
 					photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ||
+					photoMode == MyApplicationInterface.PhotoMode.FastBurst ||
 					photoMode == MyApplicationInterface.PhotoMode.NoiseReduction
 					) &&
 					!applicationInterface.isVideoPref() ) { // these photo modes not supported for video mode
@@ -901,6 +908,7 @@ public class DrawPreview {
 				Bitmap bitmap = photoMode == MyApplicationInterface.PhotoMode.DRO ? dro_bitmap :
 						photoMode == MyApplicationInterface.PhotoMode.HDR ? hdr_bitmap :
 						photoMode == MyApplicationInterface.PhotoMode.ExpoBracketing ? expo_bitmap :
+						photoMode == MyApplicationInterface.PhotoMode.FastBurst ? burst_bitmap :
 						photoMode == MyApplicationInterface.PhotoMode.NoiseReduction ? nr_bitmap :
 								null;
 				if( bitmap != null ) {
