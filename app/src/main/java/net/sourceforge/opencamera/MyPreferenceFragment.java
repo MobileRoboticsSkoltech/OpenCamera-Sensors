@@ -388,6 +388,17 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
 			pg.removePreference(pref);
         }
+		{
+			// remove preference_category_photo_debugging category if empty (which will be the case for old api)
+        	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
+			if( MyDebug.LOG )
+				Log.d(TAG, "preference_category_photo_debugging children: " + pg.getPreferenceCount());
+        	if( pg.getPreferenceCount() == 0 ) {
+        		// pg.getParent() requires API level 26
+	        	PreferenceGroup parent = (PreferenceGroup)this.findPreference("preference_screen_photo_settings");
+        		parent.removePreference(pg);
+			}
+		}
 
 		final boolean supports_camera2 = bundle.getBoolean("supports_camera2");
 		if( MyDebug.LOG )

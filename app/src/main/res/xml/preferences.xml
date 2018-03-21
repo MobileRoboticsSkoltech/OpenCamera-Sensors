@@ -647,6 +647,7 @@
 
 	        </PreferenceCategory>
 
+	        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
 	        <PreferenceCategory
 		        android:key="preference_category_photo_debugging"
 		        android:title="@string/preference_category_photo_debugging"
