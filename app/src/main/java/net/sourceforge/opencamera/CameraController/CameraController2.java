@@ -323,10 +323,17 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "setSceneMode");
 				Log.d(TAG, "builder: " + builder);
 			}
-			/*if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null && scene_mode == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
-				// can leave off
+			if( has_face_detect_mode ) {
+				// face detection mode overrides scene mode
+				if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || builder.get(CaptureRequest.CONTROL_SCENE_MODE) != CameraMetadata.CONTROL_SCENE_MODE_FACE_PRIORITY ) {
+					if (MyDebug.LOG)
+						Log.d(TAG, "setting scene mode for face detection");
+					builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_USE_SCENE_MODE);
+					builder.set(CaptureRequest.CONTROL_SCENE_MODE, CameraMetadata.CONTROL_SCENE_MODE_FACE_PRIORITY);
+					return true;
+				}
 			}
-			else*/ if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || builder.get(CaptureRequest.CONTROL_SCENE_MODE) != scene_mode ) {
+			else if( builder.get(CaptureRequest.CONTROL_SCENE_MODE) == null || builder.get(CaptureRequest.CONTROL_SCENE_MODE) != scene_mode ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "setting scene mode: " + scene_mode);
 				if( scene_mode == CameraMetadata.CONTROL_SCENE_MODE_DISABLED ) {
@@ -1410,6 +1417,28 @@ public class CameraController2 extends CameraController {
 		if( camera_features.supports_face_detection ) {
 			int face_count = characteristics.get(CameraCharacteristics.STATISTICS_INFO_MAX_FACE_COUNT);
 			if( face_count <= 0 ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "can't support face detection, as zero max face count");
+				camera_features.supports_face_detection = false;
+				supports_face_detect_mode_simple = false;
+				supports_face_detect_mode_full = false;
+			}
+		}
+		if( camera_features.supports_face_detection ) {
+			// check we have scene mode CONTROL_SCENE_MODE_FACE_PRIORITY
+			int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES);
+			boolean has_face_priority = false;
+			for(int value2 : values2) {
+				if( value2 == CameraMetadata.CONTROL_SCENE_MODE_FACE_PRIORITY ) {
+					has_face_priority = true;
+					break;
+				}
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "has_face_priority: " + has_face_priority);
+			if( !has_face_priority ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "can't support face detection, as no CONTROL_SCENE_MODE_FACE_PRIORITY");
 				camera_features.supports_face_detection = false;
 				supports_face_detect_mode_simple = false;
 				supports_face_detect_mode_full = false;
@@ -3663,6 +3692,7 @@ public class CameraController2 extends CameraController {
 			return false;
 		}
     	camera_settings.setFaceDetectMode(previewBuilder);
+		camera_settings.setSceneMode(previewBuilder); // also need to set the scene mode
     	try {
     		setRepeatingRequest();
 			return false;

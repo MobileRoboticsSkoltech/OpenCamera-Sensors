@@ -356,11 +356,15 @@ if the device has enough memory.)</p>-->
 <p><b>Camera Controls:</b></p>
 
 <p><b>Face detection</b> - If this is enabled, then the camera will automatically try to detect faces, and use
-them for the focus, metering (exposure) and white balance. Faces will be drawn as yellow squares when detected.
-Note that if this option is enabled, then you will not be able to touch to manually select the focus area, and
-the white balance option will have no effect (since the face recognition will be used to determine these). Also
-note that if you are using an accessibility service such as Google Talkback, information about the number and
-location of detected faces will be reported when face detection is enabled.</p>
+them for the focus, metering (exposure) and white balance. Faces will be drawn as yellow squares when detected.</p>
+<ul>
+	<li>If this option is enabled, then you will not be able to touch to manually select the focus area, and
+	the white balance option will have no effect (since the face recognition will be used to determine these).</li>
+	<li>If Camera2 API is enabled, then the scene mode option will also have no effect (again since the face recognition
+	option overrides this).</li>
+	<li>If you are using an accessibility service such as Google Talkback, information about the number and
+	location of detected faces will be reported when face detection is enabled.</li>
+</ul>
 
 <p><b>Timer</b> - Set a timer for taking photos or recording video. Press the take photo/video button again to
 cancel the timer.</p>
