@@ -3017,13 +3017,39 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 		setToDefault();
+
+		boolean supports_auto_stabilise = mActivity.supportsAutoStabilise();
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_only");
 		editor.apply();
 		updateForSettings();
 
+		// test modes not supported in RAW only mode
+		assertFalse(mActivity.supportsAutoStabilise());
+		assertFalse(mActivity.supportsDRO());
+
 		subTestTakePhoto(false, false, true, true, false, false, true, false);
+
+		// switch to video mode
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+		if( !mPreview.isVideo() ) {
+			clickView(switchVideoButton);
+			waitUntilCameraOpened();
+		}
+	    assertTrue(mPreview.isVideo());
+		assertTrue(mPreview.isPreviewStarted());
+
+		// check auto-stabilise mode now available (since it'll apply to the snapshots, which are always JPEG)
+		assertTrue(mActivity.supportsAutoStabilise() == supports_auto_stabilise);
+
+		if( !mPreview.supportsPhotoVideoRecording() ) {
+			Log.d(TAG, "video snapshot not supported");
+		}
+		else {
+			subTestTakeVideoSnapshot();
+		}
 	}
 
 	public void testTakePhotoAutoStabilise() throws InterruptedException {
