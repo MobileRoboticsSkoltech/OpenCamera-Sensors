@@ -5797,8 +5797,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
     public boolean supportsFaceDetection() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "supportsFaceDetection");
+		// don't log this, as we call from DrawPreview!
     	return supports_face_detection;
     }
     
