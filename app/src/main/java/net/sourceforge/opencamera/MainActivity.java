@@ -1108,7 +1108,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		seekBar.setProgress(new_value);
 	}
     
-    private static double exponentialScaling(double frac, double min, double max) {
+    public static long exponentialScaling(double frac, double min, double max) {
 		/* We use S(frac) = A * e^(s * frac)
 		 * We want S(0) = min, S(1) = max
 		 * So A = min
@@ -1116,7 +1116,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		 * => s = ln(max/min)
 		 */
 		double s = Math.log(max / min);
-		return min * Math.exp(s * frac);
+		return (long)(min * Math.exp(s * frac) + 0.5f); // add 0.5f so we round to nearest
 	}
 
     private static double exponentialScalingInverse(double value, double min, double max) {
@@ -2710,7 +2710,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 							long exposure_time = min_exposure_time + (long)(scaling * (max_exposure_time - min_exposure_time));*/
 							long min_exposure_time = preview.getMinimumExposureTime();
 							long max_exposure_time = preview.getMaximumExposureTime();
-							long exposure_time = (long)exponentialScaling(frac, min_exposure_time, max_exposure_time);
+							long exposure_time = exponentialScaling(frac, min_exposure_time, max_exposure_time);
 							preview.setExposureTime(exposure_time);
 						}
 

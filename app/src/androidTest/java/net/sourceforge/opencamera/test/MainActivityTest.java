@@ -340,6 +340,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		switchToFlashValue("flash_off");
 		switchToFocusValue("focus_mode_continuous_picture");
+		// pause for safety - needed for Nokia 8 at least otherwise some tests like testContinuousPictureFocusRepeat,
+		// testLocationOff result in hang whilst waiting for photo to be taken, and hit the timeout in waitForTakePhoto()
+		try {
+			Thread.sleep(200);
+		}
+		catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/* Ensures that shut down properly when pausing.
@@ -2227,9 +2235,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			assertTrue( mPreview.getCameraController().getExposureTime() == mPreview.getMinimumExposureTime() );
 	    }
 
+		Log.d(TAG, "camera_controller ISO: " + mPreview.getCameraController().getISO());
 		Log.d(TAG, "change ISO to max");
 	    isoSeekBar.setProgress(manual_n);
 		this.getInstrumentation().waitForIdleSync();
+		Log.d(TAG, "camera_controller ISO: " + mPreview.getCameraController().getISO());
+		Log.d(TAG, "reported max ISO: " + mPreview.getMaximumISO());
 		assertTrue( mPreview.getCameraController().getISO() == mPreview.getMaximumISO() );
 
 		// n.b., currently don't test this on devices with long shutter times (e.g., OnePlus 3T)
@@ -2488,7 +2499,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "wait until finished taking photo");
 		long time_s = System.currentTimeMillis();
 		while( mPreview.isTakingPhoto() || !mActivity.getApplicationInterface().canTakeNewPhoto() ) {
-			assertTrue( System.currentTimeMillis() - time_s < 20000 ); // make sure the test fails rather than hanging, if for some reason we get stuck (note that testTakePhotoManualISOExposure takes over 10s on Nexus 6)
+			// make sure the test fails rather than hanging, if for some reason we get stuck (note that testTakePhotoManualISOExposure takes over 10s on Nexus 6)
+			// also see note at end of setToDefault for Nokia 8, need to sleep briefly to avoid hanging here
+			assertTrue( System.currentTimeMillis() - time_s < 20000 );
 			assertTrue(!mPreview.isTakingPhoto() || switchCameraButton.getVisibility() == View.GONE);
 			assertTrue(!mPreview.isTakingPhoto() || switchVideoButton.getVisibility() == View.GONE);
 			//assertTrue(!mPreview.isTakingPhoto() || flashButton.getVisibility() == View.GONE);
