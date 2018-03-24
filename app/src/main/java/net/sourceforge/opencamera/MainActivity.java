@@ -1750,8 +1750,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     /** Sets the window flags for when the settings window is open.
      */
     public void setWindowFlagsForSettings() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setWindowFlagsForSettings");
 		// allow screen rotation
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+
 		// revert to standard screen blank behaviour
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // settings should still be protected by screen lock
