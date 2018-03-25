@@ -158,6 +158,19 @@ public class VideoQualityHandler {
         return this.video_sizes_high_speed;
     }
 
+    /** Whether the requested fps is supported, without relying on high-speed mode.
+     *  Typically caller should first check videoSupportsFrameRateHighSpeed().
+     */
+    public boolean videoSupportsFrameRate(int fps) {
+        return CameraController.CameraFeatures.supportsFrameRate(this.video_sizes, fps);
+    }
+
+    /** Whether the requested fps is supported as a high-speed mode.
+     */
+    public boolean videoSupportsFrameRateHighSpeed(int fps) {
+        return CameraController.CameraFeatures.supportsFrameRate(this.video_sizes_high_speed, fps);
+    }
+
     private static CameraController.Size getMaxVideoSize(List<CameraController.Size> sizes) {
         int max_width = -1, max_height = -1;
         for(CameraController.Size size : sizes) {

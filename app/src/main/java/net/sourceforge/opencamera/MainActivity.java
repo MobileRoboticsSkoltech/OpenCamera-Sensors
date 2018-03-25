@@ -1388,6 +1388,31 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			bundle.putIntArray("video_widths", widths);
 			bundle.putIntArray("video_heights", heights);
 		}
+
+		// set up supported fps values
+		if( preview.usingCamera2API() ) {
+			// with Camera2, we know what frame rates are supported
+			int [] candidate_fps = {15, 24, 25, 30, 60, 96, 100, 120, 240};
+			List<Integer> video_fps = new ArrayList<>();
+			for(int fps : candidate_fps) {
+				if( this.preview.getVideoQualityHander().videoSupportsFrameRateHighSpeed(fps) ||
+						this.preview.getVideoQualityHander().videoSupportsFrameRate(fps) ) {
+					video_fps.add(fps);
+				}
+			}
+			int [] video_fps_array = new int[video_fps.size()];
+			int i=0;
+			for(Integer fps : video_fps) {
+				video_fps_array[i++] = fps;
+			}
+			bundle.putIntArray("video_fps", video_fps_array);
+		}
+		else {
+			// with old API, we don't know what frame rates are supported, so we make it up and let the user try
+			// probably shouldn't allow 120fps, but we did in the past, and there may be some devices where this did work?
+			int [] video_fps = {15, 24, 25, 30, 60, 96, 100, 120};
+			bundle.putIntArray("video_fps", video_fps);
+		}
 		
 		putBundleExtra(bundle, "flash_values", this.preview.getSupportedFlashValues());
 		putBundleExtra(bundle, "focus_values", this.preview.getSupportedFocusValues());

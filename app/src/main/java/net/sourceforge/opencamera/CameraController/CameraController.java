@@ -80,6 +80,19 @@ public abstract class CameraController {
 		public float view_angle_x; // horizontal angle of view in degrees (when unzoomed)
 		public float view_angle_y; // vertical angle of view in degrees (when unzoomed)
 
+		/** Returns whether any of the supplied sizes support the requested fps.
+		 */
+		public static boolean supportsFrameRate(List<Size> sizes, int fps) {
+			if( sizes == null )
+				return false;
+			for(Size size : sizes) {
+				if( size.supportsFrameRate(fps) ) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public static Size findSize(List<Size> sizes, Size size, int fps, boolean return_closest) {
 			Size last_s = null;
 			for(Size s : sizes) {

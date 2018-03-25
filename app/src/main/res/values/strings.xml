@@ -456,15 +456,6 @@
     <string name="high_speed">High Speed</string> <!-- in the sense of high speed video frame rates -->
 
     <string name="preference_video_fps_default">Default</string>
-    <string name="preference_video_fps_15">15</string>
-    <string name="preference_video_fps_24">24</string>
-    <string name="preference_video_fps_25">25</string>
-    <string name="preference_video_fps_30">30</string>
-    <string name="preference_video_fps_60">60</string>
-    <string name="preference_video_fps_96">96</string>
-    <string name="preference_video_fps_100">100</string>
-    <string name="preference_video_fps_120">120</string>
-    <string name="preference_video_fps_240">240</string>
 
     <string name="preference_category_exif_tags">Custom EXIF tags</string>
     <string name="preference_exif_artist">Artist</string>

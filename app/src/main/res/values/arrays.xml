@@ -618,30 +618,6 @@
         <item>preference_nr_save_single</item>
         <item>preference_nr_save_all</item>
     </string-array>
-    <string-array name="preference_video_fps_entries">
-        <item>@string/preference_video_fps_default</item>
-        <item>@string/preference_video_fps_15</item>
-        <item>@string/preference_video_fps_24</item>
-        <item>@string/preference_video_fps_25</item>
-        <item>@string/preference_video_fps_30</item>
-        <item>@string/preference_video_fps_60</item>
-        <item>@string/preference_video_fps_96</item>
-        <item>@string/preference_video_fps_100</item>
-        <item>@string/preference_video_fps_120</item>
-        <item>@string/preference_video_fps_240</item>
-    </string-array>
-    <string-array name="preference_video_fps_values">
-        <item>default</item>
-        <item>15</item>
-        <item>24</item>
-        <item>25</item>
-        <item>30</item>
-        <item>60</item>
-        <item>96</item>
-        <item>100</item>
-        <item>120</item>
-        <item>240</item>
-    </string-array>
     <string-array name="preference_raw_entries">
         <item>@string/preference_raw_no</item>
         <item>@string/preference_raw_yes</item>
