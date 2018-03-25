@@ -43,6 +43,7 @@ public class StorageUtils {
     static final int MEDIA_TYPE_VIDEO = 2;
 
 	private final Context context;
+	private final MyApplicationInterface applicationInterface;
     private Uri last_media_scanned;
 
 	private final static File base_folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
@@ -50,8 +51,9 @@ public class StorageUtils {
 	// for testing:
 	public volatile boolean failed_to_scan;
 	
-	StorageUtils(Context context) {
+	StorageUtils(Context context, MyApplicationInterface applicationInterface) {
 		this.context = context;
+		this.applicationInterface = applicationInterface;
 	}
 	
 	Uri getLastMediaScanned() {
@@ -233,6 +235,7 @@ public class StorageUtils {
         		 				Log.d(TAG, "set last_media_scanned to " + last_media_scanned);
     		 			}
     		 			announceUri(uri, is_new_picture, is_new_video);
+    		 			applicationInterface.scannedFile(file, uri);
 
     	    			// it seems caller apps seem to prefer the content:// Uri rather than one based on a File
 						// update for Android 7: seems that passing file uris is now restricted anyway, see https://code.google.com/p/android/issues/detail?id=203555

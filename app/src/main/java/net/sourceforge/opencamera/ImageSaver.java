@@ -2258,6 +2258,18 @@ public class ImageSaver extends Thread {
 	    			Log.d(TAG, "location: " + location);
     		}*/
 
+    		// set last image for share/trash options for pause preview
+			// Must be done before broadcastFile() (because on Android 7+ with non-SAF, we update
+			// the LastImage's uri from the MediaScannerConnection.scanFile() callback from
+			// StorageUtils.broadcastFile(), which assumes the last image has already been set.
+    		MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
+    		if( success && saveUri == null ) {
+            	applicationInterface.addLastImage(picFile, false);
+            }
+            else if( success && storageUtils.isUsingSAF() ){
+            	applicationInterface.addLastImageSAF(saveUri, false);
+            }
+
     		if( saveUri == null ) {
     			success = true;
         		//Uri media_uri = storageUtils.broadcastFileRaw(picFile, current_date, location);
@@ -2282,15 +2294,6 @@ public class ImageSaver extends Thread {
 	    		    storageUtils.announceUri(saveUri, true, false);
                 }
             }
-
-    		MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
-    		if( success && saveUri == null ) {
-            	applicationInterface.addLastImage(picFile, false);
-            }
-            else if( success && storageUtils.isUsingSAF() ){
-            	applicationInterface.addLastImageSAF(saveUri, false);
-            }
-
         }
         catch(FileNotFoundException e) {
     		if( MyDebug.LOG )

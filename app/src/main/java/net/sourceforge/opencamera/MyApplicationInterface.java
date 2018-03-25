@@ -90,7 +90,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	private static class LastImage {
 		public final boolean share; // one of the images in the list should have share set to true, to indicate which image to share
 		public final String name;
-		final Uri uri;
+		Uri uri;
 
 		LastImage(Uri uri, boolean share) {
 			this.name = null;
@@ -100,7 +100,16 @@ public class MyApplicationInterface implements ApplicationInterface {
 		
 		LastImage(String filename, boolean share) {
 	    	this.name = filename;
-	    	this.uri = Uri.parse("file://" + this.name);
+			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+				// previous to Android 7, we could just use a "file://" uri, but this is no longer supported on Android 7, and
+				// results in a android.os.FileUriExposedException when trying to share!
+				// see https://stackoverflow.com/questions/38200282/android-os-fileuriexposedexception-file-storage-emulated-0-test-txt-exposed
+				// so instead we leave null for now, and set it from MyApplicationInterface.scannedFile().
+				this.uri = null;
+			}
+			else {
+		    	this.uri = Uri.parse("file://" + this.name);
+			}
 			this.share = share;
 		}
 	}
@@ -126,7 +135,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "MyApplicationInterface: time after creating location supplier: " + (System.currentTimeMillis() - debug_time));
 		this.gyroSensor = new GyroSensor(main_activity);
-		this.storageUtils = new StorageUtils(main_activity);
+		this.storageUtils = new StorageUtils(main_activity, this);
 		if( MyDebug.LOG )
 			Log.d(TAG, "MyApplicationInterface: time after creating storage utils: " + (System.currentTimeMillis() - debug_time));
 		this.drawPreview = new DrawPreview(main_activity, this);
@@ -2190,17 +2199,28 @@ public class MyApplicationInterface implements ApplicationInterface {
 					share_image = last_image;
 				}
 			}
+			boolean done = true;
 			if( share_image != null ) {
 				Uri last_image_uri = share_image.uri;
 				if( MyDebug.LOG )
 					Log.d(TAG, "Share: " + last_image_uri);
-				Intent intent = new Intent(Intent.ACTION_SEND);
-				intent.setType("image/jpeg");
-				intent.putExtra(Intent.EXTRA_STREAM, last_image_uri);
-				main_activity.startActivity(Intent.createChooser(intent, "Photo"));
+				if( last_image_uri == null ) {
+					// could happen with Android 7+ with non-SAF if the image hasn't been scanned yet,
+					// so we don't know the uri yet
+					Log.e(TAG, "can't share last image as don't yet have uri");
+					done = false;
+				}
+				else {
+					Intent intent = new Intent(Intent.ACTION_SEND);
+					intent.setType("image/jpeg");
+					intent.putExtra(Intent.EXTRA_STREAM, last_image_uri);
+					main_activity.startActivity(Intent.createChooser(intent, "Photo"));
+				}
 			}
-			clearLastImages();
-			preview.startCameraPreview();
+			if( done ) {
+				clearLastImages();
+				preview.startCameraPreview();
+			}
 		}
 	}
 	
@@ -2274,6 +2294,29 @@ public class MyApplicationInterface implements ApplicationInterface {
 				main_activity.updateGalleryIcon();
 			}
 		}, 500);
+	}
+
+	/** Called when StorageUtils scans a saved photo with MediaScannerConnection.scanFile.
+	 * @param file The file that was scanned.
+	 * @param uri  The file's corresponding uri.
+	 */
+	void scannedFile(File file, Uri uri) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "scannedFile");
+			Log.d(TAG, "file: " + file);
+			Log.d(TAG, "uri: " + uri);
+		}
+		// see note under LastImage constructor for why we need to update the Uris
+		for(int i=0;i<last_images.size();i++) {
+			LastImage last_image = last_images.get(i);
+			if( MyDebug.LOG )
+				Log.d(TAG, "compare to last_image: " + last_image.name);
+			if( last_image.uri == null && last_image.name != null && last_image.name.equals(file.getAbsolutePath()) ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "updated last_image : " + i);
+				last_image.uri = uri;
+			}
+		}
 	}
 
 	// for testing
