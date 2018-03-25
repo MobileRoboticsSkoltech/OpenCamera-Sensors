@@ -1145,6 +1145,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			class SubtitleVideoTimerTask extends TimerTask {
 				OutputStreamWriter writer;
 				private int count = 1;
+				private long min_video_time_from = 0;
 
 				private String getSubtitleFilename(String video_filename) {
 					if( MyDebug.LOG )
@@ -1176,6 +1177,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 					Date current_date = new Date();
 					Calendar current_calendar = Calendar.getInstance();
 					int offset_ms = current_calendar.get(Calendar.MILLISECOND);
+					// We subtract an offset, because if the current time is say 00:00:03.425 and the video has been recording for
+					// 1s, we instead need to record the video time when it became 00:00:03.000. This does mean that the GPS
+					// location is going to be off by up to 1s, but that should be less noticeable than the clock being off.
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "count: " + count);
 						Log.d(TAG, "offset_ms: " + offset_ms);
@@ -1209,8 +1213,12 @@ public class MyApplicationInterface implements ApplicationInterface {
 					}
 					long video_time_from = video_time - offset_ms;
 					long video_time_to = video_time_from + 999;
-					if( video_time_from < 0 )
-						video_time_from = 0;
+					// don't want to start from before 0; also need to keep track of min_video_time_from to avoid bug reported at
+					// https://forum.xda-developers.com/showpost.php?p=74827802&postcount=345 for pause video where we ended up
+					// with overlapping times when resuming
+					if( video_time_from < min_video_time_from )
+						video_time_from = min_video_time_from;
+					min_video_time_from = video_time_to + 1;
 					String subtitle_time_from = TextFormatter.formatTimeMS(video_time_from);
 					String subtitle_time_to = TextFormatter.formatTimeMS(video_time_to);
 					try {
