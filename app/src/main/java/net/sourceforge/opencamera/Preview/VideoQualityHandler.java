@@ -158,17 +158,27 @@ public class VideoQualityHandler {
         return this.video_sizes_high_speed;
     }
 
-    /** Returns the maximum supported video size.
-     */
-    CameraController.Size getMaxSupportedVideoSize() {
+    private static CameraController.Size getMaxVideoSize(List<CameraController.Size> sizes) {
         int max_width = -1, max_height = -1;
-        for(CameraController.Size size : video_sizes) {
+        for(CameraController.Size size : sizes) {
             if( max_width == -1 || size.width*size.height > max_width*max_height ) {
                 max_width = size.width;
                 max_height = size.height;
             }
         }
         return new CameraController.Size(max_width, max_height);
+    }
+
+    /** Returns the maximum supported (non-high-speed) video size.
+     */
+    CameraController.Size getMaxSupportedVideoSize() {
+        return getMaxVideoSize(video_sizes);
+    }
+
+    /** Returns the maximum supported high speed video size.
+     */
+    CameraController.Size getMaxSupportedVideoSizeHighSpeed() {
+        return getMaxVideoSize(video_sizes_high_speed);
     }
 
     public void setVideoSizes(List<CameraController.Size> video_sizes) {

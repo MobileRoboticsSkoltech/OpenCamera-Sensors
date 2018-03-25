@@ -2415,11 +2415,48 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 						Log.d(TAG, "need to check high speed sizes");
 					// check high speed
 					best_video_size = CameraController.CameraFeatures.findSize(video_quality_handler.getSupportedVideoSizesHighSpeed(), requested_size, profile.videoCaptureRate, false);
+
+					if( best_video_size == null ) {
+						Log.e(TAG, "can't find match for capture rate: " + profile.videoCaptureRate + " and video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight + " at fps " + profile.videoCaptureRate);
+						// try falling back to one of the supported high speed resolutions
+						requested_size = video_quality_handler.getMaxSupportedVideoSizeHighSpeed();
+						profile.videoFrameWidth = requested_size.width;
+						profile.videoFrameHeight = requested_size.height;
+						// now try again
+						best_video_size = CameraController.CameraFeatures.findSize(video_quality_handler.getSupportedVideoSizesHighSpeed(), requested_size, profile.videoCaptureRate, false);
+						if( best_video_size != null ) {
+							if( MyDebug.LOG )
+								Log.d(TAG, "fall back to a supported video size for high speed fps");
+							// need to write back to the application
+							// so find the corresponding quality value
+							video_quality_handler.setCurrentVideoQualityIndex(-1);
+							for(int i=0;i<video_quality_handler.getSupportedVideoQuality().size();i++) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "check video quality: " + video_quality_handler.getSupportedVideoQuality().get(i));
+								CamcorderProfile camcorder_profile = getCamcorderProfile(video_quality_handler.getSupportedVideoQuality().get(i));
+								if( camcorder_profile.videoFrameWidth == profile.videoFrameWidth && camcorder_profile.videoFrameHeight == profile.videoFrameHeight ) {
+									video_quality_handler.setCurrentVideoQualityIndex(i);
+									break;
+								}
+							}
+							if( video_quality_handler.getCurrentVideoQualityIndex() != -1 ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "reset to video quality: " + video_quality_handler.getCurrentVideoQuality());
+								applicationInterface.setVideoQualityPref(video_quality_handler.getCurrentVideoQuality());
+							}
+							else {
+								if( MyDebug.LOG )
+									Log.d(TAG, "but couldn't find a corresponding video quality");
+								best_video_size = null;
+							}
+						}
+					}
 				}
 
 				if( best_video_size == null ) {
 					Log.e(TAG, "fps not supported for this video size: " + profile.videoFrameWidth + " x " + profile.videoFrameHeight + " at fps " + profile.videoCaptureRate);
-					// TODO handle this
+					// we'll end up trying to record at the requested resolution and fps even though these seem incompatible;
+					// the camera driver will either ignore the requested fps, or fail
 				}
 				else if( best_video_size.high_speed ) {
 					video_high_speed = true;
