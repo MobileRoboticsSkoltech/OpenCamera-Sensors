@@ -694,10 +694,15 @@ please test before using. Also note that the bitrate setting is approximate - th
 to that requested.</p>
 
 <p><b>Video frame rate (approx)</b> - If set to a value other than "default", the camera will try to match this frame
-rate. Note that this is very approximate, as frame rate depends on many factors such as your device and lighting
-conditions, so there is no guarantee that the resultant video's frame rate will match with the requested value. Also note
-that some frame rate values may be unsupported by your device, and cause the recording to fail, so please test before
-using.</p>
+rate.</p>
+<ul>
+	<li>This is very approximate, as frame rate depends on many factors such as your device and lighting
+    conditions, so there is no guarantee that the resultant video's frame rate will match with the requested value.</li>
+	<li>Some frame rate values may be unsupported by your device, and cause the recording to fail, so please test before
+    using.</li>
+	<li>For best results (especially for 120fps or higher), please enable Settings/"Use Camera2 API". Even there, some
+	devices seem to show buggy behaviour, so please test before using.</li>
+</ul>
 
 <p><b>Max duration of video</b> - This option can be used to set a maximum duration of the video. If set, video recording
 will stop after the specified time (unless already stopped earlier).</p>
@@ -883,12 +888,12 @@ option can make this work anyway, but it's unreliable - ultimately the fault is 
 supporting third party camera applications.)</p>
 
 <p><b>Why doesn't the FPS/bitrate setting for video work?</b> - These settings only give "recommendations" to the
-camera, and there is no guarantee that they will be met. Some devices might not even allow recording at some
-settings, and there's no way to determine this in advance.</p>
+camera, and there is no guarantee that they will be met. For best chance of success, try with Settings/"Use Camera2 API"
+enabled.</p>
 
 <p><b>But my camera can do 60/120FPS, so why can't Open Camera?</b> - High frame rates often are achieved only by the
 "stock" camera app (or "mods" of it) because these are written for a specific device and don't have to go through
-the standard Android camera API.</p>
+the standard Android camera API. Some devices do now support high speed frame rates when Camera2 API is enabled.</p>
 
 <p><b>Why doesn't Open Camera show 23MP resolution on my Sony Xperia, only 8MP?</b> - This is because
 <a href="http://talk.sonymobile.com/t5/Xperia-Z5-Z5-Compact-Z5-Premium/Full-camera-res-in-third-party-apps/td-p/1045437/highlight/true/page/4">Sony
