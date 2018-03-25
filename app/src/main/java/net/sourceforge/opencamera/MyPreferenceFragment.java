@@ -166,7 +166,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			ListPreference lp = (ListPreference)findPreference("preference_video_fps");
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
-			String fps_preference_key = PreferenceKeys.getVideoFPSPreferenceKey();
+			String fps_preference_key = PreferenceKeys.getVideoFPSPreferenceKey(cameraId);
+			if( MyDebug.LOG )
+				Log.d(TAG, "fps_preference_key: " + fps_preference_key);
 			String fps_value = sharedPreferences.getString(fps_preference_key, "default");
 			if( MyDebug.LOG )
 				Log.d(TAG, "fps_value: " + fps_value);

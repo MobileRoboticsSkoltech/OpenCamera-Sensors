@@ -5481,7 +5481,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		for(String fps_value : fps_values) {
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(), fps_value);
+			editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(mPreview.getCameraId()), fps_value);
 			editor.apply();
 			restart(); // should restart to emulate what happens in real app
 

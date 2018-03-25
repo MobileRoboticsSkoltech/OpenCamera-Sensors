@@ -221,8 +221,10 @@ public class PreferenceKeys {
     	return "preference_video_bitrate";
     }
 
-    public static String getVideoFPSPreferenceKey() {
-    	return "preference_video_fps";
+    public static String getVideoFPSPreferenceKey(int cameraId) {
+    	// for cameraId==0, we return preference_video_fps instead of preference_video_fps_0, for
+		// backwards compatibility for people upgrading
+    	return "preference_video_fps" + ((cameraId==0) ? "" : ("_"+cameraId));
     }
     
     public static String getVideoMaxDurationPreferenceKey() {

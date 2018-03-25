@@ -440,7 +440,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public String getVideoFPSPref() {
-    	return sharedPreferences.getString(PreferenceKeys.getVideoFPSPreferenceKey(), "default");
+    	return sharedPreferences.getString(PreferenceKeys.getVideoFPSPreferenceKey(cameraId), "default");
     }
     
     @Override
