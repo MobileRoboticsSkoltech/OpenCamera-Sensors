@@ -1963,6 +1963,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					/** Accessibility: report number of faces for talkback etc.
 					 */
 				    private void reportFaces(CameraController.Face[] local_faces) {
+				    	// View.announceForAccessibility requires JELLY_BEAN
 						if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && accessibility_manager.isEnabled() && accessibility_manager.isTouchExplorationEnabled() ) {
 							int n_faces = local_faces.length;
 							FaceLocation face_location = FaceLocation.FACELOCATION_UNKNOWN;
