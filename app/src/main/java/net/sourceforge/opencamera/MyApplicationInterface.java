@@ -241,13 +241,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 
 	@Override
 	public File createOutputVideoFile() throws IOException {
-		last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", false, "mp4", new Date());
+		last_video_file = storageUtils.createOutputMediaFile(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
 		return last_video_file;
 	}
 
 	@Override
 	public Uri createOutputVideoSAF() throws IOException {
-		last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", false, "mp4", new Date());
+		last_video_file_saf = storageUtils.createOutputMediaFileSAF(StorageUtils.MEDIA_TYPE_VIDEO, "", "mp4", new Date());
 		return last_video_file_saf;
 	}
 
@@ -2021,7 +2021,6 @@ public class MyApplicationInterface implements ApplicationInterface {
 				}
 
 				imageSaver.startImageAverage(true,
-					false,
 					save_base,
 					image_capture_intent, image_capture_intent_uri,
 					using_camera2, image_quality,
@@ -2039,7 +2038,9 @@ public class MyApplicationInterface implements ApplicationInterface {
 		}
 		else {
 			success = imageSaver.saveImageJpeg(do_in_background, is_hdr,
+					// fast burst shots come is as separate requests, so we need to make sure we get the filename suffixes right
 					photo_mode == PhotoMode.FastBurst,
+					photo_mode == PhotoMode.FastBurst ? n_capture_images : 0, // n.b., n_capture_images will be 1 for first image, not 0, but this is fine for naming of burst images
 					save_expo, images,
 					image_capture_intent, image_capture_intent_uri,
 					using_camera2, image_quality,
