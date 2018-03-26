@@ -914,7 +914,9 @@ public class PopupView extends LinearLayout {
 
     			ViewGroup.LayoutParams params = view.getLayoutParams();
     			params.width = button_width;
-    			params.height = (int) ((resource != -1 ? 50 : 30) * scale + 0.5f); // convert dps to pixels
+    			// be careful of making the height too smaller, as harder to touch buttons; remember that this also affects the
+				// ISO buttons on exposure panel, and not just the main popup!
+    			params.height = (int) (50 * scale + 0.5f); // convert dps to pixels
     			view.setLayoutParams(params);
 
     			view.setContentDescription(button_string);
