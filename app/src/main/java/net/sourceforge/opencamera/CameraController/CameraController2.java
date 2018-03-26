@@ -5465,13 +5465,18 @@ public class CameraController2 extends CameraController {
 				capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "capture_result_iso: " + capture_result_iso);*/
-				if( camera_settings.has_iso && Math.abs(camera_settings.iso - capture_result_iso) > 10 && previewBuilder != null ) {
+				/*if( camera_settings.has_iso && Math.abs(camera_settings.iso - capture_result_iso) > 10 && previewBuilder != null ) {
 					// ugly hack: problem (on Nexus 6 at least) that when we start recording video (video_recorder.start() call), this often causes the ISO setting to reset to the wrong value!
 					// seems to happen more often with shorter exposure time
 					// seems to happen on other camera apps with Camera2 API too
 					// update: allow some tolerance, as on OnePlus 3T it's normal to have some slight difference between requested and actual
 					// this workaround still means a brief flash with incorrect ISO, but is best we can do for now!
 					// check previewBuilder != null as we have had Google Play crashes from the setRepeatingRequest() call via here
+					// Update 20180326: can no longer reproduce original problem on Nexus 6 (at FullHD or 4K); no evidence of
+					// problems on OnePlus 3T or Nokia 8.
+					// Also note that this code was being activated whenever manual ISO is changed (since we don't immediately
+					// update to the new ISO). At the least, this should be restricted to when recording video, but best to
+					// disable completely now that we don't seem to need it.
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "ISO " + capture_result_iso + " different to requested ISO " + camera_settings.iso);
 						Log.d(TAG, "    requested ISO was: " + request.get(CaptureRequest.SENSOR_SENSITIVITY));
@@ -5488,7 +5493,7 @@ public class CameraController2 extends CameraController {
 						}
 						e.printStackTrace();
 					} 
-				}
+				}*/
 			}
 			else {
 				capture_result_has_iso = false;
