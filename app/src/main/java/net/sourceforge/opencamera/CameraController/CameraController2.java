@@ -5465,12 +5465,13 @@ public class CameraController2 extends CameraController {
 				capture_result_iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
 				/*if( MyDebug.LOG )
 					Log.d(TAG, "capture_result_iso: " + capture_result_iso);*/
-				if( camera_settings.has_iso && Math.abs(camera_settings.iso - capture_result_iso) > 10  ) {
+				if( camera_settings.has_iso && Math.abs(camera_settings.iso - capture_result_iso) > 10 && previewBuilder != null ) {
 					// ugly hack: problem (on Nexus 6 at least) that when we start recording video (video_recorder.start() call), this often causes the ISO setting to reset to the wrong value!
 					// seems to happen more often with shorter exposure time
 					// seems to happen on other camera apps with Camera2 API too
 					// update: allow some tolerance, as on OnePlus 3T it's normal to have some slight difference between requested and actual
 					// this workaround still means a brief flash with incorrect ISO, but is best we can do for now!
+					// check previewBuilder != null as we have had Google Play crashes from the setRepeatingRequest() call via here
 					if( MyDebug.LOG ) {
 						Log.d(TAG, "ISO " + capture_result_iso + " different to requested ISO " + camera_settings.iso);
 						Log.d(TAG, "    requested ISO was: " + request.get(CaptureRequest.SENSOR_SENSITIVITY));
@@ -5572,7 +5573,7 @@ public class CameraController2 extends CameraController {
 				}
 			}
 
-			if( push_repeating_request_when_torch_off && push_repeating_request_when_torch_off_id == request ) {
+			if( push_repeating_request_when_torch_off && push_repeating_request_when_torch_off_id == request && previewBuilder != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "received push_repeating_request_when_torch_off");
 				Integer flash_state = result.get(CaptureResult.FLASH_STATE);
@@ -5598,7 +5599,7 @@ public class CameraController2 extends CameraController {
 					} 
 				}
 			}
-			/*if( push_set_ae_lock && push_set_ae_lock_id == request ) {
+			/*if( push_set_ae_lock && push_set_ae_lock_id == request && previewBuilder != null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "received push_set_ae_lock");
 				// hack - needed to fix bug on Nexus 6 where auto-exposure sometimes locks when taking a photo of bright scene with flash on!
@@ -5643,46 +5644,48 @@ public class CameraController2 extends CameraController {
 				// actual parsing of image data is done in the imageReader's OnImageAvailableListener()
 				// need to cancel the autofocus, and restart the preview after taking the photo
 				// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
-				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-				if( MyDebug.LOG )
-					Log.d(TAG, "### reset ae mode");
-				String saved_flash_value = camera_settings.flash_value;
-				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
-					// same hack as in setFlashValue() - for fake precapture we need to turn off the torch mode that was set, but
-					// at least on Nexus 6, we need to turn to flash_off to turn off the torch!
-					camera_settings.flash_value = "flash_off";
-				}
-				// if not using fake precapture, not sure if we need to set the ae mode, but the AE mode is set again in Camera2Basic
-				camera_settings.setAEMode(previewBuilder, false);
-				// n.b., if capture/setRepeatingRequest throw exception, we don't call the take_picture_error_cb.onError() callback, as the photo should have been taken by this point
-				try {
-	            	capture();
-				}
-				catch(CameraAccessException e) {
-					if( MyDebug.LOG ) {
-						Log.e(TAG, "failed to cancel autofocus after taking photo");
-						Log.e(TAG, "reason: " + e.getReason());
-						Log.e(TAG, "message: " + e.getMessage());
+				if( previewBuilder != null ) {
+					previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+					if( MyDebug.LOG )
+						Log.d(TAG, "### reset ae mode");
+					String saved_flash_value = camera_settings.flash_value;
+					if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+						// same hack as in setFlashValue() - for fake precapture we need to turn off the torch mode that was set, but
+						// at least on Nexus 6, we need to turn to flash_off to turn off the torch!
+						camera_settings.flash_value = "flash_off";
 					}
-					e.printStackTrace();
-				}
-				if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
-					// now set up the request to switch to the correct flash value
-			    	camera_settings.flash_value = saved_flash_value;
+					// if not using fake precapture, not sure if we need to set the ae mode, but the AE mode is set again in Camera2Basic
 					camera_settings.setAEMode(previewBuilder, false);
-				}
-				previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
-				try {
-					setRepeatingRequest();
-				}
-				catch(CameraAccessException e) {
-					if( MyDebug.LOG ) {
-						Log.e(TAG, "failed to start preview after taking photo");
-						Log.e(TAG, "reason: " + e.getReason());
-						Log.e(TAG, "message: " + e.getMessage());
+					// n.b., if capture/setRepeatingRequest throw exception, we don't call the take_picture_error_cb.onError() callback, as the photo should have been taken by this point
+					try {
+						capture();
 					}
-					e.printStackTrace();
-					preview_error_cb.onError();
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to cancel autofocus after taking photo");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+					}
+					if( use_fake_precapture_mode && fake_precapture_torch_performed ) {
+						// now set up the request to switch to the correct flash value
+						camera_settings.flash_value = saved_flash_value;
+						camera_settings.setAEMode(previewBuilder, false);
+					}
+					previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE); // ensure set back to idle
+					try {
+						setRepeatingRequest();
+					}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to start preview after taking photo");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+						preview_error_cb.onError();
+					}
 				}
 				fake_precapture_torch_performed = false;
 			}
