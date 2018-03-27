@@ -315,6 +315,9 @@ being taken.</li>
 <li>Some Android camera apps use "HDR" to mean "apply a whacky-looking filter". Whilst HDR filters can be used to apply a rather
 unreal or vivid image, for now Open Camera's HDR is more geared towards capturing the range of exposures. Also note that many camera
 apps that advertise "HDR" don't even make use of multiple images - this is more a case of filtering, than HDR.</li>
+<li>If you have a Google Pixel (2), you should get Google's HDR+ photos when using Open Camera's Standard photo mode, so there
+is generally little benefit to using Open Camera's HDR mode on these devices. See "Does Open Camera support HDR+" in the
+<a href="#faq">FAQ</a> for more details.</li>
 <li>See <a href="http://www.androidauthority.com/how-to-use-hdr-android-173210/">this guide</a> for more information on HDR.</li>
 </ul>
 
@@ -1004,8 +1007,9 @@ This is turned off by default as some <a href="devices.html">devices</a> have po
 enabling Camera2 on such devices.</p>
 
 <p><b>Does Open Camera support HDR+, or use the Pixel 2's Visual Core?</b> If you have a Google Pixel (2), then Open Camera
-should be using HDR+ when the following settings are set: Photo Mode Standard, flash off (or auto may work?), white
-balance auto, color effect none, no exposure compensation, no manual ISO/exposure, no RAW (JPEG only). See
+should be using HDR+ when the following settings are set: Photo Mode Standard, flash off (or auto if the flash doesn't fire),
+white balance auto, color effect none, no exposure compensation, no manual ISO/exposure, no RAW (JPEG only). HDR+ should be
+supported in both old and Camera2 API. See
 <a href="https://sourceforge.net/p/opencamera/discussion/general/thread/61950751/">this thread</a> for more discussion.</p>
 
 <p><b>Why doesn't Open Camera's HDR images look like other HDR camera apps?</b> - There are a great many different ways
