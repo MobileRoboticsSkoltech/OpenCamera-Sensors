@@ -41,8 +41,8 @@ public class PreferenceKeys {
     	return "camera_resolution_" + cameraId;
     }
     
-    public static String getVideoQualityPreferenceKey(int cameraId) {
-    	return "video_quality_" + cameraId;
+    public static String getVideoQualityPreferenceKey(int cameraId, boolean high_speed) {
+    	return "video_quality_" + cameraId + (high_speed ? "_highspeed" : "");
     }
     
 	public static final String IsVideoPreferenceKey = "is_video";

@@ -429,7 +429,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     
 	@Override
 	public String getVideoQualityPref() {
-		return sharedPreferences.getString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId), "");
+		return sharedPreferences.getString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId, false), "");
 	}
 	
     @Override
@@ -1778,7 +1778,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public void setVideoQualityPref(String video_quality) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId), video_quality);
+		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId, false), video_quality);
 		editor.apply();
     }
     
