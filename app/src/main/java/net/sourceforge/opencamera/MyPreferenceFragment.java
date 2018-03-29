@@ -44,6 +44,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 
 /** Fragment to handle the Settings UI. Note that originally this was a
@@ -325,14 +326,16 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 
-		final String [] video_quality = bundle.getStringArray("video_quality");
-		final String [] video_quality_string = bundle.getStringArray("video_quality_string");
-		if( video_quality != null && video_quality_string != null ) {
-			CharSequence [] entries = new CharSequence[video_quality.length];
-			CharSequence [] values = new CharSequence[video_quality.length];
-			for(int i=0;i<video_quality.length;i++) {
-				entries[i] = video_quality_string[i];
-				values[i] = video_quality[i];
+		/*final String [] video_quality = bundle.getStringArray("video_quality");
+		final String [] video_quality_string = bundle.getStringArray("video_quality_string");*/
+		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+		final List<String> video_quality = main_activity.getPreview().getVideoQualityHander().getSupportedVideoQuality();
+		if( video_quality != null ) {
+			CharSequence [] entries = new CharSequence[video_quality.size()];
+			CharSequence [] values = new CharSequence[video_quality.size()];
+			for(int i=0;i<video_quality.size();i++) {
+				entries[i] = main_activity.getPreview().getCamcorderProfileDescription(video_quality.get(i));
+				values[i] = video_quality.get(i);
 			}
 			ListPreference lp = (ListPreference)findPreference("preference_video_quality");
 			lp.setEntries(entries);
@@ -359,7 +362,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		final boolean supports_force_video_4k = bundle.getBoolean("supports_force_video_4k");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_force_video_4k: " + supports_force_video_4k);
-		if( !supports_force_video_4k || video_quality == null || video_quality_string == null ) {
+		if( !supports_force_video_4k || video_quality == null ) {
 			Preference pref = findPreference("preference_force_video_4k");
 			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_video_debugging");
         	pg.removePreference(pref);
@@ -739,11 +742,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 						about_string.append(resolution_height);
                         if( video_quality != null ) {
                             about_string.append("\nVideo qualities: ");
-                			for(int i=0;i<video_quality.length;i++) {
+                			for(int i=0;i<video_quality.size();i++) {
                 				if( i > 0 ) {
                     				about_string.append(", ");
                 				}
-                				about_string.append(video_quality[i]);
+                				about_string.append(video_quality.get(i));
                 			}
                         }
                         if( video_widths != null && video_heights != null ) {

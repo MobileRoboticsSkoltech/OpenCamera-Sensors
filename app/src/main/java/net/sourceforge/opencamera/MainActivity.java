@@ -1353,19 +1353,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			bundle.putInt("resolution_height", preview.getCurrentPictureSize().height);
 		}
 		
-		List<String> video_quality = this.preview.getVideoQualityHander().getSupportedVideoQuality();
-		if( video_quality != null && this.preview.getCameraController() != null ) {
-			String [] video_quality_arr = new String[video_quality.size()];
-			String [] video_quality_string_arr = new String[video_quality.size()];
-			int i=0;
-			for(String value: video_quality) {
-				video_quality_arr[i] = value;
-				video_quality_string_arr[i] = this.preview.getCamcorderProfileDescription(value);
-				i++;
-			}
-			bundle.putStringArray("video_quality", video_quality_arr);
-			bundle.putStringArray("video_quality_string", video_quality_string_arr);
-		}
 		if( preview.getVideoQualityHander().getCurrentVideoQuality() != null ) {
 			bundle.putString("current_video_quality", preview.getVideoQualityHander().getCurrentVideoQuality());
 		}
