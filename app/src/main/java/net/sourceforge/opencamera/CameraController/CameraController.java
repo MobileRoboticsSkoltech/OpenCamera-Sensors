@@ -83,13 +83,19 @@ public abstract class CameraController {
 		/** Returns whether any of the supplied sizes support the requested fps.
 		 */
 		public static boolean supportsFrameRate(List<Size> sizes, int fps) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "supportsFrameRate: " + fps);
 			if( sizes == null )
 				return false;
 			for(Size size : sizes) {
 				if( size.supportsFrameRate(fps) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "fps is supported");
 					return true;
 				}
 			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "fps is NOT supported");
 			return false;
 		}
 
