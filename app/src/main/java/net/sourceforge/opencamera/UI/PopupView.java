@@ -388,8 +388,25 @@ public class PopupView extends LinearLayout {
 
 			if( preview.isVideo() ) {
 				// only show video resolutions in video mode
-				final List<String> video_sizes = preview.getVideoQualityHander().getSupportedVideoQuality();
-				video_size_index = preview.getVideoQualityHander().getCurrentVideoQualityIndex();
+				//final List<String> video_sizes = preview.getVideoQualityHander().getSupportedVideoQuality();
+				//video_size_index = preview.getVideoQualityHander().getCurrentVideoQualityIndex();
+				List<String> video_sizes = preview.getSupportedVideoQuality(main_activity.getApplicationInterface().getVideoFPSPref());
+				if( video_sizes.size() == 0 ) {
+					Log.e(TAG, "can't find any supported video sizes for current fps!");
+					// fall back to unfiltered list
+					video_sizes = preview.getVideoQualityHander().getSupportedVideoQuality();
+				}
+				final List<String> video_sizes_f = video_sizes;
+				video_size_index = 0; // default to largest
+				for(int i=0;i<video_sizes.size();i++) {
+					String video_size = video_sizes.get(i);
+					if( video_size.equals(preview.getVideoQualityHander().getCurrentVideoQuality()) ) {
+						video_size_index = i;
+						break;
+					}
+				}
+				if( MyDebug.LOG )
+					Log.d(TAG, "video_size_index:" + video_size_index);
 				final List<String> video_size_strings = new ArrayList<>();
 				for(String video_size : video_sizes) {
 					String quality_string = preview.getCamcorderProfileDescriptionShort(video_size);
@@ -409,7 +426,7 @@ public class PopupView extends LinearLayout {
 					private void update() {
 						if( video_size_index == -1 )
 							return;
-						String quality = video_sizes.get(video_size_index);
+						String quality = video_sizes_f.get(video_size_index);
 						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
 						editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(preview.getCameraId(), false), quality);
@@ -432,7 +449,7 @@ public class PopupView extends LinearLayout {
 
 					@Override
 					public int onClickNext() {
-						if( video_size_index != -1 && video_size_index < video_sizes.size() - 1 ) {
+						if( video_size_index != -1 && video_size_index < video_sizes_f.size() - 1 ) {
 							video_size_index++;
 							update();
 							return video_size_index;

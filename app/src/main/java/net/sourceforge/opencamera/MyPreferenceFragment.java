@@ -57,6 +57,10 @@ import java.util.Locale;
 public class MyPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "MyPreferenceFragment";
 
+	private int cameraId;
+	private List<String> video_quality;
+	private ListPreference preference_video_quality_lp;
+
 	/* Any AlertDialogs we create should be added to dialogs, and removed when dismissed. Any dialogs still
 	 * opened when onDestroy() is called are closed.
 	 * Normally this shouldn't be needed - the settings is usually only closed by the user pressing Back,
@@ -76,7 +80,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		addPreferencesFromResource(R.xml.preferences);
 
 		final Bundle bundle = getArguments();
-		final int cameraId = bundle.getInt("cameraId");
+		this.cameraId = bundle.getInt("cameraId");
 		if( MyDebug.LOG )
 			Log.d(TAG, "cameraId: " + cameraId);
 		final int nCameras = bundle.getInt("nCameras");
@@ -149,6 +153,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 
+		String fps_preference_key = PreferenceKeys.getVideoFPSPreferenceKey(cameraId);
+		if( MyDebug.LOG )
+			Log.d(TAG, "fps_preference_key: " + fps_preference_key);
+		String fps_value = sharedPreferences.getString(fps_preference_key, "default");
+		if( MyDebug.LOG )
+			Log.d(TAG, "fps_value: " + fps_value);
 		if( video_fps != null ) {
 			// build video fps settings
 			CharSequence [] entries = new CharSequence[video_fps.length+1];
@@ -167,15 +177,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			ListPreference lp = (ListPreference)findPreference("preference_video_fps");
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
-			String fps_preference_key = PreferenceKeys.getVideoFPSPreferenceKey(cameraId);
-			if( MyDebug.LOG )
-				Log.d(TAG, "fps_preference_key: " + fps_preference_key);
-			String fps_value = sharedPreferences.getString(fps_preference_key, "default");
-			if( MyDebug.LOG )
-				Log.d(TAG, "fps_value: " + fps_value);
 			lp.setValue(fps_value);
 			// now set the key, so we save for the correct cameraId
 			lp.setKey(fps_preference_key);
+
+			lp.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+				public boolean onPreferenceChange(Preference preference, Object newValue) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "fps listpreference changed: " + newValue);
+					// if fps has changed, we nee to update the available video resolutions
+					setupVideoResolutions((String)newValue);
+			        return true;
+				}
+			});
 		}
 
 		{
@@ -326,33 +340,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 
-		/*final String [] video_quality = bundle.getStringArray("video_quality");
-		final String [] video_quality_string = bundle.getStringArray("video_quality_string");*/
-		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-		final List<String> video_quality = main_activity.getPreview().getVideoQualityHander().getSupportedVideoQuality();
-		if( video_quality != null ) {
-			CharSequence [] entries = new CharSequence[video_quality.size()];
-			CharSequence [] values = new CharSequence[video_quality.size()];
-			for(int i=0;i<video_quality.size();i++) {
-				entries[i] = main_activity.getPreview().getCamcorderProfileDescription(video_quality.get(i));
-				values[i] = video_quality.get(i);
-			}
-			ListPreference lp = (ListPreference)findPreference("preference_video_quality");
-			lp.setEntries(entries);
-			lp.setEntryValues(values);
-			String video_quality_preference_key = PreferenceKeys.getVideoQualityPreferenceKey(cameraId, false);
-			String video_quality_value = sharedPreferences.getString(video_quality_preference_key, "");
-			if( MyDebug.LOG )
-				Log.d(TAG, "video_quality_value: " + video_quality_value);
-			lp.setValue(video_quality_value);
-			// now set the key, so we save for the correct cameraId
-			lp.setKey(video_quality_preference_key);
-		}
-		else {
-			Preference pref = findPreference("preference_video_quality");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
-        	pg.removePreference(pref);
-		}
+		preference_video_quality_lp = (ListPreference)findPreference("preference_video_quality");
+		setupVideoResolutions(fps_value);
 		final String current_video_quality = bundle.getString("current_video_quality");
 		final int video_frame_width = bundle.getInt("video_frame_width");
 		final int video_frame_height = bundle.getInt("video_frame_height");
@@ -1044,6 +1033,43 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 }
             });
         }
+	}
+
+	/** Call to set up or update the video resolutions listpreference.
+	 *  Note that we don't care if the currently selected preference for video resolution is no
+	 *  longer in the supported list for the new fps value, we let the user select a new one, else
+	 *  the Preview will choose an appropriate resolution when the user exits settings.
+	 */
+	private void setupVideoResolutions(String fps_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setupVideoResolutions: " + fps_value);
+		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+		//video_quality = main_activity.getPreview().getVideoQualityHander().getSupportedVideoQuality();
+		video_quality = main_activity.getPreview().getSupportedVideoQuality(fps_value);
+		if( video_quality != null ) {
+			CharSequence [] entries = new CharSequence[video_quality.size()];
+			CharSequence [] values = new CharSequence[video_quality.size()];
+			for(int i=0;i<video_quality.size();i++) {
+				entries[i] = main_activity.getPreview().getCamcorderProfileDescription(video_quality.get(i));
+				values[i] = video_quality.get(i);
+			}
+			ListPreference lp = preference_video_quality_lp;
+			lp.setEntries(entries);
+			lp.setEntryValues(values);
+			String video_quality_preference_key = PreferenceKeys.getVideoQualityPreferenceKey(cameraId, false);
+			String video_quality_value = sharedPreferences.getString(video_quality_preference_key, "");
+			if( MyDebug.LOG )
+				Log.d(TAG, "video_quality_value: " + video_quality_value);
+			lp.setValue(video_quality_value);
+			// now set the key, so we save for the correct cameraId
+			lp.setKey(video_quality_preference_key);
+		}
+		else {
+			Preference pref = findPreference("preference_video_quality");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
+        	pg.removePreference(pref);
+		}
 	}
 
 	public static class SaveFolderChooserDialog extends FolderChooserDialog {
