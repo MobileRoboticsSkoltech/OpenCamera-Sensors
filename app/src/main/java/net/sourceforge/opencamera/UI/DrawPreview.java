@@ -66,6 +66,7 @@ public class DrawPreview {
 	private boolean is_raw_only_pref; // whether in RAW only mode
 	private boolean is_face_detection_pref;
 	private boolean is_audio_enabled_pref;
+	private boolean is_high_speed;
 	private boolean auto_stabilise_pref;
 	private String preference_grid_pref;
 
@@ -119,6 +120,7 @@ public class DrawPreview {
 	private Bitmap flash_bitmap;
 	private Bitmap face_detection_bitmap;
 	private Bitmap audio_disabled_bitmap;
+	private Bitmap high_speed_fps_bitmap;
 	private final Rect icon_dest = new Rect();
 	private long needs_flash_time = -1; // time when flash symbol comes on (used for fade-in effect)
 
@@ -177,6 +179,7 @@ public class DrawPreview {
 		flash_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.flash_on);
 		face_detection_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_face_white_48dp);
 		audio_disabled_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_mic_off_white_48dp);
+		high_speed_fps_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_fast_forward_white_48dp);
 
 		ybounds_text = getContext().getResources().getString(R.string.zoom) + getContext().getResources().getString(R.string.angle) + getContext().getResources().getString(R.string.direction);
 	}
@@ -236,6 +239,10 @@ public class DrawPreview {
 		if( audio_disabled_bitmap != null ) {
 			audio_disabled_bitmap.recycle();
 			audio_disabled_bitmap = null;
+		}
+		if( high_speed_fps_bitmap != null ) {
+			high_speed_fps_bitmap.recycle();
+			high_speed_fps_bitmap = null;
 		}
 	}
 
@@ -375,6 +382,8 @@ public class DrawPreview {
 		is_raw_only_pref = applicationInterface.isRawOnly();
 		is_face_detection_pref = applicationInterface.getFaceDetectionPref();
 		is_audio_enabled_pref = applicationInterface.getRecordAudioPref();
+
+		is_high_speed = applicationInterface.fpsIsHighSpeed();
 
 		auto_stabilise_pref = applicationInterface.getAutoStabilisePref();
 
@@ -950,6 +959,23 @@ public class DrawPreview {
 				canvas.drawRect(icon_dest, p);
 				p.setAlpha(255);
 				canvas.drawBitmap(audio_disabled_bitmap, null, icon_dest, p);
+
+				if( ui_rotation == 180 ) {
+					location_x2 -= icon_size + flash_padding;
+				}
+				else {
+					location_x2 += icon_size + flash_padding;
+				}
+			}
+
+			if( is_high_speed && applicationInterface.isVideoPref() ) {
+				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
+				p.setStyle(Paint.Style.FILL);
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				canvas.drawRect(icon_dest, p);
+				p.setAlpha(255);
+				canvas.drawBitmap(high_speed_fps_bitmap, null, icon_dest, p);
 
 				if( ui_rotation == 180 ) {
 					location_x2 -= icon_size + flash_padding;
