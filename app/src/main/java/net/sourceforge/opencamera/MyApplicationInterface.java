@@ -426,10 +426,19 @@ public class MyApplicationInterface implements ApplicationInterface {
 	public boolean getFaceDetectionPref() {
 		return sharedPreferences.getBoolean(PreferenceKeys.FaceDetectionPreferenceKey, false);
     }
-    
+
+	/** Returns whether the current fps preference is one that requires a "high speed" video size/
+	 *  frame rate.
+	 */
+	public boolean fpsIsHighSpeed() {
+		return main_activity.getPreview().fpsIsHighSpeed(getVideoFPSPref());
+	}
+
 	@Override
 	public String getVideoQualityPref() {
-		return sharedPreferences.getString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId, false), "");
+		// Conceivably, we might get in a state where the fps isn't supported at all (e.g., an upgrade changes the available
+		// supported video resolutions/frame-rates).
+		return sharedPreferences.getString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId, fpsIsHighSpeed()), "");
 	}
 	
     @Override
@@ -1778,7 +1787,7 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public void setVideoQualityPref(String video_quality) {
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId, false), video_quality);
+		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(cameraId, fpsIsHighSpeed()), video_quality);
 		editor.apply();
     }
     

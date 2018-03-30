@@ -6115,6 +6115,31 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return video_quality_handler.getSupportedVideoQuality();
     }
 
+	/** Returns whether the user's fps preference is both non-default, and is considered a
+	 *  "high-speed" frame rate. (Note, we go by the supplied fps_value, and not what the
+	 *  user's preference necessarily is; so this doesn't say whether the Preview is currently set
+	 *  to normal or high speed video mode.)
+	 */
+    public boolean fpsIsHighSpeed(String fps_value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "fpsIsHighSpeed: " + fps_value);
+        if( !fps_value.equals("default") && supports_video_high_speed ) {
+            try {
+                int fps = Integer.parseInt(fps_value);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "fps: " + fps);
+               return video_quality_handler.videoSupportsFrameRateHighSpeed(fps);
+            }
+            catch(NumberFormatException exception) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "fps invalid format, can't parse to int: " + fps_value);
+            }
+        }
+		if( MyDebug.LOG )
+			Log.d(TAG, "fps is not high speed");
+        return false;
+	}
+
 	public List<String> getSupportedFlashValues() {
 		return supported_flash_values;
 	}

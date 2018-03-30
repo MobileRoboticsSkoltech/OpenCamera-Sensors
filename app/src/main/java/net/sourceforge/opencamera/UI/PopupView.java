@@ -429,7 +429,7 @@ public class PopupView extends LinearLayout {
 						String quality = video_sizes_f.get(video_size_index);
 						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
 						SharedPreferences.Editor editor = sharedPreferences.edit();
-						editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(preview.getCameraId(), false), quality);
+						editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(preview.getCameraId(), main_activity.getApplicationInterface().fpsIsHighSpeed()), quality);
 						editor.apply();
 
 						// make it easier to scroll through the list of resolutions without a pause each time

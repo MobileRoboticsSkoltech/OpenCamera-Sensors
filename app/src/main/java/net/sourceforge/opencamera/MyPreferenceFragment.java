@@ -1057,13 +1057,18 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			ListPreference lp = preference_video_quality_lp;
 			lp.setEntries(entries);
 			lp.setEntryValues(values);
-			String video_quality_preference_key = PreferenceKeys.getVideoQualityPreferenceKey(cameraId, false);
+			String video_quality_preference_key = PreferenceKeys.getVideoQualityPreferenceKey(cameraId, main_activity.getPreview().fpsIsHighSpeed(fps_value));
+			if( MyDebug.LOG )
+				Log.d(TAG, "video_quality_preference_key: " + video_quality_preference_key);
 			String video_quality_value = sharedPreferences.getString(video_quality_preference_key, "");
 			if( MyDebug.LOG )
 				Log.d(TAG, "video_quality_value: " + video_quality_value);
-			lp.setValue(video_quality_value);
-			// now set the key, so we save for the correct cameraId
+			// set the key, so we save for the correct cameraId and high-speed setting
+			// this must be done before setting the value (otherwise the video resolutions preference won't be
+			// updated correctly when this is called from the callback when the user switches between
+			// normal and high speed frame rates
 			lp.setKey(video_quality_preference_key);
+			lp.setValue(video_quality_value);
 		}
 		else {
 			Preference pref = findPreference("preference_video_quality");
