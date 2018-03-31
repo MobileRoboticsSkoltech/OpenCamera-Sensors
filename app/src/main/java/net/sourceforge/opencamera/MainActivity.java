@@ -2525,6 +2525,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	public boolean supportsExposureButton() {
 		if( preview.getCameraController() == null )
 			return false;
+		if( preview.isVideoHighSpeed() ) {
+			// manuai ISO/exposure not supported for high speed video mode
+			// it's safer not to allow opening the panel at all (otherwise the user could open it, and switch to manual)
+			return false;
+		}
     	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		String iso_value = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
 		boolean manual_iso = !iso_value.equals(CameraController.ISO_DEFAULT);
@@ -2998,6 +3003,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		String toast_string;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean simple = true;
+		boolean video_high_speed = preview.isVideoHighSpeed();
 		if( preview.isVideo() ) {
 			VideoProfile profile = preview.getVideoProfile();
 			String bitrate_string;
@@ -3008,12 +3014,10 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			else
 				bitrate_string = profile.videoBitRate + "bps";
 
-			boolean is_high_speed = preview.isVideoHighSpeed();
-
-			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + getResources().getString(R.string.fps) + (is_high_speed ? " [" + getResources().getString(R.string.high_speed) + "]" : "") + ", " + bitrate_string;
+			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + getResources().getString(R.string.fps) + (video_high_speed ? " [" + getResources().getString(R.string.high_speed) + "]" : "") + ", " + bitrate_string;
 
 			String fps_value = applicationInterface.getVideoFPSPref();
-			if( !fps_value.equals("default") || is_high_speed ) {
+			if( !fps_value.equals("default") || video_high_speed ) {
 				simple = false;
 			}
 
@@ -3091,19 +3095,22 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			toast_string += "\n" + getResources().getString(R.string.preference_face_detection);
 			simple = false;
 		}
-		String iso_value = applicationInterface.getISOPref();
-		if( !iso_value.equals(CameraController.ISO_DEFAULT) ) {
-			toast_string += "\nISO: " + iso_value;
-			if( preview.supportsExposureTime() ) {
-				long exposure_time_value = applicationInterface.getExposureTimePref();
-				toast_string += " " + preview.getExposureTimeString(exposure_time_value);
+		if( !video_high_speed ) {
+			//manual ISO only supported for high speed video
+			String iso_value = applicationInterface.getISOPref();
+			if( !iso_value.equals(CameraController.ISO_DEFAULT) ) {
+				toast_string += "\nISO: " + iso_value;
+				if( preview.supportsExposureTime() ) {
+					long exposure_time_value = applicationInterface.getExposureTimePref();
+					toast_string += " " + preview.getExposureTimeString(exposure_time_value);
+				}
+				simple = false;
 			}
-			simple = false;
-		}
-		int current_exposure = camera_controller.getExposureCompensation();
-		if( current_exposure != 0 ) {
-			toast_string += "\n" + preview.getExposureCompensationString(current_exposure);
-			simple = false;
+			int current_exposure = camera_controller.getExposureCompensation();
+			if( current_exposure != 0 ) {
+				toast_string += "\n" + preview.getExposureCompensationString(current_exposure);
+				simple = false;
+			}
 		}
 		String scene_mode = camera_controller.getSceneMode();
     	if( scene_mode != null && !scene_mode.equals(CameraController.SCENE_MODE_DEFAULT) ) {

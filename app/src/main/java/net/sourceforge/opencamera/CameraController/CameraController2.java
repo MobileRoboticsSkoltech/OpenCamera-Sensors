@@ -2194,7 +2194,7 @@ public class CameraController2 extends CameraController {
 	@Override
 	public void setManualISO(boolean manual_iso, int iso) {
 		if( MyDebug.LOG )
-			Log.d(TAG, "setManualISO" + manual_iso);
+			Log.d(TAG, "setManualISO: " + manual_iso);
 		try {
 			if( manual_iso ) {
 				if( MyDebug.LOG )
@@ -3767,6 +3767,11 @@ public class CameraController2 extends CameraController {
 			this.autofocus_cb = cb;
 			return;
 		}
+		else if( is_video_high_speed ) {
+			// CONTROL_AF_TRIGGER_IDLE/CONTROL_AF_TRIGGER_START not supported for high speed video
+			cb.onAutoFocus(true);
+			return;
+		}
 		/*if( state == STATE_WAITING_AUTOFOCUS ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "already waiting for an autofocus");
@@ -3872,6 +3877,13 @@ public class CameraController2 extends CameraController {
 				Log.d(TAG, "no camera or capture session");
 			return;
 		}
+
+		if( is_video_high_speed ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "video is high speed");
+			return;
+		}
+
     	previewBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
 		// Camera2Basic does a capture then sets a repeating request - do the same here just to be safe
     	try {

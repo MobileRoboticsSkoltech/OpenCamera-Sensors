@@ -269,7 +269,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private final DecimalFormat decimal_format_1dp = new DecimalFormat("#.#");
 	private final DecimalFormat decimal_format_2dp = new DecimalFormat("#.##");
 
-	/* If the user touches to focus in continuous mode, we switch the camera_controller to autofocus mode.
+	/* If the user touches to focus in continuous mode, and in photo mode, we switch the camera_controller to autofocus mode.
 	 * autofocus_in_continuous_mode is set to true when this happens; the runnable reset_continuous_focus_runnable
 	 * switches back to continuous mode.
 	 */
@@ -2457,6 +2457,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "video_high_speed?: " + video_high_speed);
+		}
+
+		if( is_video && video_high_speed && supports_iso_range && is_manual_iso ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "manual mode not supported for video_high_speed");
+			camera_controller.setManualISO(false, 0);
+			is_manual_iso = false;
 		}
 
 		{
@@ -6116,9 +6123,9 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     }
 
 	/** Returns whether the user's fps preference is both non-default, and is considered a
-	 *  "high-speed" frame rate. (Note, we go by the supplied fps_value, and not what the
-	 *  user's preference necessarily is; so this doesn't say whether the Preview is currently set
-	 *  to normal or high speed video mode.)
+	 *  "high-speed" frame rate, but not a normal frame rate. (Note, we go by the supplied
+	 *  fps_value, and not what the user's preference necessarily is; so this doesn't say whether
+	 *  the Preview is currently set to normal or high speed video mode.)
 	 */
     public boolean fpsIsHighSpeed(String fps_value) {
 		if( MyDebug.LOG )
@@ -6128,7 +6135,22 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
                 int fps = Integer.parseInt(fps_value);
                 if( MyDebug.LOG )
                     Log.d(TAG, "fps: " + fps);
-               return video_quality_handler.videoSupportsFrameRateHighSpeed(fps);
+                // need to check both, e.g., 30fps on Nokia 8 is in fps ranges of both normal and high speed video sizes
+				if( video_quality_handler.videoSupportsFrameRate(fps) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "fps is normal");
+					return false;
+				}
+				else if( video_quality_handler.videoSupportsFrameRateHighSpeed(fps) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "fps is high speed");
+					return true;
+				}
+				else {
+					// shouldn't be here?!
+					Log.e(TAG, "fps is neither normal nor high speed");
+					return false;
+				}
             }
             catch(NumberFormatException exception) {
                 if( MyDebug.LOG )
