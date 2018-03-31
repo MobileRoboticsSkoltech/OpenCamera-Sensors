@@ -3900,7 +3900,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakePhotoPreviewPaused(false, false);
 	}
 
-	private void subTestTakePhotoPreviewPausedTrash(boolean is_raw) throws InterruptedException {
+	/** Tests pause preview option.
+	 * @param share If true, share the image; else, trash it.
+	 */
+	private void subTestTakePhotoPreviewPausedShareTrash(boolean is_raw, boolean share) throws InterruptedException {
 		// count initial files in folder
 		File folder = mActivity.getImageFolder();
 		int n_files = getNFiles(folder);
@@ -3974,38 +3977,50 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(trashButton.getVisibility() == View.VISIBLE);
 	    assertTrue(shareButton.getVisibility() == View.VISIBLE);
 
-		Log.d(TAG, "about to click trash");
-		clickView(trashButton);
-		Log.d(TAG, "done click trash");
+		if( share ) {
+			Log.d(TAG, "about to click share");
+			clickView(shareButton);
+			Log.d(TAG, "done click share");
 
-		// check photo(s) deleted
-		n_new_files = folder.listFiles().length - n_files;
-		Log.d(TAG, "n_new_files: " + n_new_files);
-		assertTrue(n_new_files == 0);
+			// check photo(s) not deleted
+			n_new_files = folder.listFiles().length - n_files;
+			Log.d(TAG, "n_new_files: " + n_new_files);
+			assertTrue(n_new_files == exp_n_new_files);
+		}
+		else {
+			Log.d(TAG, "about to click trash");
+			clickView(trashButton);
+			Log.d(TAG, "done click trash");
 
-		assertTrue(mPreview.isPreviewStarted()); // check preview restarted
-	    assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
-	    assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
-	    //assertTrue(flashButton.getVisibility() == flashVisibility);
-	    //assertTrue(focusButton.getVisibility() == focusVisibility);
-	    assertTrue(exposureButton.getVisibility() == exposureVisibility);
-	    assertTrue(exposureLockButton.getVisibility() == exposureLockVisibility);
-	    assertTrue(audioControlButton.getVisibility() == (has_audio_control_button ? View.VISIBLE : View.GONE));
-	    assertTrue(popupButton.getVisibility() == View.VISIBLE);
-	    assertTrue(trashButton.getVisibility() == View.GONE);
-	    assertTrue(shareButton.getVisibility() == View.GONE);
+			// check photo(s) deleted
+			n_new_files = folder.listFiles().length - n_files;
+			Log.d(TAG, "n_new_files: " + n_new_files);
+			assertTrue(n_new_files == 0);
 
-	    // icon may be null, or have been set to another image - only changed after a delay
-	    Thread.sleep(2000);
-		Log.d(TAG, "gallery_bitmap: " + mActivity.gallery_bitmap);
-		Log.d(TAG, "thumbnail: " + thumbnail);
-		assertTrue(mActivity.gallery_bitmap != thumbnail);
+			assertTrue(mPreview.isPreviewStarted()); // check preview restarted
+			assertTrue(switchCameraButton.getVisibility() == View.VISIBLE);
+			assertTrue(switchVideoButton.getVisibility() == View.VISIBLE);
+			//assertTrue(flashButton.getVisibility() == flashVisibility);
+			//assertTrue(focusButton.getVisibility() == focusVisibility);
+			assertTrue(exposureButton.getVisibility() == exposureVisibility);
+			assertTrue(exposureLockButton.getVisibility() == exposureLockVisibility);
+			assertTrue(audioControlButton.getVisibility() == (has_audio_control_button ? View.VISIBLE : View.GONE));
+			assertTrue(popupButton.getVisibility() == View.VISIBLE);
+			assertTrue(trashButton.getVisibility() == View.GONE);
+			assertTrue(shareButton.getVisibility() == View.GONE);
+
+			// icon may be null, or have been set to another image - only changed after a delay
+			Thread.sleep(2000);
+			Log.d(TAG, "gallery_bitmap: " + mActivity.gallery_bitmap);
+			Log.d(TAG, "thumbnail: " + thumbnail);
+			assertTrue(mActivity.gallery_bitmap != thumbnail);
+		}
 	}
 
 	public void testTakePhotoPreviewPausedTrash() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoPreviewPausedTrash");
 		setToDefault();
-		subTestTakePhotoPreviewPausedTrash(false);
+		subTestTakePhotoPreviewPausedShareTrash(false, false);
 	}
 
 	/** Equivalent of testTakePhotoPreviewPausedTrash(), but for Storage Access Framework.
@@ -4027,7 +4042,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
-		subTestTakePhotoPreviewPausedTrash(false);
+		subTestTakePhotoPreviewPausedShareTrash(false, false);
 	}
 
 	/** Like testTakePhotoPreviewPausedTrash() but taking 2 photos, only deleting the most recent - make
@@ -4041,7 +4056,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		mPreview.count_cameraTakePicture = 0; // need to reset
 
-		subTestTakePhotoPreviewPausedTrash(false);
+		subTestTakePhotoPreviewPausedShareTrash(false, false);
 	}
 
 	/** Equivalent of testTakePhotoPreviewPausedTrash(), but with Raw enabled.
@@ -4058,7 +4073,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		editor.apply();
 		updateForSettings();
 
-		subTestTakePhotoPreviewPausedTrash(true);
+		subTestTakePhotoPreviewPausedShareTrash(true, false);
 	}
 
 	/** Take a photo with RAW that we keep, then take a photo without RAW that we delete, and ensure we
@@ -4086,7 +4101,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		updateForSettings();
 		mPreview.count_cameraTakePicture = 0; // need to reset
 
-		subTestTakePhotoPreviewPausedTrash(false);
+		subTestTakePhotoPreviewPausedShareTrash(false, false);
+	}
+
+	public void testTakePhotoPreviewPausedShare() throws InterruptedException {
+		Log.d(TAG, "testTakePhotoPreviewPausedShare");
+		setToDefault();
+		subTestTakePhotoPreviewPausedShareTrash(false, true);
 	}
 
 	/* Tests that we don't do an extra autofocus when taking a photo, if recently touch-focused.
