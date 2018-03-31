@@ -893,7 +893,7 @@ public class MainUI {
 			exposure_seek_bar.setVisibility(View.GONE);
 
 			// with Camera2 API, when using manual ISO we instead show sliders for ISO range and exposure time
-			if( main_activity.getPreview().supportsISORange()) {
+			if( main_activity.getPreview().supportsISORange() ) {
 				manual_exposure_seek_bar.setVisibility(View.VISIBLE);
 				SeekBar exposure_time_seek_bar = ((SeekBar)main_activity.findViewById(R.id.exposure_time_seekbar));
 				if( main_activity.getPreview().supportsExposureTime() ) {
