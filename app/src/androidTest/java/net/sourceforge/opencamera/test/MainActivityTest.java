@@ -5471,22 +5471,38 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakeVideo(false, false, true, false, null, 5000, false, false);
 	}
 
-	/* Test can be reliable on some devices, test no longer run as part of test suites.
+	/** Will likely be unreliable on OnePlus 3T with Camera2.
 	 */
 	public void testTakeVideoFPS() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoFPS");
 
 		setToDefault();
-		final String [] fps_values = new String[]{"15", "24", "25", "30", "60"};
-		for(String fps_value : fps_values) {
+		// different frame rates only reliable for Camera2, but at least make sure we don't crash on old api
+		final int [] fps_values = mPreview.usingCamera2API() ? new int[]{15, 25, 30, 60, 120, 240} : new int[]{30};
+		for(int fps_value : fps_values) {
+			if( mPreview.usingCamera2API() ) {
+				if( mPreview.getVideoQualityHander().videoSupportsFrameRateHighSpeed(fps_value) ) {
+					Log.d(TAG, "fps supported at HIGH SPEED: " + fps_value);
+				}
+				else if( mPreview.getVideoQualityHander().videoSupportsFrameRate(fps_value) ) {
+					Log.d(TAG, "fps supported at normal speed: " + fps_value);
+				}
+				else {
+					Log.d(TAG, "fps is NOT supported: " + fps_value);
+					continue;
+				}
+				assertTrue( mPreview.fpsIsHighSpeed("" + fps_value) == (fps_value >= 60) );
+			}
+
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(mPreview.getCameraId()), fps_value);
+			editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(mPreview.getCameraId()), "" + fps_value);
 			editor.apply();
-			restart(); // should restart to emulate what happens in real app
+			updateForSettings();
 
 			Log.d(TAG, "test video with fps: " + fps_value);
-			boolean allow_failure = fps_value.equals("24") || fps_value.equals("25") || fps_value.equals("60");
+			//boolean allow_failure = fps_value.equals("24") || fps_value.equals("25") || fps_value.equals("60");
+			boolean allow_failure = false;
 			subTestTakeVideo(false, false, allow_failure, false, null, 5000, false, false);
 		}
 	}
@@ -5504,7 +5520,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putString(PreferenceKeys.getVideoBitratePreferenceKey(), bitrate_value);
 			editor.apply();
-			restart(); // should restart to emulate what happens in real app
+			updateForSettings();
 
 			Log.d(TAG, "test video with bitrate: " + bitrate_value);
 			boolean allow_failure = bitrate_value.equals("30000000") || bitrate_value.equals("50000000");
