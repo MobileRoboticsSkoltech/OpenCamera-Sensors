@@ -1047,6 +1047,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
 		//video_quality = main_activity.getPreview().getVideoQualityHander().getSupportedVideoQuality();
 		video_quality = main_activity.getPreview().getSupportedVideoQuality(fps_value);
+		if( video_quality == null || video_quality.size() == 0 ) {
+			Log.e(TAG, "can't find any supported video sizes for current fps!");
+			// fall back to unfiltered list
+			video_quality = main_activity.getPreview().getVideoQualityHander().getSupportedVideoQuality();
+		}
 		if( video_quality != null ) {
 			CharSequence [] entries = new CharSequence[video_quality.size()];
 			CharSequence [] values = new CharSequence[video_quality.size()];
