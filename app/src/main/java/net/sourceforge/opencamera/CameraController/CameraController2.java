@@ -2778,7 +2778,7 @@ public class CameraController2 extends CameraController {
 			l.add( ir );
 		}
 		if( MyDebug.LOG )
-			Log.e(TAG, "   using " + (want_video_high_speed ? "high speed" : "ae")  + " preview fps ranges");
+			Log.d(TAG, "   using " + (want_video_high_speed ? "high speed" : "ae")  + " preview fps ranges");
 
 		return l;
 	}
