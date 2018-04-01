@@ -57,6 +57,7 @@ public class PopupView extends LinearLayout {
 	private int picture_size_index = -1;
 	private int burst_n_images_index = -1;
 	private int video_size_index = -1;
+	private int slow_motion_index = -1;
 	private int timer_index = -1;
 	private int repeat_mode_index = -1;
 	private int grid_index = -1;
@@ -546,6 +547,72 @@ public class PopupView extends LinearLayout {
 					}
 				});
 			}
+
+			if( preview.isVideo() ) {
+				List<Integer> slow_motion_rates = main_activity.getApplicationInterface().getSupportedSlowMotionRates();
+				if( slow_motion_rates.size() > 1 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "add slow motion options");
+		    		float capture_rate_value = sharedPreferences.getFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(preview.getCameraId()), 1.0f);
+					final List<String> slow_motion_str = new ArrayList<>();
+					final List<Float> capture_rate_values = new ArrayList<>();
+					for(int i=0;i<slow_motion_rates.size();i++) {
+						int slow_motion_rate = slow_motion_rates.get(i);
+						float this_capture_rate;
+						if( slow_motion_rate == 1 ) {
+							slow_motion_str.add(getResources().getString(R.string.off));
+							this_capture_rate = 1.0f;
+						}
+						else {
+							slow_motion_str.add("1/" + slow_motion_rate + "x");
+							this_capture_rate = 1.0f / slow_motion_rate;
+						}
+						capture_rate_values.add(this_capture_rate);
+						if( Math.abs(capture_rate_value - this_capture_rate) < 1.0e-5 ) {
+							slow_motion_index = i;
+						}
+					}
+					if( slow_motion_index == -1 ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "can't find slow_motion_index " + slow_motion_index);
+						slow_motion_index = 0;
+					}
+					addArrayOptionsToPopup(slow_motion_str, getResources().getString(R.string.preference_slow_motion), true, false, slow_motion_index, false, "SLOWMOTION", new ArrayOptionsPopupListener() {
+						private void update() {
+							if( slow_motion_index == -1 )
+								return;
+							float new_capture_rate_value = capture_rate_values.get(slow_motion_index);
+							SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
+							SharedPreferences.Editor editor = sharedPreferences.edit();
+							editor.putFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(preview.getCameraId()), new_capture_rate_value);
+							editor.apply();
+							if( MyDebug.LOG )
+								Log.d(TAG, "update settings due to capture rate change");
+    						String toast_message = getResources().getString(R.string.preference_slow_motion) + ": " + slow_motion_str.get(slow_motion_index);
+							main_activity.updateForSettings(toast_message, false); // close the popuop
+						}
+						@Override
+						public int onClickPrev() {
+							if( slow_motion_index != -1 && slow_motion_index > 0 ) {
+								slow_motion_index--;
+								update();
+								return slow_motion_index;
+							}
+							return -1;
+						}
+						@Override
+						public int onClickNext() {
+							if( slow_motion_index != -1 && slow_motion_index < capture_rate_values.size()-1 ) {
+								slow_motion_index++;
+								update();
+								return slow_motion_index;
+							}
+							return -1;
+						}
+					});
+				}
+			}
+
 
     		final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
         	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);

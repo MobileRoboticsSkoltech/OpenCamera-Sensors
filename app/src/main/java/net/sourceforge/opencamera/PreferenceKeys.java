@@ -227,6 +227,10 @@ public class PreferenceKeys {
     	return "preference_video_fps" + ((cameraId==0) ? "" : ("_"+cameraId));
     }
     
+    public static String getVideoCaptureRatePreferenceKey(int cameraId) {
+    	return "preference_capture_rate_" + cameraId;
+    }
+
     public static String getVideoMaxDurationPreferenceKey() {
     	return "preference_video_max_duration";
     }

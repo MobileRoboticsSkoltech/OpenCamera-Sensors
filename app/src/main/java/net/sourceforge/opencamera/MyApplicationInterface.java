@@ -458,9 +458,84 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     @Override
     public String getVideoFPSPref() {
+		float capture_rate_factor = getVideoCaptureRateFactor();
+		if( capture_rate_factor < 1.0f-1.0e-5f ) {
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "set fps for slow motion, capture rate: " + capture_rate_factor);
+    		int preferred_fps = (int)(30.0/capture_rate_factor+0.5);
+    		if( MyDebug.LOG )
+    			Log.d(TAG, "preferred_fps: " + preferred_fps);
+			if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(preferred_fps) ||
+					main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(preferred_fps) )
+	    		return "" + preferred_fps;
+			// just in case say we support 120fps but NOT 60fps, getSupportedSlowMotionRates() will have returned that 2x slow
+			// motion is supported, but we need to set 120fps instead of 60fps
+			while( preferred_fps < 240 ) {
+				preferred_fps *= 2;
+				if( MyDebug.LOG )
+					Log.d(TAG, "preferred_fps not supported, try: " + preferred_fps);
+				if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(preferred_fps) ||
+						main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(preferred_fps) )
+					return "" + preferred_fps;
+			}
+			// shouln't happen based on getSupportedSlowMotionRates()
+			Log.e(TAG, "can't find valid fps for slow motion");
+			return "default";
+		}
     	return sharedPreferences.getString(PreferenceKeys.getVideoFPSPreferenceKey(cameraId), "default");
     }
-    
+
+    @Override
+    public float getVideoCaptureRateFactor() {
+		float capture_rate_factor = sharedPreferences.getFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(main_activity.getPreview().getCameraId()), 1.0f);
+		if( capture_rate_factor < 1.0f-1.0e-5f ) {
+			// check stored capture rate is valid
+			List<Integer> supported_slow_motion = getSupportedSlowMotionRates();
+			boolean found = false;
+			for(int slow_motion_rate : supported_slow_motion) {
+				if( Math.abs(capture_rate_factor - 1.0f/slow_motion_rate) < 1.0e-5 ) {
+					found = true;
+					break;
+				}
+			}
+			if( !found ) {
+    			Log.e(TAG, "stored capture_rate_factor: " + capture_rate_factor + " not supported");
+    			capture_rate_factor = 1.0f;
+			}
+		}
+		return capture_rate_factor;
+	}
+
+	/** This will always return 1, even if slow motion isn't supported (i.e.,
+	 *  slow motion should only be considered as supported if at least 2 entries
+	 *  are returned. Entries are returned in increasing order.
+	 */
+	public List<Integer> getSupportedSlowMotionRates() {
+		List<Integer> rates = new ArrayList<>();
+		rates.add(1);
+		if( main_activity.getPreview().supportsVideoHighSpeed() ) {
+			// We consider a slow motion rate supported if we can get at least 30fps in slow motion.
+			// If this code is updated, see if we also need to update how slow motion fps is chosen
+			// in getVideoFPSPref().
+			if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(240) ||
+					main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(240) ) {
+				rates.add(2);
+				rates.add(4);
+				rates.add(8);
+			}
+			else if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(120) ||
+					main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(120) ) {
+				rates.add(2);
+				rates.add(4);
+			}
+			else if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(60) ||
+					main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(60) ) {
+				rates.add(2);
+			}
+		}
+		return rates;
+	}
+
     @Override
     public long getVideoMaxDurationPref() {
 		String video_max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");

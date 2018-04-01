@@ -3014,10 +3014,16 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			else
 				bitrate_string = profile.videoBitRate + "bps";
 
-			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + getResources().getString(R.string.fps) + (video_high_speed ? " [" + getResources().getString(R.string.high_speed) + "]" : "") + ", " + bitrate_string;
+			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoCaptureRate + getResources().getString(R.string.fps) + (video_high_speed ? " [" + getResources().getString(R.string.high_speed) + "]" : "") + ", " + bitrate_string;
 
 			String fps_value = applicationInterface.getVideoFPSPref();
 			if( !fps_value.equals("default") || video_high_speed ) {
+				simple = false;
+			}
+
+			float capture_rate_factor = applicationInterface.getVideoCaptureRateFactor();
+			if( capture_rate_factor < 1.0f-1.0e-5f ) {
+				toast_string += "\n" + getResources().getString(R.string.preference_slow_motion) + ": " + capture_rate_factor;
 				simple = false;
 			}
 

@@ -215,8 +215,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private int current_size_index = -1; // this is an index into the sizes array, or -1 if sizes not yet set
 
 	private boolean supports_video;
-	private boolean has_capture_rate_factor; // whether we have a capture rate for faster or slow motion
-	private float capture_rate_factor = 1.0f; // should be 1.0f if has_capture_rate_factor is false
+	private boolean has_capture_rate_factor; // whether we have a capture rate for faster (timelapse) or slow motion
+	private float capture_rate_factor = 1.0f; // should be 1.0f if has_capture_rate_factor is false; set lower than 1 for slow motion, higher than 1 for timelapse
 	private boolean video_high_speed; // whether the current video mode requires high speed frame rate (note this may still be true even if is_video==false, so potentially we could switch photo/video modes without setting up the flag)
 	private boolean supports_video_high_speed;
 	private final VideoQualityHandler video_quality_handler = new VideoQualityHandler();
@@ -1676,16 +1676,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// in video mode; but don't set high speed mode in photo mode just to be safe
 		// Setup for high speed - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize() and startCameraPreview()
 		camera_controller.setVideoHighSpeed(is_video && video_high_speed);
-	    // test slow motion
-		/*if( this.is_video && video_high_speed
-				//&& false
-				// && applicationInterface.isVideoSlowMotionPref()
-			) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "set capture rate for slow motion");
-	    	has_capture_rate_factor = true;
-	    	capture_rate_factor = 0.25f;
-		}*/
+		if( this.is_video ) {
+	    	capture_rate_factor = applicationInterface.getVideoCaptureRateFactor();
+	    	has_capture_rate_factor = Math.abs(capture_rate_factor - 1.0f) > 1.0e-5f;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "has_capture_rate_factor: " + has_capture_rate_factor);
+				Log.d(TAG, "capture_rate_factor: " + capture_rate_factor);
+			}
+		}
 
 		if( do_startup_focus && using_android_l && camera_controller.supportsAutoFocus() ) {
 			// need to switch flash off for autofocus - and for Android L, need to do this before starting preview (otherwise it won't work in time); for old camera API, need to do this after starting preview!
@@ -3716,7 +3714,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     			}
             }
 	    	if( MyDebug.LOG )
-	    		Log.d(TAG, "    can't find match for fps range, so choose closest: " + selected_min_fps + " to " + selected_max_fps);
+	    		Log.e(TAG, "    can't find match for fps range, so choose closest: " + selected_min_fps + " to " + selected_max_fps);
         }
     	return new int[]{selected_min_fps, selected_max_fps};
 	}
@@ -3811,7 +3809,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				selected_fps = chooseBestPreviewFps(fps_ranges);
 			}
 			else {
-				selected_fps = matchPreviewFpsToVideo(fps_ranges, profile.videoFrameRate*1000);
+				selected_fps = matchPreviewFpsToVideo(fps_ranges, profile.videoCaptureRate*1000);
 			}
 		}
 		else {
@@ -6160,6 +6158,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "fps is not high speed");
         return false;
+	}
+
+	public boolean supportsVideoHighSpeed() {
+    	return this.supports_video_high_speed;
 	}
 
 	public List<String> getSupportedFlashValues() {
