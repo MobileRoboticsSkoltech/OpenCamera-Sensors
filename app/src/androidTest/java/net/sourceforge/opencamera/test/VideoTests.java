@@ -55,6 +55,7 @@ public class VideoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFPS"));
 		if( MainActivityTest.test_camera2 ) {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFPSHighSpeedManual"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoSlowMotion"));
 		}
 		// update: now deprecating these tests, as setting these settings can be dodgy on some devices
 		/*suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoBitrate"));

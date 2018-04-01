@@ -5708,6 +5708,55 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue(video_width == high_speed_video_width && video_height == high_speed_video_height);
 	}
 
+	/** Will likely be unreliable on OnePlus 3T.
+	 */
+	public void testTakeVideoSlowMotion() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoSlowMotion");
+
+		setToDefault();
+
+		if( !mPreview.usingCamera2API() ) {
+			return;
+		}
+
+		List<Integer> supported_slow_motion = mActivity.getApplicationInterface().getSupportedSlowMotionRates();
+		if( supported_slow_motion.size() <= 1 ) {
+			Log.d(TAG, "slow motion not supported");
+			return;
+		}
+
+		int slow_motion_rate = supported_slow_motion.get(supported_slow_motion.size()-1);
+		float capture_rate = 1.0f / slow_motion_rate;
+		Log.d(TAG, "slow_motion_rate: " + slow_motion_rate);
+		Log.d(TAG, "capture_rate: " + capture_rate);
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(mPreview.getCameraId()), capture_rate);
+		editor.apply();
+		updateForSettings();
+
+		// switch to video, and check we've set a high speed fps
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(mPreview.isVideo());
+
+        String fps_value = mActivity.getApplicationInterface().getVideoFPSPref();
+        int fps = Integer.parseInt(fps_value);
+        Log.d(TAG, "fps: " + fps);
+        assertTrue(fps >= 60);
+        assertTrue(mPreview.isVideoHighSpeed());
+
+        // check video profile
+        VideoProfile profile = mPreview.getVideoProfile();
+        assertEquals(profile.videoCaptureRate, fps);
+        assertEquals((float)profile.videoFrameRate, (float)(profile.videoCaptureRate/(float)slow_motion_rate), 1.0e-5);
+
+		boolean allow_failure = false;
+		subTestTakeVideo(false, false, allow_failure, false, null, 5000, false, false);
+	}
+
 	/* Test can be reliable on some devices, test no longer run as part of test suites.
 	 */
 	public void testTakeVideoBitrate() throws InterruptedException {
