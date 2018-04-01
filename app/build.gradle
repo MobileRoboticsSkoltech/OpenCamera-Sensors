@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.1'
     compileOptions.encoding = 'UTF-8'
 
     defaultConfig {
@@ -31,6 +30,6 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:27.1.0'
-    testCompile 'junit:junit:4.12'
+    implementation 'com.android.support:support-v4:27.1.0'
+    testImplementation 'junit:junit:4.12'
 }
