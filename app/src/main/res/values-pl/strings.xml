@@ -279,7 +279,8 @@
     <string name="hdr_info">Tryb HDR jest przydatny w ujęciach z obszarami o dużych różnicach w jasności. Polega on na wykonaniu kilku zdjęć o różnej ekspozycji i połączeniu w jeden obraz.\n\nZauważ, że tryb HDR jest nieodpowiedni do fotografowania poruszających się obiektów, może to skutkować w mniej dokładną reprodukcję kolorów.\n\nWykonanie zdjęcia w HDR jest wolniejsze.</string>
     <string name="dont_show_again">Nie pokazuj ponownie</string>
     <string name="photo_mode">Tryb fotografowania</string>
-    <string name="photo_mode_standard">Standard</string>
+    <string name="photo_mode_standard">Std</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_standard_full">Standard</string>
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">Expo {}</string>
     <string name="photo_mode_expo_bracketing_full">Bracketing ekspozycji</string>

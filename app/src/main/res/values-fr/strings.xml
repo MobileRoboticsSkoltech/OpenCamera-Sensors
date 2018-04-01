@@ -290,7 +290,8 @@
     </string>
     <string name="photo_mode">Mode photo</string>
     <string name="photo_mode_hdr">HDR</string>
-    <string name="photo_mode_standard">Standard</string>
+    <string name="photo_mode_standard">Std</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_standard_full">Standard</string>
     <string name="preference_background_photo_saving">Utiliser une tâche de fond</string>
     <string name="preference_background_photo_saving_summary">Permettre d\'enregistrer les photos dans une tâche de fond
         (opération plus rapide)

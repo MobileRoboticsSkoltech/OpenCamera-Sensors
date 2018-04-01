@@ -289,14 +289,14 @@
     <string name="dont_show_again">Don\'t show again</string>
 
     <string name="photo_mode">Photo Mode</string>
-    <string name="photo_mode_standard">Std</string>
+    <string name="photo_mode_standard">Std</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_standard_full">Standard</string>
-    <string name="photo_mode_hdr">HDR</string>
-    <string name="photo_mode_expo_bracketing">Expo {}</string>
+    <string name="photo_mode_hdr">HDR</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_expo_bracketing_full">Exposure Bracketing</string>
-    <string name="photo_mode_fast_burst">[]]]</string>
+    <string name="photo_mode_fast_burst">[]]]</string> <!-- keep short, as this shows in the popup menu; shouldn't be translated -->
     <string name="photo_mode_fast_burst_full">Fast Burst</string>
-    <string name="photo_mode_noise_reduction">NR</string>
+    <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
     <string name="photo_mode_noise_reduction_full">Noise Reduction</string>
     <string name="preference_category_stamp">Photo Stamp</string>
     <string name="preference_hdr_save_expo">Save all images for HDR mode</string>
@@ -357,7 +357,7 @@
     <string name="preference_calibrate_level_calibrated">Level calibrated</string>
     <string name="preference_calibrate_level_calibration_reset">Level calibration reset</string>
 
-    <string name="photo_mode_dro">DRO</string>
+    <string name="photo_mode_dro">DRO</string> <!-- keep short, as this shows in the popup menu -->
 
     <string name="preference_show_pitch_lines">Show pitch lines</string>
     <string name="preference_show_pitch_lines_summary">Display horizontal pitch lines</string>

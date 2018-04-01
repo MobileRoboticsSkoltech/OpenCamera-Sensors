@@ -288,7 +288,8 @@
     <string name="dont_show_again">Don\'t show again</string>
 
     <string name="photo_mode">Photo Mode</string>
-    <string name="photo_mode_standard">Standard</string>
+    <string name="photo_mode_standard">Std</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_standard_full">Standard</string>
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">Expo {}</string>
     <string name="photo_mode_expo_bracketing_full">Horquillado de exposición</string>

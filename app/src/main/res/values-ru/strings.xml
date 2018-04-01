@@ -288,7 +288,8 @@
     <string name="dont_show_again">Больше не показывать</string>
 
     <string name="photo_mode">Режим фото</string>
-    <string name="photo_mode_standard">Стандартный</string>
+    <string name="photo_mode_standard">Std</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_standard_full">Стандартный</string>
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">Expo {}</string>
     <string name="photo_mode_expo_bracketing_full">Брекетинг экспозиции</string>

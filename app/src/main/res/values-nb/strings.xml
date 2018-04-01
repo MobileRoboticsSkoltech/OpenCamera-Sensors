@@ -293,7 +293,8 @@
     <string name="photo_mode_hdr">HDR</string>
     <string name="photo_mode_expo_bracketing">Ekspo {}</string>
     <string name="photo_mode_expo_bracketing_full">Exposure Bracketing</string>
-    <string name="photo_mode_noise_reduction">Støyreduksjon</string>
+    <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
+    <string name="photo_mode_noise_reduction_full">Støyreduksjon</string>
     <string name="preference_category_stamp">Fotostempel</string>
     <string name="preference_hdr_save_expo">Lagre alle bilder i HDR-modus</string>
     <string name="preference_hdr_save_expo_summary">Hvis dette er aktivert, vil det i HDR-fotomodus være tre eksponeringsgrunnbilder som vil bli lagret, i tillegg til det endelige HDR-bildet. Bemerk at dette vil gjøre lagring tregere, spesielt hvis innstillinger som \"Stemple bilder\" eller Auto-vater også er brukt.</string>

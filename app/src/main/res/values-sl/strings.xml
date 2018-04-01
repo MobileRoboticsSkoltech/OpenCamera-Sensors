@@ -290,11 +290,13 @@
     <string name="dont_show_again">Ne prikazuj več</string>
 
     <string name="photo_mode">Način za fotografije</string>
-    <string name="photo_mode_standard">Običajni</string>
+    <string name="photo_mode_standard">Std</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_standard_full">Običajni</string>
     <string name="photo_mode_hdr">HDR</string>
-	<string name="photo_mode_expo_bracketing">Kor. sam. osvetlitve</string>
+    <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_expo_bracketing_full">Korektura samodejne osvetlitve</string>
-	<string name="photo_mode_noise_reduction">Zmanjševanje šuma</string>
+    <string name="photo_mode_noise_reduction">NR</string> <!-- keep short, as this shows in the popup menu; probably shouldn't be translated? -->
+	<string name="photo_mode_noise_reduction_full">Zmanjševanje šuma</string>
     <string name="preference_category_stamp">Dodaj žig</string>
     <string name="preference_hdr_save_expo">Shrani vse slike za način HDR</string>
     <string name="preference_hdr_save_expo_summary">Če je omogočeno, bodo ob uporabi načina HDR posnete tri osnovne slike kot tudi končna slika HDR. Upoštevajte, da bo shranevanje počasnejše, posebno, če uporabljate možnosti, kot sta \"Dodaj žig\" ali samodejno izravnavo.</string>

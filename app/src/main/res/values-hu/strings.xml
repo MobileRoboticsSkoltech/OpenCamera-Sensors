@@ -288,9 +288,10 @@
     <string name="dont_show_again">Ne jelenjen meg újra</string>
 
     <string name="photo_mode">Fotómód</string>
-    <string name="photo_mode_standard">Normál</string>
+    <string name="photo_mode_standard">Norma</string> <!-- keep short, as this shows in the popup menu -->
+    <string name="photo_mode_standard_full">Normál</string>
     <string name="photo_mode_hdr">HDR</string>
-    <string name="photo_mode_expo_bracketing">Expozíció {}</string>
+    <string name="photo_mode_expo_bracketing">Expo {}</string> <!-- keep short, as this shows in the popup menu -->
     <string name="photo_mode_expo_bracketing_full">Expozíció sorozat</string>
     <string name="preference_category_stamp">Fotó feliratozás</string>
     <string name="preference_hdr_save_expo">Az összes kép mentése HDR módban</string>
