@@ -71,6 +71,9 @@ public class MainTests {
 		if( !MainActivityTest.test_camera2 ) {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testGPSString"));
 		}
+		if( MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testVideoFPSHighSpeed"));
+		}
         return suite;
     }
 }

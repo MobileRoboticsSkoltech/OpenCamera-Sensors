@@ -5502,11 +5502,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		final int [] fps_values = mPreview.usingCamera2API() ? new int[]{15, 25, 30, 60, 120, 240} : new int[]{30};
 		for(int fps_value : fps_values) {
 			if( mPreview.usingCamera2API() ) {
-				if( mPreview.getVideoQualityHander().videoSupportsFrameRateHighSpeed(fps_value) ) {
-					Log.d(TAG, "fps supported at HIGH SPEED: " + fps_value);
-				}
-				else if( mPreview.getVideoQualityHander().videoSupportsFrameRate(fps_value) ) {
+				if( mPreview.getVideoQualityHander().videoSupportsFrameRate(fps_value) ) {
 					Log.d(TAG, "fps supported at normal speed: " + fps_value);
+				}
+				else if( mPreview.getVideoQualityHander().videoSupportsFrameRateHighSpeed(fps_value) ) {
+					Log.d(TAG, "fps supported at HIGH SPEED: " + fps_value);
 				}
 				else {
 					Log.d(TAG, "fps is NOT supported: " + fps_value);
@@ -5526,6 +5526,186 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			boolean allow_failure = false;
 			subTestTakeVideo(false, false, allow_failure, false, null, 5000, false, false);
 		}
+	}
+
+	/** Will likely be unreliable on OnePlus 3T with Camera2.
+	 *  Manual mode should be ignored by high speed video, but check this doesn't crash at least!
+	 */
+	public void testTakeVideoFPSHighSpeedManual() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoFPSHighSpeedManual");
+
+		if( !mPreview.usingCamera2API() ) {
+			return;
+		}
+		else if( !mPreview.supportsISORange() ) {
+			return;
+		}
+
+		setToDefault();
+
+		int fps_value = 120;
+		if( mPreview.getVideoQualityHander().videoSupportsFrameRate(fps_value) ) {
+			Log.d(TAG, "fps supported at normal speed: " + fps_value);
+			return;
+		}
+		else if( !mPreview.getVideoQualityHander().videoSupportsFrameRateHighSpeed(fps_value) ) {
+			Log.d(TAG, "fps is NOT supported: " + fps_value);
+			return;
+		}
+
+		assertTrue( mPreview.fpsIsHighSpeed("" + fps_value) );
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(mPreview.getCameraId()), "" + fps_value);
+		editor.apply();
+		updateForSettings();
+
+		Log.d(TAG, "test video with fps: " + fps_value);
+
+		switchToISO(100);
+
+		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
+	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+
+	    // switch to video mode, ensure that exposure button disappears due to high speed video
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(mPreview.isVideo());
+	    assertTrue(exposureButton.getVisibility() == View.GONE);
+
+	    // test recording video
+		subTestTakeVideo(false, false, false, false, null, 5000, false, false);
+
+	    // switch to photo mode, ensure that exposure button re-appears
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(!mPreview.isVideo());
+	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
+	}
+
+	/** Tests that video resolutions are stored separately for high speed fps, for Camera2.
+	 */
+	public void testVideoFPSHighSpeed() throws InterruptedException {
+		Log.d(TAG, "testVideoFPSHighSpeed");
+
+		if( !mPreview.usingCamera2API() ) {
+			return;
+		}
+
+		setToDefault();
+
+		int fps_value = 120;
+		if( mPreview.getVideoQualityHander().videoSupportsFrameRate(fps_value) ) {
+			Log.d(TAG, "fps supported at normal speed: " + fps_value);
+			return;
+		}
+		else if( !mPreview.getVideoQualityHander().videoSupportsFrameRateHighSpeed(fps_value) ) {
+			Log.d(TAG, "fps is NOT supported: " + fps_value);
+			return;
+		}
+
+		assertTrue( mPreview.fpsIsHighSpeed("" + fps_value) );
+
+	    // switch to video mode
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(mPreview.isVideo());
+
+		// get initial video resolution, for non-high-speed
+		String saved_quality = mActivity.getApplicationInterface().getVideoQualityPref();
+		VideoProfile profile = mPreview.getVideoProfile();
+		int saved_video_width = profile.videoFrameWidth;
+		int saved_video_height = profile.videoFrameHeight;
+		Log.d(TAG, "saved_quality: " + saved_quality);
+		Log.d(TAG, "saved_video_width: " + saved_video_width);
+		Log.d(TAG, "saved_video_height: " + saved_video_height);
+
+		// switch to high speed fps
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(mPreview.getCameraId()), "" + fps_value);
+		editor.apply();
+		updateForSettings();
+
+		Log.d(TAG, "test video with fps: " + fps_value);
+
+		// change video resolution
+		List<String> video_sizes = mPreview.getSupportedVideoQuality(mActivity.getApplicationInterface().getVideoFPSPref());
+		assertTrue(video_sizes.size() >= 2);
+		// find current index
+		int video_size_index = -1;
+		for(int i=0;i<video_sizes.size();i++) {
+			String video_size = video_sizes.get(i);
+			if( video_size.equals(mPreview.getVideoQualityHander().getCurrentVideoQuality()) ) {
+				video_size_index = i;
+				break;
+			}
+		}
+		Log.d(TAG, "video_size_index: " + video_size_index);
+		assertTrue(video_size_index != -1);
+		// should have defaulted to largest resolution
+		assertTrue(video_size_index == 0);
+		video_size_index++;
+		String quality = video_sizes.get(video_size_index);
+		settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		editor = settings.edit();
+		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), mActivity.getApplicationInterface().fpsIsHighSpeed()), quality);
+		editor.apply();
+		updateForSettings();
+
+		quality = mActivity.getApplicationInterface().getVideoQualityPref();
+		profile = mPreview.getVideoProfile();
+		int video_width = profile.videoFrameWidth;
+		int video_height = profile.videoFrameHeight;
+		Log.d(TAG, "quality: " + quality);
+		Log.d(TAG, "video_width: " + video_width);
+		Log.d(TAG, "video_height: " + video_height);
+		assertFalse(saved_quality.equals(quality));
+		assertFalse(video_width == saved_video_width && video_height == saved_video_height);
+		String high_speed_quality = quality;
+		int high_speed_video_width = video_width;
+		int high_speed_video_height = video_height;
+
+		// switch to normal fps
+		Log.d(TAG, "switch to normal fps");
+		settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		editor = settings.edit();
+		editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(mPreview.getCameraId()), "30");
+		editor.apply();
+		updateForSettings();
+
+		// check resolution reverts to original
+		quality = mActivity.getApplicationInterface().getVideoQualityPref();
+		profile = mPreview.getVideoProfile();
+		video_width = profile.videoFrameWidth;
+		video_height = profile.videoFrameHeight;
+		Log.d(TAG, "quality: " + quality);
+		Log.d(TAG, "video_width: " + video_width);
+		Log.d(TAG, "video_height: " + video_height);
+		assertTrue(saved_quality.equals(quality));
+		assertTrue(video_width == saved_video_width && video_height == saved_video_height);
+
+		// switch to high speed fps again
+		Log.d(TAG, "switch to high speed fps again");
+		settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		editor = settings.edit();
+		editor.putString(PreferenceKeys.getVideoFPSPreferenceKey(mPreview.getCameraId()), "" + fps_value);
+		editor.apply();
+		updateForSettings();
+
+		// check resolution reverts to high speed
+		quality = mActivity.getApplicationInterface().getVideoQualityPref();
+		profile = mPreview.getVideoProfile();
+		video_width = profile.videoFrameWidth;
+		video_height = profile.videoFrameHeight;
+		Log.d(TAG, "quality: " + quality);
+		Log.d(TAG, "video_width: " + video_width);
+		Log.d(TAG, "video_height: " + video_height);
+		assertTrue(high_speed_quality.equals(quality));
+		assertTrue(video_width == high_speed_video_width && video_height == high_speed_video_height);
 	}
 
 	/* Test can be reliable on some devices, test no longer run as part of test suites.
