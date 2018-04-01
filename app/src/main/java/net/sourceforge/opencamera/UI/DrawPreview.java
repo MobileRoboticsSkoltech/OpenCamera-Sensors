@@ -67,6 +67,7 @@ public class DrawPreview {
 	private boolean is_face_detection_pref;
 	private boolean is_audio_enabled_pref;
 	private boolean is_high_speed;
+	private float capture_rate_factor;
 	private boolean auto_stabilise_pref;
 	private String preference_grid_pref;
 
@@ -121,6 +122,7 @@ public class DrawPreview {
 	private Bitmap face_detection_bitmap;
 	private Bitmap audio_disabled_bitmap;
 	private Bitmap high_speed_fps_bitmap;
+	private Bitmap slow_motion_bitmap;
 	private final Rect icon_dest = new Rect();
 	private long needs_flash_time = -1; // time when flash symbol comes on (used for fade-in effect)
 
@@ -180,6 +182,7 @@ public class DrawPreview {
 		face_detection_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_face_white_48dp);
 		audio_disabled_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_mic_off_white_48dp);
 		high_speed_fps_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_fast_forward_white_48dp);
+		slow_motion_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_slow_motion_video_white_48dp);
 
 		ybounds_text = getContext().getResources().getString(R.string.zoom) + getContext().getResources().getString(R.string.angle) + getContext().getResources().getString(R.string.direction);
 	}
@@ -243,6 +246,10 @@ public class DrawPreview {
 		if( high_speed_fps_bitmap != null ) {
 			high_speed_fps_bitmap.recycle();
 			high_speed_fps_bitmap = null;
+		}
+		if( slow_motion_bitmap != null ) {
+			slow_motion_bitmap.recycle();
+			slow_motion_bitmap = null;
 		}
 	}
 
@@ -384,6 +391,7 @@ public class DrawPreview {
 		is_audio_enabled_pref = applicationInterface.getRecordAudioPref();
 
 		is_high_speed = applicationInterface.fpsIsHighSpeed();
+		capture_rate_factor = applicationInterface.getVideoCaptureRateFactor();
 
 		auto_stabilise_pref = applicationInterface.getAutoStabilisePref();
 
@@ -968,7 +976,24 @@ public class DrawPreview {
 				}
 			}
 
-			if( is_high_speed && applicationInterface.isVideoPref() ) {
+			// icons for slow motion or high speed video
+			if( capture_rate_factor < 1.0f-1.0e-5f && applicationInterface.isVideoPref() ) {
+				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
+				p.setStyle(Paint.Style.FILL);
+				p.setColor(Color.BLACK);
+				p.setAlpha(64);
+				canvas.drawRect(icon_dest, p);
+				p.setAlpha(255);
+				canvas.drawBitmap(slow_motion_bitmap, null, icon_dest, p);
+
+				if( ui_rotation == 180 ) {
+					location_x2 -= icon_size + flash_padding;
+				}
+				else {
+					location_x2 += icon_size + flash_padding;
+				}
+			}
+			else if( is_high_speed && applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
