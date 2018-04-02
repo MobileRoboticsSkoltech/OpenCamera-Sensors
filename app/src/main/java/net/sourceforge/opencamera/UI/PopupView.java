@@ -107,16 +107,18 @@ public class PopupView extends LinearLayout {
 				}
 				supported_flash_values = filter;
 			}
-	    	addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
-				@Override
-				public void onClick(String option) {
-					if( MyDebug.LOG )
-						Log.d(TAG, "clicked flash: " + option);
-					preview.updateFlash(option);
-			    	main_activity.getMainUI().setPopupIcon();
-    				main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
-				}
-			});
+			if( supported_flash_values.size() > 1 ) { // no point showing flash options if only one available!
+				addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
+					@Override
+					public void onClick(String option) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "clicked flash: " + option);
+						preview.updateFlash(option);
+						main_activity.getMainUI().setPopupIcon();
+						main_activity.getMainUI().destroyPopup(); // need to recreate popup for new selection
+					}
+				});
+			}
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "PopupView time 3: " + (System.nanoTime() - debug_time));
