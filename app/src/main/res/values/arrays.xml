@@ -655,6 +655,7 @@
         <item>drawable/flash_red_eye</item>
         <item>drawable/flash_auto</item>
         <item>drawable/flash_on</item>
+        <item>drawable/flash_torch</item>
     </string-array>
     <string-array name="flash_entries">
         <item>@string/flash_off</item>
@@ -664,6 +665,7 @@
         <item>@string/flash_red_eye</item>
         <item>@string/flash_frontscreen_auto</item>
         <item>@string/flash_frontscreen_on</item>
+        <item>@string/flash_frontscreen_torch</item>
     </string-array>
     <string-array name="flash_values">
         <item>flash_off</item>
@@ -673,5 +675,6 @@
         <item>flash_red_eye</item>
         <item>flash_frontscreen_auto</item>
         <item>flash_frontscreen_on</item>
+        <item>flash_frontscreen_torch</item>
     </string-array>
 </resources>

@@ -221,6 +221,7 @@ public class CameraController1 extends CameraController {
 				output_modes.clear(); // clear any pre-existing mode (see note above about Samsung Galaxy S7)
 				output_modes.add("flash_off");
 				output_modes.add("flash_frontscreen_on");
+				output_modes.add("flash_frontscreen_torch");
 			}
 			else {
 				if( MyDebug.LOG )
@@ -985,6 +986,7 @@ public class CameraController1 extends CameraController {
 				flash_mode = Camera.Parameters.FLASH_MODE_RED_EYE;
 				break;
 			case "flash_frontscreen_on":
+			case "flash_frontscreen_torch":
 				flash_mode = Camera.Parameters.FLASH_MODE_OFF;
 				break;
 		}

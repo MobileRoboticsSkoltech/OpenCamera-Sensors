@@ -472,6 +472,7 @@ public class CameraController2 extends CameraController {
 						break;
 					case "flash_frontscreen_auto":
 					case "flash_frontscreen_on":
+					case "flash_frontscreen_torch":
 						builder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
 						builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
 						break;
@@ -1630,6 +1631,7 @@ public class CameraController2 extends CameraController {
 			camera_features.supported_flash_values.add("flash_off");
 			camera_features.supported_flash_values.add("flash_frontscreen_auto");
 			camera_features.supported_flash_values.add("flash_frontscreen_on");
+			camera_features.supported_flash_values.add("flash_frontscreen_torch");
 		}
 
 		Float minimum_focus_distance = characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE); // may be null on some devices

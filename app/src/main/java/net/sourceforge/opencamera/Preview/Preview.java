@@ -3985,11 +3985,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 	}
 
-	/** Whether the flash mode is supported in video mode. This only returns true or flash_off or
-	 * flash_torch.
+	/** Whether the flash mode is supported in video mode.
 	 */
 	public static boolean isFlashSupportedForVideo(String flash_mode) {
-		return flash_mode != null && ( flash_mode.equals("flash_off") || flash_mode.equals("flash_torch") );
+		return flash_mode != null && ( flash_mode.equals("flash_off") || flash_mode.equals("flash_torch") || flash_mode.equals("flash_frontscreen_torch") );
 	}
 	
 	public String getErrorFeatures(VideoProfile profile) {

@@ -496,6 +496,7 @@
     <string name="flash_red_eye">Red Eye</string>
     <string name="flash_frontscreen_auto">Screen Flash Auto</string>
     <string name="flash_frontscreen_on">Screen Flash On</string>
+    <string name="flash_frontscreen_torch">Screen Torch</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n

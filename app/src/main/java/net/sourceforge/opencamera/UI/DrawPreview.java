@@ -1710,6 +1710,13 @@ public class DrawPreview {
 			p.setColor(Color.WHITE);
 			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
 		}
+		else if( preview != null && "flash_frontscreen_torch".equals(preview.getCurrentFlashValue()) ) { // getCurrentFlashValue() may return null
+			p.setColor(Color.WHITE);
+			p.setAlpha(200); // set alpha so user can still see some of the preview
+			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
+			p.setAlpha(255);
+		}
+
 		if( main_activity.getMainUI().inImmersiveMode() ) {
 			if( immersive_mode_everything_pref ) {
 				// exit, to ensure we don't display anything!
