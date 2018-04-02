@@ -452,4 +452,12 @@
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/åååå</string>
     <string name="preference_stamp_dateformat_none">ingen</string>
 
+    <string name="flash_off">Blits av</string>
+    <string name="flash_auto">Auto-blits</string>
+    <string name="flash_on">Blits på</string>
+    <string name="flash_torch">Fakkel</string>
+    <string name="flash_red_eye">Rødt øye</string>
+    <string name="flash_frontscreen_auto">Auto-skjermblits</string>
+    <string name="flash_frontscreen_on">Skjermblits på</string>
+
 </resources>

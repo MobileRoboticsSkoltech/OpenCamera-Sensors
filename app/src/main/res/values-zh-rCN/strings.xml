@@ -300,4 +300,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
     <string name="preference_stamp_dateformat_none">无</string>
 
+    <string name="flash_off">关闭闪光</string>
+    <string name="flash_auto">自动闪光</string>
+    <string name="flash_on">开启闪光</string>
+    <string name="flash_torch">手电筒</string>
+    <string name="flash_red_eye">红眼</string>
+
 </resources>

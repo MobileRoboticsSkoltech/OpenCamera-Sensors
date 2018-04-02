@@ -282,4 +282,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">月/日/年</string>
     <string name="preference_stamp_dateformat_none">なし</string>
 
+    <string name="flash_off">オフ</string>
+    <string name="flash_auto">自動</string>
+    <string name="flash_on">オン</string>
+    <string name="flash_torch">懐中電灯</string>
+    <string name="flash_red_eye">赤目軽減</string>
+
 </resources>

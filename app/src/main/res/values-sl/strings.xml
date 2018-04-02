@@ -459,4 +459,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
     <string name="preference_stamp_dateformat_none">Brez</string>
 
+    <string name="flash_off">Bliskavica izk.</string>
+    <string name="flash_auto">Samodejna bliskavica</string>
+    <string name="flash_on">Bliskavica vkl.</string>
+    <string name="flash_torch">Svetilka</string>
+    <string name="flash_red_eye">Zm. uč. rdečih oči</string>
+
 </resources>

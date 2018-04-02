@@ -407,4 +407,7 @@
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
     <string name="preference_stamp_dateformat_none">Ninguno</string>
 
+    <string name="flash_torch">Linterna</string>
+    <string name="flash_red_eye">Ojos Rojos</string>
+
 </resources>

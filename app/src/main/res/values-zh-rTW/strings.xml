@@ -274,4 +274,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">月/日/年</string>
     <string name="preference_stamp_dateformat_none">無</string>
 
+    <string name="flash_off">關閉閃光</string>
+    <string name="flash_auto">自動閃光</string>
+    <string name="flash_on">開啟閃光</string>
+    <string name="flash_torch">手電筒</string>
+    <string name="flash_red_eye">紅眼</string>
+
 </resources>

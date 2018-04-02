@@ -278,4 +278,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">м/дз/г</string>
     <string name="preference_stamp_dateformat_none">Няма</string>
 
+    <string name="flash_off">Выбліск быў выключаны</string>
+    <string name="flash_auto">Аўтаматычна</string>
+    <string name="flash_on">Выбліск быў уключаны</string>
+    <string name="flash_torch">Асвятленне</string>
+    <string name="flash_red_eye">Чырвоныя вочы</string>
+
 </resources>

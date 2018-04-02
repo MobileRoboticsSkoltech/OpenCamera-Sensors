@@ -346,4 +346,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">mm/jj/aaaa</string>
     <string name="preference_stamp_dateformat_none">Aucun</string>
 
+    <string name="flash_off">Flash éteint</string>
+    <string name="flash_auto">Flash auto</string>
+    <string name="flash_on">Flash forcé</string>
+    <string name="flash_torch">Torche</string>
+    <string name="flash_red_eye">Yeux rouges</string>
+
 </resources>

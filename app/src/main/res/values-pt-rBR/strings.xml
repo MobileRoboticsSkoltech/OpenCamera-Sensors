@@ -246,4 +246,10 @@
     <string name="duration_45m">45 minutos</string>
     <string name="duration_1h">1 hora</string>
     <string name="preference_video_fps_default">Padrão</string>
+
+    <string name="flash_off">Flash Desligado</string>
+    <string name="flash_auto">Flash Automático</string>
+    <string name="flash_on">Flash Ligado</string>
+    <string name="flash_torch">Lanterna</string>
+    <string name="flash_red_eye">Olho Vermelho</string>
 </resources>

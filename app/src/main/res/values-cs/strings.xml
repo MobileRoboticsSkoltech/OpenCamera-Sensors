@@ -282,4 +282,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/rrrr</string>
     <string name="preference_stamp_dateformat_none">Žádné</string>
 
+    <string name="flash_off">Blesk Vypnut</string>
+    <string name="flash_auto">Blesk Auto</string>
+    <string name="flash_on">Blesk Zapnut</string>
+    <string name="flash_torch">Svítilna</string>
+    <string name="flash_red_eye">Redukce červených očí</string>
+
 </resources>

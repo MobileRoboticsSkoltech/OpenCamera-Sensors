@@ -281,4 +281,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">aa/gg/yyyy</string>
     <string name="preference_stamp_dateformat_none">Tarih bilgisi yok</string>
 
+    <string name="flash_off">Flaş Kapalı</string>
+    <string name="flash_auto">Flaş Otomatik</string>
+    <string name="flash_on">Flaş Açık</string>
+    <string name="flash_torch">Flaş Işığı</string>
+    <string name="flash_red_eye">Kırmızı Göz</string>
+
 </resources>

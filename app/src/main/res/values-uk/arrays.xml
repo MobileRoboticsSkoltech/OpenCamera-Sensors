@@ -1,32 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="flash_icons">
-        <item>drawable/flash_off</item>
-        <item>drawable/flash_auto</item>
-        <item>drawable/flash_on</item>
-        <item>drawable/flash_torch</item>
-        <item>drawable/flash_red_eye</item>
-        <item>drawable/flash_auto</item>
-        <item>drawable/flash_on</item>
-    </string-array>
-    <string-array name="flash_entries">
-        <item>Спалах Вимк.</item>
-        <item>Спалах Авто</item>
-        <item>Спалах Увімк.</item>
-        <item>Ліхтарик</item>
-        <item>Червоні очі</item>
-        <item>Спалах екрану Авто</item>
-        <item>Спалах екрану Увімк.</item>
-    </string-array>
-    <string-array name="flash_values">
-        <item>flash_off</item>
-        <item>flash_auto</item>
-        <item>flash_on</item>
-        <item>flash_torch</item>
-        <item>flash_red_eye</item>
-        <item>flash_frontscreen_auto</item>
-        <item>flash_frontscreen_on</item>
-    </string-array>
     <string-array name="focus_mode_icons">
         <item>drawable/focus_mode_auto</item>
         <item>drawable/focus_mode_infinity</item>

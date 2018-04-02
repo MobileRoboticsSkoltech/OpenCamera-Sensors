@@ -234,4 +234,10 @@
     <string name="duration_45m">45 dəqiqə</string>
     <string name="duration_1h">1 saat</string>
     <string name="preference_video_fps_default">Susmaya görə</string>
+
+    <string name="flash_off">İşıq bağlandı</string>
+    <string name="flash_auto">İşıq avtomatikdir</string>
+    <string name="flash_on">İşıq yandırıldı</string>
+    <string name="flash_torch">FONAR</string>
+    <string name="flash_red_eye">Qırmızı göz rejimi</string>
 </resources>

@@ -402,4 +402,12 @@
     <string name="preference_stamp_dateformat_mmddyyyy">hh/nn/éééé</string>
     <string name="preference_stamp_dateformat_none">Nincs</string>
 
+    <string name="flash_off">Vaku ki</string>
+    <string name="flash_auto">Vaku automata</string>
+    <string name="flash_on">Vaku be</string>
+    <string name="flash_torch">Zseblámpa</string>
+    <string name="flash_red_eye">Vörös szem</string>
+    <string name="flash_frontscreen_auto">Képernyő vaku automata</string>
+    <string name="flash_frontscreen_on">Képernyő vaku ki</string>
+
 </resources>

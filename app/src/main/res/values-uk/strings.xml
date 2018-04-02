@@ -402,4 +402,12 @@
     <string name="preference_stamp_dateformat_mmddyyyy">мм/дд/рррр</string>
     <string name="preference_stamp_dateformat_none">Відсутня</string>
 
+    <string name="flash_off">Спалах Вимк.</string>
+    <string name="flash_auto">Спалах Авто</string>
+    <string name="flash_on">Спалах Увімк.</string>
+    <string name="flash_torch">Ліхтарик</string>
+    <string name="flash_red_eye">Червоні очі</string>
+    <string name="flash_frontscreen_auto">Спалах екрану Авто</string>
+    <string name="flash_frontscreen_on">Спалах екрану Увімк.</string>
+
 </resources>

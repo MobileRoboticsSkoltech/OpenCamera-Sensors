@@ -402,4 +402,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">мм/дд/гггг</string>
     <string name="preference_stamp_dateformat_none">Нет</string>
 
+    <string name="flash_off">Вспышка Выкл</string>
+    <string name="flash_auto">Вспышка Авто</string>
+    <string name="flash_on">Вспышка Вкл</string>
+    <string name="flash_torch">Фонарик</string>
+    <string name="flash_red_eye">Красные глаза</string>
+
 </resources>

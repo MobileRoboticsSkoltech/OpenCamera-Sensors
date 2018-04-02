@@ -435,4 +435,7 @@
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
     <string name="preference_stamp_dateformat_none">Nessuno</string>
 
+    <string name="flash_torch">Torcia</string>
+    <string name="flash_red_eye">Occhi rossi</string>
+
 </resources>

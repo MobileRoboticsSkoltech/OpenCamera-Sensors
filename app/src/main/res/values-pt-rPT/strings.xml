@@ -320,4 +320,10 @@
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/aaaa</string>
     <string name="preference_stamp_dateformat_none">Nenhum</string>
 
+    <string name="flash_off">Flash desligado</string>
+    <string name="flash_auto">Flash automático</string>
+    <string name="flash_on">Flash Ligado</string>
+    <string name="flash_torch">lanterna</string>
+    <string name="flash_red_eye">Olhos vermelhos</string>
+
 </resources>

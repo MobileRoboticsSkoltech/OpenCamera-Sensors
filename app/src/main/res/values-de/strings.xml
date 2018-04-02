@@ -402,4 +402,12 @@
     <string name="preference_stamp_dateformat_mmddyyyy">MM/TT/JJJJ</string>
     <string name="preference_stamp_dateformat_none">Kein Datum-Stempel</string>
 
+    <string name="flash_off">Ohne Blitz</string>
+    <string name="flash_auto">Automatischer Blitz</string>
+    <string name="flash_on">Mit Blitz</string>
+    <string name="flash_torch">Taschenlampe</string>
+    <string name="flash_red_eye">Rote-Augen-Reduktion</string>
+    <string name="flash_frontscreen_auto">Frontblitz Auto</string>
+    <string name="flash_frontscreen_on">Frontblitz ein</string>
+
 </resources>

@@ -378,4 +378,12 @@
     <string name="preference_stamp_dateformat_mmddyyyy">mm/dd/yyyy</string>
     <string name="preference_stamp_dateformat_none">Brak</string>
 
+    <string name="flash_off">Lampa wyłączona</string>
+    <string name="flash_auto">Lampa auto</string>
+    <string name="flash_on">Lampa włączona</string>
+    <string name="flash_torch">Latarka</string>
+    <string name="flash_red_eye">Czerwone oczy</string>
+    <string name="flash_frontscreen_auto">Błysk ekranowy auto</string>
+    <string name="flash_frontscreen_on">Błysk ekranowy włączony</string>
+
 </resources>

@@ -246,4 +246,10 @@
     <string name="duration_45m">45분</string>
     <string name="duration_1h">1시간</string>
     <string name="preference_video_fps_default">기본값</string>
+
+    <string name="flash_off">플래시 꺼짐</string>
+    <string name="flash_auto">자동 플래시</string>
+    <string name="flash_on">플래시 켜짐</string>
+    <string name="flash_torch">플래시 항상 켜짐</string>
+    <string name="flash_red_eye">적목 현상 감소 플래시</string>
 </resources>
