@@ -1678,6 +1678,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		camera_controller.setVideoHighSpeed(is_video && video_high_speed);
 		if( this.is_video ) {
 	    	capture_rate_factor = applicationInterface.getVideoCaptureRateFactor();
+	    	//capture_rate_factor = 4.0f; // test timelapse
 	    	has_capture_rate_factor = Math.abs(capture_rate_factor - 1.0f) > 1.0e-5f;
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "has_capture_rate_factor: " + has_capture_rate_factor);
@@ -2836,10 +2837,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( has_capture_rate_factor ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "set video profile frame rate for slow motion or timelapse");
-			// capture rate remains the same, and we adjust the frame rate of video
-			video_profile.videoFrameRate = (int)(video_profile.videoFrameRate * capture_rate_factor + 0.5f);
-			video_profile.videoBitRate = (int)(video_profile.videoBitRate * capture_rate_factor + 0.5f);
-			// audio not recorded with slow motion video
+			if( capture_rate_factor < 1.0 ) {
+				// capture rate remains the same, and we adjust the frame rate of video
+				video_profile.videoFrameRate = (int)(video_profile.videoFrameRate * capture_rate_factor + 0.5f);
+				video_profile.videoBitRate = (int)(video_profile.videoBitRate * capture_rate_factor + 0.5f);
+			}
+			else if( capture_rate_factor > 1.0 ) {
+				// resultant framerate remains the same, instead adjst the capture rate
+				video_profile.videoCaptureRate = video_profile.videoCaptureRate / (double)capture_rate_factor;
+			}
+			// audio not recorded with slow motion or timelapse video
 			record_audio = false;
 		}
 
@@ -3809,7 +3816,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				selected_fps = chooseBestPreviewFps(fps_ranges);
 			}
 			else {
-				selected_fps = matchPreviewFpsToVideo(fps_ranges, profile.videoCaptureRate*1000);
+				selected_fps = matchPreviewFpsToVideo(fps_ranges, (int)(profile.videoCaptureRate*1000));
 			}
 		}
 		else {

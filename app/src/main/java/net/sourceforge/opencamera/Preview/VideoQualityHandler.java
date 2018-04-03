@@ -171,7 +171,7 @@ public class VideoQualityHandler {
         return CameraController.CameraFeatures.supportsFrameRate(this.video_sizes_high_speed, fps);
     }
 
-	CameraController.Size findVideoSizeForFrameRate(int width, int height, int fps) {
+	CameraController.Size findVideoSizeForFrameRate(int width, int height, double fps) {
         if( MyDebug.LOG ) {
             Log.d(TAG, "findVideoSizeForFrameRate");
             Log.d(TAG, "width: " + width);

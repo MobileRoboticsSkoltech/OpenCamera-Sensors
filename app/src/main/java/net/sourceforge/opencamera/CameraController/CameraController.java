@@ -99,7 +99,7 @@ public abstract class CameraController {
 			return false;
 		}
 
-		public static Size findSize(List<Size> sizes, Size size, int fps, boolean return_closest) {
+		public static Size findSize(List<Size> sizes, Size size, double fps, boolean return_closest) {
 			Size last_s = null;
 			for(Size s : sizes) {
 				if (size.equals(s)) {
@@ -153,7 +153,7 @@ public abstract class CameraController {
 			this(width, height, new ArrayList<int[]>(), false);
 		}
 
-		public boolean supportsFrameRate(int fps) {
+		public boolean supportsFrameRate(double fps) {
 			for (int[] f : this.fps_ranges) {
 				if (f[0] <= fps && fps <= f[1])
 					return true;
