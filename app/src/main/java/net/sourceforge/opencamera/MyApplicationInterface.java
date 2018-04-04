@@ -488,12 +488,18 @@ public class MyApplicationInterface implements ApplicationInterface {
     @Override
     public float getVideoCaptureRateFactor() {
 		float capture_rate_factor = sharedPreferences.getFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(main_activity.getPreview().getCameraId()), 1.0f);
-		if( capture_rate_factor < 1.0f-1.0e-5f ) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "capture_rate_factor: " + capture_rate_factor);
+		if( Math.abs(capture_rate_factor - 1.0f) > 1.0e-5 ) {
 			// check stored capture rate is valid
-			List<Integer> supported_slow_motion = getSupportedSlowMotionRates();
+			if( MyDebug.LOG )
+				Log.d(TAG, "check stored capture rate is valid");
+			List<Float> supported_capture_rates = getSupportedVideoCaptureRates();
+			if( MyDebug.LOG )
+				Log.d(TAG, "supported_capture_rates: " + supported_capture_rates);
 			boolean found = false;
-			for(int slow_motion_rate : supported_slow_motion) {
-				if( Math.abs(capture_rate_factor - 1.0f/slow_motion_rate) < 1.0e-5 ) {
+			for(float this_capture_rate : supported_capture_rates) {
+				if( Math.abs(capture_rate_factor - this_capture_rate) < 1.0e-5 ) {
 					found = true;
 					break;
 				}
@@ -510,29 +516,35 @@ public class MyApplicationInterface implements ApplicationInterface {
 	 *  slow motion should only be considered as supported if at least 2 entries
 	 *  are returned. Entries are returned in increasing order.
 	 */
-	public List<Integer> getSupportedSlowMotionRates() {
-		List<Integer> rates = new ArrayList<>();
-		rates.add(1);
+	public List<Float> getSupportedVideoCaptureRates() {
+		List<Float> rates = new ArrayList<>();
 		if( main_activity.getPreview().supportsVideoHighSpeed() ) {
 			// We consider a slow motion rate supported if we can get at least 30fps in slow motion.
 			// If this code is updated, see if we also need to update how slow motion fps is chosen
 			// in getVideoFPSPref().
 			if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(240) ||
 					main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(240) ) {
-				rates.add(2);
-				rates.add(4);
-				rates.add(8);
+				rates.add(1.0f/8.0f);
+				rates.add(1.0f/4.0f);
+				rates.add(1.0f/2.0f);
 			}
 			else if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(120) ||
 					main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(120) ) {
-				rates.add(2);
-				rates.add(4);
+				rates.add(1.0f/4.0f);
+				rates.add(1.0f/2.0f);
 			}
 			else if( main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRateHighSpeed(60) ||
 					main_activity.getPreview().getVideoQualityHander().videoSupportsFrameRate(60) ) {
-				rates.add(2);
+				rates.add(1.0f/2.0f);
 			}
 		}
+		rates.add(1.0f);
+		rates.add(4.0f);
+		rates.add(5.0f);
+		rates.add(10.0f);
+		rates.add(20.0f);
+		rates.add(30.0f);
+		rates.add(60.0f);
 		return rates;
 	}
 

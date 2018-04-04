@@ -5719,15 +5719,17 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 
-		List<Integer> supported_slow_motion = mActivity.getApplicationInterface().getSupportedSlowMotionRates();
-		if( supported_slow_motion.size() <= 1 ) {
+		List<Float> supported_capture_rates = mActivity.getApplicationInterface().getSupportedVideoCaptureRates();
+		if( supported_capture_rates.size() <= 1 ) {
 			Log.d(TAG, "slow motion not supported");
 			return;
 		}
 
-		int slow_motion_rate = supported_slow_motion.get(supported_slow_motion.size()-1);
-		float capture_rate = 1.0f / slow_motion_rate;
-		Log.d(TAG, "slow_motion_rate: " + slow_motion_rate);
+		float capture_rate = supported_capture_rates.get(0);
+		if( capture_rate > 1.0f-1.0e-5f ) {
+			Log.d(TAG, "slow motion not supported");
+			return;
+		}
 		Log.d(TAG, "capture_rate: " + capture_rate);
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -5750,8 +5752,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         // check video profile
         VideoProfile profile = mPreview.getVideoProfile();
-        assertEquals(profile.videoCaptureRate, fps);
-        assertEquals((float)profile.videoFrameRate, (float)(profile.videoCaptureRate/(float)slow_motion_rate), 1.0e-5);
+        assertEquals(profile.videoCaptureRate, (double)fps, 1.0e-5);
+        assertEquals((float)profile.videoFrameRate, (float)(profile.videoCaptureRate*capture_rate), 1.0e-5);
 
 		boolean allow_failure = false;
 		subTestTakeVideo(false, false, allow_failure, false, null, 5000, false, false);

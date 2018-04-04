@@ -3023,8 +3023,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			}
 
 			float capture_rate_factor = applicationInterface.getVideoCaptureRateFactor();
-			if( capture_rate_factor < 1.0f-1.0e-5f ) {
-				toast_string += "\n" + getResources().getString(R.string.preference_slow_motion) + ": " + capture_rate_factor;
+			if( Math.abs(capture_rate_factor - 1.0f) > 1.0e-5 ) {
+				toast_string += "\n" + getResources().getString(R.string.preference_video_capture_rate) + ": " + capture_rate_factor + "x";
 				simple = false;
 			}
 

@@ -487,7 +487,8 @@
     <string name="preference_fast_burst_n_images_entries_15">15</string>
     <string name="preference_fast_burst_n_images_entries_20">20</string>
 
-    <string name="preference_slow_motion">Slow Motion</string>
+    <string name="preference_video_capture_rate">Speed</string>
+    <string name="preference_video_capture_rate_normal">Normal</string>
 
     <string name="flash_off">Flash Off</string>
     <string name="flash_auto">Flash Auto</string>
