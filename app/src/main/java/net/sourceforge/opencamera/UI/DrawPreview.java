@@ -123,6 +123,7 @@ public class DrawPreview {
 	private Bitmap audio_disabled_bitmap;
 	private Bitmap high_speed_fps_bitmap;
 	private Bitmap slow_motion_bitmap;
+	private Bitmap time_lapse_bitmap;
 	private final Rect icon_dest = new Rect();
 	private long needs_flash_time = -1; // time when flash symbol comes on (used for fade-in effect)
 
@@ -183,6 +184,7 @@ public class DrawPreview {
 		audio_disabled_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_mic_off_white_48dp);
 		high_speed_fps_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_fast_forward_white_48dp);
 		slow_motion_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_slow_motion_video_white_48dp);
+		time_lapse_bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_timelapse_white_48dp);
 
 		ybounds_text = getContext().getResources().getString(R.string.zoom) + getContext().getResources().getString(R.string.angle) + getContext().getResources().getString(R.string.direction);
 	}
@@ -250,6 +252,10 @@ public class DrawPreview {
 		if( slow_motion_bitmap != null ) {
 			slow_motion_bitmap.recycle();
 			slow_motion_bitmap = null;
+		}
+		if( time_lapse_bitmap != null ) {
+			time_lapse_bitmap.recycle();
+			time_lapse_bitmap = null;
 		}
 	}
 
@@ -976,15 +982,15 @@ public class DrawPreview {
 				}
 			}
 
-			// icons for slow motion or high speed video
-			if( capture_rate_factor < 1.0f-1.0e-5f && applicationInterface.isVideoPref() ) {
+			// icons for slow motion, time lapse or high speed video
+			if( Math.abs(capture_rate_factor - 1.0f) > 1.0e-5 && applicationInterface.isVideoPref() ) {
 				icon_dest.set(location_x2, location_y, location_x2 + icon_size, location_y + icon_size);
 				p.setStyle(Paint.Style.FILL);
 				p.setColor(Color.BLACK);
 				p.setAlpha(64);
 				canvas.drawRect(icon_dest, p);
 				p.setAlpha(255);
-				canvas.drawBitmap(slow_motion_bitmap, null, icon_dest, p);
+				canvas.drawBitmap(capture_rate_factor < 1.0f ? slow_motion_bitmap : time_lapse_bitmap, null, icon_dest, p);
 
 				if( ui_rotation == 180 ) {
 					location_x2 -= icon_size + flash_padding;
