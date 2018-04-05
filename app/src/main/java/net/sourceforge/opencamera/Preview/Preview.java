@@ -2855,6 +2855,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			else if( capture_rate_factor > 1.0 ) {
 				// resultant framerate remains the same, instead adjst the capture rate
 				video_profile.videoCaptureRate = video_profile.videoCaptureRate / (double)capture_rate_factor;
+				if( MyDebug.LOG )
+					Log.d(TAG, "scaled capture rate to: " + video_profile.videoCaptureRate);
+		    	if( Math.abs(capture_rate_factor - 2.0f) < 1.0e-5f ) {
+		    		// hack - similar idea to the hack above for 2x slow motion
+					// again, even decreasing by 1.0e-5 works
+					// again, unclear if this is needed in general, or is a Nokia specific bug
+					video_profile.videoCaptureRate -= 1.0e-3f;
+					if( MyDebug.LOG )
+						Log.d(TAG, "fudged videoCaptureRate to: " + video_profile.videoCaptureRate);
+				}
 			}
 			// audio not recorded with slow motion or timelapse video
 			record_audio = false;

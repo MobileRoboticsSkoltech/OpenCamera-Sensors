@@ -539,6 +539,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 		}
 		rates.add(1.0f);
+		rates.add(2.0f);
+		rates.add(3.0f);
 		rates.add(4.0f);
 		rates.add(5.0f);
 		rates.add(10.0f);
