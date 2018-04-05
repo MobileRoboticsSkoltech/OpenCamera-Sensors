@@ -1676,15 +1676,6 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		// in video mode; but don't set high speed mode in photo mode just to be safe
 		// Setup for high speed - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize() and startCameraPreview()
 		camera_controller.setVideoHighSpeed(is_video && video_high_speed);
-		if( this.is_video ) {
-	    	capture_rate_factor = applicationInterface.getVideoCaptureRateFactor();
-	    	//capture_rate_factor = 4.0f; // test timelapse
-	    	has_capture_rate_factor = Math.abs(capture_rate_factor - 1.0f) > 1.0e-5f;
-			if( MyDebug.LOG ) {
-				Log.d(TAG, "has_capture_rate_factor: " + has_capture_rate_factor);
-				Log.d(TAG, "capture_rate_factor: " + capture_rate_factor);
-			}
-		}
 
 		if( do_startup_focus && using_android_l && camera_controller.supportsAutoFocus() ) {
 			// need to switch flash off for autofocus - and for Android L, need to do this before starting preview (otherwise it won't work in time); for old camera API, need to do this after starting preview!
@@ -2400,8 +2391,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
 		if( supports_video ) {
+	    	capture_rate_factor = applicationInterface.getVideoCaptureRateFactor();
+	    	has_capture_rate_factor = Math.abs(capture_rate_factor - 1.0f) > 1.0e-5f;
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "has_capture_rate_factor: " + has_capture_rate_factor);
+				Log.d(TAG, "capture_rate_factor: " + capture_rate_factor);
+			}
+
 			// set up high speed frame rates
-			// should be done after checking the requested video size is available
+			// should be done after checking the requested video size is available, and after reading the requested capture rate
 			video_high_speed = false;
 			if( this.supports_video_high_speed ) {
 				VideoProfile profile = getVideoProfile();
@@ -2836,7 +2834,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
 		if( has_capture_rate_factor ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "set video profile frame rate for slow motion or timelapse");
+				Log.d(TAG, "set video profile frame rate for slow motion or timelapse, capture rate: " + capture_rate_factor);
 			if( capture_rate_factor < 1.0 ) {
 				// capture rate remains the same, and we adjust the frame rate of video
 				video_profile.videoFrameRate = (int)(video_profile.videoFrameRate * capture_rate_factor + 0.5f);
