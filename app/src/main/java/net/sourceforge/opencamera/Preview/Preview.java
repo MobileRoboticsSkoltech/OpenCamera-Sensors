@@ -2841,6 +2841,16 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				// capture rate remains the same, and we adjust the frame rate of video
 				video_profile.videoFrameRate = (int)(video_profile.videoFrameRate * capture_rate_factor + 0.5f);
 				video_profile.videoBitRate = (int)(video_profile.videoBitRate * capture_rate_factor + 0.5f);
+				if( MyDebug.LOG )
+					Log.d(TAG, "scaled frame rate to: " + video_profile.videoFrameRate);
+		    	if( Math.abs(capture_rate_factor - 0.5f) < 1.0e-5f ) {
+		    		// hack - on Nokia 8 at least, capture_rate_factor of 0.5x still gives a normal speed video, but a
+					// workaround is to increase the capture rate - even increasing by just 1.0e-5 works
+					// unclear if this is needed in general, or is a Nokia specific bug
+					video_profile.videoCaptureRate += 1.0e-3;
+					if( MyDebug.LOG )
+						Log.d(TAG, "fudged videoCaptureRate to: " + video_profile.videoCaptureRate);
+				}
 			}
 			else if( capture_rate_factor > 1.0 ) {
 				// resultant framerate remains the same, instead adjst the capture rate
