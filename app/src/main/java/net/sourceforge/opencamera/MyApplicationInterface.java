@@ -320,6 +320,11 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
+	public String getAntiBandingPref() {
+		return sharedPreferences.getString(PreferenceKeys.AntiBandingPreferenceKey, CameraController.ANTIBANDING_DEFAULT);
+	}
+
+	@Override
 	public String getISOPref() {
     	return sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
     }

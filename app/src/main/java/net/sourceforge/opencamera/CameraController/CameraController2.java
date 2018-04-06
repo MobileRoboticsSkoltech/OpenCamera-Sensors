@@ -194,6 +194,8 @@ public class CameraController2 extends CameraController {
 		private int scene_mode = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
 		private int color_effect = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
 		private int white_balance = CameraMetadata.CONTROL_AWB_MODE_AUTO;
+		private boolean has_antibanding;
+		private int antibanding = CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO;
 		private int white_balance_temperature = 5000; // used for white_balance == CONTROL_AWB_MODE_OFF
 		private String flash_value = "flash_off";
 		private boolean has_iso;
@@ -261,6 +263,7 @@ public class CameraController2 extends CameraController {
 			setSceneMode(builder);
 			setColorEffect(builder);
 			setWhiteBalance(builder);
+			setAntiBanding(builder);
 			setAEMode(builder, is_still);
 			setCropRegion(builder);
 			setExposureCompensation(builder);
@@ -380,6 +383,19 @@ public class CameraController2 extends CameraController {
 				builder.set(CaptureRequest.COLOR_CORRECTION_MODE, CameraMetadata.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX);
 				builder.set(CaptureRequest.COLOR_CORRECTION_GAINS, rggbChannelVector);
 				changed = true;
+			}
+			return changed;
+		}
+
+		private boolean setAntiBanding(CaptureRequest.Builder builder) {
+			boolean changed = false;
+			if( has_antibanding ) {
+				if( builder.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE) == null || builder.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE) != antibanding ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "setting antibanding: " + antibanding);
+					builder.set(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE, antibanding);
+					changed = true;
+				}
 			}
 			return changed;
 		}
@@ -2178,6 +2194,97 @@ public class CameraController2 extends CameraController {
 	@Override
 	public int getWhiteBalanceTemperature() {
 		return camera_settings.white_balance_temperature;
+	}
+
+	private String convertAntiBanding(int value2) {
+		String value;
+		switch( value2 ) {
+		case CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO:
+			value = ANTIBANDING_DEFAULT;
+			break;
+		case CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_50HZ:
+			value = "50hz";
+			break;
+		case CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_60HZ:
+			value = "60hz";
+			break;
+		case CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_OFF:
+			value = "off";
+			break;
+		default:
+			if( MyDebug.LOG )
+				Log.d(TAG, "unknown antibanding: " + value2);
+			value = null;
+			break;
+		}
+		return value;
+	}
+
+	@Override
+	public SupportedValues setAntiBanding(String value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setAntiBanding: " + value);
+		// we convert to/from strings to be compatible with original Android Camera API
+		String default_value = ANTIBANDING_DEFAULT;
+		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_ANTIBANDING_MODES );
+		List<String> values = new ArrayList<>();
+		for(int value2 : values2) {
+			String this_value = convertAntiBanding(value2);
+			if( this_value != null ) {
+				values.add(this_value);
+			}
+		}
+		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		if( supported_values != null ) {
+			// for antibanding, if the requested value isn't available, we don't modify it at all
+			// (so we stick with the device's default setting)
+			if( supported_values.selected_value.equals(value) ) {
+				int selected_value2 = CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO;
+				switch(supported_values.selected_value) {
+					case ANTIBANDING_DEFAULT:
+						selected_value2 = CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_AUTO;
+						break;
+					case "50hz":
+						selected_value2 = CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_50HZ;
+						break;
+					case "60hz":
+						selected_value2 = CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_60HZ;
+						break;
+					case "off":
+						selected_value2 = CameraMetadata.CONTROL_AE_ANTIBANDING_MODE_OFF;
+						break;
+					default:
+						if( MyDebug.LOG )
+							Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+						break;
+				}
+
+				camera_settings.has_antibanding = true;
+				camera_settings.antibanding = selected_value2;
+				if( camera_settings.setAntiBanding(previewBuilder) ) {
+					try {
+						setRepeatingRequest();
+					}
+					catch(CameraAccessException e) {
+						if( MyDebug.LOG ) {
+							Log.e(TAG, "failed to set antibanding");
+							Log.e(TAG, "reason: " + e.getReason());
+							Log.e(TAG, "message: " + e.getMessage());
+						}
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return supported_values;
+	}
+
+	@Override
+	public String getAntiBanding() {
+		if( previewBuilder.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE) == null )
+			return null;
+		int value2 = previewBuilder.get(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE);
+		return convertAntiBanding(value2);
 	}
 
 	@Override

@@ -854,7 +854,14 @@
 	            />
 		    
 	    </PreferenceScreen>
-	        
+
+        <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
+	    <ListPreference
+	        android:key="preference_antibanding"
+	        android:title="@string/preference_antibanding"
+	        android:summary="@string/preference_antibanding_summary"
+	        />
+
 	</PreferenceCategory>
 
     <PreferenceCategory

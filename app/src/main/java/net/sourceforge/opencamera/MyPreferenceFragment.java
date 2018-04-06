@@ -1,5 +1,6 @@
 package net.sourceforge.opencamera;
 
+import net.sourceforge.opencamera.CameraController.CameraController;
 import net.sourceforge.opencamera.Preview.Preview;
 import net.sourceforge.opencamera.UI.FolderChooserDialog;
 
@@ -106,6 +107,16 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		//readFromBundle(bundle, "white_balances", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
 		//readFromBundle(bundle, "isos", Preview.getISOPreferenceKey(), "auto", "preference_category_camera_effects");
 		//readFromBundle(bundle, "exposures", "preference_exposure", "0", "preference_category_camera_effects");
+
+		String [] antibanding_values = bundle.getStringArray("antibanding");
+		if( antibanding_values != null && antibanding_values.length > 0 ) {
+			MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+			String [] entries = new String[antibanding_values.length];
+			for(int i=0;i<antibanding_values.length;i++) {
+				entries[i] = main_activity.getMainUI().getEntryForAntiBanding(antibanding_values[i]);
+			}
+			readFromBundle(antibanding_values, entries, PreferenceKeys.AntiBandingPreferenceKey, CameraController.ANTIBANDING_DEFAULT, "preference_category_camera_quality");
+		}
 
 		final boolean supports_face_detection = bundle.getBoolean("supports_face_detection");
 		if( MyDebug.LOG )
@@ -1098,20 +1109,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		}
 	}
 
-	/*private void readFromBundle(Bundle bundle, String intent_key, String preference_key, String default_value, String preference_category_key) {
+	private void readFromBundle(String [] values, String [] entries, String preference_key, String default_value, String preference_category_key) {
 		if( MyDebug.LOG ) {
-			Log.d(TAG, "readFromBundle: " + intent_key);
+			Log.d(TAG, "readFromBundle");
 		}
-		String [] values = bundle.getStringArray(intent_key);
 		if( values != null && values.length > 0 ) {
 			if( MyDebug.LOG ) {
-				Log.d(TAG, intent_key + " values:");
+				Log.d(TAG, "values:");
 				for(int i=0;i<values.length;i++) {
 					Log.d(TAG, values[i]);
 				}
 			}
 			ListPreference lp = (ListPreference)findPreference(preference_key);
-			lp.setEntries(values);
+			lp.setEntries(entries);
 			lp.setEntryValues(values);
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 			String value = sharedPreferences.getString(preference_key, default_value);
@@ -1126,7 +1136,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference(preference_category_key);
         	pg.removePreference(pref);
 		}
-	}*/
+	}
 	
 	public void onResume() {
 		super.onResume();

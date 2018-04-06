@@ -31,6 +31,7 @@ public abstract class CameraController {
 	public static final String SCENE_MODE_DEFAULT = "auto"; // chosen to match Camera.Parameters.SCENE_MODE_AUTO, but we also use compatible values for Camera2 API
 	public static final String COLOR_EFFECT_DEFAULT = "none"; // chosen to match Camera.Parameters.EFFECT_NONE, but we also use compatible values for Camera2 API
 	public static final String WHITE_BALANCE_DEFAULT = "auto"; // chosen to match Camera.Parameters.WHITE_BALANCE_AUTO, but we also use compatible values for Camera2 API
+	public static final String ANTIBANDING_DEFAULT = "auto"; // chosen to match Camera.Parameters.ANTIBANDING_AUTO, but we also use compatible values for Camera2 API
 	public static final String ISO_DEFAULT = "auto";
 	public static final long EXPOSURE_TIME_DEFAULT = 1000000000L/30; // note, responsibility of callers to check that this is within the valid min/max range
 
@@ -293,6 +294,8 @@ public abstract class CameraController {
 	public abstract String getWhiteBalance();
 	public abstract boolean setWhiteBalanceTemperature(int temperature);
 	public abstract int getWhiteBalanceTemperature();
+	public abstract SupportedValues setAntiBanding(String value);
+	public abstract String getAntiBanding();
 	/** Set an ISO value. Only supported if supports_iso_range is false.
 	 */
 	public abstract SupportedValues setISO(String value);

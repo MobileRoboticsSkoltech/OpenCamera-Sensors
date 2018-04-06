@@ -1318,6 +1318,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		if( this.preview.getCameraController() != null ) {
 			bundle.putString("parameters_string", preview.getCameraController().getParametersString());
 		}
+		putBundleExtra(bundle, "antibanding", this.preview.getSupportedAntiBanding());
 
 		List<CameraController.Size> preview_sizes = this.preview.getSupportedPreviewSizes();
 		if( preview_sizes != null ) {

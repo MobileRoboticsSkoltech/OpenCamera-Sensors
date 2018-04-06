@@ -188,6 +188,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private List<String> color_effects;
 	private List<String> scene_modes;
 	private List<String> white_balances;
+	private List<String> antibanding;
 	private List<String> isos;
 	private boolean supports_white_balance_temperature;
 	private int min_temperature;
@@ -1258,6 +1259,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		can_disable_shutter_sound = false;
 		color_effects = null;
 		white_balances = null;
+		antibanding = null;
 		isos = null;
 		supports_white_balance_temperature = false;
 		min_temperature = 0;
@@ -2143,6 +2145,21 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			Log.d(TAG, "setupCameraParameters: time after white balance: " + (System.currentTimeMillis() - debug_time));
 		}
 		
+		{
+			if( MyDebug.LOG )
+				Log.d(TAG, "set up antibanding");
+			String value = applicationInterface.getAntiBandingPref();
+			if( MyDebug.LOG )
+				Log.d(TAG, "saved antibanding: " + value);
+
+			CameraController.SupportedValues supported_values = camera_controller.setAntiBanding(value);
+            // for anti-banding, if the stored preference wasn't supported, we stick with the device default - but don't
+            // write it back to the user preference
+			if( supported_values != null ) {
+                antibanding = supported_values.values;
+            }
+		}
+
 		// must be done before setting flash modes, as we may remove flash modes if in manual mode
 		if( MyDebug.LOG )
 			Log.d(TAG, "set up iso");
@@ -5903,6 +5920,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "getSupportedWhiteBalances");
 		return this.white_balances;
+    }
+
+    public List<String> getSupportedAntiBanding() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getSupportedAntiBanding");
+		return this.antibanding;
     }
     
     public String getISOKey() {

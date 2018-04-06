@@ -518,6 +518,32 @@ public class CameraController1 extends CameraController {
 	}
 
 	@Override
+	public SupportedValues setAntiBanding(String value) {
+		String default_value = ANTIBANDING_DEFAULT;
+    	Camera.Parameters parameters = this.getParameters();
+		List<String> values = parameters.getSupportedAntibanding();
+		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		if( supported_values != null ) {
+			// for antibanding, if the requested value isn't available, we don't modify it at all
+			// (so we stick with the device's default setting)
+			if( supported_values.selected_value.equals(value) ) {
+				String antibanding = parameters.getAntibanding();
+				if( antibanding == null || !antibanding.equals(supported_values.selected_value) ) {
+					parameters.setAntibanding(supported_values.selected_value);
+					setCameraParameters(parameters);
+				}
+			}
+		}
+		return supported_values;
+	}
+
+	@Override
+	public String getAntiBanding() {
+    	Camera.Parameters parameters = this.getParameters();
+    	return parameters.getAntibanding();
+	}
+
+	@Override
 	public SupportedValues setISO(String value) {
     	Camera.Parameters parameters = this.getParameters();
 		// get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting

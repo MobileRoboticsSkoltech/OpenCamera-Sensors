@@ -499,6 +499,13 @@
     <string name="flash_frontscreen_on">Screen Flash On</string>
     <string name="flash_frontscreen_torch">Screen Torch</string>
 
+    <string name="preference_antibanding">Anti-banding</string>
+    <string name="preference_antibanding_summary">Algorithms to help with light flickering.\n%s</string>
+    <string name="anti_banding_auto">Auto</string>
+    <string name="anti_banding_50hz">50Hz</string>
+    <string name="anti_banding_60hz">60Hz</string>
+    <string name="anti_banding_off">Off</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

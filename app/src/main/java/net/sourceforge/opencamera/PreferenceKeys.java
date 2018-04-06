@@ -57,6 +57,8 @@ public class PreferenceKeys {
 
 	public static final String WhiteBalanceTemperaturePreferenceKey = "preference_white_balance_temperature";
 
+	public static final String AntiBandingPreferenceKey = "preference_antibanding";
+
 	public static final String ISOPreferenceKey = "preference_iso";
 
 	public static final String ExposureTimePreferenceKey = "preference_exposure_time";

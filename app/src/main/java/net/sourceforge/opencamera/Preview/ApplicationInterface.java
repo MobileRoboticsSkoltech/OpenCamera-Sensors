@@ -51,6 +51,7 @@ public interface ApplicationInterface {
 	String getColorEffectPref(); // "node" for default (strings correspond to Android's color effect constants in android.hardware.Camera.Parameters)
 	String getWhiteBalancePref(); // "auto" for default (strings correspond to Android's white balance constants in android.hardware.Camera.Parameters)
 	int getWhiteBalanceTemperaturePref();
+	String getAntiBandingPref(); // "auto" for default (strings correspond to Android's antibanding constants in android.hardware.Camera.Parameters)
 	String getISOPref(); // "auto" for auto-ISO, otherwise a numerical value; see documentation for Preview.supportsISORange().
 	int getExposureCompensationPref(); // 0 for default
 	Pair<Integer, Integer> getCameraResolutionPref(); // return null to let Preview choose size

@@ -1478,6 +1478,37 @@ public class MainUI {
 		return entry;
 	}
 
+	/** Returns a (possibly translated) user readable string for an antibanding preference value.
+	 *  If the value is not recognised, then the received value is returned.
+	 */
+	public String getEntryForAntiBanding(String value) {
+		int id = -1;
+		switch( value ) {
+			case CameraController.ANTIBANDING_DEFAULT:
+				id = R.string.anti_banding_auto;
+				break;
+			case "50hz":
+				id = R.string.anti_banding_50hz;
+				break;
+			case "60hz":
+				id = R.string.anti_banding_60hz;
+				break;
+			case "off":
+				id = R.string.anti_banding_off;
+				break;
+			default:
+				break;
+		}
+		String entry;
+		if( id != -1 ) {
+			entry = main_activity.getResources().getString(id);
+		}
+		else {
+			entry = value;
+		}
+		return entry;
+	}
+
     // for testing
     public View getUIButton(String key) {
 		if( MyDebug.LOG ) {
