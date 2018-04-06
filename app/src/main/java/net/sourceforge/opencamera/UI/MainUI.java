@@ -1028,7 +1028,7 @@ public class MainUI {
     	if( flash_value != null && flash_value.equals("flash_off") ) {
 			popup.setImageResource(R.drawable.popup_flash_off);
     	}
-    	else if( flash_value != null && flash_value.equals("flash_torch") || flash_value.equals("flash_frontscreen_torch") ) {
+    	else if( flash_value != null && ( flash_value.equals("flash_torch") || flash_value.equals("flash_frontscreen_torch") ) ) {
     		popup.setImageResource(R.drawable.popup_flash_torch);
     	}
 		else if( flash_value != null && ( flash_value.equals("flash_auto") || flash_value.equals("flash_frontscreen_auto") ) ) {

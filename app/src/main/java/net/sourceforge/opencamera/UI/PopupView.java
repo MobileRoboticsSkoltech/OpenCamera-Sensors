@@ -107,7 +107,7 @@ public class PopupView extends LinearLayout {
 				}
 				supported_flash_values = filter;
 			}
-			if( supported_flash_values.size() > 1 ) { // no point showing flash options if only one available!
+			if( supported_flash_values != null && supported_flash_values.size() > 1 ) { // no point showing flash options if only one available!
 				addButtonOptionsToPopup(supported_flash_values, R.array.flash_icons, R.array.flash_values, getResources().getString(R.string.flash_mode), preview.getCurrentFlashValue(), "TEST_FLASH", new ButtonOptionsPopupListener() {
 					@Override
 					public void onClick(String option) {
