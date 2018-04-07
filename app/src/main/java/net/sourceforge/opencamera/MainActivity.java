@@ -2883,8 +2883,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 
     public boolean supportsNoiseReduction() {
-		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() && preview.supportsExposureTime() );
-		//return false; // currently blocked for release
+		//return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() && preview.supportsExposureTime() );
+		return false; // currently blocked for release
 	}
     
     private int maxExpoBracketingNImages() {
