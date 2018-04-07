@@ -489,6 +489,8 @@
 
     <string name="preference_video_capture_rate">Speed</string>
     <string name="preference_video_capture_rate_normal">Normal</string>
+    <string name="slow_motion_enabled">Slow motion enabled</string>
+    <string name="slow_motion_disabled">Slow motion disabled</string>
 
     <string name="flash_off">Flash Off</string>
     <string name="flash_auto">Flash Auto</string>

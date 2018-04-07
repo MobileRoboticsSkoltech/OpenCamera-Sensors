@@ -592,13 +592,21 @@ public class PopupView extends LinearLayout {
 							SharedPreferences.Editor editor = sharedPreferences.edit();
 							editor.putFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(preview.getCameraId()), new_capture_rate_value);
 							editor.apply();
-    						String toast_message = getResources().getString(R.string.preference_video_capture_rate) + ": " + capture_rate_str.get(video_capture_rate_index);
 							float old_capture_rate_value = capture_rate_values.get(old_video_capture_rate_index);
 							boolean old_slow_motion = (old_capture_rate_value < 1.0f-1.0e-5f);
 							boolean new_slow_motion = (new_capture_rate_value < 1.0f-1.0e-5f);
 							// if changing to/from a slow motion mode, this will in general switch on/off high fps frame
 							// rates, which changes the available video resolutions, so we need to re-open the popup
     						boolean keep_popup = (old_slow_motion==new_slow_motion);
+							// only display a toast if the popup is closing
+    						//String toast_message = getResources().getString(R.string.preference_video_capture_rate) + ": " + capture_rate_str.get(video_capture_rate_index);
+    						String toast_message = "";
+    						if( !keep_popup ) {
+    						    if( new_slow_motion )
+                                    toast_message = getResources().getString(R.string.slow_motion_enabled) + "\n" + getResources().getString(R.string.preference_video_capture_rate) + ": " + capture_rate_str.get(video_capture_rate_index);
+    						    else
+                                    toast_message = getResources().getString(R.string.slow_motion_disabled);
+                            }
 							if( MyDebug.LOG ) {
 								Log.d(TAG, "update settings due to capture rate change");
 								Log.d(TAG, "old_capture_rate_value: " + old_capture_rate_value);
@@ -606,6 +614,7 @@ public class PopupView extends LinearLayout {
 								Log.d(TAG, "old_slow_motion: " + old_slow_motion);
 								Log.d(TAG, "new_slow_motion: " + new_slow_motion);
 								Log.d(TAG, "keep_popup: " + keep_popup);
+								Log.d(TAG, "toast_message: " + toast_message);
 							}
 							old_video_capture_rate_index = video_capture_rate_index;
 
