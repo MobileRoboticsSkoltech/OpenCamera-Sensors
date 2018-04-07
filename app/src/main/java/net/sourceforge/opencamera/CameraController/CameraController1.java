@@ -474,6 +474,8 @@ public class CameraController1 extends CameraController {
 	}
 
 	public SupportedValues setWhiteBalance(String value) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setWhiteBalance: " + value);
 		Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedWhiteBalance();
 		if( values != null ) {
