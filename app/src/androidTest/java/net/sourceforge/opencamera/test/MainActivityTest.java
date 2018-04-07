@@ -5759,6 +5759,59 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakeVideo(false, false, allow_failure, false, null, 5000, false, false);
 	}
 
+	/** Take video with timelapse mode.
+	 */
+	public void testTakeVideoTimeLapse() throws InterruptedException {
+		Log.d(TAG, "testTakeVideoTimeLapse");
+
+		setToDefault();
+
+		List<Float> supported_capture_rates = mActivity.getApplicationInterface().getSupportedVideoCaptureRates();
+		if( supported_capture_rates.size() <= 1 ) {
+			Log.d(TAG, "timelapse not supported");
+			return;
+		}
+
+		float capture_rate = -1.0f;
+		// find the first timelapse rate
+		for(float this_capture_rate : supported_capture_rates) {
+			if( this_capture_rate > 1.0f+1.0e-5f ) {
+				capture_rate = this_capture_rate;
+				break;
+			}
+		}
+		if( capture_rate < 0.0f ) {
+			Log.d(TAG, "timelapse not supported");
+			return;
+		}
+		Log.d(TAG, "capture_rate: " + capture_rate);
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(mPreview.getCameraId()), capture_rate);
+		editor.apply();
+		updateForSettings();
+
+		// switch to video, and check we've set a non-high speed fps
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+	    assertTrue(mPreview.isVideo());
+
+        String fps_value = mActivity.getApplicationInterface().getVideoFPSPref();
+        Log.d(TAG, "fps_value: " + fps_value);
+        assertTrue(fps_value.equals("default"));
+        assertTrue(!mPreview.isVideoHighSpeed());
+
+        // check video profile
+        VideoProfile profile = mPreview.getVideoProfile();
+        // note, need to allow a larger delta, due to the fudge factor applied for 2x timelapse
+        assertEquals((float)profile.videoFrameRate, (float)(profile.videoCaptureRate*capture_rate), 5.0e-3);
+
+		boolean allow_failure = false;
+		subTestTakeVideo(false, false, allow_failure, false, null, 5000, false, false);
+	}
+
 	/* Test can be reliable on some devices, test no longer run as part of test suites.
 	 */
 	public void testTakeVideoBitrate() throws InterruptedException {

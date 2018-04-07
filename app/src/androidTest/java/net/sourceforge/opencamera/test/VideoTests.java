@@ -50,6 +50,7 @@ public class VideoTests {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize2"));
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoMaxFileSize3"));
 		}
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoTimeLapse"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoForceFailure"));
 		// put tests which change bitrate, fps or test 4K at end
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoFPS"));
