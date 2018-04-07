@@ -55,8 +55,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	private static final String TAG = "MainActivityTest";
 	private MainActivity mActivity = null;
 	private Preview mPreview = null;
-	public static boolean test_camera2 = false;
-	//public static boolean test_camera2 = true;
+	public static final boolean test_camera2 = false;
+	//public static final boolean test_camera2 = true;
 
 	@SuppressWarnings("deprecation")
 	public MainActivityTest() {
@@ -230,7 +230,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			    assertTrue(currentFlashButton.getAlpha() == PopupView.ALPHA_BUTTON_SELECTED);
 			    View flashButton = mActivity.getUIButton("TEST_FLASH_" + required_flash_value);
 			    assertTrue(flashButton != null);
-			    assertTrue(flashButton.getAlpha() == PopupView.ALPHA_BUTTON);
+			    assertEquals(flashButton.getAlpha(), PopupView.ALPHA_BUTTON, 1.0e-5);
 			    clickView(flashButton);
 			    flash_value = mPreview.getCurrentFlashValue();
 				Log.d(TAG, "changed flash_value to: "+ flash_value);
@@ -1626,7 +1626,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 		Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 		assertTrue(mPreview.count_cameraTakePicture==3);
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 3);
 	}
@@ -1691,7 +1691,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		mActivity.waitUntilImageQueueEmpty();
 
 		assertTrue( folder.exists() );
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 1);
 	}
@@ -1768,7 +1768,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		mActivity.waitUntilImageQueueEmpty();
 
 		assertTrue( folder.exists() );
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 1);
 	}
@@ -2722,7 +2722,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int n_files = files.length;
 		assertTrue( folder.exists() );
 		File [] files2 = folder.listFiles();
-		int n_new_files = files2.length - n_files;
+		int n_new_files = (files2 == null ? 0 : files2.length) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		int exp_n_new_files = getExpNNewFiles(is_raw);
 		assertTrue(n_new_files == exp_n_new_files);
@@ -3004,7 +3004,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		mActivity.waitUntilImageQueueEmpty();
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 2*n_photos); // if we fail here, be careful we haven't lost images (i.e., waitUntilImageQueueEmpty() returns before all images are saved)
 	}
@@ -3809,7 +3809,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Bitmap thumbnail = mActivity.gallery_bitmap;
 		assertTrue(thumbnail != null);
 
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		int exp_n_new_files = is_raw ? 2 : 1;
 		Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
@@ -3833,7 +3833,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "after idle sync 3");
 
 		// check photo not deleted
-		n_new_files = folder.listFiles().length - n_files;
+		n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
 		assertTrue(n_new_files == exp_n_new_files);
@@ -3958,7 +3958,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Bitmap thumbnail = mActivity.gallery_bitmap;
 		assertTrue(thumbnail != null);
 
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		int exp_n_new_files = is_raw ? 2 : 1;
 		Log.d(TAG, "exp_n_new_files: " + exp_n_new_files);
@@ -3983,7 +3983,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "done click share");
 
 			// check photo(s) not deleted
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == exp_n_new_files);
 		}
@@ -3993,7 +3993,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "done click trash");
 
 			// check photo(s) deleted
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 0);
 
@@ -4281,7 +4281,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		mActivity.waitUntilImageQueueEmpty();
 
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 1);
 
@@ -4335,7 +4335,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		mActivity.waitUntilImageQueueEmpty();
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == count);
 	}
@@ -4420,7 +4420,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		}
 
 		mActivity.waitUntilImageQueueEmpty();
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == angles.length); // if we fail here, be careful we haven't lost images (i.e., waitUntilImageQueueEmpty() returns before all images are saved); note that in some cases, this test fails here because the activity onPause() after clicking take photo?!
 
@@ -4672,7 +4672,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    }
 
 		assertTrue( folder.exists() );
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		if( test_cb == null ) {
 			if( time_ms <= 500 ) {
@@ -5908,7 +5908,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "check still taking video");
 		assertTrue( mPreview.isVideoRecording() );
 
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 1);
 
@@ -5926,7 +5926,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				Log.d(TAG, "check restarted video");
 				assertTrue( mPreview.isVideoRecording() );
 				assertTrue( folder.exists() );
-				n_new_files = folder.listFiles().length - n_files;
+				n_new_files = getNFiles(folder) - n_files;
 				Log.d(TAG, "n_new_files: " + n_new_files);
 				assertTrue(n_new_files == 2);
 
@@ -5940,7 +5940,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( !mPreview.isVideoRecording() );
 
 		assertTrue( folder.exists() );
-		n_new_files = folder.listFiles().length - n_files;
+		n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == (restart ? 2 : 1));
 
@@ -6018,7 +6018,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "check still taking video");
 		assertTrue( mPreview.isVideoRecording() );
 
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 1);
 
@@ -6032,7 +6032,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( !mPreview.isVideoRecording() );
 
 		assertTrue( folder.exists() );
-		n_new_files = folder.listFiles().length - n_files;
+		n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 1);
 
@@ -6057,7 +6057,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertTrue( mPreview.isVideoRecording() );
 
 		assertTrue( folder.exists() );
-		n_new_files = folder.listFiles().length - n_files;
+		n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 2);
 
@@ -6128,7 +6128,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Log.d(TAG, "check still taking video");
 		assertTrue( mPreview.isVideoRecording() );
 
-		int n_new_files = folder.listFiles().length - n_files;
+		int n_new_files = getNFiles(folder) - n_files;
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == 1);
 
@@ -6275,7 +6275,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    // check timer cancelled, and not yet taken a photo
 			assertTrue(!mPreview.isOnTimer());
 			assertTrue(mPreview.count_cameraTakePicture==0);
-			int n_new_files = folder.listFiles().length - n_files;
+			int n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 0);
 
@@ -6287,7 +6287,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "done clicking take photo");
 			assertTrue(mPreview.isOnTimer());
 			assertTrue(mPreview.count_cameraTakePicture==0);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 0);
 
@@ -6296,7 +6296,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "waited, count now " + mPreview.count_cameraTakePicture);
 			assertTrue(!mPreview.isOnTimer());
 			assertTrue(mPreview.count_cameraTakePicture==1);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 1);
 
@@ -6312,7 +6312,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "done clicking take photo");
 			assertTrue(mPreview.isOnTimer());
 			assertTrue(mPreview.count_cameraTakePicture==1);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 1);
 
@@ -6321,7 +6321,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "waited, count now " + mPreview.count_cameraTakePicture);
 			assertTrue(!mPreview.isOnTimer());
 			assertTrue(mPreview.count_cameraTakePicture==2);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 2);
 
@@ -6333,7 +6333,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "done clicking take photo");
 			assertTrue(mPreview.isOnTimer());
 			assertTrue(mPreview.count_cameraTakePicture==2);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 2);
 
@@ -6346,7 +6346,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "done clicking take photo to cancel");
 			assertTrue(!mPreview.isOnTimer());
 			assertTrue(mPreview.count_cameraTakePicture==2);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 2);
 
@@ -6355,7 +6355,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			Log.d(TAG, "waited, count now " + mPreview.count_cameraTakePicture);
 			assertTrue(!mPreview.isOnTimer());
 			assertTrue(mPreview.count_cameraTakePicture==2);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 2);
 		}
@@ -6661,7 +6661,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 			Log.d(TAG, "count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 			assertTrue(mPreview.count_cameraTakePicture==3);
-			int n_new_files = folder.listFiles().length - n_files;
+			int n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 3);
 
@@ -6672,7 +6672,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
 			Log.d(TAG, "mPreview.count_cameraTakePicture: " + mPreview.count_cameraTakePicture);
 			assertTrue(mPreview.count_cameraTakePicture==3);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 3);
 
@@ -6686,14 +6686,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		    clickView(takePhotoButton);
 			Thread.sleep(7000);
 			assertTrue(mPreview.count_cameraTakePicture==6);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 6);
 			assertTrue(!mPreview.isPreviewStarted()); // check preview paused
 
 		    TouchUtils.clickView(MainActivityTest.this, mPreview.getView());
 			this.getInstrumentation().waitForIdleSync();
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 6);
 		    assertTrue(mPreview.isPreviewStarted()); // check preview restarted
@@ -6719,25 +6719,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			this.getInstrumentation().waitForIdleSync();
 			assertTrue(mPreview.count_cameraTakePicture==7);
 			mActivity.waitUntilImageQueueEmpty();
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 7);
 			// wait 2s, should still not have taken another photo
 			Thread.sleep(2000);
 			assertTrue(mPreview.count_cameraTakePicture==7);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 7);
 			// wait another 5s, should have taken another photo (need to allow time for the extra auto-focus)
 			Thread.sleep(5000);
 			assertTrue(mPreview.count_cameraTakePicture==8);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 8);
 			// wait 4s, should not have taken any more photos
 			Thread.sleep(4000);
 			assertTrue(mPreview.count_cameraTakePicture==8);
-			n_new_files = folder.listFiles().length - n_files;
+			n_new_files = getNFiles(folder) - n_files;
 			Log.d(TAG, "n_new_files: " + n_new_files);
 			assertTrue(n_new_files == 8);
 		}
@@ -7569,17 +7569,19 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			// delete folder - need to delete contents first
 			if( folder.isDirectory() ) {
 		        String [] children = folder.list();
-				for(String child : children) {
-		            File file = new File(folder, child);
-		            file.delete();
-		        	MediaScannerConnection.scanFile(mActivity, new String[] { file.getAbsolutePath() }, null, null);
-		        }
+		        if( children != null ) {
+					for(String child : children) {
+						File file = new File(folder, child);
+						file.delete();
+						MediaScannerConnection.scanFile(mActivity, new String[] { file.getAbsolutePath() }, null, null);
+					}
+				}
 			}
 			folder.delete();
 		}
 		int n_old_files = 0;
 		if( folder.exists() ) {
-			n_old_files = folder.listFiles().length;
+			n_old_files = getNFiles(folder);
 		}
 		Log.d(TAG, "n_old_files: " + n_old_files);
 
@@ -7598,7 +7600,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		mActivity.waitUntilImageQueueEmpty();
 
 		assertTrue( folder.exists() );
-		int n_new_files = folder.listFiles().length;
+		int n_new_files = getNFiles(folder);
 		Log.d(TAG, "n_new_files: " + n_new_files);
 		assertTrue(n_new_files == n_old_files+1);
 
@@ -7692,11 +7694,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			// delete folder - need to delete contents first
 			if( folder.isDirectory() ) {
 		        String [] children = folder.list();
-				for(String child : children) {
-					File file = new File(folder, child);
-		            file.delete();
-		        	MediaScannerConnection.scanFile(mActivity, new String[] { file.getAbsolutePath() }, null, null);
-		        }
+		        if( children != null ) {
+					for(String child : children) {
+						File file = new File(folder, child);
+						file.delete();
+						MediaScannerConnection.scanFile(mActivity, new String[] { file.getAbsolutePath() }, null, null);
+					}
+				}
 			}
 			folder.delete();
 		}
@@ -8453,7 +8457,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		assertEquals(mActivity.getTextFormatter().getGPSString("preference_stamp_gpsformat_dms", false, null, true, Math.toRadians(74)), "74°");
 	}
 
-	private class HistogramDetails {
+	private static class HistogramDetails {
 		final int min_value;
 		final int median_value;
 		final int max_value;
