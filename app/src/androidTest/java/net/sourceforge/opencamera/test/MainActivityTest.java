@@ -7919,6 +7919,22 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		String new_scene_mode = mPreview.getCameraController().getSceneMode();
 		Log.d(TAG, "scene_mode is now: " + new_scene_mode);
 	    assertTrue( new_scene_mode.equals(scene_mode) );
+
+	    // Now set back to default - important as on some devices, non-default scene modes may override e.g. what
+		// white balance mode can be set.
+		// This was needed to fix the test testCameraModes() on Galaxy Nexus, which started failing in
+		// April 2018 for v1.43. Earlier versions (e.g., 1.42) still had the problem despite previously
+		// testing fine, so something must have changed on the device?
+
+		settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		editor = settings.edit();
+		editor.putString(PreferenceKeys.SceneModePreferenceKey, CameraController.SCENE_MODE_DEFAULT);
+		editor.apply();
+		updateForSettings();
+
+		new_scene_mode = mPreview.getCameraController().getSceneMode();
+		Log.d(TAG, "scene_mode is now: " + new_scene_mode);
+	    assertTrue( new_scene_mode.equals(CameraController.SCENE_MODE_DEFAULT) );
 	}
 
 	private void subTestColorEffect() {
