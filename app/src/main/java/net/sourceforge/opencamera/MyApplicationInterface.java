@@ -544,14 +544,18 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 		}
 		rates.add(1.0f);
-		rates.add(2.0f);
-		rates.add(3.0f);
-		rates.add(4.0f);
-		rates.add(5.0f);
-		rates.add(10.0f);
-		rates.add(20.0f);
-		rates.add(30.0f);
-		rates.add(60.0f);
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+			// add timelapse options
+			// in theory this should work on any Android version, though video fails to record in timelapse mode on Galaxy Nexus...
+			rates.add(2.0f);
+			rates.add(3.0f);
+			rates.add(4.0f);
+			rates.add(5.0f);
+			rates.add(10.0f);
+			rates.add(20.0f);
+			rates.add(30.0f);
+			rates.add(60.0f);
+		}
 		return rates;
 	}
 
