@@ -261,7 +261,6 @@ public class ImageSaver extends Thread {
 	/** Computes the cost (in terms of number of slots on the image queue) of a new photo.
 	 * @param has_raw Whether this is RAW+JPEG or RAW only.
 	 * @param n_jpegs If has_raw is false, the number of JPEGs that will be taken.
-	 * @return
 	 */
 	int computePhotoCost(boolean has_raw, int n_jpegs) {
 		if( MyDebug.LOG ) {

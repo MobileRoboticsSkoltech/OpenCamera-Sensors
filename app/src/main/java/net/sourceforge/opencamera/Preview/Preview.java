@@ -6338,7 +6338,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			private final Rect sub_bounds = new Rect();
 			private final RectF rect = new RectF();
 
-			public RotatedTextView(String text, Context context) {
+			RotatedTextView(String text, Context context) {
 				super(context);
 
 				this.lines = text.split("\n");

@@ -88,8 +88,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 	/** This class keeps track of the images saved in this batch, for use with Pause Preview option, so we can share or trash images.
 	 */
 	private static class LastImage {
-		public final boolean share; // one of the images in the list should have share set to true, to indicate which image to share
-		public final String name;
+		final boolean share; // one of the images in the list should have share set to true, to indicate which image to share
+		final String name;
 		Uri uri;
 
 		LastImage(Uri uri, boolean share) {
@@ -1226,7 +1226,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			main_activity.lockScreen();
 		}
 		main_activity.stopAudioListeners(); // important otherwise MediaRecorder will fail to start() if we have an audiolistener! Also don't want to have the speech recognizer going off
-		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		ImageButton view = main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_recording);
 		view.setContentDescription( getContext().getResources().getString(R.string.stop_video) );
 		view.setTag(R.drawable.take_video_recording); // for testing
@@ -1408,7 +1408,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "stoppingVideo()");
 		main_activity.unlockScreen();
-		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		ImageButton view = main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_selector);
 		view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
 		view.setTag(R.drawable.take_video_selector); // for testing
@@ -1515,7 +1515,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				}
 			}
 			if( thumbnail != null ) {
-				ImageButton galleryButton = (ImageButton) main_activity.findViewById(R.id.gallery);
+				ImageButton galleryButton = main_activity.findViewById(R.id.gallery);
 				int width = thumbnail.getWidth();
 				int height = thumbnail.getHeight();
 				if( MyDebug.LOG )
@@ -1610,7 +1610,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			error_message = getContext().getResources().getString(R.string.failed_to_record_video);
 		}
 		main_activity.getPreview().showToast(null, error_message);
-		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		ImageButton view = main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_selector);
 		view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
 		view.setTag(R.drawable.take_video_selector); // for testing
@@ -1637,7 +1637,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	@Override
 	public void onFailedCreateVideoFileError() {
 		main_activity.getPreview().showToast(null, R.string.failed_to_save_video);
-		ImageButton view = (ImageButton)main_activity.findViewById(R.id.take_photo);
+		ImageButton view = main_activity.findViewById(R.id.take_photo);
 		view.setImageResource(R.drawable.take_video_selector);
 		view.setContentDescription( getContext().getResources().getString(R.string.start_video) );
 		view.setTag(R.drawable.take_video_selector); // for testing

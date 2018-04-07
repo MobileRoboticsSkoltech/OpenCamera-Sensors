@@ -1120,7 +1120,7 @@ public class PopupView extends LinearLayout {
 		 *                       by addRadioOptionsToPopup) that corresponds to the selected radio
 		 *                       option.
 		 */
-		public abstract void onClick(String selected_value);
+		protected abstract void onClick(String selected_value);
 	}
 
 	/** Adds a set of radio options to the popup menu.
@@ -1174,7 +1174,7 @@ public class PopupView extends LinearLayout {
 					if( opened ) {
 						//rg.removeAllViews();
 						rg.setVisibility(View.GONE);
-						final ScrollView popup_container = (ScrollView) main_activity.findViewById(R.id.popup_container);
+						final ScrollView popup_container = main_activity.findViewById(R.id.popup_container);
 						// need to invalidate/requestLayout so that the scrollview's scroll positions update - otherwise scrollBy below doesn't work properly, when the user reopens the radio buttons
 						popup_container.invalidate();
 						popup_container.requestLayout();
@@ -1185,7 +1185,7 @@ public class PopupView extends LinearLayout {
 							created = true;
 						}
 						rg.setVisibility(View.VISIBLE);
-						final ScrollView popup_container = (ScrollView) main_activity.findViewById(R.id.popup_container);
+						final ScrollView popup_container = main_activity.findViewById(R.id.popup_container);
 						popup_container.getViewTreeObserver().addOnGlobalLayoutListener(
 								new OnGlobalLayoutListener() {
 									@SuppressWarnings("deprecation")
@@ -1295,8 +1295,8 @@ public class PopupView extends LinearLayout {
 	}
     
     private abstract class ArrayOptionsPopupListener {
-		public abstract int onClickPrev();
-		public abstract int onClickNext();
+		protected abstract int onClickPrev();
+		protected abstract int onClickNext();
     }
 
     private void setArrayOptionsText(List<String> supported_options, String title, TextView textView, boolean title_in_options, boolean title_in_options_first_only, int current_index) {

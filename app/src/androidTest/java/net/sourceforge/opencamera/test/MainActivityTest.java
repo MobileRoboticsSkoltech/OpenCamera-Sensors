@@ -2106,7 +2106,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	    View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
 		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_container);
-		SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
+		SeekBar seekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
 	    assertTrue(exposureButton.getVisibility() == (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
 	    assertTrue(exposureContainer.getVisibility() == View.GONE);
 
@@ -2205,8 +2205,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
 		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.manual_exposure_container);
-		SeekBar isoSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.iso_seekbar);
-	    SeekBar exposureTimeSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_time_seekbar);
+		SeekBar isoSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.iso_seekbar);
+	    SeekBar exposureTimeSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_time_seekbar);
 	    assertTrue(exposureButton.getVisibility() == View.VISIBLE);
 	    assertTrue(exposureContainer.getVisibility() == View.GONE);
 
@@ -2343,7 +2343,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		int initial_temperature = mPreview.getCameraController().getWhiteBalanceTemperature();
 		int initial_temperature_setting = settings.getInt(PreferenceKeys.WhiteBalanceTemperaturePreferenceKey, 5000);
 		assertTrue(initial_temperature == initial_temperature_setting);
-		SeekBar white_balance_seek_bar = ((SeekBar)mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_seekbar));
+		SeekBar white_balance_seek_bar = mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_seekbar);
 		int initial_white_balance_seek_bar_pos = white_balance_seek_bar.getProgress();
 
 		/*SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -2419,9 +2419,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		View exposureButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure);
 		View exposureContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_container);
-		SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
+		SeekBar seekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.exposure_seekbar);
         View manualWBContainer = mActivity.findViewById(net.sourceforge.opencamera.R.id.manual_white_balance_container);
-		SeekBar seekBarWB = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_seekbar);
+		SeekBar seekBarWB = mActivity.findViewById(net.sourceforge.opencamera.R.id.white_balance_seekbar);
 
 		assertTrue(exposureButton.getVisibility() == (mPreview.supportsExposures() ? View.VISIBLE : View.GONE));
 		assertTrue(exposureContainer.getVisibility() == View.GONE);
@@ -3424,7 +3424,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 		setToDefault();
-	    SeekBar seekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
+	    SeekBar seekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
 	    assertTrue(seekBar.getVisibility() == View.GONE);
 		switchToFocusValue("focus_mode_manual2");
 	    assertTrue(seekBar.getVisibility() == View.VISIBLE);
@@ -7228,10 +7228,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 
-	    final ZoomControls zoomControls = (ZoomControls) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom);
+	    final ZoomControls zoomControls = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom);
 		assertTrue(zoomControls.getVisibility() == View.GONE);
 
-	    final SeekBar zoomSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
+	    final SeekBar zoomSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
 		assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 		int max_zoom = mPreview.getMaxZoom();
 		assertTrue(zoomSeekBar.getMax() == max_zoom);
@@ -7402,7 +7402,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 
-	    final SeekBar zoomSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
+	    final SeekBar zoomSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
 		assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 		int init_zoom = mPreview.getCameraController().getZoom();
 	    int max_zoom = mPreview.getMaxZoom();
@@ -7432,7 +7432,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 
-	    final SeekBar zoomSeekBar = (SeekBar) mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
+	    final SeekBar zoomSeekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.zoom_seekbar);
 		assertTrue(zoomSeekBar.getVisibility() == View.VISIBLE);
 		int init_zoom = mPreview.getCameraController().getZoom();
 	    int max_zoom = mPreview.getMaxZoom();

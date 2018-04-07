@@ -90,7 +90,7 @@ public class CameraController2 extends CameraController {
 		BURSTTYPE_NONE, // for when enable_burst is false
 		BURSTTYPE_EXPO, // enable expo bracketing mode; see expo_bracketing_n_images, expo_bracketing_stops for further control
 		BURSTTYPE_NORMAL // take a regular burst; see burst_for_noise_reduction, burst_requested_n_images for further control
-	};
+	}
 	private BurstType burst_type = BurstType.BURSTTYPE_NONE;
 	// for BURSTTYPE_EXPO:
 	private final static int max_expo_bracketing_n_images = 5; // could be more, but limit to 5 for now
@@ -1355,16 +1355,23 @@ public class CameraController2 extends CameraController {
 			throw new CameraControllerException();*/
 		if( MyDebug.LOG ) {
 			int hardware_level = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-			if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY )
-				Log.d(TAG, "Hardware Level: LEGACY");
-			else if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED )
-				Log.d(TAG, "Hardware Level: LIMITED");
-			else if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL )
-				Log.d(TAG, "Hardware Level: FULL");
-			else if( hardware_level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_3 )
-				Log.d(TAG, "Hardware Level: Level 3");
-			else
-				Log.e(TAG, "Unknown Hardware Level: " + hardware_level);
+			switch (hardware_level) {
+				case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY:
+					Log.d(TAG, "Hardware Level: LEGACY");
+					break;
+				case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED:
+					Log.d(TAG, "Hardware Level: LIMITED");
+					break;
+				case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL:
+					Log.d(TAG, "Hardware Level: FULL");
+					break;
+				case CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_3:
+					Log.d(TAG, "Hardware Level: Level 3");
+					break;
+				default:
+					Log.e(TAG, "Unknown Hardware Level: " + hardware_level);
+					break;
+			}
 
 			int [] nr_modes = characteristics.get(CameraCharacteristics.NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES);
 			Log.d(TAG, "nr_modes:");
@@ -1802,7 +1809,6 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setSceneMode: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
-		String default_value = SCENE_MODE_DEFAULT;
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES);
 		boolean has_disabled = false;
 		List<String> values = new ArrayList<>();
@@ -1817,7 +1823,7 @@ public class CameraController2 extends CameraController {
 		if( !has_disabled ) {
 			values.add(0, SCENE_MODE_DEFAULT);
 		}
-		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		SupportedValues supported_values = checkModeIsSupported(values, value, SCENE_MODE_DEFAULT);
 		if( supported_values != null ) {
 			int selected_value2 = CameraMetadata.CONTROL_SCENE_MODE_DISABLED;
 			switch(supported_values.selected_value) {
@@ -1952,7 +1958,6 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setColorEffect: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
-		String default_value = COLOR_EFFECT_DEFAULT;
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_EFFECTS);
 		List<String> values = new ArrayList<>();
 		for(int value2 : values2) {
@@ -1961,7 +1966,7 @@ public class CameraController2 extends CameraController {
 				values.add(this_value);
 			}
 		}
-		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		SupportedValues supported_values = checkModeIsSupported(values, value, COLOR_EFFECT_DEFAULT);
 		if( supported_values != null ) {
 			int selected_value2 = CameraMetadata.CONTROL_EFFECT_MODE_OFF;
 			switch(supported_values.selected_value) {
@@ -2076,7 +2081,6 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setWhiteBalance: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
-		String default_value = WHITE_BALANCE_DEFAULT;
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES);
 		List<String> values = new ArrayList<>();
 		for(int value2 : values2) {
@@ -2099,7 +2103,7 @@ public class CameraController2 extends CameraController {
 			if( has_auto )
 				values.add(0, WHITE_BALANCE_DEFAULT);
 		}
-		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		SupportedValues supported_values = checkModeIsSupported(values, value, WHITE_BALANCE_DEFAULT);
 		if( supported_values != null ) {
 			int selected_value2 = CameraMetadata.CONTROL_AWB_MODE_AUTO;
 			switch(supported_values.selected_value) {
@@ -2225,7 +2229,6 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setAntiBanding: " + value);
 		// we convert to/from strings to be compatible with original Android Camera API
-		String default_value = ANTIBANDING_DEFAULT;
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_ANTIBANDING_MODES );
 		List<String> values = new ArrayList<>();
 		for(int value2 : values2) {
@@ -2234,7 +2237,7 @@ public class CameraController2 extends CameraController {
 				values.add(this_value);
 			}
 		}
-		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		SupportedValues supported_values = checkModeIsSupported(values, value, ANTIBANDING_DEFAULT);
 		if( supported_values != null ) {
 			// for antibanding, if the requested value isn't available, we don't modify it at all
 			// (so we stick with the device's default setting)
@@ -2948,23 +2951,25 @@ public class CameraController2 extends CameraController {
 		if( MyDebug.LOG )
 			Log.d(TAG, "convertFocusModeToValue: " + focus_mode);
 		String focus_value = "";
-		if( focus_mode == CaptureRequest.CONTROL_AF_MODE_AUTO ) {
-    		focus_value = "focus_mode_auto";
-    	}
-		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_MACRO ) {
-    		focus_value = "focus_mode_macro";
-    	}
-		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_EDOF ) {
-    		focus_value = "focus_mode_edof";
-    	}
-		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE ) {
-    		focus_value = "focus_mode_continuous_picture";
-    	}
-		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO ) {
-    		focus_value = "focus_mode_continuous_video";
-    	}
-		else if( focus_mode == CaptureRequest.CONTROL_AF_MODE_OFF ) {
-    		focus_value = "focus_mode_manual2"; // n.b., could be infinity
+		switch (focus_mode) {
+			case CaptureRequest.CONTROL_AF_MODE_AUTO:
+				focus_value = "focus_mode_auto";
+				break;
+			case CaptureRequest.CONTROL_AF_MODE_MACRO:
+				focus_value = "focus_mode_macro";
+				break;
+			case CaptureRequest.CONTROL_AF_MODE_EDOF:
+				focus_value = "focus_mode_edof";
+				break;
+			case CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE:
+				focus_value = "focus_mode_continuous_picture";
+				break;
+			case CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO:
+				focus_value = "focus_mode_continuous_video";
+				break;
+			case CaptureRequest.CONTROL_AF_MODE_OFF:
+				focus_value = "focus_mode_manual2"; // n.b., could be infinity
+				break;
 		}
     	return focus_value;
 	}

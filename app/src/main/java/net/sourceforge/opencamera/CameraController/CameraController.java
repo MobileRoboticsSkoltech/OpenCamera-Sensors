@@ -142,10 +142,10 @@ public abstract class CameraController {
 	public static class Size {
 		public final int width;
 		public final int height;
-		public final List<int[]> fps_ranges;
+		final List<int[]> fps_ranges;
 		public final boolean high_speed;
 
-		public Size(int width, int height, List<int[]> fps_ranges, boolean high_speed) {
+		Size(int width, int height, List<int[]> fps_ranges, boolean high_speed) {
 			this.width = width;
 			this.height = height;
 			this.fps_ranges = fps_ranges;
@@ -157,7 +157,7 @@ public abstract class CameraController {
 			this(width, height, new ArrayList<int[]>(), false);
 		}
 
-		public boolean supportsFrameRate(double fps) {
+		boolean supportsFrameRate(double fps) {
 			for (int[] f : this.fps_ranges) {
 				if (f[0] <= fps && fps <= f[1])
 					return true;

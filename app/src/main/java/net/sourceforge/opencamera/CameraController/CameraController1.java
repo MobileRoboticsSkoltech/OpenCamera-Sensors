@@ -418,15 +418,14 @@ public class CameraController1 extends CameraController {
 	 */
 	@Override
 	public SupportedValues setSceneMode(String value) {
-		String default_value = SCENE_MODE_DEFAULT;
-    	Camera.Parameters parameters = this.getParameters();
+		Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedSceneModes();
 		/*{
 			// test
 			values = new ArrayList<>();
 			values.add(ISO_DEFAULT);
 		}*/
-		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		SupportedValues supported_values = checkModeIsSupported(values, value, SCENE_MODE_DEFAULT);
 		if( supported_values != null ) {
 			String scene_mode = parameters.getSceneMode();
 			// if scene mode is null, it should mean scene modes aren't supported anyway
@@ -455,10 +454,9 @@ public class CameraController1 extends CameraController {
 	}
 
 	public SupportedValues setColorEffect(String value) {
-		String default_value = COLOR_EFFECT_DEFAULT;
-    	Camera.Parameters parameters = this.getParameters();
+		Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedColorEffects();
-		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		SupportedValues supported_values = checkModeIsSupported(values, value, COLOR_EFFECT_DEFAULT);
 		if( supported_values != null ) {
 			String color_effect = parameters.getColorEffect();
 			// have got nullpointerexception from Google Play, so now check for null
@@ -476,8 +474,7 @@ public class CameraController1 extends CameraController {
 	}
 
 	public SupportedValues setWhiteBalance(String value) {
-		String default_value = WHITE_BALANCE_DEFAULT;
-    	Camera.Parameters parameters = this.getParameters();
+		Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedWhiteBalance();
 		if( values != null ) {
 			// Some devices (e.g., OnePlus 3T) claim to support a "manual" mode, even though this
@@ -488,7 +485,7 @@ public class CameraController1 extends CameraController {
 				values.remove("manual");
 			}
 		}
-		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		SupportedValues supported_values = checkModeIsSupported(values, value, WHITE_BALANCE_DEFAULT);
 		if( supported_values != null ) {
 			String white_balance = parameters.getWhiteBalance();
 			// if white balance is null, it should mean white balances aren't supported anyway
@@ -519,10 +516,9 @@ public class CameraController1 extends CameraController {
 
 	@Override
 	public SupportedValues setAntiBanding(String value) {
-		String default_value = ANTIBANDING_DEFAULT;
-    	Camera.Parameters parameters = this.getParameters();
+		Camera.Parameters parameters = this.getParameters();
 		List<String> values = parameters.getSupportedAntibanding();
-		SupportedValues supported_values = checkModeIsSupported(values, value, default_value);
+		SupportedValues supported_values = checkModeIsSupported(values, value, ANTIBANDING_DEFAULT);
 		if( supported_values != null ) {
 			// for antibanding, if the requested value isn't available, we don't modify it at all
 			// (so we stick with the device's default setting)

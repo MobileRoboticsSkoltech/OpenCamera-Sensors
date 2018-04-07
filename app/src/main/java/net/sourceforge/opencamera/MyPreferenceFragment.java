@@ -44,6 +44,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -1116,8 +1117,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		if( values != null && values.length > 0 ) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "values:");
-				for(int i=0;i<values.length;i++) {
-					Log.d(TAG, values[i]);
+				for(String value : values) {
+					Log.d(TAG, value);
 				}
 			}
 			ListPreference lp = (ListPreference)findPreference(preference_key);
@@ -1126,7 +1127,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 			String value = sharedPreferences.getString(preference_key, default_value);
 			if( MyDebug.LOG )
-				Log.d(TAG, "    value: " + values);
+				Log.d(TAG, "    value: " + Arrays.toString(values));
 			lp.setValue(value);
 		}
 		else {
