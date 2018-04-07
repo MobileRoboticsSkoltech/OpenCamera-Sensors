@@ -5158,6 +5158,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoAvailableMemory() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoAvailableMemory");
 
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			// as not fine-tuned to pre-Android 5 devices
+			return;
+		}
 		setToDefault();
 
 		mActivity.getApplicationInterface().test_set_available_memory = true;
@@ -5222,6 +5226,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoMaxFileSize1() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxFileSize1");
 
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			// as not fine-tuned to pre-Android 5 devices
+			return;
+		}
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
@@ -5321,6 +5329,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoMaxFileSize2() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxFileSize2");
 
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			// as not fine-tuned to pre-Android 5 devices
+			return;
+		}
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
@@ -5362,6 +5374,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoMaxFileSize3() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMaxFileSize3");
 
+		if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+			// as not fine-tuned to pre-Android 5 devices
+			return;
+		}
 		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
