@@ -554,7 +554,7 @@ public class PopupView extends LinearLayout {
 				final List<Float> capture_rate_values = main_activity.getApplicationInterface().getSupportedVideoCaptureRates();
 				if( capture_rate_values.size() > 1 ) {
 					if( MyDebug.LOG )
-						Log.d(TAG, "add slow motion options");
+						Log.d(TAG, "add slow motion / timelapse video options");
 		    		float capture_rate_value = sharedPreferences.getFloat(PreferenceKeys.getVideoCaptureRatePreferenceKey(preview.getCameraId()), 1.0f);
 					final List<String> capture_rate_str = new ArrayList<>();
 					int capture_rate_std_index = -1;
