@@ -63,6 +63,7 @@ public class ImageSaver extends Thread {
 	 * Therefore we should always have n_images_to_save >= queue.size().
 	 * Also note, main_activity.imageQueueChanged() should be called on UI thread after n_images_to_save increases or
 	 * decreases.
+	 * Access to n_images_to_save should always be synchronized to this (i.e., the ImageSaver class)
 	 */
 	private int n_images_to_save = 0;
 	private final int queue_capacity;
@@ -283,7 +284,7 @@ public class ImageSaver extends Thread {
 	/** Whether taking an extra photo would overflow the queue, resulting in the UI hanging.
 	 * @param photo_cost The result returned by computePhotoCost().
 	 */
-	boolean queueWouldBlock(int photo_cost) {
+	synchronized boolean queueWouldBlock(int photo_cost) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "queueWouldBlock");
 			Log.d(TAG, "photo_cost: " + photo_cost);
@@ -316,7 +317,7 @@ public class ImageSaver extends Thread {
 		return max_dng;
 	}
 
-	int getNImagesToSave() {
+	synchronized int getNImagesToSave() {
 		return n_images_to_save;
 	}
 
@@ -1428,7 +1429,7 @@ public class ImageSaver extends Thread {
 		return bitmap;
 	}
 
-	private class PostProcessBitmapResult {
+	private static class PostProcessBitmapResult {
 		final Bitmap bitmap;
 		final File exifTempFile;
 
