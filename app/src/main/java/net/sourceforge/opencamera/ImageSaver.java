@@ -2250,6 +2250,7 @@ public class ImageSaver extends Thread {
 			raw_image = null;
     		output.close();
     		output = null;
+			success = true;
 
     		/*Location location = null;
     		if( main_activity.getApplicationInterface().getGeotaggingPref() ) {
@@ -2263,21 +2264,22 @@ public class ImageSaver extends Thread {
 			// the LastImage's uri from the MediaScannerConnection.scanFile() callback from
 			// StorageUtils.broadcastFile(), which assumes the last image has already been set.
     		MyApplicationInterface applicationInterface = main_activity.getApplicationInterface();
-    		if( success && saveUri == null ) {
-            	applicationInterface.addLastImage(picFile, false);
+			boolean raw_only = applicationInterface.isRawOnly();
+			if( MyDebug.LOG )
+				Log.d(TAG, "raw_only: " + raw_only);
+    		if( saveUri == null ) {
+            	applicationInterface.addLastImage(picFile, raw_only);
             }
-            else if( success && storageUtils.isUsingSAF() ){
-            	applicationInterface.addLastImageSAF(saveUri, false);
+            else if( storageUtils.isUsingSAF() ){
+            	applicationInterface.addLastImageSAF(saveUri, raw_only);
             }
 
     		if( saveUri == null ) {
-    			success = true;
         		//Uri media_uri = storageUtils.broadcastFileRaw(picFile, current_date, location);
     		    //storageUtils.announceUri(media_uri, true, false);    			
             	storageUtils.broadcastFile(picFile, true, false, false);
     		}
     		else {
-    		    success = true;
 	    	    File real_file = storageUtils.getFileFromDocumentUriSAF(saveUri, false);
 				if( MyDebug.LOG )
 					Log.d(TAG, "real_file: " + real_file);
