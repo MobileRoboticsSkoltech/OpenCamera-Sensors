@@ -49,7 +49,6 @@ public class PhotoTests {
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPreviewPausedTrash"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPreviewPausedTrashSAF"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPreviewPausedTrash2"));
-		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPreviewPausedShare"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoQuickFocus"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoRepeatFocus"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoRepeatFocusLocked"));
@@ -85,6 +84,8 @@ public class PhotoTests {
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolderUnicode"));
 			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testCreateSaveFolderEmpty"));
 		}
+		// testTakePhotoPreviewPausedShare should be last, as sharing the image may sometimes cause later tests to hang
+		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakePhotoPreviewPausedShare"));
         return suite;
     }
 }
