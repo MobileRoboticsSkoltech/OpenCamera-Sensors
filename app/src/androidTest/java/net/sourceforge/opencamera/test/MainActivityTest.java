@@ -90,7 +90,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    mPreview = mActivity.getPreview();
 		Log.d(TAG, "setUp: preview: " + mPreview);
 
-		waitUntilCameraOpened();
+		// don't waitUntilCameraOpened() here, as if an assertion fails in setUp(), it can cause later tests to hang in the suite
+        // instead we now wait for camera to open in setToDefault()
+		//waitUntilCameraOpened();
 
 		//restart(); // no longer need to restart, as we reset prefs before starting up; not restarting makes tests run faster!
 
@@ -317,6 +319,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 * As a side-effect, the camera and/or camera parameters values may become invalid.
 	 */
 	private void setToDefault() {
+		waitUntilCameraOpened();
+
 		if( mPreview.isVideo() ) {
 			Log.d(TAG, "turn off video mode");
 		    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -634,14 +638,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	/*public void testSaveFlashTorchSwitchCamera() {
 		Log.d(TAG, "testSaveFlashTorchSwitchCamera");
 
+		setToDefault();
+
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
 		else if( Camera.getNumberOfCameras() <= 1 ) {
 			return;
 		}
-
-		setToDefault();
 
 		switchToFlashValue("flash_torch");
 
@@ -926,13 +930,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testAutoFocus() throws InterruptedException {
 		Log.d(TAG, "testAutoFocus");
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 		//int saved_count = mPreview.count_cameraAutoFocus;
 	    int saved_count = 0; // set to 0 rather than count_cameraAutoFocus, as on Galaxy Nexus, it can happen that startup autofocus has already occurred by the time we reach here
 	    Log.d(TAG, "saved_count: " + saved_count);
-		setToDefault();
 		switchToFocusValue("focus_mode_auto");
 
 		assertTrue(!mPreview.hasFocusArea());
@@ -1071,13 +1076,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testStartupAutoFocus() throws InterruptedException {
 		Log.d(TAG, "testStartupAutoFocus");
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 		//int saved_count = mPreview.count_cameraAutoFocus;
 	    int saved_count = 0; // set to 0 rather than count_cameraAutoFocus, as on Galaxy Nexus, it can happen that startup autofocus has already occurred by the time we reach here
 	    Log.d(TAG, "saved_count: " + saved_count);
-		setToDefault();
 		switchToFocusValue("focus_mode_auto");
 
 		Thread.sleep(1000);
@@ -1141,10 +1147,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testAutoFocusCorners() {
 		Log.d(TAG, "testAutoFocusCorners");
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
-		setToDefault();
+
 		int [] gui_location = new int[2];
 		mPreview.getView().getLocationOnScreen(gui_location);
 		final int step_dist_c = 2;
@@ -1200,11 +1208,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testFaceDetection() throws InterruptedException {
 		Log.d(TAG, "testFaceDetection");
+		setToDefault();
+
 	    if( !mPreview.supportsFaceDetection() ) {
 			Log.d(TAG, "face detection not supported");
 	    	return;
 	    }
-		setToDefault();
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.FaceDetectionPreferenceKey, true);
@@ -1506,11 +1516,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testContinuousPictureFocus() throws InterruptedException {
 		Log.d(TAG, "testContinuousPictureFocus");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 
-	    setToDefault();
 		// first switch to auto-focus (if we're already in continuous picture mode, we might have already done the continuous focus moving
 		switchToFocusValue("focus_mode_auto");
 		pauseAndResume();
@@ -1554,11 +1565,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testContinuousVideoFocusForPhoto() throws InterruptedException {
 		Log.d(TAG, "testContinuousVideoFocusForPhoto");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 
-	    setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.getFocusPreferenceKey(mPreview.getCameraId(), false), "focus_mode_continuous_video");
@@ -1592,11 +1604,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testContinuousPictureFocusRepeat() throws InterruptedException {
 		Log.d(TAG, "testContinuousPictureFocusRepeat");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 
-	    setToDefault();
 		{
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 			SharedPreferences.Editor editor = settings.edit();
@@ -1637,11 +1650,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testContinuousPicture1() throws InterruptedException {
 		Log.d(TAG, "testContinuousPicture1");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 
-	    setToDefault();
 		switchToFocusValue("focus_mode_continuous_picture");
 
 		String focus_value = "focus_mode_continuous_picture";
@@ -1702,11 +1716,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testContinuousPicture2() throws InterruptedException {
 		Log.d(TAG, "testContinuousPicture1");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 
-	    setToDefault();
 		switchToFocusValue("focus_mode_continuous_picture");
 
 		String focus_value = "focus_mode_continuous_picture";
@@ -1780,11 +1795,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testContinuousPictureRepeatTouch() throws InterruptedException {
 		Log.d(TAG, "testContinuousPictureRepeatTouch");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 
-	    setToDefault();
 		switchToFocusValue("focus_mode_continuous_picture");
 
 		String focus_value = "focus_mode_continuous_picture";
@@ -1829,11 +1845,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testContinuousPictureSwitchAuto() throws InterruptedException {
 		Log.d(TAG, "testContinuousPictureSwitchAuto");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 
-	    setToDefault();
 		switchToFocusValue("focus_mode_continuous_picture");
 
 		String focus_value = "focus_mode_continuous_picture";
@@ -1893,6 +1910,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testFocusSwitchVideoSwitchCameras() {
 		Log.d(TAG, "testFocusSwitchVideoSwitchCameras");
 
+		setToDefault();
+
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
 			return;
 		}
@@ -1901,7 +1920,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 
-		setToDefault();
 		switchToFocusValue("focus_mode_auto");
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -1942,6 +1960,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testFocusRemainMacroSwitchCamera() {
 		Log.d(TAG, "testFocusRemainMacroSwitchCamera");
 
+		setToDefault();
+
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
 			return;
 		}
@@ -1950,7 +1970,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	    	return;
 	    }
 
-		setToDefault();
 		switchToFocusValue("focus_mode_macro");
 
 	    View switchCameraButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_camera);
@@ -1975,11 +1994,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testFocusRemainMacroSwitchPhoto() {
 		Log.d(TAG, "testFocusRemainMacroSwitchPhoto");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 
-		setToDefault();
 		switchToFocusValue("focus_mode_auto");
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -2009,11 +2029,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testFocusSaveMacroSwitchPhoto() {
 		Log.d(TAG, "testFocusSaveMacroSwitchPhoto");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
-
-		setToDefault();
 
 		switchToFocusValue("focus_mode_macro");
 
@@ -2044,11 +2064,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testFocusSwitchVideoResetContinuous() {
 		Log.d(TAG, "testFocusSwitchVideoResetContinuous");
 
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
 
-		setToDefault();
 		switchToFocusValue("focus_mode_auto");
 
 	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
@@ -2193,13 +2214,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoManualISOExposure() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoManualISOExposure");
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test requires camera2 api");
 			return;
 		}
 		else if( !mPreview.supportsISORange() ) {
+			Log.d(TAG, "test requires manual iso range");
 			return;
 		}
-		setToDefault();
 
 		switchToISO(100);
 
@@ -2330,13 +2354,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoManualWB() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoManualWB");
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
 		if( !mPreview.supportsWhiteBalanceTemperature() ) {
 			return;
 		}
-		setToDefault();
 
 		assertTrue( mPreview.getCameraController().getWhiteBalance().equals("auto"));
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -2888,7 +2913,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			suffix = "_" + (n_expo_images-1);
 		}
 		else if( is_fast_burst ) {
-			suffix = "_" + (n_fast_burst_images-1);
+			//suffix = "_" + (n_fast_burst_images-1); // when burst numbering starts from _0
+			suffix = "_" + (n_fast_burst_images); // when burst numbering starts from _1
 			max_time_s = 3; // takes longer to save 20 images!
 		}
 		this.getInstrumentation().waitForIdleSync();
@@ -2906,7 +2932,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				int allowed_time_ms = 8000;
 				if( !mPreview.usingCamera2API() && ( is_hdr || is_expo ) ) {
 					// some devices need longer time
-					allowed_time_ms = 8000;
+					allowed_time_ms = 10000;
 				}
 				assertTrue( System.currentTimeMillis() - time_s < allowed_time_ms );
 			}
@@ -2936,10 +2962,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoRaw() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoRaw");
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
@@ -2953,10 +2980,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoRawWaitCaptureResult() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoRawWaitCaptureResult");
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
@@ -2971,10 +2999,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoRawMulti() {
 		Log.d(TAG, "testTakePhotoRawMulti");
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
@@ -3013,10 +3042,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoRawOnly() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoRawOnly");
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
-		setToDefault();
 
 		boolean supports_auto_stabilise = mActivity.supportsAutoStabilise();
 
@@ -3095,11 +3125,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoFlashAuto() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashAuto");
+		setToDefault();
+
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
 
-		setToDefault();
 		switchToFlashValue("flash_auto");
 		Thread.sleep(2000); // wait so we don't take the photo immediately, to be more realistic
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
@@ -3110,11 +3141,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoFlashOn() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashOn");
+		setToDefault();
+
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
 
-		setToDefault();
 		switchToFlashValue("flash_on");
 		Thread.sleep(2000); // wait so we don't take the photo immediately, to be more realistic
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
@@ -3123,11 +3155,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoFlashTorch() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashTorch");
+		setToDefault();
+
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
 
-		setToDefault();
 		switchToFlashValue("flash_torch");
 		Thread.sleep(2000); // wait so we don't take the photo immediately, to be more realistic
 		subTestTakePhoto(false, false, false, false, false, false, false, false);
@@ -3141,6 +3174,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
 	public void testTakePhotoFlashAutoFakeMode() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashAutoFakeMode");
+		setToDefault();
+
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
@@ -3148,7 +3183,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.Camera2FakeFlashPreferenceKey, true);
@@ -3178,6 +3212,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoFlashOnFakeMode() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashOnFakeMode");
+		setToDefault();
+
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
@@ -3185,7 +3221,6 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.Camera2FakeFlashPreferenceKey, true);
@@ -3309,11 +3344,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	/* Tests bug fixed by take_photo_after_autofocus in Preview, where the app would hang due to taking a photo after touching to focus. */
 	public void testTakePhotoFlashBug() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFlashBug");
+		setToDefault();
+
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
 
-		setToDefault();
 		switchToFlashValue("flash_on");
 		subTestTakePhoto(false, false, true, false, false, false, false, false);
 	}
@@ -3324,10 +3360,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoFrontCamera() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFrontCamera");
+		setToDefault();
+
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
 			return;
 		}
-		setToDefault();
 		int cameraId = mPreview.getCameraId();
 		boolean is_front_facing = mPreview.getCameraControllerManager().isFrontFacing(cameraId);
 
@@ -3376,10 +3413,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoFrontCameraScreenFlash() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFrontCameraScreenFlash");
+		setToDefault();
+
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
 			return;
 		}
-		setToDefault();
 
 		int cameraId = mPreview.getCameraId();
 
@@ -3420,10 +3458,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoManualFocus() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoManualFocus");
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
-		setToDefault();
 	    SeekBar seekBar = mActivity.findViewById(net.sourceforge.opencamera.R.id.focus_seekbar);
 	    assertTrue(seekBar.getVisibility() == View.GONE);
 		switchToFocusValue("focus_mode_manual2");
@@ -3901,7 +3940,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	}
 
 	/** Tests pause preview option.
-	 * @param share If true, share the image; else, trash it.
+	 * @param share If true, share the image; else, trash it. A test with share==true should be the
+	 *              last test if run in a suite, as sharing the image may sometimes cause later
+	 *              tests to hang.
 	 */
 	private void subTestTakePhotoPreviewPausedShareTrash(boolean is_raw, boolean share) throws InterruptedException {
 		// count initial files in folder
@@ -4063,10 +4104,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoPreviewPausedTrashRaw() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoPreviewPausedTrashRaw");
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.RawPreferenceKey, "preference_raw_yes");
@@ -4081,10 +4123,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoPreviewPausedTrashRaw2() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoPreviewPausedTrashRaw2");
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
-		setToDefault();
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
@@ -4104,6 +4147,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		subTestTakePhotoPreviewPausedShareTrash(false, false);
 	}
 
+	/** Tests sharing an image. If run in a suite, this test should be last, as sharing the image
+	 *  may sometimes cause later tests to hang.
+	 */
 	public void testTakePhotoPreviewPausedShare() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoPreviewPausedShare");
 		setToDefault();
@@ -5083,12 +5129,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoSnapshot() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoSnapshot");
 
+		setToDefault();
+
 		if( !mPreview.supportsPhotoVideoRecording() ) {
 			Log.d(TAG, "video snapshot not supported");
 			return;
 		}
-
-		setToDefault();
 
 		subTestTakeVideoSnapshot();
 	}
@@ -5098,12 +5144,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoSnapshotTimer() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoSnapshotTimer");
 
+		setToDefault();
+
 		if( !mPreview.supportsPhotoVideoRecording() ) {
 			Log.d(TAG, "video snapshot not supported");
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.getTimerPreferenceKey(), "5");
@@ -5118,12 +5165,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoSnapshotPausePreview() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoSnapshotPausePreview");
 
+		setToDefault();
+
 		if( !mPreview.supportsPhotoVideoRecording() ) {
 			Log.d(TAG, "video snapshot not supported");
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.PausePreviewPreferenceKey, true);
@@ -5137,12 +5185,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoSnapshotMax() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoSnapshotMax");
 
+		setToDefault();
+
 		if( !mPreview.supportsPhotoVideoRecording() ) {
 			Log.d(TAG, "video snapshot not supported");
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.getVideoQualityPreferenceKey(mPreview.getCameraId(), false), "" + CamcorderProfile.QUALITY_HIGH); // set to highest quality (4K on Nexus 6 or OnePlus 3T)
@@ -5415,13 +5464,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoStabilization() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoStabilization");
 
+		setToDefault();
+
 	    if( !mPreview.supportsVideoStabilization() ) {
 			Log.d(TAG, "video stabilization not supported");
 	    	return;
 	    }
 	    assertFalse(mPreview.getCameraController().getVideoStabilization());
 
-	    setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.getVideoStabilizationPreferenceKey(), true);
@@ -5494,11 +5544,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideo4K() throws InterruptedException {
 		Log.d(TAG, "testTakeVideo4K");
 
+		setToDefault();
+
 		if( !mActivity.supportsForceVideo4K() ) {
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.getForceVideo4KPreferenceKey(), true);
@@ -5550,14 +5601,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoFPSHighSpeedManual() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoFPSHighSpeedManual");
 
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
 		else if( !mPreview.supportsISORange() ) {
 			return;
 		}
-
-		setToDefault();
 
 		int fps_value = 120;
 		if( mPreview.getVideoQualityHander().videoSupportsFrameRate(fps_value) ) {
@@ -5606,11 +5657,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testVideoFPSHighSpeed() throws InterruptedException {
 		Log.d(TAG, "testVideoFPSHighSpeed");
 
+		setToDefault();
+
 		if( !mPreview.usingCamera2API() ) {
 			return;
 		}
-
-		setToDefault();
 
 		int fps_value = 120;
 		if( mPreview.getVideoQualityHander().videoSupportsFrameRate(fps_value) ) {
@@ -6083,11 +6134,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakeVideoMacro() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoMacro");
+
+		setToDefault();
+
 	    if( !mPreview.supportsFocus() ) {
 	    	return;
 	    }
-
-		setToDefault();
 
 		assertTrue(mPreview.isPreviewStarted());
 
@@ -6153,11 +6205,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testTakeVideoFlashVideo() throws InterruptedException {
 		Log.d(TAG, "testTakeVideoFlashVideo");
 
+		setToDefault();
+
 		if( !mPreview.supportsFlash() ) {
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putBoolean(PreferenceKeys.getVideoFlashPreferenceKey(), true);
@@ -6768,10 +6821,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testSaveQuality() {
 		Log.d(TAG, "testSaveQuality");
 
+		setToDefault();
+
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
 			return;
 		}
-		setToDefault();
 
 	    List<CameraController.Size> preview_sizes = mPreview.getSupportedPictureSizes();
 
@@ -7043,7 +7097,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putBoolean(PreferenceKeys.LocationPreferenceKey, true);
 			editor.apply();
-			restart(); // need to restart for this preference to take effect
+			updateForSettings();
 		}
 
 		long start_t = System.currentTimeMillis();
@@ -8054,6 +8108,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	public void testSwitchResolution() throws InterruptedException {
 		Log.d(TAG, "testSwitchResolution");
 
+		setToDefault();
+
 		View popupButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.popup);
         CameraController.Size old_picture_size = mPreview.getCameraController().getPictureSize();
 
@@ -8164,11 +8220,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoDRO() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoDRO");
+
+		setToDefault();
+
 		if( !mActivity.supportsDRO() ) {
 			return;
 		}
-
-		setToDefault();
 
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
 
@@ -8193,11 +8250,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoDROPhotoStamp() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoDROPhotoStamp");
+
+		setToDefault();
+
 		if( !mActivity.supportsDRO() ) {
 			return;
 		}
-
-		setToDefault();
 
 		assertTrue( mActivity.getApplicationInterface().getImageQualityPref() == 90 );
 
@@ -8236,11 +8294,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoHDR() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDR");
+
+		setToDefault();
+
 		if( !mActivity.supportsHDR() ) {
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
@@ -8256,11 +8316,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoHDRSaveExpo() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDRSaveExpo");
+
+		setToDefault();
+
 		if( !mActivity.supportsHDR() ) {
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
@@ -8281,13 +8343,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoHDRFrontCamera() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDRFrontCamera");
+
+		setToDefault();
+
 		if( !mActivity.supportsHDR() ) {
 			return;
 		}
 		if( mPreview.getCameraControllerManager().getNumberOfCameras() <= 1 ) {
 			return;
 		}
-		setToDefault();
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
@@ -8316,11 +8381,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoHDRAutoStabilise() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDRAutoStabilise");
+
+		setToDefault();
+
 		if( !mActivity.supportsHDR() ) {
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
@@ -8337,11 +8404,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	public void testTakePhotoHDRPhotoStamp() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoHDRPhotoStamp");
+
+		setToDefault();
+
 		if( !mActivity.supportsHDR() ) {
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_hdr");
@@ -8360,11 +8429,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
 	public void testTakePhotoExpo() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExpo");
+
+		setToDefault();
+
 		if( !mActivity.supportsExpoBracketing() ) {
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
@@ -8382,11 +8453,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 */
 	public void testTakePhotoExpo5() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoExpo5");
+
+		setToDefault();
+
 		if( !mActivity.supportsExpoBracketing() ) {
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_expo_bracketing");
@@ -8406,11 +8479,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
      */
 	public void testTakePhotoFastBurst() throws InterruptedException {
 		Log.d(TAG, "testTakePhotoFastBurst");
+
+		setToDefault();
+
 		if( !mActivity.supportsFastBurst() ) {
 			return;
 		}
 
-		setToDefault();
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(PreferenceKeys.PhotoModePreferenceKey, "preference_photo_mode_fast_burst");
