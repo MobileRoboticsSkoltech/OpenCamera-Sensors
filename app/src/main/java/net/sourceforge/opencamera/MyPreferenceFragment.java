@@ -111,12 +111,10 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 		String [] antibanding_values = bundle.getStringArray("antibanding");
 		if( antibanding_values != null && antibanding_values.length > 0 ) {
-			MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
-			String [] entries = new String[antibanding_values.length];
-			for(int i=0;i<antibanding_values.length;i++) {
-				entries[i] = main_activity.getMainUI().getEntryForAntiBanding(antibanding_values[i]);
+			String [] antibanding_entries = bundle.getStringArray("antibanding_entries");
+			if( antibanding_entries != null && antibanding_entries.length == antibanding_values.length ) { // should always be true here, but just in case
+				readFromBundle(antibanding_values, antibanding_entries, PreferenceKeys.AntiBandingPreferenceKey, CameraController.ANTIBANDING_DEFAULT, "preference_category_camera_quality");
 			}
-			readFromBundle(antibanding_values, entries, PreferenceKeys.AntiBandingPreferenceKey, CameraController.ANTIBANDING_DEFAULT, "preference_category_camera_quality");
 		}
 
 		final boolean supports_face_detection = bundle.getBoolean("supports_face_detection");
