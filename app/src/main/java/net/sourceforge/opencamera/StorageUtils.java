@@ -338,9 +338,9 @@ public class StorageUtils {
 		}
 	    File file = null;
 		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
-            final String id = is_folder ? DocumentsContract.getTreeDocumentId(uri) : DocumentsContract.getDocumentId(uri);
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "id: " + id);
+			final String id = is_folder ? DocumentsContract.getTreeDocumentId(uri) : DocumentsContract.getDocumentId(uri);
+			if( MyDebug.LOG )
+				Log.d(TAG, "id: " + id);
 			String [] split = id.split(":");
 			if( split.length >= 2 ) {
 				String type = split[0];
@@ -368,13 +368,24 @@ public class StorageUtils {
 			}
 		}
 		else if( "com.android.providers.downloads.documents".equals(uri.getAuthority()) ) {
-			final String id = DocumentsContract.getDocumentId(uri);
-			final Uri contentUri = ContentUris.withAppendedId(
-					Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
+			if( !is_folder ) {
+				final String id = DocumentsContract.getDocumentId(uri);
+				final Uri contentUri = ContentUris.withAppendedId(
+						Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
 
-			String filename = getDataColumn(contentUri, null, null);
-			if( filename != null )
-				file = new File(filename);
+				String filename = getDataColumn(contentUri, null, null);
+				if( filename != null )
+					file = new File(filename);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.d(TAG, "downloads uri not supported for folders");
+				// This codepath can be reproduced by enabling SAF and selecting Downloads.
+				// DocumentsContract.getDocumentId() throws IllegalArgumentException for
+				// this (content://com.android.providers.downloads.documents/tree/downloads).
+				// If we use DocumentsContract.getTreeDocumentId() for folders, it returns
+				// "downloads" - not clear how to parse this!
+			}
 		}
 		else if( "com.android.providers.media.documents".equals(uri.getAuthority()) ) {
 			final String docId = DocumentsContract.getDocumentId(uri);
