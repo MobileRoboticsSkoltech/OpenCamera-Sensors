@@ -109,12 +109,21 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		//readFromBundle(bundle, "isos", Preview.getISOPreferenceKey(), "auto", "preference_category_camera_effects");
 		//readFromBundle(bundle, "exposures", "preference_exposure", "0", "preference_category_camera_effects");
 
+		boolean has_antibanding = false;
 		String [] antibanding_values = bundle.getStringArray("antibanding");
 		if( antibanding_values != null && antibanding_values.length > 0 ) {
 			String [] antibanding_entries = bundle.getStringArray("antibanding_entries");
 			if( antibanding_entries != null && antibanding_entries.length == antibanding_values.length ) { // should always be true here, but just in case
 				readFromBundle(antibanding_values, antibanding_entries, PreferenceKeys.AntiBandingPreferenceKey, CameraController.ANTIBANDING_DEFAULT, "preference_category_camera_quality");
+				has_antibanding = true;
 			}
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "has_antibanding?: " + has_antibanding);
+		if( !has_antibanding ) {
+			Preference pref = findPreference("preference_antibanding");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_quality");
+        	pg.removePreference(pref);
 		}
 
 		final boolean supports_face_detection = bundle.getBoolean("supports_face_detection");

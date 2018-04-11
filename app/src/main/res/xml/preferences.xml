@@ -855,6 +855,7 @@
 		    
 	    </PreferenceScreen>
 
+        <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
         <!--  if we move this to another PreferenceGroup, we should update code for the readFromIntent() call -->
 	    <ListPreference
 	        android:key="preference_antibanding"
