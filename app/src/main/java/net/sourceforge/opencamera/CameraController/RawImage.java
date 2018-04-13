@@ -30,7 +30,21 @@ public class RawImage {
     public void writeImage(OutputStream dngOutput) throws IOException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "writeImage");
-        dngCreator.writeImage(dngOutput, image);
+		try {
+            dngCreator.writeImage(dngOutput, image);
+        }
+        catch(AssertionError e) {
+		    // have had AssertionError from OnePlus 5 on Google Play; rethrow as an IOException so it's handled
+            // in the same way
+		    e.printStackTrace();
+		    throw new IOException();
+        }
+        catch(IllegalStateException e) {
+		    // have had IllegalStateException from Galaxy Note 8 on Google Play; rethrow as an IOException so it's handled
+            // in the same way
+		    e.printStackTrace();
+		    throw new IOException();
+        }
     }
 
     /** Closes the image. Must be called to free up resources when no longer needed. After calling

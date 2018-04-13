@@ -875,7 +875,9 @@ public class MainUI {
 				}
 				else {
 					editor.apply();
-					preview.getCameraController().setISO(option);
+					if( preview.getCameraController() != null ) {
+						preview.getCameraController().setISO(option);
+					}
 				}
 
 				setupExposureUI();
