@@ -548,7 +548,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		else if( (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && MyTileServiceFrontCamera.TILE_ID.equals(action)) || ACTION_SHORTCUT_SELFIE.equals(action) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "launching from quick settings tile or application shortcut for Open Camera: selfie mode");
-			for(int i=0;i<preview.getCameraControllerManager().getNumberOfCameras();i++) {
+			int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
+			for(int i=0;i<n_cameras;i++) {
 				if( preview.getCameraControllerManager().isFrontFacing(i) ) {
 					if (MyDebug.LOG)
 						Log.d(TAG, "found front camera: " + i);
@@ -578,12 +579,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
         	CameraControllerManager2 manager2 = new CameraControllerManager2(this);
         	supports_camera2 = true;
-        	if( manager2.getNumberOfCameras() == 0 ) {
+			int n_cameras = manager2.getNumberOfCameras();
+        	if( n_cameras == 0 ) {
         		if( MyDebug.LOG )
         			Log.d(TAG, "Camera2 reports 0 cameras");
             	supports_camera2 = false;
         	}
-        	for(int i=0;i<manager2.getNumberOfCameras() && supports_camera2;i++) {
+        	for(int i=0;i<n_cameras && supports_camera2;i++) {
         		if( !manager2.allowCamera2Support(i) ) {
         			if( MyDebug.LOG )
         				Log.d(TAG, "camera " + i + " doesn't have limited or full support for Camera2 API");
