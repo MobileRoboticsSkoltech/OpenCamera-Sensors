@@ -1165,6 +1165,17 @@ public class CameraController2 extends CameraController {
 			e.printStackTrace();
 			throw new CameraControllerException();
 		}
+		catch(ArrayIndexOutOfBoundsException e) {
+			// Have seen this from Google Play - even though the Preview should have checked the
+			// cameraId is within the valid range! Although potentially this could happen if
+			// getCameraIdList() returns an empty list.
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to open camera: ArrayIndexOutOfBoundsException");
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
 
 		// set up a timeout - sometimes if the camera has got in a state where it can't be opened until after a reboot, we'll never even get a myStateCallback callback called
 		handler.postDelayed(new Runnable() {
