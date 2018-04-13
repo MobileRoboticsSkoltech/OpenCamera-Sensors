@@ -1365,7 +1365,35 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			bundle.putInt("resolution_width", preview.getCurrentPictureSize().width);
 			bundle.putInt("resolution_height", preview.getCurrentPictureSize().height);
 		}
-		
+
+		//List<String> video_quality = this.preview.getVideoQualityHander().getSupportedVideoQuality();
+		String fps_value = applicationInterface.getVideoFPSPref(); // n.b., this takes into account slow motion mode putting us into a high frame rate
+		if( MyDebug.LOG )
+			Log.d(TAG, "fps_value: " + fps_value);
+		List<String> video_quality = this.preview.getSupportedVideoQuality(fps_value);
+		if( video_quality == null || video_quality.size() == 0 ) {
+			Log.e(TAG, "can't find any supported video sizes for current fps!");
+			// fall back to unfiltered list
+			video_quality = this.preview.getVideoQualityHander().getSupportedVideoQuality();
+		}
+		if( video_quality != null && this.preview.getCameraController() != null ) {
+			String [] video_quality_arr = new String[video_quality.size()];
+			String [] video_quality_string_arr = new String[video_quality.size()];
+			int i=0;
+			for(String value: video_quality) {
+				video_quality_arr[i] = value;
+				video_quality_string_arr[i] = this.preview.getCamcorderProfileDescription(value);
+				i++;
+			}
+			bundle.putStringArray("video_quality", video_quality_arr);
+			bundle.putStringArray("video_quality_string", video_quality_string_arr);
+
+			String video_quality_preference_key = PreferenceKeys.getVideoQualityPreferenceKey(this.preview.getCameraId(), this.preview.fpsIsHighSpeed(fps_value));
+			if( MyDebug.LOG )
+				Log.d(TAG, "video_quality_preference_key: " + video_quality_preference_key);
+			bundle.putString("video_quality_preference_key", video_quality_preference_key);
+		}
+
 		if( preview.getVideoQualityHander().getCurrentVideoQuality() != null ) {
 			bundle.putString("current_video_quality", preview.getVideoQualityHander().getCurrentVideoQuality());
 		}
