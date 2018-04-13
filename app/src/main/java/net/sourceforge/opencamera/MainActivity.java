@@ -2205,10 +2205,18 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			// n.b., fragments have to be static (as they might be inserted into a new Activity - see http://stackoverflow.com/questions/15571010/fragment-inner-class-should-be-static),
 			// so we access the MainActivity via the fragment's getActivity().
 			MainActivity main_activity = (MainActivity)this.getActivity();
-			main_activity.setWindowFlagsForCamera();
-			main_activity.showPreview(true);
-			String new_save_location = this.getChosenFolder();
-			main_activity.updateSaveFolder(new_save_location);
+			// activity may be null, see https://stackoverflow.com/questions/13116104/best-practice-to-reference-the-parent-activity-of-a-fragment
+			// have had Google Play crashes from this
+			if( main_activity != null ) {
+				main_activity.setWindowFlagsForCamera();
+				main_activity.showPreview(true);
+				String new_save_location = this.getChosenFolder();
+				main_activity.updateSaveFolder(new_save_location);
+			}
+			else {
+				if( MyDebug.LOG )
+					Log.e(TAG, "activity no longer exists!");
+			}
 			super.onDismiss(dialog);
 		}
 	}
