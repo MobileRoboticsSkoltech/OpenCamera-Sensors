@@ -1812,12 +1812,15 @@ public class CameraController2 extends CameraController {
 		int [] values2 = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES);
 		boolean has_disabled = false;
 		List<String> values = new ArrayList<>();
-		for(int value2 : values2) {
-			if( value2 == CameraMetadata.CONTROL_SCENE_MODE_DISABLED )
-				has_disabled = true;
-			String this_value = convertSceneMode(value2);
-			if( this_value != null ) {
-				values.add(this_value);
+		if( values2 != null ) {
+			// CONTROL_AVAILABLE_SCENE_MODES is supposed to always be available, but have had some (rare) crashes from Google Play due to being null
+			for(int value2 : values2) {
+				if( value2 == CameraMetadata.CONTROL_SCENE_MODE_DISABLED )
+					has_disabled = true;
+				String this_value = convertSceneMode(value2);
+				if( this_value != null ) {
+					values.add(this_value);
+				}
 			}
 		}
 		if( !has_disabled ) {
