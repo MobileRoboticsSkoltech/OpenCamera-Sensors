@@ -4955,12 +4955,16 @@ public class CameraController2 extends CameraController {
 	public void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException {
 		if( MyDebug.LOG )
 			Log.d(TAG, "initVideoRecorderPostPrepare");
+		if( camera == null ) {
+			Log.e(TAG, "no camera");
+			throw new CameraControllerException();
+		}
 		try {
 			if( MyDebug.LOG )
 				Log.d(TAG, "obtain video_recorder surface");
+			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
 			if( MyDebug.LOG )
 				Log.d(TAG, "done");
-			previewBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
 			previewIsVideoMode = true;
 			previewBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);
 			camera_settings.setupBuilder(previewBuilder, false);
