@@ -3736,6 +3736,16 @@ public class CameraController2 extends CameraController {
 			e.printStackTrace();
 			throw new CameraControllerException();
 		}
+		catch(IllegalArgumentException e) {
+			// have had crashes from Google Play, from both createConstrainedHighSpeedCaptureSession and
+			// createCaptureSession
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "IllegalArgumentException trying to create capture session");
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+			throw new CameraControllerException();
+		}
 	}
 
 	@Override
