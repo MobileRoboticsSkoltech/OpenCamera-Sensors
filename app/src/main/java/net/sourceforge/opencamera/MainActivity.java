@@ -925,7 +925,13 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
         mSensorManager.unregisterListener(accelerometerListener);
         mSensorManager.unregisterListener(magneticListener);
         orientationEventListener.disable();
-        unregisterReceiver(cameraReceiver);
+        try {
+			unregisterReceiver(cameraReceiver);
+		}
+		catch(IllegalArgumentException e) {
+        	// this can happen if not registered - simplest to just catch the exception
+        	e.printStackTrace();
+		}
         freeAudioListener(false);
         freeSpeechRecognizer();
         applicationInterface.getLocationSupplier().freeLocationListeners();
