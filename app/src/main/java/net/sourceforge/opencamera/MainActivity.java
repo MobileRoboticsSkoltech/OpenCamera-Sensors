@@ -1402,6 +1402,9 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putInt("video_frame_height", camcorder_profile.videoFrameHeight);
 		bundle.putInt("video_bit_rate", camcorder_profile.videoBitRate);
 		bundle.putInt("video_frame_rate", camcorder_profile.videoFrameRate);
+		bundle.putDouble("video_capture_rate", camcorder_profile.videoCaptureRate);
+		bundle.putBoolean("video_high_speed", preview.isVideoHighSpeed());
+		bundle.putFloat("video_capture_rate_factor", applicationInterface.getVideoCaptureRateFactor());
 
 		List<CameraController.Size> video_sizes = this.preview.getVideoQualityHander().getSupportedVideoSizes();
 		if( video_sizes != null ) {

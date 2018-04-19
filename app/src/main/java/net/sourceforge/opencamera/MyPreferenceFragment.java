@@ -397,6 +397,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		final int video_frame_height = bundle.getInt("video_frame_height");
 		final int video_bit_rate = bundle.getInt("video_bit_rate");
 		final int video_frame_rate = bundle.getInt("video_frame_rate");
+		final double video_capture_rate = bundle.getDouble("video_capture_rate");
+		final boolean video_high_speed = bundle.getBoolean("video_high_speed");
+		final float video_capture_rate_factor = bundle.getFloat("video_capture_rate_factor");
 
 		final boolean supports_force_video_4k = bundle.getBoolean("supports_force_video_4k");
 		if( MyDebug.LOG )
@@ -809,6 +812,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 						about_string.append(video_bit_rate);
 						about_string.append("\nVideo frame rate: ");
 						about_string.append(video_frame_rate);
+						about_string.append("\nVideo capture rate: ");
+						about_string.append(video_capture_rate);
+						about_string.append("\nVideo high speed: ");
+						about_string.append(video_high_speed);
+						about_string.append("\nVideo capture rate factor: ");
+						about_string.append(video_capture_rate_factor);
                         about_string.append("\nAuto-stabilise?: ");
                         about_string.append(getString(supports_auto_stabilise ? R.string.about_available : R.string.about_not_available));
 						about_string.append("\nAuto-stabilise enabled?: ");
