@@ -3687,10 +3687,23 @@ public class CameraController2 extends CameraController {
 				is_video_high_speed = true;
 			}
 			else {
-				camera.createCaptureSession(surfaces,
-					myStateCallback,
-					handler);
-				is_video_high_speed = false;
+        		try {
+					camera.createCaptureSession(surfaces,
+						myStateCallback,
+						handler);
+					is_video_high_speed = false;
+				}
+				catch(NullPointerException e) {
+					// have had this from some devices on Google Play, from deep within createCaptureSession
+					// note, we put the catch here rather than below, so as to not mask nullpointerexceptions
+					// from my code
+					if( MyDebug.LOG ) {
+						Log.e(TAG, "NullPointerException trying to create capture session");
+						Log.e(TAG, "message: " + e.getMessage());
+					}
+					e.printStackTrace();
+					throw new CameraControllerException();
+				}
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "wait until session created...");
