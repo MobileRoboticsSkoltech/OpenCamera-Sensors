@@ -2796,7 +2796,10 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			CamcorderProfile cam_profile;
 			int cameraId = camera_controller.getCameraId();
 
-			if( force4k ) {
+			// video_high_speed should only be for Camera2, where we don't support force4k option, but
+			// put the check here just in case - don't want to be forcing 4K resolution if high speed
+			// frame rate!
+			if( force4k && !video_high_speed ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "force 4K UHD video");
 				cam_profile = CamcorderProfile.get(cameraId, CamcorderProfile.QUALITY_HIGH);
@@ -4034,7 +4037,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	}
 	
 	public String getErrorFeatures(VideoProfile profile) {
-		boolean was_4k = false, was_bitrate = false, was_fps = false;
+		boolean was_4k = false, was_bitrate = false, was_fps = false, was_slow_motion = false;
 		if( profile.videoFrameWidth == 3840 && profile.videoFrameHeight == 2160 && applicationInterface.getForce4KPref() ) {
 			was_4k = true;
 		}
@@ -4043,11 +4046,14 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			was_bitrate = true;
 		}
 		String fps_value = applicationInterface.getVideoFPSPref();
-		if( !fps_value.equals("default") ) {
+		if( applicationInterface.getVideoCaptureRateFactor() < 1.0f-1.0e-5f ) {
+			was_slow_motion = true;
+		}
+		else if( !fps_value.equals("default") ) {
 			was_fps = true;
 		}
 		String features = "";
-		if( was_4k || was_bitrate || was_fps ) {
+		if( was_4k || was_bitrate || was_fps || was_slow_motion ) {
 			if( was_4k ) {
 				features = "4K UHD";
 			}
@@ -4062,6 +4068,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 					features = "Frame rate";
 				else
 					features += "/Frame rate";
+			}
+			if( was_slow_motion ) {
+				if( features.length() == 0 )
+					features = "Slow motion";
+				else
+					features += "/Slow motion";
 			}
 		}
 		return features;
