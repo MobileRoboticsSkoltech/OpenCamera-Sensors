@@ -3832,7 +3832,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				Log.d(TAG, "fps_ranges not available");
 			return;
 		}
-		int [] selected_fps;
+		int [] selected_fps = null;
 		if( this.is_video ) {
 			// For Nexus 5 and Nexus 6, we need to set the preview fps using matchPreviewFpsToVideo to avoid problem of dark preview in low light, as described above.
 			// When the video recording starts, the preview automatically adjusts, but still good to avoid too-dark preview before the user starts recording.
@@ -3844,13 +3844,20 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// but leaving the code as it is, to be safe.
 			// Update for v1.43: implementing setPreviewFpsRange() for CameraController2 caused the dark preview problem on
 			// OnePlus 3T. So enable the preview_too_dark for all devices on Camera2.
+            // Update for v1.43.3: had reports of problems (e.g., setting manual mode with video on camera2) since 1.43. It's unclear
+            // if there is any benefit to setting the preview fps when we aren't requesting a specific fps value, so seems safest to
+            // revert to the old behaviour (where CameraController2.setPreviewFpsRange() did nothing).
 			boolean preview_too_dark = using_android_l || Build.MODEL.equals("Nexus 5") || Build.MODEL.equals("Nexus 6");
 			String fps_value = applicationInterface.getVideoFPSPref();
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "preview_too_dark? " + preview_too_dark);
 				Log.d(TAG, "fps_value: " + fps_value);
 			}
-			if( fps_value.equals("default") && preview_too_dark ) {
+			if( fps_value.equals("default") && using_android_l ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "don't set preview fps for camera2 and default fps video");
+			}
+			else if( fps_value.equals("default") && preview_too_dark ) {
 				selected_fps = chooseBestPreviewFps(fps_ranges);
 			}
 			else {
@@ -3863,11 +3870,23 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			// we could hardcode behaviour like we do for video, but this is the same way that Google Camera chooses preview fps for photos
 			// or I could hardcode behaviour for Galaxy Nexus, but since it's an old device (and an obscure bug anyway - most users don't really need continuous focus in photo mode), better to live with the bug rather than complicating the code
 			// Update for v1.29: this doesn't seem to happen on Galaxy Nexus with continuous picture focus mode, which is what we now use
-			// Update for v1.31: we no longer seem to need this - I no longer get a dark preview in photo or video mode if we don't set the fps range;
+			// Update for v1.31: we no longer seem to need this for old API - I no longer get a dark preview in photo or video mode if we don't set the fps range;
 			// but leaving the code as it is, to be safe.
-			selected_fps = chooseBestPreviewFps(fps_ranges);
+            // Update for v1.43.3: as noted above, setPreviewFpsRange() was implemented for CameraController2 in v1.43, but no evidence this
+            // is needed for anything, so thinking about it, best to keep things as they were before for Camera2
+			if( using_android_l ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "don't set preview fps for camera2 and photo");
+			}
+			else {
+                selected_fps = chooseBestPreviewFps(fps_ranges);
+            }
 		}
-        camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);
+		if( selected_fps != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "set preview fps range: " + selected_fps);
+            camera_controller.setPreviewFpsRange(selected_fps[0], selected_fps[1]);
+        }
 	}
 	
 	public void switchVideo(boolean during_startup, boolean change_user_pref) {
