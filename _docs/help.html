@@ -26,6 +26,7 @@
 <!-- End Cookie Consent plugin -->
 
 <!-- Google Analytics -->
+<!-- anonymizeIp is set: unclear if this is needed for EU GDPR, but just in case -->
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -33,6 +34,7 @@
   })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
   ga('create', 'UA-38364448-5', 'auto');
+  ga('set', 'anonymizeIp', true);
   ga('send', 'pageview');
 </script>
 
