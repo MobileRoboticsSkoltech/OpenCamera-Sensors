@@ -623,6 +623,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onDestroy");
 			Log.d(TAG, "size of preloaded_bitmap_resources: " + preloaded_bitmap_resources.size());
 		}
+		// it can happen that a new image appears after onPause is called, in which case we want to wait until images are saved,
+		// otherwise we can have crash if we need Renderscript after calling releaseAllContexts(), or because rs has been set to
+		// null from beneath applicationInterface.onDestroy()
+		waitUntilImageQueueEmpty();
+
 		preview.onDestroy();
 		if( applicationInterface != null ) {
 			applicationInterface.onDestroy();
@@ -2940,8 +2945,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	}
 
     public boolean supportsNoiseReduction() {
-		//return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() && preview.supportsExposureTime() );
-		return false; // currently blocked for release
+		return( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && preview.usingCamera2API() && large_heap_memory >= 512 && preview.supportsBurst() && preview.supportsExposureTime() );
+		//return false; // currently blocked for release
 	}
     
     private int maxExpoBracketingNImages() {

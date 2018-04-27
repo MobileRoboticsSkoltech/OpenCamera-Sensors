@@ -624,6 +624,13 @@ public class ImageSaver extends Thread {
 	private void addRequest(Request request, int cost) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "addRequest, cost: " + cost);
+		if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && main_activity.isDestroyed() ) {
+			// If the application is being destroyed as a new photo is being taken, it's not safe to continue, e.g., we'll
+			// crash if needing to use RenderScript.
+			// MainDestroy.onDestroy() does call waitUntilDone(), but this is extra protection in case an image comes in after that.
+			Log.e(TAG, "application is destroyed, image lost!");
+			return;
+		}
 		// this should not be synchronized on "this": BlockingQueue is thread safe, and if it's blocking in queue.put(), we'll hang because
 		// the saver queue will need to synchronize on "this" in order to notifyAll() the main thread
 		boolean done = false;
