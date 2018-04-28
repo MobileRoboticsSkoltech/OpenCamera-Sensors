@@ -336,8 +336,16 @@ public class StorageUtils {
 			Log.d(TAG, "getFileFromDocumentUriSAF: " + uri);
 			Log.d(TAG, "is_folder?: " + is_folder);
 		}
+        String authority = uri.getAuthority();
+        if( MyDebug.LOG ) {
+            Log.d(TAG, "authority: " + authority);
+            Log.d(TAG, "scheme: " + uri.getScheme());
+            Log.d(TAG, "fragment: " + uri.getFragment());
+            Log.d(TAG, "path: " + uri.getPath());
+            Log.d(TAG, "last path segment: " + uri.getLastPathSegment());
+        }
 	    File file = null;
-		if( "com.android.externalstorage.documents".equals(uri.getAuthority()) ) {
+		if( "com.android.externalstorage.documents".equals(authority) ) {
 			final String id = is_folder ? DocumentsContract.getTreeDocumentId(uri) : DocumentsContract.getDocumentId(uri);
 			if( MyDebug.LOG )
 				Log.d(TAG, "id: " + id);
@@ -367,15 +375,24 @@ public class StorageUtils {
 				}
 			}
 		}
-		else if( "com.android.providers.downloads.documents".equals(uri.getAuthority()) ) {
+		else if( "com.android.providers.downloads.documents".equals(authority) ) {
 			if( !is_folder ) {
 				final String id = DocumentsContract.getDocumentId(uri);
-				final Uri contentUri = ContentUris.withAppendedId(
-						Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
-
-				String filename = getDataColumn(contentUri, null, null);
-				if( filename != null )
+				if( id.startsWith("raw:") ) {
+					// unclear if this is needed for Open Camera, but on Vibrance HDR
+				    // on some devices (at least on a Chromebook), I've had reports of id being of the form
+                    // "raw:/storage/emulated/0/Download/..."
+				    String filename = id.replaceFirst("raw:", "");
 					file = new File(filename);
+                }
+                else {
+					final Uri contentUri = ContentUris.withAppendedId(
+							Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
+
+					String filename = getDataColumn(contentUri, null, null);
+					if( filename != null )
+						file = new File(filename);
+				}
 			}
 			else {
 				if( MyDebug.LOG )
@@ -387,7 +404,7 @@ public class StorageUtils {
 				// "downloads" - not clear how to parse this!
 			}
 		}
-		else if( "com.android.providers.media.documents".equals(uri.getAuthority()) ) {
+		else if( "com.android.providers.media.documents".equals(authority) ) {
 			final String docId = DocumentsContract.getDocumentId(uri);
 			final String[] split = docId.split(":");
 			final String type = split[0];
