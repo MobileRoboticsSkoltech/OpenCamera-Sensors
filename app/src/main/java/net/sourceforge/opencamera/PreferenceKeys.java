@@ -213,6 +213,8 @@ public class PreferenceKeys {
 
 	public static final String GhostImagePreferenceKey = "preference_ghost_image";
 
+	public static final String GhostSelectedImageSAFPreferenceKey = "preference_ghost_selected_image_saf";
+
     public static String getVideoStabilizationPreferenceKey() {
     	return "preference_video_stabilization";
     }

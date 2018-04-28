@@ -519,6 +519,29 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
             });
         }
 
+        {
+        	ListPreference pref = (ListPreference)findPreference("preference_ghost_image");
+
+	        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ) {
+	        	// require Storage Access Framework to select a ghost image
+	        	pref.setEntries(R.array.preference_ghost_image_entries_preandroid5);
+	        	pref.setEntryValues(R.array.preference_ghost_image_values_preandroid5);
+			}
+
+        	pref.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+        		@Override
+                public boolean onPreferenceChange(Preference arg0, Object newValue) {
+            		if( MyDebug.LOG )
+            			Log.d(TAG, "clicked ghost image: " + newValue);
+            		if( newValue.equals("preference_ghost_image_selected") ) {
+						MainActivity main_activity = (MainActivity) MyPreferenceFragment.this.getActivity();
+						main_activity.openGhostImageChooserDialogSAF(true);
+					}
+            		return true;
+                }
+            });
+        }
+
         /*{
         	EditTextPreference edit = (EditTextPreference)findPreference("preference_save_location");
         	InputFilter filter = new InputFilter() { 
@@ -1197,10 +1220,14 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		if( MyDebug.LOG )
 			Log.d(TAG, "onSharedPreferenceChanged");
 	    Preference pref = findPreference(key);
-	    if( pref instanceof TwoStatePreference ){
+	    if( pref instanceof TwoStatePreference ) {
 	    	TwoStatePreference twoStatePref = (TwoStatePreference)pref;
 	    	twoStatePref.setChecked(prefs.getBoolean(key, true));
 	    }
+	    else if( pref instanceof  ListPreference ) {
+	    	ListPreference listPref = (ListPreference)pref;
+	    	listPref.setValue(prefs.getString(key, ""));
+		}
 	    setSummary(key);
 	}
 

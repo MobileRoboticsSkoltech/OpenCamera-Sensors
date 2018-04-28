@@ -331,7 +331,7 @@ public class StorageUtils {
 	// http://stackoverflow.com/questions/20067508/get-real-path-from-uri-android-kitkat-new-storage-access-framework/
     // only valid if isUsingSAF()
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	File getFileFromDocumentUriSAF(Uri uri, boolean is_folder) {
+	public File getFileFromDocumentUriSAF(Uri uri, boolean is_folder) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "getFileFromDocumentUriSAF: " + uri);
 			Log.d(TAG, "is_folder?: " + is_folder);

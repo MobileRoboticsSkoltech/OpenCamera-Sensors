@@ -509,9 +509,13 @@
     <string name="anti_banding_off">Off</string>
 
     <string name="preference_ghost_image">Ghost image</string>
-    <string name="preference_ghost_image_summary">Overlay last photo taken, to help with alignment.\n%s</string>
+    <string name="preference_ghost_image_summary">Overlay an image, to help with alignment.\n%s</string>
     <string name="preference_ghost_image_off">Off</string>
     <string name="preference_ghost_image_last">Last photo taken</string>
+    <string name="preference_ghost_image_selected">Selected image</string>
+
+    <string name="open_files_saf_exception_ghost">No file dialog found on this device, ghost image option is not supported</string>
+    <string name="saf_permission_failed_open_image">Unable to open this image</string>
 
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n

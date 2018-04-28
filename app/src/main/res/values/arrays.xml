@@ -680,8 +680,18 @@
     <string-array name="preference_ghost_image_entries">
         <item>@string/preference_ghost_image_off</item>
         <item>@string/preference_ghost_image_last</item>
+        <item>@string/preference_ghost_image_selected</item>
     </string-array>
     <string-array name="preference_ghost_image_values">
+        <item>preference_ghost_image_off</item>
+        <item>preference_ghost_image_last</item>
+        <item>preference_ghost_image_selected</item>
+    </string-array>
+    <string-array name="preference_ghost_image_entries_preandroid5">
+        <item>@string/preference_ghost_image_off</item>
+        <item>@string/preference_ghost_image_last</item>
+    </string-array>
+    <string-array name="preference_ghost_image_values_preandroid5">
         <item>preference_ghost_image_off</item>
         <item>preference_ghost_image_last</item>
     </string-array>
