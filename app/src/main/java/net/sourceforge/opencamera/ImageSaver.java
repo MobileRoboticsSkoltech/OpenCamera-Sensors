@@ -1804,6 +1804,10 @@ public class ImageSaver extends Thread {
 				}
 				options.inSampleSize = sample_size;
     			thumbnail = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "thumbnail width: " + thumbnail.getWidth());
+					Log.d(TAG, "thumbnail height: " + thumbnail.getHeight());
+				}
 				// now get the rotation from the Exif data
 				if( MyDebug.LOG )
 					Log.d(TAG, "rotate thumbnail for exif tags?");
@@ -1819,6 +1823,10 @@ public class ImageSaver extends Thread {
 	    			Log.d(TAG, "    scale: " + scale);
 				if( width > 0 && height > 0 ) {
 					thumbnail = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "thumbnail width: " + thumbnail.getWidth());
+						Log.d(TAG, "thumbnail height: " + thumbnail.getHeight());
+					}
 					// don't need to rotate for exif, as we already did that when creating the bitmap
 				}
 				else {
