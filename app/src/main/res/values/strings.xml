@@ -508,6 +508,11 @@
     <string name="anti_banding_60hz">60Hz</string>
     <string name="anti_banding_off">Off</string>
 
+    <string name="preference_ghost_image">Ghost image</string>
+    <string name="preference_ghost_image_summary">Overlay last photo taken, to help with alignment.\n%s</string>
+    <string name="preference_ghost_image_off">Off</string>
+    <string name="preference_ghost_image_last">Last photo taken</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

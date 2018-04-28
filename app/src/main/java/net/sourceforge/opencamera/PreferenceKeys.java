@@ -211,6 +211,8 @@ public class PreferenceKeys {
 
 	public static final String FaceDetectionPreferenceKey = "preference_face_detection";
 
+	public static final String GhostImagePreferenceKey = "preference_ghost_image";
+
     public static String getVideoStabilizationPreferenceKey() {
     	return "preference_video_stabilization";
     }

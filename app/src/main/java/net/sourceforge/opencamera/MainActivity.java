@@ -943,6 +943,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		applicationInterface.getGyroSensor().stopRecording();
 		releaseSound();
 		applicationInterface.clearLastImages(); // this should happen when pausing the preview, but call explicitly just to be safe
+		applicationInterface.getDrawPreview().clearGhostImage();
 		preview.onPause();
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "onPause: total time to pause: " + (System.currentTimeMillis() - debug_time));
@@ -1089,6 +1090,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		mainUI.setTakePhotoIcon();
 	    mainUI.setPopupIcon(); // needed as turning to video mode or back can turn flash mode off or back on
+		applicationInterface.getDrawPreview().clearGhostImage();
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast(true);
 		}
@@ -1220,6 +1222,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			switch( key ) {
 				// we whitelist preferences where we're sure that we don't need to call updateForSettings() if they've changed
 				case "preference_timer":
+				case "preference_ghost_image":
 				case "preference_touch_capture":
 				case "preference_pause_preview":
 				case "preference_shutter_sound":

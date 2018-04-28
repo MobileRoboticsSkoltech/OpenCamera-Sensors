@@ -677,4 +677,12 @@
         <item>flash_frontscreen_on</item>
         <item>flash_frontscreen_torch</item>
     </string-array>
+    <string-array name="preference_ghost_image_entries">
+        <item>@string/preference_ghost_image_off</item>
+        <item>@string/preference_ghost_image_last</item>
+    </string-array>
+    <string-array name="preference_ghost_image_values">
+        <item>preference_ghost_image_off</item>
+        <item>preference_ghost_image_last</item>
+    </string-array>
 </resources>

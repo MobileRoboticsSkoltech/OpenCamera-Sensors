@@ -70,6 +70,7 @@ public class DrawPreview {
 	private float capture_rate_factor;
 	private boolean auto_stabilise_pref;
 	private String preference_grid_pref;
+	private String ghost_image_pref;
 
 	// avoid doing things that allocate memory every frame!
 	private final Paint p = new Paint();
@@ -133,11 +134,14 @@ public class DrawPreview {
 	private final RectF thumbnail_anim_src_rect = new RectF();
 	private final RectF thumbnail_anim_dst_rect = new RectF();
 	private final Matrix thumbnail_anim_matrix = new Matrix();
+	private int last_thumbnail_ui_rotation; // Preview.getUIRotation() value when thumbnail was set
+	private boolean last_thumbnail_is_video; // whether thumbnail is for video
 
-	private boolean show_last_image;
+	private boolean show_last_image; // whether to show the last image as part of "pause preview"
 	private final RectF last_image_src_rect = new RectF();
 	private final RectF last_image_dst_rect = new RectF();
 	private final Matrix last_image_matrix = new Matrix();
+	private boolean allow_ghost_last_image; // whether to allow ghosting the last image
 
 	private long ae_started_scanning_ms = -1; // time when ae started scanning
 
@@ -263,7 +267,7 @@ public class DrawPreview {
     	return main_activity;
     }
 	
-	public void updateThumbnail(Bitmap thumbnail) {
+	public void updateThumbnail(Bitmap thumbnail, boolean is_video) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateThumbnail");
 		if( applicationInterface.getThumbnailAnimationPref() ) {
@@ -274,6 +278,9 @@ public class DrawPreview {
 		}
     	Bitmap old_thumbnail = this.last_thumbnail;
     	this.last_thumbnail = thumbnail;
+    	this.last_thumbnail_ui_rotation = main_activity.getPreview().getUIRotation();
+    	this.last_thumbnail_is_video = is_video;
+    	this.allow_ghost_last_image = true;
     	if( old_thumbnail != null ) {
     		// only recycle after we've set the new thumbnail
     		old_thumbnail.recycle();
@@ -296,6 +303,12 @@ public class DrawPreview {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clearLastImage");
 		this.show_last_image = false;
+	}
+
+	public void clearGhostImage() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "clearGhostImage");
+		this.allow_ghost_last_image = false;
 	}
 
 	public void cameraInOperation(boolean in_operation) {
@@ -402,6 +415,8 @@ public class DrawPreview {
 		auto_stabilise_pref = applicationInterface.getAutoStabilisePref();
 
 		preference_grid_pref = sharedPreferences.getString(PreferenceKeys.ShowGridPreferenceKey, "preference_grid_none");
+
+		ghost_image_pref = sharedPreferences.getString(PreferenceKeys.GhostImagePreferenceKey, "preference_ghost_image_off");
 
 		has_settings = true;
 	}
@@ -1746,17 +1761,21 @@ public class DrawPreview {
 
 		drawCropGuides(canvas);
 
-		if( show_last_image && last_thumbnail != null ) {
+		if( last_thumbnail != null && !last_thumbnail_is_video && camera_controller != null && ( show_last_image || ( allow_ghost_last_image && ghost_image_pref.equals("preference_ghost_image_last") ) ) ) {
 			// If changing this code, ensure that pause preview still works when:
 			// - Taking a photo in portrait or landscape - and check rotating the device while preview paused
 			// - Taking a photo with lock to portrait/landscape options still shows the thumbnail with aspect ratio preserved
-			p.setColor(Color.rgb(0, 0, 0)); // in case image doesn't cover the canvas (due to different aspect ratios)
-			canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p); // in case
+			// Also check ghost last image works okay!
+			int this_ui_rotation = show_last_image ? ui_rotation : last_thumbnail_ui_rotation;
+			if( show_last_image ) {
+				p.setColor(Color.rgb(0, 0, 0)); // in case image doesn't cover the canvas (due to different aspect ratios)
+				canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p); // in case
+			}
 			last_image_src_rect.left = 0;
 			last_image_src_rect.top = 0;
 			last_image_src_rect.right = last_thumbnail.getWidth();
 			last_image_src_rect.bottom = last_thumbnail.getHeight();
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
+			if( this_ui_rotation == 90 || this_ui_rotation == 270 ) {
 				last_image_src_rect.right = last_thumbnail.getHeight();
 				last_image_src_rect.bottom = last_thumbnail.getWidth();
 			}
@@ -1769,15 +1788,27 @@ public class DrawPreview {
 				Log.d(TAG, "canvas: " + canvas.getWidth() + " x " + canvas.getHeight());
 			}*/
 			last_image_matrix.setRectToRect(last_image_src_rect, last_image_dst_rect, Matrix.ScaleToFit.CENTER); // use CENTER to preserve aspect ratio
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
+			if( this_ui_rotation == 90 || this_ui_rotation == 270 ) {
 				// the rotation maps (0, 0) to (tw/2 - th/2, th/2 - tw/2), so we translate to undo this
 				float diff = last_thumbnail.getHeight() - last_thumbnail.getWidth();
 				last_image_matrix.preTranslate(diff/2.0f, -diff/2.0f);
 			}
-			last_image_matrix.preRotate(ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+			last_image_matrix.preRotate(this_ui_rotation, last_thumbnail.getWidth()/2.0f, last_thumbnail.getHeight()/2.0f);
+			if( !show_last_image ) {
+				boolean is_front_facing = camera_controller != null && camera_controller.isFrontFacing();
+				if( is_front_facing && !sharedPreferences.getString(PreferenceKeys.FrontCameraMirrorKey, "preference_front_camera_mirror_no").equals("preference_front_camera_mirror_photo") ) {
+					//last_image_matrix.postScale(-1.0f, 1.0f);
+					last_image_matrix.preScale(-1.0f, 1.0f, last_thumbnail.getWidth()/2, 0.0f);
+					//last_image_matrix.postScale(-1.0f, 1.0f, last_image_dst_rect.width()/2, 0.0f);
+				}
+			}
+			if( !show_last_image )
+				p.setAlpha(127);
 			canvas.drawBitmap(last_thumbnail, last_image_matrix, p);
+			if( !show_last_image )
+				p.setAlpha(255);
 		}
-		
+
 		doThumbnailAnimation(canvas, time_ms);
 
 		drawUI(canvas, time_ms);

@@ -1727,7 +1727,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateThumbnail");
 		main_activity.updateGalleryIcon(thumbnail);
-		drawPreview.updateThumbnail(thumbnail);
+		drawPreview.updateThumbnail(thumbnail, is_video);
 		if( !is_video && this.getPausePreviewPref() ) {
 			drawPreview.showLastImage();
 		}
@@ -2109,10 +2109,13 @@ public class MyApplicationInterface implements ApplicationInterface {
 		boolean has_thumbnail_animation = getThumbnailAnimationPref();
         
 		boolean do_in_background = saveInBackground(image_capture_intent);
-		
+
+		String ghost_image_pref = sharedPreferences.getString(PreferenceKeys.GhostImagePreferenceKey, "preference_ghost_image_off");
+
 		int sample_factor = 1;
-		if( !this.getPausePreviewPref() ) {
+		if( !this.getPausePreviewPref() && !ghost_image_pref.equals("preference_ghost_image_last") ) {
 			// if pausing the preview, we use the thumbnail also for the preview, so don't downsample
+			// similarly for ghosting last image
 			// otherwise, we can downsample by 4 to increase performance, without noticeable loss in visual quality (even for the thumbnail animation)
 			sample_factor *= 4;
 			if( !has_thumbnail_animation ) {
@@ -2390,6 +2393,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 				trashImage(last_images_saf, last_image.uri, last_image.name);
 			}
 			clearLastImages();
+			drawPreview.clearGhostImage(); // doesn't make sense to show the last image as a ghost, if the user has trashed it!
 			preview.startCameraPreview();
 		}
     	// Calling updateGalleryIcon() immediately has problem that it still returns the latest image that we've just deleted!

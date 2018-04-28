@@ -104,6 +104,15 @@
             android:defaultValue="0"
             />
 
+        <ListPreference
+            android:key="preference_ghost_image"
+            android:title="@string/preference_ghost_image"
+            android:summary="@string/preference_ghost_image_summary"
+            android:entries="@array/preference_ghost_image_entries"
+            android:entryValues="@array/preference_ghost_image_values"
+            android:defaultValue="preference_ghost_image_off"
+            />
+
 	    <PreferenceScreen
 	        android:key="preference_screen_camera_controls_more"
 	        android:title="@string/preference_screen_camera_controls_more"
