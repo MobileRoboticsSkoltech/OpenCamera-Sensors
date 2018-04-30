@@ -1295,7 +1295,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     public void openSettings() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "openSettings");
-		waitUntilImageQueueEmpty(); // in theory not needed as we could continue running in the background, but best to be safe
 		closePopup();
 		preview.cancelTimer(); // best to cancel any timer, in case we take a photo while settings window is open, or when changing settings
 		preview.cancelRepeat(); // similarly cancel the auto-repeat mode!

@@ -486,10 +486,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 	if( pref.getKey().equals("preference_use_camera2") ) {
                 		if( MyDebug.LOG )
                 			Log.d(TAG, "user clicked camera2 API - need to restart");
-                		// see http://stackoverflow.com/questions/2470870/force-application-to-restart-on-first-activity
-                		Intent i = getActivity().getBaseContext().getPackageManager().getLaunchIntentForPackage( getActivity().getBaseContext().getPackageName() );
-	                	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	                	startActivity(i);
+                		restartOpenCamera();
 	                	return false;
                 	}
                 	return false;
@@ -1091,10 +1088,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 								main_activity.setDeviceDefaults();
 		                		if( MyDebug.LOG )
 		                			Log.d(TAG, "user clicked reset - need to restart");
-		                		// see http://stackoverflow.com/questions/2470870/force-application-to-restart-on-first-activity
-		                		Intent i = getActivity().getBaseContext().getPackageManager().getLaunchIntentForPackage( getActivity().getBaseContext().getPackageName() );
-			                	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			                	startActivity(i);
+		                		restartOpenCamera();
 					        }
 			        	});
 			        	alertDialog.setNegativeButton(android.R.string.no, null);
@@ -1115,6 +1109,17 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                 }
             });
         }
+	}
+
+	private void restartOpenCamera() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "restartOpenCamera");
+		MainActivity main_activity = (MainActivity)MyPreferenceFragment.this.getActivity();
+		main_activity.waitUntilImageQueueEmpty();
+		// see http://stackoverflow.com/questions/2470870/force-application-to-restart-on-first-activity
+		Intent i = getActivity().getBaseContext().getPackageManager().getLaunchIntentForPackage( getActivity().getBaseContext().getPackageName() );
+		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(i);
 	}
 
 	public static class SaveFolderChooserDialog extends FolderChooserDialog {
