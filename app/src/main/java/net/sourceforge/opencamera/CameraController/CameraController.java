@@ -450,6 +450,12 @@ public abstract class CameraController {
 	public boolean needsFlash() {
 		return false;
 	}
+	/**
+	 * @return whether front screen "flash" will fire; returns false if not known
+     */
+	public boolean needsFrontScreenFlash() {
+		return false;
+	}
 	public boolean captureResultHasWhiteBalanceTemperature() {
 		return false;
 	}

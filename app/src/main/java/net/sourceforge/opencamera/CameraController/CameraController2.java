@@ -128,7 +128,8 @@ public class CameraController2 extends CameraController {
 	private Surface surface_texture;
 	private HandlerThread thread;
 	private Handler handler;
-	
+	private Surface video_recorder_surface;
+
 	private int preview_width;
 	private int preview_height;
 	
@@ -3620,6 +3621,13 @@ public class CameraController2 extends CameraController {
 			if( MyDebug.LOG )
 				Log.d(TAG, "preview size: " + this.preview_width + " x " + this.preview_height);
 
+			if( video_recorder != null )
+				video_recorder_surface = video_recorder.getSurface();
+			else
+				video_recorder_surface = null;
+			if( MyDebug.LOG )
+				Log.d(TAG, "video_recorder_surface: " + video_recorder_surface);
+
 			class MyStateCallback extends CameraCaptureSession.StateCallback {
 				private boolean callback_done; // must sychronize on this and notifyAll when setting to true
 				@Override
@@ -3642,7 +3650,7 @@ public class CameraController2 extends CameraController {
 		        	Surface surface = getPreviewSurface();
 	        		previewBuilder.addTarget(surface);
 	        		if( video_recorder != null )
-	        			previewBuilder.addTarget(video_recorder.getSurface());
+	        			previewBuilder.addTarget(video_recorder_surface);
 	        		try {
 	        			setRepeatingRequest();
 	        		}
@@ -3710,10 +3718,10 @@ public class CameraController2 extends CameraController {
         	List<Surface> surfaces;
         	if( video_recorder != null ) {
 				if( supports_photo_video_recording && !want_video_high_speed ) {
-					surfaces = Arrays.asList(preview_surface, video_recorder.getSurface(), imageReader.getSurface());
+					surfaces = Arrays.asList(preview_surface, video_recorder_surface, imageReader.getSurface());
 				}
 				else {
-					surfaces = Arrays.asList(preview_surface, video_recorder.getSurface());
+					surfaces = Arrays.asList(preview_surface, video_recorder_surface);
 				}
 				// n.b., raw not supported for photo snapshots while video recording
         	}
@@ -4861,6 +4869,12 @@ public class CameraController2 extends CameraController {
 			}
 		} 
 	}
+
+	private boolean fireAutoFlashFrontScreen() {
+		// iso_threshold fine-tuned for Nexus 6 - front camera ISO never goes above 805, but a threshold of 700 is too low
+		final int iso_threshold = 750;
+		return capture_result_has_iso && capture_result_iso >= iso_threshold;
+	}
 	
 	/** Used in use_fake_precapture mode when flash is auto, this returns whether we fire the flash.
 	 *  If the decision was recently calculated, we return that same decision - used to fix problem that if
@@ -4888,9 +4902,7 @@ public class CameraController2 extends CameraController {
 				fake_precapture_use_flash = is_flash_required;
 				break;
 			case "flash_frontscreen_auto":
-				// iso_threshold fine-tuned for Nexus 6 - front camera ISO never goes above 805, but a threshold of 700 is too low
-				int iso_threshold = camera_settings.flash_value.equals("flash_frontscreen_auto") ? 750 : 1000;
-				fake_precapture_use_flash = capture_result_has_iso && capture_result_iso >= iso_threshold;
+				fake_precapture_use_flash = fireAutoFlashFrontScreen();
 				if(MyDebug.LOG)
 					Log.d(TAG, "    ISO was: " + capture_result_iso);
 				break;
@@ -5110,6 +5122,12 @@ public class CameraController2 extends CameraController {
 		//boolean needs_flash = capture_result_ae != null && capture_result_ae == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED;
 		//return needs_flash;
 		return is_flash_required;
+	}
+
+	@Override
+	public boolean needsFrontScreenFlash() {
+		return camera_settings.flash_value.equals("flash_frontscreen_on") ||
+				( camera_settings.flash_value.equals("flash_frontscreen_auto") && fireAutoFlashFrontScreen() );
 	}
 
 	@Override
