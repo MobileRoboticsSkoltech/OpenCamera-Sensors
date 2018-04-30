@@ -31,6 +31,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.RggbChannelVector;
 import android.hardware.camera2.params.StreamConfigurationMap;
+//import android.hardware.camera2.params.TonemapCurve;
 import android.location.Location;
 import android.media.ExifInterface;
 import android.media.Image;
@@ -305,6 +306,63 @@ public class CameraController2 extends CameraController {
 			/*if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N ) {
 				builder.set(CaptureRequest.CONTROL_POST_RAW_SENSITIVITY_BOOST, 0);
 			}*/
+			/*builder.set(CaptureRequest.CONTROL_EFFECT_MODE, CaptureRequest.CONTROL_EFFECT_MODE_OFF);
+			builder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF);
+			builder.set(CaptureRequest.HOT_PIXEL_MODE, CaptureRequest.HOT_PIXEL_MODE_OFF);
+			builder.set(CaptureRequest.CONTROL_SCENE_MODE, CaptureRequest.CONTROL_SCENE_MODE_DISABLED);
+			builder.set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_HIGH_QUALITY);
+			builder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY);
+			builder.set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF);
+			builder.set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_OFF);
+			builder.set(CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE, CaptureRequest.STATISTICS_LENS_SHADING_MAP_MODE_OFF);*/
+			/*if( MyDebug.LOG ) {
+				builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_HIGH_QUALITY);
+				TonemapCurve original_curve = builder.get(CaptureRequest.TONEMAP_CURVE);
+				for(int c=0;c<3;c++) {
+					Log.d(TAG, "color c = " + c);
+					for(int i=0;i<original_curve.getPointCount(c);i++) {
+						PointF point = original_curve.getPoint(c, i);
+						Log.d(TAG, "    i = " + i);
+						Log.d(TAG, "        in: " + point.x);
+						Log.d(TAG, "        out: " + point.y);
+					}
+				}
+			}*/
+			{
+				/*int n_values = 11;
+				float [] values = new float [2*n_values];
+				final float power = 1.0f/15.0f;
+				for(int i=0;i<n_values;i++) {
+					float in = ((float)i) / (n_values-1.0f);
+					float out = (float)Math.pow(in, power);
+					values[2*i] = in;
+					values[2*i+1] = out;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "i = " + i);
+						Log.d(TAG, "    in: " + in);
+						Log.d(TAG, "    out: " + out);
+					}
+				}*/
+				// sRGB:
+				/*float [] values = new float []{0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
+						0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f, 0.4667f, 0.7130f,
+						0.5333f, 0.7569f, 0.6000f, 0.7977f, 0.6667f, 0.8360f, 0.7333f, 0.8721f,
+						0.8000f, 0.9063f, 0.8667f, 0.9389f, 0.9333f, 0.9701f, 1.0000f, 1.0000f};*/
+				/*float [] values = new float []{0.0000f, 0.0000f, 0.05f, 0.3f, 0.1f, 0.4f, 0.2000f, 0.4845f,
+						0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f,
+						0.5f, 0.78f, 1.0000f, 1.0000f};*/
+				/*float [] values = new float []{0.0f, 0.0f, 0.05f, 0.4f, 0.1f, 0.54f, 0.2f, 0.6f, 0.3f, 0.65f, 0.4f, 0.7f,
+						0.5f, 0.78f, 1.0f, 1.0f};
+				//float [] values = new float []{0.0f, 0.5f, 0.05f, 0.6f, 0.1f, 0.7f, 0.2f, 0.8f, 0.5f, 0.9f, 1.0f, 1.0f};
+				builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_CONTRAST_CURVE);
+				TonemapCurve tonemap_curve = new TonemapCurve(values, values, values);
+				builder.set(CaptureRequest.TONEMAP_CURVE, tonemap_curve);*/
+			}
+			/*if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ) {
+				builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_PRESET_CURVE);
+				builder.set(CaptureRequest.TONEMAP_PRESET_CURVE, CaptureRequest.TONEMAP_PRESET_CURVE_SRGB);
+			}*/
+
 			if( MyDebug.LOG ) {
 				if( is_still ) {
 					Integer nr_mode = builder.get(CaptureRequest.NOISE_REDUCTION_MODE);
