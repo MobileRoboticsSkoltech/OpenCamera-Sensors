@@ -1225,6 +1225,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			switch( key ) {
 				// we whitelist preferences where we're sure that we don't need to call updateForSettings() if they've changed
 				case "preference_timer":
+				case "preference_burst_mode":
+				case "preference_burst_interval":
 				case "preference_ghost_image":
 				case "preference_touch_capture":
 				case "preference_pause_preview":
