@@ -626,7 +626,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onDestroy");
 			Log.d(TAG, "size of preloaded_bitmap_resources: " + preloaded_bitmap_resources.size());
 		}
-		// it can happen that a new image appears after onPause is called, in which case we want to wait until images are saved,
+
+		// reduce risk of losing any images
+		// we don't do this in onPause or onStop, due to risk of ANRs
+		// note that even if we did call this earlier in onPause or onStop, we'd still want to wait again here: as it can happen
+		// that a new image appears after onPause/onStop is called, in which case we want to wait until images are saved,
 		// otherwise we can have crash if we need Renderscript after calling releaseAllContexts(), or because rs has been set to
 		// null from beneath applicationInterface.onDestroy()
 		waitUntilImageQueueEmpty();
@@ -655,6 +659,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 	    	textToSpeech = null;
 	    }
 	    super.onDestroy();
+		if( MyDebug.LOG )
+			Log.d(TAG, "onDestroy done");
 	}
 	
 	@Override
@@ -927,7 +933,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			Log.d(TAG, "onPause");
 			debug_time = System.currentTimeMillis();
 		}
-		waitUntilImageQueueEmpty(); // so we don't risk losing any images
         super.onPause(); // docs say to call this before freeing other things
         mainUI.destroyPopup(); // important as user could change/reset settings from Android settings when pausing
         mSensorManager.unregisterListener(accelerometerListener);
