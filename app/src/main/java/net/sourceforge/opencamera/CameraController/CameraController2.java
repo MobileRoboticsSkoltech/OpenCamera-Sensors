@@ -1745,8 +1745,18 @@ public class CameraController2 extends CameraController {
 		camera_features.max_num_focus_areas = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
 
 		camera_features.is_exposure_lock_supported = true;
-		
-        camera_features.is_video_stabilization_supported = true;
+
+        camera_features.is_video_stabilization_supported = false;
+		int [] supported_video_stabilization_modes = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);
+		if( supported_video_stabilization_modes != null ) {
+			for(int supported_video_stabilization_mode : supported_video_stabilization_modes) {
+				if( supported_video_stabilization_mode == CameraCharacteristics.CONTROL_VIDEO_STABILIZATION_MODE_ON ) {
+			        camera_features.is_video_stabilization_supported = true;
+				}
+			}
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "is_video_stabilization_supported: " + camera_features.is_video_stabilization_supported);
 
 		// although we currently require at least LIMITED to offer Camera2, we explicitly check here in case we do ever support
 		// LEGACY devices
