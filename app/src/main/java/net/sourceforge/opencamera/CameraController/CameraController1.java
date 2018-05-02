@@ -44,6 +44,7 @@ public class CameraController1 extends CameraController {
 	// for performance (affects UI rendering times, e.g., see profiling of GPU rendering). Secondly runtimeexceptions from
 	// Camera.getParameters() seem to be common in Google Play, particularly for getZoom().
 	private int current_zoom_value;
+	private int current_exposure_compensation;
 	private int picture_width;
 	private int picture_height;
 
@@ -836,8 +837,9 @@ public class CameraController1 extends CameraController {
 	}
 
 	public int getExposureCompensation() {
-		Camera.Parameters parameters = this.getParameters();
-		return parameters.getExposureCompensation();
+		/*Camera.Parameters parameters = this.getParameters();
+		return parameters.getExposureCompensation();*/
+		return this.current_exposure_compensation;
 	}
 
 	private float getExposureCompensationStep() {
@@ -858,11 +860,14 @@ public class CameraController1 extends CameraController {
 	
 	// Returns whether exposure was modified
 	public boolean setExposureCompensation(int new_exposure) {
-		Camera.Parameters parameters = this.getParameters();
+		/*Camera.Parameters parameters = this.getParameters();
 		int current_exposure = parameters.getExposureCompensation();
-		if( new_exposure != current_exposure ) {
+		if( new_exposure != current_exposure ) {*/
+		if( new_exposure != current_exposure_compensation ) {
 			if( MyDebug.LOG )
-				Log.d(TAG, "change exposure from " + current_exposure + " to " + new_exposure);
+				Log.d(TAG, "change exposure from " + current_exposure_compensation + " to " + new_exposure);
+			Camera.Parameters parameters = this.getParameters();
+			this.current_exposure_compensation = new_exposure;
 			parameters.setExposureCompensation(new_exposure);
         	setCameraParameters(parameters);
         	return true;
@@ -1101,22 +1106,30 @@ public class CameraController1 extends CameraController {
 	public void setRecordingHint(boolean hint) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "setRecordingHint: " + hint);
-		Camera.Parameters parameters = this.getParameters();
-		// Calling setParameters here with continuous video focus mode causes preview to not restart after taking a photo on Galaxy Nexus?! (fine on my Nexus 7).
-		// The issue seems to specifically be with setParameters (i.e., the problem occurs even if we don't setRecordingHint).
-		// In addition, I had a report of a bug on HTC Desire X, Android 4.0.4 where the saved video was corrupted.
-		// This worked fine in 1.7, then not in 1.8 and 1.9, then was fixed again in 1.10
-		// The only thing in common to 1.7->1.8 and 1.9-1.10, that seems relevant, was adding this code to setRecordingHint() and setParameters() (unclear which would have been the problem),
-		// so we should be very careful about enabling this code again!
-		// Update for v1.23: the bug with Galaxy Nexus has come back (see comments in Preview.setPreviewFps()) and is now unavoidable,
-		// but I've still kept this check here - if nothing else, because it apparently caused video recording problems on other devices too.
-		// Update for v1.29: this doesn't seem to happen on Galaxy Nexus with continuous picture focus mode, which is what we now use; but again, still keepin the check here due to possible problems on other devices
-		String focus_mode = parameters.getFocusMode();
-		// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
-        if( focus_mode != null && !focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
-			parameters.setRecordingHint(hint);
-        	setCameraParameters(parameters);
-        }
+		try {
+			Camera.Parameters parameters = this.getParameters();
+			// Calling setParameters here with continuous video focus mode causes preview to not restart after taking a photo on Galaxy Nexus?! (fine on my Nexus 7).
+			// The issue seems to specifically be with setParameters (i.e., the problem occurs even if we don't setRecordingHint).
+			// In addition, I had a report of a bug on HTC Desire X, Android 4.0.4 where the saved video was corrupted.
+			// This worked fine in 1.7, then not in 1.8 and 1.9, then was fixed again in 1.10
+			// The only thing in common to 1.7->1.8 and 1.9-1.10, that seems relevant, was adding this code to setRecordingHint() and setParameters() (unclear which would have been the problem),
+			// so we should be very careful about enabling this code again!
+			// Update for v1.23: the bug with Galaxy Nexus has come back (see comments in Preview.setPreviewFps()) and is now unavoidable,
+			// but I've still kept this check here - if nothing else, because it apparently caused video recording problems on other devices too.
+			// Update for v1.29: this doesn't seem to happen on Galaxy Nexus with continuous picture focus mode, which is what we now use; but again, still keepin the check here due to possible problems on other devices
+			String focus_mode = parameters.getFocusMode();
+			// getFocusMode() is documented as never returning null, however I've had null pointer exceptions reported in Google Play
+			if( focus_mode != null && !focus_mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO) ) {
+				parameters.setRecordingHint(hint);
+				setCameraParameters(parameters);
+			}
+		}
+		catch(RuntimeException e) {
+			// can get RuntimeException from getParameters - we don't catch within that function because callers may not be able to recover,
+			// but here it doesn't really matter if we fail to set the recording hint
+    		Log.e(TAG, "setRecordingHint failed to get parameters");
+			e.printStackTrace();
+		}
 	}
 
 	public void setAutoExposureLock(boolean enabled) {
