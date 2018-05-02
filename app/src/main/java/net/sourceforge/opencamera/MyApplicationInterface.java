@@ -413,7 +413,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
-    public int getImageQualityPref(){
+    public int getImageQualityPref() {
 		if( MyDebug.LOG )
 			Log.d(TAG, "getImageQualityPref");
 		// see documentation for getSaveImageQualityPref(): in DRO mode we want to take the photo
