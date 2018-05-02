@@ -422,6 +422,8 @@ public class MyApplicationInterface implements ApplicationInterface {
 		PhotoMode photo_mode = getPhotoMode();
 		if( photo_mode == PhotoMode.DRO )
 			return 100;
+		else if( photo_mode == PhotoMode.HDR )
+			return 100;
 		else if( photo_mode == PhotoMode.NoiseReduction )
 			return 100;
 		return getSaveImageQualityPref();
