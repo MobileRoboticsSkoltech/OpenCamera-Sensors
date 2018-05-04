@@ -480,17 +480,14 @@ uchar4 __attribute__((kernel)) hdr_n(uchar4 in, uint32_t x, uint32_t y) {
 		if( weight < 1.0 ) {
     		float3 base_rgb = rgb;
 			int adj_indx = mid_indx;
+			int step_dir = avg <= 127.5f ? 1 : -1;
 
             for(int k=0;k<mid_indx;k++) {
 
 			// now look at a neighbour image
 			weight = 1.0f - weight;
-			if( avg <= 127.5f ) {
-    			adj_indx++;
-			}
-			else {
-    			adj_indx--;
-			}
+			adj_indx += step_dir;
+
             rgb = convert_float3(pixels[adj_indx].rgb);
             //if( n_bitmaps_g > 3 ) {
             if( k+1 < mid_indx ) {
