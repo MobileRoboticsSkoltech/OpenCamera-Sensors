@@ -311,7 +311,7 @@ public class HDRProcessor {
 			bitmaps = new ArrayList<>(bitmaps);
 		}
 		int n_bitmaps = bitmaps.size();
-		if( n_bitmaps != 1 && n_bitmaps != 3 && n_bitmaps != 5 ) {
+		if( n_bitmaps != 1 && n_bitmaps != 3 && n_bitmaps != 5 && n_bitmaps != 7 ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "n_bitmaps not supported: " + n_bitmaps);
 			throw new HDRProcessorException(HDRProcessorException.INVALID_N_IMAGES);
@@ -614,6 +614,21 @@ public class HDRProcessor {
 			processHDRScript.set_offset_y4(offsets_y[4]);
 			processHDRScript.set_parameter_A4(response_functions[4].parameter_A);
 			processHDRScript.set_parameter_B4(response_functions[4].parameter_B);
+
+			if( n_bitmaps > 5 ) {
+				processHDRScript.set_bitmap5(allocations[5]);
+				processHDRScript.set_offset_x5(offsets_x[5]);
+				processHDRScript.set_offset_y5(offsets_y[5]);
+				processHDRScript.set_parameter_A5(response_functions[5].parameter_A);
+				processHDRScript.set_parameter_B5(response_functions[5].parameter_B);
+
+				processHDRScript.set_bitmap6(allocations[6]);
+				processHDRScript.set_offset_x6(offsets_x[6]);
+				processHDRScript.set_offset_y6(offsets_y[6]);
+				processHDRScript.set_parameter_A6(response_functions[6].parameter_A);
+				processHDRScript.set_parameter_B6(response_functions[6].parameter_B);
+			}
+
 		}
 
 		// set globals
