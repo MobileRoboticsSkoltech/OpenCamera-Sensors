@@ -9260,6 +9260,52 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
 	}
 
+	/** Tests HDR algorithm on test samples "testHDR23", but with 2 images.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR23_exp2() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR23_exp2");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0068.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR23_exp2_output.jpg", false);
+
+        int [] exp_offsets_x = {0, 0};
+        int [] exp_offsets_y = {0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 13, 72, 250);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR23", but with 2 images, and greater exposure gap.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR23_exp2b() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR23_exp2b");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0070.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0062.png") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR23_exp2b_output.jpg", false);
+
+        int [] exp_offsets_x = {0, 0};
+        int [] exp_offsets_y = {0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 39, 116, 251);
+	}
+
 	/** Tests HDR algorithm on test samples "testHDR23".
 	 * @throws IOException
 	 * @throws InterruptedException 
@@ -9275,11 +9321,38 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0066.png") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
 
-		subTestHDR(inputs, "testHDR23_output.jpg", false);
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR23_output.jpg", false);
 
 		int [] exp_offsets_x = {0, 0, 0};
 		int [] exp_offsets_y = {0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR23", but with 4 images.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR23_exp4() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR23_exp4");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0070.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0068.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0062.png") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR23_exp4_output.jpg", false);
+
+        int [] exp_offsets_x = {0, 0, 0, 0};
+        int [] exp_offsets_y = {0, 0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 15, 69, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR23", but with 5 images.
@@ -9298,11 +9371,41 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0066.png") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0062.png") );
-		subTestHDR(inputs, "testHDR23_exp5_output.jpg", false);
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR23_exp5_output.jpg", false);
 
         int [] exp_offsets_x = {0, 0, 0, 0, 0};
         int [] exp_offsets_y = {0, 0, 0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR23", but with 6 images.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR23_exp6() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR23_exp6");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0072.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0070.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0068.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0062.png") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0061.png") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR23_exp6_output.jpg", false);
+
+        int [] exp_offsets_x = {0, 0, 0, 0, 0, 0};
+        int [] exp_offsets_y = {0, 0, 0, 0, 0, 0};
+		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 15, 70, 254);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR23", but with 7 images.
@@ -9323,11 +9426,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0064.png") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0062.png") );
 		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR23/memorial0061.png") );
-		subTestHDR(inputs, "testHDR23_exp7_output.jpg", false);
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR23_exp7_output.jpg", false);
 
         int [] exp_offsets_x = {0, 0, 0, 0, 0, 0, 0};
         int [] exp_offsets_y = {0, 0, 0, 0, 0, 0, 0};
 		checkHDROffsets(exp_offsets_x, exp_offsets_y);
+
+		checkHistogramDetails(hdrHistogramDetails, 17, 81, 255);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR24".
@@ -9964,6 +10070,24 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
+	public void testHDR47_exp2() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR47_exp2");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 05.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR47/High Five - ppw - 03.jpg") );
+
+		subTestHDR(inputs, "testHDR47_exp2_output.jpg", false);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR47".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public void testHDR47() throws IOException, InterruptedException {
 		Log.d(TAG, "testHDR47");
 
@@ -10082,6 +10206,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
+	public void testHDR49_exp2() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR49_exp2");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR49/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR49/input3.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR49_exp2_output.jpg", false);
+
+        checkHistogramDetails(hdrHistogramDetails, 0, 92, 250);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR49".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public void testHDR49() throws IOException, InterruptedException {
 		Log.d(TAG, "testHDR49");
 
@@ -10096,6 +10239,27 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR49_output.jpg", false);
 
         checkHistogramDetails(hdrHistogramDetails, 0, 75, 255);
+	}
+
+	/** Tests HDR algorithm on test samples "testHDR49".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testHDR49_exp4() throws IOException, InterruptedException {
+		Log.d(TAG, "testHDR49_exp4");
+
+		setToDefault();
+
+		// list assets
+		List<Bitmap> inputs = new ArrayList<>();
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR49/input0.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR49/input1.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR49/input3.jpg") );
+		inputs.add( getBitmapFromFile(hdr_images_path + "testHDR49/input4.jpg") );
+
+		HistogramDetails hdrHistogramDetails = subTestHDR(inputs, "testHDR49_exp4_output.jpg", false);
+
+        checkHistogramDetails(hdrHistogramDetails, 0, 100, 245);
 	}
 
 	/** Tests HDR algorithm on test samples "testHDR49".

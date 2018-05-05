@@ -311,7 +311,8 @@ public class HDRProcessor {
 			bitmaps = new ArrayList<>(bitmaps);
 		}
 		int n_bitmaps = bitmaps.size();
-		if( n_bitmaps != 1 && n_bitmaps != 3 && n_bitmaps != 5 && n_bitmaps != 7 ) {
+		//if( n_bitmaps != 1 && n_bitmaps != 3 && n_bitmaps != 5 && n_bitmaps != 7 ) {
+		if( n_bitmaps < 1 || n_bitmaps > 7 ) {
 			if( MyDebug.LOG )
 				Log.e(TAG, "n_bitmaps not supported: " + n_bitmaps);
 			throw new HDRProcessorException(HDRProcessorException.INVALID_N_IMAGES);
@@ -509,7 +510,9 @@ public class HDRProcessor {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
-		final int base_bitmap = (n_bitmaps - 1) / 2; // index of the bitmap with the base exposure and offsets
+		//final int base_bitmap = (n_bitmaps - 1) / 2; // index of the bitmap with the base exposure and offsets
+		final int base_bitmap = n_bitmaps % 2 == 0 ? n_bitmaps/2 : (n_bitmaps - 1) / 2; // index of the bitmap with the base exposure and offsets
+        // for even number of images, round up to brighter image
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
@@ -521,7 +524,7 @@ public class HDRProcessor {
 		}
 
 		//final boolean use_hdr_n = true; // test always using hdr_n
-		final boolean use_hdr_n = n_bitmaps > 3;
+		final boolean use_hdr_n = n_bitmaps != 3;
 
 		// compute response_functions
 		for(int i=0;i<n_bitmaps;i++) {
@@ -537,6 +540,34 @@ public class HDRProcessor {
 		}
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating response functions: " + (System.currentTimeMillis() - time_s));
+
+		if( n_bitmaps % 2 == 0 ) {
+			// need to remap so that we aim for a brightness between the middle two images
+			float a = (float)Math.sqrt(response_functions[base_bitmap-1].parameter_A);
+			float b = response_functions[base_bitmap-1].parameter_B / (a+1.0f);
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "remap for even number of images");
+				Log.d(TAG, "    a: " + a);
+				Log.d(TAG, "    b: " + b);
+			}
+			if( a < 1.0e-5f ) {
+				// avoid risk of division by 0
+				a = 1.0e-5f;
+				if( MyDebug.LOG )
+					Log.e(TAG, "    clamp a to: " + a);
+			}
+			for(int i=0;i<n_bitmaps;i++) {
+				float this_A = response_functions[i].parameter_A;
+				float this_B = response_functions[i].parameter_B;
+				response_functions[i].parameter_A = this_A / a;
+				response_functions[i].parameter_B = this_B - this_A * b / a;
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "remapped: " + i);
+					Log.d(TAG, "    A: " + this_A + " -> " + response_functions[i].parameter_A);
+					Log.d(TAG, "    B: " + this_B + " -> " + response_functions[i].parameter_B);
+				}
+			}
+		}
 
 		/*
 		// calculate average luminance by sampling
@@ -577,21 +608,27 @@ public class HDRProcessor {
 
 		// set allocations
 		processHDRScript.set_bitmap0(allocations[0]);
-		processHDRScript.set_bitmap2(allocations[2]);
+		if( n_bitmaps > 2 ) {
+			processHDRScript.set_bitmap2(allocations[2]);
+		}
 
 		// set offsets
 		processHDRScript.set_offset_x0(offsets_x[0]);
 		processHDRScript.set_offset_y0(offsets_y[0]);
 		// no offset for middle image
-		processHDRScript.set_offset_x2(offsets_x[2]);
-		processHDRScript.set_offset_y2(offsets_y[2]);
+		if( n_bitmaps > 2 ) {
+			processHDRScript.set_offset_x2(offsets_x[2]);
+			processHDRScript.set_offset_y2(offsets_y[2]);
+		}
 
 		// set response functions
 		processHDRScript.set_parameter_A0(response_functions[0].parameter_A);
 		processHDRScript.set_parameter_B0(response_functions[0].parameter_B);
 		// no response function for middle image
-		processHDRScript.set_parameter_A2(response_functions[2].parameter_A);
-		processHDRScript.set_parameter_B2(response_functions[2].parameter_B);
+		if( n_bitmaps > 2 ) {
+            processHDRScript.set_parameter_A2(response_functions[2].parameter_A);
+            processHDRScript.set_parameter_B2(response_functions[2].parameter_B);
+        }
 
 		if( use_hdr_n ) {
 			// now need to set values for image 1
@@ -609,26 +646,29 @@ public class HDRProcessor {
 			processHDRScript.set_parameter_A3(response_functions[3].parameter_A);
 			processHDRScript.set_parameter_B3(response_functions[3].parameter_B);
 
-			processHDRScript.set_bitmap4(allocations[4]);
-			processHDRScript.set_offset_x4(offsets_x[4]);
-			processHDRScript.set_offset_y4(offsets_y[4]);
-			processHDRScript.set_parameter_A4(response_functions[4].parameter_A);
-			processHDRScript.set_parameter_B4(response_functions[4].parameter_B);
+    		if( n_bitmaps > 4 ) {
+                processHDRScript.set_bitmap4(allocations[4]);
+                processHDRScript.set_offset_x4(offsets_x[4]);
+                processHDRScript.set_offset_y4(offsets_y[4]);
+                processHDRScript.set_parameter_A4(response_functions[4].parameter_A);
+                processHDRScript.set_parameter_B4(response_functions[4].parameter_B);
 
-			if( n_bitmaps > 5 ) {
-				processHDRScript.set_bitmap5(allocations[5]);
-				processHDRScript.set_offset_x5(offsets_x[5]);
-				processHDRScript.set_offset_y5(offsets_y[5]);
-				processHDRScript.set_parameter_A5(response_functions[5].parameter_A);
-				processHDRScript.set_parameter_B5(response_functions[5].parameter_B);
+                if( n_bitmaps > 5 ) {
+                    processHDRScript.set_bitmap5(allocations[5]);
+                    processHDRScript.set_offset_x5(offsets_x[5]);
+                    processHDRScript.set_offset_y5(offsets_y[5]);
+                    processHDRScript.set_parameter_A5(response_functions[5].parameter_A);
+                    processHDRScript.set_parameter_B5(response_functions[5].parameter_B);
 
-				processHDRScript.set_bitmap6(allocations[6]);
-				processHDRScript.set_offset_x6(offsets_x[6]);
-				processHDRScript.set_offset_y6(offsets_y[6]);
-				processHDRScript.set_parameter_A6(response_functions[6].parameter_A);
-				processHDRScript.set_parameter_B6(response_functions[6].parameter_B);
-			}
-
+                    if( n_bitmaps > 6 ) {
+                        processHDRScript.set_bitmap6(allocations[6]);
+                        processHDRScript.set_offset_x6(offsets_x[6]);
+                        processHDRScript.set_offset_y6(offsets_y[6]);
+                        processHDRScript.set_parameter_A6(response_functions[6].parameter_A);
+                        processHDRScript.set_parameter_B6(response_functions[6].parameter_B);
+                    }
+                }
+            }
 		}
 
 		// set globals
