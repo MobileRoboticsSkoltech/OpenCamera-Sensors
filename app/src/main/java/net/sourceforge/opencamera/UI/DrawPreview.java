@@ -1546,7 +1546,7 @@ public class DrawPreview {
 			canvas.save();
 			canvas.rotate((float)angle, cx, cy);
 
-			final int line_alpha = 96;
+			final int line_alpha = 160;
 			float hthickness = (0.5f * scale + 0.5f); // convert dps to pixels
 			p.setStyle(Paint.Style.FILL);
 			if( show_angle_line_pref ) {
