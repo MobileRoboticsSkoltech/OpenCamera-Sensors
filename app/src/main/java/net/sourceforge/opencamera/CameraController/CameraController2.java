@@ -1698,6 +1698,12 @@ public class CameraController2 extends CameraController {
         {
             Display display = activity.getWindowManager().getDefaultDisplay();
             display.getRealSize(display_size);
+            // getRealSize() is adjusted based on the current rotation, so should already be landscape format, but it
+			// would be good to not assume Open Camera runs in landscape mode (if we ever ran in portrait mode,
+			// we'd still want display_size.x > display_size.y as preview resolutions also have width > height)
+			if( display_size.x < display_size.y ) {
+				display_size.set(display_size.y, display_size.x);
+			}
     		if( MyDebug.LOG )
     			Log.d(TAG, "display_size: " + display_size.x + " x " + display_size.y);
         }

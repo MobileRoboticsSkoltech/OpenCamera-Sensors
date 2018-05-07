@@ -78,13 +78,18 @@ public class PopupView extends LinearLayout {
 		{
 			Activity activity = (Activity)this.getContext();
 			Display display = activity.getWindowManager().getDefaultDisplay();
+			// ensure we have display for landscape orientation (even if we ever allow Open Camera
 			DisplayMetrics outMetrics = new DisplayMetrics();
 			display.getMetrics(outMetrics);
 
-			// the height should limit the width, due to when held in portrait
-			int dpHeight = (int)(outMetrics.heightPixels / scale);
-			if( MyDebug.LOG )
+			// normally we should always have heightPixels < widthPixels, but good not to assume we're running in landscape orientation
+			int smaller_dim = Math.min(outMetrics.widthPixels, outMetrics.heightPixels);
+			// the smaller dimension should limit the width, due to when held in portrait
+			int dpHeight = (int)(smaller_dim / scale);
+			if( MyDebug.LOG ) {
+    			Log.d(TAG, "display size: " + outMetrics.widthPixels + " x " + outMetrics.heightPixels);
 				Log.d(TAG, "dpHeight: " + dpHeight);
+			}
 			dpHeight -= 50; // allow space for the icons at top/right of screen
 			if( total_width_dp > dpHeight )
 				total_width_dp = dpHeight;

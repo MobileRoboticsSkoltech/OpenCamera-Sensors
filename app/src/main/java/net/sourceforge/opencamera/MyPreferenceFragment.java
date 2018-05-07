@@ -37,6 +37,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -777,6 +778,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
                             about_string.append(display_size.x);
                             about_string.append("x");
                             about_string.append(display_size.y);
+							DisplayMetrics outMetrics = new DisplayMetrics();
+							display.getMetrics(outMetrics);
+                            about_string.append("\nDisplay metrics: ");
+                            about_string.append(outMetrics.widthPixels);
+                            about_string.append("x");
+                            about_string.append(outMetrics.heightPixels);
                         }
 						about_string.append("\nCurrent camera ID: ");
 						about_string.append(cameraId);
