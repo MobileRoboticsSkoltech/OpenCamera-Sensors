@@ -123,6 +123,8 @@ public class PreferenceKeys {
 
 	public static final String Camera2FastBurstPreferenceKey = "preference_camera2_fast_burst";
 
+	public static final String Camera2PhotoVideoRecordingPreferenceKey = "preference_camera2_photo_video_recording";
+
 	public static final String UIPlacementPreferenceKey = "preference_ui_placement";
 
 	public static final String TouchCapturePreferenceKey = "preference_touch_capture";

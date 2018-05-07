@@ -653,7 +653,7 @@ public class MainUI {
 						View pauseVideoButton = main_activity.findViewById(R.id.pause_video);
 						pauseVideoButton.setVisibility(visibility);
 					}
-					if( main_activity.getPreview().supportsPhotoVideoRecording() && main_activity.getPreview().isVideoRecording() ) {
+					if( main_activity.getPreview().supportsPhotoVideoRecording() && main_activity.getApplicationInterface().usePhotoVideoRecording() && main_activity.getPreview().isVideoRecording() ) {
 						View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
 						takePhotoVideoButton.setVisibility(visibility);
 					}

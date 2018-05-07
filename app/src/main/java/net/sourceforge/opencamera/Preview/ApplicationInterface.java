@@ -106,6 +106,7 @@ public interface ApplicationInterface {
 	int getMaxRawImages(); // see documentation of CameraController.setRaw(), corresponds to max_raw_images
 	boolean useCamera2FakeFlash(); // whether to enable CameraController.setUseCamera2FakeFlash() for Camera2 API
 	boolean useCamera2FastBurst(); // whether to enable Camera2's captureBurst() for faster taking of expo-bracketing photos (generally should be true, but some devices have problems with captureBurst())
+	boolean usePhotoVideoRecording(); // whether to enable support for taking photos when recording video (if not supported, this won't be called)
 
 	// for testing purposes:
 	boolean isTestAlwaysFocus(); // if true, pretend autofocus always successful

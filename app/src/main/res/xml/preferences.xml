@@ -678,6 +678,14 @@
 					android:defaultValue="true"
 					/>
 
+		        <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+		        <SwitchPreference
+		            android:key="preference_camera2_photo_video_recording"
+		            android:title="@string/preference_camera2_photo_video_recording"
+		            android:summary="@string/preference_camera2_photo_video_recording_summary"
+		            android:defaultValue="true"
+		            />
+
 				<!--
 				<SwitchPreference
 		            android:key="preference_background_photo_saving"

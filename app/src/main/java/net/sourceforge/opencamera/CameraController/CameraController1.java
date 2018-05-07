@@ -1714,7 +1714,7 @@ public class CameraController1 extends CameraController {
 	}
 	
 	@Override
-	public void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException {
+	public void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording) throws CameraControllerException {
 		// no further actions necessary
 	}
 	

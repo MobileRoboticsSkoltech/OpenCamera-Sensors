@@ -1140,6 +1140,14 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
 	@Override
+	public boolean usePhotoVideoRecording() {
+		// we only show the preference for Camera2 API (since there's no point disabling the feature for old API)
+		if( !useCamera2() )
+			return true;
+		return sharedPreferences.getBoolean(PreferenceKeys.Camera2PhotoVideoRecordingPreferenceKey, true);
+	}
+
+	@Override
     public boolean isTestAlwaysFocus() {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "isTestAlwaysFocus: " + main_activity.is_test);
@@ -1246,7 +1254,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 			main_activity.getMainUI().setPauseVideoContentDescription();
 		}
-		if( main_activity.getPreview().supportsPhotoVideoRecording() ) {
+		if( main_activity.getPreview().supportsPhotoVideoRecording() && this.usePhotoVideoRecording() ) {
 			if( !( main_activity.getMainUI().inImmersiveMode() && main_activity.usingKitKatImmersiveModeEverything() ) ) {
 				View takePhotoVideoButton = main_activity.findViewById(R.id.take_photo_when_video_recording);
 				takePhotoVideoButton.setVisibility(View.VISIBLE);

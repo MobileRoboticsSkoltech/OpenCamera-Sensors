@@ -449,11 +449,18 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 
 		final boolean using_android_l = bundle.getBoolean("using_android_l");
+		if( MyDebug.LOG )
+			Log.d(TAG, "using_android_l: " + using_android_l);
+		final boolean supports_photo_video_recording = bundle.getBoolean("supports_photo_video_recording");
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_photo_video_recording: " + supports_photo_video_recording);
+
         if( !using_android_l ) {
         	Preference pref = findPreference("preference_show_iso");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_gui");
         	pg.removePreference(pref);
         }
+
         if( !using_android_l ) {
         	Preference pref = findPreference("preference_camera2_fake_flash");
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
@@ -462,7 +469,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			pref = findPreference("preference_camera2_fast_burst");
 			pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
 			pg.removePreference(pref);
+
+			pref = findPreference("preference_camera2_photo_video_recording");
+			pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
+			pg.removePreference(pref);
         }
+        else {
+        	if( !supports_photo_video_recording ) {
+				Preference pref = findPreference("preference_camera2_photo_video_recording");
+				PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");
+				pg.removePreference(pref);
+			}
+		}
+
 		{
 			// remove preference_category_photo_debugging category if empty (which will be the case for old api)
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");

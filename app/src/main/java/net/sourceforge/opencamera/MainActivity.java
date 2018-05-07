@@ -1334,6 +1334,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putInt("white_balance_temperature_max", this.preview.getMaximumWhiteBalanceTemperature());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
 		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
+		bundle.putBoolean("supports_photo_video_recording", this.preview.supportsPhotoVideoRecording());
 
 		putBundleExtra(bundle, "color_effects", this.preview.getSupportedColorEffects());
 		putBundleExtra(bundle, "scene_modes", this.preview.getSupportedSceneModes());

@@ -517,6 +517,9 @@
     <string name="open_files_saf_exception_ghost">No file dialog found on this device, ghost image option is not supported</string>
     <string name="saf_permission_failed_open_image">Unable to open this image</string>
 
+    <string name="preference_camera2_photo_video_recording">Allow photos whilst recording video</string>
+    <string name="preference_camera2_photo_video_recording_summary">Allows taking photos whilst recording videos. Disable this if there are problems with video recording with Camera2 API enabled on your device.</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

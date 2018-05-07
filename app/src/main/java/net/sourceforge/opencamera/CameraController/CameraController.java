@@ -438,8 +438,15 @@ public abstract class CameraController {
 	public abstract int getCameraOrientation();
 	public abstract boolean isFrontFacing();
 	public abstract void unlock();
+	/** Call to initialise video recording, should call before MediaRecorder.prepare().
+	 * @param video_recorder The media recorder object.
+	 */
 	public abstract void initVideoRecorderPrePrepare(MediaRecorder video_recorder);
-	public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder) throws CameraControllerException;
+	/** Call to initialise video recording, should call after MediaRecorder.prepare(), but before MediaRecorder.start().
+	 * @param video_recorder The media recorder object.
+	 * @param want_photo_video_recording Whether support for taking photos whilst video recording is required. If this feature isn't supported, the option has no effect.
+	 */
+	public abstract void initVideoRecorderPostPrepare(MediaRecorder video_recorder, boolean want_photo_video_recording) throws CameraControllerException;
 	public abstract String getParametersString();
 	public boolean captureResultIsAEScanning() {
 		return false;

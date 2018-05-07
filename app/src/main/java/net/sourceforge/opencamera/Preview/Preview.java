@@ -4838,7 +4838,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to prepare video recorder");
 				local_video_recorder.prepare();
-				camera_controller.initVideoRecorderPostPrepare(local_video_recorder);
+				boolean want_photo_video_recording = supportsPhotoVideoRecording() && applicationInterface.usePhotoVideoRecording();
+				camera_controller.initVideoRecorderPostPrepare(local_video_recorder, want_photo_video_recording);
 				if( MyDebug.LOG )
 					Log.d(TAG, "about to start video recorder");
 
