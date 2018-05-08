@@ -63,6 +63,9 @@ ADDED   On-screen flash icon (to show whether flash will fire or not) now suppor
 ADDED   New Camera2 API debug option under Settings/"Photo settings" to disable taking photos whilst
         recording video feature (if your device has problems recording videos with Camera2 API
         enabled, try disabling this).
+ADDED   Launching from intent now recognises request for front or back camera
+        (android.intent.extras.CAMERA_FACING, android.intent.extras.LENS_FACING_FRONT,
+        android.intent.extras.LENS_FACING_BACK, android.intent.extra.USE_FRONT_CAMERA).
 UPDATED No longer wait for image queue to be saved to go to settings, or background.
 UPDATED Made on-screen level lines clearer.
 UPDATED Camera opening on background thread (for smoother operation) now enabled for Android 6

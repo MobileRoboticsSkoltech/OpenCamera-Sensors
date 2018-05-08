@@ -527,6 +527,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				Log.d(TAG, "restoring from saved state");
 			return;
 		}
+		boolean done_facing = false;
         String action = this.getIntent().getAction();
         if( MediaStore.INTENT_ACTION_VIDEO_CAMERA.equals(action) || MediaStore.ACTION_VIDEO_CAPTURE.equals(action) ) {
     		if( MyDebug.LOG )
@@ -551,15 +552,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		else if( (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && MyTileServiceFrontCamera.TILE_ID.equals(action)) || ACTION_SHORTCUT_SELFIE.equals(action) ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "launching from quick settings tile or application shortcut for Open Camera: selfie mode");
-			int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
-			for(int i=0;i<n_cameras;i++) {
-				if( preview.getCameraControllerManager().isFrontFacing(i) ) {
-					if (MyDebug.LOG)
-						Log.d(TAG, "found front camera: " + i);
-					applicationInterface.setCameraIdPref(i);
-					break;
-				}
-			}
+			done_facing = true;
+			switchToCamera(true);
 		}
 		else if( ACTION_SHORTCUT_GALLERY.equals(action) ) {
 			if( MyDebug.LOG )
@@ -570,6 +564,62 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "launching from application shortcut for Open Camera: settings");
 			openSettings();
+		}
+
+		Bundle extras = this.getIntent().getExtras();
+        if( extras != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "handle intent extra information");
+			if( !done_facing ) {
+				int camera_facing = extras.getInt("android.intent.extras.CAMERA_FACING", -1);
+				if( camera_facing == 0 || camera_facing == 1 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found android.intent.extras.CAMERA_FACING: " + camera_facing);
+					switchToCamera(camera_facing==1);
+					done_facing = true;
+				}
+			}
+			if( !done_facing ) {
+				if( extras.getInt("android.intent.extras.LENS_FACING_FRONT", -1) == 1 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found android.intent.extras.LENS_FACING_FRONT");
+					switchToCamera(true);
+					done_facing = true;
+				}
+			}
+			if( !done_facing ) {
+				if( extras.getInt("android.intent.extras.LENS_FACING_BACK", -1) == 1 ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found android.intent.extras.LENS_FACING_BACK");
+					switchToCamera(false);
+					done_facing = true;
+				}
+			}
+			if( !done_facing ) {
+				if( extras.getBoolean("android.intent.extra.USE_FRONT_CAMERA", false) ) {
+					if( MyDebug.LOG )
+						Log.d(TAG, "found android.intent.extra.USE_FRONT_CAMERA");
+					switchToCamera(true);
+					done_facing = true;
+				}
+			}
+		}
+	}
+
+	/** Switch to the first available camera that is front or back facing as desired.
+ 	 * @param front_facing Whether to switch to a front or back facing camera.
+	 */
+	private void switchToCamera(boolean front_facing) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "switchToCamera: " + front_facing);
+		int n_cameras = preview.getCameraControllerManager().getNumberOfCameras();
+		for(int i=0;i<n_cameras;i++) {
+			if( preview.getCameraControllerManager().isFrontFacing(i) == front_facing ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "found desired camera: " + i);
+				applicationInterface.setCameraIdPref(i);
+				break;
+			}
 		}
 	}
 
