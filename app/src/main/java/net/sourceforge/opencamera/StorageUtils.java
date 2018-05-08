@@ -555,8 +555,15 @@ public class StorageUtils {
 			e.printStackTrace();
 			throw new IOException();
 		}
+		catch(IllegalStateException e) {
+			// Have reports of this from Google Play for DocumentsContract.createDocument - better to fail gracefully and tell user rather than crash!
+			if( MyDebug.LOG )
+				Log.e(TAG, "createOutputMediaFileSAF failed with IllegalStateException");
+			e.printStackTrace();
+			throw new IOException();
+		}
 		catch(SecurityException e) {
-			// Have reports of this from GooglePlay - better to fail gracefully and tell user rather than crash!
+			// Have reports of this from Google Play - better to fail gracefully and tell user rather than crash!
 			if( MyDebug.LOG )
 				Log.e(TAG, "createOutputMediaFileSAF failed with SecurityException");
 			e.printStackTrace();
