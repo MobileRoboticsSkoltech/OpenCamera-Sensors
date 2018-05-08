@@ -1352,9 +1352,12 @@ public class CameraController1 extends CameraController {
 	
 	@Override
 	public void stopPreview() {
-		camera.stopPreview();
+		if( camera != null ) {
+			// have had crashes when this is called from Preview/CloseCameraTask.
+			camera.stopPreview();
+		}
 	}
-	
+
 	// returns false if RuntimeException thrown (may include if face-detection already started)
 	public boolean startFaceDetection() {
 	    try {
