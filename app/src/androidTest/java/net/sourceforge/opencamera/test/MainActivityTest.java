@@ -11329,6 +11329,62 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
 	}
 
+	/** Tests Avg algorithm on test samples "testAvg21".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg21() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg21");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		// repeat same image twice
+		inputs.add(avg_images_path + "testAvg21/input0.jpg");
+		inputs.add(avg_images_path + "testAvg21/input0.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg21_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg22".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg22() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg22");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		// repeat same image twice
+		inputs.add(avg_images_path + "testAvg22/input0.jpg");
+		inputs.add(avg_images_path + "testAvg22/input0.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg22_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
 	/** Tests Avg algorithm on test samples "testHDRtemp".
 	 *  Used for one-off testing, or to recreate HDR images from the base exposures to test an updated alorithm.
 	 *  The test images should be copied to the test device into DCIM/testOpenCamera/testdata/hdrsamples/testHDRtemp/ .
