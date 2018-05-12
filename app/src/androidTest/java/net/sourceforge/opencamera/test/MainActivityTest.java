@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 //import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.location.Location;
 import android.media.CamcorderProfile;
@@ -8520,6 +8521,53 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		if( bitmap == null )
 			throw new FileNotFoundException();
 		Log.d(TAG, "    done: " + bitmap);
+
+        // now need to take exif orientation into account, as some devices or camera apps store the orientation in the exif tag,
+        // which getBitmap() doesn't account for
+		try {
+			ExifInterface exif = new ExifInterface(filename);
+			if( exif != null ) {
+				int exif_orientation_s = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+				boolean needs_tf = false;
+				int exif_orientation = 0;
+				// from http://jpegclub.org/exif_orientation.html
+				// and http://stackoverflow.com/questions/20478765/how-to-get-the-correct-orientation-of-the-image-selected-from-the-default-image
+				if( exif_orientation_s == ExifInterface.ORIENTATION_UNDEFINED || exif_orientation_s == ExifInterface.ORIENTATION_NORMAL ) {
+					// leave unchanged
+				}
+				else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_180 ) {
+					needs_tf = true;
+					exif_orientation = 180;
+				}
+				else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_90 ) {
+					needs_tf = true;
+					exif_orientation = 90;
+				}
+				else if( exif_orientation_s == ExifInterface.ORIENTATION_ROTATE_270 ) {
+					needs_tf = true;
+					exif_orientation = 270;
+				}
+				else {
+					// just leave unchanged for now
+					Log.e(TAG, "    unsupported exif orientation: " + exif_orientation_s);
+				}
+				Log.d(TAG, "    exif orientation: " + exif_orientation);
+
+				if( needs_tf ) {
+					Log.d(TAG, "    need to rotate bitmap due to exif orientation tag");
+					Matrix m = new Matrix();
+					m.setRotate(exif_orientation, bitmap.getWidth() * 0.5f, bitmap.getHeight() * 0.5f);
+					Bitmap rotated_bitmap = Bitmap.createBitmap(bitmap, 0, 0,bitmap.getWidth(), bitmap.getHeight(), m, true);
+					if( rotated_bitmap != bitmap ) {
+						bitmap.recycle();
+						bitmap = rotated_bitmap;
+					}
+				}
+			}
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
 	    return bitmap;
     }
 
@@ -10316,7 +10364,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(avg_images_path + "testAvg3/input0.jpg") );
 
-		subTestHDR(inputs, "testAvg3_output.jpg", true);
+		subTestHDR(inputs, "testDRODark0_output.jpg", true);
 	}
 
 	/** Tests DRO only on a dark image.
@@ -10331,7 +10379,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		List<Bitmap> inputs = new ArrayList<>();
 		inputs.add( getBitmapFromFile(avg_images_path + "testAvg8/input0.jpg") );
 
-		subTestHDR(inputs, "testAvg8_output.jpg", true);
+		subTestHDR(inputs, "testDRODark1_output.jpg", true);
 	}
 
 	/** Tests calling the DRO routine with 0.0 factor - and that the resultant image is identical.
@@ -11186,6 +11234,89 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		inputs.add(avg_images_path + "testAvg17/input7.jpg");
 
 		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg17_output.jpg", 800, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg18".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg18() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg18");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		inputs.add(avg_images_path + "testAvg18/input0.jpg");
+		inputs.add(avg_images_path + "testAvg18/input1.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg18_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 1);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg19".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg19() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg19");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		// repeat same image twice
+		inputs.add(avg_images_path + "testAvg19/input0.jpg");
+		inputs.add(avg_images_path + "testAvg19/input0.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg19_output.jpg", 100, new TestAvgCallback() {
+			@Override
+			public void doneProcessAvg(int index) {
+				Log.d(TAG, "doneProcessAvg: " + index);
+				if( index == 1 ) {
+					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
+				}
+			}
+		});
+
+		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	/** Tests Avg algorithm on test samples "testAvg20".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testAvg20() throws IOException, InterruptedException {
+		Log.d(TAG, "testAvg20");
+
+		setToDefault();
+
+		// list assets
+		List<String> inputs = new ArrayList<>();
+		// repeat same image twice
+		inputs.add(avg_images_path + "testAvg20/input0.jpg");
+		inputs.add(avg_images_path + "testAvg20/input0.jpg");
+
+		HistogramDetails hdrHistogramDetails = subTestAvg(inputs, "testAvg20_output.jpg", 100, new TestAvgCallback() {
 			@Override
 			public void doneProcessAvg(int index) {
 				Log.d(TAG, "doneProcessAvg: " + index);
