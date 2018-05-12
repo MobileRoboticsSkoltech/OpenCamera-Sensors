@@ -10501,7 +10501,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			int width = bitmap0.getWidth();
 			int height = bitmap0.getHeight();
 			float avg_factor = 1.0f;
+			List<Long> times = new ArrayList<>();
+			long time_s = System.currentTimeMillis();
 			Allocation allocation = mActivity.getApplicationInterface().getHDRProcessor().processAvg(bitmap0, bitmap1, avg_factor, iso, true);
+			times.add(System.currentTimeMillis() - time_s);
 			// processAvg recycles both bitmaps
 			if( cb != null ) {
 				cb.doneProcessAvg(1);
@@ -10512,14 +10515,26 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 				Bitmap new_bitmap = getBitmapFromFile(inputs.get(i));
 				avg_factor = (float)i;
+				time_s = System.currentTimeMillis();
 				mActivity.getApplicationInterface().getHDRProcessor().updateAvg(allocation, width, height, new_bitmap, avg_factor, iso, true);
+				times.add(System.currentTimeMillis() - time_s);
 				// updateAvg recycles new_bitmap
 				if( cb != null ) {
 					cb.doneProcessAvg(i);
 				}
 			}
 
+			time_s = System.currentTimeMillis();
             nr_bitmap = mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(allocation, width, height, iso);
+			times.add(System.currentTimeMillis() - time_s);
+
+			long total_time = 0;
+			Log.d(TAG, "*** times are:");
+			for(long time : times) {
+				total_time += time;
+				Log.d(TAG, "    " + time);
+			}
+			Log.d(TAG, "    total: " + total_time);
 		}
 		catch(HDRProcessorException e) {
 			e.printStackTrace();

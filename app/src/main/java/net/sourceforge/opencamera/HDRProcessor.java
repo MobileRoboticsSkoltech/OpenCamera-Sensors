@@ -1037,7 +1037,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "median: " + luminanceInfo.median_value);*/
 
-		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, iso, true);
+		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, iso, true, time_s);
 
 		if( release_bitmap ) {
 			if( MyDebug.LOG )
@@ -1075,7 +1075,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
 
-		processAvgCore(allocation, allocation, allocation_new, width, height, avg_factor, iso, false);
+		processAvgCore(allocation, allocation, allocation_new, width, height, avg_factor, iso, false, time_s);
 
 		if( release_bitmap ) {
 			if( MyDebug.LOG )
@@ -1088,12 +1088,11 @@ public class HDRProcessor {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void processAvgCore(Allocation allocation_out, Allocation allocation_avg, Allocation allocation_new, int width, int height, float avg_factor, int iso, boolean first) throws HDRProcessorException {
+	private void processAvgCore(Allocation allocation_out, Allocation allocation_avg, Allocation allocation_new, int width, int height, float avg_factor, int iso, boolean first, long time_s) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvgCore");
 			Log.d(TAG, "iso: " + iso);
 		}
-		long time_s = System.currentTimeMillis();
 
 		offsets_x = new int[2];
 		offsets_y = new int[2];
@@ -1308,6 +1307,8 @@ public class HDRProcessor {
 
 		// create RenderScript
 		ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after creating createMTBScript: " + (System.currentTimeMillis() - time_s));
 
 		LuminanceInfo [] luminanceInfos = null;
 		if( use_mtb ) {
@@ -1505,6 +1506,7 @@ public class HDRProcessor {
 
 			int step_size = initial_step_size;
 			while( step_size > 1 ) {
+			//while( step_size > 2 ) {
 				step_size /= 2;
 				alignMTBScript.set_off_x( offsets_x[i] );
 				alignMTBScript.set_off_y( offsets_y[i] );
@@ -2195,8 +2197,14 @@ public class HDRProcessor {
 	private float computeSharpness(Allocation allocation_in, int width, long time_s) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "computeSharpness");
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time: " + (System.currentTimeMillis() - time_s));
 		Allocation sumsAllocation = Allocation.createSized(rs, Element.I32(rs), width);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after createSized: " + (System.currentTimeMillis() - time_s));
 		ScriptC_calculate_sharpness sharpnessScript = new ScriptC_calculate_sharpness(rs);
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after create sharpnessScript: " + (System.currentTimeMillis() - time_s));
 		if( MyDebug.LOG )
 			Log.d(TAG, "bind sums allocation");
 		sharpnessScript.bind_sums(sumsAllocation);
@@ -2206,10 +2214,10 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "call sharpnessScript");
 		if( MyDebug.LOG )
-			Log.d(TAG, "time before sharpnessScript: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "### time before sharpnessScript: " + (System.currentTimeMillis() - time_s));
 		sharpnessScript.forEach_calculate_sharpness(allocation_in);
 		if( MyDebug.LOG )
-			Log.d(TAG, "time after sharpnessScript: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "### time after sharpnessScript: " + (System.currentTimeMillis() - time_s));
 
 		int [] sums = new int[width];
 		sumsAllocation.copyTo(sums);
