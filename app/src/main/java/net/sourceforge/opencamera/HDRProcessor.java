@@ -516,7 +516,7 @@ public class HDRProcessor {
 
 		// perform auto-alignment
 		// if assume_sorted if false, this function will also sort the allocations and bitmaps from darkest to brightest.
-		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, base_bitmap, assume_sorted, sort_cb, true, false, time_s);
+		BrightnessDetails brightnessDetails = autoAlignment(offsets_x, offsets_y, allocations, width, height, bitmaps, base_bitmap, assume_sorted, sort_cb, true, false, 1, time_s);
 		int median_brightness = brightnessDetails.median_brightness;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
@@ -1101,7 +1101,7 @@ public class HDRProcessor {
 			Allocation [] allocations = new Allocation[2];
 			allocations[0] = allocation_avg;
 			allocations[1] = allocation_new;
-			autoAlignment(offsets_x, offsets_y, allocations, width, height, null, 0, true, null, false, !first, time_s);
+			autoAlignment(offsets_x, offsets_y, allocations, width, height, null, 0, true, null, false, !first, 2, time_s);
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
 			}
@@ -1280,9 +1280,13 @@ public class HDRProcessor {
 	 * @param floating_point If true, the first allocation is in floating point (F32_3) format.
      */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean assume_sorted, SortCallback sort_cb, boolean use_mtb, boolean floating_point, long time_s) {
-		if( MyDebug.LOG )
+	private BrightnessDetails autoAlignment(int [] offsets_x, int [] offsets_y, Allocation [] allocations, int width, int height, List<Bitmap> bitmaps, int base_bitmap, boolean assume_sorted, SortCallback sort_cb, boolean use_mtb, boolean floating_point, int min_step_size, long time_s) {
+		if( MyDebug.LOG ) {
 			Log.d(TAG, "autoAlignment");
+			Log.d(TAG, "width: " + width);
+			Log.d(TAG, "height: " + height);
+			Log.d(TAG, "use_mtb: " + use_mtb);
+		}
 
 		// initialise
 		for(int i=0;i<offsets_x.length;i++) {
@@ -1300,10 +1304,23 @@ public class HDRProcessor {
 		int mtb_height = height/2;
 		int mtb_x = mtb_width/2;
 		int mtb_y = mtb_height/2;
+		if( !use_mtb ) {
+			// If using full image rather than mtb, we can get away with an even smaller region
+			mtb_width = width/4;
+			mtb_height = height/4;
+			mtb_x = (width - mtb_width)/2;
+			mtb_y = (height - mtb_height)/2;
+		}
 		/*int mtb_width = width;
 		int mtb_height = height;
 		int mtb_x = 0;
 		int mtb_y = 0;*/
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "mtb_x: " + mtb_x);
+			Log.d(TAG, "mtb_y: " + mtb_y);
+			Log.d(TAG, "mtb_width: " + mtb_width);
+			Log.d(TAG, "mtb_height: " + mtb_height);
+		}
 
 		// create RenderScript
 		ScriptC_create_mtb createMTBScript = new ScriptC_create_mtb(rs);
@@ -1505,8 +1522,7 @@ public class HDRProcessor {
 			alignMTBScript.set_bitmap1(mtb_allocations[i]);
 
 			int step_size = initial_step_size;
-			while( step_size > 1 ) {
-			//while( step_size > 2 ) {
+			while( step_size > min_step_size ) {
 				step_size /= 2;
 				alignMTBScript.set_off_x( offsets_x[i] );
 				alignMTBScript.set_off_y( offsets_y[i] );
