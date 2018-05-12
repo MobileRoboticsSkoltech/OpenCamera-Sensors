@@ -104,8 +104,39 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         out.a = 255;
     }*/
 
-    rgb *= gain;
+    /*float3 hdr = rgb;
+
+	uchar4 out;
+    {
+        float value = fmax(hdr.r, hdr.g);
+        value = fmax(value, hdr.b);
+        float scale = 255.0f / ( tonemap_scale + value );
+        scale *= linear_scale;
+
+        hdr *= scale;
+
+        // shouldn't need to clamp - linear_scale should be such that values don't map to more than 255
+        out.r = (uchar)(hdr.r + 0.5f);
+        out.g = (uchar)(hdr.g + 0.5f);
+        out.b = (uchar)(hdr.b + 0.5f);
+        out.a = 255;
+    }*/
+
+    /*rgb *= gain;
     float3 hdr = powr(rgb/255.0f, gamma) * 255.0f;
+	uchar4 out;
+    out.rgb = convert_uchar3(clamp(hdr+0.5f, 0.f, 255.f));
+    out.a = 255;*/
+
+    rgb *= gain;
+    float3 hdr = rgb;
+    float value = fmax(hdr.r, hdr.g);
+    value = fmax(value, hdr.b);
+    if( value >= 0.5f ) {
+        float new_value = powr(value/255.0f, gamma) * 255.0f;
+        float gamma_scale = new_value / value;
+        hdr *= gamma_scale;
+    }
 	uchar4 out;
     out.rgb = convert_uchar3(clamp(hdr+0.5f, 0.f, 255.f));
     out.a = 255;

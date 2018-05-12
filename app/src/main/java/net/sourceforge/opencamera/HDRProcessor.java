@@ -717,12 +717,9 @@ public class HDRProcessor {
 		//final float tonemap_scale_c = 255.0f;
 		//final float tonemap_scale_c = 255.0f - median_brightness;
 		float tonemap_scale_c = 255.0f;
-		if( median_brightness <= 0 )
-			median_brightness = 1;
-		if( MyDebug.LOG )
-			Log.d(TAG, "median_brightness: " + median_brightness);
-		int median_target = Math.min(119, 2*median_brightness);
-		median_target = Math.max(median_brightness, median_target); // don't make median darker
+
+		int median_target = getMedianTarget(median_brightness, 2);
+
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "median_target: " + median_target);
 			Log.d(TAG, "compare: " + 255.0f / max_possible_value);
@@ -2003,8 +2000,10 @@ public class HDRProcessor {
 			median_brightness = 1;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "max_gain_factor: " + max_gain_factor);
+			Log.d(TAG, "median_brightness: " + median_brightness);
 		}
-		return Math.min(119, max_gain_factor*median_brightness);
+		int median_target = Math.min(119, max_gain_factor*median_brightness);
+		return Math.max(median_brightness, median_target); // don't make median darker
 	}
 
 	/**
@@ -2115,6 +2114,7 @@ public class HDRProcessor {
 			Log.d(TAG, "black_level: " + black_level);
 		}
 		script.invoke_setBlackLevel(black_level);
+
 		script.set_gamma(gamma);
 		script.set_gain(gain);
 
@@ -2136,6 +2136,30 @@ public class HDRProcessor {
 			Log.d(TAG, "linear_scale: " + linear_scale);
 		script.set_linear_scale(linear_scale);*/
 
+		/*{
+			max_possible_value = max_brightness;
+			float tonemap_scale_c = 255.0f;
+			if( 255.0f / max_possible_value < ((float)median_target)/(float)median_brightness + median_target / 255.0f - 1.0f ) {
+				final float tonemap_denom = ((float)median_target)/(float)median_brightness - (255.0f / max_possible_value);
+				if( MyDebug.LOG )
+					Log.d(TAG, "tonemap_denom: " + tonemap_denom);
+				if( tonemap_denom != 0.0f ) // just in case
+					tonemap_scale_c = (255.0f - median_target) / tonemap_denom;
+				//throw new RuntimeException(); // test
+			}
+			// Higher tonemap_scale_c values means darker results from the Reinhard tonemapping.
+			// Colours brighter than 255-tonemap_scale_c will be made darker, colours darker than 255-tonemap_scale_c will be made brighter
+			// (tonemap_scale_c==255 means therefore that colours will only be made darker).
+			if( MyDebug.LOG )
+				Log.d(TAG, "tonemap_scale_c: " + tonemap_scale_c);
+			script.set_tonemap_scale(tonemap_scale_c);
+
+			float linear_scale = (max_possible_value + tonemap_scale_c) / max_possible_value;
+			if( MyDebug.LOG )
+				Log.d(TAG, "linear_scale: " + linear_scale);
+			script.set_linear_scale(linear_scale);
+		}*/
+
 		Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		Allocation allocation_out = Allocation.createFromBitmap(rs, bitmap);
 		if( MyDebug.LOG )
@@ -2148,7 +2172,9 @@ public class HDRProcessor {
 		if( iso <= 150 ) {
 			// for bright scenes, local contrast enhancement helps improve the quality of images (especially where we may have both
 			// dark and bright regions, e.g., testAvg12); but for dark scenes, it just blows up the noise too much
-			adjustHistogram(allocation_out, allocation_out, width, height, 0.5f, 4, time_s);
+			//adjustHistogram(allocation_out, allocation_out, width, height, 0.5f, 4, time_s);
+			adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 4, time_s);
+			//adjustHistogram(allocation_out, allocation_out, width, height, 0.25f, 1, time_s);
 			if( MyDebug.LOG )
 				Log.d(TAG, "### time after adjustHistogram: " + (System.currentTimeMillis() - time_s));
 		}
