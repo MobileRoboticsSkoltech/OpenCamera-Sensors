@@ -1515,8 +1515,9 @@ public class HDRProcessor {
 		// sampling - since we sample every step_size pixels - though there might be some overhead for every extra call
 		// to renderscript that we do). But high step sizes have a risk of producing really bad results if we were
 		// to misidentify cases as needing a large offset.
+		// Update: use a smaller window for noise reduction (when use_mtb==false)
 		int max_dim = Math.max(width, height); // n.b., use the full width and height here, not the mtb_width, height
-		int max_ideal_size = max_dim / 150;
+		int max_ideal_size = max_dim / (use_mtb ? 150 : 300);
 		int initial_step_size = 1;
 		while( initial_step_size < max_ideal_size ) {
 			initial_step_size *= 2;
@@ -1588,12 +1589,15 @@ public class HDRProcessor {
 				//launch_options.setY((int)(stop_y*0.25), (int)(stop_y*0.75));
 				launch_options.setX(0, stop_x);
 				launch_options.setY(0, stop_y);
+				long this_time_s = System.currentTimeMillis();
 				if( use_mtb )
 					alignMTBScript.forEach_align_mtb(mtb_allocations[base_bitmap], launch_options);
 				else
 					alignMTBScript.forEach_align(mtb_allocations[base_bitmap], launch_options);
-				if( MyDebug.LOG )
+				if( MyDebug.LOG ) {
+					Log.d(TAG, "time for alignMTBScript: " + (System.currentTimeMillis() - this_time_s));
 					Log.d(TAG, "time after alignMTBScript: " + (System.currentTimeMillis() - time_s));
+				}
 
 				int best_error = -1;
 				int best_id = -1;
