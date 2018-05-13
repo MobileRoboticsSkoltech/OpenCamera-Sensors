@@ -1037,24 +1037,27 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
 
-		float sharpness_avg = computeSharpness(allocation_avg, width, time_s);
-		float sharpness_new = computeSharpness(allocation_new, width, time_s);
-		if( sharpness_new > sharpness_avg ) {
+		final boolean use_sharpness_test = false; // disabled for now - takes about 1s extra, and no evidence this helps quality
+		if( use_sharpness_test ) {
+			float sharpness_avg = computeSharpness(allocation_avg, width, time_s);
+			float sharpness_new = computeSharpness(allocation_new, width, time_s);
+			if( sharpness_new > sharpness_avg ) {
+				if( MyDebug.LOG )
+					Log.d(TAG, "use new image as reference");
+				Allocation dummy_allocation = allocation_avg;
+				allocation_avg = allocation_new;
+				allocation_new = dummy_allocation;
+				Bitmap dummy_bitmap = bitmap_avg;
+				bitmap_avg = bitmap_new;
+				bitmap_new = dummy_bitmap;
+				sharp_index = 1;
+			}
+			else {
+				sharp_index = 0;
+			}
 			if( MyDebug.LOG )
-				Log.d(TAG, "use new image as reference");
-			Allocation dummy_allocation = allocation_avg;
-			allocation_avg = allocation_new;
-			allocation_new = dummy_allocation;
-			Bitmap dummy_bitmap = bitmap_avg;
-			bitmap_avg = bitmap_new;
-			bitmap_new = dummy_bitmap;
-			sharp_index = 1;
+				Log.d(TAG, "sharp_index: " + sharp_index);
 		}
-		else {
-			sharp_index = 0;
-		}
-		if( MyDebug.LOG )
-			Log.d(TAG, "sharp_index: " + sharp_index);
 
 		/*LuminanceInfo luminanceInfo = computeMedianLuminance(bitmap_avg, 0, 0, width, height);
 		if( MyDebug.LOG )
