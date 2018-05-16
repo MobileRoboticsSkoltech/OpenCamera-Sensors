@@ -937,6 +937,7 @@ public class ImageSaver extends Thread {
 					}
 
 					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height, iso);
+					allocation.destroy();
 				}
 				catch(HDRProcessorException e) {
 					e.printStackTrace();

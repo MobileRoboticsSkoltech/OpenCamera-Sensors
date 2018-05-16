@@ -10526,6 +10526,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 			time_s = System.currentTimeMillis();
             nr_bitmap = mActivity.getApplicationInterface().getHDRProcessor().avgBrighten(allocation, width, height, iso);
+            allocation.destroy();
 			times.add(System.currentTimeMillis() - time_s);
 
 			long total_time = 0;

@@ -1065,6 +1065,8 @@ public class HDRProcessor {
 			Log.d(TAG, "median: " + luminanceInfo.median_value);*/
 
 		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, iso, true, time_s);
+		allocation_avg.destroy();
+		allocation_new.destroy();
 
 		if( release_bitmap ) {
 			if( MyDebug.LOG )
@@ -1103,6 +1105,7 @@ public class HDRProcessor {
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
 
 		processAvgCore(allocation, allocation, allocation_new, width, height, avg_factor, iso, false, time_s);
+		allocation_new.destroy();
 
 		if( release_bitmap ) {
 			if( MyDebug.LOG )
@@ -1537,6 +1540,10 @@ public class HDRProcessor {
 		if( mtb_allocations[base_bitmap] == null ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "base image not suitable for image alignment");
+			for(int i=0;i<mtb_allocations.length;i++) {
+				if( mtb_allocations[i] != null )
+					mtb_allocations[i].destroy();
+			}
 			return new BrightnessDetails(median_brightness);
 		}
 
@@ -1610,6 +1617,7 @@ public class HDRProcessor {
 				int best_id = -1;
 				int [] errors = new int[9];
 				errorsAllocation.copyTo(errors);
+				errorsAllocation.destroy();
 				for(int j=0;j<9;j++) {
 					int this_error = errors[j];
 					if( MyDebug.LOG )
@@ -1644,6 +1652,10 @@ public class HDRProcessor {
 			offsets_x[i] = 0;
 			offsets_y[i] = 0;
 		}*/
+		for(int i=0;i<mtb_allocations.length;i++) {
+			if( mtb_allocations[i] != null )
+				mtb_allocations[i].destroy();
+		}
 		return new BrightnessDetails(median_brightness);
 	}
 
@@ -1802,6 +1814,7 @@ public class HDRProcessor {
 			histogramAdjustScript.forEach_histogram_adjust(allocation_in, allocation_out);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
+			histogramAllocation.destroy();
 		}
 
 		//final boolean adjust_histogram_local = false;
@@ -1963,6 +1976,9 @@ public class HDRProcessor {
 			histogramAdjustScript.forEach_histogram_adjust(allocation_in, allocation_out);
 			if( MyDebug.LOG )
 				Log.d(TAG, "time after histogramAdjustScript: " + (System.currentTimeMillis() - time_s));
+
+			histogramAllocation.destroy();
+			c_histogramAllocation.destroy();
 		}
 	}
 
@@ -2035,7 +2051,9 @@ public class HDRProcessor {
 		Allocation allocation_in = Allocation.createFromBitmap(rs, bitmap);
 		if( MyDebug.LOG )
 			Log.d(TAG, "time after createFromBitmap: " + (System.currentTimeMillis() - time_s));
-		return computeHistogram(allocation_in, avg, false);
+		int [] histogram = computeHistogram(allocation_in, avg, false);
+		allocation_in.destroy();
+		return histogram;
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -2046,6 +2064,7 @@ public class HDRProcessor {
 		int [] histogram = new int[256];
 		Allocation histogramAllocation = computeHistogramAllocation(allocation, avg, floating_point, time_s);
 		histogramAllocation.copyTo(histogram);
+		histogramAllocation.destroy();
 		return histogram;
 	}
 
@@ -2268,6 +2287,7 @@ public class HDRProcessor {
 		}
 
         allocation_out.copyTo(bitmap);
+		allocation_out.destroy();
 		if( MyDebug.LOG )
 			Log.d(TAG, "### total time for avgBrighten: " + (System.currentTimeMillis() - time_s));
 		return bitmap;
@@ -2312,6 +2332,7 @@ public class HDRProcessor {
 
 		int [] sums = new int[width];
 		sumsAllocation.copyTo(sums);
+		sumsAllocation.destroy();
 		float total_sum = 0.0f;
 		for(int i=0;i<width;i++) {
 			/*if( MyDebug.LOG )
