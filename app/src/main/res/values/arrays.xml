@@ -695,4 +695,18 @@
         <item>preference_ghost_image_off</item>
         <item>preference_ghost_image_last</item>
     </string-array>
+    <string-array name="preference_video_log_entries">
+        <item>@string/preference_video_log_off</item>
+        <item>@string/preference_video_log_low</item>
+        <item>@string/preference_video_log_medium</item>
+        <item>@string/preference_video_log_strong</item>
+        <item>@string/preference_video_log_extra_strong</item>
+    </string-array>
+    <string-array name="preference_video_log_values">
+        <item>off</item>
+        <item>low</item>
+        <item>medium</item>
+        <item>strong</item>
+        <item>extra_strong</item>
+    </string-array>
 </resources>

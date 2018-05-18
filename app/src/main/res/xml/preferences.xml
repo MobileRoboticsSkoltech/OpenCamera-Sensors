@@ -736,7 +736,17 @@
                 android:defaultValue="default"
                 />
 
-            <ListPreference 
+            <!--  if we move this to another PreferenceGroup, we should update code for the findPreference() call -->
+            <ListPreference
+                android:key="preference_video_log"
+                android:title="@string/preference_video_log"
+                android:summary="@string/preference_video_log_summary"
+                android:entries="@array/preference_video_log_entries"
+                android:entryValues="@array/preference_video_log_values"
+                android:defaultValue="off"
+                />
+
+            <ListPreference
                 android:key="preference_video_max_duration"
                 android:title="@string/preference_video_max_duration"
                 android:summary="@string/preference_video_max_duration_summary"

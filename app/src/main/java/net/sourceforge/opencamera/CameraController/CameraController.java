@@ -380,6 +380,7 @@ public abstract class CameraController {
 	}
 	public abstract void setVideoStabilization(boolean enabled);
 	public abstract boolean getVideoStabilization();
+	public abstract void setLogProfile(boolean use_log_profile, float log_profile_strength);
 	public abstract int getJpegQuality();
 	public abstract void setJpegQuality(int quality);
 	public abstract int getZoom();

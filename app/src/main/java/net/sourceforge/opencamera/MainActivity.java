@@ -3234,6 +3234,11 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				simple = false;
 			}
 
+			if( applicationInterface.useVideoLogProfile() ) {
+				simple = false;
+				toast_string += "\n" + getResources().getString(R.string.video_log);
+			}
+
 			boolean record_audio = applicationInterface.getRecordAudioPref();
 			if( !record_audio ) {
 				toast_string += "\n" + getResources().getString(R.string.audio_disabled);

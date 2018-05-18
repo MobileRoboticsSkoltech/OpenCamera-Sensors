@@ -31,7 +31,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.RggbChannelVector;
 import android.hardware.camera2.params.StreamConfigurationMap;
-//import android.hardware.camera2.params.TonemapCurve;
+import android.hardware.camera2.params.TonemapCurve;
 import android.location.Location;
 import android.media.ExifInterface;
 import android.media.Image;
@@ -218,6 +218,9 @@ public class CameraController2 extends CameraController {
 		private boolean has_face_detect_mode;
 		private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
 		private boolean video_stabilization;
+		private boolean use_log_profile;
+		private float log_profile_strength;
+		private Integer default_tonemap_mode; // since we don't know what a device's tonemap mode is, we save it so we can switch back to it
 		private Range<Integer> ae_target_fps_range;
 		private long sensor_frame_duration;
 
@@ -277,6 +280,7 @@ public class CameraController2 extends CameraController {
 			setFaceDetectMode(builder);
 			setRawMode(builder);
 			setVideoStabilization(builder);
+			setLogProfile(builder);
 
 			if( is_still ) {
 				if( location != null ) {
@@ -329,36 +333,6 @@ public class CameraController2 extends CameraController {
 					}
 				}
 			}*/
-			{
-				/*int n_values = 11;
-				float [] values = new float [2*n_values];
-				final float power = 1.0f/15.0f;
-				for(int i=0;i<n_values;i++) {
-					float in = ((float)i) / (n_values-1.0f);
-					float out = (float)Math.pow(in, power);
-					values[2*i] = in;
-					values[2*i+1] = out;
-					if( MyDebug.LOG ) {
-						Log.d(TAG, "i = " + i);
-						Log.d(TAG, "    in: " + in);
-						Log.d(TAG, "    out: " + out);
-					}
-				}*/
-				// sRGB:
-				/*float [] values = new float []{0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
-						0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f, 0.4667f, 0.7130f,
-						0.5333f, 0.7569f, 0.6000f, 0.7977f, 0.6667f, 0.8360f, 0.7333f, 0.8721f,
-						0.8000f, 0.9063f, 0.8667f, 0.9389f, 0.9333f, 0.9701f, 1.0000f, 1.0000f};*/
-				/*float [] values = new float []{0.0000f, 0.0000f, 0.05f, 0.3f, 0.1f, 0.4f, 0.2000f, 0.4845f,
-						0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f,
-						0.5f, 0.78f, 1.0000f, 1.0000f};*/
-				/*float [] values = new float []{0.0f, 0.0f, 0.05f, 0.4f, 0.1f, 0.54f, 0.2f, 0.6f, 0.3f, 0.65f, 0.4f, 0.7f,
-						0.5f, 0.78f, 1.0f, 1.0f};
-				//float [] values = new float []{0.0f, 0.5f, 0.05f, 0.6f, 0.1f, 0.7f, 0.2f, 0.8f, 0.5f, 0.9f, 1.0f, 1.0f};
-				builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_CONTRAST_CURVE);
-				TonemapCurve tonemap_curve = new TonemapCurve(values, values, values);
-				builder.set(CaptureRequest.TONEMAP_CURVE, tonemap_curve);*/
-			}
 			/*if( Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M ) {
 				builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_PRESET_CURVE);
 				builder.set(CaptureRequest.TONEMAP_PRESET_CURVE, CaptureRequest.TONEMAP_PRESET_CURVE_SRGB);
@@ -629,6 +603,69 @@ public class CameraController2 extends CameraController {
 		
 		private void setVideoStabilization(CaptureRequest.Builder builder) {
 			builder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, video_stabilization ? CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON : CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
+		}
+
+		private void setLogProfile(CaptureRequest.Builder builder) {
+			if( MyDebug.LOG ) {
+				Log.d(TAG, "setLogProfile");
+				Log.d(TAG, "use_log_profile: " + use_log_profile);
+				Log.d(TAG, "log_profile_strength: " + log_profile_strength);
+				Log.d(TAG, "default_tonemap_mode: " + default_tonemap_mode);
+			}
+			if( use_log_profile && log_profile_strength > 0.0f ) {
+				if( default_tonemap_mode == null ) {
+					// save the default tonemap_mode
+					default_tonemap_mode = builder.get(CaptureRequest.TONEMAP_MODE);
+					if( MyDebug.LOG )
+						Log.d(TAG, "default_tonemap_mode: " + default_tonemap_mode);
+				}
+				int n_values = 257;
+				float [] values = new float [2*n_values];
+				final float power = 1.0f/2.2f;
+				final float log_A = log_profile_strength;
+				final float black_level = 4.0f/255.0f;
+				for(int i=0;i<n_values;i++) {
+					float in = ((float)i) / (n_values-1.0f);
+					/*float out;
+					if( in <= black_level ) {
+						out = in;
+					}
+					else {
+						float in_m = (in - black_level) / (1.0f - black_level);
+						out = (float) (Math.log1p(log_A * in_m) / Math.log1p(log_A));
+						out = black_level + (1.0f - black_level)*out;
+					}*/
+					float out = (float) (Math.log1p(log_A * in) / Math.log1p(log_A));
+
+					// apply gamma
+					out = (float)Math.pow(out, power);
+					//out = Math.max(out, 0.5f);
+					values[2*i] = in;
+					values[2*i+1] = out;
+					if( MyDebug.LOG ) {
+						Log.d(TAG, "i = " + i);
+						Log.d(TAG, "    in: " + in);
+						Log.d(TAG, "    out: " + out);
+					}
+				}
+				// sRGB:
+				/*float [] values = new float []{0.0000f, 0.0000f, 0.0667f, 0.2864f, 0.1333f, 0.4007f, 0.2000f, 0.4845f,
+						0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f, 0.4667f, 0.7130f,
+						0.5333f, 0.7569f, 0.6000f, 0.7977f, 0.6667f, 0.8360f, 0.7333f, 0.8721f,
+						0.8000f, 0.9063f, 0.8667f, 0.9389f, 0.9333f, 0.9701f, 1.0000f, 1.0000f};*/
+				/*float [] values = new float []{0.0000f, 0.0000f, 0.05f, 0.3f, 0.1f, 0.4f, 0.2000f, 0.4845f,
+						0.2667f, 0.5532f, 0.3333f, 0.6125f, 0.4000f, 0.6652f,
+						0.5f, 0.78f, 1.0000f, 1.0000f};*/
+				/*float [] values = new float []{0.0f, 0.0f, 0.05f, 0.4f, 0.1f, 0.54f, 0.2f, 0.6f, 0.3f, 0.65f, 0.4f, 0.7f,
+						0.5f, 0.78f, 1.0f, 1.0f};*/
+				//float [] values = new float []{0.0f, 0.5f, 0.05f, 0.6f, 0.1f, 0.7f, 0.2f, 0.8f, 0.5f, 0.9f, 1.0f, 1.0f};
+				builder.set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_CONTRAST_CURVE);
+				TonemapCurve tonemap_curve = new TonemapCurve(values, values, values);
+				builder.set(CaptureRequest.TONEMAP_CURVE, tonemap_curve);
+			}
+			else {
+				builder.set(CaptureRequest.TONEMAP_MODE, default_tonemap_mode);
+			}
 		}
 		
 		// n.b., if we add more methods, remember to update setupBuilder() above!
@@ -2839,6 +2876,39 @@ public class CameraController2 extends CameraController {
 	@Override
 	public boolean getVideoStabilization() {
 		return camera_settings.video_stabilization;
+	}
+
+	@Override
+	public void setLogProfile(boolean use_log_profile, float log_profile_strength) {
+		if( MyDebug.LOG ) {
+			Log.d(TAG, "setLogProfile: " + use_log_profile);
+			Log.d(TAG, "log_profile_strength: " + log_profile_strength);
+		}
+		if( camera_settings.use_log_profile == use_log_profile && camera_settings.log_profile_strength == log_profile_strength )
+			return; // no change
+		camera_settings.use_log_profile = use_log_profile;
+		if( use_log_profile )
+			camera_settings.log_profile_strength = log_profile_strength;
+		else
+			camera_settings.log_profile_strength = 0.0f;
+		camera_settings.setLogProfile(previewBuilder);
+		try {
+			setRepeatingRequest();
+		}
+		catch(CameraAccessException e) {
+			if( MyDebug.LOG ) {
+				Log.e(TAG, "failed to set log profile");
+				Log.e(TAG, "reason: " + e.getReason());
+				Log.e(TAG, "message: " + e.getMessage());
+			}
+			e.printStackTrace();
+		}
+	}
+
+	/** For testing.
+	 */
+	public TonemapCurve testGetTonemapCurve() {
+		return previewBuilder.get(CaptureRequest.TONEMAP_CURVE);
 	}
 
 	@Override

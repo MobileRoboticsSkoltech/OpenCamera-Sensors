@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import net.sourceforge.opencamera.CameraController.CameraController2;
 import net.sourceforge.opencamera.HDRProcessor;
 import net.sourceforge.opencamera.HDRProcessorException;
 import net.sourceforge.opencamera.MainActivity;
@@ -30,8 +31,11 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 //import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.PointF;
+import android.hardware.camera2.params.TonemapCurve;
 import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.ExifInterface;
@@ -8770,6 +8774,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 	final private String hdr_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/hdrsamples/";
 	final private String avg_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/avgsamples/";
+	final private String logprofile_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/logprofilesamples/";
 	final private String panorama_images_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/testOpenCamera/testdata/panoramasamples/";
 
 	/** Tests HDR algorithm on test samples "saintpaul".
@@ -11525,6 +11530,221 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		});
 
 		//checkHistogramDetails(hdrHistogramDetails, 1, 39, 253);
+	}
+
+	private int tonemapConvert(int in, TonemapCurve curve, int channel) {
+		float in_f = in/255.0f;
+		float out_f = 0.0f;
+		// first need to undo the gamma that's already been applied to the test input images (since the tonemap curve also reapplies gamma)
+		in_f = (float)Math.pow(in_f, 2.2f);
+		boolean found = false;
+		for(int i=0;i<curve.getPointCount(channel)-1 && !found;i++) {
+			PointF p0 = curve.getPoint(channel, i);
+			PointF p1 = curve.getPoint(channel, i+1);
+			if( in_f >= p0.x && in_f <= p1.x ) {
+				found = true;
+				float alpha = (in_f - p0.x) / (p1.x - p0.x);
+				out_f = p0.y + alpha * (p1.y - p0.y);
+			}
+		}
+		if( !found ) {
+			Log.d(TAG, "failed to convert: " + in_f);
+			throw new RuntimeException();
+		}
+		return (int)(255.0f * out_f + 0.5f);
+	}
+
+	private HistogramDetails subTestLogProfile(String image_path, String output_name) throws IOException, InterruptedException {
+		Log.d(TAG, "subTestLogProfile");
+
+		if( !mPreview.usingCamera2API() ) {
+			Log.d(TAG, "test requires camera2 api");
+			return null;
+		}
+
+	    View switchVideoButton = mActivity.findViewById(net.sourceforge.opencamera.R.id.switch_video);
+	    clickView(switchVideoButton);
+		waitUntilCameraOpened();
+
+		Bitmap bitmap = getBitmapFromFile(image_path);
+
+		CameraController2 camera_controller2 = (CameraController2)mPreview.getCameraController();
+		TonemapCurve curve = camera_controller2.testGetTonemapCurve();
+
+		// compute lookup tables for faster operation
+		int [][] tonemap_lut = new int[3][];
+		for(int channel=0;channel<3;channel++) {
+			Log.d(TAG, "compute tonemap_lut: " + channel);
+			tonemap_lut[channel] = new int[256];
+			for(int i=0;i<256;i++) {
+				tonemap_lut[channel][i] = tonemapConvert(i, curve, channel);
+			}
+		}
+
+
+		int [] buffer = new int[bitmap.getWidth()];
+		for(int y=0;y<bitmap.getHeight();y++) {
+			if( y % 100 == 0 ) {
+				Log.d(TAG, "processing y = " + y + " / " + bitmap.getHeight());
+			}
+			bitmap.getPixels(buffer, 0, bitmap.getWidth(), 0, y, bitmap.getWidth(), 1);
+			for(int x=0;x<bitmap.getWidth();x++) {
+				//Log.d(TAG, "    processing x = " + x + " / " + bitmap.getWidth());
+				int color = buffer[x];
+				int r = Color.red(color);
+				int g = Color.green(color);
+				int b = Color.blue(color);
+				int a = Color.alpha(color);
+				/*r = tonemapConvert(r, curve, 0);
+				g = tonemapConvert(g, curve, 1);
+				b = tonemapConvert(b, curve, 2);*/
+				r = tonemap_lut[0][r];
+				g = tonemap_lut[1][g];
+				b = tonemap_lut[2][b];
+
+				buffer[x] = Color.argb(a, r, g, b);
+			}
+			bitmap.setPixels(buffer, 0, bitmap.getWidth(), 0, y, bitmap.getWidth(), 1);
+		}
+
+		File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + output_name);
+		OutputStream outputStream = new FileOutputStream(file);
+		bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+        outputStream.close();
+        mActivity.getStorageUtils().broadcastFile(file, true, false, true);
+		HistogramDetails hdrHistogramDetails = checkHistogram(bitmap);
+		bitmap.recycle();
+		System.gc();
+
+		Thread.sleep(500);
+
+		return hdrHistogramDetails;
+	}
+
+	/** Tests video log profile algorithm on test samples in "testAvg1".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testLogProfile1() throws IOException, InterruptedException {
+		Log.d(TAG, "testLogProfile1");
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.VideoLogPreferenceKey, "medium");
+		editor.apply();
+		updateForSettings();
+
+		String image_path = avg_images_path + "testAvg1/input0.jpg";
+
+		HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile1_output.jpg");
+
+		checkHistogramDetails(hdrHistogramDetails, 1, 23, 253);
+	}
+
+	/** Tests video log profile algorithm on test samples in "testAvg20".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testLogProfile2() throws IOException, InterruptedException {
+		Log.d(TAG, "testLogProfile2");
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.VideoLogPreferenceKey, "medium");
+		editor.apply();
+		updateForSettings();
+
+		String image_path = avg_images_path + "testAvg20/input0.jpg";
+
+		HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile2_output.jpg");
+
+		checkHistogramDetails(hdrHistogramDetails, 0, 58, 243);
+	}
+
+	/** Tests video log profile algorithm on test samples in "testLogProfile3".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testLogProfile3() throws IOException, InterruptedException {
+		Log.d(TAG, "testLogProfile3");
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.VideoLogPreferenceKey, "medium");
+		editor.apply();
+		updateForSettings();
+
+		String image_path = logprofile_images_path + "testLogProfile3.jpg";
+
+		HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile3_output.jpg");
+
+		checkHistogramDetails(hdrHistogramDetails, 0, 157, 255);
+	}
+
+	/** Tests video log profile algorithm on test samples in "testAvg1".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testLogProfile1_extra_strong() throws IOException, InterruptedException {
+		Log.d(TAG, "testLogProfile1_extra_strong");
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.VideoLogPreferenceKey, "extra_strong");
+		editor.apply();
+		updateForSettings();
+
+		String image_path = avg_images_path + "testAvg1/input0.jpg";
+
+		HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile1_extra_strong_output.jpg");
+
+		checkHistogramDetails(hdrHistogramDetails, 2, 67, 254);
+	}
+
+	/** Tests video log profile algorithm on test samples in "testAvg20".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testLogProfile2_extra_strong() throws IOException, InterruptedException {
+		Log.d(TAG, "testLogProfile2_extra_strong");
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.VideoLogPreferenceKey, "extra_strong");
+		editor.apply();
+		updateForSettings();
+
+		String image_path = avg_images_path + "testAvg20/input0.jpg";
+
+		HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile2_extra_strong_output.jpg");
+
+		checkHistogramDetails(hdrHistogramDetails, 0, 126, 250);
+	}
+
+	/** Tests video log profile algorithm on test samples in "testLogProfile3".
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void testLogProfile3_extra_strong() throws IOException, InterruptedException {
+		Log.d(TAG, "testLogProfile3_extra_strong");
+
+		setToDefault();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mActivity);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putString(PreferenceKeys.VideoLogPreferenceKey, "extra_strong");
+		editor.apply();
+		updateForSettings();
+
+		String image_path = logprofile_images_path + "testLogProfile3.jpg";
+
+		HistogramDetails hdrHistogramDetails = subTestLogProfile(image_path, "testLogProfile3_extra_strong_output.jpg");
+
+		checkHistogramDetails(hdrHistogramDetails, 0, 212, 255);
 	}
 
 	/** Tests panorama algorithm on test samples "testPanorama1".

@@ -562,6 +562,41 @@ public class MyApplicationInterface implements ApplicationInterface {
 	}
 
     @Override
+	public boolean useVideoLogProfile() {
+    	String video_log = sharedPreferences.getString(PreferenceKeys.VideoLogPreferenceKey, "off");
+    	// only return true for values recognised by getVideoLogProfileStrength()
+    	switch( video_log ) {
+			case "off":
+				return false;
+			case "low":
+			case "medium":
+			case "strong":
+			case "extra_strong":
+				return true;
+		}
+		return false;
+	}
+
+    @Override
+	public float getVideoLogProfileStrength() {
+    	String video_log = sharedPreferences.getString(PreferenceKeys.VideoLogPreferenceKey, "off");
+    	// remember to update useVideoLogProfile() if adding/changing modes
+    	switch( video_log ) {
+			case "off":
+				return 0.0f;
+			case "low":
+				return 5.0f;
+			case "medium":
+				return 10.0f;
+			case "strong":
+				return 100.0f;
+			case "extra_strong":
+				return 500.0f;
+		}
+		return 0.0f;
+	}
+
+    @Override
     public long getVideoMaxDurationPref() {
 		String video_max_duration_value = sharedPreferences.getString(PreferenceKeys.getVideoMaxDurationPreferenceKey(), "0");
 		long video_max_duration;
@@ -917,7 +952,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     	// even if the queue isn't full, we may apply additional limits
 		PhotoMode photo_mode = getPhotoMode();
-		if( photo_mode == PhotoMode.FastBurst ) {
+		if( photo_mode == PhotoMode.FastBurst || photo_mode == PhotoMode.NoiseReduction ) {
 			// only allow one fast burst at a time, so require queue to be empty
 			if( imageSaver.getNImagesToSave() > 0 ) {
 				return false;

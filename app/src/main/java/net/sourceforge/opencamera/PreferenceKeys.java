@@ -239,6 +239,8 @@ public class PreferenceKeys {
     	return "preference_capture_rate_" + cameraId;
     }
 
+	public static final String VideoLogPreferenceKey = "preference_video_log";
+
     public static String getVideoMaxDurationPreferenceKey() {
     	return "preference_video_max_duration";
     }

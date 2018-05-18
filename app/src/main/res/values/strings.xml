@@ -520,6 +520,15 @@
     <string name="preference_camera2_photo_video_recording">Allow photos whilst recording video</string>
     <string name="preference_camera2_photo_video_recording_summary">Allows taking photos whilst recording videos. Disable this if there are problems with video recording with Camera2 API enabled on your device.</string>
 
+    <string name="preference_video_log">Video flat (log) profile</string>
+    <string name="preference_video_log_summary">Enable a flat (log) profile for video mode\n%s</string>
+    <string name="preference_video_log_off">Off</string>
+    <string name="preference_video_log_low">Low</string>
+    <string name="preference_video_log_medium">Medium</string>
+    <string name="preference_video_log_strong">Strong</string>
+    <string name="preference_video_log_extra_strong">Extra strong</string>
+    <string name="video_log">Log profile</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

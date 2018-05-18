@@ -61,6 +61,16 @@ public class VideoTests {
 		// update: now deprecating these tests, as setting these settings can be dodgy on some devices
 		/*suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideoBitrate"));
 		suite.addTest(TestSuite.createTest(MainActivityTest.class, "testTakeVideo4K"));*/
+
+		// tests for video log profile
+		if( MainActivityTest.test_camera2 ) {
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLogProfile1"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLogProfile2"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLogProfile3"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLogProfile1_extra_strong"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLogProfile2_extra_strong"));
+			suite.addTest(TestSuite.createTest(MainActivityTest.class, "testLogProfile3_extra_strong"));
+		}
         return suite;
     }
 }

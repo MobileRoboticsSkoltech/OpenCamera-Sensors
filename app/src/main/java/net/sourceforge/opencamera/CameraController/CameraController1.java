@@ -810,6 +810,10 @@ public class CameraController1 extends CameraController {
         return parameters.getVideoStabilization();
 	}
 
+	public void setLogProfile(boolean use_log_profile, float log_profile_strength) {
+		// not supported for CameraController1!
+	}
+
 	public int getJpegQuality() {
 	    Camera.Parameters parameters = this.getParameters();
 	    return parameters.getJpegQuality();

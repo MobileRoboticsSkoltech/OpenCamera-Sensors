@@ -483,6 +483,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			}
 		}
 
+        if( !using_android_l ) {
+        	Preference pref = findPreference("preference_video_log");
+			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
+        	pg.removePreference(pref);
+		}
+
 		{
 			// remove preference_category_photo_debugging category if empty (which will be the case for old api)
         	PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_photo_debugging");

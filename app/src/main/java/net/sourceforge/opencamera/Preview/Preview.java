@@ -1675,6 +1675,13 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 			}
 		}
 
+        // must be done after switching to video mode (so is_video is set correctly)
+		if( this.is_video ) {
+			boolean use_video_log_profile = applicationInterface.useVideoLogProfile();
+			float video_log_profile_strength = use_video_log_profile ? applicationInterface.getVideoLogProfileStrength() : 0.0f;
+			camera_controller.setLogProfile(use_video_log_profile, video_log_profile_strength);
+		}
+
 		// in theory it shouldn't matter if we call setVideoHighSpeed(true) if is_video==false, as it should only have an effect
 		// in video mode; but don't set high speed mode in photo mode just to be safe
 		// Setup for high speed - must be done after setupCameraParameters() and switching to video mode, but before setPreviewSize() and startCameraPreview()

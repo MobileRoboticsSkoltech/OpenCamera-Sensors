@@ -2048,6 +2048,7 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "computeHistogram");
 		long time_s = System.currentTimeMillis();
+		initRenderscript();
 		Allocation allocation_in = Allocation.createFromBitmap(rs, bitmap);
 		if( MyDebug.LOG )
 			Log.d(TAG, "time after createFromBitmap: " + (System.currentTimeMillis() - time_s));
