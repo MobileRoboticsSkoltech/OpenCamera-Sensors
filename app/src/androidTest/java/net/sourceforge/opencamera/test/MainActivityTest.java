@@ -8518,9 +8518,20 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }*/
 
 	private Bitmap getBitmapFromFile(String filename) throws FileNotFoundException {
+		return getBitmapFromFile(filename, 1);
+	}
+
+	private Bitmap getBitmapFromFile(String filename, int inSampleSize) throws FileNotFoundException {
 		Log.d(TAG, "getBitmapFromFile: " + filename);
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inMutable = true;
+		//options.inSampleSize = inSampleSize;
+		if( inSampleSize > 1 ) {
+			// use inDensity for better quality, as inSampleSize uses nearest neighbour
+			// see same code in ImageSaver.setBitmapOptionsSampleSize()
+			options.inDensity = inSampleSize;
+			options.inTargetDensity = 1;
+		}
 		Bitmap bitmap = BitmapFactory.decodeFile(filename, options);
 		if( bitmap == null )
 			throw new FileNotFoundException();
@@ -8572,6 +8583,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		catch(IOException e) {
 			e.printStackTrace();
 		}
+		/*{
+			for(int y=0;y<bitmap.getHeight();y++) {
+				for(int x=0;x<bitmap.getWidth();x++) {
+					int color = bitmap.getPixel(x, y);
+					Log.d(TAG, x + "," + y + ": " + Color.red(color) + "," + Color.green(color) + "," + Color.blue(color));
+				}
+			}
+		}*/
 	    return bitmap;
     }
 
@@ -8749,16 +8768,20 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		return hdrHistogramDetails;
 	}
 
+	private void checkHDROffsets(int [] exp_offsets_x, int [] exp_offsets_y) {
+		checkHDROffsets(exp_offsets_x, exp_offsets_y, 1);
+	}
+
 	/** Checks that the HDR offsets used for auto-alignment are as expected.
      */
-	private void checkHDROffsets(int [] exp_offsets_x, int [] exp_offsets_y) {
+	private void checkHDROffsets(int [] exp_offsets_x, int [] exp_offsets_y, int scale) {
 		int [] offsets_x = mActivity.getApplicationInterface().getHDRProcessor().offsets_x;
 		int [] offsets_y = mActivity.getApplicationInterface().getHDRProcessor().offsets_y;
 		for(int i=0;i<offsets_x.length;i++) {
-			Log.d(TAG, "offsets " + i + " ( " + offsets_x[i] + " , " + offsets_y[i] + " ), expected ( " + exp_offsets_x[i] + " , " + exp_offsets_y[i] + " )");
+			Log.d(TAG, "offsets " + i + " ( " + offsets_x[i]*scale + " , " + offsets_y[i]*scale + " ), expected ( " + exp_offsets_x[i] + " , " + exp_offsets_y[i] + " )");
 			// we allow some tolerance as different devices can produce different results (e.g., Nexus 6 vs OnePlus 3T; see testHDR5 on Nexus 6)
-			assertTrue(Math.abs(offsets_x[i] - exp_offsets_x[i]) <= 1);
-			assertTrue(Math.abs(offsets_y[i] - exp_offsets_y[i]) <= 1);
+			assertTrue(Math.abs(offsets_x[i]*scale - exp_offsets_x[i]) <= 1);
+			assertTrue(Math.abs(offsets_y[i]*scale - exp_offsets_y[i]) <= 1);
 		}
 	}
 
@@ -10501,8 +10524,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 		Bitmap nr_bitmap;
 		try {
 			// initialise allocation from first two bitmaps
-			Bitmap bitmap0 = getBitmapFromFile(inputs.get(0));
-			Bitmap bitmap1 = getBitmapFromFile(inputs.get(1));
+			int inSampleSize = mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize();
+			Bitmap bitmap0 = getBitmapFromFile(inputs.get(0), inSampleSize);
+			Bitmap bitmap1 = getBitmapFromFile(inputs.get(1), inSampleSize);
 			int width = bitmap0.getWidth();
 			int height = bitmap0.getHeight();
 			float avg_factor = 1.0f;
@@ -10518,7 +10542,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 			for(int i=2;i<inputs.size();i++) {
 				Log.d(TAG, "processAvg for image: " + i);
 
-				Bitmap new_bitmap = getBitmapFromFile(inputs.get(i));
+				Bitmap new_bitmap = getBitmapFromFile(inputs.get(i), inSampleSize);
 				avg_factor = (float)i;
 				time_s = System.currentTimeMillis();
 				mActivity.getApplicationInterface().getHDRProcessor().updateAvg(allocation, width, height, new_bitmap, avg_factor, iso, true);
@@ -10586,10 +10610,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 1, 0};
 					//int [] exp_offsets_x = {0, 4, 0};
 					//int [] exp_offsets_y = {0, 1, 0};
-					int [] exp_offsets_x = {0, 2, 0};
+					//int [] exp_offsets_x = {0, 2, 0};
+					//int [] exp_offsets_y = {0, 0, 0};
+					int [] exp_offsets_x = {0, 4, 0};
 					int [] exp_offsets_y = {0, 0, 0};
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 2 ) {
 					//int [] exp_offsets_x = {0, 6, 0};
@@ -10598,7 +10624,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 1, 0};
 					int [] exp_offsets_x = {0, 7, 0};
 					int [] exp_offsets_y = {0, -1, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else {
 					assertTrue(false);
@@ -10631,19 +10657,23 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				if( index == 1 ) {
 					//int [] exp_offsets_x = {0, -15, 0};
 					//int [] exp_offsets_y = {0, -10, 0};
-					int [] exp_offsets_x = {0, -15, 0};
-					int [] exp_offsets_y = {0, -11, 0};
+					//int [] exp_offsets_x = {0, -15, 0};
+					//int [] exp_offsets_y = {0, -11, 0};
+					int [] exp_offsets_x = {0, -12, 0};
+					int [] exp_offsets_y = {0, -12, 0};
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 2 ) {
 					//int [] exp_offsets_x = {0, -15, 0};
 					//int [] exp_offsets_y = {0, -10, 0};
 					//int [] exp_offsets_x = {0, -13, 0};
 					//int [] exp_offsets_y = {0, -12, 0};
+					//int [] exp_offsets_x = {0, -12, 0};
+					//int [] exp_offsets_y = {0, -14, 0};
 					int [] exp_offsets_x = {0, -12, 0};
-					int [] exp_offsets_y = {0, -14, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					int [] exp_offsets_y = {0, -12, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else {
 					assertTrue(false);
@@ -10682,19 +10712,23 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 0, 0};
 					//int [] exp_offsets_x = {0, -9, 0};
 					//int [] exp_offsets_y = {0, -11, 0};
+					//int [] exp_offsets_x = {0, -8, 0};
+					//int [] exp_offsets_y = {0, -10, 0};
 					int [] exp_offsets_x = {0, -8, 0};
-					int [] exp_offsets_y = {0, -10, 0};
+					int [] exp_offsets_y = {0, -8, 0};
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 2 ) {
 					//int [] exp_offsets_x = {0, -18, 0};
 					//int [] exp_offsets_y = {0, 17, 0};
 					//int [] exp_offsets_x = {0, -2, 0};
 					//int [] exp_offsets_y = {0, 0, 0};
-					int [] exp_offsets_x = {0, -7, 0};
-					int [] exp_offsets_y = {0, -2, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					//int [] exp_offsets_x = {0, -7, 0};
+					//int [] exp_offsets_y = {0, -2, 0};
+					int [] exp_offsets_x = {0, -8, 0};
+					int [] exp_offsets_y = {0, -8, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 3 ) {
 					//int [] exp_offsets_x = {0, -12, 0};
@@ -10703,9 +10737,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 0, 0};
 					//int [] exp_offsets_x = {0, -9, 0};
 					//int [] exp_offsets_y = {0, 14, 0};
-					int [] exp_offsets_x = {0, -8, 0};
-					int [] exp_offsets_y = {0, 2, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					//int [] exp_offsets_x = {0, -8, 0};
+					//int [] exp_offsets_y = {0, 2, 0};
+					int [] exp_offsets_x = {0, -12, 0};
+					int [] exp_offsets_y = {0, 12, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 4 ) {
 					//int [] exp_offsets_x = {0, -29, 0};
@@ -10716,9 +10752,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 11, 0};
 					//int [] exp_offsets_x = {0, -6, 0};
 					//int [] exp_offsets_y = {0, 14, 0};
+					//int [] exp_offsets_x = {0, -8, 0};
+					//int [] exp_offsets_y = {0, 2, 0};
 					int [] exp_offsets_x = {0, -8, 0};
-					int [] exp_offsets_y = {0, 2, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					int [] exp_offsets_y = {0, 12, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else {
 					assertTrue(false);
@@ -10756,21 +10794,23 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					int [] exp_offsets_x = {0, 5, 0};
 					int [] exp_offsets_y = {0, 1, 0};
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 2 ) {
 					//int [] exp_offsets_x = {0, 3, 0};
 					//int [] exp_offsets_y = {0, 5, 0};
 					int [] exp_offsets_x = {0, 4, 0};
 					int [] exp_offsets_y = {0, 4, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 3 ) {
 					//int [] exp_offsets_x = {0, 0, 0};
 					//int [] exp_offsets_y = {0, 7, 0};
-					int [] exp_offsets_x = {0, 1, 0};
-					int [] exp_offsets_y = {0, 6, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					//int [] exp_offsets_x = {0, 1, 0};
+					//int [] exp_offsets_y = {0, 6, 0};
+					int [] exp_offsets_x = {0, 0, 0};
+					int [] exp_offsets_y = {0, 8, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 4 ) {
 					//int [] exp_offsets_x = {0, 4, 0};
@@ -10781,7 +10821,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 8, 0};
 					int [] exp_offsets_x = {0, 3, 0};
 					int [] exp_offsets_y = {0, 9, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else {
 					assertTrue(false);
@@ -10818,31 +10858,33 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, -1, 0};
 					//int [] exp_offsets_x = {0, 5, 0};
 					//int [] exp_offsets_y = {0, 0, 0};
-					int [] exp_offsets_x = {0, 6, 0};
-					int [] exp_offsets_y = {0, -2, 0};
+					//int [] exp_offsets_x = {0, 6, 0};
+					//int [] exp_offsets_y = {0, -2, 0};
+					int [] exp_offsets_x = {0, 4, 0};
+					int [] exp_offsets_y = {0, 0, 0};
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 2 ) {
 					//int [] exp_offsets_x = {0, 7, 0};
 					//int [] exp_offsets_y = {0, -2, 0};
 					int [] exp_offsets_x = {0, 8, 0};
 					int [] exp_offsets_y = {0, -1, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 3 ) {
 					//int [] exp_offsets_x = {0, 9, 0};
 					//int [] exp_offsets_y = {0, -2, 0};
 					int [] exp_offsets_x = {0, 9, 0};
 					int [] exp_offsets_y = {0, -1, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 4 ) {
 					//int [] exp_offsets_x = {0, 10, 0};
 					//int [] exp_offsets_y = {0, -4, 0};
 					int [] exp_offsets_x = {0, 11, 0};
 					int [] exp_offsets_y = {0, -3, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else {
 					assertTrue(false);
@@ -10882,40 +10924,42 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 				if( index == 1 ) {
 					//int [] exp_offsets_x = {0, 0, 0};
 					//int [] exp_offsets_y = {0, 0, 0};
-					int [] exp_offsets_x = {0, -2, 0};
+					//int [] exp_offsets_x = {0, -2, 0};
+					//int [] exp_offsets_y = {0, 0, 0};
+					int [] exp_offsets_x = {0, 0, 0};
 					int [] exp_offsets_y = {0, 0, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
 				}
 				else if( index == 2 ) {
 					int [] exp_offsets_x = {0, 0, 0};
 					int [] exp_offsets_y = {0, 0, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 3 ) {
 					int [] exp_offsets_x = {0, 0, 0};
 					int [] exp_offsets_y = {0, 0, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 4 ) {
 					int [] exp_offsets_x = {0, 0, 0};
 					int [] exp_offsets_y = {0, 0, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 5 ) {
 					int [] exp_offsets_x = {0, 0, 0};
 					int [] exp_offsets_y = {0, 0, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 6 ) {
 					int [] exp_offsets_x = {0, 0, 0};
 					int [] exp_offsets_y = {0, 0, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 7 ) {
 					int [] exp_offsets_x = {0, 0, 0};
 					int [] exp_offsets_y = {0, 0, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else {
 					assertTrue(false);
@@ -10955,9 +10999,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, 0, 0};
 					//int [] exp_offsets_x = {0, -10, 0};
 					//int [] exp_offsets_y = {0, 6, 0};
-					int [] exp_offsets_x = {0, -6, 0};
-					int [] exp_offsets_y = {0, 2, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					//int [] exp_offsets_x = {0, -6, 0};
+					//int [] exp_offsets_y = {0, 2, 0};
+					int [] exp_offsets_x = {0, -4, 0};
+					int [] exp_offsets_y = {0, 0, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 					assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 0);
 				}
 			}
@@ -11126,60 +11172,74 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 					//int [] exp_offsets_y = {0, -8, 0};
 					//int [] exp_offsets_x = {0, 6, 0};
 					//int [] exp_offsets_y = {0, -8, 0};
-					int [] exp_offsets_x = {0, -6, 0};
+					//int [] exp_offsets_x = {0, -6, 0};
+					//int [] exp_offsets_y = {0, 8, 0};
+					int [] exp_offsets_x = {0, -4, 0};
 					int [] exp_offsets_y = {0, 8, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 					//assertTrue(mActivity.getApplicationInterface().getHDRProcessor().sharp_index == 1);
 				}
 				else if( index == 2 ) {
 					//int [] exp_offsets_x = {0, -5, 0};
 					//int [] exp_offsets_y = {0, -1, 0};
-					int [] exp_offsets_x = {0, -10, 0};
-					int [] exp_offsets_y = {0, 6, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					//int [] exp_offsets_x = {0, -10, 0};
+					//int [] exp_offsets_y = {0, 6, 0};
+					int [] exp_offsets_x = {0, -8, 0};
+					int [] exp_offsets_y = {0, 8, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 3 ) {
 					//int [] exp_offsets_x = {0, -1, 0};
 					//int [] exp_offsets_y = {0, -18, 0};
 					//int [] exp_offsets_x = {0, 0, 0};
 					//int [] exp_offsets_y = {0, -16, 0};
+					//int [] exp_offsets_x = {0, -4, 0};
+					//int [] exp_offsets_y = {0, -10, 0};
 					int [] exp_offsets_x = {0, -4, 0};
-					int [] exp_offsets_y = {0, -10, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					int [] exp_offsets_y = {0, -8, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 4 ) {
 					//int [] exp_offsets_x = {0, -3, 0};
 					//int [] exp_offsets_y = {0, -20, 0};
 					//int [] exp_offsets_x = {0, -2, 0};
 					//int [] exp_offsets_y = {0, -18, 0};
-					int [] exp_offsets_x = {0, -6, 0};
+					//int [] exp_offsets_x = {0, -6, 0};
+					//int [] exp_offsets_y = {0, -12, 0};
+					int [] exp_offsets_x = {0, -8, 0};
 					int [] exp_offsets_y = {0, -12, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 5 ) {
 					//int [] exp_offsets_x = {0, -8, 0};
 					//int [] exp_offsets_y = {0, 2, 0};
 					//int [] exp_offsets_x = {0, -10, 0};
 					//int [] exp_offsets_y = {0, 4, 0};
+					//int [] exp_offsets_x = {0, -12, 0};
+					//int [] exp_offsets_y = {0, 10, 0};
 					int [] exp_offsets_x = {0, -12, 0};
-					int [] exp_offsets_y = {0, 10, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					int [] exp_offsets_y = {0, 8, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 6 ) {
 					//int [] exp_offsets_x = {0, 0, 0};
 					//int [] exp_offsets_y = {0, -6, 0};
 					//int [] exp_offsets_x = {0, 2, 0};
 					//int [] exp_offsets_y = {0, -6, 0};
+					//int [] exp_offsets_x = {0, -4, 0};
+					//int [] exp_offsets_y = {0, 2, 0};
 					int [] exp_offsets_x = {0, -4, 0};
-					int [] exp_offsets_y = {0, 2, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					int [] exp_offsets_y = {0, 0, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 				else if( index == 7 ) {
 					//int [] exp_offsets_x = {0, 7, 0};
 					//int [] exp_offsets_y = {0, -2, 0};
-					int [] exp_offsets_x = {0, 6, 0};
-					int [] exp_offsets_y = {0, 6, 0};
-					checkHDROffsets(exp_offsets_x, exp_offsets_y);
+					//int [] exp_offsets_x = {0, 6, 0};
+					//int [] exp_offsets_y = {0, 6, 0};
+					int [] exp_offsets_x = {0, 4, 0};
+					int [] exp_offsets_y = {0, 4, 0};
+					checkHDROffsets(exp_offsets_x, exp_offsets_y, mActivity.getApplicationInterface().getHDRProcessor().getAvgSampleSize());
 				}
 			}
 		});
@@ -11513,10 +11573,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
 		// list assets
 		List<String> inputs = new ArrayList<>();
-		inputs.add(avg_images_path + "testAvgtemp/input0.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input0.png");
+		/*inputs.add(avg_images_path + "testAvgtemp/input0.jpg");
 		inputs.add(avg_images_path + "testAvgtemp/input1.jpg");
 		inputs.add(avg_images_path + "testAvgtemp/input2.jpg");
-		inputs.add(avg_images_path + "testAvgtemp/input3.jpg");
+		inputs.add(avg_images_path + "testAvgtemp/input3.jpg");*/
 		/*inputs.add(avg_images_path + "testAvgtemp/input4.jpg");
 		inputs.add(avg_images_path + "testAvgtemp/input5.jpg");
 		inputs.add(avg_images_path + "testAvgtemp/input6.jpg");

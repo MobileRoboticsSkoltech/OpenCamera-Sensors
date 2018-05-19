@@ -13,6 +13,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Bitmap;
 //import android.graphics.Color;
+import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.os.Environment;
@@ -995,6 +996,16 @@ public class HDRProcessor {
 			if( MyDebug.LOG )
 				Log.d(TAG, "create renderscript object");
 		}
+	}
+
+	/** As part of the noise reduction process, the caller should scale the input images down by the factor returned
+	 *  by this method. This both provides a spatial smoothing, as well as improving performance and memory usage.
+	 *  The bitmap returned by avgBrighten() will automatically be scaled up again by this factor.
+	 */
+	public int getAvgSampleSize() {
+		// If changing this, may also want to change the radius of the spatial filter in avg_brighten.rs
+		//return 1;
+		return 2;
 	}
 
 	/** Combines two images by averaging them. Each pixel of bitmap_avg is modified to contain:
@@ -2111,7 +2122,8 @@ public class HDRProcessor {
 		return Math.max(median_brightness, median_target); // don't make median darker
 	}
 
-	/**
+	/** Final stage of the noise reduction algorithm.
+	 *  Note that the returned bitmap will be scaled up by the factor returned by getAvgSampleSize().
 	 * @param input         The allocation in floating point format.
 	 * @param width         Width of the input.
 	 * @param height        Height of the input.
@@ -2289,6 +2301,20 @@ public class HDRProcessor {
 
         allocation_out.copyTo(bitmap);
 		allocation_out.destroy();
+		if( MyDebug.LOG )
+			Log.d(TAG, "### time after copying to bitmap: " + (System.currentTimeMillis() - time_s));
+
+		int sample_size = getAvgSampleSize();
+		if( MyDebug.LOG )
+			Log.d(TAG, "sample_size: " + sample_size);
+		if( sample_size > 1 ) {
+			Matrix matrix = new Matrix();
+			matrix.postScale(sample_size, sample_size);
+			Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+			bitmap.recycle();
+			bitmap = new_bitmap;
+		}
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "### total time for avgBrighten: " + (System.currentTimeMillis() - time_s));
 		return bitmap;

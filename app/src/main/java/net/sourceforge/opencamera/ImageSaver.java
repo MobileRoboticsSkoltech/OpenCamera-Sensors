@@ -731,13 +731,24 @@ public class ImageSaver extends Thread {
 			Log.d(TAG, "waitUntilDone: images all saved");
 	}
 
+	private void setBitmapOptionsSampleSize(BitmapFactory.Options options, int inSampleSize) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "setBitmapOptionsSampleSize: " + inSampleSize);
+		//options.inSampleSize = inSampleSize;
+		if( inSampleSize > 1 ) {
+			// use inDensity for better quality, as inSampleSize uses nearest neighbour
+			options.inDensity = inSampleSize;
+			options.inTargetDensity = 1;
+		}
+	}
+
 	/** Loads a single jpeg as a Bitmaps.
 	 * @param mutable Whether the bitmap should be mutable. Note that when converting to bitmaps
 	 *                for the image post-processing (auto-stabilise etc), in general we need the
 	 *                bitmap to be mutable (for photostamp to work).
 	 */
 	@SuppressWarnings("deprecation")
-	private Bitmap loadBitmap(byte [] jpeg_image, boolean mutable) {
+	private Bitmap loadBitmap(byte [] jpeg_image, boolean mutable, int inSampleSize) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "loadBitmap");
 			Log.d(TAG, "mutable?: " + mutable);
@@ -746,6 +757,7 @@ public class ImageSaver extends Thread {
 		if( MyDebug.LOG )
 			Log.d(TAG, "options.inMutable is: " + options.inMutable);
 		options.inMutable = mutable;
+		setBitmapOptionsSampleSize(options, inSampleSize);
 		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
 			// setting is ignored in Android 5 onwards
 			options.inPurgeable = true;
@@ -776,15 +788,17 @@ public class ImageSaver extends Thread {
 	/** Converts the array of jpegs to Bitmaps. The bitmap with index mutable_id will be marked as mutable (or set to -1 to have no mutable bitmaps).
 	 */
 	@SuppressWarnings("deprecation")
-	private List<Bitmap> loadBitmaps(List<byte []> jpeg_images, int mutable_id) {
+	private List<Bitmap> loadBitmaps(List<byte []> jpeg_images, int mutable_id, int inSampleSize) {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "loadBitmaps");
 			Log.d(TAG, "mutable_id: " + mutable_id);
 		}
 		BitmapFactory.Options mutable_options = new BitmapFactory.Options();
 		mutable_options.inMutable = true; // bitmap that needs to be writable
+		setBitmapOptionsSampleSize(mutable_options, inSampleSize);
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inMutable = false; // later bitmaps don't need to be writable
+		setBitmapOptionsSampleSize(options, inSampleSize);
 		if( Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT ) {
 			// setting is ignored in Android 5 onwards
 			mutable_options.inPurgeable = true;
@@ -910,8 +924,9 @@ public class ImageSaver extends Thread {
 			if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
 				try {
 					// initialise allocation from first two bitmaps
-					Bitmap bitmap0 = loadBitmap(request.jpeg_images.get(0), false);
-					Bitmap bitmap1 = loadBitmap(request.jpeg_images.get(1), false);
+					int inSampleSize = hdrProcessor.getAvgSampleSize();
+					Bitmap bitmap0 = loadBitmap(request.jpeg_images.get(0), false, inSampleSize);
+					Bitmap bitmap1 = loadBitmap(request.jpeg_images.get(1), false, inSampleSize);
 					int width = bitmap0.getWidth();
 					int height = bitmap0.getHeight();
 					float avg_factor = 1.0f;
@@ -930,7 +945,7 @@ public class ImageSaver extends Thread {
 						if( MyDebug.LOG )
 							Log.d(TAG, "processAvg for image: " + i);
 
-						Bitmap new_bitmap = loadBitmap(request.jpeg_images.get(i), false);
+						Bitmap new_bitmap = loadBitmap(request.jpeg_images.get(i), false, inSampleSize);
 						avg_factor = (float)i;
 						hdrProcessor.updateAvg(allocation, width, height, new_bitmap, avg_factor, iso, true);
 						// updateAvg recycles new_bitmap
@@ -995,7 +1010,7 @@ public class ImageSaver extends Thread {
 			int base_bitmap = (request.jpeg_images.size()-1)/2;
 			if( MyDebug.LOG )
 				Log.d(TAG, "base_bitmap: " + base_bitmap);
-			List<Bitmap> bitmaps = loadBitmaps(request.jpeg_images, base_bitmap);
+			List<Bitmap> bitmaps = loadBitmaps(request.jpeg_images, base_bitmap, 1);
 			if( bitmaps == null ) {
 				if( MyDebug.LOG )
 					Log.e(TAG, "failed to load bitmaps");
@@ -1139,7 +1154,7 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.d(TAG, "need to decode bitmap to auto-stabilise");
 			// bitmap doesn't need to be mutable here, as this won't be the final bitmap retured from the auto-stabilise code
-			bitmap = loadBitmap(data, false);
+			bitmap = loadBitmap(data, false, 1);
 			if( bitmap == null ) {
 				main_activity.getPreview().showToast(null, R.string.failed_to_auto_stabilise);
 				System.gc();
@@ -1290,7 +1305,7 @@ public class ImageSaver extends Thread {
 			if( MyDebug.LOG )
 				Log.d(TAG, "need to decode bitmap to mirror");
 			// bitmap doesn't need to be mutable here, as this won't be the final bitmap retured from the auto-stabilise code
-			bitmap = loadBitmap(data, false);
+			bitmap = loadBitmap(data, false, 1);
 			if( bitmap == null ) {
 				// don't bother warning to the user - we simply won't mirror the image
 				System.gc();
@@ -1337,7 +1352,7 @@ public class ImageSaver extends Thread {
 			if( bitmap == null ) {
 				if( MyDebug.LOG )
 					Log.d(TAG, "decode bitmap in order to stamp info");
-				bitmap = loadBitmap(data, true);
+				bitmap = loadBitmap(data, true, 1);
 				if( bitmap == null ) {
 					main_activity.getPreview().showToast(null, R.string.failed_to_stamp);
 					System.gc();
@@ -1579,7 +1594,7 @@ public class ImageSaver extends Thread {
 	        			if( MyDebug.LOG )
 	        				Log.d(TAG, "create bitmap");
 						// bitmap we return doesn't need to be mutable
-						bitmap = loadBitmap(data, false);
+						bitmap = loadBitmap(data, false, 1);
 						if( bitmap != null ) {
 							// rotate the bitmap if necessary for exif tags
 							if( MyDebug.LOG )
