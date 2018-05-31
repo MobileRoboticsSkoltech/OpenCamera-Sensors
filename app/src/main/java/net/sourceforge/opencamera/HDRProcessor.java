@@ -1004,8 +1004,37 @@ public class HDRProcessor {
 	 */
 	public int getAvgSampleSize() {
 		// If changing this, may also want to change the radius of the spatial filter in avg_brighten.rs
-		//return 1;
-		return 2;
+		return 1;
+		//return 2;
+	}
+
+	public class AvgData {
+		public Allocation allocation_out;
+		Bitmap bitmap_avg_align;
+		public Allocation allocation_avg_align;
+
+		AvgData(Allocation allocation_out, Bitmap bitmap_avg_align, Allocation allocation_avg_align) {
+			this.allocation_out = allocation_out;
+			this.bitmap_avg_align = bitmap_avg_align;
+			this.allocation_avg_align = allocation_avg_align;
+		}
+
+		public void destroy() {
+            if( MyDebug.LOG )
+                Log.d(TAG, "AvgData.destroy()");
+		    if( allocation_out != null ) {
+                allocation_out.destroy();
+                allocation_out = null;
+            }
+            if( bitmap_avg_align != null ) {
+		        bitmap_avg_align.recycle();
+		        bitmap_avg_align = null;
+            }
+            if( allocation_avg_align != null ) {
+                allocation_avg_align.destroy();
+                allocation_avg_align = null;
+            }
+        }
 	}
 
 	/** Combines two images by averaging them. Each pixel of bitmap_avg is modified to contain:
@@ -1018,10 +1047,9 @@ public class HDRProcessor {
 	 * @param bitmap_avg     One of the input images; the result is written to this bitmap.
 	 * @param bitmap_new     The other input image.
 	 * @param avg_factor     The weighting factor for bitmap_avg.
-	 * @param release_bitmap If true, bitmap_new will be recycled.
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public Allocation processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, int iso, boolean release_bitmap) throws HDRProcessorException {
+	public AvgData processAvg(Bitmap bitmap_avg, Bitmap bitmap_new, float avg_factor, int iso) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
@@ -1043,13 +1071,14 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating renderscript: " + (System.currentTimeMillis() - time_s));
 		// create allocations
-		Allocation allocation_avg = Allocation.createFromBitmap(rs, bitmap_avg);
-		Allocation allocation_new = Allocation.createFromBitmap(rs, bitmap_new);
-		Allocation allocation_out = Allocation.createTyped(rs, Type.createXY(rs, Element.F32_3(rs), width, height));
+		/*Allocation allocation_avg = Allocation.createFromBitmap(rs, bitmap_avg);
+		//Allocation allocation_new = Allocation.createFromBitmap(rs, bitmap_new);
+		//Allocation allocation_out = Allocation.createTyped(rs, Type.createXY(rs, Element.F32_3(rs), width, height));
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+			*/
 
-		final boolean use_sharpness_test = false; // disabled for now - takes about 1s extra, and no evidence this helps quality
+		/*final boolean use_sharpness_test = false; // disabled for now - takes about 1s extra, and no evidence this helps quality
 		if( use_sharpness_test ) {
 			float sharpness_avg = computeSharpness(allocation_avg, width, time_s);
 			float sharpness_new = computeSharpness(allocation_new, width, time_s);
@@ -1069,33 +1098,24 @@ public class HDRProcessor {
 			}
 			if( MyDebug.LOG )
 				Log.d(TAG, "sharp_index: " + sharp_index);
-		}
+		}*/
 
 		/*LuminanceInfo luminanceInfo = computeMedianLuminance(bitmap_avg, 0, 0, width, height);
 		if( MyDebug.LOG )
 			Log.d(TAG, "median: " + luminanceInfo.median_value);*/
 
-		processAvgCore(allocation_out, allocation_avg, allocation_new, width, height, avg_factor, iso, true, time_s);
-		allocation_avg.destroy();
-		allocation_new.destroy();
-
-		if( release_bitmap ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "release bitmaps");
-			bitmap_avg.recycle();
-			bitmap_new.recycle();
-		}
+		AvgData avg_data = processAvgCore(null, null, bitmap_avg, bitmap_new, width, height, avg_factor, iso, true, null, null, time_s);
 
 		//allocation_avg.copyTo(bitmap_avg);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time for processAvg: " + (System.currentTimeMillis() - time_s));
 
-		return allocation_out;
+		return avg_data;
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	public void updateAvg(Allocation allocation, int width, int height, Bitmap bitmap_new, float avg_factor, int iso, boolean release_bitmap) throws HDRProcessorException {
+	public void updateAvg(AvgData avg_data, int width, int height, Bitmap bitmap_new, float avg_factor, int iso) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvg");
 			Log.d(TAG, "avg_factor: " + avg_factor);
@@ -1111,41 +1131,114 @@ public class HDRProcessor {
 		long time_s = System.currentTimeMillis();
 
 		// create allocations
-		Allocation allocation_new = Allocation.createFromBitmap(rs, bitmap_new);
+		/*Allocation allocation_new = Allocation.createFromBitmap(rs, bitmap_new);
 		if( MyDebug.LOG )
-			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+			Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));*/
 
-		processAvgCore(allocation, allocation, allocation_new, width, height, avg_factor, iso, false, time_s);
-		allocation_new.destroy();
-
-		if( release_bitmap ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "release bitmap");
-			bitmap_new.recycle();
-		}
+		processAvgCore(avg_data.allocation_out, avg_data.allocation_out, null, bitmap_new, width, height, avg_factor, iso, false, avg_data.allocation_avg_align, avg_data.bitmap_avg_align, time_s);
 
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time for updateAvg: " + (System.currentTimeMillis() - time_s));
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-	private void processAvgCore(Allocation allocation_out, Allocation allocation_avg, Allocation allocation_new, int width, int height, float avg_factor, int iso, boolean first, long time_s) throws HDRProcessorException {
+	private AvgData processAvgCore(Allocation allocation_out, Allocation allocation_avg, Bitmap bitmap_avg, Bitmap bitmap_new, int width, int height, float avg_factor, int iso, boolean first, Allocation allocation_avg_align, Bitmap bitmap_avg_align, long time_s) throws HDRProcessorException {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "processAvgCore");
 			Log.d(TAG, "iso: " + iso);
 		}
 
+		Allocation allocation_new = null;
+		boolean free_allocation_avg = false;
+
 		offsets_x = new int[2];
 		offsets_y = new int[2];
 		{
 			// perform auto-alignment
+			boolean floating_point = !first;
 			Allocation [] allocations = new Allocation[2];
-			allocations[0] = allocation_avg;
-			allocations[1] = allocation_new;
-			autoAlignment(offsets_x, offsets_y, allocations, width, height, null, 0, true, null, false, !first, 2, time_s);
+			Bitmap bitmap_new_align = null;
+			Allocation allocation_new_align = null;
+			int alignment_width = width;
+			int alignment_height = height;
+
+			//final boolean scale_align = false;
+			final boolean scale_align = true;
+			//final int scale_align_size = 2;
+			final int scale_align_size = 4;
+			if( scale_align ) {
+			    // use scaled down bitmaps for alignment
+				if( MyDebug.LOG )
+					Log.d(TAG, "### time before creating allocations for autoalignment: " + (System.currentTimeMillis() - time_s));
+                Matrix align_scale_matrix = new Matrix();
+                align_scale_matrix.postScale(1.0f/scale_align_size, 1.0f/scale_align_size);
+
+				if( allocation_avg_align == null ) {
+    				bitmap_avg_align = Bitmap.createBitmap(bitmap_avg, 0, 0, width, height, align_scale_matrix, false);
+					allocation_avg_align = Allocation.createFromBitmap(rs, bitmap_avg_align);
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "### time after creating avg allocation for autoalignment: " + (System.currentTimeMillis() - time_s));
+				}
+                bitmap_new_align = Bitmap.createBitmap(bitmap_new, 0, 0, width, height, align_scale_matrix, false);
+				allocation_new_align = Allocation.createFromBitmap(rs, bitmap_new_align);
+
+				alignment_width = bitmap_new_align.getWidth();
+				alignment_height = bitmap_new_align.getHeight();
+
+				allocations[0] = allocation_avg_align;
+				allocations[1] = allocation_new_align;
+				floating_point = false;
+				if( MyDebug.LOG )
+					Log.d(TAG, "### time after creating allocations for autoalignment: " + (System.currentTimeMillis() - time_s));
+            }
+			else {
+				if( allocation_avg == null ) {
+					allocation_avg = Allocation.createFromBitmap(rs, bitmap_avg);
+					free_allocation_avg = true;
+				}
+				allocation_new = Allocation.createFromBitmap(rs, bitmap_new);
+				if( MyDebug.LOG )
+					Log.d(TAG, "### time after creating allocations from bitmaps: " + (System.currentTimeMillis() - time_s));
+				allocations[0] = allocation_avg;
+				allocations[1] = allocation_new;
+			}
+
+			autoAlignment(offsets_x, offsets_y, allocations, alignment_width, alignment_height, null, 0, true, null, false, floating_point, 1, time_s);
+			if( scale_align ) {
+				for(int i=0;i<offsets_x.length;i++) {
+					offsets_x[i] *= scale_align_size;
+				}
+				for(int i=0;i<offsets_y.length;i++) {
+					offsets_y[i] *= scale_align_size;
+				}
+			}
+
+			if( bitmap_new_align != null ) {
+				bitmap_new_align.recycle();
+				bitmap_new_align = null;
+			}
+			if( allocation_new_align != null ) {
+				allocation_new_align.destroy();
+				allocation_new_align = null;
+			}
+
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "### time after autoAlignment: " + (System.currentTimeMillis() - time_s));
 			}
+		}
+
+		if( allocation_out == null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "need to create allocation_out");
+			allocation_out = Allocation.createTyped(rs, Type.createXY(rs, Element.F32_3(rs), width, height));
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after create allocation_out: " + (System.currentTimeMillis() - time_s));
+		}
+		if( allocation_avg == null ) {
+			allocation_avg = Allocation.createFromBitmap(rs, bitmap_avg);
+			free_allocation_avg = true;
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after creating allocation_avg from bitmap: " + (System.currentTimeMillis() - time_s));
 		}
 
 		// write new avg image
@@ -1155,6 +1248,31 @@ public class HDRProcessor {
 			processAvgScript = new ScriptC_process_avg(rs);
 		}*/
 		ScriptC_process_avg processAvgScript = new ScriptC_process_avg(rs);
+
+		/*final boolean separate_first_pass = false; // whether to convert the first two images in separate passes (reduces memory)
+		if( first && separate_first_pass ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time before convert_to_f: " + (System.currentTimeMillis() - time_s));
+			processAvgScript.forEach_convert_to_f(allocation_avg, allocation_out);
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after convert_to_f: " + (System.currentTimeMillis() - time_s));
+			if( free_allocation_avg ) {
+				allocation_avg.destroy();
+				free_allocation_avg = false;
+			}
+			if( MyDebug.LOG )
+				Log.d(TAG, "release bitmap_avg");
+			bitmap_avg.recycle();
+			bitmap_avg = null;
+			allocation_avg = allocation_out;
+			first = false;
+		}*/
+
+		if( allocation_new == null ) {
+			allocation_new = Allocation.createFromBitmap(rs, bitmap_new);
+			if( MyDebug.LOG )
+				Log.d(TAG, "### time after creating allocation_new from bitmap: " + (System.currentTimeMillis() - time_s));
+		}
 
 		// set allocations
 		processAvgScript.set_bitmap_new(allocation_new);
@@ -1185,8 +1303,26 @@ public class HDRProcessor {
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time after processAvgScript: " + (System.currentTimeMillis() - time_s));
 
+		allocation_new.destroy();
+		if( free_allocation_avg ) {
+			allocation_avg.destroy();
+		}
+        if( bitmap_avg != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "release bitmap_avg");
+			bitmap_avg.recycle();
+			bitmap_avg = null;
+		}
+        if( bitmap_new != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "release bitmap_new");
+			bitmap_new.recycle();
+			bitmap_new = null;
+		}
+
 		if( MyDebug.LOG )
 			Log.d(TAG, "### time for processAvgCore: " + (System.currentTimeMillis() - time_s));
+		return new AvgData(allocation_out, bitmap_avg_align, allocation_avg_align);
 	}
 
 	/** Combines multiple images by averaging them.
@@ -1333,6 +1469,13 @@ public class HDRProcessor {
 			Log.d(TAG, "width: " + width);
 			Log.d(TAG, "height: " + height);
 			Log.d(TAG, "use_mtb: " + use_mtb);
+			Log.d(TAG, "allocations: " + allocations.length);
+			for(Allocation allocation : allocations) {
+				Log.d(TAG, "    allocation:");
+				Log.d(TAG, "    element: " + allocation.getElement());
+				Log.d(TAG, "    type X: " + allocation.getType().getX());
+				Log.d(TAG, "    type Y: " + allocation.getType().getY());
+			}
 		}
 
 		// initialise

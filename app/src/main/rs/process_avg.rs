@@ -54,6 +54,10 @@ float3 __attribute__((kernel)) avg(uchar4 pixel_avg, uint32_t x, uint32_t y) {
     return avg_f(pixel_avg_f, x, y);
 }
 
+/*float3 __attribute__((kernel)) convert_to_f(uchar4 pixel_avg, uint32_t x, uint32_t y) {
+    return convert_float3(pixel_avg.rgb);
+}*/
+
 rs_allocation bitmap1;
 rs_allocation bitmap2;
 rs_allocation bitmap3;

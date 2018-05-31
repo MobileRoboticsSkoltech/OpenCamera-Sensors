@@ -938,8 +938,8 @@ public class ImageSaver extends Thread {
 								Log.d(TAG, "iso: " + iso);
 						}
 					}
-					Allocation allocation = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, iso, true);
-					// processAvg recycles both bitmaps
+					HDRProcessor.AvgData avg_data = hdrProcessor.processAvg(bitmap0, bitmap1, avg_factor, iso);
+					Allocation allocation = avg_data.allocation_out;
 
 					for(int i=2;i<request.jpeg_images.size();i++) {
 						if( MyDebug.LOG )
@@ -947,12 +947,13 @@ public class ImageSaver extends Thread {
 
 						Bitmap new_bitmap = loadBitmap(request.jpeg_images.get(i), false, inSampleSize);
 						avg_factor = (float)i;
-						hdrProcessor.updateAvg(allocation, width, height, new_bitmap, avg_factor, iso, true);
+						hdrProcessor.updateAvg(avg_data, width, height, new_bitmap, avg_factor, iso);
 						// updateAvg recycles new_bitmap
 					}
 
 					nr_bitmap = hdrProcessor.avgBrighten(allocation, width, height, iso);
-					allocation.destroy();
+					avg_data.destroy();
+					avg_data = null;
 				}
 				catch(HDRProcessorException e) {
 					e.printStackTrace();

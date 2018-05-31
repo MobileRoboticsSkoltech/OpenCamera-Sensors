@@ -36,14 +36,15 @@ uchar4 __attribute__((kernel)) avg_brighten_f(float3 rgb, uint32_t x, uint32_t y
         out.a = 255;
         return out;
     }*/
+    //if( false )
     {
         // spatial noise reduction filter
         /*float old_value = fmax(rgb.r, rgb.g);
         old_value = fmax(old_value, rgb.b);*/
         float3 sum = 0.0;
         // if changing the radius, may also want to change the value returned by HDRProcessor.getAvgSampleSize()
-        //int radius = 4;
-        int radius = 2;
+        int radius = 4;
+        //int radius = 2;
         int width = rsAllocationGetDimX(bitmap);
         int height = rsAllocationGetDimY(bitmap);
         int count = 0;
