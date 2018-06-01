@@ -317,7 +317,7 @@
     <string name="preference_expo_bracketing_stops_summary">Hvor mange stopp som skal legges til / fjernes fra, for det mørkeste/lyseste bildet.</string>
 
     <string name="preference_nr_save">Støyreduksjon av opprinnelige bilder</string>
-    <string name="preference_nr_save_summary">Hvorvidt de opprinnelige bildene skal lagres under støyreduksjonsmodus. Bemerk at dette kan gjøre det mye tregere å lagre bilder.</string>
+    <string name="preference_nr_save_summary">Hvorvidt de opprinnelige bildene skal lagres under støyreduksjonsmodus. Bemerk at dette kan gjøre det mye tregere å lagre bilder.\n%s</string>
 
     <string name="preference_nr_save_no">Ikke lagre de opprinnelige bildene</string>
     <string name="preference_nr_save_single">Lagre ett enkelt opprinnelig bilde</string>

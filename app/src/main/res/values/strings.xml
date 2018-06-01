@@ -320,7 +320,7 @@
     <string name="preference_expo_bracketing_stops_summary">How many stops to subtract/add for the darkest/brightest image</string>
 
     <string name="preference_nr_save">Noise Reduction original images</string>
-    <string name="preference_nr_save_summary">Whether to save original images in noise reduction mode. Note this can make saving photos much slower.</string>
+    <string name="preference_nr_save_summary">Whether to save original images in noise reduction mode. Note this can make saving photos much slower.\n%s</string>
 
     <string name="preference_nr_save_no">Don\'t save original images</string>
     <string name="preference_nr_save_single">Save single original image</string>
