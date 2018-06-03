@@ -280,4 +280,8 @@
     <string name="flash_torch">手電筒</string>
     <string name="flash_red_eye">紅眼</string>
 
+    <string name="preference_record_audio_src_camcorder">攝影機</string>
+    <string name="preference_record_audio_src_mic">外部麥克風（如果存在）</string>
+    <string name="preference_record_audio_src_default">預設的音源</string>
+    <string name="preference_record_audio_src_voice_communication">優化語音</string>
 </resources>

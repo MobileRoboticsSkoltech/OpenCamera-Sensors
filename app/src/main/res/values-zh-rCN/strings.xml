@@ -306,4 +306,8 @@
     <string name="flash_torch">手电筒</string>
     <string name="flash_red_eye">红眼</string>
 
+    <string name="preference_record_audio_src_camcorder">摄像机</string>
+    <string name="preference_record_audio_src_mic">外部麦克风（如果存在）</string>
+    <string name="preference_record_audio_src_default">默认的音频源</string>
+    <string name="preference_record_audio_src_voice_communication">优化语音</string>
 </resources>

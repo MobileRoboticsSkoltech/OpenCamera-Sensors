@@ -326,4 +326,8 @@
     <string name="flash_torch">lanterna</string>
     <string name="flash_red_eye">Olhos vermelhos</string>
 
+    <string name="preference_record_audio_src_camcorder">Câmara de vídeo</string>
+    <string name="preference_record_audio_src_mic">Microfone externo (se presente)</string>
+    <string name="preference_record_audio_src_default">Fonte de áudio predefinida</string>
+    <string name="preference_record_audio_src_voice_communication">Otimizado para voz</string>
 </resources>

@@ -410,4 +410,8 @@
     <string name="flash_frontscreen_auto">Képernyő vaku automata</string>
     <string name="flash_frontscreen_on">Képernyő vaku ki</string>
 
+    <string name="preference_record_audio_src_camcorder">Kamkorder</string>
+    <string name="preference_record_audio_src_mic">Külső mikrofon (ha van)</string>
+    <string name="preference_record_audio_src_default">Alapértelmezett hangforrás</string>
+    <string name="preference_record_audio_src_voice_communication">Hangra optimalizált</string>
 </resources>

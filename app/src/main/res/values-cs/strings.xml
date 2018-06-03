@@ -288,4 +288,9 @@
     <string name="flash_torch">Svítilna</string>
     <string name="flash_red_eye">Redukce červených očí</string>
 
+    <string name="preference_record_audio_src_camcorder">Kamera</string>
+    <string name="preference_record_audio_src_mic">Externí mikrofon (pokud je připojen)</string>
+    <string name="preference_record_audio_src_default">Implicitní zdroj zvuku</string>
+    <string name="preference_record_audio_src_voice_communication">Optimalizováno pro hlas</string>
+
 </resources>

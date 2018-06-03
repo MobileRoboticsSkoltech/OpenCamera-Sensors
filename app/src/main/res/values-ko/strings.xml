@@ -252,4 +252,9 @@
     <string name="flash_on">플래시 켜짐</string>
     <string name="flash_torch">플래시 항상 켜짐</string>
     <string name="flash_red_eye">적목 현상 감소 플래시</string>
+
+    <string name="preference_record_audio_src_camcorder">캠코더</string>
+    <string name="preference_record_audio_src_mic">외부 마이크(존재할 경우)</string>
+    <string name="preference_record_audio_src_default">기본 음원</string>
+    <string name="preference_record_audio_src_voice_communication">목소리 녹음 최적화</string>
 </resources>

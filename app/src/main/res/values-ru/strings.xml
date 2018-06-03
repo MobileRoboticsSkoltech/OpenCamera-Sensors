@@ -408,4 +408,8 @@
     <string name="flash_torch">Фонарик</string>
     <string name="flash_red_eye">Красные глаза</string>
 
+    <string name="preference_record_audio_src_camcorder">Микрофон видеокамеры</string>
+    <string name="preference_record_audio_src_mic">Внешний микрофон (если есть)</string>
+    <string name="preference_record_audio_src_default">По умолчанию</string>
+    <string name="preference_record_audio_src_voice_communication">Оптимизировано для голоса</string>
 </resources>

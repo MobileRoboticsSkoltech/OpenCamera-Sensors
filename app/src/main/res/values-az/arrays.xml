@@ -349,16 +349,4 @@
         <item>9</item>
         <item>10</item>
     </string-array>
-    <string-array name="preference_record_audio_src_entries">
-        <item>Videokamera</item>
-        <item>Daxili mikrafon (əgər varsa)</item>
-        <item>Susmaya görə səs mənbəyi</item>
-        <item>Səs üçün optimallaşma</item>
-    </string-array>
-    <string-array name="preference_record_audio_src_values">
-        <item>audio_src_camcorder</item>
-        <item>audio_src_mic</item>
-        <item>audio_src_default</item>
-        <item>audio_src_voice_communication</item>
-    </string-array>
 </resources>

@@ -405,18 +405,6 @@
         <item>9</item>
         <item>10</item>
     </string-array>
-    <string-array name="preference_record_audio_src_entries">
-        <item>Kamera</item>
-        <item>Externí mikrofon (pokud je připojen)</item>
-        <item>Implicitní zdroj zvuku</item>
-        <item>Optimalizováno pro hlas</item>
-    </string-array>
-    <string-array name="preference_record_audio_src_values">
-        <item>audio_src_camcorder</item>
-        <item>audio_src_mic</item>
-        <item>audio_src_default</item>
-        <item>audio_src_voice_communication</item>
-    </string-array>
     <string-array name="preference_record_audio_channels_entries">
         <item>Implicitní</item>
         <item>Mono</item>

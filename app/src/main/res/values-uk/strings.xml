@@ -410,4 +410,8 @@
     <string name="flash_frontscreen_auto">Спалах екрану Авто</string>
     <string name="flash_frontscreen_on">Спалах екрану Увімк.</string>
 
+    <string name="preference_record_audio_src_camcorder">Відеокамера</string>
+    <string name="preference_record_audio_src_mic">Зовнішній мікрофон (якщо є)</string>
+    <string name="preference_record_audio_src_default">Типово</string>
+    <string name="preference_record_audio_src_voice_communication">Внутрішній мікрофон</string>
 </resources>

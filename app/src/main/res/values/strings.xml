@@ -529,6 +529,11 @@
     <string name="preference_video_log_extra_strong">Extra strong</string>
     <string name="video_log">Log profile</string>
 
+    <string name="preference_record_audio_src_camcorder">Camcorder</string>
+    <string name="preference_record_audio_src_mic">External mic (if present)</string>
+    <string name="preference_record_audio_src_default">Default audio source</string>
+    <string name="preference_record_audio_src_voice_communication">Optimised for voice</string>
+
     <!-- There's no point translating the What's New text - it'll be updated constantly, and change each version -->
     <string name="whats_new_text"><b>v1.41:</b>\n\n
         <ul>

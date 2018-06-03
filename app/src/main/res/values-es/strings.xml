@@ -410,4 +410,9 @@
     <string name="flash_torch">Linterna</string>
     <string name="flash_red_eye">Ojos Rojos</string>
 
+    <string name="preference_record_audio_src_camcorder">VideocÃ¡mara</string>
+    <string name="preference_record_audio_src_mic">MicrÃ³fono Externo(si existe)</string>
+    <string name="preference_record_audio_src_default">Entrada de Audio predefinida</string>
+    <string name="preference_record_audio_src_voice_communication">Optimizada para voz</string>
+
 </resources>

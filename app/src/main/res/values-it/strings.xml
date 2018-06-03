@@ -438,4 +438,8 @@
     <string name="flash_torch">Torcia</string>
     <string name="flash_red_eye">Occhi rossi</string>
 
+    <string name="preference_record_audio_src_camcorder">Videocamera</string>
+    <string name="preference_record_audio_src_mic">Microfono esterno (se presente)</string>
+    <string name="preference_record_audio_src_default">Sorgente audio predefinita</string>
+    <string name="preference_record_audio_src_voice_communication">Ottimizzato per voce</string>
 </resources>

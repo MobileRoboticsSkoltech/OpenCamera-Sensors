@@ -386,4 +386,8 @@
     <string name="flash_frontscreen_auto">Błysk ekranowy auto</string>
     <string name="flash_frontscreen_on">Błysk ekranowy włączony</string>
 
+    <string name="preference_record_audio_src_camcorder">Aparat</string>
+    <string name="preference_record_audio_src_mic">Zewnętrzny mikrofon (jeśli podłączony)</string>
+    <string name="preference_record_audio_src_default">Domyślne źródło dźwięku</string>
+    <string name="preference_record_audio_src_voice_communication">Zoptymalizowane dla głosu</string>
 </resources>

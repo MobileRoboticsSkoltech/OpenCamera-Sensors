@@ -465,4 +465,8 @@
     <string name="flash_torch">Svetilka</string>
     <string name="flash_red_eye">Zm. uč. rdečih oči</string>
 
+    <string name="preference_record_audio_src_camcorder">Kamera</string>
+    <string name="preference_record_audio_src_mic">Zunanji mikrofon (če je prisoten)</string>
+    <string name="preference_record_audio_src_default">Privzeti vir zvoka</string>
+    <string name="preference_record_audio_src_voice_communication">Optimizirano za glas</string>
 </resources>

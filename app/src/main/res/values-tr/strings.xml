@@ -287,4 +287,8 @@
     <string name="flash_torch">Flaş Işığı</string>
     <string name="flash_red_eye">Kırmızı Göz</string>
 
+    <string name="preference_record_audio_src_camcorder">Camcorder</string>
+    <string name="preference_record_audio_src_mic">Harici mikrofon (varsa)</string>
+    <string name="preference_record_audio_src_default">Öntanımlı ses kaynağı</string>
+    <string name="preference_record_audio_src_voice_communication">Kişi sesine optimize et</string>
 </resources>

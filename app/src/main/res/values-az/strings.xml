@@ -240,4 +240,9 @@
     <string name="flash_on">İşıq yandırıldı</string>
     <string name="flash_torch">FONAR</string>
     <string name="flash_red_eye">Qırmızı göz rejimi</string>
+
+    <string name="preference_record_audio_src_camcorder">Videokamera</string>
+    <string name="preference_record_audio_src_mic">Daxili mikrafon (əgər varsa)</string>
+    <string name="preference_record_audio_src_default">Susmaya görə səs mənbəyi</string>
+    <string name="preference_record_audio_src_voice_communication">Səs üçün optimallaşma</string>
 </resources>

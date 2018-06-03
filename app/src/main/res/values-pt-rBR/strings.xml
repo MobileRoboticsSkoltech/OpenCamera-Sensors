@@ -252,4 +252,9 @@
     <string name="flash_on">Flash Ligado</string>
     <string name="flash_torch">Lanterna</string>
     <string name="flash_red_eye">Olho Vermelho</string>
+
+    <string name="preference_record_audio_src_camcorder">Filmadora</string>
+    <string name="preference_record_audio_src_mic">Microfone Externo (se existir)</string>
+    <string name="preference_record_audio_src_default">Áudio padrão</string>
+    <string name="preference_record_audio_src_voice_communication">Otimizado para voz</string>
 </resources>

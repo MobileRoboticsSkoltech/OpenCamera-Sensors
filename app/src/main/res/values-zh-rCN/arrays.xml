@@ -405,18 +405,6 @@
         <item>9</item>
         <item>10</item>
     </string-array>
-    <string-array name="preference_record_audio_src_entries">
-        <item>摄像机</item>
-        <item>外部麦克风（如果存在）</item>
-        <item>默认的音频源</item>
-        <item>优化语音</item>
-    </string-array>
-    <string-array name="preference_record_audio_src_values">
-        <item>audio_src_camcorder</item>
-        <item>audio_src_mic</item>
-        <item>audio_src_default</item>
-        <item>audio_src_voice_communication</item>
-    </string-array>
     <string-array name="preference_record_audio_channels_entries">
         <item>默认</item>
         <item>单声道</item>

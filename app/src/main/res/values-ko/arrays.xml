@@ -349,16 +349,4 @@
         <item>9</item>
         <item>10</item>
     </string-array>
-    <string-array name="preference_record_audio_src_entries">
-        <item>캠코더</item>
-        <item>외부 마이크(존재할 경우)</item>
-        <item>기본 음원</item>
-        <item>목소리 녹음 최적화</item>
-    </string-array>
-    <string-array name="preference_record_audio_src_values">
-        <item>audio_src_camcorder</item>
-        <item>audio_src_mic</item>
-        <item>audio_src_default</item>
-        <item>audio_src_voice_communication</item>
-    </string-array>
 </resources>

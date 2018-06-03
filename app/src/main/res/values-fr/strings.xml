@@ -352,4 +352,9 @@
     <string name="flash_torch">Torche</string>
     <string name="flash_red_eye">Yeux rouges</string>
 
+    <string name="preference_record_audio_src_camcorder">Caméscope</string>
+    <string name="preference_record_audio_src_mic">Micro externe (si présent)</string>
+    <string name="preference_record_audio_src_default">Source audio par défaut</string>
+    <string name="preference_record_audio_src_voice_communication">Optimisé pour la voix</string>
+
 </resources>

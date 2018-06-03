@@ -460,4 +460,8 @@
     <string name="flash_frontscreen_auto">Auto-skjermblits</string>
     <string name="flash_frontscreen_on">Skjermblits på</string>
 
+    <string name="preference_record_audio_src_camcorder">Kameraopptaker</string>
+    <string name="preference_record_audio_src_mic">Ekstern mikrofon (hvis det er en)</string>
+    <string name="preference_record_audio_src_default">Standardlydkilden</string>
+    <string name="preference_record_audio_src_voice_communication">Optimalisert for stemmer</string>
 </resources>

@@ -410,4 +410,9 @@
     <string name="flash_frontscreen_auto">Frontblitz Auto</string>
     <string name="flash_frontscreen_on">Frontblitz ein</string>
 
+    <string name="preference_record_audio_src_camcorder">Camcorder</string>
+    <string name="preference_record_audio_src_mic">Externes Mikrofon</string>
+    <string name="preference_record_audio_src_default">Standard-Audioquelle</string>
+    <string name="preference_record_audio_src_voice_communication">Optimiert für Stimme</string>
+
 </resources>

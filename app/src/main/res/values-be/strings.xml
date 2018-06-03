@@ -284,4 +284,9 @@
     <string name="flash_torch">Асвятленне</string>
     <string name="flash_red_eye">Чырвоныя вочы</string>
 
+    <string name="preference_record_audio_src_camcorder">Відэакамера</string>
+    <string name="preference_record_audio_src_mic">Знешні мікрафон (калі ёсць)</string>
+    <string name="preference_record_audio_src_default">Прадвызначаная крыніца гуку</string>
+    <string name="preference_record_audio_src_voice_communication">Аптымізатар для голасу</string>
+
 </resources>
