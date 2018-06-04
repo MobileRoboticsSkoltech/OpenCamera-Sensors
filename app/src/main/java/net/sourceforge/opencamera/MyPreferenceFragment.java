@@ -420,6 +420,16 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	pg.removePreference(pref);
 		}
 
+		{
+        	ListPreference pref = (ListPreference)findPreference("preference_record_audio_src");
+
+	        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.N ) {
+	        	// some values require at least Android 7
+	        	pref.setEntries(R.array.preference_record_audio_src_entries_preandroid7);
+	        	pref.setEntryValues(R.array.preference_record_audio_src_values_preandroid7);
+			}
+		}
+
 		final boolean can_disable_shutter_sound = bundle.getBoolean("can_disable_shutter_sound");
 		if( MyDebug.LOG )
 			Log.d(TAG, "can_disable_shutter_sound: " + can_disable_shutter_sound);

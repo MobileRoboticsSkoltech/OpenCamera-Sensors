@@ -2930,6 +2930,18 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 				case "audio_src_voice_communication":
 					video_profile.audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
 					break;
+				case "audio_src_voice_recognition":
+					video_profile.audioSource = MediaRecorder.AudioSource.VOICE_RECOGNITION;
+					break;
+				case "audio_src_unprocessed":
+					if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+						video_profile.audioSource = MediaRecorder.AudioSource.UNPROCESSED;
+					}
+					else {
+						Log.e(TAG, "audio_src_voice_unprocessed requires Android 7");
+						video_profile.audioSource = MediaRecorder.AudioSource.CAMCORDER;
+					}
+					break;
 				case "audio_src_camcorder":
 				default:
 					video_profile.audioSource = MediaRecorder.AudioSource.CAMCORDER;

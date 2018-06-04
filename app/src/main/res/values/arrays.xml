@@ -702,11 +702,29 @@
         <item>@string/preference_record_audio_src_mic</item>
         <item>@string/preference_record_audio_src_default</item>
         <item>@string/preference_record_audio_src_voice_communication</item>
+        <item>@string/preference_record_audio_src_voice_recognition</item>
+        <item>@string/preference_record_audio_src_unprocessed</item>
     </string-array>
     <string-array name="preference_record_audio_src_values">
         <item>audio_src_camcorder</item>
         <item>audio_src_mic</item>
         <item>audio_src_default</item>
         <item>audio_src_voice_communication</item>
+        <item>audio_src_voice_recognition</item>
+        <item>audio_src_unprocessed</item>
+    </string-array>
+    <string-array name="preference_record_audio_src_entries_preandroid7">
+        <item>@string/preference_record_audio_src_camcorder</item>
+        <item>@string/preference_record_audio_src_mic</item>
+        <item>@string/preference_record_audio_src_default</item>
+        <item>@string/preference_record_audio_src_voice_communication</item>
+        <item>@string/preference_record_audio_src_voice_recognition</item>
+    </string-array>
+    <string-array name="preference_record_audio_src_values_preandroid7">
+        <item>audio_src_camcorder</item>
+        <item>audio_src_mic</item>
+        <item>audio_src_default</item>
+        <item>audio_src_voice_communication</item>
+        <item>audio_src_voice_recognition</item>
     </string-array>
 </resources>
