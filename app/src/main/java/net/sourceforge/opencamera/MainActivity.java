@@ -1863,12 +1863,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			if( MyDebug.LOG )
 				Log.d(TAG, "do show when locked");
 	        // keep Open Camera on top of screen-lock (will still need to unlock when going to gallery or settings)
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+			showWhenLocked(true);
 		}
 		else {
 			if( MyDebug.LOG )
 				Log.d(TAG, "don't show when locked");
-	        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+			showWhenLocked(false);
 		}
 
 		setBrightnessForCamera(false);
@@ -1888,7 +1888,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		// revert to standard screen blank behaviour
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // settings should still be protected by screen lock
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+		showWhenLocked(false);
 
 		{
 	        WindowManager.LayoutParams layout = getWindow().getAttributes();
@@ -1899,6 +1899,28 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		setImmersiveMode(false);
 		camera_in_background = true;
     }
+
+    private void showWhenLocked(boolean show) {
+		if( MyDebug.LOG )
+			Log.d(TAG, "showWhenLocked: " + show);
+		// although FLAG_SHOW_WHEN_LOCKED is deprecated, setShowWhenLocked(false) does not work
+		// correctly: if we turn screen off and on when camera is open (so we're now running above
+		// the lock screen), going to settings does not show the lock screen, i.e.,
+		// setShowWhenLocked(false) does not take effect!
+		/*if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "use setShowWhenLocked");
+			setShowWhenLocked(show);
+		}
+		else*/ {
+			if( show ) {
+				getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+			}
+			else {
+				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+			}
+		}
+	}
 
 	/** Use this is place of simply alert.show(), if the orientation has just been set to allow
 	 *  rotation via setWindowFlagsForSettings(). On some devices (e.g., OnePlus 3T with Android 8),
