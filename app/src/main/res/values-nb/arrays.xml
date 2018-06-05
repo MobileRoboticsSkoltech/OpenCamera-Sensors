@@ -327,58 +327,6 @@
         <item>preference_stamp_style_shadowed</item>
         <item>preference_stamp_style_plain</item>
     </string-array>
-    <string-array name="preference_video_bitrate_entries">
-        <item>Standard</item>
-        <item>12KB/s</item>
-        <item>25KB/s</item>
-        <item>62KB/s</item>
-        <item>125KB/s</item>
-        <item>250KB/s</item>
-        <item>375KB/s</item>
-        <item>500KB/s</item>
-        <item>625KB/s</item>
-        <item>750KB/s</item>
-        <item>875KB/s</item>
-        <item>1MB/s</item>
-        <item>1,12MB/s</item>
-        <item>1,25MB/s</item>
-        <item>1,87MB/s</item>
-        <item>2,5MB/s</item>
-        <item>3,75MB/s</item>
-        <item>5MB/s</item>
-        <item>6,25MB/s</item>
-        <item>7,5MB/s</item>
-        <item>8,75MB/s</item>
-        <item>10MB/s</item>
-        <item>11,25MB/s</item>
-        <item>12,5MB/s</item>
-    </string-array>
-    <string-array name="preference_video_bitrate_values">
-        <item>default</item>
-        <item>100000</item>
-        <item>200000</item>
-        <item>500000</item>
-        <item>1000000</item>
-        <item>2000000</item>
-        <item>3000000</item>
-        <item>4000000</item>
-        <item>5000000</item>
-        <item>6000000</item>
-        <item>7000000</item>
-        <item>8000000</item>
-        <item>9000000</item>
-        <item>10000000</item>
-        <item>15000000</item>
-        <item>20000000</item>
-        <item>30000000</item>
-        <item>40000000</item>
-        <item>50000000</item>
-        <item>60000000</item>
-        <item>70000000</item>
-        <item>80000000</item>
-        <item>90000000</item>
-        <item>100000000</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>Ikke gjenta</item>
         <item>Gjenta 1 gang</item>

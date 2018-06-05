@@ -415,4 +415,29 @@
     <string name="preference_record_audio_src_default">Standard-Audioquelle</string>
     <string name="preference_record_audio_src_voice_communication">Optimiert für Stimme</string>
 
+    <string name="preference_video_bitrate_default">Standard</string>
+    <string name="preference_video_bitrate_100000">100 kbit/s</string>
+    <string name="preference_video_bitrate_200000">200 kbit/s</string>
+    <string name="preference_video_bitrate_500000">500 kbit/s</string>
+    <string name="preference_video_bitrate_1000000">1 Mbit/s</string>
+    <string name="preference_video_bitrate_2000000">2 Mbit/s</string>
+    <string name="preference_video_bitrate_3000000">3 Mbit/s</string>
+    <string name="preference_video_bitrate_4000000">4 Mbit/s</string>
+    <string name="preference_video_bitrate_5000000">5 Mbit/s</string>
+    <string name="preference_video_bitrate_6000000">6 Mbit/s</string>
+    <string name="preference_video_bitrate_7000000">7 Mbit/s</string>
+    <string name="preference_video_bitrate_8000000">8 Mbit/s</string>
+    <string name="preference_video_bitrate_9000000">9 Mbit/s</string>
+    <string name="preference_video_bitrate_10000000">10 Mbit/s</string>
+    <string name="preference_video_bitrate_15000000">15 Mbit/s</string>
+    <string name="preference_video_bitrate_20000000">20 Mbit/s</string>
+    <string name="preference_video_bitrate_30000000">30 Mbit/s</string>
+    <string name="preference_video_bitrate_40000000">40 Mbit/s</string>
+    <string name="preference_video_bitrate_50000000">50 Mbit/s</string>
+    <string name="preference_video_bitrate_60000000">60 Mbit/s</string>
+    <string name="preference_video_bitrate_70000000">70 Mbit/s</string>
+    <string name="preference_video_bitrate_80000000">80 Mbit/s</string>
+    <string name="preference_video_bitrate_90000000">90 Mbit/s</string>
+    <string name="preference_video_bitrate_100000000">100 Mbit/s</string>
+
 </resources>

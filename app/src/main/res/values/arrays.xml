@@ -329,58 +329,6 @@
         <item>preference_stamp_style_shadowed</item>
         <item>preference_stamp_style_plain</item>
     </string-array>
-    <string-array name="preference_video_bitrate_entries">
-        <item>Default</item>
-        <item>100kbps</item>
-        <item>200kbps</item>
-        <item>500kbps</item>
-        <item>1Mbps</item>
-        <item>2Mbps</item>
-        <item>3Mbps</item>
-        <item>4Mbps</item>
-        <item>5Mbps</item>
-        <item>6Mbps</item>
-        <item>7Mbps</item>
-        <item>8Mbps</item>
-        <item>9Mbps</item>
-        <item>10Mbps</item>
-        <item>15Mbps</item>
-        <item>20Mbps</item>
-        <item>30Mbps</item>
-        <item>40Mbps</item>
-        <item>50Mbps</item>
-        <item>60Mbps</item>
-        <item>70Mbps</item>
-        <item>80Mbps</item>
-        <item>90Mbps</item>
-        <item>100Mbps</item>
-    </string-array>
-    <string-array name="preference_video_bitrate_values">
-        <item>default</item>
-        <item>100000</item>
-        <item>200000</item>
-        <item>500000</item>
-        <item>1000000</item>
-        <item>2000000</item>
-        <item>3000000</item>
-        <item>4000000</item>
-        <item>5000000</item>
-        <item>6000000</item>
-        <item>7000000</item>
-        <item>8000000</item>
-        <item>9000000</item>
-        <item>10000000</item>
-        <item>15000000</item>
-        <item>20000000</item>
-        <item>30000000</item>
-        <item>40000000</item>
-        <item>50000000</item>
-        <item>60000000</item>
-        <item>70000000</item>
-        <item>80000000</item>
-        <item>90000000</item>
-        <item>100000000</item>
-    </string-array>
     <string-array name="preference_video_restart_entries">
         <item>Don\'t restart</item>
         <item>Repeat 1 time</item>
@@ -726,5 +674,57 @@
         <item>audio_src_default</item>
         <item>audio_src_voice_communication</item>
         <item>audio_src_voice_recognition</item>
+    </string-array>
+    <string-array name="preference_video_bitrate_entries">
+        <item>@string/preference_video_bitrate_default</item>
+        <item>@string/preference_video_bitrate_100000</item>
+        <item>@string/preference_video_bitrate_200000</item>
+        <item>@string/preference_video_bitrate_500000</item>
+        <item>@string/preference_video_bitrate_1000000</item>
+        <item>@string/preference_video_bitrate_2000000</item>
+        <item>@string/preference_video_bitrate_3000000</item>
+        <item>@string/preference_video_bitrate_4000000</item>
+        <item>@string/preference_video_bitrate_5000000</item>
+        <item>@string/preference_video_bitrate_6000000</item>
+        <item>@string/preference_video_bitrate_7000000</item>
+        <item>@string/preference_video_bitrate_8000000</item>
+        <item>@string/preference_video_bitrate_9000000</item>
+        <item>@string/preference_video_bitrate_10000000</item>
+        <item>@string/preference_video_bitrate_15000000</item>
+        <item>@string/preference_video_bitrate_20000000</item>
+        <item>@string/preference_video_bitrate_30000000</item>
+        <item>@string/preference_video_bitrate_40000000</item>
+        <item>@string/preference_video_bitrate_50000000</item>
+        <item>@string/preference_video_bitrate_60000000</item>
+        <item>@string/preference_video_bitrate_70000000</item>
+        <item>@string/preference_video_bitrate_80000000</item>
+        <item>@string/preference_video_bitrate_90000000</item>
+        <item>@string/preference_video_bitrate_100000000</item>
+    </string-array>
+    <string-array name="preference_video_bitrate_values">
+        <item>default</item>
+        <item>100000</item>
+        <item>200000</item>
+        <item>500000</item>
+        <item>1000000</item>
+        <item>2000000</item>
+        <item>3000000</item>
+        <item>4000000</item>
+        <item>5000000</item>
+        <item>6000000</item>
+        <item>7000000</item>
+        <item>8000000</item>
+        <item>9000000</item>
+        <item>10000000</item>
+        <item>15000000</item>
+        <item>20000000</item>
+        <item>30000000</item>
+        <item>40000000</item>
+        <item>50000000</item>
+        <item>60000000</item>
+        <item>70000000</item>
+        <item>80000000</item>
+        <item>90000000</item>
+        <item>100000000</item>
     </string-array>
 </resources>
