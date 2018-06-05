@@ -700,6 +700,8 @@
         <item>@string/preference_video_bitrate_80000000</item>
         <item>@string/preference_video_bitrate_90000000</item>
         <item>@string/preference_video_bitrate_100000000</item>
+        <item>@string/preference_video_bitrate_150000000</item>
+        <item>@string/preference_video_bitrate_200000000</item>
     </string-array>
     <string-array name="preference_video_bitrate_values">
         <item>default</item>
@@ -726,5 +728,7 @@
         <item>80000000</item>
         <item>90000000</item>
         <item>100000000</item>
+        <item>150000000</item>
+        <item>200000000</item>
     </string-array>
 </resources>
