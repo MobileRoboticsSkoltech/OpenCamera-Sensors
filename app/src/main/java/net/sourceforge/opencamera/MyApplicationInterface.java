@@ -952,9 +952,15 @@ public class MyApplicationInterface implements ApplicationInterface {
 
     	// even if the queue isn't full, we may apply additional limits
 		PhotoMode photo_mode = getPhotoMode();
-		if( photo_mode == PhotoMode.FastBurst || photo_mode == PhotoMode.NoiseReduction ) {
+		if( photo_mode == PhotoMode.FastBurst ) {
 			// only allow one fast burst at a time, so require queue to be empty
 			if( imageSaver.getNImagesToSave() > 0 ) {
+				return false;
+			}
+		}
+		if( photo_mode == PhotoMode.NoiseReduction ) {
+			// allow a max of 2 photos in memory when at max of 8 images
+			if( imageSaver.getNImagesToSave() >= 2*photo_cost ) {
 				return false;
 			}
 		}
@@ -965,7 +971,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 			}
 		}
 		if( n_raw > 0 ) {
-			// if RAW mode, allow a max of photos
+			// if RAW mode, allow a max of 3 photos
 			if( imageSaver.getNImagesToSave() >= 3*photo_cost ) {
 				return false;
 			}
