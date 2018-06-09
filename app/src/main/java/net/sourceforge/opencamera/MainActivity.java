@@ -9,6 +9,7 @@ import net.sourceforge.opencamera.UI.MainUI;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -24,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -68,6 +70,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.SparseIntArray;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
@@ -1148,7 +1151,6 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 
 		mainUI.setTakePhotoIcon();
 	    mainUI.setPopupIcon(); // needed as turning to video mode or back can turn flash mode off or back on
-		applicationInterface.getDrawPreview().clearGhostImage();
 		if( !block_startup_toast ) {
 			this.showPhotoVideoToast(true);
 		}
@@ -1282,7 +1284,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				case "preference_timer":
 				case "preference_burst_mode":
 				case "preference_burst_interval":
-				case "preference_ghost_image":
+				//case "preference_ghost_image": // don't whitelist this, as may need to reload ghost image (at fullscreen resolution) if "last" is enabled
 				case "preference_touch_capture":
 				case "preference_pause_preview":
 				case "preference_shutter_sound":
@@ -1566,7 +1568,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
     	
 		if( MyDebug.LOG )
 			Log.d(TAG, "update folder history");
-		save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true);
+		save_location_history.updateFolderHistory(getStorageUtils().getSaveLocation(), true); // this also updates the last icon for ghost image, if that pref has changed
 		// no need to update save_location_history_saf, as we always do this in onActivityResult()
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "updateForSettings: time after update folder history: " + (System.currentTimeMillis() - debug_time));
@@ -1986,8 +1988,12 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 			debug_time = System.currentTimeMillis();
 		}
 
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String ghost_image_pref = sharedPreferences.getString(PreferenceKeys.GhostImagePreferenceKey, "preference_ghost_image_off");
+		final boolean ghost_image_last = ghost_image_pref.equals("preference_ghost_image_last");
 		new AsyncTask<Void, Void, Bitmap>() {
 			private static final String TAG = "MainActivity/AsyncTask";
+			private boolean is_video;
 
 			/** The system calls this to perform work in a worker thread and
 		      * delivers it the parameters given to AsyncTask.execute() */
@@ -2002,21 +2008,88 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					Log.d(TAG, "is_locked?: " + is_locked);
 		    	if( media != null && getContentResolver() != null && !is_locked ) {
 		    		// check for getContentResolver() != null, as have had reported Google Play crashes
-		    		try {
-			    		if( media.video ) {
-			    			  thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
-			    		}
-			    		else {
-			    			  thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
-			    		}
-		    		}
-		    		catch(Throwable exception) {
-		    			// have had Google Play NoClassDefFoundError crashes from new ExifInterface() for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn)
-						// also NegativeArraySizeException - best to catch everything
- 		    			if( MyDebug.LOG )
-		    				Log.e(TAG, "exif orientation exception");
-		    			exception.printStackTrace();
-		    		}
+					if( ghost_image_last && !media.video ) {
+						if( MyDebug.LOG )
+							Log.d(TAG, "load full size bitmap for ghost image last photo");
+						try {
+							//thumbnail = MediaStore.Images.Media.getBitmap(getContentResolver(), media.uri);
+							// only need to load a bitmap as large as the screen size
+							BitmapFactory.Options options = new BitmapFactory.Options();
+							InputStream is = getContentResolver().openInputStream(media.uri);
+							// get dimensions
+							options.inJustDecodeBounds = true;
+							BitmapFactory.decodeStream(is, null, options);
+							int bitmap_width = options.outWidth;
+							int bitmap_height = options.outHeight;
+							Point display_size = new Point();
+							Display display = getWindowManager().getDefaultDisplay();
+							display.getSize(display_size);
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "bitmap_width: " + bitmap_width);
+								Log.d(TAG, "bitmap_height: " + bitmap_height);
+								Log.d(TAG, "display width: " + display_size.x);
+								Log.d(TAG, "display height: " + display_size.y);
+							}
+							// align dimensions
+							if( display_size.x < display_size.y ) {
+								display_size.set(display_size.y, display_size.x);
+							}
+							if( bitmap_width < bitmap_height ) {
+								int dummy = bitmap_width;
+								bitmap_width = bitmap_height;
+								bitmap_height = dummy;
+							}
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "bitmap_width: " + bitmap_width);
+								Log.d(TAG, "bitmap_height: " + bitmap_height);
+								Log.d(TAG, "display width: " + display_size.x);
+								Log.d(TAG, "display height: " + display_size.y);
+							}
+							// only care about height, to save worrying about different aspect ratios
+							options.inSampleSize = 1;
+							while( bitmap_height / (2*options.inSampleSize) >= display_size.y ) {
+								options.inSampleSize *= 2;
+							}
+							if( MyDebug.LOG ) {
+								Log.d(TAG, "inSampleSize: " + options.inSampleSize);
+							}
+							options.inJustDecodeBounds = false;
+							// need a new inputstream, see https://stackoverflow.com/questions/2503628/bitmapfactory-decodestream-returning-null-when-options-are-set
+							is.close();
+							is = getContentResolver().openInputStream(media.uri);
+							thumbnail = BitmapFactory.decodeStream(is, null, options);
+							if( thumbnail == null ) {
+								Log.e(TAG, "decodeStream returned null bitmap for ghost image last");
+							}
+							is.close();
+						}
+						catch(IOException e) {
+							Log.e(TAG, "failed to load bitmap for ghost image last");
+							e.printStackTrace();
+						}
+					}
+					if( thumbnail == null ) {
+						try {
+							if( media.video ) {
+								if( MyDebug.LOG )
+									Log.d(TAG, "load thumbnail for video");
+								thumbnail = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Video.Thumbnails.MINI_KIND, null);
+								is_video = true;
+							}
+							else {
+								if( MyDebug.LOG )
+									Log.d(TAG, "load thumbnail for photo");
+								thumbnail = MediaStore.Images.Thumbnails.getThumbnail(getContentResolver(), media.id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+							}
+						}
+						catch(Throwable exception) {
+							// have had Google Play NoClassDefFoundError crashes from getThumbnail() for Galaxy Ace4 (vivalto3g), Galaxy S Duos3 (vivalto3gvn)
+							// also NegativeArraySizeException - best to catch everything
+							if( MyDebug.LOG )
+								Log.e(TAG, "exif orientation exception");
+							exception.printStackTrace();
+						}
+					}
 		    		if( thumbnail != null ) {
 			    		if( media.orientation != 0 ) {
 			    			if( MyDebug.LOG )
@@ -2052,6 +2125,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 					if( MyDebug.LOG )
 						Log.d(TAG, "set gallery button to thumbnail");
 					updateGalleryIcon(thumbnail);
+					applicationInterface.getDrawPreview().updateThumbnail(thumbnail, is_video, false); // needed in case last ghost image is enabled
 		    	}
 		    	else {
 					if( MyDebug.LOG )

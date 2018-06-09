@@ -145,7 +145,6 @@ public class DrawPreview {
 	private final RectF thumbnail_anim_src_rect = new RectF();
 	private final RectF thumbnail_anim_dst_rect = new RectF();
 	private final Matrix thumbnail_anim_matrix = new Matrix();
-	private int last_thumbnail_ui_rotation; // Preview.getUIRotation() value when thumbnail was set
 	private boolean last_thumbnail_is_video; // whether thumbnail is for video
 
 	private boolean show_last_image; // whether to show the last image as part of "pause preview"
@@ -283,11 +282,14 @@ public class DrawPreview {
 	private Context getContext() {
     	return main_activity;
     }
-	
-	public void updateThumbnail(Bitmap thumbnail, boolean is_video) {
+
+	/** Sets a current thumbnail for a photo or video just taken. Used for thumbnail animation,
+	 *  and when ghosting the last image.
+	 */
+	public void updateThumbnail(Bitmap thumbnail, boolean is_video, boolean want_thumbnail_animation) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateThumbnail");
-		if( applicationInterface.getThumbnailAnimationPref() ) {
+		if( want_thumbnail_animation && applicationInterface.getThumbnailAnimationPref() ) {
 			if( MyDebug.LOG )
 				Log.d(TAG, "thumbnail_anim started");
 			thumbnail_anim = true;
@@ -295,7 +297,6 @@ public class DrawPreview {
 		}
     	Bitmap old_thumbnail = this.last_thumbnail;
     	this.last_thumbnail = thumbnail;
-    	this.last_thumbnail_ui_rotation = main_activity.getPreview().getUIRotation();
     	this.last_thumbnail_is_video = is_video;
     	this.allow_ghost_last_image = true;
     	if( old_thumbnail != null ) {
@@ -1907,8 +1908,7 @@ public class DrawPreview {
 				p.setColor(Color.rgb(0, 0, 0)); // in case image doesn't cover the canvas (due to different aspect ratios)
 				canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p); // in case
 			}
-			int this_ui_rotation = show_last_image ? ui_rotation : last_thumbnail_ui_rotation;
-			setLastImageMatrix(canvas, last_thumbnail, this_ui_rotation, !show_last_image);
+			setLastImageMatrix(canvas, last_thumbnail, ui_rotation, !show_last_image);
 			if( !show_last_image )
 				p.setAlpha(127);
 			canvas.drawBitmap(last_thumbnail, last_image_matrix, p);

@@ -1778,7 +1778,7 @@ public class MyApplicationInterface implements ApplicationInterface {
 		if( MyDebug.LOG )
 			Log.d(TAG, "updateThumbnail");
 		main_activity.updateGalleryIcon(thumbnail);
-		drawPreview.updateThumbnail(thumbnail, is_video);
+		drawPreview.updateThumbnail(thumbnail, is_video, true);
 		if( !is_video && this.getPausePreviewPref() ) {
 			drawPreview.showLastImage();
 		}
