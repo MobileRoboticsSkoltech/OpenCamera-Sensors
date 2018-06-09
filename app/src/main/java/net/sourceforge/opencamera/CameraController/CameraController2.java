@@ -72,6 +72,7 @@ public class CameraController2 extends CameraController {
 	private boolean supports_face_detect_mode_simple;
 	private boolean supports_face_detect_mode_full;
 	private boolean supports_photo_video_recording;
+	private final int tonemap_max_curve_points_c = 64;
 	private final ErrorCallback preview_error_cb;
 	private final ErrorCallback camera_error_cb;
 	private CameraCaptureSession captureSession;
@@ -605,6 +606,28 @@ public class CameraController2 extends CameraController {
 			builder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, video_stabilization ? CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON : CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
 		}
 
+		private float getLogProfile(float in) {
+			//final float black_level = 4.0f/255.0f;
+			final float power = 1.0f/2.2f;
+			final float log_A = log_profile_strength;
+			/*float out;
+			if( in <= black_level ) {
+				out = in;
+			}
+			else {
+				float in_m = (in - black_level) / (1.0f - black_level);
+				out = (float) (Math.log1p(log_A * in_m) / Math.log1p(log_A));
+				out = black_level + (1.0f - black_level)*out;
+			}*/
+			float out = (float) (Math.log1p(log_A * in) / Math.log1p(log_A));
+
+			// apply gamma
+			out = (float)Math.pow(out, power);
+			//out = Math.max(out, 0.5f);
+
+			return out;
+		}
+
 		private void setLogProfile(CaptureRequest.Builder builder) {
 			if( MyDebug.LOG ) {
 				Log.d(TAG, "setLogProfile");
@@ -619,33 +642,44 @@ public class CameraController2 extends CameraController {
 					if( MyDebug.LOG )
 						Log.d(TAG, "default_tonemap_mode: " + default_tonemap_mode);
 				}
-				int n_values = 257;
-				float [] values = new float [2*n_values];
-				final float power = 1.0f/2.2f;
-				final float log_A = log_profile_strength;
-				final float black_level = 4.0f/255.0f;
-				for(int i=0;i<n_values;i++) {
-					float in = ((float)i) / (n_values-1.0f);
-					/*float out;
-					if( in <= black_level ) {
-						out = in;
+				// if changing this, make sure we don't exceed tonemap_max_curve_points_c
+				// we want:
+				// 0-15: step 1 (16 values)
+				// 16-47: step 2 (16 values)
+				// 48-111: step 4 (16 values)
+				// 112-231 : step 8 (15 values)
+				// 232-255: step 24 (1 value)
+				int step = 1, c = 0;
+				float [] values = new float[2*tonemap_max_curve_points_c];
+				for(int i=0;i<232;i+=step) {
+					float in = ((float)i) / 255.0f;
+					float out = getLogProfile(in);
+					values[c++] = in;
+					values[c++] = out;
+					if( (c/2) % 16 == 0 ) {
+						step *= 2;
 					}
-					else {
-						float in_m = (in - black_level) / (1.0f - black_level);
-						out = (float) (Math.log1p(log_A * in_m) / Math.log1p(log_A));
-						out = black_level + (1.0f - black_level)*out;
-					}*/
-					float out = (float) (Math.log1p(log_A * in) / Math.log1p(log_A));
-
-					// apply gamma
-					out = (float)Math.pow(out, power);
-					//out = Math.max(out, 0.5f);
-					values[2*i] = in;
-					values[2*i+1] = out;
-					if( MyDebug.LOG ) {
+				}
+				values[c++] = 1.0f;
+				values[c++] = getLogProfile(1.0f);
+				int n_values = c/2;
+				/*{
+					int n_values = 257;
+					float [] values = new float [2*n_values];
+					for(int i=0;i<n_values;i++) {
+						float in = ((float)i) / (n_values-1.0f);
+						float out = getLogProfile(in);
+						values[2*i] = in;
+						values[2*i+1] = out;
+					}
+				}*/
+				if( MyDebug.LOG ) {
+					for(int i=0;i<n_values;i++) {
+						float in = values[2*i];
+						float out = values[2*i+1];
 						Log.d(TAG, "i = " + i);
-						Log.d(TAG, "    in: " + in);
-						Log.d(TAG, "    out: " + out);
+						Log.d(TAG, "    in: " + (int)(in*255.0f+0.5f));
+						Log.d(TAG, "    out: " + (int)(out*255.0f+0.5f));
 					}
 				}
 				// sRGB:
@@ -1839,6 +1873,20 @@ public class CameraController2 extends CameraController {
 		camera_features.exposure_step = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP).floatValue();
 
 		camera_features.can_disable_shutter_sound = true;
+
+		Integer tonemap_max_curve_points = characteristics.get(CameraCharacteristics.TONEMAP_MAX_CURVE_POINTS);
+		if( tonemap_max_curve_points != null ) {
+			if( MyDebug.LOG )
+				Log.d(TAG, "tonemap_max_curve_points: " + tonemap_max_curve_points);
+			camera_features.tonemap_max_curve_points = tonemap_max_curve_points;
+			camera_features.supports_tonemap_curve = tonemap_max_curve_points >= tonemap_max_curve_points_c;
+		}
+		else {
+			if( MyDebug.LOG )
+				Log.d(TAG, "tonemap_max_curve_points is null");
+		}
+		if( MyDebug.LOG )
+			Log.d(TAG, "supports_tonemap_curve?: " + camera_features.supports_tonemap_curve);
 
 		{
 			// Calculate view angles

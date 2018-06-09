@@ -1386,6 +1386,8 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 		bundle.putInt("white_balance_temperature_max", this.preview.getMaximumWhiteBalanceTemperature());
 		bundle.putBoolean("supports_video_stabilization", this.preview.supportsVideoStabilization());
 		bundle.putBoolean("can_disable_shutter_sound", this.preview.canDisableShutterSound());
+		bundle.putInt("tonemap_max_curve_points", this.preview.getTonemapMaxCurvePoints());
+		bundle.putBoolean("supports_tonemap_curve", this.preview.supportsTonemapCurve());
 		bundle.putBoolean("supports_photo_video_recording", this.preview.supportsPhotoVideoRecording());
 
 		putBundleExtra(bundle, "color_effects", this.preview.getSupportedColorEffects());
@@ -3335,7 +3337,7 @@ public class MainActivity extends Activity implements AudioListener.AudioListene
 				simple = false;
 			}
 
-			if( applicationInterface.useVideoLogProfile() ) {
+			if( applicationInterface.useVideoLogProfile() && preview.supportsTonemapCurve() ) {
 				simple = false;
 				toast_string += "\n" + getResources().getString(R.string.video_log);
 			}

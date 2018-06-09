@@ -239,6 +239,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	private boolean supports_video_stabilization;
 	private boolean supports_photo_video_recording;
 	private boolean can_disable_shutter_sound;
+	private int tonemap_max_curve_points;
+	private boolean supports_tonemap_curve;
 	private boolean has_focus_area;
 	private int focus_screen_x;
 	private int focus_screen_y;
@@ -1257,6 +1259,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		supports_video_stabilization = false;
 		supports_photo_video_recording = false;
 		can_disable_shutter_sound = false;
+		tonemap_max_curve_points = 0;
+		supports_tonemap_curve = false;
 		color_effects = null;
 		white_balances = null;
 		antibanding = null;
@@ -1677,7 +1681,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
         // must be done after switching to video mode (so is_video is set correctly)
 		if( this.is_video ) {
-			boolean use_video_log_profile = applicationInterface.useVideoLogProfile();
+			boolean use_video_log_profile = supports_tonemap_curve && applicationInterface.useVideoLogProfile();
 			float video_log_profile_strength = use_video_log_profile ? applicationInterface.getVideoLogProfileStrength() : 0.0f;
 			camera_controller.setLogProfile(use_video_log_profile, video_log_profile_strength);
 		}
@@ -1865,6 +1869,8 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 	        this.supports_video_stabilization = camera_features.is_video_stabilization_supported;
 			this.supports_photo_video_recording = camera_features.is_photo_video_recording_supported;
 	        this.can_disable_shutter_sound = camera_features.can_disable_shutter_sound;
+	        this.tonemap_max_curve_points = camera_features.tonemap_max_curve_points;
+	        this.supports_tonemap_curve = camera_features.supports_tonemap_curve;
 			this.supports_white_balance_temperature = camera_features.supports_white_balance_temperature;
 			this.min_temperature = camera_features.min_temperature;
 			this.max_temperature = camera_features.max_temperature;
@@ -5963,6 +5969,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		if( MyDebug.LOG )
 			Log.d(TAG, "canDisableShutterSound");
     	return can_disable_shutter_sound;
+    }
+
+    public int getTonemapMaxCurvePoints() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "getTonemapMaxCurvePoints");
+    	return tonemap_max_curve_points;
+    }
+    public boolean supportsTonemapCurve() {
+		if( MyDebug.LOG )
+			Log.d(TAG, "supportsTonemapCurve");
+    	return supports_tonemap_curve;
     }
 
     public List<String> getSupportedColorEffects() {
