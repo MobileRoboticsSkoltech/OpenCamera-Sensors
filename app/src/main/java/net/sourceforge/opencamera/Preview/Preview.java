@@ -1680,9 +1680,15 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 		}
 
         // must be done after switching to video mode (so is_video is set correctly)
+		if( MyDebug.LOG )
+			Log.d(TAG, "is_video?: " + is_video);
 		if( this.is_video ) {
 			boolean use_video_log_profile = supports_tonemap_curve && applicationInterface.useVideoLogProfile();
 			float video_log_profile_strength = use_video_log_profile ? applicationInterface.getVideoLogProfileStrength() : 0.0f;
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "use_video_log_profile: " + use_video_log_profile);
+                Log.d(TAG, "video_log_profile_strength: " + video_log_profile_strength);
+            }
 			camera_controller.setLogProfile(use_video_log_profile, video_log_profile_strength);
 		}
 
