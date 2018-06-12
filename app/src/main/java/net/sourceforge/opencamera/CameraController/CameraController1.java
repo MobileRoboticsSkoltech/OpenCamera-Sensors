@@ -810,8 +810,15 @@ public class CameraController1 extends CameraController {
         return parameters.getVideoStabilization();
 	}
 
+	@Override
 	public void setLogProfile(boolean use_log_profile, float log_profile_strength) {
 		// not supported for CameraController1!
+	}
+
+	@Override
+	public boolean isLogProfile() {
+		// not supported for CameraController1!
+		return false;
 	}
 
 	public int getJpegQuality() {

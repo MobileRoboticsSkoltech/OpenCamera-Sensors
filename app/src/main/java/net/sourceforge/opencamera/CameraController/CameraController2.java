@@ -2953,6 +2953,11 @@ public class CameraController2 extends CameraController {
 		}
 	}
 
+	@Override
+	public boolean isLogProfile() {
+		return camera_settings.use_log_profile;
+	}
+
 	/** For testing.
 	 */
 	public TonemapCurve testGetTonemapCurve() {
